@@ -8,7 +8,7 @@ import android.content.Intent
 import android.net.Uri
 import mozilla.components.lib.crash.CrashReporter
 import mozilla.components.lib.crash.ui.AbstractCrashListActivity
-import org.mozilla.reference.browser.ext.components
+import com.shmibblez.inferno.ext.components
 
 class CrashListActivity : AbstractCrashListActivity() {
     override val crashReporter: CrashReporter by lazy { components.analytics.crashReporter }

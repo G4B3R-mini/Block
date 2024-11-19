@@ -2,9 +2,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package org.mozilla.reference.browser.ext
+package com.shmibblez.inferno.ext
 
-import org.mozilla.reference.browser.Components
+import com.shmibblez.inferno.Components
 
 /**
  * Get the requireComponents of this application.

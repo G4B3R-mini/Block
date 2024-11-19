@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package org.mozilla.reference.browser.browser
+package com.shmibblez.inferno.browser
 
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -17,8 +17,8 @@ import kotlinx.coroutines.launch
 import mozilla.components.lib.crash.Crash
 import mozilla.components.lib.crash.CrashReporter
 import mozilla.components.support.utils.ext.registerReceiverCompat
-import org.mozilla.reference.browser.BrowserApplication.Companion.NON_FATAL_CRASH_BROADCAST
-import org.mozilla.reference.browser.ext.isCrashReportActive
+import com.shmibblez.inferno.BrowserApplication.Companion.NON_FATAL_CRASH_BROADCAST
+import com.shmibblez.inferno.ext.isCrashReportActive
 
 class CrashIntegration(
     private val context: Context,

@@ -2,11 +2,11 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package org.mozilla.reference.browser.tabs
+package com.shmibblez.inferno.tabs
 
 import android.content.Context
 import androidx.annotation.RawRes
-import org.mozilla.reference.browser.R
+import com.shmibblez.inferno.R
 
 object PrivatePage {
     /**

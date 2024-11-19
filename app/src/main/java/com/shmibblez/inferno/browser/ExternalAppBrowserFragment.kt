@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package org.mozilla.reference.browser.browser
+package com.shmibblez.inferno.browser
 
 import android.net.Uri
 import android.os.Bundle
@@ -21,8 +21,8 @@ import mozilla.components.support.base.feature.UserInteractionHandler
 import mozilla.components.support.base.feature.ViewBoundFeatureWrapper
 import mozilla.components.support.ktx.android.arch.lifecycle.addObservers
 import mozilla.components.support.utils.ext.getParcelableArrayListCompat
-import org.mozilla.reference.browser.R
-import org.mozilla.reference.browser.ext.requireComponents
+import com.shmibblez.inferno.R
+import com.shmibblez.inferno.ext.requireComponents
 
 /**
  * Fragment used for browsing within an external app, such as for custom tabs and PWAs.

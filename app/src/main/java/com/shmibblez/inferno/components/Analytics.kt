@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package org.mozilla.reference.browser.components
+package com.shmibblez.inferno.components
 
 import android.app.PendingIntent
 import android.content.Context
@@ -16,10 +16,10 @@ import org.mozilla.geckoview.BuildConfig.MOZ_APP_BUILDID
 import org.mozilla.geckoview.BuildConfig.MOZ_APP_VENDOR
 import org.mozilla.geckoview.BuildConfig.MOZ_APP_VERSION
 import org.mozilla.geckoview.BuildConfig.MOZ_UPDATE_CHANNEL
-import org.mozilla.reference.browser.BrowserApplication
-import org.mozilla.reference.browser.BuildConfig
-import org.mozilla.reference.browser.R
-import org.mozilla.reference.browser.ext.components
+import com.shmibblez.inferno.BrowserApplication
+import com.shmibblez.inferno.BuildConfig
+import com.shmibblez.inferno.R
+import com.shmibblez.inferno.ext.components
 
 /**
  * Component group for all functionality related to analytics e.g. crash

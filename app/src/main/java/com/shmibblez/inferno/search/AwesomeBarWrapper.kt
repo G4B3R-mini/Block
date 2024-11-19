@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package org.mozilla.reference.browser.search
+package com.shmibblez.inferno.search
 
 import android.content.Context
 import android.util.AttributeSet
@@ -15,7 +15,7 @@ import mozilla.components.compose.browser.awesomebar.AwesomeBarDefaults
 import mozilla.components.compose.browser.awesomebar.AwesomeBarOrientation
 import mozilla.components.concept.awesomebar.AwesomeBar
 import mozilla.components.support.ktx.android.view.hideKeyboard
-import org.mozilla.reference.browser.ext.components
+import com.shmibblez.inferno.ext.components
 
 /**
  * This wrapper wraps the `AwesomeBar()` composable and exposes it as a `View` and `concept-awesomebar`

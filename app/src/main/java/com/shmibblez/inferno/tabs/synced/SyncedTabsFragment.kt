@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package org.mozilla.reference.browser.tabs.synced
+package com.shmibblez.inferno.tabs.synced
 
 import android.content.Intent
 import android.net.Uri
@@ -14,8 +14,8 @@ import androidx.fragment.app.Fragment
 import mozilla.components.browser.storage.sync.Tab
 import mozilla.components.feature.syncedtabs.SyncedTabsFeature
 import mozilla.components.support.base.feature.ViewBoundFeatureWrapper
-import org.mozilla.reference.browser.R
-import org.mozilla.reference.browser.ext.components
+import com.shmibblez.inferno.R
+import com.shmibblez.inferno.ext.components
 
 class SyncedTabsFragment : Fragment() {
     private val syncedTabsFeature = ViewBoundFeatureWrapper<SyncedTabsFeature>()

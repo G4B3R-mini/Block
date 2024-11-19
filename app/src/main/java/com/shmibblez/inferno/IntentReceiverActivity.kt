@@ -9,7 +9,7 @@ import android.content.Intent
 import android.os.Bundle
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
-import org.mozilla.reference.browser.ext.components
+import com.shmibblez.inferno.ext.components
 
 class IntentReceiverActivity : Activity() {
 

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package org.mozilla.reference.browser.components
+package com.shmibblez.inferno.components
 
 import android.content.Context
 import android.content.SharedPreferences
@@ -43,18 +43,18 @@ import mozilla.components.lib.dataprotect.SecureAbove22Preferences
 import mozilla.components.service.location.LocationService
 import mozilla.components.service.sync.logins.SyncableLoginsStorage
 import mozilla.components.support.base.worker.Frequency
-import org.mozilla.reference.browser.AppRequestInterceptor
-import org.mozilla.reference.browser.BrowserActivity
-import org.mozilla.reference.browser.EngineProvider
-import org.mozilla.reference.browser.R
-import org.mozilla.reference.browser.R.string.pref_key_remote_debugging
-import org.mozilla.reference.browser.R.string.pref_key_tracking_protection_normal
-import org.mozilla.reference.browser.R.string.pref_key_tracking_protection_private
-import org.mozilla.reference.browser.downloads.DownloadService
-import org.mozilla.reference.browser.ext.components
-import org.mozilla.reference.browser.ext.getPreferenceKey
-import org.mozilla.reference.browser.media.MediaSessionService
-import org.mozilla.reference.browser.settings.Settings
+import com.shmibblez.inferno.AppRequestInterceptor
+import com.shmibblez.inferno.BrowserActivity
+import com.shmibblez.inferno.EngineProvider
+import com.shmibblez.inferno.R
+import com.shmibblez.inferno.R.string.pref_key_remote_debugging
+import com.shmibblez.inferno.R.string.pref_key_tracking_protection_normal
+import com.shmibblez.inferno.R.string.pref_key_tracking_protection_private
+import com.shmibblez.inferno.downloads.DownloadService
+import com.shmibblez.inferno.ext.components
+import com.shmibblez.inferno.ext.getPreferenceKey
+import com.shmibblez.inferno.media.MediaSessionService
+import com.shmibblez.inferno.settings.Settings
 import java.util.concurrent.TimeUnit
 
 private const val DAY_IN_MINUTES = 24 * 60L

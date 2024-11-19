@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package org.mozilla.reference.browser.browser
+package com.shmibblez.inferno.browser
 
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -46,14 +46,14 @@ import mozilla.components.support.ktx.android.view.enterImmersiveMode
 import mozilla.components.support.ktx.android.view.exitImmersiveMode
 import mozilla.components.ui.widgets.behavior.EngineViewClippingBehavior
 import mozilla.components.ui.widgets.behavior.EngineViewScrollingBehavior
-import org.mozilla.reference.browser.BuildConfig
-import org.mozilla.reference.browser.R
-import org.mozilla.reference.browser.addons.WebExtensionPromptFeature
-import org.mozilla.reference.browser.downloads.DownloadService
-import org.mozilla.reference.browser.ext.getPreferenceKey
-import org.mozilla.reference.browser.ext.requireComponents
-import org.mozilla.reference.browser.pip.PictureInPictureIntegration
-import org.mozilla.reference.browser.tabs.LastTabFeature
+import com.shmibblez.inferno.BuildConfig
+import com.shmibblez.inferno.R
+import com.shmibblez.inferno.addons.WebExtensionPromptFeature
+import com.shmibblez.inferno.downloads.DownloadService
+import com.shmibblez.inferno.ext.getPreferenceKey
+import com.shmibblez.inferno.ext.requireComponents
+import com.shmibblez.inferno.pip.PictureInPictureIntegration
+import com.shmibblez.inferno.tabs.LastTabFeature
 import mozilla.components.ui.widgets.behavior.ToolbarPosition as MozacEngineBehaviorToolbarPosition
 import mozilla.components.ui.widgets.behavior.ViewPosition as MozacToolbarBehaviorToolbarPosition
 

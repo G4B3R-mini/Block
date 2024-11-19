@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package org.mozilla.reference.browser.addons
+package com.shmibblez.inferno.addons
 
 import android.content.Intent
 import android.net.Uri
@@ -17,7 +17,7 @@ import androidx.recyclerview.widget.RecyclerView
 import mozilla.components.feature.addons.Addon
 import mozilla.components.feature.addons.ui.translateName
 import mozilla.components.support.utils.ext.getParcelableExtraCompat
-import org.mozilla.reference.browser.R
+import com.shmibblez.inferno.R
 
 private const val LEARN_MORE_URL =
     "https://support.mozilla.org/kb/permission-request-messages-firefox-extensions"

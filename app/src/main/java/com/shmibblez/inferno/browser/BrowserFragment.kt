@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package org.mozilla.reference.browser.browser
+package com.shmibblez.inferno.browser
 
 import android.os.Bundle
 import android.view.View
@@ -20,11 +20,11 @@ import mozilla.components.feature.tabs.toolbar.TabsToolbarFeature
 import mozilla.components.feature.toolbar.WebExtensionToolbarFeature
 import mozilla.components.support.base.feature.UserInteractionHandler
 import mozilla.components.support.base.feature.ViewBoundFeatureWrapper
-import org.mozilla.reference.browser.R
-import org.mozilla.reference.browser.ext.components
-import org.mozilla.reference.browser.ext.requireComponents
-import org.mozilla.reference.browser.search.AwesomeBarWrapper
-import org.mozilla.reference.browser.tabs.TabsTrayFragment
+import com.shmibblez.inferno.R
+import com.shmibblez.inferno.ext.components
+import com.shmibblez.inferno.ext.requireComponents
+import com.shmibblez.inferno.search.AwesomeBarWrapper
+import com.shmibblez.inferno.tabs.TabsTrayFragment
 
 /**
  * Fragment used for browsing the web within the main app.

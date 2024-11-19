@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package org.mozilla.reference.browser.browser
+package com.shmibblez.inferno.browser
 
 import android.app.Activity
 import android.content.Context
@@ -32,9 +32,9 @@ import mozilla.components.lib.state.ext.flowScoped
 import mozilla.components.support.base.feature.LifecycleAwareFeature
 import mozilla.components.support.base.feature.UserInteractionHandler
 import mozilla.components.support.base.log.logger.Logger
-import org.mozilla.reference.browser.BrowserActivity
-import org.mozilla.reference.browser.R
-import org.mozilla.reference.browser.ext.share
+import com.shmibblez.inferno.BrowserActivity
+import com.shmibblez.inferno.R
+import com.shmibblez.inferno.ext.share
 
 @Suppress("LongParameterList")
 class CustomTabsIntegration(

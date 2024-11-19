@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package org.mozilla.reference.browser.settings
+package com.shmibblez.inferno.settings
 
 import android.content.DialogInterface
 import android.content.Intent
@@ -23,22 +23,22 @@ import androidx.preference.SwitchPreferenceCompat
 import mozilla.components.service.fxa.manager.SCOPE_PROFILE
 import mozilla.components.service.fxa.manager.SCOPE_SYNC
 import mozilla.components.support.ktx.android.view.showKeyboard
-import org.mozilla.reference.browser.R
-import org.mozilla.reference.browser.R.string.pref_key_about_page
-import org.mozilla.reference.browser.R.string.pref_key_firefox_account
-import org.mozilla.reference.browser.R.string.pref_key_make_default_browser
-import org.mozilla.reference.browser.R.string.pref_key_override_amo_collection
-import org.mozilla.reference.browser.R.string.pref_key_pair_sign_in
-import org.mozilla.reference.browser.R.string.pref_key_privacy
-import org.mozilla.reference.browser.R.string.pref_key_remote_debugging
-import org.mozilla.reference.browser.R.string.pref_key_sign_in
-import org.mozilla.reference.browser.autofill.AutofillPreference
-import org.mozilla.reference.browser.ext.getPreferenceKey
-import org.mozilla.reference.browser.ext.requireComponents
-import org.mozilla.reference.browser.sync.BrowserFxAEntryPoint
+import com.shmibblez.inferno.R
+import com.shmibblez.inferno.R.string.pref_key_about_page
+import com.shmibblez.inferno.R.string.pref_key_firefox_account
+import com.shmibblez.inferno.R.string.pref_key_make_default_browser
+import com.shmibblez.inferno.R.string.pref_key_override_amo_collection
+import com.shmibblez.inferno.R.string.pref_key_pair_sign_in
+import com.shmibblez.inferno.R.string.pref_key_privacy
+import com.shmibblez.inferno.R.string.pref_key_remote_debugging
+import com.shmibblez.inferno.R.string.pref_key_sign_in
+import com.shmibblez.inferno.autofill.AutofillPreference
+import com.shmibblez.inferno.ext.getPreferenceKey
+import com.shmibblez.inferno.ext.requireComponents
+import com.shmibblez.inferno.sync.BrowserFxAEntryPoint
 import kotlin.system.exitProcess
 
-private typealias RBSettings = org.mozilla.reference.browser.settings.Settings
+private typealias RBSettings = com.shmibblez.inferno.settings.Settings
 
 class SettingsFragment : PreferenceFragmentCompat() {
 

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package org.mozilla.reference.browser.settings
+package com.shmibblez.inferno.settings
 
 import android.Manifest.permission.CAMERA
 import android.os.Bundle
@@ -18,9 +18,9 @@ import mozilla.components.service.fxa.manager.SCOPE_SESSION
 import mozilla.components.service.fxa.manager.SCOPE_SYNC
 import mozilla.components.support.base.feature.UserInteractionHandler
 import mozilla.components.support.base.feature.ViewBoundFeatureWrapper
-import org.mozilla.reference.browser.R
-import org.mozilla.reference.browser.ext.requireComponents
-import org.mozilla.reference.browser.sync.BrowserFxAEntryPoint
+import com.shmibblez.inferno.R
+import com.shmibblez.inferno.ext.requireComponents
+import com.shmibblez.inferno.sync.BrowserFxAEntryPoint
 
 class PairSettingsFragment : Fragment(), UserInteractionHandler {
     private val qrFeature = ViewBoundFeatureWrapper<QrFeature>()

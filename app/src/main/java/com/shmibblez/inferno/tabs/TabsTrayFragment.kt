@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package org.mozilla.reference.browser.tabs
+package com.shmibblez.inferno.tabs
 
 import android.content.Context
 import android.graphics.Color
@@ -22,10 +22,10 @@ import mozilla.components.browser.tabstray.ViewHolderProvider
 import mozilla.components.browser.thumbnails.loader.ThumbnailLoader
 import mozilla.components.feature.tabs.tabstray.TabsFeature
 import mozilla.components.support.base.feature.UserInteractionHandler
-import org.mozilla.reference.browser.R
-import org.mozilla.reference.browser.browser.BrowserFragment
-import org.mozilla.reference.browser.ext.components
-import org.mozilla.reference.browser.ext.requireComponents
+import com.shmibblez.inferno.R
+import com.shmibblez.inferno.browser.BrowserFragment
+import com.shmibblez.inferno.ext.components
+import com.shmibblez.inferno.ext.requireComponents
 
 /**
  * A fragment for displaying the tabs tray.

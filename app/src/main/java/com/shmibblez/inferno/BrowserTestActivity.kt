@@ -7,7 +7,7 @@ package com.shmibblez.inferno
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import org.mozilla.reference.browser.ext.components
+import com.shmibblez.inferno.ext.components
 
 /**
  * This activity is used for performance testing with Raptor/tp6:

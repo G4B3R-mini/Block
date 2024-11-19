@@ -9,16 +9,16 @@ import android.content.Context
 import androidx.core.app.NotificationManagerCompat
 import mozilla.components.feature.autofill.AutofillConfiguration
 import mozilla.components.support.base.android.NotificationsDelegate
-import org.mozilla.reference.browser.autofill.AutofillConfirmActivity
-import org.mozilla.reference.browser.autofill.AutofillSearchActivity
-import org.mozilla.reference.browser.autofill.AutofillUnlockActivity
-import org.mozilla.reference.browser.components.Analytics
-import org.mozilla.reference.browser.components.BackgroundServices
-import org.mozilla.reference.browser.components.Core
-import org.mozilla.reference.browser.components.Push
-import org.mozilla.reference.browser.components.Services
-import org.mozilla.reference.browser.components.UseCases
-import org.mozilla.reference.browser.components.Utilities
+import com.shmibblez.inferno.autofill.AutofillConfirmActivity
+import com.shmibblez.inferno.autofill.AutofillSearchActivity
+import com.shmibblez.inferno.autofill.AutofillUnlockActivity
+import com.shmibblez.inferno.components.Analytics
+import com.shmibblez.inferno.components.BackgroundServices
+import com.shmibblez.inferno.components.Core
+import com.shmibblez.inferno.components.Push
+import com.shmibblez.inferno.components.Services
+import com.shmibblez.inferno.components.UseCases
+import com.shmibblez.inferno.components.Utilities
 
 /**
  * Provides access to all components.

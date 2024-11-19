@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package org.mozilla.reference.browser.tabs.synced
+package com.shmibblez.inferno.tabs.synced
 
 import android.content.Context
 import android.util.AttributeSet
@@ -19,7 +19,7 @@ import mozilla.components.feature.syncedtabs.view.SyncedTabsView.ErrorType.NO_TA
 import mozilla.components.feature.syncedtabs.view.SyncedTabsView.ErrorType.SYNC_ENGINE_UNAVAILABLE
 import mozilla.components.feature.syncedtabs.view.SyncedTabsView.ErrorType.SYNC_NEEDS_REAUTHENTICATION
 import mozilla.components.feature.syncedtabs.view.SyncedTabsView.ErrorType.SYNC_UNAVAILABLE
-import org.mozilla.reference.browser.R
+import com.shmibblez.inferno.R
 
 class SyncedTabsLayout @JvmOverloads constructor(
     context: Context,

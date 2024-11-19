@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package org.mozilla.reference.browser.ext
+package com.shmibblez.inferno.ext
 
 import android.content.ActivityNotFoundException
 import android.content.Context
@@ -14,9 +14,9 @@ import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import androidx.annotation.StringRes
 import mozilla.components.support.base.log.Log
 import mozilla.components.support.base.log.Log.Priority.WARN
-import org.mozilla.reference.browser.BrowserApplication
-import org.mozilla.reference.browser.Components
-import org.mozilla.reference.browser.R
+import com.shmibblez.inferno.BrowserApplication
+import com.shmibblez.inferno.Components
+import com.shmibblez.inferno.R
 
 /**
  * Get the BrowserApplication object from a context.

@@ -2,14 +2,14 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package org.mozilla.reference.browser.tabs.synced
+package com.shmibblez.inferno.tabs.synced
 
 import android.view.View
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import mozilla.components.browser.storage.sync.Tab
-import org.mozilla.reference.browser.R
-import org.mozilla.reference.browser.tabs.synced.SyncedTabsAdapter.AdapterItem
+import com.shmibblez.inferno.R
+import com.shmibblez.inferno.tabs.synced.SyncedTabsAdapter.AdapterItem
 
 sealed class SyncedTabsViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 

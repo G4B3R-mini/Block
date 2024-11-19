@@ -8,7 +8,7 @@ import android.net.Uri
 import androidx.fragment.app.Fragment
 import mozilla.components.concept.engine.manifest.WebAppManifest
 import mozilla.components.feature.pwa.ext.getWebAppManifest
-import org.mozilla.reference.browser.browser.ExternalAppBrowserFragment
+import com.shmibblez.inferno.browser.ExternalAppBrowserFragment
 
 /**
  * Activity that holds the BrowserFragment that is launched within an external app,

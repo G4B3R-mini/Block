@@ -2,13 +2,13 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package org.mozilla.reference.browser.tabs
+package com.shmibblez.inferno.tabs
 
 import android.content.Context
 import android.util.AttributeSet
 import mozilla.components.feature.tabs.tabstray.TabsFeature
-import org.mozilla.reference.browser.R
-import org.mozilla.reference.browser.ext.components
+import com.shmibblez.inferno.R
+import com.shmibblez.inferno.ext.components
 
 class TabsToolbar @JvmOverloads constructor(
     context: Context,

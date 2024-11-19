@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package org.mozilla.reference.browser.components
+package com.shmibblez.inferno.components
 
 import android.content.Context
 import android.os.Build
@@ -28,9 +28,9 @@ import mozilla.components.service.fxa.SyncEngine
 import mozilla.components.service.fxa.manager.FxaAccountManager
 import mozilla.components.service.fxa.sync.GlobalSyncableStoreProvider
 import mozilla.components.service.sync.logins.SyncableLoginsStorage
-import org.mozilla.reference.browser.NotificationManager
-import org.mozilla.reference.browser.ext.components
-import org.mozilla.reference.browser.tabs.synced.SyncedTabsIntegration
+import com.shmibblez.inferno.NotificationManager
+import com.shmibblez.inferno.ext.components
+import com.shmibblez.inferno.tabs.synced.SyncedTabsIntegration
 import java.util.concurrent.TimeUnit
 
 const val DEFAULT_ACTIVE_DAYS = 14L

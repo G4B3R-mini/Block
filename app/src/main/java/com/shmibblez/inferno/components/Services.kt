@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package org.mozilla.reference.browser.components
+package com.shmibblez.inferno.components
 
 import android.content.Context
 import androidx.preference.PreferenceManager
@@ -12,8 +12,8 @@ import mozilla.components.feature.accounts.FirefoxAccountsAuthFeature
 import mozilla.components.feature.app.links.AppLinksInterceptor
 import mozilla.components.feature.tabs.TabsUseCases
 import mozilla.components.service.fxa.manager.FxaAccountManager
-import org.mozilla.reference.browser.R
-import org.mozilla.reference.browser.ext.getPreferenceKey
+import com.shmibblez.inferno.R
+import com.shmibblez.inferno.ext.getPreferenceKey
 
 /**
  * Component group which encapsulates foreground-friendly services.

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package org.mozilla.reference.browser.settings
+package com.shmibblez.inferno.settings
 
 import android.content.Context
 import android.util.AttributeSet
@@ -10,7 +10,7 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.preference.Preference
 import androidx.preference.PreferenceViewHolder
-import org.mozilla.reference.browser.R
+import com.shmibblez.inferno.R
 
 /**
  * This preference is used to define custom  colors for both title and summary texts.

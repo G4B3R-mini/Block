@@ -37,7 +37,7 @@
             android:title="@string/preferences_sync_passwords" />
     </PreferenceCategory>
 
-    <org.mozilla.reference.browser.settings.CustomColorPreference
+    <com.shmibblez.inferno.settings.CustomColorPreference
             android:key="@string/pref_key_sign_out"
             android:title="@string/sign_out"
             app:titleColor="@color/photonRed50" />

@@ -21,9 +21,9 @@ import mozilla.components.support.ktx.android.content.runOnlyInMainProcess
 import mozilla.components.support.rusthttp.RustHttpConfig
 import mozilla.components.support.rustlog.RustLog
 import mozilla.components.support.webextensions.WebExtensionSupport
-import org.mozilla.reference.browser.ext.isCrashReportActive
-import org.mozilla.reference.browser.push.PushFxaIntegration
-import org.mozilla.reference.browser.push.WebPushEngineIntegration
+import com.shmibblez.inferno.ext.isCrashReportActive
+import com.shmibblez.inferno.push.PushFxaIntegration
+import com.shmibblez.inferno.push.WebPushEngineIntegration
 import java.util.concurrent.TimeUnit
 
 open class BrowserApplication : Application() {
@@ -130,7 +130,7 @@ open class BrowserApplication : Application() {
     }
 
     companion object {
-        const val NON_FATAL_CRASH_BROADCAST = "org.mozilla.reference.browser"
+        const val NON_FATAL_CRASH_BROADCAST = "com.shmibblez.inferno"
     }
 }
 

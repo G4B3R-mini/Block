@@ -13,8 +13,8 @@ import mozilla.components.browser.errorpages.ErrorPages
 import mozilla.components.browser.errorpages.ErrorType
 import mozilla.components.concept.engine.EngineSession
 import mozilla.components.concept.engine.request.RequestInterceptor
-import org.mozilla.reference.browser.ext.components
-import org.mozilla.reference.browser.tabs.PrivatePage
+import com.shmibblez.inferno.ext.components
+import com.shmibblez.inferno.tabs.PrivatePage
 
 /**
  * NB, and FIXME: this class is consumed by a 'Core' component group, but itself relies on 'firefoxAccountsFeature'

@@ -2,16 +2,16 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package org.mozilla.reference.browser.settings
+package com.shmibblez.inferno.settings
 
 import android.os.Bundle
 import androidx.preference.Preference.OnPreferenceChangeListener
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
 import mozilla.components.concept.engine.EngineSession.TrackingProtectionPolicy
-import org.mozilla.reference.browser.R
-import org.mozilla.reference.browser.ext.getPreferenceKey
-import org.mozilla.reference.browser.ext.requireComponents
+import com.shmibblez.inferno.R
+import com.shmibblez.inferno.ext.getPreferenceKey
+import com.shmibblez.inferno.ext.requireComponents
 
 class PrivacySettingsFragment : PreferenceFragmentCompat() {
 

@@ -4,6 +4,7 @@
 
 package com.shmibblez.inferno
 
+import android.app.ComponentCaller
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -22,11 +23,11 @@ import mozilla.components.support.base.feature.UserInteractionHandler
 import mozilla.components.support.base.log.logger.Logger
 import mozilla.components.support.utils.SafeIntent
 import mozilla.components.support.webextensions.WebExtensionPopupObserver
-import org.mozilla.reference.browser.addons.WebExtensionActionPopupActivity
-import org.mozilla.reference.browser.browser.BrowserFragment
-import org.mozilla.reference.browser.browser.CrashIntegration
-import org.mozilla.reference.browser.ext.components
-import org.mozilla.reference.browser.ext.isCrashReportActive
+import com.shmibblez.inferno.addons.WebExtensionActionPopupActivity
+import com.shmibblez.inferno.browser.BrowserFragment
+import com.shmibblez.inferno.browser.CrashIntegration
+import com.shmibblez.inferno.ext.components
+import com.shmibblez.inferno.ext.isCrashReportActive
 
 /**
  * Activity that holds the [BrowserFragment].
@@ -39,6 +40,7 @@ open class BrowserActivity : AppCompatActivity() {
         get() = SafeIntent(intent).getStringExtra(EXTRA_SESSION_ID)
 
     private val webExtensionPopupObserver by lazy {
+
         WebExtensionPopupObserver(components.core.store, ::openPopup)
     }
 
@@ -83,7 +85,8 @@ open class BrowserActivity : AppCompatActivity() {
         super.onBackPressedDispatcher.onBackPressed()
     }
 
-    @Suppress("DEPRECATION") // ComponentActivity wants us to use registerForActivityResult
+    // ComponentActivity wants us to use registerForActivityResult
+    @Deprecated("This method has been deprecated in favor of using the Activity Result API\n      which brings increased type safety via an {@link ActivityResultContract} and the prebuilt\n      contracts for common intents available in\n      {@link androidx.activity.result.contract.ActivityResultContracts}, provides hooks for\n      testing, and allow receiving results in separate, testable classes independent from your\n      activity. Use\n      {@link #registerForActivityResult(ActivityResultContract, ActivityResultCallback)}\n      with the appropriate {@link ActivityResultContract} and handling the result in the\n      {@link ActivityResultCallback#onActivityResult(Object) callback}.")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         Logger.info(
             "Activity onActivityResult received with " +

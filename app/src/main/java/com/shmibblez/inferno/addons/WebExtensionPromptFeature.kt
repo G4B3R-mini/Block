@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package org.mozilla.reference.browser.addons
+package com.shmibblez.inferno.addons
 
 import android.content.Context
 import androidx.annotation.VisibleForTesting
@@ -24,7 +24,7 @@ import mozilla.components.lib.state.ext.flowScoped
 import mozilla.components.support.base.feature.LifecycleAwareFeature
 import mozilla.components.support.ktx.android.content.appVersionName
 import mozilla.components.ui.widgets.withCenterAlignedButtons
-import org.mozilla.reference.browser.R
+import com.shmibblez.inferno.R
 
 /**
  * Feature implementation for handling [WebExtensionPromptRequest] and showing the respective UI.

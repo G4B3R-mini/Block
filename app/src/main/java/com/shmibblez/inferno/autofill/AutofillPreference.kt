@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package org.mozilla.reference.browser.autofill
+package com.shmibblez.inferno.autofill
 
 import android.content.Context
 import android.content.Intent
@@ -15,7 +15,7 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.widget.SwitchCompat
 import androidx.preference.Preference
 import androidx.preference.PreferenceViewHolder
-import org.mozilla.reference.browser.R
+import com.shmibblez.inferno.R
 
 class AutofillPreference @JvmOverloads constructor(
     context: Context,

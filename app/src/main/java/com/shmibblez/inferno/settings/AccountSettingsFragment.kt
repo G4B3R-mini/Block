@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package org.mozilla.reference.browser.settings
+package com.shmibblez.inferno.settings
 
 import android.content.Context
 import android.content.Intent
@@ -23,18 +23,18 @@ import mozilla.components.service.fxa.manager.SyncEnginesStorage
 import mozilla.components.service.fxa.sync.SyncReason
 import mozilla.components.service.fxa.sync.SyncStatusObserver
 import mozilla.components.service.fxa.sync.getLastSynced
-import org.mozilla.reference.browser.IntentReceiverActivity
-import org.mozilla.reference.browser.R
-import org.mozilla.reference.browser.R.string.pref_key_sign_out
-import org.mozilla.reference.browser.R.string.pref_key_sync_history
-import org.mozilla.reference.browser.R.string.pref_key_sync_manage_account
-import org.mozilla.reference.browser.R.string.pref_key_sync_now
-import org.mozilla.reference.browser.R.string.pref_key_sync_passwords
-import org.mozilla.reference.browser.R.string.pref_key_sync_tabs
-import org.mozilla.reference.browser.components.BackgroundServices.Companion.SUPPORTED_SYNC_ENGINES
-import org.mozilla.reference.browser.ext.getPreferenceKey
-import org.mozilla.reference.browser.ext.requireComponents
-import org.mozilla.reference.browser.sync.BrowserFxAEntryPoint
+import com.shmibblez.inferno.IntentReceiverActivity
+import com.shmibblez.inferno.R
+import com.shmibblez.inferno.R.string.pref_key_sign_out
+import com.shmibblez.inferno.R.string.pref_key_sync_history
+import com.shmibblez.inferno.R.string.pref_key_sync_manage_account
+import com.shmibblez.inferno.R.string.pref_key_sync_now
+import com.shmibblez.inferno.R.string.pref_key_sync_passwords
+import com.shmibblez.inferno.R.string.pref_key_sync_tabs
+import com.shmibblez.inferno.components.BackgroundServices.Companion.SUPPORTED_SYNC_ENGINES
+import com.shmibblez.inferno.ext.getPreferenceKey
+import com.shmibblez.inferno.ext.requireComponents
+import com.shmibblez.inferno.sync.BrowserFxAEntryPoint
 
 class AccountSettingsFragment : PreferenceFragmentCompat() {
     private val syncStatusObserver = object : SyncStatusObserver {
