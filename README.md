@@ -1,6 +1,11 @@
  # About
- Inferno is a browser for Android based off of Mozilla's geckoView for Android, Mozilla's android components, and built from Mozilla's reference-browser.
- 
+Inferno is a browser for Android based off of Mozilla's geckoView for Android, Mozilla's Android
+ Components, and built from Mozilla's reference-browser. We're not a firefox fork like most other
+ browsers, but instead a firefox-based browser using Mozilla's Android Components. Although this
+ means more code to write initially, it allows for more customizability while maintaining similarity
+ to firefox, and less maintenance in the long term since we don't have to merge with changes made to
+ firefox for Android. Hell yeah.
+
 # Upcoming features:
 - tabs (finally for firefox-mobile-based apps)
 - privacy
