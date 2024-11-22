@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package mozilla.components.lib.state
+package com.shmibblez.inferno
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -10,6 +10,9 @@ import androidx.compose.runtime.remember
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import mozilla.components.lib.state.Action
+import mozilla.components.lib.state.State
+import mozilla.components.lib.state.Store
 import mozilla.components.lib.state.ext.observe
 import androidx.compose.runtime.State as ComposeState
 

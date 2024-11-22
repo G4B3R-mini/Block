@@ -18,7 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import mozilla.components.browser.state.selector.selectedTab
-import mozilla.components.lib.state.observeAsState
+import com.shmibblez.inferno.observeAsState
 import com.shmibblez.inferno.compose.browserStore
 import com.shmibblez.inferno.compose.sessionUseCases
 

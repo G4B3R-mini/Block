@@ -4,7 +4,6 @@
 
 package com.shmibblez.inferno
 
-import android.app.ComponentCaller
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle

@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- This Source Code Form is subject to the terms of the Mozilla Public
+<?xml version="1.0" encoding="utf-8"?><!-- This Source Code Form is subject to the terms of the Mozilla Public
    - License, v. 2.0. If a copy of the MPL was not distributed with this
    - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
 <resources>
@@ -110,8 +109,17 @@
     <!-- Preference for settings related turn on telemetry data-->
     <string name="use_telemetry">Use Telemetry</string>
 
-    <!-- Preference category for Mozilla about/legal etc. -->
-    <string name="mozilla_category">Mozilla</string>
+    <!-- Preference category for Layout settings -->
+    <string name="layout_category">Layout</string>
+
+    <!-- Preference for toolbar settings -->
+    <string name="toolbar_settings">Toolbar Settings</string>
+
+    <!-- Preference for tabs settings -->
+    <string name="tabs_settings">Tabs Settings</string>
+
+    <!-- Preference for theme settings-->
+    <string name="theme_settings">Theme Settings</string>
 
     <!-- Preference category for tracking protection -->
     <string name="tracker_category">Tracking Protection</string>
@@ -161,7 +169,7 @@
 
     <!-- Summary of the notification shown on app startup informing about the data policy -->
     <string name="datareporting_notification_summary">To improve your experience, Reference Browser automatically sends some information to Mozilla.</string>
-    
+
     <string name="default_notification_channel">Browser</string>
 
     <!-- About content -->
@@ -207,4 +215,6 @@
     <string name="customize_addon_collection_user_hint">Collection owner (User ID)</string>
     <!-- Toast shown after confirming the custom add-on collection configuration -->
     <string name="toast_customize_addon_collection_done">Add-on collection modified. Quitting the application to apply changes…</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

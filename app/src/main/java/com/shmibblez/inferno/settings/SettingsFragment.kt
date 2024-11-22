@@ -32,6 +32,9 @@ import com.shmibblez.inferno.R.string.pref_key_pair_sign_in
 import com.shmibblez.inferno.R.string.pref_key_privacy
 import com.shmibblez.inferno.R.string.pref_key_remote_debugging
 import com.shmibblez.inferno.R.string.pref_key_sign_in
+import com.shmibblez.inferno.R.string.pref_key_tabs
+import com.shmibblez.inferno.R.string.pref_key_theme
+import com.shmibblez.inferno.R.string.pref_key_toolbar
 import com.shmibblez.inferno.autofill.AutofillPreference
 import com.shmibblez.inferno.ext.getPreferenceKey
 import com.shmibblez.inferno.ext.requireComponents
@@ -70,20 +73,24 @@ class SettingsFragment : PreferenceFragmentCompat() {
         val firefoxAccountKey = requireContext().getPreferenceKey(pref_key_firefox_account)
         val makeDefaultBrowserKey = requireContext().getPreferenceKey(pref_key_make_default_browser)
         val remoteDebuggingKey = requireContext().getPreferenceKey(pref_key_remote_debugging)
-        val aboutPageKey = requireContext().getPreferenceKey(pref_key_about_page)
         val privacyKey = requireContext().getPreferenceKey(pref_key_privacy)
         val customAddonsKey = requireContext().getPreferenceKey(pref_key_override_amo_collection)
         val autofillPreferenceKey = requireContext().getPreferenceKey(R.string.pref_key_autofill)
+        val toolbarPreferenceKey = requireContext().getPreferenceKey(pref_key_toolbar)
+        val tabsPreferenceKey = requireContext().getPreferenceKey(pref_key_tabs)
+        val themePreferenceKey = requireContext().getPreferenceKey(pref_key_theme)
 
         val preferenceSignIn = findPreference<Preference>(signInKey)
         val preferencePairSignIn = findPreference<Preference>(signInPairKey)
         val preferenceFirefoxAccount = findPreference<Preference>(firefoxAccountKey)
         val preferenceMakeDefaultBrowser = findPreference<Preference>(makeDefaultBrowserKey)
         val preferenceRemoteDebugging = findPreference<SwitchPreferenceCompat>(remoteDebuggingKey)
-        val preferenceAboutPage = findPreference<Preference>(aboutPageKey)
         val preferencePrivacy = findPreference<Preference>(privacyKey)
         val preferenceCustomAddons = findPreference<Preference>(customAddonsKey)
         val preferenceAutofill = findPreference<AutofillPreference>(autofillPreferenceKey)
+        val preferenceToolbar = findPreference<Preference>(toolbarPreferenceKey)
+        val preferenceTabs = findPreference<Preference>(tabsPreferenceKey)
+        val preferenceTheme = findPreference<Preference>(themePreferenceKey)
 
         val accountManager = requireComponents.backgroundServices.accountManager
         if (accountManager.authenticatedAccount() != null) {
@@ -108,7 +115,9 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
         preferenceMakeDefaultBrowser?.onPreferenceClickListener = getClickListenerForMakeDefaultBrowser()
         preferenceRemoteDebugging?.onPreferenceChangeListener = getChangeListenerForRemoteDebugging()
-        preferenceAboutPage?.onPreferenceClickListener = getAboutPageListener()
+        preferenceToolbar?.onPreferenceClickListener = getToolbarListener()
+        preferenceTabs?.onPreferenceClickListener = getTabsListener()
+        preferenceTheme?.onPreferenceClickListener = getThemeListener()
         preferencePrivacy?.onPreferenceClickListener = getClickListenerForPrivacy()
         preferenceCustomAddons?.onPreferenceClickListener = getClickListenerForCustomAddons()
     }
@@ -185,15 +194,37 @@ class SettingsFragment : PreferenceFragmentCompat() {
         }
     }
 
-    private fun getAboutPageListener(): OnPreferenceClickListener {
+    private fun getToolbarListener(): OnPreferenceClickListener {
         return OnPreferenceClickListener {
             parentFragmentManager.beginTransaction()
-                .replace(android.R.id.content, AboutFragment())
+                .replace(android.R.id.content, ToolbarFragment())
                 .addToBackStack(null)
                 .commit()
             true
         }
     }
+
+    private fun getTabsListener(): OnPreferenceClickListener {
+        return OnPreferenceClickListener {
+            parentFragmentManager.beginTransaction()
+                .replace(android.R.id.content, TabsFragment())
+                .addToBackStack(null)
+                .commit()
+            true
+        }
+    }
+
+    private fun getThemeListener(): OnPreferenceClickListener {
+        return OnPreferenceClickListener {
+            parentFragmentManager.beginTransaction()
+                .replace(android.R.id.content, ThemeFragment())
+                .addToBackStack(null)
+                .commit()
+            true
+        }
+    }
+
+
 
     private fun getActionBarUpdater() = activity as ActionBarUpdater
 

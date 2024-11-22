@@ -26,4 +26,7 @@
     <string name="pref_key_override_amo_collection" translatable="false">pref_key_override_amo_collection</string>
     <string name="pref_key_override_amo_user" translatable="false">pref_key_override_amo_user</string>
     <string name="pref_key_compose_ui" translatable="false">pref_key_compose_ui</string>
+    <string name="pref_key_toolbar" translatable="false">pref_key_toolbar</string>
+    <string name="pref_key_tabs" translatable="false">pref_key_tabs</string>
+    <string name="pref_key_theme" translatable="false">pref_key_theme</string>
 </resources>
