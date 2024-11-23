@@ -21,7 +21,7 @@ import androidx.preference.PreferenceManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import mozilla.components.browser.state.selector.selectedTab
 import mozilla.components.browser.toolbar.BrowserToolbar
-import mozilla.components.compose.browser.toolbar.BrowserToolbar
+import com.shmibblez.inferno.toolbar.BrowserToolbar
 import mozilla.components.concept.engine.EngineView
 import mozilla.components.feature.app.links.AppLinksFeature
 import mozilla.components.feature.downloads.DownloadsFeature

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package mozilla.components.compose.browser.toolbar
+package com.shmibblez.inferno.toolbar
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.text.KeyboardActions
@@ -18,9 +18,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import mozilla.components.browser.state.selector.selectedTab
-import com.shmibblez.inferno.observeAsState
 import com.shmibblez.inferno.compose.browserStore
 import com.shmibblez.inferno.compose.sessionUseCases
+import com.shmibblez.inferno.state.observeAsState
 
 @Composable
 fun BrowserToolbar() {
