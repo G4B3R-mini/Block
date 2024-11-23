@@ -22,6 +22,8 @@ import mozilla.components.browser.tabstray.TabsTrayStyling
 import mozilla.components.browser.tabstray.ViewHolderProvider
 import mozilla.components.browser.thumbnails.loader.ThumbnailLoader
 
+// TODO: update MiniTabViewHolder layout for individual tab layout
+
 @Composable
 fun BrowserTabBar() {
     val (miniTabsFeature, setMiniTabsFeature) = remember { mutableStateOf<MiniTabsFeature?>(null) }
