@@ -8,6 +8,9 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.util.AttributeSet
+import android.util.TypedValue.COMPLEX_UNIT_DIP
+import android.util.TypedValue.applyDimension
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -53,9 +56,12 @@ import com.shmibblez.inferno.downloads.DownloadService
 import com.shmibblez.inferno.ext.getPreferenceKey
 import com.shmibblez.inferno.ext.requireComponents
 import com.shmibblez.inferno.pip.PictureInPictureIntegration
+import com.shmibblez.inferno.tabbar.BrowserTabBar
 import com.shmibblez.inferno.tabs.LastTabFeature
 import mozilla.components.ui.widgets.behavior.ToolbarPosition as MozacEngineBehaviorToolbarPosition
 import mozilla.components.ui.widgets.behavior.ViewPosition as MozacToolbarBehaviorToolbarPosition
+import androidx.appcompat.widget.LinearLayoutCompat
+import com.shmibblez.inferno.tabbar.ToolbarWrapper
 
 /**
  * Base fragment extended by [BrowserFragment] and [ExternalAppBrowserFragment].
@@ -64,6 +70,7 @@ import mozilla.components.ui.widgets.behavior.ViewPosition as MozacToolbarBehavi
  */
 abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, ActivityResultHandler {
     private val sessionFeature = ViewBoundFeatureWrapper<SessionFeature>()
+
     private val toolbarIntegration = ViewBoundFeatureWrapper<ToolbarIntegration>()
     private val contextMenuIntegration = ViewBoundFeatureWrapper<ContextMenuIntegration>()
     private val downloadsFeature = ViewBoundFeatureWrapper<DownloadsFeature>()
@@ -78,14 +85,20 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
     private val swipeRefreshFeature = ViewBoundFeatureWrapper<SwipeRefreshFeature>()
     private val windowFeature = ViewBoundFeatureWrapper<WindowFeature>()
     private val webAuthnFeature = ViewBoundFeatureWrapper<WebAuthnFeature>()
-    private val fullScreenMediaSessionFeature = ViewBoundFeatureWrapper<MediaSessionFullscreenFeature>()
+    private val fullScreenMediaSessionFeature =
+        ViewBoundFeatureWrapper<MediaSessionFullscreenFeature>()
     private val lastTabFeature = ViewBoundFeatureWrapper<LastTabFeature>()
     private val screenOrientationFeature = ViewBoundFeatureWrapper<ScreenOrientationFeature>()
 
     private val engineView: EngineView
         get() = requireView().findViewById<View>(R.id.engineView) as EngineView
+
     private val toolbar: BrowserToolbar
         get() = requireView().findViewById(R.id.toolbar)
+    private val tabBar: ComposeView
+        get() = requireView().findViewById(R.id.tabbar)
+    private val bottomLayout: ToolbarWrapper
+        get() = requireView().findViewById(R.id.bottomLayout)
     private val findInPageBar: FindInPageBar
         get() = requireView().findViewById(R.id.findInPageBar)
     private val swipeRefresh: SwipeRefreshLayout
@@ -95,7 +108,6 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
         fullScreenFeature,
         findInPageIntegration,
         toolbarIntegration,
-
         sessionFeature,
         lastTabFeature,
     )
@@ -180,13 +192,15 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
             view = view,
         )
 
-        (toolbar.layoutParams as? CoordinatorLayout.LayoutParams)?.apply {
+        tabBar.setContent { BrowserTabBar() }
+        (bottomLayout.layoutParams as? CoordinatorLayout.LayoutParams)?.apply {
             behavior = EngineViewScrollingBehavior(
                 view.context,
                 null,
                 MozacToolbarBehaviorToolbarPosition.BOTTOM,
             )
         }
+
         toolbarIntegration.set(
             feature = ToolbarIntegration(
                 requireContext(),
@@ -254,7 +268,10 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
                 sessionId = sessionId,
                 fragmentManager = parentFragmentManager,
                 launchInApp = {
-                    prefs.getBoolean(requireContext().getPreferenceKey(R.string.pref_key_launch_external_app), false)
+                    prefs.getBoolean(
+                        requireContext().getPreferenceKey(R.string.pref_key_launch_external_app),
+                        false
+                    )
                 },
             ),
             owner = this,
@@ -288,7 +305,10 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
         )
 
         windowFeature.set(
-            feature = WindowFeature(requireComponents.core.store, requireComponents.useCases.tabsUseCases),
+            feature = WindowFeature(
+                requireComponents.core.store,
+                requireComponents.useCases.tabsUseCases
+            ),
             owner = this,
             view = view,
         )
@@ -357,7 +377,7 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
                 context,
                 null,
                 swipeRefresh,
-                toolbar.height,
+                bottomLayout.height,
                 MozacEngineBehaviorToolbarPosition.BOTTOM,
             )
         }
@@ -463,7 +483,7 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
     override fun onActivityResult(requestCode: Int, data: Intent?, resultCode: Int): Boolean {
         Logger.info(
             "Fragment onActivityResult received with " +
-                "requestCode: $requestCode, resultCode: $resultCode, data: $data",
+                    "requestCode: $requestCode, resultCode: $resultCode, data: $data",
         )
 
         return activityResultHandler.any { it.onActivityResult(requestCode, data, resultCode) }

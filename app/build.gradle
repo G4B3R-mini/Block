@@ -15,6 +15,8 @@ import com.android.build.api.variant.FilterConfiguration
 import com.android.build.gradle.internal.tasks.AppPreBuildTask
 import groovy.json.JsonOutput
 
+int a = 0;
+
 android {
     defaultConfig {
         applicationId "com.shmibblez.inferno"
@@ -49,9 +51,11 @@ android {
 
     buildTypes {
         debug {
+            minifyEnabled false
             applicationIdSuffix ".debug"
         }
-        raptor releaseTemplate >> { // the ">>" concatenates the raptor-specific options with the template
+        raptor releaseTemplate >> {
+            // the ">>" concatenates the raptor-specific options with the template
             applicationIdSuffix ".raptor"
             manifestPlaceholders.isRaptorEnabled = "true"
             matchingFallbacks = ['release']
@@ -61,7 +65,8 @@ android {
         }
     }
 
-    variantFilter { // There's a "release" build type that exists by default that we don't use (it's replaced by "nightly" and "beta")
+    variantFilter {
+        // There's a "release" build type that exists by default that we don't use (it's replaced by "nightly" and "beta")
         if (buildType.name == 'release') {
             setIgnore true
         }
@@ -71,16 +76,12 @@ android {
         execution 'ANDROIDX_TEST_ORCHESTRATOR'
         animationsDisabled = true
     }
-
-    lintOptions {
-        lintConfig file("lint.xml")
-        baseline file("lint-baseline.xml")
-        disable 'GradleDependency', 'AndroidGradlePluginVersion'
-    }
-
     packagingOptions {
-        exclude 'META-INF/atomicfu.kotlin_module'
+        resources {
+            excludes += ['META-INF/atomicfu.kotlin_module']
+        }
     }
+
 
     splits {
         abi {
@@ -93,6 +94,11 @@ android {
     }
 
     namespace 'com.shmibblez.inferno'
+    lint {
+        baseline file('lint-baseline.xml')
+        disable 'GradleDependency', 'AndroidGradlePluginVersion'
+        lintConfig file('lint.xml')
+    }
 }
 
 kotlin {
@@ -106,7 +112,7 @@ android.applicationVariants.configureEach { variant ->
 // -------------------------------------------------------------------------------------------------
 // Sentry: Read token from local file if it exists (Only release builds)
 // -------------------------------------------------------------------------------------------------
-    print("Sentry token:  "+ variant.name)
+    print("Sentry token:  " + variant.name)
     try {
         def token = new File("${rootDir}/.sentry_token").text.trim()
         buildConfigField 'String', 'SENTRY_TOKEN', '"' + token + '"'
@@ -234,6 +240,7 @@ project.configurations.configureEach {
 }
 
 dependencies {
+
     implementation libs.androidx.activity
     implementation libs.androidx.annotation
     implementation libs.androidx.appcompat
@@ -260,6 +267,20 @@ dependencies {
     implementation libs.androidx.compose.ui.graphics
     implementation libs.androidx.compose.ui.text
     implementation libs.androidx.compose.ui.tooling
+
+    // Android Studio Preview support
+    implementation 'androidx.compose.ui:ui-tooling-preview'
+    // UI Tests
+    androidTestImplementation 'androidx.compose.ui:ui-test-junit4'
+    debugImplementation 'androidx.compose.ui:ui-test-manifest'
+    // Optional - Integration with activities
+    implementation 'androidx.activity:activity-compose:1.9.2'
+//    // Optional - Integration with ViewModels
+//    implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.8.5'
+//    // Optional - Integration with LiveData
+//    implementation 'androidx.compose.runtime:runtime-livedata'
+//    // Optional - Integration with RxJava
+//    implementation 'androidx.compose.runtime:runtime-rxjava2'
 
     implementation libs.google.material
 

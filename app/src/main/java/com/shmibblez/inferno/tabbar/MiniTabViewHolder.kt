@@ -8,7 +8,6 @@ import androidx.annotation.VisibleForTesting
 import androidx.appcompat.widget.AppCompatImageButton
 import androidx.recyclerview.widget.RecyclerView
 import mozilla.components.browser.state.state.TabSessionState
-import mozilla.components.browser.tabstray.TabsTray
 import mozilla.components.browser.tabstray.TabsTrayStyling
 import mozilla.components.support.ktx.kotlin.tryGetHostFromUrl
 import com.shmibblez.inferno.R
@@ -27,7 +26,7 @@ abstract class MiniTabViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         tab: TabSessionState,
         isSelected: Boolean,
         styling: TabsTrayStyling,
-        delegate: TabsTray.Delegate,
+        delegate: MiniTabsTray.Delegate,
     )
 
     /**
@@ -73,7 +72,7 @@ class DefaultMiniTabViewHolder(
         tab: TabSessionState,
         isSelected: Boolean,
         styling: TabsTrayStyling,
-        delegate: TabsTray.Delegate,
+        delegate: MiniTabsTray.Delegate,
     ) {
         this.tab = tab
         this.styling = styling

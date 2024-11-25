@@ -5,6 +5,7 @@
 package com.shmibblez.inferno.browser
 
 import android.os.Bundle
+import android.util.TypedValue
 import android.view.View
 import androidx.preference.PreferenceManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -137,7 +138,7 @@ class BrowserFragment : BaseBrowserFragment(), UserInteractionHandler {
             view = view,
         )
 
-        engineView.setDynamicToolbarMaxHeight(resources.getDimensionPixelSize(R.dimen.browser_toolbar_height))
+        engineView.setDynamicToolbarMaxHeight(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,96F, context?.resources?.displayMetrics).toInt())
     }
 
     private fun showTabs() {
