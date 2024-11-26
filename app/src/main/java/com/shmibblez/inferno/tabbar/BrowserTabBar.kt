@@ -3,8 +3,12 @@ package com.shmibblez.inferno.tabbar
 import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
@@ -23,8 +27,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -55,32 +61,40 @@ fun BrowserState.toTabList(
 @Composable
 fun BrowserTabBar() {
     val context = LocalContext.current
-    val (tabList, selectedTab) = context.components.core.store.state.toTabList()
+    val (tabList, selectedTabId) = context.components.core.store.state.toTabList()
 
     return LazyRow(
         Modifier
             .fillMaxSize()
-            .height(Dp(44F))
+            .height(Dp(60F))
     ) {
         items(tabList.size) {
-            MiniTab(context, tabList[it])
+            MiniTab(context, tabList[it], tabList[it].id == selectedTabId)
         }
     }
 }
 
 @Composable
-private fun MiniTab(context: Context, tabSessionState: TabSessionState) {
+private fun MiniTab(context: Context, tabSessionState: TabSessionState, selected: Boolean) {
     return Row(
         Modifier
-            .height(Dp(40F))
-            .width(Dp(50F))
-            .background(Color(0xFFFFFFFF))
+            .fillMaxSize()
+            .background(if (selected) Color.DarkGray else Color.Black)
+            .border(1.dp, if (selected) Color.LightGray else Color.DarkGray)
     ) {
         Text(
             text = tabSessionState.content.title.ifEmpty { tabSessionState.content.url },
             modifier = Modifier.fillMaxSize(),
+            maxLines = 1,
+            overflow = TextOverflow.Clip,
+            color = Color.White
         )
-        IconButton(onClick = { context.components.useCases.tabsUseCases.removeTab(tabSessionState.id) }) {
+        IconButton(
+            modifier = Modifier
+                .fillMaxHeight()
+                .aspectRatio(1F),
+            onClick = { context.components.useCases.tabsUseCases.removeTab(tabSessionState.id) }
+        ) {
             Image(
                 imageVector = ImageVector.vectorResource(R.drawable.close),
                 contentDescription = "close tab"
@@ -89,6 +103,7 @@ private fun MiniTab(context: Context, tabSessionState: TabSessionState) {
     }
 }
 
+// TODO: add listener to tab state, when last closed: if in normal tabs, open new empty one, if in private tabs, go to last used normal tab
 private fun onLastTabClosed(context: Context) {
     context.components.useCases.tabsUseCases.addTab.invoke("about:blank", selectTab = true)
 }

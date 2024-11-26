@@ -8,9 +8,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.util.AttributeSet
-import android.util.TypedValue.COMPLEX_UNIT_DIP
-import android.util.TypedValue.applyDimension
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -22,9 +19,18 @@ import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.shmibblez.inferno.R
+import com.shmibblez.inferno.addons.WebExtensionPromptFeature
+import com.shmibblez.inferno.downloads.DownloadService
+import com.shmibblez.inferno.ext.getPreferenceKey
+import com.shmibblez.inferno.ext.requireComponents
+import com.shmibblez.inferno.pip.PictureInPictureIntegration
+import com.shmibblez.inferno.tabbar.BrowserTabBar
+import com.shmibblez.inferno.tabbar.ToolbarWrapper
+import com.shmibblez.inferno.tabs.LastTabFeature
+import com.shmibblez.inferno.toolbar.BrowserToolbar
 import mozilla.components.browser.state.selector.selectedTab
 import mozilla.components.browser.toolbar.BrowserToolbar
-import com.shmibblez.inferno.toolbar.BrowserToolbar
 import mozilla.components.concept.engine.EngineView
 import mozilla.components.feature.app.links.AppLinksFeature
 import mozilla.components.feature.downloads.DownloadsFeature
@@ -49,19 +55,9 @@ import mozilla.components.support.ktx.android.view.enterImmersiveMode
 import mozilla.components.support.ktx.android.view.exitImmersiveMode
 import mozilla.components.ui.widgets.behavior.EngineViewClippingBehavior
 import mozilla.components.ui.widgets.behavior.EngineViewScrollingBehavior
-import com.shmibblez.inferno.BuildConfig
-import com.shmibblez.inferno.R
-import com.shmibblez.inferno.addons.WebExtensionPromptFeature
-import com.shmibblez.inferno.downloads.DownloadService
-import com.shmibblez.inferno.ext.getPreferenceKey
-import com.shmibblez.inferno.ext.requireComponents
-import com.shmibblez.inferno.pip.PictureInPictureIntegration
-import com.shmibblez.inferno.tabbar.BrowserTabBar
-import com.shmibblez.inferno.tabs.LastTabFeature
+import org.mozilla.geckoview.BuildConfig
 import mozilla.components.ui.widgets.behavior.ToolbarPosition as MozacEngineBehaviorToolbarPosition
 import mozilla.components.ui.widgets.behavior.ViewPosition as MozacToolbarBehaviorToolbarPosition
-import androidx.appcompat.widget.LinearLayoutCompat
-import com.shmibblez.inferno.tabbar.ToolbarWrapper
 
 /**
  * Base fragment extended by [BrowserFragment] and [ExternalAppBrowserFragment].
