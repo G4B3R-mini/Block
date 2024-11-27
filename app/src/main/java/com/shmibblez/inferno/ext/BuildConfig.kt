@@ -4,7 +4,7 @@
 
 package com.shmibblez.inferno.ext
 
-import org.mozilla.geckoview.BuildConfig
+//import com.shmibblez.inferno.BuildConfig
 
 val isCrashReportActive: Boolean
     get() = false //!BuildConfig.DEBUG && BuildConfig.CRASH_REPORTING_ENABLED

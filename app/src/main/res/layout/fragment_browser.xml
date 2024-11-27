@@ -50,32 +50,21 @@
         mozac:findInPageQueryTextColor="#ffffff"
         mozac:findInPageResultCountTextColor="#ff88ff" />
 
-    <com.shmibblez.inferno.tabbar.ToolbarWrapper
-        android:id="@+id/bottomLayout"
+    <androidx.compose.ui.platform.ComposeView
+        android:id="@+id/tabbar"
         android:layout_width="match_parent"
-        android:layout_height="96dp"
-        android:layout_gravity="bottom"
-        android:background="#00FF00"
-        android:orientation="vertical">
+        android:layout_height="40dp"
+        android:background="#ff0000" />
 
-        <androidx.compose.ui.platform.ComposeView
-            android:id="@+id/tabbar"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:background="#ff0000" />
+    <mozilla.components.browser.toolbar.BrowserToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/browser_toolbar_height"
+        android:background="@color/toolbarBackgroundColor"
+        mozac:browserToolbarSuggestionBackgroundColor="@color/toolbarSuggestionBackground"
+        mozac:browserToolbarSuggestionForegroundColor="@color/toolbarSuggestionForeground"
+        mozac:browserToolbarTrackingProtectionAndSecurityIndicatorSeparatorColor="@color/photonWhite" />
 
-        <mozilla.components.browser.toolbar.BrowserToolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/browser_toolbar_height"
-            android:background="#0000ff"
-            mozac:browserToolbarSuggestionBackgroundColor="@color/toolbarSuggestionBackground"
-            mozac:browserToolbarSuggestionForegroundColor="@color/toolbarSuggestionForeground"
-            mozac:browserToolbarTrackingProtectionAndSecurityIndicatorSeparatorColor="@color/photonWhite" />
-
-    </com.shmibblez.inferno.tabbar.ToolbarWrapper>
-
-    <!--        android:background="@color/toolbarBackgroundColor"-->
 
     <mozilla.components.feature.readerview.view.ReaderViewControlsBar
         android:id="@+id/readerViewBar"

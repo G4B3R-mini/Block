@@ -26,7 +26,6 @@ import com.shmibblez.inferno.ext.getPreferenceKey
 import com.shmibblez.inferno.ext.requireComponents
 import com.shmibblez.inferno.pip.PictureInPictureIntegration
 import com.shmibblez.inferno.tabbar.BrowserTabBar
-import com.shmibblez.inferno.tabbar.ToolbarWrapper
 import com.shmibblez.inferno.tabs.LastTabFeature
 import com.shmibblez.inferno.toolbar.BrowserToolbar
 import mozilla.components.browser.state.selector.selectedTab
@@ -55,7 +54,6 @@ import mozilla.components.support.ktx.android.view.enterImmersiveMode
 import mozilla.components.support.ktx.android.view.exitImmersiveMode
 import mozilla.components.ui.widgets.behavior.EngineViewClippingBehavior
 import mozilla.components.ui.widgets.behavior.EngineViewScrollingBehavior
-import org.mozilla.geckoview.BuildConfig
 import mozilla.components.ui.widgets.behavior.ToolbarPosition as MozacEngineBehaviorToolbarPosition
 import mozilla.components.ui.widgets.behavior.ViewPosition as MozacToolbarBehaviorToolbarPosition
 
@@ -93,8 +91,6 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
         get() = requireView().findViewById(R.id.toolbar)
     private val tabBar: ComposeView
         get() = requireView().findViewById(R.id.tabbar)
-    private val bottomLayout: ToolbarWrapper
-        get() = requireView().findViewById(R.id.bottomLayout)
     private val findInPageBar: FindInPageBar
         get() = requireView().findViewById(R.id.findInPageBar)
     private val swipeRefresh: SwipeRefreshLayout
@@ -189,7 +185,7 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
         )
 
         tabBar.setContent { BrowserTabBar() }
-        (bottomLayout.layoutParams as? CoordinatorLayout.LayoutParams)?.apply {
+        (toolbar.layoutParams as? CoordinatorLayout.LayoutParams)?.apply {
             behavior = EngineViewScrollingBehavior(
                 view.context,
                 null,
@@ -373,7 +369,7 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
                 context,
                 null,
                 swipeRefresh,
-                bottomLayout.height,
+                toolbar.height,
                 MozacEngineBehaviorToolbarPosition.BOTTOM,
             )
         }
@@ -407,17 +403,17 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
             view = view,
         )
 
-        if (BuildConfig.MOZILLA_OFFICIAL) {
-            webAuthnFeature.set(
-                feature = WebAuthnFeature(
-                    requireComponents.core.engine,
-                    requireActivity(),
-                    requireComponents.useCases.sessionUseCases.exitFullscreen::invoke,
-                ) { requireComponents.core.store.state.selectedTabId },
-                owner = this,
-                view = view,
-            )
-        }
+//        if (BuildConfig.MOZILLA_OFFICIAL) {
+        webAuthnFeature.set(
+            feature = WebAuthnFeature(
+                requireComponents.core.engine,
+                requireActivity(),
+                requireComponents.useCases.sessionUseCases.exitFullscreen::invoke,
+            ) { requireComponents.core.store.state.selectedTabId },
+            owner = this,
+            view = view,
+        )
+//        }
 
         val composeView = view.findViewById<ComposeView>(R.id.compose_view)
         if (shouldUseComposeUI) {
@@ -481,7 +477,6 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
             "Fragment onActivityResult received with " +
                     "requestCode: $requestCode, resultCode: $resultCode, data: $data",
         )
-
         return activityResultHandler.any { it.onActivityResult(requestCode, data, resultCode) }
     }
 }
