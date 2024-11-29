@@ -5,6 +5,7 @@
 package com.shmibblez.inferno.browser
 
 import android.os.Bundle
+import android.util.Log
 import android.util.TypedValue
 import android.view.View
 import androidx.preference.PreferenceManager
@@ -56,6 +57,8 @@ class BrowserFragment : BaseBrowserFragment(), UserInteractionHandler {
     @Suppress("LongMethod")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        Log.i("BrowserFragment", "BrowserFragment onViewCreated")
 
         AwesomeBarFeature(awesomeBar, toolbar, engineView)
             .addSearchProvider(
@@ -138,7 +141,7 @@ class BrowserFragment : BaseBrowserFragment(), UserInteractionHandler {
             view = view,
         )
 
-        engineView.setDynamicToolbarMaxHeight(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,96F, context?.resources?.displayMetrics).toInt())
+        engineView.setDynamicToolbarMaxHeight(R.dimen.browser_toolbar_height)
     }
 
     private fun showTabs() {

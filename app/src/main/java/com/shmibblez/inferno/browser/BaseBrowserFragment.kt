@@ -184,7 +184,6 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
             view = view,
         )
 
-        tabBar.setContent { BrowserTabBar() }
         (toolbar.layoutParams as? CoordinatorLayout.LayoutParams)?.apply {
             behavior = EngineViewScrollingBehavior(
                 view.context,

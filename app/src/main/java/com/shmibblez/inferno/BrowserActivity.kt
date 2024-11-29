@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.AttributeSet
+import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
@@ -23,13 +24,13 @@ import mozilla.components.support.base.log.logger.Logger
 import mozilla.components.support.utils.SafeIntent
 import mozilla.components.support.webextensions.WebExtensionPopupObserver
 import com.shmibblez.inferno.addons.WebExtensionActionPopupActivity
-import com.shmibblez.inferno.browser.BrowserFragment
+import com.shmibblez.inferno.browser.BrowserComponentWrapperFragment
 import com.shmibblez.inferno.browser.CrashIntegration
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.isCrashReportActive
 
 /**
- * Activity that holds the [BrowserFragment].
+ * Activity that holds the [BrowserComponentWrapperFragment].
  */
 open class BrowserActivity : AppCompatActivity() {
 
@@ -44,15 +45,17 @@ open class BrowserActivity : AppCompatActivity() {
     }
 
     /**
-     * Returns a new instance of [BrowserFragment] to display.
+     * Returns a new instance of [BrowserComponentWrapperFragment] to display.
      */
     open fun createBrowserFragment(sessionId: String?): Fragment =
-        BrowserFragment.create(sessionId)
+        BrowserComponentWrapperFragment.create(sessionId)
+//        BrowserFragment.create(sessionId)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        Log.d("BrowserActivity","BrowserActivity created")
         components.notificationsDelegate.bindToActivity(this)
 
         if (savedInstanceState == null) {

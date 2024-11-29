@@ -1,30 +1,34 @@
 package com.shmibblez.inferno.browser
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.os.Build
-import android.util.TypedValue
+import android.util.Log
 import android.view.View
-import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams
+import android.widget.FrameLayout
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.BottomAppBar
 import androidx.compose.material.FabPosition
 import androidx.compose.material.Scaffold
 import androidx.compose.material.ScaffoldDefaults
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -32,24 +36,26 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.app.ActivityCompat.shouldShowRequestPermissionRationale
 import androidx.core.view.children
 import androidx.fragment.app.findFragment
+import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.preference.PreferenceManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -94,10 +100,6 @@ import mozilla.components.support.base.log.logger.Logger
 import mozilla.components.support.ktx.android.view.enterImmersiveMode
 import mozilla.components.support.ktx.android.view.exitImmersiveMode
 import mozilla.components.ui.widgets.VerticalSwipeRefreshLayout
-import mozilla.components.ui.widgets.behavior.EngineViewClippingBehavior
-import mozilla.components.ui.widgets.behavior.EngineViewScrollingBehavior
-import mozilla.components.ui.widgets.behavior.ToolbarPosition
-import mozilla.components.ui.widgets.behavior.ViewPosition
 import kotlin.math.roundToInt
 
 // TODO: check if works:
@@ -120,12 +122,14 @@ fun Context.getActivity(): AppCompatActivity? = when (this) {
  * @param sessionId session id, from Moz BaseBrowserFragment
  */
 @Composable
+@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 fun BrowserComponent(
     sessionId: String?,
     setOnActivityResultHandler: ((OnActivityResultModel) -> Boolean) -> Unit
 ) {
+    Log.i("BrowserComponent", "BrowserComponent composed")
     val scaffoldState = rememberScaffoldState()
-    val coroutineScope = rememberCoroutineScope()
+//    val coroutineScope = rememberCoroutineScope()
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
     val view = LocalView.current
@@ -159,8 +163,7 @@ fun BrowserComponent(
     val thumbnailsFeature = remember { ViewBoundFeatureWrapper<BrowserThumbnails>() }
     val readerViewFeature = remember { ViewBoundFeatureWrapper<ReaderViewIntegration>() }
     val webExtToolbarFeature = remember { ViewBoundFeatureWrapper<WebExtensionToolbarFeature>() }
-    // also in Moz BrowserHandler
-    // val windowFeature = remember { ViewBoundFeatureWrapper<WindowFeature>() }
+
 
     /// views
     // from Moz BaseBrowserFragment
@@ -169,12 +172,7 @@ fun BrowserComponent(
     var findInPageBar: FindInPageBar? by remember { mutableStateOf(null) }
     var swipeRefresh: SwipeRefreshLayout? by remember { mutableStateOf(null) }
     // from Moz BrowserFragment
-    // TODO: where does awesomeBar go in layout?
     var awesomeBar: AwesomeBarWrapper? by remember { mutableStateOf(null) }
-    // also in Moz BaseBrowserHandler
-    // var toolbar: BrowserToolbar? by remember { mutableStateOf(null) }
-    // also in Moz BaseBrowserHandler
-    // var engineView: EngineView? by remember { mutableStateOf(null) }
     var readerViewBar: ReaderViewControlsBar? by remember { mutableStateOf(null) }
     var readerViewAppearanceButton: FloatingActionButton? by remember { mutableStateOf(null) }
 
@@ -205,8 +203,7 @@ fun BrowserComponent(
             )
         }
     }
-    var webAppToolbarShouldBeVisible = true
-    // TODO: request permissions with accompanyist or experimental api
+//    var webAppToolbarShouldBeVisible = true
 
     // from Moz BaseBrowserFragment
     val requestDownloadPermissionsLauncher: ActivityResultLauncher<Array<String>> =
@@ -252,7 +249,9 @@ fun BrowserComponent(
     //  ONLY IF NECESSARY, MIGHT NOT BE
 
 
-    LaunchedEffect(true) {
+    LaunchedEffect(engineView) {
+        if (engineView == null)
+            return@LaunchedEffect
         // from Moz BaseBrowserFragment
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
 
@@ -268,13 +267,13 @@ fun BrowserComponent(
             view = view,
         )
 
-        (toolbar!!.layoutParams as? CoordinatorLayout.LayoutParams)?.apply {
-            behavior = EngineViewScrollingBehavior(
-                view.context,
-                null,
-                ViewPosition.BOTTOM,
-            )
-        }
+//        (toolbar!!.layoutParams as? CoordinatorLayout.LayoutParams)?.apply {
+//            behavior = EngineViewScrollingBehavior(
+//                view.context,
+//                null,
+//                ViewPosition.BOTTOM,
+//            )
+//        }
 
         toolbarIntegration.set(
             feature = ToolbarIntegration(
@@ -464,15 +463,15 @@ fun BrowserComponent(
             view = view,
         )
 
-        (swipeRefresh!!.layoutParams as? CoordinatorLayout.LayoutParams)?.apply {
-            behavior = EngineViewClippingBehavior(
-                context,
-                null,
-                swipeRefresh!!,
-                toolbar!!.height,
-                ToolbarPosition.BOTTOM,
-            )
-        }
+//        (swipeRefresh!!.layoutParams as? CoordinatorLayout.LayoutParams)?.apply {
+//            behavior = EngineViewClippingBehavior(
+//                context,
+//                null,
+//                swipeRefresh!!,
+//                toolbar!!.height,
+//                ToolbarPosition.BOTTOM,
+//            )
+//        }
         swipeRefreshFeature.set(
             feature = SwipeRefreshFeature(
                 context.components.core.store,
@@ -607,16 +606,10 @@ fun BrowserComponent(
         )
 
         // from Moz BrowserHandler
-        engineView!!.setDynamicToolbarMaxHeight(
-            TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_DIP,
-                96F,
-                context.resources.displayMetrics
-            ).toInt()
-        )
+        engineView!!.setDynamicToolbarMaxHeight(context.resources.getDimensionPixelSize(R.dimen.browser_toolbar_height))
     }
 
-    val bottomBarHeight = 48.dp
+    val bottomBarHeight = 90.dp
     val bottomBarHeightPx =
         with(LocalDensity.current) { bottomBarHeight.roundToPx().toFloat() }
     val bottomBarOffsetHeightPx = remember { mutableFloatStateOf(0f) }
@@ -640,22 +633,20 @@ fun BrowserComponent(
     Scaffold(
         modifier = Modifier.nestedScroll(nestedScrollConnection),
         scaffoldState = scaffoldState,
-        topBar = {
-            TopAppBar(
-                content = {
-
-                }
-            )
-        },
+//        topBar = {
+//            TopAppBar(
+//                content = {
+//
+//                }
+//            )
+//        },
         contentWindowInsets = ScaffoldDefaults.contentWindowInsets,
-        content = { innerPadding ->
+        content = { _ ->
             MozAwesomeBar(setView = { ab -> awesomeBar = ab })
-            Box(Modifier.padding(innerPadding)) {
-                MozEngineView(
-                    setEngineView = { ev -> engineView = ev },
-                    setSwipeView = { sr -> swipeRefresh = sr },
-                )
-            }
+            MozEngineView(
+                setEngineView = { ev -> engineView = ev },
+                setSwipeView = { sr -> swipeRefresh = sr },
+            )
         },
         floatingActionButtonPosition = FabPosition.End,
         floatingActionButton = {
@@ -664,8 +655,9 @@ fun BrowserComponent(
         bottomBar = {
             // hide and show when scrolling
             BottomAppBar(
+                contentPadding = PaddingValues(0.dp),
                 modifier = Modifier
-                    .height(40.dp)
+                    .height(bottomBarHeight)
                     .offset {
                         IntOffset(
                             x = 0,
@@ -673,11 +665,21 @@ fun BrowserComponent(
                         )
                     }
             ) {
-                Column(Modifier.fillMaxSize()) {
-                    MozFindInPageBar { fip -> findInPageBar = fip }
-                    MozReaderViewControlsBar { cb -> readerViewBar = cb }
+                Column(
+                    Modifier
+                        .fillMaxSize()
+                        .background(Color.Black)
+                ) {
                     BrowserTabBar()
                     MozBrowserToolbar { bt -> toolbar = bt }
+                    MozFindInPageBar { fip -> findInPageBar = fip }
+                    MozReaderViewControlsBar { cb -> readerViewBar = cb }
+                    Box(
+                        Modifier
+                            .fillMaxWidth()
+                            .height(10.dp)
+                            .background(Color.Magenta)
+                    )
                 }
             }
         }
@@ -734,16 +736,17 @@ fun Dp.toPx(): Int {
 @Composable
 fun MozAwesomeBar(setView: (AwesomeBarWrapper) -> Unit) {
     AndroidView(
-        factory = { context ->
-            val ab = AwesomeBarWrapper(context)
-            ab.visibility = View.GONE
-            ab.layoutParams.width = LayoutParams.MATCH_PARENT
-            ab.layoutParams.height = LayoutParams.MATCH_PARENT
-            ab.setPadding(4.dp.toPx(), 4.dp.toPx(), 4.dp.toPx(), 4.dp.toPx())
-            setView(ab)
-            ab
-        },
-        update = { setView(it) }
+        modifier = Modifier
+            .height(0.dp)
+            .width(0.dp),
+        factory = { context -> AwesomeBarWrapper(context) },
+        update = {
+            it.visibility = View.GONE
+            it.layoutParams.width = LayoutParams.MATCH_PARENT
+            it.layoutParams.height = LayoutParams.MATCH_PARENT
+            it.setPadding(4.dp.toPx(), 4.dp.toPx(), 4.dp.toPx(), 4.dp.toPx())
+            setView(it)
+        }
     )
 }
 
@@ -757,27 +760,31 @@ fun MozEngineView(
         factory = { context ->
             val vl = VerticalSwipeRefreshLayout(context)
             val gv = GeckoEngineView(context)
-            with(vl.layoutParams) {
-                this.width = ViewGroup.LayoutParams.MATCH_PARENT
-                this.height = ViewGroup.LayoutParams.MATCH_PARENT
-            }
-            with(gv.layoutParams) {
-                this.width = ViewGroup.LayoutParams.MATCH_PARENT
-                this.height = ViewGroup.LayoutParams.MATCH_PARENT
-            }
-            setSwipeView(vl)
-            setEngineView(gv)
+            vl.addView(gv)
             vl
         },
-        update = {
-            setSwipeView(it)
-            for (v in it.children) {
+        update = { sv ->
+            var gv: GeckoEngineView? = null
+            // find GeckoEngineView child in scroll view
+            for (v in sv.children) {
                 if (v is GeckoEngineView) {
-                    setEngineView(v)
+                    gv = v
                     break
                 }
             }
-            Unit
+            // setup views
+            gv!!.setDynamicToolbarMaxHeight(R.dimen.browser_toolbar_height)
+            with(sv.layoutParams) {
+                this.width = LayoutParams.MATCH_PARENT
+                this.height = LayoutParams.MATCH_PARENT
+            }
+            with(gv.layoutParams) {
+                this.width = LayoutParams.MATCH_PARENT
+                this.height = LayoutParams.MATCH_PARENT
+            }
+            // set view references
+            setSwipeView(sv)
+            setEngineView(gv)
         }
     )
 }
@@ -785,13 +792,20 @@ fun MozEngineView(
 @Composable
 fun MozBrowserToolbar(setView: (BrowserToolbar) -> Unit) {
     AndroidView(
-        modifier = Modifier.fillMaxSize(),
-        factory = { context ->
-            val bt = BrowserToolbar(context)
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(dimensionResource(id = R.dimen.browser_toolbar_height))
+            .background(Color.Black)
+            .padding(horizontal = 8.dp, vertical = 0.dp),
+        factory = { context -> BrowserToolbar(context) },
+        update = { bt ->
+            bt.layoutParams.height = R.dimen.browser_toolbar_height
+            bt.layoutParams.width = LayoutParams.MATCH_PARENT
+            bt.visibility = View.VISIBLE
+            bt.setBackgroundColor(0xFF0000)
+            bt.displayMode()
             setView(bt)
-            bt
-        },
-        update = { setView(it) }
+        }
     )
 }
 
@@ -799,36 +813,49 @@ fun MozBrowserToolbar(setView: (BrowserToolbar) -> Unit) {
  * @param setView function to set view variable in parent
  */
 @Composable
-fun MozFindInPageBar(visible: Boolean = false, setView: (FindInPageBar) -> Unit) {
-    if (visible)
-        AndroidView(
-            modifier = Modifier.fillMaxSize(),
-            factory = { context -> FindInPageBar(context) },
-            update = { setView(it) }
-        )
+fun MozFindInPageBar(setView: (FindInPageBar) -> Unit) {
+    AndroidView(
+        modifier = Modifier
+            .fillMaxSize()
+            .height(0.dp)
+            .width(0.dp),
+        factory = { context -> FindInPageBar(context) },
+        update = {
+            setView(it)
+            it.visibility = View.GONE
+        }
+    )
 }
 
 @Composable
 fun MozReaderViewControlsBar(
-    visible: Boolean = false,
     setView: (ReaderViewControlsBar) -> Unit
 ) {
-    if (visible)
-        AndroidView(
-            factory = { context -> ReaderViewControlsBar(context) },
-            update = { setView(it) }
-        )
+    AndroidView(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(colorResource(id = R.color.toolbarBackgroundColor))
+            .height(0.dp)
+            .width(0.dp),
+        factory = { context -> ReaderViewControlsBar(context) },
+        update = {
+            setView(it)
+            it.visibility = View.GONE
+        }
+    )
 }
 
 // reader view button, what this for?
 @Composable
 fun MozFloatingActionButton(
-    visible: Boolean = false,
     setView: (FloatingActionButton) -> Unit
 ) {
-    if (visible)
-        AndroidView(
-            factory = { context -> FloatingActionButton(context) },
-            update = { setView(it) }
-        )
+    AndroidView(
+        modifier = Modifier.fillMaxSize(),
+        factory = { context -> FloatingActionButton(context) },
+        update = {
+            setView(it)
+            it.visibility = View.GONE
+        }
+    )
 }

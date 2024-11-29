@@ -23,7 +23,7 @@ import mozilla.components.browser.thumbnails.loader.ThumbnailLoader
 import mozilla.components.feature.tabs.tabstray.TabsFeature
 import mozilla.components.support.base.feature.UserInteractionHandler
 import com.shmibblez.inferno.R
-import com.shmibblez.inferno.browser.BrowserFragment
+import com.shmibblez.inferno.browser.BrowserComponentWrapperFragment
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.requireComponents
 
@@ -73,7 +73,7 @@ class TabsTrayFragment : Fragment(), UserInteractionHandler {
 
     private fun closeTabsTray() {
         activity?.supportFragmentManager?.beginTransaction()?.apply {
-            replace(R.id.container, BrowserFragment.create())
+            replace(R.id.container, BrowserComponentWrapperFragment.create())
             commit()
         }
     }

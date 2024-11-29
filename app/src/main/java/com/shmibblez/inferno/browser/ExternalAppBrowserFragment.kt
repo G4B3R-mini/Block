@@ -6,6 +6,7 @@ package com.shmibblez.inferno.browser
 
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.core.view.isVisible
 import mozilla.components.browser.toolbar.BrowserToolbar
@@ -47,6 +48,7 @@ class ExternalAppBrowserFragment : BaseBrowserFragment(), UserInteractionHandler
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        Log.i("ExtAppBrowserFragment", "ExternalAppBrowserFragment onViewCreated")
         val manifest = this.manifest
         val sessionId = this.sessionId
 

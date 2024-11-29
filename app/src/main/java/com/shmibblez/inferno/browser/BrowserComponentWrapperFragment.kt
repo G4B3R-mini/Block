@@ -2,6 +2,7 @@ package com.shmibblez.inferno.browser
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -59,7 +60,7 @@ class BrowserComponentWrapperFragment : Fragment(), UserInteractionHandler, Acti
             putString(SESSION_ID, sessionId)
         }
 
-        fun create(sessionId: String? = null) = BrowserFragment().apply {
+        fun create(sessionId: String? = null) = BrowserComponentWrapperFragment().apply {
             arguments = Bundle().apply {
                 putSessionId(sessionId)
             }
@@ -67,14 +68,26 @@ class BrowserComponentWrapperFragment : Fragment(), UserInteractionHandler, Acti
     }
 
     override fun onActivityResult(requestCode: Int, data: Intent?, resultCode: Int): Boolean {
-        return if (onActivityResultHandler != null)
-            onActivityResultHandler!!.invoke(
+        Log.d("BrowserComponentWFrag", "BrowserComponentWrapperFragment.onActivityResult called")
+        Log.d(
+            "BrowserComponentWFrag",
+            "BrowserComponentWrapperFragment.onActivityResult, onActivityResultHandler: $onActivityResultHandler"
+        )
+
+        if (onActivityResultHandler != null) {
+            Log.d(
+                "BrowserComponentWFrag",
+                "BrowserComponentWrapperFragment.onActivityResult, handled correctly"
+            )
+            return onActivityResultHandler!!.invoke(
                 OnActivityResultModel(requestCode, data, resultCode)
             )
-        else false
+        } else
+            return false
     }
 
     override fun onBackPressed(): Boolean {
-        TODO("Not yet implemented")
+//        TODO("Not yet implemented")
+        return false
     }
 }
