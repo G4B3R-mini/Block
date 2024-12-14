@@ -9,8 +9,25 @@ Inferno is a browser for Android based off of Mozilla's geckoView for Android, M
 # Upcoming features:
 - tabs (finally for firefox-mobile-based apps)
 - privacy
-  - mozilla telemetry disabled (off by default, can enable if you want to contribute to mozilla's dev team)
+  - mozilla telemetry disabled
 - theme (slick ui with lots of preference options)
 - lots of customizability in general
 
 that's it for now, hopefully this project doesn't die
+
+# Under Construction
+- [ ] tabs
+  - [ ] add text overflow fade
+  - [ ] hide / show completely if scroll up / down
+  - [ ] bottom margin fixes for EngineView when scroll
+- [ ] toolbar 2 view tab icons bug fix
+- [ ] find in page bug fixes (not showing)
+- [ ] toolbar suggestions bug fixes (not showing)
+
+# Future Features
+- [ ] color customization
+- [ ] more customization settings
+  - [ ] enable / disable tabs
+  - [ ] customize toolbar items
+  - [ ] toolbar and tabs position (top / bottom for each, which is above and below in case both on same side)
+  - [ ] if horizontal, add option to show tabs on right or left, make resizable by sliding
