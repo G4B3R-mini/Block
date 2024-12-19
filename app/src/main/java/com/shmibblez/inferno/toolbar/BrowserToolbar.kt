@@ -4,42 +4,54 @@
 
 package com.shmibblez.inferno.toolbar
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import mozilla.components.browser.state.selector.selectedTab
 import com.shmibblez.inferno.compose.browserStore
 import com.shmibblez.inferno.compose.sessionUseCases
 import com.shmibblez.inferno.state.observeAsState
+import mozilla.components.browser.state.selector.selectedTab
+import mozilla.components.browser.state.state.TabSessionState
+
+// TODO:
+//  -[ ] implement moz AwesomeBarFeature
+//  -[ ] implement moz TabsToolbarFeature
+//  -[ ] implement moz ReaderViewIntegration
+//  -[ ] implement moz WebExtensionToolbarFeature
+//  -[ ] implement moz engineView!!.setDynamicToolbarMaxHeight
+//  -[ ] implement moz ToolbarIntegration
 
 @Composable
-fun BrowserToolbar() {
+fun BrowserToolbar(tabSessionState: TabSessionState) {
+    val context = LocalContext.current
+    val searchTerms = tabSessionState.content.searchTerms
     val url: String? by browserStore().observeAsState { state -> state.selectedTab?.content?.url }
-    val editMode = remember { mutableStateOf(false) }
+    var editMode by remember { mutableStateOf(false) }
     val useCases = sessionUseCases()
+    val siteSecure = tabSessionState.content.securityInfo.secure
+    val trackingProtectionEnabled = tabSessionState.trackingProtection.enabled
 
-    if (editMode.value) {
+    if (editMode) {
         BrowserEditToolbar(
             url = url ?: "<empty>",
             onUrlCommitted = { text ->
                 useCases.loadUrl(text)
-                editMode.value = false
+                editMode = false
             },
         )
     } else {
         BrowserDisplayToolbar(
             url = url ?: "<empty>",
-            onUrlClicked = { editMode.value = true },
+            tabSessionState = tabSessionState
         )
     }
 }
@@ -47,13 +59,11 @@ fun BrowserToolbar() {
 @Composable
 fun BrowserDisplayToolbar(
     url: String,
-    onUrlClicked: () -> Unit = {},
+    tabSessionState: TabSessionState
 ) {
-    Text(
-        url,
-        modifier = Modifier.clickable { onUrlClicked() },
-        maxLines = 1,
-    )
+    Row {
+        ToolbarOrigin(tabSessionState)
+    }
 }
 
 @Composable
@@ -67,7 +77,10 @@ fun BrowserEditToolbar(
         input,
         onValueChange = { value -> input = value },
         singleLine = true,
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri, imeAction = ImeAction.Go),
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Uri,
+            imeAction = ImeAction.Go
+        ),
         keyboardActions = KeyboardActions(
             onGo = { onUrlCommitted(input) },
         ),

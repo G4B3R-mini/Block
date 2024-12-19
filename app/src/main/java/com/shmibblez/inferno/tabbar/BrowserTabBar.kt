@@ -29,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -40,6 +41,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.shmibblez.inferno.R
+import com.shmibblez.inferno.browser.toPx
 import com.shmibblez.inferno.ext.components
 import mozilla.components.browser.state.action.BrowserAction
 import mozilla.components.browser.state.selector.normalTabs
@@ -217,7 +219,16 @@ private fun MiniTab(
             modifier = Modifier
                 .wrapContentHeight()
                 .padding(4.dp, 0.dp, 0.dp, 0.dp)
-                .weight(1F),
+                .weight(1F)
+                .background(
+                    brush = Brush.horizontalGradient(
+                        colors = listOf(
+                            Color.Transparent,
+                            if (selected) Color.Black else Color.DarkGray
+                        ),
+                        startX = (90.dp - 10.dp).toPx().toFloat()
+                    )
+                ),
             maxLines = 1,
             overflow = TextOverflow.Clip,
             color = Color.White,
