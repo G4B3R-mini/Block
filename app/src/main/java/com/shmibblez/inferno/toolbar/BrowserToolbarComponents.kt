@@ -1,5 +1,6 @@
 package com.shmibblez.inferno.toolbar
 
+import androidx.annotation.Px
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -12,19 +13,28 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.shmibblez.inferno.R
-import mozilla.components.browser.state.state.TabSessionState
+import com.shmibblez.inferno.compose.sessionUseCases
+import com.shmibblez.inferno.toolbar.ToolbarOriginScopeInstance.ToolbarEmptyIndicator
+import com.shmibblez.inferno.toolbar.ToolbarOriginScopeInstance.ToolbarSecurityIndicator
+import com.shmibblez.inferno.toolbar.ToolbarOriginScopeInstance.ToolbarTrackingProtectionIndicator
 
 // TODO: review views implementations
 
 @Composable
-fun ToolbarSeparator() {
+fun RowScope.ToolbarSeparator() {
     Divider(
         modifier = Modifier
             .fillMaxHeight()
@@ -36,14 +46,13 @@ fun ToolbarSeparator() {
 
 @Composable
 fun ToolbarLeftArrow(enabled: Boolean) {
+    val useCases = sessionUseCases()
     Icon(
         modifier = Modifier
             .fillMaxHeight()
             .aspectRatio(1F)
             .alpha(if (enabled) 1F else 0.5F)
-            .clickable(enabled = enabled) {
-                // TODO: what to do on click back
-            },
+            .clickable(enabled = enabled) { useCases.goBack() },
         painter = painterResource(id = R.drawable.mozac_ic_chevron_left_24),
         contentDescription = "back",
         tint = Color.White
@@ -52,14 +61,13 @@ fun ToolbarLeftArrow(enabled: Boolean) {
 
 @Composable
 fun ToolbarRightArrow(enabled: Boolean) {
+    val useCases = sessionUseCases()
     Icon(
         modifier = Modifier
             .fillMaxHeight()
             .aspectRatio(1F)
             .alpha(if (enabled) 1F else 0.5F)
-            .clickable(enabled = enabled) {
-                // TODO: what to do on click forward
-            },
+            .clickable(enabled = enabled) { useCases.goForward() },
         painter = painterResource(id = R.drawable.mozac_ic_chevron_right_24),
         contentDescription = "back",
         tint = Color.White,
@@ -68,22 +76,36 @@ fun ToolbarRightArrow(enabled: Boolean) {
 
 @Composable
 fun ToolbarReload(enabled: Boolean) {
+    val useCases = sessionUseCases()
     Icon(
         modifier = Modifier
             .fillMaxHeight()
             .aspectRatio(1F)
             .alpha(if (enabled) 1F else 0.5F)
-            .clickable(enabled = enabled) {
-                // TODO: what to do on click back
-            },
+            .clickable(enabled = enabled) { useCases.reload },
         painter = painterResource(id = R.drawable.mozac_ic_arrow_clockwise_24),
         contentDescription = "back",
         tint = Color.White
     )
 }
 
+data class ToolbarOriginData(
+    val siteSecure: SiteSecurity,
+    val siteTrackingProtection: SiteTrackingProtection,
+    val url: String?,
+    val searchTerms: String,
+)
+
+data class OriginBounds(
+    val left: Dp,
+    val right: Dp,
+)
+
 @Composable
-public fun RowScope.ToolbarOrigin(tabSessionState: TabSessionState) {
+fun RowScope.ToolbarOrigin(
+    toolbarOriginData: ToolbarOriginData,
+    setOriginBounds: (OriginBounds) -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxHeight()
@@ -91,15 +113,35 @@ public fun RowScope.ToolbarOrigin(tabSessionState: TabSessionState) {
             .padding(all = 4.dp)
             .border(BorderStroke(0.dp, Color.Transparent), shape = RoundedCornerShape(2.dp))
             .background(Color.DarkGray)
+            .onGloballyPositioned { layoutCoordinates ->
+                val left = layoutCoordinates.boundsInWindow().left.dp
+                val right = layoutCoordinates.boundsInWindow().right.dp
+                setOriginBounds(OriginBounds(left, right))
+            },
     ) {
-        // TODO:
-
+        // toolbar indicators
+        with(toolbarOriginData) {
+            ToolbarTrackingProtectionIndicator(trackingProtection = siteTrackingProtection)
+            if (siteTrackingProtection != SiteTrackingProtection.OFF_GLOBALLY) ToolbarSeparator()
+            ToolbarSecurityIndicator(siteSecure)
+            ToolbarSeparator()
+            ToolbarEmptyIndicator(enabled = url == null)
+            if (url == null) ToolbarSeparator()
+            // url
+            Text(text = url ?: "")
+        }
     }
 }
 
+interface ToolbarOriginScope {
+    @Composable
+    fun ToolbarEmptyIndicator(enabled: Boolean)
 
-enum class SiteSecurity {
-    INSECURE, SECURE,
+    @Composable
+    fun ToolbarTrackingProtectionIndicator(trackingProtection: SiteTrackingProtection?)
+
+    @Composable
+    fun ToolbarSecurityIndicator(siteSecurity: SiteSecurity)
 }
 
 /**
@@ -127,14 +169,29 @@ enum class SiteTrackingProtection {
     OFF_GLOBALLY,
 }
 
-interface ToolbarOriginIcon {
+enum class SiteSecurity {
+    INSECURE, SECURE,
+}
+
+object ToolbarOriginScopeInstance : ToolbarOriginScope {
     @Composable
-    fun ToolbarEmptyIndicator() {
-        // TODO: what is this
+    override fun ToolbarEmptyIndicator(enabled: Boolean) {
+        Icon(
+            modifier = Modifier
+                .fillMaxHeight()
+                .aspectRatio(1F)
+                .clickable(enabled = enabled) {
+                    // TODO: what to do on click empty
+                    //  show explanation message?
+                },
+            painter = painterResource(id = R.drawable.mozac_ic_tracking_protection_on_trackers_blocked),
+            contentDescription = "empty indicator",
+            tint = Color.White
+        )
     }
 
     @Composable
-    fun ToolbarTrackingProtectionIndicator(trackingProtection: SiteTrackingProtection?) {
+    override fun ToolbarTrackingProtectionIndicator(trackingProtection: SiteTrackingProtection?) {
         // TODO: add to toolbar
         when (trackingProtection) {
             SiteTrackingProtection.ON_TRACKERS_BLOCKED, SiteTrackingProtection.ON_NO_TRACKERS_BLOCKED -> {
@@ -143,10 +200,10 @@ interface ToolbarOriginIcon {
                         .fillMaxHeight()
                         .aspectRatio(1F)
                         .clickable() {
-                            // TODO: what to do on click back
+                            // TODO: what to do on click
                         },
                     painter = painterResource(id = R.drawable.mozac_ic_tracking_protection_on_trackers_blocked),
-                    contentDescription = "back",
+                    contentDescription = "tracking protection indicator",
                     tint = Color.White
                 )
             }
@@ -157,10 +214,10 @@ interface ToolbarOriginIcon {
                         .fillMaxHeight()
                         .aspectRatio(1F)
                         .clickable() {
-                            // TODO: what to do on click back
+                            // TODO: what to do on click
                         },
                     painter = painterResource(id = R.drawable.mozac_ic_tracking_protection_on_trackers_blocked),
-                    contentDescription = "back",
+                    contentDescription = "tracking protection indicator",
                     tint = Color.White
                 )
             }
@@ -168,6 +225,35 @@ interface ToolbarOriginIcon {
             SiteTrackingProtection.OFF_GLOBALLY -> {}
 
             else -> {}
+        }
+    }
+
+    @Composable
+    override fun ToolbarSecurityIndicator(siteSecurity: SiteSecurity) {
+        if (siteSecurity == SiteSecurity.SECURE) {
+            Icon(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .aspectRatio(1F)
+                    .clickable() {
+                        // TODO: what to do on click if secure
+                    },
+                painter = painterResource(id = R.drawable.mozac_ic_lock_20),
+                contentDescription = "security indicator",
+                tint = Color.White
+            )
+        } else if (siteSecurity == SiteSecurity.INSECURE) {
+            Icon(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .aspectRatio(1F)
+                    .clickable() {
+                        // TODO: what to do on click if insecure
+                    },
+                painter = painterResource(id = R.drawable.mozac_ic_broken_lock),
+                contentDescription = "security indicator",
+                tint = Color.White
+            )
         }
     }
 }
@@ -184,36 +270,7 @@ fun ToolbarMenu() {
                 // TODO: what to do on click back
             },
         painter = painterResource(id = R.drawable.mozac_ic_app_menu_24),
-        contentDescription = "back",
+        contentDescription = "menu",
         tint = Color.White
     )
-}
-
-@Composable
-fun ToolbarSecurityIndicator(secure: Boolean) {
-    if (secure) {
-        Icon(
-            modifier = Modifier
-                .fillMaxHeight()
-                .aspectRatio(1F)
-                .clickable() {
-                    // TODO: what to do on click if secure
-                },
-            painter = painterResource(id = R.drawable.mozac_ic_lock_20),
-            contentDescription = "back",
-            tint = Color.White
-        )
-    } else {
-        Icon(
-            modifier = Modifier
-                .fillMaxHeight()
-                .aspectRatio(1F)
-                .clickable() {
-                    // TODO: what to do on click if insecure
-                },
-            painter = painterResource(id = R.drawable.mozac_ic_broken_lock),
-            contentDescription = "back",
-            tint = Color.White
-        )
-    }
 }
