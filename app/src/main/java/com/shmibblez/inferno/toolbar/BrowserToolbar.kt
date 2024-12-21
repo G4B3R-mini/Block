@@ -4,11 +4,12 @@
 
 package com.shmibblez.inferno.toolbar
 
-import androidx.annotation.Px
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.focusable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -25,11 +26,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.shmibblez.inferno.compose.browserStore
 import com.shmibblez.inferno.compose.sessionUseCases
@@ -59,7 +62,6 @@ fun BrowserToolbar(tabSessionState: TabSessionState) {
     if (editMode) {
         BrowserEditToolbar(
             url = url ?: "<empty>",
-            editMode = editMode,
             setEditMode = setEditMode,
             searchTerms = searchTerms,
             originBounds = originBounds,
@@ -70,6 +72,7 @@ fun BrowserToolbar(tabSessionState: TabSessionState) {
             searchTerms = searchTerms,
             setOriginBounds = setOriginBounds,
             tabSessionState = tabSessionState,
+            setEditMode = setEditMode
         )
     }
 }
@@ -93,28 +96,41 @@ fun BrowserDisplayToolbar(
     searchTerms: String,
     setOriginBounds: (OriginBounds) -> Unit,
     tabSessionState: TabSessionState,
+    setEditMode: (Boolean) -> Unit,
 ) {
+    var textFullSize by remember { mutableStateOf(true) }
+
+    LaunchedEffect(true) {
+        textFullSize = false
+    }
+
     Row {
+        if (!textFullSize) {
+            ToolbarLeftArrow(enabled = tabSessionState.content.canGoBack)
+            ToolbarRightArrow(enabled = tabSessionState.content.canGoForward)
+        }
         ToolbarOrigin(
-            ToolbarOriginData(
+            modifier = Modifier.animateContentSize() { initialValue, targetValue ->
+                // finished callback
+            }, toolbarOriginData = ToolbarOriginData(
                 url = url,
                 searchTerms = searchTerms,
                 siteSecure = detectSiteSecurity(tabSessionState),
                 siteTrackingProtection = detectSiteTrackingProtection(tabSessionState),
-            ),
-            setOriginBounds = setOriginBounds
+                setEditMode = setEditMode,
+            ), setOriginBounds = setOriginBounds
         )
+        if (!textFullSize) {
+            ToolbarReload(enabled = true)
+            ToolbarShowTabsTray()
+        }
     }
 }
 
-// TODO: make BrowserEditToolbar ToolbarOrigin url clickable, on click blend in BrowserEditToolbar
-//  at same location as ToolbarOrigin (save left and right location in Toolbar state vars),
-//  animate spread to left and right completely, and then set focus and pop up keyboard
-
+// TODO: test and add blend animation
 @Composable
 fun BrowserEditToolbar(
     url: String,
-    editMode: Boolean,
     setEditMode: (Boolean) -> Unit,
     searchTerms: String,
     originBounds: OriginBounds,
@@ -122,6 +138,7 @@ fun BrowserEditToolbar(
     var input by remember { mutableStateOf(searchTerms.ifEmpty { url }) }
     var textFullSize by remember { mutableStateOf(false) }
     val useCases = sessionUseCases()
+    val focusRequester = remember { FocusRequester() }
 
     LaunchedEffect(true) {
         // animate to fill width after first compose
@@ -144,9 +161,16 @@ fun BrowserEditToolbar(
                 .padding(all = 4.dp)
                 .border(BorderStroke(0.dp, Color.Transparent), shape = RoundedCornerShape(2.dp))
                 .background(Color.DarkGray)
+                .onFocusChanged { focusState ->
+                    // if focus lost, go back to editing mode
+                    if (!focusState.isFocused) setEditMode(false)
+                }
+                .focusable(true)
+                .focusRequester(focusRequester)
                 .animateContentSize() { initialValue, targetValue ->
                     if (initialValue.width > targetValue.width) {
-                        // animate forward, focus attained
+                        // after animation, request focus and show keyboard
+                        focusRequester.requestFocus()
                     }
                 },
             keyboardOptions = KeyboardOptions(

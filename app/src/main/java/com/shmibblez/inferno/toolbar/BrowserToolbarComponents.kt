@@ -1,5 +1,6 @@
 package com.shmibblez.inferno.toolbar
 
+import android.content.Context
 import androidx.annotation.Px
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -22,11 +23,14 @@ import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.shmibblez.inferno.R
+import com.shmibblez.inferno.browser.getActivity
 import com.shmibblez.inferno.compose.sessionUseCases
+import com.shmibblez.inferno.tabs.TabsTrayFragment
 import com.shmibblez.inferno.toolbar.ToolbarOriginScopeInstance.ToolbarEmptyIndicator
 import com.shmibblez.inferno.toolbar.ToolbarOriginScopeInstance.ToolbarSecurityIndicator
 import com.shmibblez.inferno.toolbar.ToolbarOriginScopeInstance.ToolbarTrackingProtectionIndicator
@@ -69,7 +73,7 @@ fun ToolbarRightArrow(enabled: Boolean) {
             .alpha(if (enabled) 1F else 0.5F)
             .clickable(enabled = enabled) { useCases.goForward() },
         painter = painterResource(id = R.drawable.mozac_ic_chevron_right_24),
-        contentDescription = "back",
+        contentDescription = "forward",
         tint = Color.White,
     )
 }
@@ -82,9 +86,34 @@ fun ToolbarReload(enabled: Boolean) {
             .fillMaxHeight()
             .aspectRatio(1F)
             .alpha(if (enabled) 1F else 0.5F)
-            .clickable(enabled = enabled) { useCases.reload },
+            .clickable(enabled = enabled) { useCases.reload() },
         painter = painterResource(id = R.drawable.mozac_ic_arrow_clockwise_24),
-        contentDescription = "back",
+        contentDescription = "reload page",
+        tint = Color.White
+    )
+}
+
+@Composable
+fun ToolbarShowTabsTray() {
+    fun showTabs(context: Context) {
+        // For now we are performing manual fragment transactions here. Once we can use the new
+        // navigation support library we may want to pass navigation graphs around.
+        // TODO: use navigation instead of fragment transactions
+        context.getActivity()?.supportFragmentManager?.beginTransaction()?.apply {
+            replace(R.id.container, TabsTrayFragment())
+            commit()
+        }
+    }
+
+    val context = LocalContext.current
+    Icon(
+        modifier = Modifier
+            .fillMaxHeight()
+            .aspectRatio(1F)
+            .alpha(1F)
+            .clickable { showTabs(context) },
+        painter = painterResource(id = R.drawable.mozac_ic_tab_tray_24),
+        contentDescription = "show tabs tray",
         tint = Color.White
     )
 }
@@ -94,6 +123,7 @@ data class ToolbarOriginData(
     val siteTrackingProtection: SiteTrackingProtection,
     val url: String?,
     val searchTerms: String,
+    val setEditMode: (Boolean) -> Unit
 )
 
 data class OriginBounds(
@@ -103,11 +133,12 @@ data class OriginBounds(
 
 @Composable
 fun RowScope.ToolbarOrigin(
+    modifier: Modifier,
     toolbarOriginData: ToolbarOriginData,
     setOriginBounds: (OriginBounds) -> Unit
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxHeight()
             .weight(1F)
             .padding(all = 4.dp)
@@ -128,7 +159,10 @@ fun RowScope.ToolbarOrigin(
             ToolbarEmptyIndicator(enabled = url == null)
             if (url == null) ToolbarSeparator()
             // url
-            Text(text = url ?: "")
+            Text(text = url ?: "",
+                modifier = Modifier.clickable {
+                    setEditMode(true)
+                })
         }
     }
 }
