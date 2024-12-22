@@ -159,10 +159,9 @@ fun RowScope.ToolbarOrigin(
             ToolbarEmptyIndicator(enabled = url == null)
             if (url == null) ToolbarSeparator()
             // url
-            Text(text = url ?: "",
-                modifier = Modifier.clickable {
-                    setEditMode(true)
-                })
+            Text(text = url ?: "", modifier = Modifier.clickable {
+                setEditMode(true)
+            })
         }
     }
 }
@@ -294,17 +293,20 @@ object ToolbarOriginScopeInstance : ToolbarOriginScope {
 
 
 @Composable
-fun ToolbarMenu() {
+fun ToolbarMenu(setShowMenu: (Boolean) -> Unit) {
     // TODO: menu popup
     Icon(
         modifier = Modifier
             .fillMaxHeight()
             .aspectRatio(1F)
-            .clickable() {
-                // TODO: what to do on click back
-            },
+            .clickable { setShowMenu(true) },
         painter = painterResource(id = R.drawable.mozac_ic_app_menu_24),
         contentDescription = "menu",
         tint = Color.White
     )
+}
+
+@Composable
+fun ToolbarMenuItems() {
+    // TODO: add menu items for bottom sheet
 }

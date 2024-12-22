@@ -9,7 +9,6 @@ import android.os.Build
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup.LayoutParams
-import android.widget.FrameLayout
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
@@ -27,10 +26,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.BottomAppBar
 import androidx.compose.material.FabPosition
+import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.Scaffold
 import androidx.compose.material.ScaffoldDefaults
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -55,7 +56,6 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.app.ActivityCompat.shouldShowRequestPermissionRationale
 import androidx.core.view.children
 import androidx.fragment.app.findFragment
-import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.preference.PreferenceManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -68,11 +68,17 @@ import com.shmibblez.inferno.ext.getPreferenceKey
 import com.shmibblez.inferno.pip.PictureInPictureIntegration
 import com.shmibblez.inferno.search.AwesomeBarWrapper
 import com.shmibblez.inferno.tabbar.BrowserTabBar
+import com.shmibblez.inferno.tabbar.toTabList
 import com.shmibblez.inferno.tabs.LastTabFeature
 import com.shmibblez.inferno.tabs.TabsTrayFragment
+import com.shmibblez.inferno.toolbar.BrowserToolbar
 import mozilla.components.browser.engine.gecko.GeckoEngineView
+import mozilla.components.browser.state.action.BrowserAction
+import mozilla.components.browser.state.selector.selectedTab
+import mozilla.components.browser.state.state.BrowserState
+import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.browser.thumbnails.BrowserThumbnails
-import mozilla.components.browser.toolbar.BrowserToolbar
+import mozilla.components.browser.toolbar.BrowserToolbar as BrowserToolbarCompat
 import mozilla.components.concept.engine.EngineView
 import mozilla.components.feature.app.links.AppLinksFeature
 import mozilla.components.feature.awesomebar.AwesomeBarFeature
@@ -95,6 +101,8 @@ import mozilla.components.feature.tabs.WindowFeature
 import mozilla.components.feature.tabs.toolbar.TabsToolbarFeature
 import mozilla.components.feature.toolbar.WebExtensionToolbarFeature
 import mozilla.components.feature.webauthn.WebAuthnFeature
+import mozilla.components.lib.state.Store
+import mozilla.components.lib.state.ext.observe
 import mozilla.components.support.base.feature.ViewBoundFeatureWrapper
 import mozilla.components.support.base.log.logger.Logger
 import mozilla.components.support.ktx.android.view.enterImmersiveMode
@@ -124,8 +132,7 @@ fun Context.getActivity(): AppCompatActivity? = when (this) {
 @Composable
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 fun BrowserComponent(
-    sessionId: String?,
-    setOnActivityResultHandler: ((OnActivityResultModel) -> Boolean) -> Unit
+    sessionId: String?, setOnActivityResultHandler: ((OnActivityResultModel) -> Boolean) -> Unit
 ) {
     Log.i("BrowserComponent", "BrowserComponent composed")
     val scaffoldState = rememberScaffoldState()
@@ -134,7 +141,33 @@ fun BrowserComponent(
     val context = LocalContext.current
     val view = LocalView.current
     val parentFragmentManager = context.getActivity()!!.supportFragmentManager
+    // browser state observer setup
+    val localLifecycleOwner = LocalLifecycleOwner.current
+    var browserStateObserver: Store.Subscription<BrowserState, BrowserAction>? by remember {
+        mutableStateOf(
+            null
+        )
+    }
+    var tabList by remember { mutableStateOf(context.components.core.store.state.toTabList().first) }
+    var tabSessionState by remember { mutableStateOf(context.components.core.store.state.selectedTab) }
+    //
+    val (showMenuBottomSheet, setShowMenuBottomSheet) = remember { mutableStateOf(false) }
+    
+    if (showMenuBottomSheet){
+        // todo: show ModalBottomSheet
+    }
 
+    // setup tab observer
+    DisposableEffect(true) {
+        browserStateObserver = context.components.core.store.observe(localLifecycleOwner) {
+            tabList = it.toTabList().first
+            tabSessionState = it.selectedTab
+        }
+
+        onDispose {
+            browserStateObserver!!.unsubscribe()
+        }
+    }
     /// features
     // from Moz BaseBrowserFragment
     val sessionFeature = remember { ViewBoundFeatureWrapper<SessionFeature>() }
@@ -168,7 +201,7 @@ fun BrowserComponent(
     /// views
     // from Moz BaseBrowserFragment
     var engineView: EngineView? by remember { mutableStateOf(null) }
-    var toolbar: BrowserToolbar? by remember { mutableStateOf(null) }
+    var toolbar: BrowserToolbarCompat? by remember { mutableStateOf(null) }
     var findInPageBar: FindInPageBar? by remember { mutableStateOf(null) }
     var swipeRefresh: SwipeRefreshLayout? by remember { mutableStateOf(null) }
     // from Moz BrowserFragment
@@ -192,14 +225,11 @@ fun BrowserComponent(
     // sets parent fragment handler for onActivityResult
     setOnActivityResultHandler { result: OnActivityResultModel ->
         Logger.info(
-            "Fragment onActivityResult received with " +
-                    "requestCode: ${result.requestCode}, resultCode: ${result.resultCode}, data: ${result.data}",
+            "Fragment onActivityResult received with " + "requestCode: ${result.requestCode}, resultCode: ${result.resultCode}, data: ${result.data}",
         )
         activityResultHandler.any {
             it.onActivityResult(
-                result.requestCode,
-                result.data,
-                result.resultCode
+                result.requestCode, result.data, result.resultCode
             )
         }
     }
@@ -209,10 +239,9 @@ fun BrowserComponent(
     val requestDownloadPermissionsLauncher: ActivityResultLauncher<Array<String>> =
         rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestMultiplePermissions()) { results ->
             val permissions = results.keys.toTypedArray()
-            val grantResults =
-                results.values.map {
-                    if (it) PackageManager.PERMISSION_GRANTED else PackageManager.PERMISSION_DENIED
-                }.toIntArray()
+            val grantResults = results.values.map {
+                if (it) PackageManager.PERMISSION_GRANTED else PackageManager.PERMISSION_DENIED
+            }.toIntArray()
             downloadsFeature.withFeature {
                 it.onPermissionsResult(permissions, grantResults)
             }
@@ -220,10 +249,9 @@ fun BrowserComponent(
     val requestSitePermissionsLauncher: ActivityResultLauncher<Array<String>> =
         rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { results ->
             val permissions = results.keys.toTypedArray()
-            val grantResults =
-                results.values.map {
-                    if (it) PackageManager.PERMISSION_GRANTED else PackageManager.PERMISSION_DENIED
-                }.toIntArray()
+            val grantResults = results.values.map {
+                if (it) PackageManager.PERMISSION_GRANTED else PackageManager.PERMISSION_DENIED
+            }.toIntArray()
             sitePermissionFeature.withFeature {
                 it.onPermissionsResult(permissions, grantResults)
             }
@@ -231,10 +259,9 @@ fun BrowserComponent(
     val requestPromptsPermissionsLauncher: ActivityResultLauncher<Array<String>> =
         rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { results ->
             val permissions = results.keys.toTypedArray()
-            val grantResults =
-                results.values.map {
-                    if (it) PackageManager.PERMISSION_GRANTED else PackageManager.PERMISSION_DENIED
-                }.toIntArray()
+            val grantResults = results.values.map {
+                if (it) PackageManager.PERMISSION_GRANTED else PackageManager.PERMISSION_DENIED
+            }.toIntArray()
             promptsFeature.withFeature {
                 it.onPermissionsResult(permissions, grantResults)
             }
@@ -250,8 +277,7 @@ fun BrowserComponent(
 
 
     LaunchedEffect(engineView) {
-        if (engineView == null)
-            return@LaunchedEffect
+        if (engineView == null) return@LaunchedEffect
         // from Moz BaseBrowserFragment
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
 
@@ -343,8 +369,7 @@ fun BrowserComponent(
                 fragmentManager = parentFragmentManager,
                 launchInApp = {
                     prefs.getBoolean(
-                        context.getPreferenceKey(R.string.pref_key_launch_external_app),
-                        false
+                        context.getPreferenceKey(R.string.pref_key_launch_external_app), false
                     )
                 },
             ),
@@ -380,8 +405,7 @@ fun BrowserComponent(
 
         windowFeature.set(
             feature = WindowFeature(
-                context.components.core.store,
-                context.components.useCases.tabsUseCases
+                context.components.core.store, context.components.useCases.tabsUseCases
             ),
             owner = lifecycleOwner,
             view = view,
@@ -394,16 +418,12 @@ fun BrowserComponent(
                 tabId = sessionId,
                 viewportFitChanged = {
                     viewportFitChanged(
-                        viewportFit = it,
-                        context
+                        viewportFit = it, context
                     )
                 },
                 fullScreenChanged = {
                     fullScreenChanged(
-                        it,
-                        context,
-                        toolbar!!,
-                        engineView!!
+                        it, context, toolbar!!, engineView!!
                     )
                 },
             ),
@@ -432,10 +452,10 @@ fun BrowserComponent(
                     requestSitePermissionsLauncher.launch(permissions)
                 },
                 onShouldShowRequestPermissionRationale = {
-                    if (context.getActivity() == null)
-                        shouldShowRequestPermissionRationale(context.getActivity()!!, it)
-                    else
-                        false
+                    if (context.getActivity() == null) shouldShowRequestPermissionRationale(
+                        context.getActivity()!!, it
+                    )
+                    else false
                 },
                 store = context.components.core.store,
             ),
@@ -515,30 +535,25 @@ fun BrowserComponent(
 //        }
 
         // from Moz BrowserFragment
-        AwesomeBarFeature(awesomeBar!!, toolbar!!, engineView)
-            .addSearchProvider(
-                context,
-                context.components.core.store,
-                context.components.useCases.searchUseCases.defaultSearch,
-                fetchClient = context.components.core.client,
-                mode = SearchSuggestionProvider.Mode.MULTIPLE_SUGGESTIONS,
-                engine = context.components.core.engine,
-                limit = 5,
-                filterExactMatch = true,
-            )
-            .addSessionProvider(
-                context.resources,
-                context.components.core.store,
-                context.components.useCases.tabsUseCases.selectTab,
-            )
-            .addHistoryProvider(
-                context.components.core.historyStorage,
-                context.components.useCases.sessionUseCases.loadUrl,
-            )
-            .addClipboardProvider(
-                context,
-                context.components.useCases.sessionUseCases.loadUrl
-            )
+        AwesomeBarFeature(awesomeBar!!, toolbar!!, engineView).addSearchProvider(
+            context,
+            context.components.core.store,
+            context.components.useCases.searchUseCases.defaultSearch,
+            fetchClient = context.components.core.client,
+            mode = SearchSuggestionProvider.Mode.MULTIPLE_SUGGESTIONS,
+            engine = context.components.core.engine,
+            limit = 5,
+            filterExactMatch = true,
+        ).addSessionProvider(
+            context.resources,
+            context.components.core.store,
+            context.components.useCases.tabsUseCases.selectTab,
+        ).addHistoryProvider(
+            context.components.core.historyStorage,
+            context.components.useCases.sessionUseCases.loadUrl,
+        ).addClipboardProvider(
+            context, context.components.useCases.sessionUseCases.loadUrl
+        )
 
         // from Moz BrowserHandler
         // We cannot really add a `addSyncedTabsProvider` to `AwesomeBarFeature` coz that would create
@@ -610,28 +625,24 @@ fun BrowserComponent(
     }
 
     val bottomBarHeight = 90.dp
-    val bottomBarHeightPx =
-        with(LocalDensity.current) { bottomBarHeight.roundToPx().toFloat() }
+    val bottomBarHeightPx = with(LocalDensity.current) { bottomBarHeight.roundToPx().toFloat() }
     val bottomBarOffsetHeightPx = remember { mutableFloatStateOf(0f) }
     // connection to the nested scroll system and listen to the scroll
     val nestedScrollConnection = remember {
         object : NestedScrollConnection {
             override fun onPreScroll(
-                available: Offset,
-                source: NestedScrollSource
+                available: Offset, source: NestedScrollSource
             ): Offset {
                 val delta = available.y
                 val newOffset = bottomBarOffsetHeightPx.floatValue + delta
-                bottomBarOffsetHeightPx.floatValue =
-                    newOffset.coerceIn(-bottomBarHeightPx, 0f)
+                bottomBarOffsetHeightPx.floatValue = newOffset.coerceIn(-bottomBarHeightPx, 0f)
 
                 return Offset.Zero
             }
         }
     }
 
-    Scaffold(
-        modifier = Modifier.nestedScroll(nestedScrollConnection),
+    Scaffold(modifier = Modifier.nestedScroll(nestedScrollConnection),
         scaffoldState = scaffoldState,
 //        topBar = {
 //            TopAppBar(
@@ -654,23 +665,22 @@ fun BrowserComponent(
         },
         bottomBar = {
             // hide and show when scrolling
-            BottomAppBar(
-                contentPadding = PaddingValues(0.dp),
+            BottomAppBar(contentPadding = PaddingValues(0.dp),
                 modifier = Modifier
                     .height(bottomBarHeight)
                     .offset {
                         IntOffset(
-                            x = 0,
-                            y = -bottomBarOffsetHeightPx.floatValue.roundToInt()
+                            x = 0, y = -bottomBarOffsetHeightPx.floatValue.roundToInt()
                         )
-                    }
-            ) {
+                    }) {
                 Column(
                     Modifier
                         .fillMaxSize()
                         .background(Color.Black)
                 ) {
-                    BrowserTabBar()
+                    BrowserTabBar(tabList)
+                    BrowserToolbar(tabSessionState = tabSessionState,
+                        setShowMenu = setShowMenuBottomSheet)
                     MozBrowserToolbar { bt -> toolbar = bt }
                     MozFindInPageBar { fip -> findInPageBar = fip }
                     MozReaderViewControlsBar { cb -> readerViewBar = cb }
@@ -682,22 +692,17 @@ fun BrowserComponent(
                     )
                 }
             }
-        }
-    )
+        })
 }
 
 private fun viewportFitChanged(viewportFit: Int, context: Context) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-        context.getActivity()!!.window.attributes.layoutInDisplayCutoutMode =
-            viewportFit
+        context.getActivity()!!.window.attributes.layoutInDisplayCutoutMode = viewportFit
     }
 }
 
 private fun fullScreenChanged(
-    enabled: Boolean,
-    context: Context,
-    toolbar: BrowserToolbar,
-    engineView: EngineView
+    enabled: Boolean, context: Context, toolbar: BrowserToolbarCompat, engineView: EngineView
 ) {
     if (enabled) {
         context.getActivity()?.enterImmersiveMode()
@@ -735,10 +740,9 @@ fun Dp.toPx(): Int {
 
 @Composable
 fun MozAwesomeBar(setView: (AwesomeBarWrapper) -> Unit) {
-    AndroidView(
-        modifier = Modifier
-            .height(0.dp)
-            .width(0.dp),
+    AndroidView(modifier = Modifier
+        .height(0.dp)
+        .width(0.dp),
         factory = { context -> AwesomeBarWrapper(context) },
         update = {
             it.visibility = View.GONE
@@ -746,58 +750,51 @@ fun MozAwesomeBar(setView: (AwesomeBarWrapper) -> Unit) {
             it.layoutParams.height = LayoutParams.MATCH_PARENT
             it.setPadding(4.dp.toPx(), 4.dp.toPx(), 4.dp.toPx(), 4.dp.toPx())
             setView(it)
-        }
-    )
+        })
 }
 
 @Composable
 fun MozEngineView(
-    setSwipeView: (VerticalSwipeRefreshLayout) -> Unit,
-    setEngineView: (GeckoEngineView) -> Unit
+    setSwipeView: (VerticalSwipeRefreshLayout) -> Unit, setEngineView: (GeckoEngineView) -> Unit
 ) {
-    AndroidView(
-        modifier = Modifier.fillMaxSize(),
-        factory = { context ->
-            val vl = VerticalSwipeRefreshLayout(context)
-            val gv = GeckoEngineView(context)
-            vl.addView(gv)
-            vl
-        },
-        update = { sv ->
-            var gv: GeckoEngineView? = null
-            // find GeckoEngineView child in scroll view
-            for (v in sv.children) {
-                if (v is GeckoEngineView) {
-                    gv = v
-                    break
-                }
+    AndroidView(modifier = Modifier.fillMaxSize(), factory = { context ->
+        val vl = VerticalSwipeRefreshLayout(context)
+        val gv = GeckoEngineView(context)
+        vl.addView(gv)
+        vl
+    }, update = { sv ->
+        var gv: GeckoEngineView? = null
+        // find GeckoEngineView child in scroll view
+        for (v in sv.children) {
+            if (v is GeckoEngineView) {
+                gv = v
+                break
             }
-            // setup views
-            gv!!.setDynamicToolbarMaxHeight(R.dimen.browser_toolbar_height)
-            with(sv.layoutParams) {
-                this.width = LayoutParams.MATCH_PARENT
-                this.height = LayoutParams.MATCH_PARENT
-            }
-            with(gv.layoutParams) {
-                this.width = LayoutParams.MATCH_PARENT
-                this.height = LayoutParams.MATCH_PARENT
-            }
-            // set view references
-            setSwipeView(sv)
-            setEngineView(gv)
         }
-    )
+        // setup views
+        gv!!.setDynamicToolbarMaxHeight(R.dimen.browser_toolbar_height)
+        with(sv.layoutParams) {
+            this.width = LayoutParams.MATCH_PARENT
+            this.height = LayoutParams.MATCH_PARENT
+        }
+        with(gv.layoutParams) {
+            this.width = LayoutParams.MATCH_PARENT
+            this.height = LayoutParams.MATCH_PARENT
+        }
+        // set view references
+        setSwipeView(sv)
+        setEngineView(gv)
+    })
 }
 
 @Composable
-fun MozBrowserToolbar(setView: (BrowserToolbar) -> Unit) {
-    AndroidView(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(dimensionResource(id = R.dimen.browser_toolbar_height))
-            .background(Color.Black)
-            .padding(horizontal = 8.dp, vertical = 0.dp),
-        factory = { context -> BrowserToolbar(context) },
+fun MozBrowserToolbar(setView: (BrowserToolbarCompat) -> Unit) {
+    AndroidView(modifier = Modifier
+        .fillMaxWidth()
+        .height(dimensionResource(id = R.dimen.browser_toolbar_height))
+        .background(Color.Black)
+        .padding(horizontal = 8.dp, vertical = 0.dp),
+        factory = { context -> BrowserToolbarCompat(context) },
         update = { bt ->
             bt.layoutParams.height = R.dimen.browser_toolbar_height
             bt.layoutParams.width = LayoutParams.MATCH_PARENT
@@ -805,8 +802,7 @@ fun MozBrowserToolbar(setView: (BrowserToolbar) -> Unit) {
             bt.setBackgroundColor(0xFF0000)
             bt.displayMode()
             setView(bt)
-        }
-    )
+        })
 }
 
 /**
@@ -814,35 +810,31 @@ fun MozBrowserToolbar(setView: (BrowserToolbar) -> Unit) {
  */
 @Composable
 fun MozFindInPageBar(setView: (FindInPageBar) -> Unit) {
-    AndroidView(
-        modifier = Modifier
-            .fillMaxSize()
-            .height(0.dp)
-            .width(0.dp),
+    AndroidView(modifier = Modifier
+        .fillMaxSize()
+        .height(0.dp)
+        .width(0.dp),
         factory = { context -> FindInPageBar(context) },
         update = {
             setView(it)
             it.visibility = View.GONE
-        }
-    )
+        })
 }
 
 @Composable
 fun MozReaderViewControlsBar(
     setView: (ReaderViewControlsBar) -> Unit
 ) {
-    AndroidView(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(colorResource(id = R.color.toolbarBackgroundColor))
-            .height(0.dp)
-            .width(0.dp),
+    AndroidView(modifier = Modifier
+        .fillMaxSize()
+        .background(colorResource(id = R.color.toolbarBackgroundColor))
+        .height(0.dp)
+        .width(0.dp),
         factory = { context -> ReaderViewControlsBar(context) },
         update = {
             setView(it)
             it.visibility = View.GONE
-        }
-    )
+        })
 }
 
 // reader view button, what this for?
@@ -850,12 +842,10 @@ fun MozReaderViewControlsBar(
 fun MozFloatingActionButton(
     setView: (FloatingActionButton) -> Unit
 ) {
-    AndroidView(
-        modifier = Modifier.fillMaxSize(),
+    AndroidView(modifier = Modifier.fillMaxSize(),
         factory = { context -> FloatingActionButton(context) },
         update = {
             setView(it)
             it.visibility = View.GONE
-        }
-    )
+        })
 }

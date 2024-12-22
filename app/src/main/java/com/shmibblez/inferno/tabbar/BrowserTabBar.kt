@@ -56,59 +56,34 @@ fun BrowserState.toTabList(
     tabsFilter: (TabSessionState) -> Boolean = { true },
 ): Pair<List<TabSessionState>, String?> {
     val tabStates = tabs.filter(tabsFilter)
-    val selectedTabId = tabStates
-        .filter(tabsFilter)
-        .firstOrNull { it.id == selectedTabId }
-        ?.id
+    val selectedTabId = tabStates.filter(tabsFilter).firstOrNull { it.id == selectedTabId }?.id
 
     return Pair(tabStates, selectedTabId)
 }
 
-public inline fun <T> Iterable<T>.findIndex(predicate: (T) -> Boolean): Int? {
+inline fun <T> Iterable<T>.findIndex(predicate: (T) -> Boolean): Int? {
     forEachIndexed { i, e -> if (predicate(e)) return i }
     return null
 }
 
-@Preview
 @Composable
-fun BrowserTabBar() {
+fun BrowserTabBar(tabList: List<TabSessionState>) {
     val context = LocalContext.current
-    val localLifecycleOwner = LocalLifecycleOwner.current
     val listState = rememberLazyListState()
-    var tabList by remember { mutableStateOf(context.components.core.store.state.toTabList().first) }
     val selectedTabId = context.components.core.store.state.toTabList().second
-    val isPrivateSession: Boolean = (
-            if (tabList.isEmpty()) {
-                false
-            } else if (selectedTabId == null) {
-                newTab(context, false)
-                false
-            } else
-                tabList.find { it.id == selectedTabId }!!.content.private
-            )
+    val isPrivateSession: Boolean = (if (tabList.isEmpty()) {
+        false
+    } else if (selectedTabId == null) {
+        newTab(context, false)
+        false
+    } else tabList.find { it.id == selectedTabId }!!.content.private)
     Log.d("BrowserTabBar", "isPrivateSession: $isPrivateSession")
     val displayedTabs =
         with(context.components.core.store.state) { if (isPrivateSession) this.privateTabs else this.normalTabs }
-    var browserStateObserver: Store.Subscription<BrowserState, BrowserAction>? by remember {
-        mutableStateOf(
-            null
-        )
-    }
     // scroll to active tab
     LaunchedEffect(selectedTabId) {
         val i = displayedTabs.findIndex { it.id == selectedTabId }
-        if (i != null)
-            listState.animateScrollToItem(i, 0)
-    }
-    // setup tab observer
-    DisposableEffect(true) {
-        browserStateObserver = context.components.core.store.observe(localLifecycleOwner) {
-            tabList = it.toTabList().first
-        }
-
-        onDispose {
-            browserStateObserver!!.unsubscribe()
-        }
+        if (i != null) listState.animateScrollToItem(i, 0)
     }
     // if tab list empty add new tab
     LaunchedEffect(displayedTabs) {
@@ -116,13 +91,12 @@ fun BrowserTabBar() {
         if (displayedTabs.isEmpty()) newTab(context, isPrivateSession)
     }
 
-    if (displayedTabs.isEmpty())
-        return Row(
-            Modifier
-                .fillMaxWidth()
-                .height(34.dp)
-                .background(Color.Black)
-        ) { }
+    if (displayedTabs.isEmpty()) return Row(
+        Modifier
+            .fillMaxWidth()
+            .height(34.dp)
+            .background(Color.Black)
+    ) { }
 
     return Row(
         Modifier
@@ -139,9 +113,7 @@ fun BrowserTabBar() {
         ) {
             items(displayedTabs.size) {
                 MiniTab(
-                    context,
-                    displayedTabs[it],
-                    displayedTabs[it].id == selectedTabId
+                    context, displayedTabs[it], displayedTabs[it].id == selectedTabId
                 )
             }
         }
@@ -165,53 +137,49 @@ fun BrowserTabBar() {
 
 @Composable
 private fun MiniTab(
-    context: Context,
-    tabSessionState: TabSessionState,
-    selected: Boolean
+    context: Context, tabSessionState: TabSessionState, selected: Boolean
 ) {
-    return Row(
-        modifier = Modifier
-            .fillMaxSize()
-            .width(90.dp)
-            .background(if (selected) Color.Black else Color.DarkGray)
-            .drawBehind {
-                val w = size.width
-                val h = size.height
-                val cap = StrokeCap.Square
-                val sw = 1.dp.toPx()
-                val hsw = sw / 2
-                val color = if (selected) Color.DarkGray else Color.Gray
-                // left
-                drawLine(
-                    cap = cap,
-                    color = color,
-                    strokeWidth = sw,
-                    start = Offset(hsw, hsw),
-                    end = Offset(hsw, h - hsw)
-                )
-                // right
-                drawLine(
-                    cap = cap,
-                    color = color,
-                    strokeWidth = sw,
-                    start = Offset(w - hsw, hsw),
-                    end = Offset(w - hsw, h - hsw)
-                )
-                // bottom
-                drawLine(
-                    cap = cap,
-                    color = color,
-                    strokeWidth = sw,
-                    start = Offset(hsw, hsw),
-                    end = Offset(w - hsw, hsw)
-                )
-            }
-            .clickable(enabled = !selected) {
-                context.components.useCases.tabsUseCases.selectTab(
-                    tabSessionState.id
-                )
-            },
-        verticalAlignment = Alignment.CenterVertically
+    return Row(modifier = Modifier
+        .fillMaxSize()
+        .width(90.dp)
+        .background(if (selected) Color.Black else Color.DarkGray)
+        .drawBehind {
+            val w = size.width
+            val h = size.height
+            val cap = StrokeCap.Square
+            val sw = 1.dp.toPx()
+            val hsw = sw / 2
+            val color = if (selected) Color.DarkGray else Color.Gray
+            // left
+            drawLine(
+                cap = cap,
+                color = color,
+                strokeWidth = sw,
+                start = Offset(hsw, hsw),
+                end = Offset(hsw, h - hsw)
+            )
+            // right
+            drawLine(
+                cap = cap,
+                color = color,
+                strokeWidth = sw,
+                start = Offset(w - hsw, hsw),
+                end = Offset(w - hsw, h - hsw)
+            )
+            // bottom
+            drawLine(
+                cap = cap,
+                color = color,
+                strokeWidth = sw,
+                start = Offset(hsw, hsw),
+                end = Offset(w - hsw, hsw)
+            )
+        }
+        .clickable(enabled = !selected) {
+            context.components.useCases.tabsUseCases.selectTab(
+                tabSessionState.id
+            )
+        }, verticalAlignment = Alignment.CenterVertically
 
     ) {
         Text(
@@ -223,10 +191,11 @@ private fun MiniTab(
                 .background(
                     brush = Brush.horizontalGradient(
                         colors = listOf(
-                            Color.Transparent,
-                            if (selected) Color.Black else Color.DarkGray
+                            Color.Transparent, if (selected) Color.Black else Color.DarkGray
                         ),
-                        startX = (90.dp - 10.dp).toPx().toFloat()
+                        startX = (90.dp - 10.dp)
+                            .toPx()
+                            .toFloat()
                     )
                 ),
             maxLines = 1,

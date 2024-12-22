@@ -49,7 +49,11 @@ import mozilla.components.browser.state.state.TabSessionState
 //  -[ ] implement moz ToolbarIntegration
 
 @Composable
-fun BrowserToolbar(tabSessionState: TabSessionState) {
+fun BrowserToolbar(tabSessionState: TabSessionState?, setShowMenu: (Boolean) -> Unit) {
+    if (tabSessionState == null) {
+        // don't show if null, TODO: show loading bar
+        return
+    }
     val context = LocalContext.current
     val searchTerms by remember { mutableStateOf(tabSessionState.content.searchTerms) }
     val url: String? by browserStore().observeAsState { state -> state.selectedTab?.content?.url }
@@ -72,7 +76,8 @@ fun BrowserToolbar(tabSessionState: TabSessionState) {
             searchTerms = searchTerms,
             setOriginBounds = setOriginBounds,
             tabSessionState = tabSessionState,
-            setEditMode = setEditMode
+            setEditMode = setEditMode,
+            setShowMenu = setShowMenu
         )
     }
 }
@@ -97,6 +102,7 @@ fun BrowserDisplayToolbar(
     setOriginBounds: (OriginBounds) -> Unit,
     tabSessionState: TabSessionState,
     setEditMode: (Boolean) -> Unit,
+    setShowMenu: (Boolean) -> Unit
 ) {
     var textFullSize by remember { mutableStateOf(true) }
 
@@ -123,6 +129,7 @@ fun BrowserDisplayToolbar(
         if (!textFullSize) {
             ToolbarReload(enabled = true)
             ToolbarShowTabsTray()
+            ToolbarMenu(setShowMenu = setShowMenu)
         }
     }
 }
