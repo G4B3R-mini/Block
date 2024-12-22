@@ -9,7 +9,6 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.focusable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -18,7 +17,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.TextField
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -39,6 +38,10 @@ import com.shmibblez.inferno.compose.sessionUseCases
 import com.shmibblez.inferno.state.observeAsState
 import mozilla.components.browser.state.selector.selectedTab
 import mozilla.components.browser.state.state.TabSessionState
+import com.shmibblez.inferno.toolbar.ToolbarOptionsScopeInstance.ToolbarReload
+import com.shmibblez.inferno.toolbar.ToolbarOptionsScopeInstance.ToolbarShowTabsTray
+import com.shmibblez.inferno.toolbar.ToolbarOptionsScopeInstance.ToolbarLeftArrow
+import com.shmibblez.inferno.toolbar.ToolbarOptionsScopeInstance.ToolbarRightArrow
 
 // TODO:
 //  -[ ] implement moz AwesomeBarFeature

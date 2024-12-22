@@ -24,12 +24,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.BottomAppBar
-import androidx.compose.material.FabPosition
-import androidx.compose.material.ModalBottomSheetLayout
-import androidx.compose.material.Scaffold
-import androidx.compose.material.ScaffoldDefaults
-import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FabPosition
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -129,13 +129,13 @@ fun Context.getActivity(): AppCompatActivity? = when (this) {
 /**
  * @param sessionId session id, from Moz BaseBrowserFragment
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 fun BrowserComponent(
     sessionId: String?, setOnActivityResultHandler: ((OnActivityResultModel) -> Boolean) -> Unit
 ) {
     Log.i("BrowserComponent", "BrowserComponent composed")
-    val scaffoldState = rememberScaffoldState()
 //    val coroutineScope = rememberCoroutineScope()
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
@@ -151,10 +151,13 @@ fun BrowserComponent(
     var tabList by remember { mutableStateOf(context.components.core.store.state.toTabList().first) }
     var tabSessionState by remember { mutableStateOf(context.components.core.store.state.selectedTab) }
     //
-    val (showMenuBottomSheet, setShowMenuBottomSheet) = remember { mutableStateOf(false) }
-    
-    if (showMenuBottomSheet){
+    var (showMenuBottomSheet, setShowMenuBottomSheet) = remember { mutableStateOf(false) }
+
+    if (showMenuBottomSheet) {
         // todo: show ModalBottomSheet
+        ModalBottomSheet(onDismissRequest = { showMenuBottomSheet = false }) {
+
+        }
     }
 
     // setup tab observer
@@ -643,7 +646,6 @@ fun BrowserComponent(
     }
 
     Scaffold(modifier = Modifier.nestedScroll(nestedScrollConnection),
-        scaffoldState = scaffoldState,
 //        topBar = {
 //            TopAppBar(
 //                content = {
@@ -651,19 +653,15 @@ fun BrowserComponent(
 //                }
 //            )
 //        },
-        contentWindowInsets = ScaffoldDefaults.contentWindowInsets,
-        content = { _ ->
+        contentWindowInsets = ScaffoldDefaults.contentWindowInsets, content = { _ ->
             MozAwesomeBar(setView = { ab -> awesomeBar = ab })
             MozEngineView(
                 setEngineView = { ev -> engineView = ev },
                 setSwipeView = { sr -> swipeRefresh = sr },
             )
-        },
-        floatingActionButtonPosition = FabPosition.End,
-        floatingActionButton = {
+        }, floatingActionButtonPosition = FabPosition.End, floatingActionButton = {
             MozFloatingActionButton { fab -> readerViewAppearanceButton = fab }
-        },
-        bottomBar = {
+        }, bottomBar = {
             // hide and show when scrolling
             BottomAppBar(contentPadding = PaddingValues(0.dp),
                 modifier = Modifier
@@ -679,8 +677,9 @@ fun BrowserComponent(
                         .background(Color.Black)
                 ) {
                     BrowserTabBar(tabList)
-                    BrowserToolbar(tabSessionState = tabSessionState,
-                        setShowMenu = setShowMenuBottomSheet)
+                    BrowserToolbar(
+                        tabSessionState = tabSessionState, setShowMenu = setShowMenuBottomSheet
+                    )
                     MozBrowserToolbar { bt -> toolbar = bt }
                     MozFindInPageBar { fip -> findInPageBar = fip }
                     MozReaderViewControlsBar { cb -> readerViewBar = cb }
