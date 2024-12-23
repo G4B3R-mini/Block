@@ -1,57 +1,104 @@
 package com.shmibblez.inferno.toolbar
 
 import android.content.Context
-import androidx.compose.foundation.BorderStroke
+import android.content.Intent
+import android.util.Log
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.material3.BottomSheetDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.shmibblez.inferno.R
+import com.shmibblez.inferno.browser.BrowserComponentMode
 import com.shmibblez.inferno.browser.getActivity
 import com.shmibblez.inferno.compose.sessionUseCases
+import com.shmibblez.inferno.ext.components
+import com.shmibblez.inferno.ext.share
+import com.shmibblez.inferno.settings.SettingsActivity
 import com.shmibblez.inferno.tabs.TabsTrayFragment
+import com.shmibblez.inferno.toolbar.ToolbarMenuItemsScopeInstance.DividerToolbarMenuItem
+import com.shmibblez.inferno.toolbar.ToolbarMenuItemsScopeInstance.FindInPageToolbarMenuItem
+import com.shmibblez.inferno.toolbar.ToolbarMenuItemsScopeInstance.NavOptionsToolbarMenuItem
+import com.shmibblez.inferno.toolbar.ToolbarMenuItemsScopeInstance.PrivateModeToolbarMenuItem
+import com.shmibblez.inferno.toolbar.ToolbarMenuItemsScopeInstance.RequestDesktopSiteToolbarMenuItem
+import com.shmibblez.inferno.toolbar.ToolbarMenuItemsScopeInstance.SettingsToolbarMenuItem
+import com.shmibblez.inferno.toolbar.ToolbarMenuItemsScopeInstance.ShareToolbarMenuItem
+import com.shmibblez.inferno.toolbar.ToolbarOptionsScopeInstance.ToolbarSeparator
 import com.shmibblez.inferno.toolbar.ToolbarOriginScopeInstance.ToolbarEmptyIndicator
 import com.shmibblez.inferno.toolbar.ToolbarOriginScopeInstance.ToolbarSecurityIndicator
 import com.shmibblez.inferno.toolbar.ToolbarOriginScopeInstance.ToolbarTrackingProtectionIndicator
-import com.shmibblez.inferno.toolbar.ToolbarOptionsScopeInstance.ToolbarSeparator
+import mozilla.components.browser.state.ext.getUrl
+import mozilla.components.browser.state.selector.normalTabs
+import mozilla.components.browser.state.selector.privateTabs
+import mozilla.components.browser.state.selector.selectedTab
+import mozilla.components.browser.state.state.TabSessionState
+import mozilla.components.feature.tabs.TabsUseCases
 
 // TODO: test implementations
+
+object IconConstants {
+    const val ICON_ASPECT_RATIO = 1F
+    val ICON_START_PADDING = 4.dp
+    val ICON_TOP_PADDING = 4.dp
+    val ICON_END_PADDING = 4.dp
+    val ICON_BOTTOM_PADDING = 4.dp
+}
 
 interface ToolbarOptionsScope {
     // TODO: add options icons for
     //  - find in page (search icon)
     //  - switch to desktop site (desktop icon)
-    //  -
+    //  - share (share icon)
+    //  - settings (settings icon)
+    //  - private mode (incog symbol)
 
     @Composable
     fun ToolbarSeparator()
 
     @Composable
-    fun ToolbarLeftArrow(enabled: Boolean)
+    fun ToolbarBack(enabled: Boolean)
 
     @Composable
-    fun ToolbarRightArrow(enabled: Boolean)
+    fun ToolbarForward(enabled: Boolean)
 
     @Composable
     fun ToolbarReload(enabled: Boolean)
+
+    @Composable
+    fun ToolbarStopLoading(enabled: Boolean)
 
     @Composable
     fun ToolbarShowTabsTray()
@@ -60,25 +107,52 @@ interface ToolbarOptionsScope {
 object ToolbarOptionsScopeInstance : ToolbarOptionsScope {
     @Composable
     override fun ToolbarSeparator() {
-        HorizontalDivider(
+        VerticalDivider(
             modifier = Modifier
                 .fillMaxHeight()
-                .padding(vertical = 2.dp),
+                .padding(vertical = 4.dp),
             color = Color.White,
             thickness = 1.dp,
         )
     }
 
     @Composable
-    override fun ToolbarRightArrow(enabled: Boolean) {
+    override fun ToolbarBack(enabled: Boolean) {
         val useCases = sessionUseCases()
         Icon(
             modifier = Modifier
                 .fillMaxHeight()
-                .aspectRatio(1F)
+                .aspectRatio(IconConstants.ICON_ASPECT_RATIO)
                 .alpha(if (enabled) 1F else 0.5F)
-                .clickable(enabled = enabled) { useCases.goForward() },
-            painter = painterResource(id = R.drawable.mozac_ic_chevron_right_24),
+                .padding(
+                    start = IconConstants.ICON_START_PADDING,
+                    top = IconConstants.ICON_TOP_PADDING,
+                    end = IconConstants.ICON_END_PADDING,
+                    bottom = IconConstants.ICON_BOTTOM_PADDING
+                )
+                .clickable(enabled = enabled) { useCases.goBack.invoke() },
+            painter = painterResource(id = R.drawable.baseline_chevron_left_24),
+            contentDescription = "back",
+            tint = Color.White
+        )
+    }
+
+    @Composable
+    override fun ToolbarForward(enabled: Boolean) {
+        val useCases = sessionUseCases()
+        Icon(
+            modifier = Modifier
+                .fillMaxHeight()
+                .aspectRatio(IconConstants.ICON_ASPECT_RATIO)
+                .alpha(if (enabled) 1F else 0.5F)
+                .padding(
+                    start = IconConstants.ICON_START_PADDING,
+                    top = IconConstants.ICON_TOP_PADDING,
+                    end = IconConstants.ICON_END_PADDING,
+                    bottom = IconConstants.ICON_BOTTOM_PADDING
+                )
+                .clickable(enabled = enabled) { useCases.goForward.invoke() },
+            painter = painterResource(id = R.drawable.baseline_chevron_right_24),
             contentDescription = "forward",
             tint = Color.White,
         )
@@ -90,9 +164,15 @@ object ToolbarOptionsScopeInstance : ToolbarOptionsScope {
         Icon(
             modifier = Modifier
                 .fillMaxHeight()
-                .aspectRatio(1F)
+                .aspectRatio(IconConstants.ICON_ASPECT_RATIO)
                 .alpha(if (enabled) 1F else 0.5F)
-                .clickable(enabled = enabled) { useCases.reload() },
+                .padding(
+                    start = IconConstants.ICON_START_PADDING,
+                    top = IconConstants.ICON_TOP_PADDING,
+                    end = IconConstants.ICON_END_PADDING,
+                    bottom = IconConstants.ICON_BOTTOM_PADDING
+                )
+                .clickable(enabled = enabled) { useCases.reload.invoke() },
             painter = painterResource(id = R.drawable.mozac_ic_arrow_clockwise_24),
             contentDescription = "reload page",
             tint = Color.White
@@ -100,16 +180,22 @@ object ToolbarOptionsScopeInstance : ToolbarOptionsScope {
     }
 
     @Composable
-    override fun ToolbarLeftArrow(enabled: Boolean) {
+    override fun ToolbarStopLoading(enabled: Boolean) {
         val useCases = sessionUseCases()
         Icon(
             modifier = Modifier
                 .fillMaxHeight()
-                .aspectRatio(1F)
+                .aspectRatio(IconConstants.ICON_ASPECT_RATIO)
                 .alpha(if (enabled) 1F else 0.5F)
-                .clickable(enabled = enabled) { useCases.goBack() },
-            painter = painterResource(id = R.drawable.mozac_ic_chevron_left_24),
-            contentDescription = "back",
+                .padding(
+                    start = IconConstants.ICON_START_PADDING,
+                    top = IconConstants.ICON_TOP_PADDING,
+                    end = IconConstants.ICON_END_PADDING,
+                    bottom = IconConstants.ICON_BOTTOM_PADDING
+                )
+                .clickable(enabled = enabled) { useCases.stopLoading.invoke() },
+            painter = painterResource(id = R.drawable.mozac_ic_cross_24),
+            contentDescription = "stop loading",
             tint = Color.White
         )
     }
@@ -129,11 +215,36 @@ object ToolbarOptionsScopeInstance : ToolbarOptionsScope {
         Icon(
             modifier = Modifier
                 .fillMaxHeight()
-                .aspectRatio(1F)
-                .alpha(1F)
+                .aspectRatio(IconConstants.ICON_ASPECT_RATIO)
+//                .alpha(0.5F)
+                .padding(
+                    start = IconConstants.ICON_START_PADDING,
+                    top = IconConstants.ICON_TOP_PADDING,
+                    end = IconConstants.ICON_END_PADDING,
+                    bottom = IconConstants.ICON_BOTTOM_PADDING
+                )
                 .clickable { showTabs(context) },
             painter = painterResource(id = R.drawable.mozac_ic_tab_tray_24),
             contentDescription = "show tabs tray",
+            tint = Color.White
+        )
+    }
+
+    @Composable
+    fun ToolbarMenuIcon(setShowMenu: (Boolean) -> Unit) {
+        Icon(
+            modifier = Modifier
+                .fillMaxHeight()
+                .aspectRatio(IconConstants.ICON_ASPECT_RATIO)
+                .padding(
+                    start = IconConstants.ICON_START_PADDING,
+                    top = IconConstants.ICON_TOP_PADDING,
+                    end = IconConstants.ICON_END_PADDING,
+                    bottom = IconConstants.ICON_BOTTOM_PADDING
+                )
+                .clickable { setShowMenu(true) },
+            painter = painterResource(id = R.drawable.mozac_ic_ellipsis_vertical_24),
+            contentDescription = "menu",
             tint = Color.White
         )
     }
@@ -162,9 +273,9 @@ fun RowScope.ToolbarOrigin(
         modifier = modifier
             .fillMaxHeight()
             .weight(1F)
-            .padding(all = 4.dp)
-            .border(BorderStroke(0.dp, Color.Transparent), shape = RoundedCornerShape(2.dp))
-            .background(Color.DarkGray)
+//            .padding(all = 4.dp)
+            .align(Alignment.CenterVertically)
+            .background(Color.DarkGray, shape = MaterialTheme.shapes.small)
             .onGloballyPositioned { layoutCoordinates ->
                 val left = layoutCoordinates.boundsInWindow().left.dp
                 val right = layoutCoordinates.boundsInWindow().right.dp
@@ -176,13 +287,26 @@ fun RowScope.ToolbarOrigin(
             ToolbarTrackingProtectionIndicator(trackingProtection = siteTrackingProtection)
             if (siteTrackingProtection != SiteTrackingProtection.OFF_GLOBALLY) ToolbarSeparator()
             ToolbarSecurityIndicator(siteSecure)
-            ToolbarSeparator()
-            ToolbarEmptyIndicator(enabled = url == null)
             if (url == null) ToolbarSeparator()
+            ToolbarEmptyIndicator(enabled = url == null)
             // url
-            Text(text = url ?: "", modifier = Modifier.clickable {
-                setEditMode(true)
-            })
+            Text(text = url ?: "",
+                minLines = 1,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.Start,
+                color = Color.White,
+                modifier = Modifier
+                    .padding(
+                        start = IconConstants.ICON_START_PADDING,
+                        end = IconConstants.ICON_END_PADDING
+                    )
+                    .weight(1F)
+                    .wrapContentHeight(Alignment.CenterVertically)
+                    .align(Alignment.CenterVertically)
+                    .clickable {
+                        setEditMode(true)
+                    })
         }
     }
 }
@@ -230,11 +354,17 @@ enum class SiteSecurity {
 object ToolbarOriginScopeInstance : ToolbarOriginScope {
     @Composable
     override fun ToolbarEmptyIndicator(enabled: Boolean) {
-        Icon(
+        if (enabled) Icon(
             modifier = Modifier
                 .fillMaxHeight()
-                .aspectRatio(1F),
-            painter = painterResource(id = R.drawable.mozac_ic_tracking_protection_on_trackers_blocked),
+                .aspectRatio(IconConstants.ICON_ASPECT_RATIO)
+                .padding(
+                    start = IconConstants.ICON_START_PADDING,
+                    top = IconConstants.ICON_TOP_PADDING,
+                    end = IconConstants.ICON_END_PADDING,
+                    bottom = IconConstants.ICON_BOTTOM_PADDING
+                ),
+            painter = painterResource(id = R.drawable.mozac_ic_search_24),
             contentDescription = "empty indicator",
             tint = Color.White
         )
@@ -247,7 +377,13 @@ object ToolbarOriginScopeInstance : ToolbarOriginScope {
                 Icon(
                     modifier = Modifier
                         .fillMaxHeight()
-                        .aspectRatio(1F),
+                        .aspectRatio(IconConstants.ICON_ASPECT_RATIO)
+                        .padding(
+                            start = IconConstants.ICON_START_PADDING,
+                            top = IconConstants.ICON_TOP_PADDING,
+                            end = IconConstants.ICON_END_PADDING,
+                            bottom = IconConstants.ICON_BOTTOM_PADDING
+                        ),
                     painter = painterResource(id = R.drawable.mozac_ic_tracking_protection_on_trackers_blocked),
                     contentDescription = "tracking protection indicator",
                     tint = Color.White
@@ -258,7 +394,13 @@ object ToolbarOriginScopeInstance : ToolbarOriginScope {
                 Icon(
                     modifier = Modifier
                         .fillMaxHeight()
-                        .aspectRatio(1F),
+                        .aspectRatio(IconConstants.ICON_ASPECT_RATIO)
+                        .padding(
+                            start = IconConstants.ICON_START_PADDING,
+                            top = IconConstants.ICON_TOP_PADDING,
+                            end = IconConstants.ICON_END_PADDING,
+                            bottom = IconConstants.ICON_BOTTOM_PADDING
+                        ),
                     painter = painterResource(id = R.drawable.mozac_ic_tracking_protection_on_trackers_blocked),
                     contentDescription = "tracking protection indicator",
                     tint = Color.White
@@ -277,7 +419,13 @@ object ToolbarOriginScopeInstance : ToolbarOriginScope {
             Icon(
                 modifier = Modifier
                     .fillMaxHeight()
-                    .aspectRatio(1F),
+                    .aspectRatio(IconConstants.ICON_ASPECT_RATIO)
+                    .padding(
+                        start = IconConstants.ICON_START_PADDING,
+                        top = IconConstants.ICON_TOP_PADDING,
+                        end = IconConstants.ICON_END_PADDING,
+                        bottom = IconConstants.ICON_BOTTOM_PADDING
+                    ),
                 painter = painterResource(id = R.drawable.mozac_ic_lock_20),
                 contentDescription = "security indicator",
                 tint = Color.White
@@ -286,7 +434,13 @@ object ToolbarOriginScopeInstance : ToolbarOriginScope {
             Icon(
                 modifier = Modifier
                     .fillMaxHeight()
-                    .aspectRatio(1F),
+                    .aspectRatio(IconConstants.ICON_ASPECT_RATIO)
+                    .padding(
+                        start = IconConstants.ICON_START_PADDING,
+                        top = IconConstants.ICON_TOP_PADDING,
+                        end = IconConstants.ICON_END_PADDING,
+                        bottom = IconConstants.ICON_BOTTOM_PADDING
+                    ),
                 painter = painterResource(id = R.drawable.mozac_ic_broken_lock),
                 contentDescription = "security indicator",
                 tint = Color.White
@@ -295,27 +449,288 @@ object ToolbarOriginScopeInstance : ToolbarOriginScope {
     }
 }
 
-
-@Composable
-fun ToolbarMenu(setShowMenu: (Boolean) -> Unit) {
-    Icon(
-        modifier = Modifier
-            .fillMaxHeight()
-            .aspectRatio(1F)
-            .clickable { setShowMenu(true) },
-        painter = painterResource(id = R.drawable.mozac_ic_app_menu_24),
-        contentDescription = "menu",
-        tint = Color.White
-    )
-}
-
 interface ToolbarMenuItemsScope {
-    // TODO: add menu items
+    // TODO: add add to home screen, add-ons, synced tabs, and report issue
     @Composable
-    fun
+    fun DividerToolbarMenuItem()
+
+    @Composable
+    fun ShareToolbarMenuItem()
+
+    @Composable
+    fun RequestDesktopSiteToolbarMenuItem(desktopMode: Boolean)
+
+    @Composable
+    fun FindInPageToolbarMenuItem(
+        setBrowserComponentMode: (BrowserComponentMode) -> Unit, dismissMenuSheet: () -> Unit
+    )
+
+    @Composable
+    fun SettingsToolbarMenuItem()
+
+    @Composable
+    fun PrivateModeToolbarMenuItem(privateMode: Boolean, dismissMenuSheet: () -> Unit)
+
+    // stop, refresh, forward, back
+    @Composable
+    fun NavOptionsToolbarMenuItem()
 }
 
+object ToolbarMenuItemConstants {
+    val OPTION_HEIGHT = 40.dp
+    val OPTION_PADDING_START = 4.dp
+    val OPTION_PADDING_TOP = 4.dp
+    val OPTION_PADDING_END = 4.dp
+    val OPTION_PADDING_BOTTOM = 4.dp
+    val SHEET_HANDLE_HEIGHT = 2.5.dp
+}
+
+object ToolbarMenuItemsScopeInstance : ToolbarMenuItemsScope {
+    @Composable
+    override fun DividerToolbarMenuItem() {
+        HorizontalDivider(thickness = 0.25F.dp, color = Color.White)
+    }
+
+    @Composable
+    override fun ShareToolbarMenuItem() {
+        val context = LocalContext.current
+        Box(contentAlignment = Alignment.CenterStart,
+            modifier = Modifier
+                .height(ToolbarMenuItemConstants.OPTION_HEIGHT)
+                .padding(
+                    start = ToolbarMenuItemConstants.OPTION_PADDING_START,
+                    top = ToolbarMenuItemConstants.OPTION_PADDING_TOP,
+                    end = ToolbarMenuItemConstants.OPTION_PADDING_END,
+                    bottom = ToolbarMenuItemConstants.OPTION_PADDING_BOTTOM,
+                )
+                .clickable {
+                    val url = context.components.core.store.state.selectedTab
+                        ?.getUrl()
+                        .orEmpty()
+                    context.share(url)
+                }) {
+            Text(
+                text = "Share", color = Color.White, modifier = Modifier.wrapContentHeight()
+            )
+        }
+    }
+
+    @Composable
+    override fun RequestDesktopSiteToolbarMenuItem(desktopMode: Boolean) {
+        val useCases = sessionUseCases()
+        Row(verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier
+                .height(ToolbarMenuItemConstants.OPTION_HEIGHT)
+                .fillMaxWidth()
+                .padding(
+                    start = ToolbarMenuItemConstants.OPTION_PADDING_START,
+                    top = ToolbarMenuItemConstants.OPTION_PADDING_TOP,
+//                    end = ToolbarMenuItemConstants.OPTION_PADDING_END,
+                    bottom = ToolbarMenuItemConstants.OPTION_PADDING_BOTTOM,
+                )
+                .clickable { useCases.requestDesktopSite.invoke(!desktopMode) }) {
+            Text(
+                text = "Request Desktop Site",
+                color = Color.White,
+                modifier = Modifier.wrapContentHeight(),
+            )
+            Checkbox(
+                checked = desktopMode, colors = CheckboxDefaults.colors(
+                    checkedColor = Color.White,
+                    checkmarkColor = Color.DarkGray,
+                    uncheckedColor = Color.White,
+                ), onCheckedChange = {}, modifier = Modifier.padding(all = 0.dp)
+            )
+        }
+    }
+
+    @Composable
+    override fun FindInPageToolbarMenuItem(
+        setBrowserComponentMode: (BrowserComponentMode) -> Unit, dismissMenuSheet: () -> Unit
+    ) {
+        Box(contentAlignment = Alignment.CenterStart,
+            modifier = Modifier
+                .height(ToolbarMenuItemConstants.OPTION_HEIGHT)
+                .padding(
+                    start = ToolbarMenuItemConstants.OPTION_PADDING_START,
+                    top = ToolbarMenuItemConstants.OPTION_PADDING_TOP,
+                    end = ToolbarMenuItemConstants.OPTION_PADDING_END,
+                    bottom = ToolbarMenuItemConstants.OPTION_PADDING_BOTTOM,
+                )
+                .clickable {
+                    setBrowserComponentMode(BrowserComponentMode.FIND_IN_PAGE)
+                    dismissMenuSheet()
+                }) {
+            Text(
+                text = "Find In Page", color = Color.White, modifier = Modifier.wrapContentHeight()
+            )
+        }
+    }
+
+    @Composable
+    override fun SettingsToolbarMenuItem() {
+        fun showSettings(context: Context) {
+            val intent = Intent(context, SettingsActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            context.startActivity(intent)
+        }
+
+        val context = LocalContext.current
+        Box(contentAlignment = Alignment.CenterStart,
+            modifier = Modifier
+                .height(ToolbarMenuItemConstants.OPTION_HEIGHT)
+                .padding(
+                    start = ToolbarMenuItemConstants.OPTION_PADDING_START,
+                    top = ToolbarMenuItemConstants.OPTION_PADDING_TOP,
+                    end = ToolbarMenuItemConstants.OPTION_PADDING_END,
+                    bottom = ToolbarMenuItemConstants.OPTION_PADDING_BOTTOM,
+                )
+                .clickable {
+                    showSettings(context)
+                }) {
+            Text(
+                text = "Settings", color = Color.White, modifier = Modifier.wrapContentHeight()
+            )
+        }
+    }
+
+    @Composable
+    override fun PrivateModeToolbarMenuItem(isPrivateMode: Boolean, dismissMenuSheet: () -> Unit) {
+        fun newTab(tabsUseCases: TabsUseCases, isPrivateSession: Boolean) {
+            Log.d("BrowserTabBar", "newTab: isPrivateSession: $isPrivateSession")
+            tabsUseCases.addTab(
+                url = if (isPrivateSession) "about:privatebrowsing" else "about:blank",
+                selectTab = true,
+                private = isPrivateSession
+            )
+        }
+
+        val state = LocalContext.current.components.core.store.state
+        val tabsUseCases = LocalContext.current.components.useCases.tabsUseCases
+        Row(verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier
+                .height(ToolbarMenuItemConstants.OPTION_HEIGHT)
+                .fillMaxWidth()
+                .padding(
+                    start = ToolbarMenuItemConstants.OPTION_PADDING_START,
+                    top = ToolbarMenuItemConstants.OPTION_PADDING_TOP,
+//                    end = ToolbarMenuItemConstants.OPTION_PADDING_END,
+                    bottom = ToolbarMenuItemConstants.OPTION_PADDING_BOTTOM,
+                )
+                .clickable {
+                    if (isPrivateMode) {
+                        // if private switch to normal tabs
+                        val lastNormalTab = try {
+                            state.normalTabs.last()
+                        } catch (e: NoSuchElementException) {
+                            null
+                        }
+                        if (lastNormalTab != null) {
+                            // if previous tabs exist switch to last one
+                            tabsUseCases.selectTab(lastNormalTab.id)
+                        } else {
+                            // if no normal tabs create new one
+                            newTab(tabsUseCases, false)
+                        }
+                    } else {
+                        // if normal mode switch to private tabs
+                        val lastPrivateTab = try {
+                            state.privateTabs.last()
+                        } catch (e: NoSuchElementException) {
+                            null
+                        }
+                        if (lastPrivateTab != null) {
+                            // if private tabs exist switch to last one
+                            tabsUseCases.selectTab(lastPrivateTab.id)
+                        } else {
+                            // if no private tabs exist create new one
+                            newTab(tabsUseCases, true)
+                        }
+                    }
+
+                    dismissMenuSheet()
+                }) {
+            Text(
+                text = "Private Browsing Activated",
+                color = Color.White,
+                modifier = Modifier.wrapContentHeight(),
+            )
+            Checkbox(
+                checked = isPrivateMode, colors = CheckboxDefaults.colors(
+                    checkedColor = Color.White,
+                    checkmarkColor = Color.DarkGray,
+                    uncheckedColor = Color.White,
+                ), onCheckedChange = {}, modifier = Modifier.padding(all = 0.dp)
+            )
+        }
+    }
+
+    @Composable
+    override fun NavOptionsToolbarMenuItem() {
+        val tabSessionState = LocalContext.current.components.core.store.state.selectedTab
+        val spacerWidth = (LocalConfiguration.current.screenWidthDp / 8).dp
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier
+                .height(ToolbarMenuItemConstants.OPTION_HEIGHT)
+                .fillMaxWidth()
+        ) {
+            Box(Modifier.width(spacerWidth))
+            ToolbarOptionsScopeInstance.ToolbarBack(
+                enabled = tabSessionState?.content?.canGoBack ?: false
+            )
+            ToolbarOptionsScopeInstance.ToolbarForward(
+                enabled = tabSessionState?.content?.canGoForward ?: false
+            )
+            ToolbarOptionsScopeInstance.ToolbarReload(enabled = tabSessionState != null)
+            ToolbarOptionsScopeInstance.ToolbarStopLoading(enabled = tabSessionState != null)
+            Box(Modifier.width(spacerWidth))
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ToolbarMenuItems() {
+fun ToolbarBottomMenuSheet(
+    tabSessionState: TabSessionState?,
+    setShowBottomMenuSheet: (Boolean) -> Unit,
+    setBrowserComponentMode: (BrowserComponentMode) -> Unit
+) {
+    if (tabSessionState == null) return
     // TODO: add menu items for bottom sheet
+    // TODO: edit toolbar text color not showing
+    ModalBottomSheet(onDismissRequest = { setShowBottomMenuSheet(false) },
+        containerColor = Color.Black,
+        scrimColor = Color.Black.copy(alpha = 0.1F),
+        shape = RectangleShape,
+        dragHandle = {
+            BottomSheetDefaults.DragHandle(
+                color = Color.White,
+                height = ToolbarMenuItemConstants.SHEET_HANDLE_HEIGHT,
+//            shape = RectangleShape,
+            )
+        }) {
+        DividerToolbarMenuItem()
+
+        ShareToolbarMenuItem()
+        DividerToolbarMenuItem()
+
+        PrivateModeToolbarMenuItem(isPrivateMode = tabSessionState.content.private,dismissMenuSheet = { setShowBottomMenuSheet(false) })
+        DividerToolbarMenuItem()
+
+        RequestDesktopSiteToolbarMenuItem(desktopMode = tabSessionState.content.desktopMode)
+        DividerToolbarMenuItem()
+
+        FindInPageToolbarMenuItem(setBrowserComponentMode = setBrowserComponentMode,
+            dismissMenuSheet = { setShowBottomMenuSheet(false) })
+        DividerToolbarMenuItem()
+
+        SettingsToolbarMenuItem()
+        DividerToolbarMenuItem()
+
+        // stop, refresh, forward, back
+        NavOptionsToolbarMenuItem()
+    }
 }

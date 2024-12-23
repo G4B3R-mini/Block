@@ -417,7 +417,7 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
         val composeView = view.findViewById<ComposeView>(R.id.compose_view)
         if (shouldUseComposeUI) {
             composeView.visibility = View.VISIBLE
-            composeView.setContent { BrowserToolbar() }
+            composeView.setContent { BrowserToolbar(tabSessionState = null, setShowMenu = {}) }
 
             val params = swipeRefresh.layoutParams as CoordinatorLayout.LayoutParams
             params.topMargin = resources.getDimensionPixelSize(R.dimen.browser_toolbar_height)

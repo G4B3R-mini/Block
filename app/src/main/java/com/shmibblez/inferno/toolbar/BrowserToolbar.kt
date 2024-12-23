@@ -4,44 +4,60 @@
 
 package com.shmibblez.inferno.toolbar
 
+import android.util.Log
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.TextField
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.LineHeightStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.shmibblez.inferno.browser.ComponentDimens
 import com.shmibblez.inferno.compose.browserStore
 import com.shmibblez.inferno.compose.sessionUseCases
+import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.state.observeAsState
+import com.shmibblez.inferno.toolbar.ToolbarOptionsScopeInstance.ToolbarBack
+import com.shmibblez.inferno.toolbar.ToolbarOptionsScopeInstance.ToolbarMenuIcon
+import com.shmibblez.inferno.toolbar.ToolbarOptionsScopeInstance.ToolbarReload
+import com.shmibblez.inferno.toolbar.ToolbarOptionsScopeInstance.ToolbarForward
+import com.shmibblez.inferno.toolbar.ToolbarOptionsScopeInstance.ToolbarShowTabsTray
+import mozilla.components.browser.engine.gecko.GeckoEngine
+import mozilla.components.browser.state.search.SearchEngine
 import mozilla.components.browser.state.selector.selectedTab
 import mozilla.components.browser.state.state.TabSessionState
-import com.shmibblez.inferno.toolbar.ToolbarOptionsScopeInstance.ToolbarReload
-import com.shmibblez.inferno.toolbar.ToolbarOptionsScopeInstance.ToolbarShowTabsTray
-import com.shmibblez.inferno.toolbar.ToolbarOptionsScopeInstance.ToolbarLeftArrow
-import com.shmibblez.inferno.toolbar.ToolbarOptionsScopeInstance.ToolbarRightArrow
+import mozilla.components.feature.search.SearchUseCases
+import mozilla.components.feature.search.ext.buildSearchUrl
 
 // TODO:
 //  -[ ] implement moz AwesomeBarFeature
@@ -68,9 +84,8 @@ fun BrowserToolbar(tabSessionState: TabSessionState?, setShowMenu: (Boolean) -> 
 
     if (editMode) {
         BrowserEditToolbar(
-            url = url ?: "<empty>",
+            tabSessionState = tabSessionState,
             setEditMode = setEditMode,
-            searchTerms = searchTerms,
             originBounds = originBounds,
         )
     } else {
@@ -113,10 +128,15 @@ fun BrowserDisplayToolbar(
         textFullSize = false
     }
 
-    Row {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp)
+            .height(ComponentDimens.TOOLBAR_HEIGHT)
+    ) {
         if (!textFullSize) {
-            ToolbarLeftArrow(enabled = tabSessionState.content.canGoBack)
-            ToolbarRightArrow(enabled = tabSessionState.content.canGoForward)
+            ToolbarBack(enabled = tabSessionState.content.canGoBack)
+            ToolbarForward(enabled = tabSessionState.content.canGoForward)
         }
         ToolbarOrigin(
             modifier = Modifier.animateContentSize() { initialValue, targetValue ->
@@ -132,7 +152,7 @@ fun BrowserDisplayToolbar(
         if (!textFullSize) {
             ToolbarReload(enabled = true)
             ToolbarShowTabsTray()
-            ToolbarMenu(setShowMenu = setShowMenu)
+            ToolbarMenuIcon(setShowMenu = setShowMenu)
         }
     }
 }
@@ -140,63 +160,115 @@ fun BrowserDisplayToolbar(
 // TODO: test and add blend animation
 @Composable
 fun BrowserEditToolbar(
-    url: String,
+    tabSessionState: TabSessionState?,
     setEditMode: (Boolean) -> Unit,
-    searchTerms: String,
     originBounds: OriginBounds,
 ) {
-    var input by remember { mutableStateOf(searchTerms.ifEmpty { url }) }
+    fun parseInput(): TextFieldValue {
+        return (tabSessionState?.content?.searchTerms?.ifEmpty { tabSessionState.content.url }
+            ?: "<empty>").let {
+            (if (it != "about:blank" && it != "about:privatebrowsing") it else "").let { searchTerms ->
+                TextFieldValue(
+                    text = searchTerms, selection = TextRange(searchTerms.length)
+                )
+            }
+        }
+    }
+
+    val context = LocalContext.current
+    var input by remember {
+        mutableStateOf(parseInput())
+    }
     var textFullSize by remember { mutableStateOf(false) }
-    val useCases = sessionUseCases()
     val focusRequester = remember { FocusRequester() }
+    var alreadyFocused by remember { mutableStateOf(false) }
 
     LaunchedEffect(true) {
         // animate to fill width after first compose
+        focusRequester.requestFocus()
         textFullSize = true
     }
 
-    Row {
-        if (!textFullSize) Box(
+    LaunchedEffect(tabSessionState) {
+        input = parseInput()
+    }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color.Black)
+            .height(ComponentDimens.TOOLBAR_HEIGHT)
+    ) {
+        if (!textFullSize) {
+            Box(
+                modifier = Modifier
+                    .width(originBounds.left)
+                    .fillMaxHeight()
+            )
+        }
+        Box(
+            contentAlignment = Alignment.CenterStart,
             modifier = Modifier
-                .width(originBounds.left)
-                .fillMaxHeight()
-        )
-        TextField(
-            value = input,
-            onValueChange = { value -> input = value },
-            singleLine = true,
-            modifier = Modifier
-                .fillMaxHeight()
-                .weight(1F)
+                .fillMaxSize()
                 .padding(all = 4.dp)
-                .border(BorderStroke(0.dp, Color.Transparent), shape = RoundedCornerShape(2.dp))
-                .background(Color.DarkGray)
-                .onFocusChanged { focusState ->
-                    // if focus lost, go back to editing mode
-                    if (!focusState.isFocused) setEditMode(false)
-                }
-                .focusable(true)
-                .focusRequester(focusRequester)
-                .animateContentSize() { initialValue, targetValue ->
-                    if (initialValue.width > targetValue.width) {
-                        // after animation, request focus and show keyboard
-                        focusRequester.requestFocus()
+                .weight(1F)
+                .background(Color.DarkGray, shape = MaterialTheme.shapes.small)
+                .animateContentSize()
+        ) {
+            BasicTextField(
+                value = input,
+                onValueChange = { v ->
+                    // move cursor to end
+                    input = v.copy(selection = TextRange(v.text.length))
+                },
+                enabled = true,
+                singleLine = true,
+                textStyle = TextStyle(
+                    color = Color.White,
+                    textAlign = TextAlign.Start,
+                    lineHeightStyle = LineHeightStyle(
+                        alignment = LineHeightStyle.Alignment.Center,
+                        trim = LineHeightStyle.Trim.None,
+                    )
+                ),
+                keyboardActions = KeyboardActions(
+                    onGo = {
+                        context.components.useCases.searchUseCases.defaultSearch.invoke(
+                            searchTerms = input.text,
+                            searchEngine = null,
+                            parentSessionId = null,
+                        )
+                        setEditMode(false)
+                    },
+                ),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Uri, imeAction = ImeAction.Go
+                ),
+                modifier = Modifier
+                    .wrapContentHeight(align = Alignment.CenterVertically)
+                    .fillMaxWidth()
+                    .padding(all = 4.dp)
+                    .onFocusChanged { focusState ->
+                        // if focus lost, go back to editing mode
+                        if (focusState.hasFocus) {
+                            alreadyFocused = true
+                        }
+                        if (alreadyFocused && !focusState.hasFocus) setEditMode(false)
+                        Log.d(
+                            "BrowserEditToolbar",
+                            "alreadyFocused: $alreadyFocused, focusState: $focusState"
+                        )
                     }
-                },
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Uri, imeAction = ImeAction.Go
-            ),
-            keyboardActions = KeyboardActions(
-                onGo = {
-                    useCases.loadUrl(searchTerms)
-                    setEditMode(false)
-                },
-            ),
-        )
-        if (!textFullSize) Box(
-            modifier = Modifier
-                .width(originBounds.right)
-                .fillMaxHeight()
-        )
+                    .focusable(true)
+                    .focusRequester(focusRequester),
+            )
+        }
+        if (!textFullSize) {
+            Box(
+                modifier = Modifier
+                    .width(originBounds.right)
+                    .fillMaxHeight()
+            )
+        }
     }
 }

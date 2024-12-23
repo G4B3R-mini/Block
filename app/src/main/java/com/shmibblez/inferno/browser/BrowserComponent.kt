@@ -18,6 +18,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -27,7 +29,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.runtime.Composable
@@ -51,6 +52,7 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.app.ActivityCompat.shouldShowRequestPermissionRationale
@@ -72,11 +74,11 @@ import com.shmibblez.inferno.tabbar.toTabList
 import com.shmibblez.inferno.tabs.LastTabFeature
 import com.shmibblez.inferno.tabs.TabsTrayFragment
 import com.shmibblez.inferno.toolbar.BrowserToolbar
+import com.shmibblez.inferno.toolbar.ToolbarBottomMenuSheet
 import mozilla.components.browser.engine.gecko.GeckoEngineView
 import mozilla.components.browser.state.action.BrowserAction
 import mozilla.components.browser.state.selector.selectedTab
 import mozilla.components.browser.state.state.BrowserState
-import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.browser.thumbnails.BrowserThumbnails
 import mozilla.components.browser.toolbar.BrowserToolbar as BrowserToolbarCompat
 import mozilla.components.concept.engine.EngineView
@@ -110,10 +112,14 @@ import mozilla.components.support.ktx.android.view.exitImmersiveMode
 import mozilla.components.ui.widgets.VerticalSwipeRefreshLayout
 import kotlin.math.roundToInt
 
-// TODO: check if works:
-//  - vertical swipe refresh
-//  - permissions handling
-//  -
+// TODO:
+//  - implement composable FindInPageBar
+//  - add home page (look at firefox source code)
+//  - add default search engines, select default
+//    - bundle in app
+//    - add search engine settings page
+//      - add search engine editor which allows removing or adding search engines
+//      - add way to select search engine
 
 fun Context.getActivity(): AppCompatActivity? = when (this) {
     is AppCompatActivity -> this
@@ -121,10 +127,17 @@ fun Context.getActivity(): AppCompatActivity? = when (this) {
     else -> null
 }
 
+enum class BrowserComponentMode {
+    TOOLBAR, FIND_IN_PAGE,
+}
 
-// TODO: pass data from parent fragment onActivityResult to handlers here
-//  with SharedFlow or LiveData (bound to view lifecycle), put this in event receiver:
-//  ``activityResultHandler.any { it.onActivityResult(requestCode, data, resultCode) }``
+object ComponentDimens {
+    val TOOLBAR_HEIGHT = 40.dp
+    val TAB_BAR_HEIGHT = 30.dp
+    val TAB_WIDTH = 120.dp
+    val FIND_IN_PAGE_BAR_HEIGHT = 50.dp
+
+}
 
 /**
  * @param sessionId session id, from Moz BaseBrowserFragment
@@ -135,6 +148,9 @@ fun Context.getActivity(): AppCompatActivity? = when (this) {
 fun BrowserComponent(
     sessionId: String?, setOnActivityResultHandler: ((OnActivityResultModel) -> Boolean) -> Unit
 ) {
+    val (browserMode, setBrowserMode) = remember {
+        mutableStateOf(BrowserComponentMode.TOOLBAR)
+    }
     Log.i("BrowserComponent", "BrowserComponent composed")
 //    val coroutineScope = rememberCoroutineScope()
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -151,13 +167,14 @@ fun BrowserComponent(
     var tabList by remember { mutableStateOf(context.components.core.store.state.toTabList().first) }
     var tabSessionState by remember { mutableStateOf(context.components.core.store.state.selectedTab) }
     //
-    var (showMenuBottomSheet, setShowMenuBottomSheet) = remember { mutableStateOf(false) }
+    val (showMenuBottomSheet, setShowMenuBottomSheet) = remember { mutableStateOf(false) }
 
     if (showMenuBottomSheet) {
-        // todo: show ModalBottomSheet
-        ModalBottomSheet(onDismissRequest = { showMenuBottomSheet = false }) {
-
-        }
+        ToolbarBottomMenuSheet(
+            tabSessionState = tabSessionState,
+            setShowBottomMenuSheet = setShowMenuBottomSheet,
+            setBrowserComponentMode = setBrowserMode
+        )
     }
 
     // setup tab observer
@@ -165,6 +182,7 @@ fun BrowserComponent(
         browserStateObserver = context.components.core.store.observe(localLifecycleOwner) {
             tabList = it.toTabList().first
             tabSessionState = it.selectedTab
+            Log.d("BrowserComponent", "tabSessionState updated")
         }
 
         onDispose {
@@ -627,7 +645,10 @@ fun BrowserComponent(
         engineView!!.setDynamicToolbarMaxHeight(context.resources.getDimensionPixelSize(R.dimen.browser_toolbar_height))
     }
 
-    val bottomBarHeight = 90.dp
+    val bottomBarHeight = when (browserMode) {
+        BrowserComponentMode.TOOLBAR -> ComponentDimens.TOOLBAR_HEIGHT + ComponentDimens.TAB_BAR_HEIGHT
+        BrowserComponentMode.FIND_IN_PAGE -> ComponentDimens.FIND_IN_PAGE_BAR_HEIGHT
+    }
     val bottomBarHeightPx = with(LocalDensity.current) { bottomBarHeight.roundToPx().toFloat() }
     val bottomBarOffsetHeightPx = remember { mutableFloatStateOf(0f) }
     // connection to the nested scroll system and listen to the scroll
@@ -636,11 +657,26 @@ fun BrowserComponent(
             override fun onPreScroll(
                 available: Offset, source: NestedScrollSource
             ): Offset {
-                val delta = available.y
-                val newOffset = bottomBarOffsetHeightPx.floatValue + delta
-                bottomBarOffsetHeightPx.floatValue = newOffset.coerceIn(-bottomBarHeightPx, 0f)
-
+                if (tabSessionState?.content?.loading == false) {
+                    val delta = available.y
+                    val newOffset = bottomBarOffsetHeightPx.floatValue + delta
+                    bottomBarOffsetHeightPx.floatValue = newOffset.coerceIn(-bottomBarHeightPx, 0f)
+                }
                 return Offset.Zero
+            }
+
+            override fun onPostScroll(
+                consumed: Offset, available: Offset, source: NestedScrollSource
+            ): Offset {
+                // TODO: add animation to offset move
+//                if (bottomBarOffsetHeightPx.floatValue >= -bottomBarHeightPx / 2) {
+//                    // if less than half way down, move up completely
+//                    bottomBarOffsetHeightPx.floatValue = 0F
+//                } else {
+//                    // if more than half awy down, move down completely
+//                    bottomBarOffsetHeightPx.floatValue = -bottomBarHeightPx
+//                }
+                return super.onPostScroll(consumed, available, source)
             }
         }
     }
@@ -653,9 +689,15 @@ fun BrowserComponent(
 //                }
 //            )
 //        },
-        contentWindowInsets = ScaffoldDefaults.contentWindowInsets, content = { _ ->
+        contentWindowInsets = ScaffoldDefaults.contentWindowInsets, content = { paddingValues ->
             MozAwesomeBar(setView = { ab -> awesomeBar = ab })
             MozEngineView(
+                modifier = Modifier.padding(
+                    start = paddingValues.calculateStartPadding(LayoutDirection.Ltr),
+                    top = 0.dp,
+                    end = paddingValues.calculateEndPadding(LayoutDirection.Ltr),
+                    bottom = 0.dp
+                ),
                 setEngineView = { ev -> engineView = ev },
                 setSwipeView = { sr -> swipeRefresh = sr },
             )
@@ -676,12 +718,16 @@ fun BrowserComponent(
                         .fillMaxSize()
                         .background(Color.Black)
                 ) {
-                    BrowserTabBar(tabList)
-                    BrowserToolbar(
-                        tabSessionState = tabSessionState, setShowMenu = setShowMenuBottomSheet
-                    )
-                    MozBrowserToolbar { bt -> toolbar = bt }
+                    if (browserMode == BrowserComponentMode.TOOLBAR) {
+                        BrowserTabBar(tabList)
+                        BrowserToolbar(
+                            tabSessionState = tabSessionState, setShowMenu = setShowMenuBottomSheet
+                        )
+                    }
+//                    if (browserMode == BrowserComponentMode.FIND_IN_PAGE) {
                     MozFindInPageBar { fip -> findInPageBar = fip }
+//                    }
+                    MozBrowserToolbar { bt -> toolbar = bt }
                     MozReaderViewControlsBar { cb -> readerViewBar = cb }
                     Box(
                         Modifier
@@ -754,9 +800,11 @@ fun MozAwesomeBar(setView: (AwesomeBarWrapper) -> Unit) {
 
 @Composable
 fun MozEngineView(
-    setSwipeView: (VerticalSwipeRefreshLayout) -> Unit, setEngineView: (GeckoEngineView) -> Unit
+    modifier: Modifier,
+    setSwipeView: (VerticalSwipeRefreshLayout) -> Unit,
+    setEngineView: (GeckoEngineView) -> Unit
 ) {
-    AndroidView(modifier = Modifier.fillMaxSize(), factory = { context ->
+    AndroidView(modifier = modifier.fillMaxSize(), factory = { context ->
         val vl = VerticalSwipeRefreshLayout(context)
         val gv = GeckoEngineView(context)
         vl.addView(gv)

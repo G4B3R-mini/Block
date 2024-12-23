@@ -17,14 +17,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.Text
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -37,19 +32,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.shmibblez.inferno.R
+import com.shmibblez.inferno.browser.ComponentDimens
 import com.shmibblez.inferno.browser.toPx
 import com.shmibblez.inferno.ext.components
-import mozilla.components.browser.state.action.BrowserAction
 import mozilla.components.browser.state.selector.normalTabs
 import mozilla.components.browser.state.selector.privateTabs
 import mozilla.components.browser.state.state.BrowserState
 import mozilla.components.browser.state.state.TabSessionState
-import mozilla.components.lib.state.Store
-import mozilla.components.lib.state.ext.observe
 
 // TODO: update MiniTabViewHolder layout for individual tab layout
 fun BrowserState.toTabList(
@@ -94,19 +85,19 @@ fun BrowserTabBar(tabList: List<TabSessionState>) {
     if (displayedTabs.isEmpty()) return Row(
         Modifier
             .fillMaxWidth()
-            .height(34.dp)
+            .height(ComponentDimens.TAB_BAR_HEIGHT)
             .background(Color.Black)
     ) { }
 
     return Row(
         Modifier
             .fillMaxWidth()
-            .height(34.dp)
+            .height(ComponentDimens.TAB_BAR_HEIGHT)
     ) {
         LazyRow(
             state = listState,
             modifier = Modifier
-                .height(34.dp)
+                .height(ComponentDimens.TAB_BAR_HEIGHT)
                 .background(Color.Black)
                 .weight(1F),
             verticalAlignment = Alignment.CenterVertically
@@ -141,7 +132,7 @@ private fun MiniTab(
 ) {
     return Row(modifier = Modifier
         .fillMaxSize()
-        .width(90.dp)
+        .width(ComponentDimens.TAB_WIDTH)
         .background(if (selected) Color.Black else Color.DarkGray)
         .drawBehind {
             val w = size.width
