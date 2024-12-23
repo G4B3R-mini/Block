@@ -114,6 +114,9 @@ import kotlin.math.roundToInt
 
 // TODO:
 //  - implement composable FindInPageBar
+//  - move to selected tab on start
+//  - use nicer icons for toolbar options
+//  - improve splash screen
 //  - add home page (look at firefox source code)
 //  - add default search engines, select default
 //    - bundle in app
@@ -134,7 +137,7 @@ enum class BrowserComponentMode {
 object ComponentDimens {
     val TOOLBAR_HEIGHT = 40.dp
     val TAB_BAR_HEIGHT = 30.dp
-    val TAB_WIDTH = 120.dp
+    val TAB_WIDTH = 95.dp
     val FIND_IN_PAGE_BAR_HEIGHT = 50.dp
 
 }
