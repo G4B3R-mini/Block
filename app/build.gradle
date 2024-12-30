@@ -293,7 +293,9 @@ dependencies {
     implementation libs.mozilla.browser.menu
     implementation libs.mozilla.browser.menu2
     implementation libs.mozilla.browser.session.storage
+//    implementation libs.mozilla.browser.search
     implementation libs.mozilla.browser.state
+
     implementation libs.mozilla.browser.storage.sync
     implementation libs.mozilla.browser.tabstray
     implementation libs.mozilla.browser.thumbnails

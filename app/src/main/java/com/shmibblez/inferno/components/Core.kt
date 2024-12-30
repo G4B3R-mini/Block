@@ -6,6 +6,12 @@ package com.shmibblez.inferno.components
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
+import androidx.appcompat.content.res.AppCompatResources.getDrawable
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import androidx.core.graphics.drawable.toBitmap
 import androidx.preference.PreferenceManager
 import mozilla.components.browser.engine.gecko.permission.GeckoSitePermissionsStorage
 import mozilla.components.browser.icons.BrowserIcons
@@ -55,9 +61,24 @@ import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.getPreferenceKey
 import com.shmibblez.inferno.media.MediaSessionService
 import com.shmibblez.inferno.settings.Settings
+import mozilla.components.browser.state.search.SearchEngine
+import mozilla.components.browser.state.state.SearchState
+import mozilla.components.feature.media.middleware.LastMediaAccessMiddleware
+import mozilla.components.feature.search.ext.createApplicationSearchEngine
+import mozilla.components.feature.session.middleware.LastAccessMiddleware
+import java.util.UUID
 import java.util.concurrent.TimeUnit
 
 private const val DAY_IN_MINUTES = 24 * 60L
+
+private object DefaultSearchEngines {
+//    val Google = SearchEngine(
+//        id="Google",
+//        name = "google",
+//        icon = ,
+//        inputEncoding = "",
+//        )
+}
 
 /**
  * Component group for all core browser functionality.
@@ -72,8 +93,14 @@ class Core(private val context: Context, crashReporter: CrashReporter) {
 
         val defaultSettings = DefaultSettings(
             requestInterceptor = AppRequestInterceptor(context),
-            remoteDebuggingEnabled = prefs.getBoolean(context.getPreferenceKey(pref_key_remote_debugging), false),
-            testingModeEnabled = prefs.getBoolean(context.getPreferenceKey(R.string.pref_key_testing_mode), false),
+            remoteDebuggingEnabled = prefs.getBoolean(
+                context.getPreferenceKey(
+                    pref_key_remote_debugging
+                ), false
+            ),
+            testingModeEnabled = prefs.getBoolean(
+                context.getPreferenceKey(R.string.pref_key_testing_mode), false
+            ),
             trackingProtectionPolicy = createTrackingProtectionPolicy(prefs),
             historyTrackingDelegate = HistoryDelegate(lazyHistoryStorage),
             globalPrivacyControlEnabled = prefs.getBoolean(
@@ -91,22 +118,112 @@ class Core(private val context: Context, crashReporter: CrashReporter) {
         EngineProvider.createClient(context)
     }
 
+    val customSearchEngines: List<SearchEngine> = listOf(
+        createApplicationSearchEngine(
+            id = UUID.randomUUID().toString(),
+            name = GOOGLE_SEARCH_ENGINE_ID,
+            url = "www.google.com/",
+            icon = getDrawable(context, R.drawable.search_engine_google_24).let {
+                it?.colorFilter =
+                    PorterDuffColorFilter(Color.White.toArgb(), PorterDuff.Mode.SRC_IN)
+                it?.toBitmap()!!
+            },
+        ), createApplicationSearchEngine(
+            id = UUID.randomUUID().toString(),
+            name = DUCKDUCKGO_SEARCH_ENGINE_ID,
+            url = "www.duckduckgo.com/",
+            icon = getDrawable(context, R.drawable.search_engine_duckduckgo_24).let {
+                it?.colorFilter =
+                    PorterDuffColorFilter(Color.White.toArgb(), PorterDuff.Mode.SRC_IN)
+                it?.toBitmap()!!
+            },
+        ), createApplicationSearchEngine(
+            id = UUID.randomUUID().toString(),
+            name = BRAVE_SEARCH_ENGINE_ID,
+            url = "search.brave.com/",
+            icon = getDrawable(context, R.drawable.search_engine_brave_24).let {
+                it?.colorFilter =
+                    PorterDuffColorFilter(Color.White.toArgb(), PorterDuff.Mode.SRC_IN)
+                it?.toBitmap()!!
+            },
+        ), createApplicationSearchEngine(
+            id = UUID.randomUUID().toString(),
+            name = YAHOO_SEARCH_ENGINE_ID,
+            url = "search.yahoo.com/",
+            icon = getDrawable(context, R.drawable.search_engine_yahoo_24).let {
+                it?.colorFilter =
+                    PorterDuffColorFilter(Color.White.toArgb(), PorterDuff.Mode.SRC_IN)
+                it?.toBitmap()!!
+            },
+        ), createApplicationSearchEngine(
+            id = UUID.randomUUID().toString(),
+            name = BING_SEARCH_ENGINE_ID,
+            url = "www.bing.com/",
+            icon = getDrawable(context, R.drawable.search_engine_bing_24).let {
+                it?.colorFilter =
+                    PorterDuffColorFilter(Color.White.toArgb(), PorterDuff.Mode.SRC_IN)
+                it?.toBitmap()!!
+            },
+        )
+    )
+
+//    val applicationSearchEngines: List<SearchEngine> by lazyMonitored {
+//        listOf(
+//            createApplicationSearchEngine(
+//                id = BOOKMARKS_SEARCH_ENGINE_ID,
+//                name = context.getString(R.string.library_bookmarks),
+//                url = "www.",
+//                icon = getDrawable(context, R.drawable.ic_bookmarks_search)?.toBitmap()!!,
+//            ),
+//            createApplicationSearchEngine(
+//                id = TABS_SEARCH_ENGINE_ID,
+//                name = context.getString(R.string.preferences_tabs),
+//                url = "",
+//                icon = getDrawable(context, R.drawable.ic_tabs_search)?.toBitmap()!!,
+//            ),
+//            createApplicationSearchEngine(
+//                id = HISTORY_SEARCH_ENGINE_ID,
+//                name = context.getString(R.string.library_history),
+//                url = "",
+//                icon = getDrawable(context, R.drawable.ic_history_search)?.toBitmap()!!,
+//            ),
+//        )
+//    }
+
     /**
      * The [BrowserStore] holds the global [BrowserState].
      */
     val store by lazy {
+        val middlewareList = mutableListOf(
+            LastAccessMiddleware(),
+//            RecentlyClosedMiddleware(recentlyClosedTabsStorage, RECENTLY_CLOSED_MAX),
+//            TelemetryMiddleware(context.settings(), metrics, crashReporter),
+//            UndoMiddleware(context.getUndoDelay()),
+//            PromptMiddleware(),
+//            AdsTelemetryMiddleware(adsTelemetry),
+            LastMediaAccessMiddleware(),
+//            HistoryMetadataMiddleware(historyMetadataService),
+//            SessionPrioritizationMiddleware(),
+//            SaveToPDFMiddleware(context),
+            DownloadMiddleware(context, DownloadService::class.java),
+            ThumbnailsMiddleware(thumbnailStorage),
+            ReaderViewMiddleware(),
+            RegionMiddleware(
+                context,
+                LocationService.default(),
+            ),
+            SearchMiddleware(context),
+            RecordingDevicesMiddleware(context, context.components.notificationsDelegate),
+        )
         BrowserStore(
-            middleware = listOf(
-                DownloadMiddleware(context, DownloadService::class.java),
-                ThumbnailsMiddleware(thumbnailStorage),
-                ReaderViewMiddleware(),
-                RegionMiddleware(
-                    context,
-                    LocationService.default(),
-                ),
-                SearchMiddleware(context),
-                RecordingDevicesMiddleware(context, context.components.notificationsDelegate),
-            ) + EngineMiddleware.create(engine),
+            initialState = BrowserState(
+                search = SearchState(
+                    customSearchEngines = customSearchEngines,
+//                    additionalBundledSearchEngineIds = listOf("reddit", "youtube"),
+//                    migration = SearchMigration(context),
+                )
+            ),
+            middleware = middlewareList + EngineMiddleware.create(engine),
         ).apply {
             icons.install(engine, this)
 
@@ -248,8 +365,16 @@ class Core(private val context: Context, crashReporter: CrashReporter) {
      */
     fun createTrackingProtectionPolicy(
         prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context),
-        normalMode: Boolean = prefs.getBoolean(context.getPreferenceKey(pref_key_tracking_protection_normal), true),
-        privateMode: Boolean = prefs.getBoolean(context.getPreferenceKey(pref_key_tracking_protection_private), true),
+        normalMode: Boolean = prefs.getBoolean(
+            context.getPreferenceKey(
+                pref_key_tracking_protection_normal
+            ), true
+        ),
+        privateMode: Boolean = prefs.getBoolean(
+            context.getPreferenceKey(
+                pref_key_tracking_protection_private
+            ), true
+        ),
     ): TrackingProtectionPolicy {
         val trackingPolicy = TrackingProtectionPolicy.recommended()
         return when {
@@ -264,5 +389,11 @@ class Core(private val context: Context, crashReporter: CrashReporter) {
 
     companion object {
         private const val KEY_STORAGE_NAME = "core_prefs"
+        // search engine ids
+        private const val GOOGLE_SEARCH_ENGINE_ID= "google"
+        private const val DUCKDUCKGO_SEARCH_ENGINE_ID= "duckduckgo"
+        private const val BRAVE_SEARCH_ENGINE_ID= "brave"
+        private const val YAHOO_SEARCH_ENGINE_ID= "yahoo"
+        private const val BING_SEARCH_ENGINE_ID= "bing"
     }
 }

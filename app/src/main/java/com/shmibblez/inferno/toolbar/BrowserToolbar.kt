@@ -8,6 +8,7 @@ import android.util.Log
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -20,8 +21,11 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.selection.LocalTextSelectionColors
+import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,6 +37,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
@@ -52,12 +57,11 @@ import com.shmibblez.inferno.toolbar.ToolbarOptionsScopeInstance.ToolbarMenuIcon
 import com.shmibblez.inferno.toolbar.ToolbarOptionsScopeInstance.ToolbarReload
 import com.shmibblez.inferno.toolbar.ToolbarOptionsScopeInstance.ToolbarForward
 import com.shmibblez.inferno.toolbar.ToolbarOptionsScopeInstance.ToolbarShowTabsTray
-import mozilla.components.browser.engine.gecko.GeckoEngine
+import com.shmibblez.inferno.toolbar.ToolbarOriginScopeInstance.ToolbarSearchEngineSelector
 import mozilla.components.browser.state.search.SearchEngine
 import mozilla.components.browser.state.selector.selectedTab
 import mozilla.components.browser.state.state.TabSessionState
-import mozilla.components.feature.search.SearchUseCases
-import mozilla.components.feature.search.ext.buildSearchUrl
+import mozilla.components.browser.state.state.selectedOrDefaultSearchEngine
 
 // TODO:
 //  -[ ] implement moz AwesomeBarFeature
@@ -68,7 +72,7 @@ import mozilla.components.feature.search.ext.buildSearchUrl
 //  -[ ] implement moz ToolbarIntegration
 
 @Composable
-fun BrowserToolbar(tabSessionState: TabSessionState?, setShowMenu: (Boolean) -> Unit) {
+fun BrowserToolbar(tabSessionState: TabSessionState?,searchEngine: SearchEngine, setShowMenu: (Boolean) -> Unit) {
     if (tabSessionState == null) {
         // don't show if null, TODO: show loading bar
         return
@@ -87,6 +91,7 @@ fun BrowserToolbar(tabSessionState: TabSessionState?, setShowMenu: (Boolean) -> 
             tabSessionState = tabSessionState,
             setEditMode = setEditMode,
             originBounds = originBounds,
+            searchEngine = searchEngine,
         )
     } else {
         BrowserDisplayToolbar(
@@ -157,31 +162,34 @@ fun BrowserDisplayToolbar(
     }
 }
 
-// TODO: test and add blend animation
+// TODO: add blend in animation
 @Composable
 fun BrowserEditToolbar(
     tabSessionState: TabSessionState?,
     setEditMode: (Boolean) -> Unit,
     originBounds: OriginBounds,
-) {
+    searchEngine: SearchEngine,
+
+    ) {
     fun parseInput(): TextFieldValue {
         return (tabSessionState?.content?.searchTerms?.ifEmpty { tabSessionState.content.url }
             ?: "<empty>").let {
             (if (it != "about:blank" && it != "about:privatebrowsing") it else "").let { searchTerms ->
                 TextFieldValue(
-                    text = searchTerms, selection = TextRange(searchTerms.length)
+                    text = searchTerms,
+                    selection = if (searchTerms.isEmpty()) TextRange.Zero else TextRange(searchTerms.length)
                 )
             }
         }
     }
 
     val context = LocalContext.current
-    var input by remember {
-        mutableStateOf(parseInput())
-    }
+    var input by remember { mutableStateOf(parseInput()) }
     var textFullSize by remember { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
     var alreadyFocused by remember { mutableStateOf(false) }
+    val interactionSource = remember { MutableInteractionSource() }
+    val (showPopupMenu, setShowPopupMenu) = remember { mutableStateOf(false) }
 
     LaunchedEffect(true) {
         // animate to fill width after first compose
@@ -189,16 +197,26 @@ fun BrowserEditToolbar(
         textFullSize = true
     }
 
-    LaunchedEffect(tabSessionState) {
-        input = parseInput()
+    LaunchedEffect(tabSessionState?.id) {
+        if (tabSessionState != null) input = parseInput()
     }
 
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Color.Black)
-            .height(ComponentDimens.TOOLBAR_HEIGHT)
-    ) {
+    Row(modifier = Modifier
+        .fillMaxWidth()
+        .background(Color.Black)
+        .height(ComponentDimens.TOOLBAR_HEIGHT)
+        .onFocusChanged { focusState ->
+            // if focus lost, go back to editing mode
+            if (focusState.hasFocus) {
+                alreadyFocused = true
+            }
+            if (alreadyFocused && !focusState.hasFocus) setEditMode(false)
+            Log.d(
+                "BrowserEditToolbar", "alreadyFocused: $alreadyFocused, focusState: $focusState"
+            )
+        }
+        .focusable(true)
+        .focusRequester(focusRequester)) {
         if (!textFullSize) {
             Box(
                 modifier = Modifier
@@ -206,8 +224,8 @@ fun BrowserEditToolbar(
                     .fillMaxHeight()
             )
         }
-        Box(
-            contentAlignment = Alignment.CenterStart,
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(all = 4.dp)
@@ -215,53 +233,57 @@ fun BrowserEditToolbar(
                 .background(Color.DarkGray, shape = MaterialTheme.shapes.small)
                 .animateContentSize()
         ) {
-            BasicTextField(
-                value = input,
-                onValueChange = { v ->
-                    // move cursor to end
-                    input = v.copy(selection = TextRange(v.text.length))
-                },
-                enabled = true,
-                singleLine = true,
-                textStyle = TextStyle(
-                    color = Color.White,
-                    textAlign = TextAlign.Start,
-                    lineHeightStyle = LineHeightStyle(
-                        alignment = LineHeightStyle.Alignment.Center,
-                        trim = LineHeightStyle.Trim.None,
-                    )
-                ),
-                keyboardActions = KeyboardActions(
-                    onGo = {
-                        context.components.useCases.searchUseCases.defaultSearch.invoke(
-                            searchTerms = input.text,
-                            searchEngine = null,
-                            parentSessionId = null,
-                        )
-                        setEditMode(false)
-                    },
-                ),
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Uri, imeAction = ImeAction.Go
-                ),
-                modifier = Modifier
-                    .wrapContentHeight(align = Alignment.CenterVertically)
-                    .fillMaxWidth()
-                    .padding(all = 4.dp)
-                    .onFocusChanged { focusState ->
-                        // if focus lost, go back to editing mode
-                        if (focusState.hasFocus) {
-                            alreadyFocused = true
-                        }
-                        if (alreadyFocused && !focusState.hasFocus) setEditMode(false)
-                        Log.d(
-                            "BrowserEditToolbar",
-                            "alreadyFocused: $alreadyFocused, focusState: $focusState"
-                        )
-                    }
-                    .focusable(true)
-                    .focusRequester(focusRequester),
+            val customTextSelectionColors = TextSelectionColors(
+                handleColor = Color.White, backgroundColor = Color.White.copy(alpha = 0.4F)
             )
+            ToolbarSearchEngineSelectorPopupMenu(
+                searchEngines = context.components.core.customSearchEngines,
+                showPopupMenu = showPopupMenu,
+                setShowPopupMenu = setShowPopupMenu,
+            )
+            ToolbarSearchEngineSelector(
+                currentSearchEngine = searchEngine,
+                showPopupMenu = setShowPopupMenu,
+            )
+            CompositionLocalProvider(LocalTextSelectionColors provides customTextSelectionColors) {
+                BasicTextField(
+                    value = input,
+                    onValueChange = { v ->
+                        // move cursor to end
+                        input = v
+                    },
+                    enabled = true,
+                    singleLine = true,
+                    interactionSource = interactionSource,
+                    textStyle = TextStyle(
+                        color = Color.White,
+                        textAlign = TextAlign.Start,
+                        lineHeightStyle = LineHeightStyle(
+                            alignment = LineHeightStyle.Alignment.Center,
+                            trim = LineHeightStyle.Trim.None,
+                        )
+                    ),
+                    cursorBrush = SolidColor(Color.White),
+                    keyboardActions = KeyboardActions(
+                        onGo = {
+                            context.components.useCases.searchUseCases.addSearchEngine
+                            context.components.useCases.searchUseCases.defaultSearch.invoke(
+                                searchTerms = input.text,
+                                searchEngine = context.components.core.store.state.search.selectedOrDefaultSearchEngine!!,
+                                parentSessionId = null,
+                            )
+                            setEditMode(false)
+                        },
+                    ),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Uri, imeAction = ImeAction.Go
+                    ),
+                    modifier = Modifier
+                        .wrapContentHeight(align = Alignment.CenterVertically)
+                        .weight(1F)
+                        .padding(all = 4.dp),
+                )
+            }
         }
         if (!textFullSize) {
             Box(

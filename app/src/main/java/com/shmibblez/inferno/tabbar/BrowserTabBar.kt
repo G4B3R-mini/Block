@@ -1,7 +1,6 @@
 package com.shmibblez.inferno.tabbar
 
 import android.content.Context
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -28,6 +27,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
@@ -60,21 +60,26 @@ inline fun <T> Iterable<T>.findIndex(predicate: (T) -> Boolean): Int? {
 @Composable
 fun BrowserTabBar(tabList: List<TabSessionState>) {
     val context = LocalContext.current
+    val localConfig = LocalConfiguration.current
     val listState = rememberLazyListState()
     val selectedTabId = context.components.core.store.state.toTabList().second
+//    val
     val isPrivateSession: Boolean = (if (tabList.isEmpty()) {
         false
     } else if (selectedTabId == null) {
         newTab(context, false)
         false
     } else tabList.find { it.id == selectedTabId }!!.content.private)
-    Log.d("BrowserTabBar", "isPrivateSession: $isPrivateSession")
     val displayedTabs =
         with(context.components.core.store.state) { if (isPrivateSession) this.privateTabs else this.normalTabs }
     // scroll to active tab
-    LaunchedEffect(selectedTabId) {
-        val i = displayedTabs.findIndex { it.id == selectedTabId }
-        if (i != null) listState.animateScrollToItem(i, 0)
+    val i = displayedTabs.findIndex { it.id == selectedTabId }
+    LaunchedEffect(i) {
+        val sw = localConfig.screenWidthDp.dp
+        if (i != null) listState.animateScrollToItem(
+            i,
+            -(sw - ComponentDimens.TAB_WIDTH).toPx() / 2
+        )
     }
     // if tab list empty add new tab
     LaunchedEffect(displayedTabs) {
@@ -209,7 +214,6 @@ private fun MiniTab(
 }
 
 private fun newTab(context: Context, isPrivateSession: Boolean) {
-    Log.d("BrowserTabBar", "newTab: isPrivateSession: $isPrivateSession")
     context.components.useCases.tabsUseCases.addTab(
         url = if (isPrivateSession) "about:privatebrowsing" else "about:blank",
         selectTab = true,

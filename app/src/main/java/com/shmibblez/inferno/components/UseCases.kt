@@ -5,6 +5,7 @@
 package com.shmibblez.inferno.components
 
 import android.content.Context
+import mozilla.components.browser.state.search.SearchEngine
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.concept.engine.Engine
 import mozilla.components.feature.contextmenu.ContextMenuUseCases

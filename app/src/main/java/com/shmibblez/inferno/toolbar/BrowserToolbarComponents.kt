@@ -3,8 +3,10 @@ package com.shmibblez.inferno.toolbar
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -19,19 +21,23 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
@@ -61,6 +67,7 @@ import com.shmibblez.inferno.toolbar.ToolbarOriginScopeInstance.ToolbarEmptyIndi
 import com.shmibblez.inferno.toolbar.ToolbarOriginScopeInstance.ToolbarSecurityIndicator
 import com.shmibblez.inferno.toolbar.ToolbarOriginScopeInstance.ToolbarTrackingProtectionIndicator
 import mozilla.components.browser.state.ext.getUrl
+import mozilla.components.browser.state.search.SearchEngine
 import mozilla.components.browser.state.selector.normalTabs
 import mozilla.components.browser.state.selector.privateTabs
 import mozilla.components.browser.state.selector.selectedTab
@@ -320,6 +327,11 @@ interface ToolbarOriginScope {
 
     @Composable
     fun ToolbarSecurityIndicator(siteSecurity: SiteSecurity)
+
+    @Composable
+    fun ToolbarSearchEngineSelector(
+        currentSearchEngine: SearchEngine, showPopupMenu: (Boolean) -> Unit
+    )
 }
 
 /**
@@ -447,6 +459,40 @@ object ToolbarOriginScopeInstance : ToolbarOriginScope {
             )
         }
     }
+
+    @Composable
+    override fun ToolbarSearchEngineSelector(
+        currentSearchEngine: SearchEngine, showPopupMenu: (Boolean) -> Unit
+    ) {
+        Box(modifier = Modifier
+            .padding(start = 4.dp, top = 4.dp, bottom = 4.dp)
+            .fillMaxHeight()
+            .focusable(false)
+            .clickable { showPopupMenu(true) }) {
+            Row(
+                modifier = Modifier
+                    .background(
+                        color = Color.Black, shape = MaterialTheme.shapes.extraSmall
+                    )
+                    .fillMaxHeight(),
+            ) {
+                Image(
+                    bitmap = currentSearchEngine.icon.asImageBitmap(),
+                    contentDescription = "search engine icon",
+//                    tint = Color.Red,
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .aspectRatio(1F)
+                        .clip(MaterialTheme.shapes.extraSmall)
+                )
+                Icon(
+                    painter = painterResource(R.drawable.mozac_ic_chevron_down_24),
+                    contentDescription = "open menu", modifier = Modifier.aspectRatio(0.5F),
+                    tint = Color.White,
+                )
+            }
+        }
+    }
 }
 
 interface ToolbarMenuItemsScope {
@@ -469,7 +515,7 @@ interface ToolbarMenuItemsScope {
     fun SettingsToolbarMenuItem()
 
     @Composable
-    fun PrivateModeToolbarMenuItem(privateMode: Boolean, dismissMenuSheet: () -> Unit)
+    fun PrivateModeToolbarMenuItem(isPrivateMode: Boolean, dismissMenuSheet: () -> Unit)
 
     // stop, refresh, forward, back
     @Composable
@@ -699,8 +745,6 @@ fun ToolbarBottomMenuSheet(
     setBrowserComponentMode: (BrowserComponentMode) -> Unit
 ) {
     if (tabSessionState == null) return
-    // TODO: add menu items for bottom sheet
-    // TODO: edit toolbar text color not showing
     ModalBottomSheet(onDismissRequest = { setShowBottomMenuSheet(false) },
         containerColor = Color.Black,
         scrimColor = Color.Black.copy(alpha = 0.1F),
@@ -717,7 +761,8 @@ fun ToolbarBottomMenuSheet(
         ShareToolbarMenuItem()
         DividerToolbarMenuItem()
 
-        PrivateModeToolbarMenuItem(isPrivateMode = tabSessionState.content.private,dismissMenuSheet = { setShowBottomMenuSheet(false) })
+        PrivateModeToolbarMenuItem(isPrivateMode = tabSessionState.content.private,
+            dismissMenuSheet = { setShowBottomMenuSheet(false) })
         DividerToolbarMenuItem()
 
         RequestDesktopSiteToolbarMenuItem(desktopMode = tabSessionState.content.desktopMode)
@@ -732,5 +777,67 @@ fun ToolbarBottomMenuSheet(
 
         // stop, refresh, forward, back
         NavOptionsToolbarMenuItem()
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ToolbarSearchEngineSelectorPopupMenu(
+    searchEngines: List<SearchEngine>, showPopupMenu: Boolean, setShowPopupMenu: (Boolean) -> Unit
+) {
+    fun setCurrentSearchEngine(context: Context, searchEngine: SearchEngine) {
+        context.components.useCases.searchUseCases.selectSearchEngine.invoke(searchEngine)
+    }
+
+    val context = LocalContext.current
+    DropdownMenu(
+        modifier = Modifier.padding(horizontal = 4.dp, vertical = 0.dp),
+        expanded = showPopupMenu,
+        containerColor = Color.Black,
+        onDismissRequest = { setShowPopupMenu(false) },
+    ) {
+        for (engine in searchEngines) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(ToolbarMenuItemConstants.OPTION_HEIGHT)
+                    .padding(
+                        start = ToolbarMenuItemConstants.OPTION_PADDING_START,
+                        top = ToolbarMenuItemConstants.OPTION_PADDING_TOP,
+                        end = ToolbarMenuItemConstants.OPTION_PADDING_END,
+                        bottom = ToolbarMenuItemConstants.OPTION_PADDING_BOTTOM,
+                    )
+                    .clickable {
+                        setCurrentSearchEngine(context, engine)
+                        setShowPopupMenu(false)
+                    },
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    bitmap = engine.icon.asImageBitmap(),
+                    contentDescription = "search engine icon",
+                    tint = Color.White,
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .aspectRatio(1F)
+                        .padding(
+                            horizontal = 4.dp,
+                        )
+
+                )
+                Text(
+                    engine.name,
+                    color = Color.White,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight()
+                        .padding(horizontal = 4.dp)
+                )
+            }
+//            DividerToolbarMenuItem()
+        }
+
+        DividerToolbarMenuItem()
+        // TODO: search engine settings
     }
 }

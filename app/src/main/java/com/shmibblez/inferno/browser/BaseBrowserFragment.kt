@@ -417,7 +417,7 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
         val composeView = view.findViewById<ComposeView>(R.id.compose_view)
         if (shouldUseComposeUI) {
             composeView.visibility = View.VISIBLE
-            composeView.setContent { BrowserToolbar(tabSessionState = null, setShowMenu = {}) }
+//            composeView.setContent { BrowserToolbar(tabSessionState = null, searchEngine = searchEngine, setShowMenu = {}) }
 
             val params = swipeRefresh.layoutParams as CoordinatorLayout.LayoutParams
             params.topMargin = resources.getDimensionPixelSize(R.dimen.browser_toolbar_height)
@@ -429,11 +429,11 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
         if (enabled) {
             activity?.enterImmersiveMode()
             toolbar.visibility = View.GONE
-            engineView.setDynamicToolbarMaxHeight(0)
+//            engineView.setDynamicToolbarMaxHeight(0)
         } else {
             activity?.exitImmersiveMode()
             toolbar.visibility = View.VISIBLE
-            engineView.setDynamicToolbarMaxHeight(resources.getDimensionPixelSize(R.dimen.browser_toolbar_height))
+//            engineView.setDynamicToolbarMaxHeight(resources.getDimensionPixelSize(R.dimen.browser_toolbar_height))
         }
     }
 
