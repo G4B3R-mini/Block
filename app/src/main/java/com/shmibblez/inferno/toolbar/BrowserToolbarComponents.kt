@@ -484,6 +484,7 @@ object ToolbarOriginScopeInstance : ToolbarOriginScope {
                         .fillMaxHeight()
                         .aspectRatio(1F)
                         .clip(MaterialTheme.shapes.extraSmall)
+                        .padding(start = 4.dp, top = 4.dp, bottom = 4.dp),
                 )
                 Icon(
                     painter = painterResource(R.drawable.mozac_ic_chevron_down_24),
@@ -813,16 +814,16 @@ fun ToolbarSearchEngineSelectorPopupMenu(
                     },
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Icon(
+                Image(
                     bitmap = engine.icon.asImageBitmap(),
                     contentDescription = "search engine icon",
-                    tint = Color.White,
                     modifier = Modifier
                         .fillMaxHeight()
                         .aspectRatio(1F)
                         .padding(
                             horizontal = 4.dp,
                         )
+                        .clip(MaterialTheme.shapes.extraSmall)
 
                 )
                 Text(

@@ -47,11 +47,14 @@ ktlint = "0.50.0"
 hamcrest = "2.2"
 jacoco = "0.8.12"
 junit = "4.13.2"
+navigationCompose = "2.8.5"
 okhttp = "4.12.0"
 okio = "3.9.0"
 
 [libraries]
 # Kotlin
+androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
+androidx-navigation-fragment = { module = "androidx.navigation:navigation-fragment", version.ref = "navigationCompose" }
 androidx-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
 androidx-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest" }
@@ -147,6 +150,7 @@ mozilla-feature-contextmenu = { group = "org.mozilla.components", name = "featur
 mozilla-feature-customtabs = { group = "org.mozilla.components", name = "feature-customtabs", version.ref = "android-components" }
 mozilla-feature-downloads = { group = "org.mozilla.components", name = "feature-downloads", version.ref = "android-components" }
 mozilla-feature-findinpage = { group = "org.mozilla.components", name = "feature-findinpage", version.ref = "android-components" }
+mozilla-feature-fxsuggest = { group = "org.mozilla.components", name = "feature-fxsuggest", version.ref = "android-components" }
 mozilla-feature-intent = { group = "org.mozilla.components", name = "feature-intent", version.ref = "android-components" }
 mozilla-feature-media = { group = "org.mozilla.components", name = "feature-media", version.ref = "android-components" }
 mozilla-feature-prompts = { group = "org.mozilla.components", name = "feature-prompts", version.ref = "android-components" }
@@ -158,8 +162,10 @@ mozilla-feature-search = { group = "org.mozilla.components", name = "feature-sea
 mozilla-feature-session = { group = "org.mozilla.components", name = "feature-session", version.ref = "android-components" }
 mozilla-feature-sitepermissions = { group = "org.mozilla.components", name = "feature-sitepermissions", version.ref = "android-components" }
 mozilla-feature-syncedtabs = { group = "org.mozilla.components", name = "feature-syncedtabs", version.ref = "android-components" }
+mozilla-feature-tab-collections = { group = "org.mozilla.components", name = "feature-tab-collections", version.ref = "android-components" }
 mozilla-feature-tabs = { group = "org.mozilla.components", name = "feature-tabs", version.ref = "android-components" }
 mozilla-feature-toolbar = { group = "org.mozilla.components", name = "feature-toolbar", version.ref = "android-components" }
+mozilla-feature-top-sites = { group = "org.mozilla.components", name = "feature-top-sites", version.ref = "android-components" }
 mozilla-feature-webauthn = { group = "org.mozilla.components", name = "feature-webauthn", version.ref = "android-components" }
 mozilla-feature-webcompat = { group = "org.mozilla.components", name = "feature-webcompat", version.ref = "android-components" }
 mozilla-feature-webnotifications = { group = "org.mozilla.components", name = "feature-webnotifications", version.ref = "android-components" }
@@ -176,6 +182,7 @@ mozilla-service-location = { group = "org.mozilla.components", name = "service-l
 mozilla-service-sync-logins = { group = "org.mozilla.components", name = "service-sync-logins", version.ref = "android-components" }
 
 mozilla-support-base = { group = "org.mozilla.components", name = "support-base", version.ref = "android-components" }
+mozilla-support-locale = { group = "org.mozilla.components", name = "support-locale", version.ref = "android-components" }
 mozilla-support-ktx = { group = "org.mozilla.components", name = "support-ktx", version.ref = "android-components" }
 mozilla-support-rusthttp = { group = "org.mozilla.components", name = "support-rusthttp", version.ref = "android-components" }
 mozilla-support-rustlog = { group = "org.mozilla.components", name = "support-rustlog", version.ref = "android-components" }

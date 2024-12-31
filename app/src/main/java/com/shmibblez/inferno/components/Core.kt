@@ -71,15 +71,6 @@ import java.util.concurrent.TimeUnit
 
 private const val DAY_IN_MINUTES = 24 * 60L
 
-private object DefaultSearchEngines {
-//    val Google = SearchEngine(
-//        id="Google",
-//        name = "google",
-//        icon = ,
-//        inputEncoding = "",
-//        )
-}
-
 /**
  * Component group for all core browser functionality.
  */
@@ -118,7 +109,7 @@ class Core(private val context: Context, crashReporter: CrashReporter) {
         EngineProvider.createClient(context)
     }
 
-    val customSearchEngines: List<SearchEngine> = listOf(
+    private val customSearchEngines: List<SearchEngine> = listOf(
         createApplicationSearchEngine(
             id = UUID.randomUUID().toString(),
             name = GOOGLE_SEARCH_ENGINE_ID,

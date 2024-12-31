@@ -61,7 +61,11 @@ import com.shmibblez.inferno.toolbar.ToolbarOriginScopeInstance.ToolbarSearchEng
 import mozilla.components.browser.state.search.SearchEngine
 import mozilla.components.browser.state.selector.selectedTab
 import mozilla.components.browser.state.state.TabSessionState
+import mozilla.components.browser.state.state.searchEngines
 import mozilla.components.browser.state.state.selectedOrDefaultSearchEngine
+import mozilla.components.concept.engine.EngineSession
+import mozilla.components.support.ktx.kotlin.isUrl
+import mozilla.components.support.ktx.kotlin.toNormalizedUrl
 
 // TODO:
 //  -[ ] implement moz AwesomeBarFeature
@@ -72,7 +76,9 @@ import mozilla.components.browser.state.state.selectedOrDefaultSearchEngine
 //  -[ ] implement moz ToolbarIntegration
 
 @Composable
-fun BrowserToolbar(tabSessionState: TabSessionState?,searchEngine: SearchEngine, setShowMenu: (Boolean) -> Unit) {
+fun BrowserToolbar(
+    tabSessionState: TabSessionState?, searchEngine: SearchEngine, setShowMenu: (Boolean) -> Unit
+) {
     if (tabSessionState == null) {
         // don't show if null, TODO: show loading bar
         return
@@ -237,7 +243,7 @@ fun BrowserEditToolbar(
                 handleColor = Color.White, backgroundColor = Color.White.copy(alpha = 0.4F)
             )
             ToolbarSearchEngineSelectorPopupMenu(
-                searchEngines = context.components.core.customSearchEngines,
+                searchEngines = context.components.core.store.state.search.searchEngines,
                 showPopupMenu = showPopupMenu,
                 setShowPopupMenu = setShowPopupMenu,
             )
@@ -266,12 +272,20 @@ fun BrowserEditToolbar(
                     cursorBrush = SolidColor(Color.White),
                     keyboardActions = KeyboardActions(
                         onGo = {
-                            context.components.useCases.searchUseCases.addSearchEngine
-                            context.components.useCases.searchUseCases.defaultSearch.invoke(
-                                searchTerms = input.text,
-                                searchEngine = context.components.core.store.state.search.selectedOrDefaultSearchEngine!!,
-                                parentSessionId = null,
-                            )
+                            with(input.text) {
+                                if (this.isUrl()) {
+                                    context.components.useCases.sessionUseCases.loadUrl(
+                                        url = this.toNormalizedUrl(),
+                                        flags = EngineSession.LoadUrlFlags.none()
+                                    )
+                                } else {
+                                    context.components.useCases.searchUseCases.defaultSearch.invoke(
+                                        searchTerms = this,
+                                        searchEngine = context.components.core.store.state.search.selectedOrDefaultSearchEngine!!,
+                                        parentSessionId = null,
+                                    )
+                                }
+                            }
                             setEditMode(false)
                         },
                     ),

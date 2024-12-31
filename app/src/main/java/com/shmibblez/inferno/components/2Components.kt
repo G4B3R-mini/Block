@@ -2,23 +2,17 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package com.shmibblez.inferno
+package com.shmibblez.inferno.components
 
 import android.annotation.SuppressLint
 import android.content.Context
 import androidx.core.app.NotificationManagerCompat
+import com.shmibblez.inferno.R
 import mozilla.components.feature.autofill.AutofillConfiguration
 import mozilla.components.support.base.android.NotificationsDelegate
 import com.shmibblez.inferno.autofill.AutofillConfirmActivity
 import com.shmibblez.inferno.autofill.AutofillSearchActivity
 import com.shmibblez.inferno.autofill.AutofillUnlockActivity
-import com.shmibblez.inferno.components.Analytics
-import com.shmibblez.inferno.components.BackgroundServices
-import com.shmibblez.inferno.components.Core
-import com.shmibblez.inferno.components.Push
-import com.shmibblez.inferno.components.Services
-import com.shmibblez.inferno.components.UseCases
-import com.shmibblez.inferno.components.Utilities
 
 /**
  * Provides access to all components.
@@ -57,6 +51,8 @@ class Components(private val context: Context) {
     }
     val services by lazy { Services(context, backgroundServices.accountManager, useCases.tabsUseCases) }
     val push by lazy { Push(context, analytics.crashReporter) }
+
+    val settings by lazy { Settings }
 
     @delegate:SuppressLint("NewApi")
     val autofillConfiguration by lazy {

@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.content.pm.PackageManager
 import android.content.res.Resources
+import android.net.Uri
 import android.os.Build
 import android.util.Log
 import android.view.MotionEvent
@@ -71,6 +72,7 @@ import com.shmibblez.inferno.downloads.DownloadService
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.getPreferenceKey
 import com.shmibblez.inferno.findInPageBar.BrowserFindInPageBar
+import com.shmibblez.inferno.home.topsites.DefaultTopSitesView
 import com.shmibblez.inferno.pip.PictureInPictureIntegration
 import com.shmibblez.inferno.search.AwesomeBarWrapper
 import com.shmibblez.inferno.tabbar.BrowserTabBar
@@ -87,6 +89,7 @@ import mozilla.components.browser.state.state.BrowserState
 import mozilla.components.browser.state.state.selectedOrDefaultSearchEngine
 import mozilla.components.browser.thumbnails.BrowserThumbnails
 import mozilla.components.concept.engine.EngineView
+import mozilla.components.concept.storage.FrecencyThresholdOption
 import mozilla.components.feature.app.links.AppLinksFeature
 import mozilla.components.feature.awesomebar.AwesomeBarFeature
 import mozilla.components.feature.awesomebar.provider.SearchSuggestionProvider
@@ -107,6 +110,11 @@ import mozilla.components.feature.syncedtabs.SyncedTabsStorageSuggestionProvider
 import mozilla.components.feature.tabs.WindowFeature
 import mozilla.components.feature.tabs.toolbar.TabsToolbarFeature
 import mozilla.components.feature.toolbar.WebExtensionToolbarFeature
+import mozilla.components.feature.top.sites.TopSitesConfig
+import mozilla.components.feature.top.sites.TopSitesFeature
+import mozilla.components.feature.top.sites.TopSitesFrecencyConfig
+import mozilla.components.feature.top.sites.TopSitesProviderConfig
+import mozilla.components.feature.top.sites.view.TopSitesView
 import mozilla.components.feature.webauthn.WebAuthnFeature
 import mozilla.components.lib.state.Store
 import mozilla.components.lib.state.ext.observe
@@ -115,17 +123,17 @@ import mozilla.components.support.base.log.logger.Logger
 import mozilla.components.support.ktx.android.view.enterImmersiveMode
 import mozilla.components.support.ktx.android.view.exitImmersiveMode
 import mozilla.components.ui.widgets.VerticalSwipeRefreshLayout
+import org.jetbrains.annotations.VisibleForTesting
 import kotlin.math.roundToInt
 import mozilla.components.browser.toolbar.BrowserToolbar as BrowserToolbarCompat
 
 
 // TODO:
-//  - toolbar
-//    - search engine default not selected
-//  - home page
 //  - implement composable FindInPageBar
+//  - home page
 //  - move to selected tab on start
 //  - use nicer icons for toolbar options
+//  - fix external app browser implementation
 //  - improve splash screen
 //  - add home page (look at firefox source code)
 //  - add default search engines, select default
@@ -133,6 +141,8 @@ import mozilla.components.browser.toolbar.BrowserToolbar as BrowserToolbarCompat
 //    - add search engine settings page
 //      - add search engine editor which allows removing or adding search engines
 //      - add way to select search engine
+//  - toolbar
+//    - revisit search engines, how to modify bundled?
 
 fun Context.getActivity(): AppCompatActivity? = when (this) {
     is AppCompatActivity -> this
@@ -142,6 +152,10 @@ fun Context.getActivity(): AppCompatActivity? = when (this) {
 
 enum class BrowserComponentMode {
     TOOLBAR, FIND_IN_PAGE,
+}
+
+enum class BrowserComponentPageType {
+    ENGINE, HOME, HOME_PRIVATE
 }
 
 object ComponentDimens {
@@ -182,6 +196,19 @@ fun BrowserComponent(
     var tabList by remember { mutableStateOf(context.components.core.store.state.toTabList().first) }
     var tabSessionState by remember { mutableStateOf(context.components.core.store.state.selectedTab) }
     var searchEngine by remember { mutableStateOf(context.components.core.store.state.search.selectedOrDefaultSearchEngine!!) }
+    val pageType by remember {
+        mutableStateOf(with(tabSessionState?.content?.url) {
+            if (this == "about:blank") // TODO: create const class and set base to inferno:home
+                BrowserComponentPageType.HOME
+            else if (this == "private page blank") // TODO: add to const class and set base to inferno:private
+                BrowserComponentPageType.HOME_PRIVATE
+            else {
+                BrowserComponentPageType.ENGINE
+            }
+            // TODO: if home, show home page and load engineView in compose tree as hidden,
+            //  if page then show engineView
+        })
+    }
     // setup tab observer
     DisposableEffect(true) {
         browserStateObserver = context.components.core.store.observe(localLifecycleOwner) {
@@ -237,7 +264,7 @@ fun BrowserComponent(
     val thumbnailsFeature = remember { ViewBoundFeatureWrapper<BrowserThumbnails>() }
     val readerViewFeature = remember { ViewBoundFeatureWrapper<ReaderViewIntegration>() }
     val webExtToolbarFeature = remember { ViewBoundFeatureWrapper<WebExtensionToolbarFeature>() }
-
+    val topSitesFeature = remember { ViewBoundFeatureWrapper<TopSitesFeature>() }
 
     /// views
     var engineView: EngineView? by remember { mutableStateOf(null) }
@@ -337,7 +364,7 @@ fun BrowserComponent(
     LaunchedEffect(engineView == null) {
         if (engineView == null) return@LaunchedEffect
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-        context.components.core.store.state.search.selectedOrDefaultSearchEngine
+
         /**
          * mozilla integrations setup
          */
@@ -685,6 +712,20 @@ fun BrowserComponent(
                 owner = lifecycleOwner,
                 view = view,
             )
+
+//            if (requireContext().settings().showTopSitesFeature) {
+            topSitesFeature.set(
+                feature = TopSitesFeature(
+                    view = DefaultTopSitesView(
+                        appStore = context.components.appStore,
+                        settings = context.components.settings,
+                    ), storage = context.components.core.topSitesStorage,
+                    config = ::getTopSitesConfig,
+                ),
+                owner = viewLifecycleOwner,
+                view = binding.root,
+            )
+//            }
         }
         mozSetup()
         engineView!!.setDynamicToolbarMaxHeight(bottomBarHeightDp.toPx() - bottomBarOffsetPx.value.toInt())
@@ -703,7 +744,7 @@ fun BrowserComponent(
                     )
                     .nestedScroll(nestedScrollConnection)
                     .motionEventSpy {
-                        if(it.action == MotionEvent.ACTION_UP || it.action == MotionEvent.ACTION_CANCEL) {
+                        if (it.action == MotionEvent.ACTION_UP || it.action == MotionEvent.ACTION_CANCEL) {
                             // set bottom bar position
                             coroutineScope.launch {
                                 if (bottomBarOffsetPx.value <= (bottomBarHeightDp.toPx() / 2)) {
@@ -817,6 +858,33 @@ private fun onBackPressed(
 
 fun Dp.toPx(): Int {
     return (this.value * Resources.getSystem().displayMetrics.density).toInt()
+}
+
+
+/**
+ * Returns a [TopSitesConfig] which specifies how many top sites to display and whether or
+ * not frequently visited sites should be displayed.
+ */
+@VisibleForTesting
+internal fun getTopSitesConfig(context: Context): TopSitesConfig {
+    val settings = context.settings()
+    return TopSitesConfig(
+        totalSites = settings.topSitesMaxLimit,
+        frecencyConfig = TopSitesFrecencyConfig(
+            FrecencyThresholdOption.SKIP_ONE_TIME_PAGES,
+        ) { !Uri.parse(it.url).containsQueryParameters(settings.frecencyFilterQuery) },
+        providerConfig = TopSitesProviderConfig(
+            showProviderTopSites = settings.showContileFeature,
+            maxThreshold = TOP_SITES_PROVIDER_MAX_THRESHOLD,
+            providerFilter = { topSite ->
+                when (store.state.search.selectedOrDefaultSearchEngine?.name) {
+                    AMAZON_SEARCH_ENGINE_NAME -> topSite.title != AMAZON_SPONSORED_TITLE
+                    EBAY_SPONSORED_TITLE -> topSite.title != EBAY_SPONSORED_TITLE
+                    else -> true
+                }
+            },
+        ),
+    )
 }
 
 @Composable

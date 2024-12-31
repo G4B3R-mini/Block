@@ -262,6 +262,8 @@ dependencies {
     implementation platform(libs.androidx.compose.bom)
     implementation libs.androidx.compose.foundation
     implementation libs.androidx.compose.material3
+    implementation libs.androidx.navigation.compose
+    implementation libs.androidx.navigation.fragment
     implementation libs.androidx.compose.runtime
     implementation libs.androidx.compose.ui.base
     implementation libs.androidx.compose.ui.graphics
@@ -323,6 +325,7 @@ dependencies {
     implementation libs.mozilla.feature.customtabs
     implementation libs.mozilla.feature.downloads
     implementation libs.mozilla.feature.findinpage
+    implementation libs.mozilla.feature.fxsuggest
     implementation libs.mozilla.feature.intent
     implementation libs.mozilla.feature.media
     implementation libs.mozilla.feature.prompts
@@ -334,8 +337,10 @@ dependencies {
     implementation libs.mozilla.feature.session
     implementation libs.mozilla.feature.sitepermissions
     implementation libs.mozilla.feature.syncedtabs
+    implementation libs.mozilla.feature.tab.collections
     implementation libs.mozilla.feature.tabs
     implementation libs.mozilla.feature.toolbar
+    implementation libs.mozilla.feature.top.sites
     implementation libs.mozilla.feature.webauthn
     implementation libs.mozilla.feature.webcompat
     implementation libs.mozilla.feature.webnotifications
@@ -352,6 +357,7 @@ dependencies {
     implementation libs.mozilla.service.sync.logins
 
     implementation libs.mozilla.support.base
+    implementation libs.mozilla.support.locale
     implementation libs.mozilla.support.ktx
     implementation libs.mozilla.support.rusthttp
     implementation libs.mozilla.support.rustlog

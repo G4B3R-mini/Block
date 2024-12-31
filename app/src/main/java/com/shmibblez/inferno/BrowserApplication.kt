@@ -5,6 +5,7 @@
 package com.shmibblez.inferno
 
 import android.app.Application
+import com.shmibblez.inferno.components.Components
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
