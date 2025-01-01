@@ -30,16 +30,16 @@ import com.shmibblez.inferno.autofill.AutofillSearchActivity
 import com.shmibblez.inferno.autofill.AutofillUnlockActivity
 import com.shmibblez.inferno.components.appstate.AppAction
 import com.shmibblez.inferno.components.appstate.AppState
-import com.shmibblez.inferno.components.metrics.MetricsMiddleware
-import com.shmibblez.inferno.crashes.CrashReportingAppMiddleware
-import com.shmibblez.inferno.crashes.SettingsCrashReportCache
+//import com.shmibblez.inferno.components.metrics.MetricsMiddleware
+//import com.shmibblez.inferno.crashes.CrashReportingAppMiddleware
+//import com.shmibblez.inferno.crashes.SettingsCrashReportCache
 import com.shmibblez.inferno.datastore.pocketStoriesSelectedCategoriesDataStore
 import com.shmibblez.inferno.ext.asRecentTabs
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.filterState
 import com.shmibblez.inferno.ext.settings
 import com.shmibblez.inferno.ext.sort
-import com.shmibblez.inferno.home.PocketUpdatesMiddleware
+//import com.shmibblez.inferno.home.PocketUpdatesMiddleware
 import com.shmibblez.inferno.home.blocklist.BlocklistHandler
 import com.shmibblez.inferno.home.blocklist.BlocklistMiddleware
 import com.shmibblez.inferno.messaging.state.MessagingMiddleware
@@ -52,6 +52,7 @@ import com.shmibblez.inferno.perf.lazyMonitored
 import com.shmibblez.inferno.utils.ClipboardHandler
 import com.shmibblez.inferno.utils.Settings
 import com.shmibblez.inferno.wifi.WifiConnectionMonitor
+import mozilla.components.lib.crash.CrashReporter
 import java.util.concurrent.TimeUnit
 
 private const val AMO_COLLECTION_MAX_CACHE_AGE = 2 * 24 * 60L // Two days in minutes
@@ -64,11 +65,19 @@ private const val AMO_COLLECTION_MAX_CACHE_AGE = 2 * 24 * 60L // Two days in min
  * can be considered a building block of our app.
  */
 class Components(private val context: Context) {
+    private val notificationManagerCompat = NotificationManagerCompat.from(context)
+
+    val notificationsDelegate: NotificationsDelegate by lazyMonitored {
+        NotificationsDelegate(
+            notificationManagerCompat,
+        )
+    }
+    private val crashReporter = CrashReporter(context, notificationsDelegate = notificationsDelegate)
     val backgroundServices by lazyMonitored {
         BackgroundServices(
             context,
-            push,
-            analytics.crashReporter,
+            push = Push(context, crashReporter),
+            crashReporter = crashReporter,
             core.lazyHistoryStorage,
             core.lazyBookmarksStorage,
             core.lazyPasswordsStorage,
@@ -77,8 +86,22 @@ class Components(private val context: Context) {
             strictMode,
         )
     }
-    val services by lazyMonitored { Services(context, core.store, backgroundServices.accountManager) }
-    val core by lazyMonitored { Core(context, analytics.crashReporter, strictMode) }
+    val services by lazyMonitored {
+        Services(
+            context,
+            core.store,
+            backgroundServices.accountManager
+        )
+    }
+
+    //    val core by lazyMonitored { Core(context, analytics.crashReporter, strictMode) }
+    val core by lazyMonitored {
+        Core(
+            context,
+            crashReporter,
+            strictMode
+        )
+    }
 
     @Suppress("Deprecation")
     val useCases by lazyMonitored {
@@ -97,14 +120,6 @@ class Components(private val context: Context) {
         )
     }
 
-    private val notificationManagerCompat = NotificationManagerCompat.from(context)
-
-    val notificationsDelegate: NotificationsDelegate by lazyMonitored {
-        NotificationsDelegate(
-            notificationManagerCompat,
-        )
-    }
-
     val intentProcessors by lazyMonitored {
         IntentProcessors(
             context,
@@ -120,7 +135,9 @@ class Components(private val context: Context) {
 
     val addonsProvider by lazyMonitored {
         // Check if we have a customized (overridden) AMO collection (supported in Nightly & Beta)
-        if (FeatureFlags.customExtensionCollectionFeature && context.settings().amoCollectionOverrideConfigured()) {
+        if (FeatureFlags.customExtensionCollectionFeature && context.settings()
+                .amoCollectionOverrideConfigured()
+        ) {
             AMOAddonsProvider(
                 context,
                 core.client,
@@ -143,7 +160,11 @@ class Components(private val context: Context) {
         }
         // Fall back to defaults
         else {
-            AMOAddonsProvider(context, core.client, maxCacheAgeInMinutes = AMO_COLLECTION_MAX_CACHE_AGE)
+            AMOAddonsProvider(
+                context,
+                core.client,
+                maxCacheAgeInMinutes = AMO_COLLECTION_MAX_CACHE_AGE
+            )
         }
     }
 
@@ -164,24 +185,25 @@ class Components(private val context: Context) {
         AddonManager(core.store, core.engine, addonsProvider, addonUpdater)
     }
 
-    val analytics by lazyMonitored { Analytics(context, performance.visualCompletenessQueue.queue) }
+    //    val analytics by lazyMonitored { Analytics(context, performance.visualCompletenessQueue.queue) }
     val nimbus by lazyMonitored { NimbusComponents(context) }
     val publicSuffixList by lazyMonitored { PublicSuffixList(context) }
     val clipboardHandler by lazyMonitored { ClipboardHandler(context) }
     val performance by lazyMonitored { PerformanceComponent() }
-    val push by lazyMonitored { Push(context, analytics.crashReporter) }
+
+    //    val push by lazyMonitored { Push(context, analytics.crashReporter) }
     val wifiConnectionMonitor by lazyMonitored { WifiConnectionMonitor(context as Application) }
     val strictMode by lazyMonitored { StrictModeManager(Config, this) }
 
     val settings by lazyMonitored { Settings(context) }
     val fenixOnboarding by lazyMonitored { FenixOnboarding(context) }
 
-    val reviewPromptController by lazyMonitored {
-        ReviewPromptController(
-            manager = ReviewManagerFactory.create(context),
-            reviewSettings = FenixReviewSettings(settings),
-        )
-    }
+//    val reviewPromptController by lazyMonitored {
+//        ReviewPromptController(
+//            manager = ReviewManagerFactory.create(context),
+//            reviewSettings = FenixReviewSettings(settings),
+//        )
+//    }
 
     @delegate:SuppressLint("NewApi")
     val autofillConfiguration by lazyMonitored {
@@ -198,7 +220,12 @@ class Components(private val context: Context) {
 
     val appStartReasonProvider by lazyMonitored { AppStartReasonProvider() }
     val startupActivityLog by lazyMonitored { StartupActivityLog() }
-    val startupStateProvider by lazyMonitored { StartupStateProvider(startupActivityLog, appStartReasonProvider) }
+    val startupStateProvider by lazyMonitored {
+        StartupStateProvider(
+            startupActivityLog,
+            appStartReasonProvider
+        )
+    }
 
     val appStore by lazyMonitored {
         val blocklistHandler = BlocklistHandler(settings)
@@ -222,22 +249,22 @@ class Components(private val context: Context) {
             ).run { filterState(blocklistHandler) },
             middlewares = listOf(
                 BlocklistMiddleware(blocklistHandler),
-                PocketUpdatesMiddleware(
-                    core.pocketStoriesService,
-                    context.pocketStoriesSelectedCategoriesDataStore,
-                ),
+//                PocketUpdatesMiddleware(
+//                    core.pocketStoriesService,
+//                    context.pocketStoriesSelectedCategoriesDataStore,
+//                ),
                 MessagingMiddleware(
                     controller = nimbus.messaging,
                     settings = settings,
                 ),
-                MetricsMiddleware(metrics = analytics.metrics),
-                CrashReportingAppMiddleware(
-                    CrashMiddleware(
-                        cache = SettingsCrashReportCache(settings),
-                        crashReporter = analytics.crashReporter,
-                        currentTimeInMillis = { System.currentTimeMillis() },
-                    ),
-                ),
+//                MetricsMiddleware(metrics = analytics.metrics),
+//                CrashReportingAppMiddleware(
+//                    CrashMiddleware(
+//                        cache = SettingsCrashReportCache(settings),
+//                        crashReporter = analytics.crashReporter,
+//                        currentTimeInMillis = { System.currentTimeMillis() },
+//                    ),
+//                ),
             ),
         ).also {
             it.dispatch(AppAction.CrashActionWrapper(CrashAction.Initialize))

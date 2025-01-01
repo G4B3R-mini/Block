@@ -143,6 +143,12 @@ import mozilla.components.browser.toolbar.BrowserToolbar as BrowserToolbarCompat
 //      - add way to select search engine
 //  - toolbar
 //    - revisit search engines, how to modify bundled?
+//  - change from datastore preferences to datastore
+//    - switch from: implementation "androidx.datastore:datastore-preferences:1.1.1"
+//      to: implementation "androidx.datastore:datastore:1.1.1"
+//  - in components/Core.kt, implement FxNimbus fingerprint protection
+//  - create Mozilla Location Service (MLS) token and put in components/Core.kt
+//  - BuildConfig.MLS_TOKEN
 
 fun Context.getActivity(): AppCompatActivity? = when (this) {
     is AppCompatActivity -> this
@@ -720,7 +726,7 @@ fun BrowserComponent(
                         appStore = context.components.appStore,
                         settings = context.components.settings,
                     ), storage = context.components.core.topSitesStorage,
-                    config = ::getTopSitesConfig,
+                    config = {getTopSitesConfig(context)},
                 ),
                 owner = viewLifecycleOwner,
                 view = binding.root,

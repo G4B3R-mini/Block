@@ -5,44 +5,52 @@
 package com.shmibblez.inferno.components
 
 import android.content.Context
-import androidx.preference.PreferenceManager
-import kotlinx.coroutines.MainScope
+import android.net.Uri
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.feature.accounts.FirefoxAccountsAuthFeature
 import mozilla.components.feature.app.links.AppLinksInterceptor
-import mozilla.components.feature.tabs.TabsUseCases
 import mozilla.components.service.fxa.manager.FxaAccountManager
-import com.shmibblez.inferno.R
-import com.shmibblez.inferno.ext.getPreferenceKey
+import com.shmibblez.inferno.ext.settings
+import com.shmibblez.inferno.perf.lazyMonitored
+import com.shmibblez.inferno.settings.SupportUtils
 
 /**
  * Component group which encapsulates foreground-friendly services.
  */
 class Services(
     private val context: Context,
+    private val store: BrowserStore,
     private val accountManager: FxaAccountManager,
-    private val tabsUseCases: TabsUseCases,
 ) {
-    private val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-    val accountsAuthFeature by lazy {
-        FirefoxAccountsAuthFeature(
-            accountManager,
-            redirectUrl = BackgroundServices.REDIRECT_URL,
-        ) {
-                _, authUrl ->
-            MainScope().launch {
-                tabsUseCases.addTab.invoke(authUrl)
+    val accountsAuthFeature by lazyMonitored {
+        FirefoxAccountsAuthFeature(accountManager, FxaServer.REDIRECT_URL) { context, authUrl ->
+            var url = authUrl
+            if (context.settings().useReactFxAServer) {
+                url = Uri.parse(url)
+                    .buildUpon()
+                    .appendQueryParameter("forceExperiment", "generalizedReactApp")
+                    .appendQueryParameter("forceExperimentGroup", "react")
+                    .build()
+                    .toString()
+            }
+            CoroutineScope(Dispatchers.Main).launch {
+                val intent = SupportUtils.createAuthCustomTabIntent(context, url)
+                context.startActivity(intent)
             }
         }
     }
 
-    val appLinksInterceptor by lazy {
+    val appLinksInterceptor by lazyMonitored {
         AppLinksInterceptor(
-            context,
+            context = context,
             interceptLinkClicks = true,
-            launchInApp = {
-                prefs.getBoolean(context.getPreferenceKey(R.string.pref_key_launch_external_app), false)
-            },
+            launchInApp = { context.settings().shouldOpenLinksInApp() },
+            shouldPrompt = { context.settings().shouldPromptOpenLinksInApp() },
+            launchFromInterceptor = true,
+            store = store,
         )
     }
 }

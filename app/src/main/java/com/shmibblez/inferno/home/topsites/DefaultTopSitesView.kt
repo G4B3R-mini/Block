@@ -9,6 +9,7 @@ import mozilla.components.feature.top.sites.view.TopSitesView
 import com.shmibblez.inferno.components.AppStore
 import com.shmibblez.inferno.components.appstate.AppAction
 import com.shmibblez.inferno.ext.sort
+import com.shmibblez.inferno.utils.Settings
 
 class DefaultTopSitesView(
     val appStore: AppStore,
