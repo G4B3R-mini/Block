@@ -149,6 +149,7 @@ import mozilla.components.browser.toolbar.BrowserToolbar as BrowserToolbarCompat
 //  - in components/Core.kt, implement FxNimbus fingerprint protection
 //  - create Mozilla Location Service (MLS) token and put in components/Core.kt
 //  - BuildConfig.MLS_TOKEN
+//  - color scheme, search for FirefoxTheme usages
 
 fun Context.getActivity(): AppCompatActivity? = when (this) {
     is AppCompatActivity -> this

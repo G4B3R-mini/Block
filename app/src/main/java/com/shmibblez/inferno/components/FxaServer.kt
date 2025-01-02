@@ -26,13 +26,14 @@ object FxaServer {
         val serverOverride = context.settings().overrideFxAServer
         val tokenServerOverride = context.settings().overrideSyncTokenServer.ifEmpty { null }
         if (serverOverride.isEmpty()) {
-            val releaseServer = if (Config.channel.isMozillaOnline && context.settings().allowDomesticChinaFxaServer) {
-                FxaServer.China
-            } else {
-                FxaServer.Release
-            }
+            val releaseServer = FxaServer.Release
             return ServerConfig(releaseServer, CLIENT_ID, REDIRECT_URL, tokenServerOverride)
         }
-        return ServerConfig(FxaServer.Custom(serverOverride), CLIENT_ID, REDIRECT_URL, tokenServerOverride)
+        return ServerConfig(
+            FxaServer.Custom(serverOverride),
+            CLIENT_ID,
+            REDIRECT_URL,
+            tokenServerOverride
+        )
     }
 }

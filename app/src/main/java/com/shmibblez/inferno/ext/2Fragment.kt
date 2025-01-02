@@ -9,5 +9,5 @@ import com.shmibblez.inferno.components.Components
 /**
  * Get the requireComponents of this application.
  */
-val androidx.fragment.app.Fragment.requireComponents: Components
+val androidx.fragment.app.Fragment.requireComponents2: Components
     get() = requireContext().components

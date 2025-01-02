@@ -42,14 +42,14 @@ import mozilla.components.service.fxa.sync.GlobalSyncableStoreProvider
 import mozilla.components.service.sync.autofill.AutofillCreditCardsAddressesStorage
 import mozilla.components.service.sync.logins.SyncableLoginsStorage
 import mozilla.components.support.utils.RunWhenReadyQueue
-import mozilla.telemetry.glean.private.NoExtras
+//import mozilla.telemetry.glean.private.NoExtras
 import com.shmibblez.inferno.Config
 import com.shmibblez.inferno.FeatureFlags
-import com.shmibblez.inferno.GleanMetrics.SyncAuth
+//import com.shmibblez.inferno.GleanMetrics.SyncAuth
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.maxActiveTime
-import com.shmibblez.inferno.ext.recordEventInNimbus
+//import com.shmibblez.inferno.ext.recordEventInNimbus
 import com.shmibblez.inferno.ext.settings
 import com.shmibblez.inferno.perf.StrictModeManager
 import com.shmibblez.inferno.perf.lazyMonitored
@@ -263,40 +263,9 @@ internal class TelemetryAccountObserver(
 ) : AccountObserver {
     override fun onAuthenticated(account: OAuthAccount, authType: AuthType) {
         context.settings().signedInFxaAccount = true
-        when (authType) {
-            // User signed-in into an existing FxA account.
-            AuthType.Signin -> {
-                SyncAuth.signIn.record(NoExtras())
-                context.recordEventInNimbus("sync_auth.sign_in")
-            }
-
-            // User created a new FxA account.
-            AuthType.Signup -> SyncAuth.signUp.record(NoExtras())
-
-            // User paired to an existing account via QR code scanning.
-            AuthType.Pairing -> SyncAuth.paired.record(NoExtras())
-
-            // Account Manager recovered a broken FxA auth state, without direct user involvement.
-            AuthType.Recovered -> SyncAuth.recovered.record(NoExtras())
-
-            // User signed-in into an FxA account via unknown means.
-            // Exact mechanism identified by the 'action' param.
-            is AuthType.OtherExternal -> SyncAuth.otherExternal.record(NoExtras())
-
-            // User signed-in into an FxA account shared from another locally installed app using the copy flow.
-            AuthType.MigratedCopy,
-            // User signed-in into an FxA account shared from another locally installed app using the reuse flow.
-            AuthType.MigratedReuse,
-            // Account restored from a hydrated state on disk (e.g. during startup).
-            AuthType.Existing,
-            -> {
-                // no-op, events not recorded in Glean
-            }
-        }
     }
 
     override fun onLoggedOut() {
-        SyncAuth.signOut.record(NoExtras())
         context.settings().signedInFxaAccount = false
     }
 }

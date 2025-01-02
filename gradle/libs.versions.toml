@@ -3,7 +3,8 @@
 activityCompose = "1.9.3"
 android-components = "134.0.20241117092920"
 browser-search = "75.0.9"
-tooling-nimbus-gradle = "111.0"
+pagingCommon = "3.3.5"
+tooling-nimbus-gradle = "111.0.20230213143237"
 
 # AGP
 android-gradle-plugin = "8.7.3"
@@ -53,12 +54,14 @@ junit = "4.13.2"
 navigationCompose = "2.8.5"
 okhttp = "4.12.0"
 okio = "3.9.0"
+pagingCommonAndroid = "3.3.5"
 
 [libraries]
 # Kotlin
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 androidx-navigation-fragment = { module = "androidx.navigation:navigation-fragment", version.ref = "navigationCompose" }
+androidx-paging-common = { module = "androidx.paging:paging-common", version.ref = "pagingCommon" }
 androidx-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
 androidx-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest" }
@@ -206,6 +209,7 @@ mozilla-ui-colors = { group = "org.mozilla.components", name = "ui-colors", vers
 mozilla-ui-icons = { group = "org.mozilla.components", name = "ui-icons", version.ref = "android-components" }
 mozilla-ui-tabcounter = { group = "org.mozilla.components", name = "ui-tabcounter", version.ref = "android-components" }
 mozilla-ui-widgets = { group = "org.mozilla.components", name = "ui-widgets", version.ref = "android-components" }
+androidx-paging-common-android = { group = "androidx.paging", name = "paging-common-android", version.ref = "pagingCommonAndroid" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "android-gradle-plugin" }

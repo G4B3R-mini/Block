@@ -6,10 +6,9 @@ package com.shmibblez.inferno.customtabs
 
 import mozilla.components.concept.engine.Engine
 import mozilla.components.feature.customtabs.AbstractCustomTabsService
-import mozilla.components.feature.customtabs.store.CustomTabsServiceStore
 import com.shmibblez.inferno.ext.components
 
 class CustomTabsService : AbstractCustomTabsService() {
-    override val customTabsServiceStore: CustomTabsServiceStore by lazy { components.core.customTabsStore }
     override val engine: Engine by lazy { components.core.engine }
+    override val customTabsServiceStore by lazy { components.core.customTabsStore }
 }

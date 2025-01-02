@@ -9,7 +9,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    tools:context="com.shmibblez.inferno.settings.AboutFragment">
+    tools:context="com.shmibblez.inferno.settings.`0AboutFragment`">
 
     <TextView
         android:id="@+id/about_content"

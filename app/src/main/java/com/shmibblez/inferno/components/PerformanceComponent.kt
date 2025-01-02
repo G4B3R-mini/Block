@@ -5,7 +5,7 @@
 package com.shmibblez.inferno.components
 
 import mozilla.components.support.utils.RunWhenReadyQueue
-import com.shmibblez.inferno.perf.ColdStartupDurationTelemetry
+//import com.shmibblez.inferno.perf.ColdStartupDurationTelemetry
 import com.shmibblez.inferno.perf.VisualCompletenessQueue
 import com.shmibblez.inferno.perf.lazyMonitored
 
@@ -14,5 +14,5 @@ import com.shmibblez.inferno.perf.lazyMonitored
  */
 class PerformanceComponent {
     val visualCompletenessQueue by lazyMonitored { VisualCompletenessQueue(RunWhenReadyQueue()) }
-    val coldStartupDurationTelemetry by lazyMonitored { ColdStartupDurationTelemetry() }
+//    val coldStartupDurationTelemetry by lazyMonitored { ColdStartupDurationTelemetry() }
 }
