@@ -25,7 +25,7 @@
         android:label="@string/app_name"
         android:usesCleartextTraffic="true"
         android:theme="@style/AppThemeNotActionBar"
-        android:name=".BrowserApplication"
+        android:name=".`0BrowserApplication`"
         tools:ignore="UnusedAttribute">
         <activity
             android:name=".BrowserActivity"

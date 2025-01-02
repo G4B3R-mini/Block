@@ -81,14 +81,14 @@ import mozilla.components.support.utils.ManufacturerCodes
 import mozilla.components.support.utils.SafeIntent
 import mozilla.components.support.utils.toSafeIntent
 import mozilla.components.support.webextensions.WebExtensionPopupObserver
-import mozilla.telemetry.glean.private.NoExtras
+//import mozilla.telemetry.glean.private.NoExtras
 import org.mozilla.experiments.nimbus.initializeTooling
-import com.shmibblez.inferno.GleanMetrics.AppIcon
-import com.shmibblez.inferno.GleanMetrics.Events
-import com.shmibblez.inferno.GleanMetrics.Metrics
-import com.shmibblez.inferno.GleanMetrics.NavigationBar
-import com.shmibblez.inferno.GleanMetrics.SplashScreen
-import com.shmibblez.inferno.GleanMetrics.StartOnHome
+//import com.shmibblez.inferno.GleanMetrics.AppIcon
+//import com.shmibblez.inferno.GleanMetrics.Events
+//import com.shmibblez.inferno.GleanMetrics.Metrics
+//import com.shmibblez.inferno.GleanMetrics.NavigationBar
+//import com.shmibblez.inferno.GleanMetrics.SplashScreen
+//import com.shmibblez.inferno.GleanMetrics.StartOnHome
 import com.shmibblez.inferno.addons.ExtensionsProcessDisabledBackgroundController
 import com.shmibblez.inferno.addons.ExtensionsProcessDisabledForegroundController
 import com.shmibblez.inferno.browser.browsingmode.BrowsingMode
@@ -96,11 +96,13 @@ import com.shmibblez.inferno.browser.browsingmode.BrowsingModeManager
 import com.shmibblez.inferno.browser.browsingmode.DefaultBrowsingModeManager
 import com.shmibblez.inferno.components.appstate.AppAction
 import com.shmibblez.inferno.components.appstate.OrientationMode
-import com.shmibblez.inferno.components.metrics.BreadcrumbsRecorder
-import com.shmibblez.inferno.components.metrics.GrowthDataWorker
-import com.shmibblez.inferno.components.metrics.fonts.FontEnumerationWorker
 import com.shmibblez.inferno.crashes.CrashReporterBinding
 import com.shmibblez.inferno.crashes.UnsubmittedCrashDialog
+//import com.shmibblez.inferno.components.metrics.BreadcrumbsRecorder
+//import com.shmibblez.inferno.components.metrics.GrowthDataWorker
+//import com.shmibblez.inferno.components.metrics.fonts.FontEnumerationWorker
+//import com.shmibblez.inferno.crashes.CrashReporterBinding
+//import com.shmibblez.inferno.crashes.UnsubmittedCrashDialog
 import com.shmibblez.inferno.customtabs.ExternalAppBrowserActivity
 import com.shmibblez.inferno.databinding.ActivityHomeBinding
 import com.shmibblez.inferno.debugsettings.data.DefaultDebugSettingsRepository
@@ -115,7 +117,7 @@ import com.shmibblez.inferno.ext.getIntentSource
 import com.shmibblez.inferno.ext.getNavDirections
 import com.shmibblez.inferno.ext.hasTopDestination
 import com.shmibblez.inferno.ext.nav
-import com.shmibblez.inferno.ext.recordEventInNimbus
+//import com.shmibblez.inferno.ext.recordEventInNimbus
 import com.shmibblez.inferno.ext.setNavigationIcon
 import com.shmibblez.inferno.ext.settings
 import com.shmibblez.inferno.ext.systemGesturesInsets
@@ -134,7 +136,7 @@ import com.shmibblez.inferno.home.intent.StartSearchIntentProcessor
 import com.shmibblez.inferno.library.bookmarks.DesktopFolders
 import com.shmibblez.inferno.messaging.FenixMessageSurfaceId
 import com.shmibblez.inferno.messaging.MessageNotificationWorker
-import com.shmibblez.inferno.nimbus.FxNimbus
+//import com.shmibblez.inferno.nimbus.FxNimbus
 import com.shmibblez.inferno.onboarding.ReEngagementNotificationWorker
 import com.shmibblez.inferno.perf.MarkersActivityLifecycleCallbacks
 import com.shmibblez.inferno.perf.MarkersFragmentLifecycleCallbacks
@@ -143,7 +145,7 @@ import com.shmibblez.inferno.perf.PerformanceInflater
 import com.shmibblez.inferno.perf.ProfilerMarkers
 import com.shmibblez.inferno.perf.StartupPathProvider
 import com.shmibblez.inferno.perf.StartupTimeline
-import com.shmibblez.inferno.perf.StartupTypeTelemetry
+//import com.shmibblez.inferno.perf.StartupTypeTelemetry
 import com.shmibblez.inferno.session.PrivateNotificationService
 import com.shmibblez.inferno.settings.SupportUtils
 import com.shmibblez.inferno.shortcut.NewTabShortcutIntentProcessor.Companion.ACTION_OPEN_PRIVATE_TAB
@@ -184,9 +186,9 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
 
     private var isToolbarInflated = false
 
-    private val webExtensionPopupObserver by lazy {
-        WebExtensionPopupObserver(components.core.store, ::openPopup)
-    }
+//    private val webExtensionPopupObserver by lazy {
+//        WebExtensionPopupObserver(components.core.store, ::openPopup)
+//    }
 
     val webExtensionPromptFeature by lazy {
         WebExtensionPromptFeature(
@@ -263,7 +265,7 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
     private var actionMode: ActionMode? = null
 
     private val startupPathProvider = StartupPathProvider()
-    private lateinit var startupTypeTelemetry: StartupTypeTelemetry
+//    private lateinit var startupTypeTelemetry: StartupTypeTelemetry
 
     private val onBackPressedCallback = UserInteractionOnBackPressedCallback(
         fragmentManager = supportFragmentManager,
@@ -315,34 +317,38 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
             isLauncherIntent = intent.toSafeIntent().isLauncherIntent,
         )
 
-        SplashScreenManager(
-            splashScreenOperation = if (FxNimbus.features.splashScreen.value().offTrainOnboarding) {
-                ApplyExperimentsOperation(
-                    storage = DefaultExperimentsOperationStorage(components.settings),
-                    nimbus = components.nimbus.sdk,
-                )
-            } else {
-                FetchExperimentsOperation(
-                    storage = DefaultExperimentsOperationStorage(components.settings),
-                    nimbus = components.nimbus.sdk,
-                )
-            },
-            splashScreenTimeout = FxNimbus.features.splashScreen.value().maximumDurationMs.toLong(),
-            isDeviceSupported = { Build.VERSION.SDK_INT > Build.VERSION_CODES.M },
-            storage = DefaultSplashScreenStorage(components.settings),
-            showSplashScreen = { installSplashScreen().setKeepOnScreenCondition(it) },
-            onSplashScreenFinished = { result ->
-                if (result.sendTelemetry) {
-                    SplashScreen.firstLaunchExtended.record(
-                        SplashScreen.FirstLaunchExtendedExtra(dataFetched = result.wasDataFetched),
-                    )
-                }
-
-                if (savedInstanceState == null && shouldShowOnboarding) {
-                    navHost.navController.navigate(NavGraphDirections.actionGlobalOnboarding())
-                }
-            },
-        ).showSplashScreen()
+//        SplashScreenManager(
+//            splashScreenOperation = FetchExperimentsOperation(
+//                storage = DefaultExperimentsOperationStorage(components.settings),
+//                nimbus = components.nimbus.sdk,
+//            ),
+////            if (FxNimbus.features.splashScreen.value().offTrainOnboarding) {
+////                ApplyExperimentsOperation(
+////                    storage = DefaultExperimentsOperationStorage(components.settings),
+////                    nimbus = components.nimbus.sdk,
+////                )
+////            } else {
+////                FetchExperimentsOperation(
+////                    storage = DefaultExperimentsOperationStorage(components.settings),
+////                    nimbus = components.nimbus.sdk,
+////                )
+////            },
+//            splashScreenTimeout = 0, // FxNimbus.features.splashScreen.value().maximumDurationMs.toLong(),
+//            isDeviceSupported = { Build.VERSION.SDK_INT > Build.VERSION_CODES.M },
+//            storage = DefaultSplashScreenStorage(components.settings),
+//            showSplashScreen = { installSplashScreen().setKeepOnScreenCondition(it) },
+//            onSplashScreenFinished = { result ->
+//                if (result.sendTelemetry) {
+//                    SplashScreen.firstLaunchExtended.record(
+//                        SplashScreen.FirstLaunchExtendedExtra(dataFetched = result.wasDataFetched),
+//                    )
+//                }
+//
+//                if (savedInstanceState == null && shouldShowOnboarding) {
+//                    navHost.navController.navigate(NavGraphDirections.actionGlobalOnboarding())
+//                }
+//            },
+//        ).showSplashScreen()
 
         lifecycleScope.launch {
             val debugSettingsRepository = DefaultDebugSettingsRepository(
@@ -403,47 +409,48 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
 
             if (!shouldStartOnHome() && shouldNavigateToBrowserOnColdStart(savedInstanceState)) {
                 navigateToBrowserOnColdStart()
-            } else {
-                StartOnHome.enterHomeScreen.record(NoExtras())
             }
+//            else {
+//                StartOnHome.enterHomeScreen.record(NoExtras())
+//            }
 
-            if (settings().showHomeOnboardingDialog && components.fenixOnboarding.userHasBeenOnboarded()) {
-                navHost.navController.navigate(NavGraphDirections.actionGlobalHomeOnboardingDialog())
-            }
+//            if (settings().showHomeOnboardingDialog && components.fenixOnboarding.userHasBeenOnboarded()) {
+//                navHost.navController.navigate(NavGraphDirections.actionGlobalHomeOnboardingDialog())
+//            }
         }
 
         Performance.processIntentIfPerformanceTest(intent, this)
 
-        if (settings().isTelemetryEnabled) {
-            lifecycle.addObserver(
-                BreadcrumbsRecorder(
-                    components.analytics.crashReporter,
-                    navHost.navController,
-                    ::getBreadcrumbMessage,
-                ),
-            )
-
-            val safeIntent = intent?.toSafeIntent()
-            safeIntent
-                ?.let(::getIntentSource)
-                ?.also { source ->
-                    Events.appOpened.record(
-                        Events.AppOpenedExtra(
-                            source = source,
-                        ),
-                    )
-                    // This will record an event in Nimbus' internal event store. Used for behavioral targeting
-                    recordEventInNimbus("app_opened")
-
-                    if (safeIntent.action.equals(ACTION_OPEN_PRIVATE_TAB) && source == APP_ICON) {
-                        AppIcon.newPrivateTabTapped.record(NoExtras())
-                    }
-                }
-        }
+//        if (settings().isTelemetryEnabled) {
+//            lifecycle.addObserver(
+//                BreadcrumbsRecorder(
+//                    components.analytics.crashReporter,
+//                    navHost.navController,
+//                    ::getBreadcrumbMessage,
+//                ),
+//            )
+//
+//            val safeIntent = intent?.toSafeIntent()
+//            safeIntent
+//                ?.let(::getIntentSource)
+//                ?.also { source ->
+//                    Events.appOpened.record(
+//                        Events.AppOpenedExtra(
+//                            source = source,
+//                        ),
+//                    )
+//                    // This will record an event in Nimbus' internal event store. Used for behavioral targeting
+//                    recordEventInNimbus("app_opened")
+//
+//                    if (safeIntent.action.equals(ACTION_OPEN_PRIVATE_TAB) && source == APP_ICON) {
+//                        AppIcon.newPrivateTabTapped.record(NoExtras())
+//                    }
+//                }
+//        }
         supportActionBar?.hide()
 
         lifecycle.addObservers(
-            webExtensionPopupObserver,
+//            webExtensionPopupObserver,
             extensionsProcessDisabledForegroundController,
             extensionsProcessDisabledBackgroundController,
             serviceWorkerSupport,
@@ -459,13 +466,13 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
             moveTaskToBack(true)
         }
 
-        captureSnapshotTelemetryMetrics()
+//        captureSnapshotTelemetryMetrics()
 
-        startupTelemetryOnCreateCalled(intent.toSafeIntent())
+//        startupTelemetryOnCreateCalled(intent.toSafeIntent())
         startupPathProvider.attachOnActivityOnCreate(lifecycle, intent)
-        startupTypeTelemetry = StartupTypeTelemetry(components.startupStateProvider, startupPathProvider).apply {
-            attachOnHomeActivityOnCreate(lifecycle)
-        }
+//        startupTypeTelemetry = StartupTypeTelemetry(components.startupStateProvider, startupPathProvider).apply {
+//            attachOnHomeActivityOnCreate(lifecycle)
+//        }
 
         components.core.requestInterceptor.setNavigationController(navHost.navController)
 
@@ -483,26 +490,26 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
             components.useCases.searchUseCases.restoreHiddenSearchEngines.invoke()
         }
 
-        // To assess whether the Pocket stories are to be downloaded or not multiple SharedPreferences
-        // are read possibly needing to load them on the current thread. Move that to a background thread.
-        lifecycleScope.launch(IO) {
-            if (settings().showPocketRecommendationsFeature) {
-                components.core.pocketStoriesService.startPeriodicStoriesRefresh()
-            }
-
-            if (settings().showPocketSponsoredStories) {
-                components.core.pocketStoriesService.startPeriodicSponsoredStoriesRefresh()
-                // If the secret setting for sponsored stories parameters is set,
-                // force refresh the sponsored Pocket stories.
-                if (settings().useCustomConfigurationForSponsoredStories) {
-                    components.core.pocketStoriesService.refreshSponsoredStories()
-                }
-            }
-
-            if (settings().showContentRecommendations) {
-                components.core.pocketStoriesService.startPeriodicContentRecommendationsRefresh()
-            }
-        }
+//        // To assess whether the Pocket stories are to be downloaded or not multiple SharedPreferences
+//        // are read possibly needing to load them on the current thread. Move that to a background thread.
+//        lifecycleScope.launch(IO) {
+////            if (settings().showPocketRecommendationsFeature) {
+////                components.core.pocketStoriesService.startPeriodicStoriesRefresh()
+////            }
+//
+////            if (settings().showPocketSponsoredStories) {
+////                components.core.pocketStoriesService.startPeriodicSponsoredStoriesRefresh()
+////                // If the secret setting for sponsored stories parameters is set,
+////                // force refresh the sponsored Pocket stories.
+////                if (settings().useCustomConfigurationForSponsoredStories) {
+////                    components.core.pocketStoriesService.refreshSponsoredStories()
+////                }
+////            }
+//
+////            if (settings().showContentRecommendations) {
+////                components.core.pocketStoriesService.startPeriodicContentRecommendationsRefresh()
+////            }
+//        }
 
         components.backgroundServices.accountManagerAvailableQueue.runIfReadyOrQueue {
             lifecycleScope.launch(IO) {
@@ -545,16 +552,16 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
         }
     }
 
-    private fun startupTelemetryOnCreateCalled(safeIntent: SafeIntent) {
-        // We intentionally only record this in HomeActivity and not ExternalBrowserActivity (e.g.
-        // PWAs) so we don't include more unpredictable code paths in the results.
-        components.performance.coldStartupDurationTelemetry.onHomeActivityOnCreate(
-            components.performance.visualCompletenessQueue,
-            components.startupStateProvider,
-            safeIntent,
-            binding.rootContainer,
-        )
-    }
+//    private fun startupTelemetryOnCreateCalled(safeIntent: SafeIntent) {
+//        // We intentionally only record this in HomeActivity and not ExternalBrowserActivity (e.g.
+//        // PWAs) so we don't include more unpredictable code paths in the results.
+//        components.performance.coldStartupDurationTelemetry.onHomeActivityOnCreate(
+//            components.performance.visualCompletenessQueue,
+//            components.startupStateProvider,
+//            safeIntent,
+//            binding.rootContainer,
+//        )
+//    }
 
     @CallSuper
     @Suppress("TooGenericExceptionCaught")
@@ -576,16 +583,16 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
                 Logger.error("Failed to refresh contile top sites", e)
             }
 
-            if (settings().checkIfFenixIsDefaultBrowserOnAppResume()) {
-                if (components.appStore.state.wasNativeDefaultBrowserPromptShown) {
-                    Metrics.defaultBrowserChangedViaNativeSystemPrompt.record(NoExtras())
-                }
-                Events.defaultBrowserChanged.record(NoExtras())
-            }
+//            if (settings().checkIfFenixIsDefaultBrowserOnAppResume()) {
+//                if (components.appStore.state.wasNativeDefaultBrowserPromptShown) {
+//                    Metrics.defaultBrowserChangedViaNativeSystemPrompt.record(NoExtras())
+//                }
+//                Events.defaultBrowserChanged.record(NoExtras())
+//            }
 
             collectOSNavigationTelemetry()
-            GrowthDataWorker.sendActivatedSignalIfNeeded(applicationContext)
-            FontEnumerationWorker.sendActivatedSignalIfNeeded(applicationContext)
+//            GrowthDataWorker.sendActivatedSignalIfNeeded(applicationContext)
+//            FontEnumerationWorker.sendActivatedSignalIfNeeded(applicationContext)
             ReEngagementNotificationWorker.setReEngagementNotificationIfNeeded(applicationContext)
             MessageNotificationWorker.setMessageNotificationWorker(applicationContext)
         }
@@ -630,17 +637,17 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
             ),
         )
 
-        if (FxNimbus.features.alternativeAppLauncherIcon.value().enabled) {
-            // User has been enrolled in alternative app icon experiment.
-            with(applicationContext) {
-                changeAppLauncherIcon(
-                    context = this,
-                    appAlias = ComponentName(this, "$packageName.App"),
-                    alternativeAppAlias = ComponentName(this, "$packageName.AlternativeApp"),
-                    resetToDefault = FxNimbus.features.alternativeAppLauncherIcon.value().resetToDefault,
-                )
-            }
-        }
+//        if (FxNimbus.features.alternativeAppLauncherIcon.value().enabled) {
+//            // User has been enrolled in alternative app icon experiment.
+//            with(applicationContext) {
+//                changeAppLauncherIcon(
+//                    context = this,
+//                    appAlias = ComponentName(this, "$packageName.App"),
+//                    alternativeAppAlias = ComponentName(this, "$packageName.AlternativeApp"),
+//                    resetToDefault = FxNimbus.features.alternativeAppLauncherIcon.value().resetToDefault,
+//                )
+//            }
+//        }
     }
 
     final override fun onPause() {
@@ -700,9 +707,9 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
         )
 
         components.core.contileTopSitesUpdater.stopPeriodicWork()
-        components.core.pocketStoriesService.stopPeriodicStoriesRefresh()
-        components.core.pocketStoriesService.stopPeriodicSponsoredStoriesRefresh()
-        components.core.pocketStoriesService.stopPeriodicContentRecommendationsRefresh()
+//        components.core.pocketStoriesService.stopPeriodicStoriesRefresh()
+//        components.core.pocketStoriesService.stopPeriodicSponsoredStoriesRefresh()
+//        components.core.pocketStoriesService.stopPeriodicContentRecommendationsRefresh()
         privateNotificationObserver?.stop()
         components.notificationsDelegate.unBindActivity(this)
 
@@ -1254,13 +1261,13 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
         return DefaultThemeManager(browsingModeManager.mode, this)
     }
 
-    private fun openPopup(webExtensionState: WebExtensionState) {
-        val action = NavGraphDirections.actionGlobalWebExtensionActionPopupFragment(
-            webExtensionId = webExtensionState.id,
-            webExtensionTitle = webExtensionState.name,
-        )
-        navHost.navController.navigate(action)
-    }
+//    private fun openPopup(webExtensionState: WebExtensionState) {
+//        val action = NavGraphDirections.actionGlobalWebExtensionActionPopupFragment(
+//            webExtensionId = webExtensionState.id,
+//            webExtensionTitle = webExtensionState.name,
+//        )
+//        navHost.navController.navigate(action)
+//    }
 
     /**
      * The root container is null at this point, so let the HomeActivity know that
@@ -1270,22 +1277,22 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
         isVisuallyComplete = true
     }
 
-    private fun captureSnapshotTelemetryMetrics() = CoroutineScope(IO).launch {
-        // PWA
-        val recentlyUsedPwaCount = components.core.webAppShortcutManager.recentlyUsedWebAppsCount(
-            activeThresholdMs = PWA_RECENTLY_USED_THRESHOLD,
-        )
-        if (recentlyUsedPwaCount == 0) {
-            Metrics.hasRecentPwas.set(false)
-        } else {
-            Metrics.hasRecentPwas.set(true)
-            // This metric's lifecycle is set to 'application', meaning that it gets reset upon
-            // application restart. Combined with the behaviour of the metric type itself (a growing counter),
-            // it's important that this metric is only set once per application's lifetime.
-            // Otherwise, we're going to over-count.
-            Metrics.recentlyUsedPwaCount.add(recentlyUsedPwaCount)
-        }
-    }
+//    private fun captureSnapshotTelemetryMetrics() = CoroutineScope(IO).launch {
+//        // PWA
+//        val recentlyUsedPwaCount = components.core.webAppShortcutManager.recentlyUsedWebAppsCount(
+//            activeThresholdMs = PWA_RECENTLY_USED_THRESHOLD,
+//        )
+//        if (recentlyUsedPwaCount == 0) {
+//            Metrics.hasRecentPwas.set(false)
+//        } else {
+//            Metrics.hasRecentPwas.set(true)
+//            // This metric's lifecycle is set to 'application', meaning that it gets reset upon
+//            // application restart. Combined with the behaviour of the metric type itself (a growing counter),
+//            // it's important that this metric is only set once per application's lifetime.
+//            // Otherwise, we're going to over-count.
+//            Metrics.recentlyUsedPwaCount.add(recentlyUsedPwaCount)
+//        }
+//    }
 
     @VisibleForTesting
     internal fun isActivityColdStarted(startingIntent: Intent, activityIcicle: Bundle?): Boolean {
@@ -1367,7 +1374,7 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
 
             val isUsingGesturesNavigation =
                 (systemGestureInsets?.left ?: 0) > 0 && (systemGestureInsets?.right ?: 0) > 0
-            NavigationBar.osNavigationUsesGestures.set(isUsingGesturesNavigation)
+//            NavigationBar.osNavigationUsesGestures.set(isUsingGesturesNavigation)
         }
     }
 

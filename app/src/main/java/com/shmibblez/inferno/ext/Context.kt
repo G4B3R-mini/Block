@@ -17,21 +17,20 @@ import android.view.accessibility.AccessibilityManager
 import androidx.annotation.StringRes
 //import mozilla.components.compose.base.theme.AcornWindowSize
 import mozilla.components.support.locale.LocaleManager
-import com.shmibblez.inferno.BrowserApplication
+import com.shmibblez.inferno.`0BrowserApplication`
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.components.Components
 //import com.shmibblez.inferno.components.metrics.MetricController
 import com.shmibblez.inferno.components.toolbar.ToolbarPosition
 import com.shmibblez.inferno.settings.advanced.getSelectedLocale
-import com.shmibblez.inferno.utils.isLargeScreenSize
 import java.lang.String.format
 import java.util.Locale
 
 /**
  * Get the BrowserApplication object from a context.
  */
-val Context.application: BrowserApplication
-    get() = applicationContext as BrowserApplication
+val Context.application: `0BrowserApplication`
+    get() = applicationContext as `0BrowserApplication`
 
 /**
  * Get the requireComponents of this application.
@@ -71,12 +70,12 @@ fun Context.getStringWithArgSafe(@StringRes resId: Int, formatArg: String): Stri
     return try {
         format(getString(resId), formatArg)
     } catch (e: IllegalArgumentException) {
-//        // fallback to <en> string
-//        logDebug(
-//            "L10n",
-//            "String: " + resources.getResourceEntryName(resId) +
-//                " not properly formatted in: " + LocaleManager.getSelectedLocale(this).language,
-//        )
+        // fallback to <en> string
+        logDebug(
+            "L10n",
+            "String: " + resources.getResourceEntryName(resId) +
+                " not properly formatted in: " + LocaleManager.getSelectedLocale(this).language,
+        )
         val config = resources.configuration
         config.setLocale(Locale("en"))
         val localizedContext: Context = this.createConfigurationContext(config)
@@ -138,16 +137,16 @@ inline fun Context.startExternalActivitySafe(intent: Intent, onActivityNotPresen
 fun Context.isSystemInDarkTheme(): Boolean =
     resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
 
-///**
-// * Returns the message to be shown when a tab is closed based on whether the tab was private or not.
-// * @param private true if the tab was private, false otherwise.
-// */
-//fun Context.tabClosedUndoMessage(private: Boolean): String =
-//    if (private) {
-//        getString(R.string.snackbar_private_tab_closed)
-//    } else {
-//        getString(R.string.snackbar_tab_closed)
-//    }
+/**
+ * Returns the message to be shown when a tab is closed based on whether the tab was private or not.
+ * @param private true if the tab was private, false otherwise.
+ */
+fun Context.tabClosedUndoMessage(private: Boolean): String =
+    if (private) {
+        getString(R.string.snackbar_private_tab_closed)
+    } else {
+        getString(R.string.snackbar_tab_closed)
+    }
 
 ///**
 // * Helper function used to determine whether the app's total *window* size is at least that of a tablet.
@@ -157,11 +156,6 @@ fun Context.isSystemInDarkTheme(): Boolean =
 // * @return true if the app has a large window size akin to a tablet.
 // */
 //fun Context.isLargeWindow(): Boolean = AcornWindowSize.isLargeWindow(this)
-
-///**
-// *  This will record an event in the Nimbus internal event store. Used for behavioral targeting.
-// */
-//fun Context.recordEventInNimbus(eventId: String) = components.nimbus.events.recordEvent(eventId)
 
 /**
  * Returns true if the toolbar is position at the bottom.

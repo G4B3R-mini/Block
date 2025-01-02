@@ -71,7 +71,7 @@ private val DEFAULT_SYNCED_TABS_COMMANDS_EXTRA_FLUSH_DELAY = 5.seconds
 @Suppress("LongParameterList")
 class BackgroundServices(
     private val context: Context,
-    private val push: Push,
+//    private val push: Push,
     crashReporter: CrashReporter,
     historyStorage: Lazy<PlacesHistoryStorage>,
     bookmarkStorage: Lazy<PlacesBookmarksStorage>,
@@ -218,11 +218,11 @@ class BackgroundServices(
 
         accountManager.register(AccountManagerReadyObserver(accountManagerAvailableQueue))
 
-        // Enable push if it's configured.
-        push.feature?.let { autoPushFeature ->
-            FxaPushSupportFeature(context, accountManager, autoPushFeature, crashReporter)
-                .initialize()
-        }
+//        // Enable push if it's configured.
+//        push.feature?.let { autoPushFeature ->
+//            FxaPushSupportFeature(context, accountManager, autoPushFeature, crashReporter)
+//                .initialize()
+//        }
 
         SendTabFeature(accountManager) { device, tabs ->
             notificationManager.showReceivedTabs(context, device, tabs)

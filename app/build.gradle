@@ -296,6 +296,8 @@ dependencies {
     implementation libs.androidx.compose.ui.text
     implementation libs.androidx.compose.ui.tooling
     implementation libs.androidx.paging.common.android
+    implementation libs.androidx.core.splashscreen
+    implementation libs.androidx.navigation.ui.ktx
 
     testImplementation libs.androidx.paging.common
 
@@ -333,6 +335,7 @@ dependencies {
     implementation libs.mozilla.browser.toolbar
 
     implementation libs.mozilla.compose.awesomebar
+    implementation libs.mozilla.compose.cfr
 
     implementation libs.mozilla.concept.awesomebar
     implementation libs.mozilla.concept.base
@@ -358,6 +361,7 @@ dependencies {
     implementation libs.mozilla.feature.intent
     implementation libs.mozilla.feature.logins
     implementation libs.mozilla.feature.media
+    implementation libs.mozilla.feature.privatemode
     implementation libs.mozilla.feature.prompts
     implementation libs.mozilla.feature.push
     implementation libs.mozilla.feature.pwa

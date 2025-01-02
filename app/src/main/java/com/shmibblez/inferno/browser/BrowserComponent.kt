@@ -70,8 +70,13 @@ import com.shmibblez.inferno.R
 import com.shmibblez.inferno.addons.WebExtensionPromptFeature
 import com.shmibblez.inferno.downloads.DownloadService
 import com.shmibblez.inferno.ext.components
+import com.shmibblez.inferno.ext.containsQueryParameters
 import com.shmibblez.inferno.ext.getPreferenceKey
+import com.shmibblez.inferno.ext.settings
 import com.shmibblez.inferno.findInPageBar.BrowserFindInPageBar
+import com.shmibblez.inferno.home.HomeFragment.Companion.AMAZON_SEARCH_ENGINE_NAME
+import com.shmibblez.inferno.home.HomeFragment.Companion.AMAZON_SPONSORED_TITLE
+import com.shmibblez.inferno.home.HomeFragment.Companion.EBAY_SPONSORED_TITLE
 import com.shmibblez.inferno.home.topsites.DefaultTopSitesView
 import com.shmibblez.inferno.pip.PictureInPictureIntegration
 import com.shmibblez.inferno.search.AwesomeBarWrapper
@@ -81,6 +86,7 @@ import com.shmibblez.inferno.tabs.LastTabFeature
 import com.shmibblez.inferno.tabs.TabsTrayFragment
 import com.shmibblez.inferno.toolbar.BrowserToolbar
 import com.shmibblez.inferno.toolbar.ToolbarBottomMenuSheet
+import com.shmibblez.inferno.utils.Settings.Companion.TOP_SITES_PROVIDER_MAX_THRESHOLD
 import kotlinx.coroutines.launch
 import mozilla.components.browser.engine.gecko.GeckoEngineView
 import mozilla.components.browser.state.action.BrowserAction
@@ -440,7 +446,7 @@ fun BrowserComponent(
                 feature = DownloadsFeature(
                     context,
                     store = context.components.core.store,
-                    useCases = context.components.useCases.downloadsUseCases,
+                    useCases = context.components.useCases.downloadUseCases,
                     fragmentManager = context.getActivity()?.supportFragmentManager,
                     downloadManager = FetchDownloadManager(
                         context.applicationContext,
@@ -721,17 +727,17 @@ fun BrowserComponent(
             )
 
 //            if (requireContext().settings().showTopSitesFeature) {
-            topSitesFeature.set(
-                feature = TopSitesFeature(
-                    view = DefaultTopSitesView(
-                        appStore = context.components.appStore,
-                        settings = context.components.settings,
-                    ), storage = context.components.core.topSitesStorage,
-                    config = {getTopSitesConfig(context)},
-                ),
-                owner = viewLifecycleOwner,
-                view = binding.root,
-            )
+//            topSitesFeature.set(
+//                feature = TopSitesFeature(
+//                    view = DefaultTopSitesView(
+//                        appStore = context.components.appStore,
+//                        settings = context.components.settings,
+//                    ), storage = context.components.core.topSitesStorage,
+//                    config = {getTopSitesConfig(context)},
+//                ),
+//                owner = viewLifecycleOwner,
+//                view = binding.root,
+//            )
 //            }
         }
         mozSetup()
@@ -884,7 +890,7 @@ internal fun getTopSitesConfig(context: Context): TopSitesConfig {
             showProviderTopSites = settings.showContileFeature,
             maxThreshold = TOP_SITES_PROVIDER_MAX_THRESHOLD,
             providerFilter = { topSite ->
-                when (store.state.search.selectedOrDefaultSearchEngine?.name) {
+                when (context.components.core.store.state.search.selectedOrDefaultSearchEngine?.name) {
                     AMAZON_SEARCH_ENGINE_NAME -> topSite.title != AMAZON_SPONSORED_TITLE
                     EBAY_SPONSORED_TITLE -> topSite.title != EBAY_SPONSORED_TITLE
                     else -> true

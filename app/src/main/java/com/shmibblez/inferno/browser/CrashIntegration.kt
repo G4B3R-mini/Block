@@ -17,7 +17,7 @@ import kotlinx.coroutines.launch
 import mozilla.components.lib.crash.Crash
 import mozilla.components.lib.crash.CrashReporter
 import mozilla.components.support.utils.ext.registerReceiverCompat
-import com.shmibblez.inferno.BrowserApplication.Companion.NON_FATAL_CRASH_BROADCAST
+import com.shmibblez.inferno.`0BrowserApplication`.Companion.NON_FATAL_CRASH_BROADCAST
 import com.shmibblez.inferno.ext.isCrashReportActive
 
 class CrashIntegration(

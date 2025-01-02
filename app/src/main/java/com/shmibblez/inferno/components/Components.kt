@@ -72,11 +72,11 @@ class Components(private val context: Context) {
             notificationManagerCompat,
         )
     }
-    private val crashReporter = CrashReporter(context, notificationsDelegate = notificationsDelegate)
+    val crashReporter = CrashReporter(context, notificationsDelegate = notificationsDelegate)
     val backgroundServices by lazyMonitored {
         BackgroundServices(
             context,
-            push = Push(context, crashReporter),
+//            push = Push(context, crashReporter),
             crashReporter = crashReporter,
             core.lazyHistoryStorage,
             core.lazyBookmarksStorage,
@@ -103,7 +103,6 @@ class Components(private val context: Context) {
         )
     }
 
-    @Suppress("Deprecation")
     val useCases by lazyMonitored {
         UseCases(
             context,
