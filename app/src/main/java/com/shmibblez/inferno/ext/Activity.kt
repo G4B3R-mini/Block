@@ -86,21 +86,21 @@ fun Activity.enterToImmersiveMode() {
         )
 }
 
-fun Activity.breadcrumb(
-    message: String,
-    data: Map<String, String> = emptyMap(),
-) {
-    components.analytics.crashReporter.recordCrashBreadcrumb(
-        Breadcrumb(
-            category = this::class.java.simpleName,
-            message = message,
-            data = data + mapOf(
-                "instance" to this.hashCode().toString(),
-            ),
-            level = Breadcrumb.Level.INFO,
-        ),
-    )
-}
+//fun Activity.breadcrumb(
+//    message: String,
+//    data: Map<String, String> = emptyMap(),
+//) {
+//    components.analytics.crashReporter.recordCrashBreadcrumb(
+//        Breadcrumb(
+//            category = this::class.java.simpleName,
+//            message = message,
+//            data = data + mapOf(
+//                "instance" to this.hashCode().toString(),
+//            ),
+//            level = Breadcrumb.Level.INFO,
+//        ),
+//    )
+//}
 
 /**
  * Opens Android's Manage Default Apps Settings if possible.

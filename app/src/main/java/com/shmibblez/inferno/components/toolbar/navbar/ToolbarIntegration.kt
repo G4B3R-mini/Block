@@ -22,8 +22,6 @@ import mozilla.components.feature.toolbar.ToolbarPresenter
 import mozilla.components.support.base.feature.LifecycleAwareFeature
 import mozilla.components.support.ktx.android.view.hideKeyboard
 import mozilla.components.ui.tabcounter.TabCounterMenu
-import mozilla.telemetry.glean.private.NoExtras
-import com.shmibblez.inferno.GleanMetrics.AddressToolbar
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.tabstrip.isTabStripEnabled
 import com.shmibblez.inferno.components.menu.MenuAccessPoint
@@ -213,7 +211,6 @@ class DefaultToolbarIntegration(
             BrowserToolbar.createShareBrowserAction(
                 context = context,
                 listener = {
-                    AddressToolbar.shareTapped.record((NoExtras()))
                     interactor.onShareActionClicked()
                 },
             ),

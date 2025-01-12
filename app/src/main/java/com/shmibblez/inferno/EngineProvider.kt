@@ -14,7 +14,7 @@ import mozilla.components.feature.webcompat.WebCompatFeature
 import mozilla.components.lib.crash.handler.CrashHandlerService
 import org.mozilla.geckoview.GeckoRuntime
 import org.mozilla.geckoview.GeckoRuntimeSettings
-import com.shmibblez.inferno.ext.isCrashReportActive
+//import com.shmibblez.inferno.ext.isCrashReportActive
 
 object EngineProvider {
 
@@ -24,10 +24,6 @@ object EngineProvider {
     fun getOrCreateRuntime(context: Context): GeckoRuntime {
         if (runtime == null) {
             val builder = GeckoRuntimeSettings.Builder()
-
-            if (isCrashReportActive) {
-                builder.crashHandler(CrashHandlerService::class.java)
-            }
 
             // About config it's no longer enabled by default
             builder.aboutConfigEnabled(true)

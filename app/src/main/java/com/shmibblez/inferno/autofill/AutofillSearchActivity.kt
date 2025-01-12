@@ -12,6 +12,10 @@ import mozilla.components.feature.autofill.AutofillConfiguration
 import mozilla.components.feature.autofill.ui.AbstractAutofillSearchActivity
 import com.shmibblez.inferno.ext.components
 
+/**
+ * Activity responsible for letting the user manually search and pick credentials for auto-filling a
+ * third-party app.
+ */
 @RequiresApi(Build.VERSION_CODES.O)
 class AutofillSearchActivity : AbstractAutofillSearchActivity() {
     override val configuration: AutofillConfiguration by lazy { components.autofillConfiguration }

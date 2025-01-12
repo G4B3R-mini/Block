@@ -92,26 +92,6 @@ fun Fragment.redirectToReAuth(
     }
 }
 
-fun Fragment.breadcrumb(
-    message: String,
-    data: Map<String, String> = emptyMap(),
-) {
-    val activityName = activity?.let { it::class.java.simpleName } ?: "null"
-
-    requireComponents.analytics.crashReporter.recordCrashBreadcrumb(
-        Breadcrumb(
-            category = this::class.java.simpleName,
-            message = message,
-            data = data + mapOf(
-                "instance" to hashCode().toString(),
-                "activityInstance" to activity?.hashCode().toString(),
-                "activityName" to activityName,
-            ),
-            level = Breadcrumb.Level.INFO,
-        ),
-    )
-}
-
 /**
  * Sets the [WindowManager.LayoutParams.FLAG_SECURE] flag for the current activity window.
  */

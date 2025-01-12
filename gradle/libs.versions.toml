@@ -53,7 +53,7 @@ jacoco = "0.8.12"
 junit = "4.13.2"
 navigationCompose = "2.8.5"
 okhttp = "4.12.0"
-okio = "3.9.0"
+#okio = "3.9.0"
 pagingCommonAndroid = "3.3.5"
 coreSplashscreen = "1.0.1"
 navigationUiKtx = "2.8.5"
@@ -63,8 +63,9 @@ navigationUiKtx = "2.8.5"
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 androidx-navigation-fragment = { module = "androidx.navigation:navigation-fragment", version.ref = "navigationCompose" }
+androidx-navigation-safe-args-gradle-plugin = { module = "androidx.navigation:navigation-safe-args-gradle-plugin", version.ref = "navigationCompose" }
 androidx-paging-common = { module = "androidx.paging:paging-common", version.ref = "pagingCommon" }
-androidx-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4" }
+#androidx-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
 androidx-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest" }
 androidx-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
@@ -120,7 +121,7 @@ hamcrest-library = { group = "org.hamcrest", name = "hamcrest-library", version.
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 mockwebserver = { group = "com.squareup.okhttp3", name = "mockwebserver", version.ref = "okhttp" }
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
-okio = { group = "com.squareup.okio", name = "okio", version.ref = "okio" }
+#okio = { group = "com.squareup.okio", name = "okio", version.ref = "okio" }
 
 # Android Components
 mozilla-browser-domains = { group = "org.mozilla.components", name = "browser-domains", version.ref = "android-components" }
@@ -138,6 +139,7 @@ mozilla-browser-thumbnails = { group = "org.mozilla.components", name = "browser
 mozilla-browser-toolbar = { group = "org.mozilla.components", name = "browser-toolbar", version.ref = "android-components" }
 
 mozilla-compose-awesomebar = { group = "org.mozilla.components", name = "compose-awesomebar", version.ref = "android-components" }
+mozilla-compose-base = { group = "org.mozilla.components", name = "compose-base", version.ref = "android-components" }
 mozilla-compose-cfr = { group = "org.mozilla.components", name = "compose-cfr", version.ref = "android-components" }
 
 mozilla-concept-awesomebar = { group = "org.mozilla.components", name = "concept-awesomebar", version.ref = "android-components" }

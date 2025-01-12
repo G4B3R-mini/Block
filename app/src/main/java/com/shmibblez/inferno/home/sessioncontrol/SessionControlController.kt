@@ -37,15 +37,7 @@ import mozilla.components.support.ktx.android.view.showKeyboard
 import mozilla.components.support.ktx.kotlin.isUrl
 import mozilla.components.support.ktx.kotlin.toNormalizedUrl
 import mozilla.components.ui.widgets.withCenterAlignedButtons
-//import mozilla.telemetry.glean.private.NoExtras
 import com.shmibblez.inferno.BrowserDirection
-//import com.shmibblez.inferno.GleanMetrics.Collections
-//import com.shmibblez.inferno.GleanMetrics.HomeBookmarks
-//import com.shmibblez.inferno.GleanMetrics.HomeScreen
-//import com.shmibblez.inferno.GleanMetrics.Pings
-//import com.shmibblez.inferno.GleanMetrics.Pocket
-//import com.shmibblez.inferno.GleanMetrics.RecentTabs
-//import com.shmibblez.inferno.GleanMetrics.TopSites
 import com.shmibblez.inferno.HomeActivity
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.browsingmode.BrowsingMode
@@ -54,7 +46,6 @@ import com.shmibblez.inferno.components.AppStore
 import com.shmibblez.inferno.components.TabCollectionStorage
 import com.shmibblez.inferno.components.appstate.AppAction
 import com.shmibblez.inferno.components.appstate.AppState
-//import com.shmibblez.inferno.components.metrics.MetricsUtils
 import com.shmibblez.inferno.components.toolbar.navbar.shouldAddNavigationBar
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.nav
@@ -208,7 +199,6 @@ class DefaultSessionControlController(
 ) : SessionControlController {
 
     override fun handleCollectionAddTabTapped(collection: TabCollection) {
-//        Collections.addTabButton.record(NoExtras())
         showCollectionCreationFragment(
             step = SaveCollectionStep.SelectTabs,
             selectedTabCollectionId = collection.id,
@@ -234,7 +224,6 @@ class DefaultSessionControlController(
             },
         )
 
-//        Collections.tabRestored.record(NoExtras())
     }
 
     override fun handleCollectionOpenTabsTapped(collection: TabCollection) {
@@ -248,14 +237,12 @@ class DefaultSessionControlController(
         )
 
         showTabTray()
-//        Collections.allTabsRestored.record(NoExtras())
     }
 
     override fun handleCollectionRemoveTab(
         collection: TabCollection,
         tab: ComponentTab,
     ) {
-//        Collections.tabRemoved.record(NoExtras())
 
         // collection tabs hold a reference to the initial collection that could have changed since
         val updatedCollection =
@@ -277,20 +264,16 @@ class DefaultSessionControlController(
             collection.title,
             collection.tabs.map { ShareData(url = it.url, title = it.title) },
         )
-//        Collections.shared.record(NoExtras())
     }
 
     override fun handleDeleteCollectionTapped(collection: TabCollection) {
         removeCollectionWithUndo(collection)
-//        Collections.removed.record(NoExtras())
     }
 
     override fun handleOpenInPrivateTabClicked(topSite: TopSite) {
-//        if (topSite is TopSite.Provided) {
-//            TopSites.openContileInPrivateTab.record(NoExtras())
-//        } else {
-//            TopSites.openInPrivateTab.record(NoExtras())
-//        }
+        if (topSite is TopSite.Provided) {
+        } else {
+        }
         with(activity) {
             browsingModeManager.mode = BrowsingMode.Private
             openToBrowserAndLoad(
@@ -377,12 +360,8 @@ class DefaultSessionControlController(
     }
 
     override fun handleRemoveTopSiteClicked(topSite: TopSite) {
-//        TopSites.remove.record(NoExtras())
-//        when (topSite.url) {
-//            SupportUtils.POCKET_TRENDING_URL -> Pocket.pocketTopSiteRemoved.record(NoExtras())
-//            SupportUtils.GOOGLE_URL -> TopSites.googleTopSiteRemoved.record(NoExtras())
-//            SupportUtils.BAIDU_URL -> TopSites.baiduTopSiteRemoved.record(NoExtras())
-//        }
+        when (topSite.url) {
+        }
 
         viewLifecycleScope.launch(Dispatchers.IO) {
             with(activity.components.useCases.topSitesUseCase) {
@@ -398,38 +377,26 @@ class DefaultSessionControlController(
             step = SaveCollectionStep.RenameCollection,
             selectedTabCollectionId = collection.id,
         )
-//        Collections.renameButton.record(NoExtras())
     }
 
     override fun handleSelectTopSite(topSite: TopSite, position: Int) {
-//        when (topSite) {
-//            is TopSite.Default -> TopSites.openDefault.record(NoExtras())
-//            is TopSite.Frecent -> TopSites.openFrecency.record(NoExtras())
-//            is TopSite.Pinned -> TopSites.openPinned.record(NoExtras())
-//            is TopSite.Provided -> TopSites.openContileTopSite.record(NoExtras()).also {
-//                submitTopSitesImpressionPing(topSite, position)
-//            }
-//        }
+        when (topSite) {
+            is TopSite.Default -> {}
+            is TopSite.Frecent ->{}
+            is TopSite.Pinned -> {}
+            is TopSite.Provided -> {
+                submitTopSitesImpressionPing(topSite, position)
+            }
+        }
 
-//        when (topSite.url) {
-//            SupportUtils.GOOGLE_URL -> TopSites.openGoogleSearchAttribution.record(NoExtras())
-//            SupportUtils.BAIDU_URL -> TopSites.openBaiduSearchAttribution.record(NoExtras())
-//            SupportUtils.POCKET_TRENDING_URL -> Pocket.pocketTopSiteClicked.record(NoExtras())
-//        }
+        when (topSite.url) {
+        }
 
-//        val availableEngines: List<SearchEngine> = getAvailableSearchEngines()
-//        val searchAccessPoint = MetricsUtils.Source.TOPSITE
+        val availableEngines: List<SearchEngine> = getAvailableSearchEngines()
 
-//        availableEngines.firstOrNull { engine ->
-//            engine.resultUrls.firstOrNull { it.contains(topSite.url) } != null
-//        }?.let { searchEngine ->
-//            MetricsUtils.recordSearchMetrics(
-//                searchEngine,
-//                searchEngine == store.state.search.selectedOrDefaultSearchEngine,
-//                searchAccessPoint,
-//                activity.components.nimbus.events,
-//            )
-//        }
+        availableEngines.firstOrNull { engine ->
+            engine.resultUrls.firstOrNull { it.contains(topSite.url) } != null
+        }
 
         if (settings.enableHomepageAsNewTab) {
             activity.openToBrowserAndLoad(
@@ -447,7 +414,6 @@ class DefaultSessionControlController(
             }
 
             if (existingTabForUrl == null) {
-//                TopSites.openInNewTab.record(NoExtras())
 
                 addTabUseCase.invoke(
                     url = appendSearchAttributionToUrlIfNeeded(topSite.url),
@@ -464,21 +430,12 @@ class DefaultSessionControlController(
 
     @VisibleForTesting
     internal fun submitTopSitesImpressionPing(topSite: TopSite.Provided, position: Int) {
-//        TopSites.contileClick.record(
-//            TopSites.ContileClickExtra(
-//                position = position + 1,
-//                source = "newtab",
-//            ),
-//        )
-
 //        topSite.id?.let { TopSites.contileTileId.set(it) }
 //        topSite.title?.let { TopSites.contileAdvertiser.set(it.lowercase()) }
 //        TopSites.contileReportingUrl.set(topSite.clickUrl)
-//        Pings.topsitesImpression.submit()
     }
 
     override fun handleTopSiteSettingsClicked() {
-//        TopSites.contileSettings.record(NoExtras())
         navController.nav(
             R.id.homeFragment,
             HomeFragmentDirections.actionGlobalHomeSettingsFragment(),
@@ -486,7 +443,6 @@ class DefaultSessionControlController(
     }
 
     override fun handleSponsorPrivacyClicked() {
-//        TopSites.contileSponsorsAndPrivacy.record(NoExtras())
         activity.openToBrowserAndLoad(
             searchTermOrURL = SupportUtils.getGenericSumoURLForTopic(SupportUtils.SumoTopic.SPONSOR_PRIVACY),
             newTab = true,
@@ -494,9 +450,8 @@ class DefaultSessionControlController(
         )
     }
 
-//    override fun handleTopSiteLongClicked(topSite: TopSite) {
-//        TopSites.longPress.record(TopSites.LongPressExtra(topSite.type))
-//    }
+    override fun handleTopSiteLongClicked(topSite: TopSite) {
+    }
 
     @VisibleForTesting
     internal fun getAvailableSearchEngines() =
@@ -523,7 +478,6 @@ class DefaultSessionControlController(
     override fun handleCustomizeHomeTapped() {
         val directions = HomeFragmentDirections.actionGlobalHomeSettingsFragment()
         navController.nav(navController.currentDestination?.id, directions)
-//        HomeScreen.customizeHomeClicked.record(NoExtras())
     }
 
     override fun handleShowWallpapersOnboardingDialog(state: WallpaperState): Boolean {
@@ -547,7 +501,6 @@ class DefaultSessionControlController(
             }
         }
     }
-
     override fun handleToggleCollectionExpanded(collection: TabCollection, expand: Boolean) {
         appStore.dispatch(AppAction.CollectionExpanded(collection, expand))
     }
@@ -589,7 +542,6 @@ class DefaultSessionControlController(
 
     override fun handleRemoveCollectionsPlaceholder() {
         settings.showCollectionsPlaceholderOnHome = false
-//        Collections.placeholderCancel.record()
         appStore.dispatch(AppAction.RemoveCollectionsPlaceholder)
     }
 
@@ -610,13 +562,14 @@ class DefaultSessionControlController(
         messageController.onMessageDismissed(message)
     }
 
-//    override fun handleReportSessionMetrics(state: AppState) {
+    override fun handleReportSessionMetrics(state: AppState) {
+        // TODO: need gleam metrics for keeping track of recent tabs
 //        if (state.recentTabs.isEmpty()) {
 //            RecentTabs.sectionVisible.set(false)
 //        } else {
 //            RecentTabs.sectionVisible.set(true)
 //        }
-//
-////        HomeBookmarks.bookmarksCount.set(state.bookmarks.size.toLong())
-//    }
+
+//        HomeBookmarks.bookmarksCount.set(state.bookmarks.size.toLong())
+    }
 }

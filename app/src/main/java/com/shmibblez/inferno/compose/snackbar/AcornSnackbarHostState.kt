@@ -4,8 +4,8 @@
 
 package com.shmibblez.inferno.compose.snackbar
 
-import androidx.compose.material.SnackbarHostState
-import androidx.compose.material.SnackbarResult
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import com.shmibblez.inferno.compose.snackbar.SnackbarState.Type
 
 /**

@@ -10,7 +10,7 @@ import android.app.Application
 import android.content.Context
 import android.os.Bundle
 import mozilla.components.browser.state.selector.privateTabs
-import com.shmibblez.inferno.FenixApplication
+import com.shmibblez.inferno.BrowserApplication
 import com.shmibblez.inferno.ext.components
 
 /**
@@ -88,7 +88,7 @@ class VisibilityLifecycleCallback(private val activityManager: ActivityManager?)
          *          false otherwise.
          */
         internal fun finishAndRemoveTaskIfInBackground(context: Context): Boolean {
-            return (context.applicationContext as FenixApplication)
+            return (context.applicationContext as BrowserApplication)
                 .visibilityLifecycleCallback?.finishAndRemoveTaskIfInBackground() ?: false
         }
     }

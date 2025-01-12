@@ -279,10 +279,10 @@
             android:defaultValue="@null"
             app:argType="string"
             app:nullable="true" />
-        <argument
-            android:name="search_access_point"
-            android:defaultValue="NONE"
-            app:argType="com.shmibblez.inferno.components.metrics.MetricsUtils$Source" />
+<!--        <argument-->
+<!--            android:name="search_access_point"-->
+<!--            android:defaultValue="NONE"-->
+<!--            app:argType="com.shmibblez.inferno.components.metrics.MetricsUtils$Source" />-->
         <argument
             android:name="search_engine"
             android:defaultValue="@null"
@@ -601,13 +601,13 @@
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
             app:popExitAnim="@anim/slide_out_right" />
-        <action
-            android:id="@+id/action_settingsFragment_to_nimbusExperimentsFragment"
-            app:destination="@id/nimbus_experiment_graph"
-            app:enterAnim="@anim/slide_in_right"
-            app:exitAnim="@anim/slide_out_left"
-            app:popEnterAnim="@anim/slide_in_left"
-            app:popExitAnim="@anim/slide_out_right" />
+<!--        <action-->
+<!--            android:id="@+id/action_settingsFragment_to_nimbusExperimentsFragment"-->
+<!--            app:destination="@id/nimbus_experiment_graph"-->
+<!--            app:enterAnim="@anim/slide_in_right"-->
+<!--            app:exitAnim="@anim/slide_out_left"-->
+<!--            app:popEnterAnim="@anim/slide_in_left"-->
+<!--            app:popExitAnim="@anim/slide_out_right" />-->
         <action
             android:id="@+id/action_settingsFragment_to_customizationFragment"
             app:destination="@id/customizationFragment"
@@ -926,10 +926,10 @@
             android:name="selectedTabCollectionId"
             android:defaultValue="-1L"
             app:argType="long" />
-        <argument
-            android:name="saveCollectionStep"
-            app:argType="com.shmibblez.inferno.collections.SaveCollectionStep"
-            app:nullable="false" />
+<!--        <argument-->
+<!--            android:name="saveCollectionStep"-->
+<!--            app:argType="com.shmibblez.inferno.collections.SaveCollectionStep"-->
+<!--            app:nullable="false" />-->
     </dialog>
 
     <dialog
@@ -1301,38 +1301,38 @@
         </fragment>
     </navigation>
 
-    <navigation
-        android:id="@+id/nimbus_experiment_graph"
-        app:startDestination="@id/nimbusExperimentsFragment">
-        <fragment
-            android:id="@+id/nimbusExperimentsFragment"
-            android:name="com.shmibblez.inferno.nimbus.NimbusExperimentsFragment"
-            android:label="@string/preferences_nimbus_experiments"
-            tools:layout="@layout/mozac_service_nimbus_experiments">
-            <action
-                android:id="@+id/action_nimbusExperimentsFragment_to_nimbusBranchesFragment"
-                app:destination="@+id/nimbusBranchesFragment" />
-        </fragment>
-        <fragment
-            android:id="@+id/nimbusBranchesFragment"
-            android:name="com.shmibblez.inferno.nimbus.NimbusBranchesFragment"
-            tools:layout="@layout/mozac_service_nimbus_experiment_details">
-            <argument
-                android:name="experimentId"
-                app:argType="string" />
-            <argument
-                android:name="experimentName"
-                app:argType="string" />
-            <action
-                android:id="@+id/action_nimbusBranchesFragment_to_dataChoicesFragment"
-                app:destination="@id/dataChoicesFragment"
-                app:enterAnim="@anim/slide_in_right"
-                app:exitAnim="@anim/slide_out_left"
-                app:popEnterAnim="@anim/slide_in_left"
-                app:popExitAnim="@anim/slide_out_right"
-                app:popUpTo="@id/settingsFragment" />
-        </fragment>
-    </navigation>
+<!--    <navigation-->
+<!--        android:id="@+id/nimbus_experiment_graph"-->
+<!--        app:startDestination="@id/nimbusExperimentsFragment">-->
+<!--        <fragment-->
+<!--            android:id="@+id/nimbusExperimentsFragment"-->
+<!--            android:name="com.shmibblez.inferno.nimbus.NimbusExperimentsFragment"-->
+<!--            android:label="@string/preferences_nimbus_experiments"-->
+<!--            tools:layout="@layout/mozac_service_nimbus_experiments">-->
+<!--            <action-->
+<!--                android:id="@+id/action_nimbusExperimentsFragment_to_nimbusBranchesFragment"-->
+<!--                app:destination="@+id/nimbusBranchesFragment" />-->
+<!--        </fragment>-->
+<!--        <fragment-->
+<!--            android:id="@+id/nimbusBranchesFragment"-->
+<!--            android:name="com.shmibblez.inferno.nimbus.NimbusBranchesFragment"-->
+<!--            tools:layout="@layout/mozac_service_nimbus_experiment_details">-->
+<!--            <argument-->
+<!--                android:name="experimentId"-->
+<!--                app:argType="string" />-->
+<!--            <argument-->
+<!--                android:name="experimentName"-->
+<!--                app:argType="string" />-->
+<!--            <action-->
+<!--                android:id="@+id/action_nimbusBranchesFragment_to_dataChoicesFragment"-->
+<!--                app:destination="@id/dataChoicesFragment"-->
+<!--                app:enterAnim="@anim/slide_in_right"-->
+<!--                app:exitAnim="@anim/slide_out_left"-->
+<!--                app:popEnterAnim="@anim/slide_in_left"-->
+<!--                app:popExitAnim="@anim/slide_out_right"-->
+<!--                app:popUpTo="@id/settingsFragment" />-->
+<!--        </fragment>-->
+<!--    </navigation>-->
 
     <navigation
         android:id="@+id/autofill_graph"

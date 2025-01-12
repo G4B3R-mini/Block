@@ -2,7 +2,7 @@
 <!-- This Source Code Form is subject to the terms of the Mozilla Public
    - License, v. 2.0. If a copy of the MPL was not distributed with this
    - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
     <!-- Name of the application -->
     <string name="app_name" translatable="false">Firefox Fenix</string>
     <string name="firefox" translatable="false">Firefox</string>
@@ -75,8 +75,6 @@
     <string name="preferences_sync_debug_temporary_auth_error_button_title">Simulate temporary account auth error</string>
     <!-- Button title for simulating an FxA permanent auth error inside the Sync Debug menu -->
     <string name="preferences_sync_debug_permanent_auth_error_button_title">Simulate permanent account auth error</string>
-    <!-- Label for enabling the Tabs Tray to Compose changes -->
-    <string name="preferences_debug_settings_tabs_tray_to_compose" translatable="false">Enable Tabs Tray to Compose rewrite</string>
     <!-- Label for enabling the Compose Top Sites -->
     <string name="preferences_debug_settings_compose_top_sites" translatable="false">Enable Compose Top Sites</string>
     <!-- Label for enabling the Compose Homepage -->
@@ -85,6 +83,8 @@
     <string name="preferences_debug_settings_compose_bookmarks" translatable="false">Enable Compose Bookmarks</string>
     <!-- Label for enabling Homepage as a New Tab -->
     <string name="preferences_debug_settings_homepage_as_new_tab" translatable="false">Enable Homepage as a New Tab</string>
+    <!-- Label for enabling MARS API integration -->
+    <string name="preferences_debug_settings_mars_api" translatable="false">Enable MARS API integration</string>
     <!-- Label for enabling Merino content recommendations -->
     <string name="preferences_debug_settings_merino_content_recommendations" translatable="false">Enable Merino Content Recommendations</string>
     <!-- Label for enabling the menu redesign -->
@@ -172,6 +172,10 @@
     <string name="debug_drawer_cfr_tools_homepage_nav_toolbar_title">Homepage Navigation Toolbar</string>
     <!-- The homepage nav toolbar CFR description in CFR Tools -->
     <string name="debug_drawer_cfr_tools_homepage_nav_toolbar_description">Displayed when the user is on the homepage and sees the new navigation bar for the first time. Note that this CFR must be displayed in order for the Homepage Sync CFR to be shown.</string>
+    <!-- The homepage search bar CFR title in CFR Tools -->
+    <string name="debug_drawer_cfr_tools_homepage_searchbar_title">Homepage Searchbar</string>
+    <!-- The homepage searchbar CFR description in CFR Tools -->
+    <string name="debug_drawer_cfr_tools_homepage_searchbar_description">Displayed when a new user sees the homepage for the first time.</string>
     <!-- The homepage sync CFR title in CFR Tools -->
     <string name="debug_drawer_cfr_tools_homepage_sync_title">Homepage Sync</string>
     <!-- The homepage sync CFR description in CFR Tools -->

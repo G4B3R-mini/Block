@@ -8,6 +8,7 @@ plugins {
     alias libs.plugins.compose.compiler
     alias libs.plugins.dependency.analysis
     alias libs.plugins.kotlin.android
+    id 'androidx.navigation.safeargs.kotlin'
 }
 
 apply from: "$project.rootDir/automation/gradle/versionCode.gradle"
@@ -26,9 +27,55 @@ android {
         targetSdkVersion Config.targetSdkVersion
         versionCode 1
         versionName Config.generateDebugVersionName()
+        vectorDrawables.useSupportLibrary = true
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunnerArguments clearPackageData: 'true'
+
+        resValue "bool", "IS_DEBUG", "false"
+        buildConfigField "boolean", "USE_RELEASE_VERSIONING", "false"
+        buildConfigField "String", "VCS_HASH", "\"\"" // see override in release builds for why it's blank.
+        // This should be the "public" base URL of AMO.
+        buildConfigField "String", "AMO_BASE_URL", "\"https://addons.mozilla.org\""
+        buildConfigField "String", "AMO_COLLECTION_NAME", "\"Extensions-for-Android\""
+        buildConfigField "String", "AMO_COLLECTION_USER", "\"mozilla\""
+        // These add-ons should be excluded for Mozilla Online builds.
+        buildConfigField "String[]", "MOZILLA_ONLINE_ADDON_EXCLUSIONS",
+                "{" +
+                        "\"uBlock0@raymondhill.net\"," +
+                        "\"firefox@ghostery.com\"," +
+                        "\"jid1-MnnxcxisBPnSXQ@jetpack\"," +
+                        "\"adguardadblocker@adguard.com\"," +
+                        "\"foxyproxy@eric.h.jung\"," +
+                        "\"{73a6fe31-595d-460b-a920-fcc0f8843232}\"," +
+                        "\"jid1-BoFifL9Vbdl2zQ@jetpack\"," +
+                        "\"woop-NoopscooPsnSXQ@jetpack\"," +
+                        "\"adnauseam@rednoise.org\"" +
+                        "}"
+        // This should be the base URL used to call the AMO API.
+        buildConfigField "String", "AMO_SERVER_URL", "\"https://services.addons.mozilla.org\""
+
+        def deepLinkSchemeValue = "fenix-dev"
+        buildConfigField "String", "DEEP_LINK_SCHEME", "\"$deepLinkSchemeValue\""
+
+        // This allows overriding the target activity for MozillaOnline builds, which happens
+        // as part of the defaultConfig below.
+        def targetActivity = "HomeActivity"
+
+        // Build flag for "Mozilla Online" variants. See `Config.isMozillaOnline`.
+        if (project.hasProperty("mozillaOnline") || gradle.hasProperty("localProperties.mozillaOnline")) {
+            buildConfigField "boolean", "MOZILLA_ONLINE", "true"
+            targetActivity = "MozillaOnlineHomeActivity"
+        } else {
+            buildConfigField "boolean", "MOZILLA_ONLINE", "false"
+        }
+
+        manifestPlaceholders = [
+                "targetActivity": targetActivity,
+                "deepLinkScheme": deepLinkSchemeValue
+        ]
+
+        buildConfigField "String[]", "SUPPORTED_LOCALE_ARRAY", getSupportedLocales()
     }
 
     def releaseTemplate = {
@@ -46,12 +93,16 @@ android {
     }
 
     buildFeatures {
-        buildConfig true
         compose true
+        buildConfig true
         viewBinding true
     }
 
     buildTypes {
+        release {
+            minifyEnabled true
+            applicationIdSuffix ".release"
+        }
         debug {
             minifyEnabled false
             applicationIdSuffix ".debug"
@@ -304,7 +355,7 @@ dependencies {
     // Android Studio Preview support
     implementation libs.androidx.ui.tooling.preview
     // UI Tests
-    androidTestImplementation libs.androidx.ui.test.junit4
+//    androidTestImplementation libs.androidx.ui.test.junit4
     debugImplementation libs.androidx.ui.test.manifest
     // Optional - Integration with activities
     implementation libs.androidx.activity.compose
@@ -335,6 +386,7 @@ dependencies {
     implementation libs.mozilla.browser.toolbar
 
     implementation libs.mozilla.compose.awesomebar
+    implementation libs.mozilla.compose.base
     implementation libs.mozilla.compose.cfr
 
     implementation libs.mozilla.concept.awesomebar
@@ -423,7 +475,7 @@ dependencies {
     androidTestImplementation libs.junit
     androidTestImplementation libs.mockwebserver
     androidTestImplementation libs.okhttp
-    androidTestImplementation libs.okio
+//    androidTestImplementation libs.okio
 
     androidTestUtil libs.androidx.test.orchestrator
 }
@@ -475,4 +527,23 @@ if (gradle.hasProperty('localProperties.autoPublish.android-components.dir')) {
 if (gradle.hasProperty('localProperties.autoPublish.application-services.dir')) {
     ext.appServicesSrcDir = gradle."localProperties.autoPublish.application-services.dir"
     apply from: "../${appServicesSrcDir}/build-scripts/substitute-local-appservices.gradle"
+}
+
+def getSupportedLocales() {
+    // This isn't running as a task, instead the array is build when the gradle file is parsed.
+    // https://github.com/mozilla-mobile/fenix/issues/14175
+    def foundLocales = new StringBuilder()
+    foundLocales.append("new String[]{")
+
+    fileTree("src/main/res").visit { FileVisitDetails details ->
+        if (details.file.path.endsWith("${File.separator}strings.xml")) {
+            def languageCode = details.file.parent.tokenize(File.separator).last().replaceAll('values-', '').replaceAll('-r', '-')
+            languageCode = (languageCode == "values") ? "en-US" : languageCode
+            foundLocales.append("\"").append(languageCode).append("\"").append(",")
+        }
+    }
+
+    foundLocales.append("}")
+    def foundLocalesString = foundLocales.toString().replaceAll(',}', '}')
+    return foundLocalesString
 }

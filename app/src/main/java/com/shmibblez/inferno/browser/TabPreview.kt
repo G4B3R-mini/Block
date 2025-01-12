@@ -22,7 +22,7 @@ import mozilla.components.browser.menu.view.MenuButton
 import mozilla.components.browser.state.selector.getNormalOrPrivateTabs
 import mozilla.components.browser.state.selector.selectedTab
 import mozilla.components.browser.thumbnails.loader.ThumbnailLoader
-import mozilla.components.compose.base.theme.AcornWindowSize
+//import mozilla.components.compose.base.theme.AcornWindowSize
 import mozilla.components.concept.base.images.ImageLoadRequest
 import mozilla.components.ui.tabcounter.TabCounterMenu
 import com.shmibblez.inferno.R
@@ -66,7 +66,7 @@ class TabPreview @JvmOverloads constructor(
     private fun initializeView() {
         val isNavBarVisible = context.shouldAddNavigationBar()
         val isNavBarEnabled = context.settings().navigationToolbarEnabled
-        val isLargeWindow = (AcornWindowSize.getWindowSize(context).isNotSmall())
+        val isLargeWindow = false // TODO: (AcornWindowSize.getWindowSize(context).isNotSmall())
         val isToolbarAtTop = context.settings().toolbarPosition == ToolbarPosition.TOP
 
         binding.fakeToolbar.isVisible = !isNavBarEnabled
@@ -172,7 +172,7 @@ class TabPreview @JvmOverloads constructor(
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         if (context.settings().navigationToolbarEnabled) {
-            val isLargeWindow = (AcornWindowSize.getWindowSize(context).isNotSmall())
+            val isLargeWindow = false // TODO: (AcornWindowSize.getWindowSize(context).isNotSmall())
 
             initNavBarLandscapeChanges(isLargeWindow)
 

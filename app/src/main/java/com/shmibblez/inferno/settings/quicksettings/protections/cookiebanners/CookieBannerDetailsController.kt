@@ -6,7 +6,7 @@ package com.shmibblez.inferno.settings.quicksettings.protections.cookiebanners
 
 import android.content.Context
 import androidx.annotation.VisibleForTesting
-import androidx.compose.material.SnackbarDuration
+import androidx.compose.material3.SnackbarDuration
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController

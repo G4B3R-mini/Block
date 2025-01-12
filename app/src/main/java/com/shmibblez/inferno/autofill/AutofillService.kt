@@ -10,6 +10,9 @@ import mozilla.components.feature.autofill.AbstractAutofillService
 import mozilla.components.feature.autofill.AutofillConfiguration
 import com.shmibblez.inferno.ext.components
 
+/**
+ * Service responsible for implementing Android's Autofill framework.
+ */
 @RequiresApi(Build.VERSION_CODES.O)
 class AutofillService : AbstractAutofillService() {
     override val configuration: AutofillConfiguration by lazy { components.autofillConfiguration }

@@ -10,6 +10,9 @@ import mozilla.components.feature.autofill.AutofillConfiguration
 import mozilla.components.feature.autofill.ui.AbstractAutofillConfirmActivity
 import com.shmibblez.inferno.ext.components
 
+/**
+ * Activity responsible for asking the user to confirm before auto-filling a third-party app.
+ */
 @RequiresApi(Build.VERSION_CODES.O)
 class AutofillConfirmActivity : AbstractAutofillConfirmActivity() {
     override val configuration: AutofillConfiguration by lazy { components.autofillConfiguration }

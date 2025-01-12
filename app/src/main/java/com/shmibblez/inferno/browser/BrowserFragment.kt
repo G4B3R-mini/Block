@@ -4,6 +4,7 @@
 
 package com.shmibblez.inferno.browser
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.StrictMode
 import android.view.View
@@ -194,9 +195,8 @@ class BrowserFragment : BaseBrowserFragment(), UserInteractionHandler {
             visible = { translationsAvailable },
             weight = { TRANSLATIONS_WEIGHT },
             listener = {
-                // TODO: fragment transaction
-//                browserToolbarInteractor.com.shmibblez.inferno()
-            },
+                browserToolbarInteractor.onTranslationsButtonClicked()
+                       },
         )
         browserToolbarView.view.addPageAction(translationsAction)
 
@@ -236,6 +236,7 @@ class BrowserFragment : BaseBrowserFragment(), UserInteractionHandler {
         )
     }
 
+    @SuppressLint("VisibleForTests")
     private fun initReloadAction(context: Context) {
         if (!context.settings().navigationToolbarEnabled) {
             return
@@ -345,10 +346,9 @@ class BrowserFragment : BaseBrowserFragment(), UserInteractionHandler {
                     requireComponents.appStore.dispatch(
                         ShoppingAction.ShoppingSheetStateUpdated(expanded = true),
                     )
-                    // TODO: fragment transaction
-//                    findNavController().navigate(
-//                        BrowserFragmentDirections.actionBrowserFragmentToReviewQualityCheckDialogFragment(),
-//                    )
+                    findNavController().navigate(
+                        BrowserFragmentDirections.actionBrowserFragmentToReviewQualityCheckDialogFragment(),
+                    )
                 },
             )
 
@@ -703,12 +703,12 @@ class BrowserFragment : BaseBrowserFragment(), UserInteractionHandler {
         refreshAction = null
     }
 
+    @SuppressLint("VisibleForTests")
     private fun updateHistoryMetadata() {
         getCurrentTab()?.let { tab ->
-            // TODO: fragment transaction
-//            (tab as? TabSessionState)?.historyMetadata?.let {
-//                requireComponents.core.historyMetadataService.updateMetadata(it, tab)
-//            }
+            (tab as? TabSessionState)?.historyMetadata?.let {
+                requireComponents.core.historyMetadataService.updateMetadata(it, tab)
+            }
         }
     }
 
@@ -745,34 +745,32 @@ class BrowserFragment : BaseBrowserFragment(), UserInteractionHandler {
                         val isTrackingProtectionEnabled =
                             tab.trackingProtection.enabled && !hasTrackingProtectionException
                         val directions = if (requireContext().settings().enableUnifiedTrustPanel) {
-                            // TODO: fragment transaction
-//                            BrowserFragmentDirections.actionBrowserFragmentToTrustPanelFragment(
-//                                sessionId = tab.id,
-//                                url = tab.content.url,
-//                                title = tab.content.title,
-//                                isSecured = tab.content.securityInfo.secure,
-//                                sitePermissions = sitePermissions,
-//                                certificateName = tab.content.securityInfo.issuer,
-//                                permissionHighlights = tab.content.permissionHighlights,
-//                                isTrackingProtectionEnabled = isTrackingProtectionEnabled,
-//                                cookieBannerUIMode = cookieBannerUIMode,
-//                            )
+                            BrowserFragmentDirections.actionBrowserFragmentToTrustPanelFragment(
+                                sessionId = tab.id,
+                                url = tab.content.url,
+                                title = tab.content.title,
+                                isSecured = tab.content.securityInfo.secure,
+                                sitePermissions = sitePermissions,
+                                certificateName = tab.content.securityInfo.issuer,
+                                permissionHighlights = tab.content.permissionHighlights,
+                                isTrackingProtectionEnabled = isTrackingProtectionEnabled,
+                                cookieBannerUIMode = cookieBannerUIMode,
+                            )
                         } else {
-                            // TODO: fragment transaction
-//                            BrowserFragmentDirections.actionBrowserFragmentToQuickSettingsSheetDialogFragment(
-//                                sessionId = tab.id,
-//                                url = tab.content.url,
-//                                title = tab.content.title,
-//                                isSecured = tab.content.securityInfo.secure,
-//                                sitePermissions = sitePermissions,
-//                                gravity = getAppropriateLayoutGravity(),
-//                                certificateName = tab.content.securityInfo.issuer,
-//                                permissionHighlights = tab.content.permissionHighlights,
-//                                isTrackingProtectionEnabled = isTrackingProtectionEnabled,
-//                                cookieBannerUIMode = cookieBannerUIMode,
-//                            )
+                            BrowserFragmentDirections.actionBrowserFragmentToQuickSettingsSheetDialogFragment(
+                                sessionId = tab.id,
+                                url = tab.content.url,
+                                title = tab.content.title,
+                                isSecured = tab.content.securityInfo.secure,
+                                sitePermissions = sitePermissions,
+                                gravity = getAppropriateLayoutGravity(),
+                                certificateName = tab.content.securityInfo.issuer,
+                                permissionHighlights = tab.content.permissionHighlights,
+                                isTrackingProtectionEnabled = isTrackingProtectionEnabled,
+                                cookieBannerUIMode = cookieBannerUIMode,
+                            )
                         }
-//                        nav(R.id.browserFragment, directions)
+                        nav(R.id.browserFragment, directions)
                     }
                 }
             }
@@ -815,13 +813,12 @@ class BrowserFragment : BaseBrowserFragment(), UserInteractionHandler {
                         action = Action(
                             label = getString(R.string.create_collection_view),
                             onClick = {
-                                // TODO: fragment transaction
-//                                findNavController().navigate(
-//                                    BrowserFragmentDirections.actionGlobalHome(
-//                                        focusOnAddressBar = false,
-//                                        scrollToCollection = true,
-//                                    ),
-//                                )
+                                findNavController().navigate(
+                                    BrowserFragmentDirections.actionGlobalHome(
+                                        focusOnAddressBar = false,
+                                        scrollToCollection = true,
+                                    ),
+                                )
                             },
                         ),
                     ),

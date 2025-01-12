@@ -16,7 +16,7 @@ import android.view.ViewGroup
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatDialogFragment
-import androidx.compose.material.SnackbarDuration
+import androidx.compose.material3.SnackbarDuration
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResultListener

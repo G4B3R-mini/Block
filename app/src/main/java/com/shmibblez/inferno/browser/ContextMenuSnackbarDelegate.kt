@@ -6,7 +6,7 @@ package com.shmibblez.inferno.browser
 
 import android.view.View
 import androidx.annotation.StringRes
-import androidx.compose.material.SnackbarDuration
+import androidx.compose.material3.SnackbarDuration
 import mozilla.components.ui.widgets.SnackbarDelegate
 import com.shmibblez.inferno.compose.core.Action
 import com.shmibblez.inferno.compose.snackbar.Snackbar

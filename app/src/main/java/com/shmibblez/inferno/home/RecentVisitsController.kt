@@ -111,7 +111,7 @@ class DefaultRecentVisitsController(
         scope.launch {
             storage.deleteHistoryMetadata(groupTitle)
         }
-        RecentSearches.groupDeleted.record(NoExtras())
+//        RecentSearches.groupDeleted.record(NoExtras())
     }
 
     /**

@@ -38,7 +38,7 @@ interface BrowserToolbarInteractor {
      * Opens the translation bottom sheet. Called when the user interacts with the translation
      * action.
      */
-    fun com.shmibblez.inferno()
+    fun onTranslationsButtonClicked()
 
     /**
      * Opens the share fragment.  Called when the user clicks the "Share" action in the toolbar.
@@ -123,7 +123,7 @@ class DefaultBrowserToolbarInteractor(
         browserToolbarController.handleEraseButtonClick()
     }
 
-    override fun com.shmibblez.inferno() {
+    override fun onTranslationsButtonClicked() {
         browserToolbarController.handleTranslationsButtonClick()
     }
 

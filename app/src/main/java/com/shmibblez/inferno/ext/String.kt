@@ -6,10 +6,19 @@ package com.shmibblez.inferno.ext
 
 import android.text.Editable
 import androidx.compose.runtime.Composable
-import mozilla.components.compose.base.utils.inComposePreview
+//import mozilla.components.compose.base.utils.inComposePreview
 import mozilla.components.support.ktx.kotlin.MAX_URI_LENGTH
 import mozilla.components.support.ktx.kotlin.toShortUrl
 import com.shmibblez.inferno.components.components
+
+/**
+ * Replaces the keys with the values with the map provided.
+ */
+fun String.replace(pairs: Map<String, String>): String {
+    var result = this
+    pairs.forEach { (l, r) -> result = result.replace(l, r) }
+    return result
+}
 
 /**
  * Shortens URLs to be more user friendly, by applying [String.toShortUrl]
@@ -22,12 +31,12 @@ fun String.toShortUrl(): String {
     // is done in the toolbar and awesomebar:
     // https://github.com/mozilla-mobile/fenix/issues/1824
     // https://github.com/mozilla-mobile/android-components/issues/6985
-    return if (inComposePreview) {
-        this.take(MAX_URI_LENGTH)
-    } else {
-        this.toShortUrl(components.publicSuffixList)
+//    return if (inComposePreview) {
+//        this.take(MAX_URI_LENGTH)
+//    } else {
+        return this.toShortUrl(components.publicSuffixList)
             .take(MAX_URI_LENGTH)
-    }
+//    }
 }
 
 /**

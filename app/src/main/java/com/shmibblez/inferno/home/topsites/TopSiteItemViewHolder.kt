@@ -172,12 +172,12 @@ class TopSiteItemViewHolder(
 
     @VisibleForTesting
     internal fun submitTopSitesImpressionPing(topSite: TopSite.Provided, position: Int) {
-        TopSites.contileImpression.record(
-            TopSites.ContileImpressionExtra(
-                position = position + 1,
-                source = "newtab",
-            ),
-        )
+//        TopSites.contileImpression.record(
+//            TopSites.ContileImpressionExtra(
+//                position = position + 1,
+//                source = "newtab",
+//            ),
+//        )
 
         topSite.id?.let { TopSites.contileTileId.set(it) }
         topSite.title?.let { TopSites.contileAdvertiser.set(it.lowercase()) }

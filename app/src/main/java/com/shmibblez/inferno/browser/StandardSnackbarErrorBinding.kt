@@ -6,7 +6,7 @@ package com.shmibblez.inferno.browser
 
 import android.content.Context
 import android.view.ViewGroup
-import androidx.compose.material.SnackbarDuration
+import androidx.compose.material3.SnackbarDuration
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map

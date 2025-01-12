@@ -28,7 +28,7 @@ class BookmarksViewHolder(
 ) : ComposeViewHolder(composeView, viewLifecycleOwner) {
 
     init {
-        HomeBookmarks.shown.record(NoExtras())
+//        HomeBookmarks.shown.record(NoExtras())
     }
 
     companion object {

@@ -93,7 +93,7 @@ class HomeMenuView(
                         // A wrapper is responsible for that, but we are using the button
                         // directly, hence recording the event directly.
                         // Should investigate further: https://bugzilla.mozilla.org/show_bug.cgi?id=1868207
-                        Events.toolbarMenuVisible.record(NoExtras())
+//                        Events.toolbarMenuVisible.record(NoExtras())
                     }
                 }
             },
@@ -115,7 +115,7 @@ class HomeMenuView(
     internal fun onItemTapped(item: HomeMenu.Item) {
         when (item) {
             HomeMenu.Item.Settings -> {
-                HomeMenuMetrics.settingsItemClicked.record(NoExtras())
+//                HomeMenuMetrics.settingsItemClicked.record(NoExtras())
 
                 navController.nav(
                     R.id.homeFragment,
@@ -123,7 +123,7 @@ class HomeMenuView(
                 )
             }
             HomeMenu.Item.CustomizeHome -> {
-                HomeScreen.customizeHomeClicked.record(NoExtras())
+//                HomeScreen.customizeHomeClicked.record(NoExtras())
 
                 navController.nav(
                     R.id.homeFragment,
@@ -184,7 +184,7 @@ class HomeMenuView(
                 )
             }
             HomeMenu.Item.Help -> {
-                HomeMenuMetrics.helpTapped.record(NoExtras())
+//                HomeMenuMetrics.helpTapped.record(NoExtras())
                 homeActivity.openToBrowserAndLoad(
                     searchTermOrURL = SupportUtils.getSumoURLForTopic(
                         context = context,
@@ -196,7 +196,7 @@ class HomeMenuView(
             }
             HomeMenu.Item.WhatsNew -> {
                 WhatsNew.userViewedWhatsNew(context)
-                Events.whatsNewTapped.record(Events.WhatsNewTappedExtra(source = "HOME"))
+//                Events.whatsNewTapped.record(Events.WhatsNewTappedExtra(source = "HOME"))
 
                 homeActivity.openToBrowserAndLoad(
                     searchTermOrURL = SupportUtils.WHATS_NEW_URL,

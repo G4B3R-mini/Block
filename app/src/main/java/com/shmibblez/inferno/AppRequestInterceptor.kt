@@ -12,7 +12,7 @@ import mozilla.components.browser.errorpages.ErrorPages
 import mozilla.components.browser.errorpages.ErrorType
 import mozilla.components.concept.engine.EngineSession
 import mozilla.components.concept.engine.request.RequestInterceptor
-import com.shmibblez.inferno.GleanMetrics.ErrorPage
+//import com.shmibblez.inferno.GleanMetrics.ErrorPage
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.isOnline
 import java.lang.ref.WeakReference
@@ -60,13 +60,6 @@ class AppRequestInterceptor(
     ): RequestInterceptor.ErrorResponse {
         val improvedErrorType = improveErrorType(errorType)
         val riskLevel = getRiskLevel(improvedErrorType)
-
-        ErrorPage.visitedError.record(ErrorPage.VisitedErrorExtra(improvedErrorType.name))
-
-        // Record additional telemetry for content URI not found
-        if (uri?.startsWith("content://") == true && improvedErrorType == ErrorType.ERROR_FILE_NOT_FOUND) {
-            ErrorPage.visitedError.record(ErrorPage.VisitedErrorExtra(errorType = "ERROR_CONTENT_URI_NOT_FOUND"))
-        }
 
         val errorPageUri = ErrorPages.createUrlEncodedErrorPage(
             context = context,

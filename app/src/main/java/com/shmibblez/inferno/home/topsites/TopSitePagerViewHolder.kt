@@ -10,7 +10,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import mozilla.components.feature.top.sites.TopSite
-import com.shmibblez.inferno.GleanMetrics.TopSites
+//import com.shmibblez.inferno.GleanMetrics.TopSites
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.components.AppStore
 import com.shmibblez.inferno.databinding.ComponentTopSitesPagerBinding
@@ -77,7 +77,7 @@ class TopSitePagerViewHolder(
     }
 
     companion object {
-        const val LAYOUT_ID = R.layout.component_top_sites_pager
+        var LAYOUT_ID = R.layout.component_top_sites_pager
         const val TOP_SITES_MAX_PAGE_SIZE = 2
         const val TOP_SITES_PER_PAGE = 8
     }

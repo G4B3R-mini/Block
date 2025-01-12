@@ -9,7 +9,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.shmibblez.inferno.FenixApplication
+import com.shmibblez.inferno.BrowserApplication
 import com.shmibblez.inferno.ext.components
 
 /**
@@ -25,7 +25,7 @@ class ProfilerViewModel(application: Application) : AndroidViewModel(application
      */
     fun getProfilerState(): LiveData<Boolean> {
         // We check here since this can be polled from anywhere in Fenix.
-        getApplication<FenixApplication>().components.core.engine.profiler?.let {
+        getApplication<BrowserApplication>().components.core.engine.profiler?.let {
             check(it.isProfilerActive() == isProfilerActive.value) {
                 "The Profiler state from Gecko is out of sync with the LiveData profiler state."
             }

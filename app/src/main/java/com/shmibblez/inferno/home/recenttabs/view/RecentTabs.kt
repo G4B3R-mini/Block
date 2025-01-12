@@ -24,8 +24,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Card
-import androidx.compose.material.Text
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CardElevation
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -49,8 +51,8 @@ import androidx.compose.ui.unit.sp
 import mozilla.components.browser.icons.compose.Loader
 import mozilla.components.browser.icons.compose.Placeholder
 import mozilla.components.browser.icons.compose.WithIcon
-import mozilla.components.compose.base.annotation.LightDarkPreview
-import mozilla.components.compose.base.utils.inComposePreview
+//import mozilla.components.compose.base.annotation.LightDarkPreview
+//import mozilla.components.compose.base.utils.inComposePreview
 import mozilla.components.support.ktx.kotlin.trimmed
 import mozilla.components.ui.colors.PhotonColors
 import com.shmibblez.inferno.components.components
@@ -62,6 +64,9 @@ import com.shmibblez.inferno.compose.text.Text
 import com.shmibblez.inferno.home.fake.FakeHomepagePreview
 import com.shmibblez.inferno.home.recenttabs.RecentTab
 import com.shmibblez.inferno.theme.FirefoxTheme
+import com.shmibblez.inferno.theme.layer2
+import com.shmibblez.inferno.theme.textPrimary
+import com.shmibblez.inferno.theme.textSecondary
 
 private const val THUMBNAIL_SIZE = 108
 
@@ -137,8 +142,7 @@ private fun RecentTabItem(
                 onLongClick = { isMenuExpanded = true },
             ),
         shape = RoundedCornerShape(8.dp),
-        backgroundColor = backgroundColor,
-        elevation = 6.dp,
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
@@ -279,25 +283,25 @@ private fun RecentTabIcon(
                 alignment = alignment,
             )
         }
-        !inComposePreview -> {
-            components.core.icons.Loader(url) {
-                Placeholder {
-                    PlaceHolderTabIcon(modifier)
-                }
-
-                WithIcon { icon ->
-                    Image(
-                        painter = icon.painter,
-                        contentDescription = null,
-                        modifier = modifier,
-                        contentScale = contentScale,
-                    )
-                }
-            }
-        }
-        else -> {
-            PlaceHolderTabIcon(modifier)
-        }
+//        !inComposePreview -> {
+//            components.core.icons.Loader(url) {
+//                Placeholder {
+//                    PlaceHolderTabIcon(modifier)
+//                }
+//
+//                WithIcon { icon ->
+//                    Image(
+//                        painter = icon.painter,
+//                        contentDescription = null,
+//                        modifier = modifier,
+//                        contentScale = contentScale,
+//                    )
+//                }
+//            }
+//        }
+//        else -> {
+//            PlaceHolderTabIcon(modifier)
+//        }
     }
 }
 
@@ -318,7 +322,7 @@ private fun PlaceHolderTabIcon(modifier: Modifier) {
     )
 }
 
-@LightDarkPreview
+//@LightDarkPreview
 @Composable
 private fun RecentTabsPreview() {
     FirefoxTheme {

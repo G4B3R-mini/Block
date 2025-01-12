@@ -20,7 +20,7 @@ import mozilla.components.support.utils.EXTRA_ACTIVITY_REFERRER_PACKAGE
 import mozilla.components.support.utils.INTENT_TYPE_PDF
 import mozilla.components.support.utils.ext.getApplicationInfoCompat
 import mozilla.components.support.utils.toSafeIntent
-import com.shmibblez.inferno.GleanMetrics.Events
+//import com.shmibblez.inferno.GleanMetrics.Events
 import com.shmibblez.inferno.HomeActivity.Companion.PRIVATE_BROWSING_MODE
 import com.shmibblez.inferno.components.IntentProcessorType
 import com.shmibblez.inferno.components.getType
@@ -72,17 +72,11 @@ class IntentReceiverActivity : Activity() {
             private = intent.getBooleanExtra(PRIVATE_BROWSING_MODE, false)
         }
         intent.putExtra(PRIVATE_BROWSING_MODE, private)
-        if (private) {
-            Events.openedLink.record(Events.OpenedLinkExtra("PRIVATE"))
-        } else {
-            Events.openedLink.record(Events.OpenedLinkExtra("NORMAL"))
-        }
 
         addReferrerInformation(intent)
 
         if (intent.type == INTENT_TYPE_PDF) {
             val referrerIsFenix = this.isIntentInternal()
-            Events.openedExtPdf.record(Events.OpenedExtPdfExtra(referrerIsFenix))
             if (!referrerIsFenix) {
                 intent.toSafeIntent().data?.let(::persistUriReadPermission)
             }
@@ -127,7 +121,6 @@ class IntentReceiverActivity : Activity() {
                 components.intentProcessors.privateIntentProcessor,
             )
         } else {
-            Events.openedLink.record(Events.OpenedLinkExtra("NORMAL"))
             listOf(
                 components.intentProcessors.customTabIntentProcessor,
                 components.intentProcessors.intentProcessor,

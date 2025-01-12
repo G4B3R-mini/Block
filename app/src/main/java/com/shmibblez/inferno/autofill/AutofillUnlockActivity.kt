@@ -10,6 +10,9 @@ import mozilla.components.feature.autofill.AutofillConfiguration
 import mozilla.components.feature.autofill.ui.AbstractAutofillUnlockActivity
 import com.shmibblez.inferno.ext.components
 
+/**
+ * Activity responsible for unlocking the autofill service by asking the user to verify.
+ */
 @RequiresApi(Build.VERSION_CODES.O)
 class AutofillUnlockActivity : AbstractAutofillUnlockActivity() {
     override val configuration: AutofillConfiguration by lazy { components.autofillConfiguration }

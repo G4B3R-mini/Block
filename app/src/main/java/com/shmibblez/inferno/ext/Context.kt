@@ -17,20 +17,21 @@ import android.view.accessibility.AccessibilityManager
 import androidx.annotation.StringRes
 //import mozilla.components.compose.base.theme.AcornWindowSize
 import mozilla.components.support.locale.LocaleManager
-import com.shmibblez.inferno.`0BrowserApplication`
+import com.shmibblez.inferno.BrowserApplication
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.components.Components
 //import com.shmibblez.inferno.components.metrics.MetricController
 import com.shmibblez.inferno.components.toolbar.ToolbarPosition
 import com.shmibblez.inferno.settings.advanced.getSelectedLocale
+import com.shmibblez.inferno.utils.isLargeScreenSize
 import java.lang.String.format
 import java.util.Locale
 
 /**
  * Get the BrowserApplication object from a context.
  */
-val Context.application: `0BrowserApplication`
-    get() = applicationContext as `0BrowserApplication`
+val Context.application: BrowserApplication
+    get() = applicationContext as BrowserApplication
 
 /**
  * Get the requireComponents of this application.
@@ -148,14 +149,14 @@ fun Context.tabClosedUndoMessage(private: Boolean): String =
         getString(R.string.snackbar_tab_closed)
     }
 
-///**
-// * Helper function used to determine whether the app's total *window* size is at least that of a tablet.
-// * This relies on the window size check from [AcornWindowSize]. To determine whether the device's
-// * *physical* size is at least the size of a tablet, use [Context.isLargeScreenSize] instead.
-// *
-// * @return true if the app has a large window size akin to a tablet.
-// */
-//fun Context.isLargeWindow(): Boolean = AcornWindowSize.isLargeWindow(this)
+/**
+ * Helper function used to determine whether the app's total *window* size is at least that of a tablet.
+ * This relies on the window size check from [AcornWindowSize]. To determine whether the device's
+ * *physical* size is at least the size of a tablet, use [Context.isLargeScreenSize] instead.
+ *
+ * @return true if the app has a large window size akin to a tablet.
+ */
+fun Context.isLargeWindow(): Boolean = isLargeScreenSize()// AcornWindowSize.isLargeWindow(this)
 
 /**
  * Returns true if the toolbar is position at the bottom.

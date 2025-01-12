@@ -38,9 +38,9 @@ abstract class FenixDialogFragment : AppCompatDialogFragment() {
     abstract val layoutId: Int
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        context?.components?.analytics?.crashReporter?.recordCrashBreadcrumb(
-            Breadcrumb("FenixDialogFragment onCreateDialog Gravity $gravity"),
-        )
+//        context?.components?.analytics?.crashReporter?.recordCrashBreadcrumb(
+//            Breadcrumb("FenixDialogFragment onCreateDialog Gravity $gravity"),
+//        )
         return if (gravity == Gravity.BOTTOM) {
             BottomSheetDialog(requireContext(), this.theme).apply {
                 setOnShowListener {

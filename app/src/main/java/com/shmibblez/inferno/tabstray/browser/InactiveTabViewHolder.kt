@@ -5,7 +5,7 @@
 package com.shmibblez.inferno.tabstray.browser
 
 import android.view.View
-import androidx.compose.material.SnackbarDuration
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf

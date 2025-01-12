@@ -119,7 +119,7 @@ class DefaultShareController(
     }
 
     override fun handleShareToApp(app: AppShareOption) {
-        Events.shareToApp.record(getShareToAppSafeExtra(app.packageName))
+//        Events.shareToApp.record(getShareToAppSafeExtra(app.packageName))
         if (app.packageName == ACTION_COPY_LINK_TO_CLIPBOARD) {
             copyClipboard()
             dismiss(ShareController.Result.SUCCESS)
@@ -162,7 +162,7 @@ class DefaultShareController(
     }
 
     override fun handlePrint(tabId: String?) {
-        Events.shareMenuAction.record(Events.ShareMenuActionExtra("print"))
+//        Events.shareMenuAction.record(Events.ShareMenuActionExtra("print"))
         handleShareClosed()
         printUseCase.invoke(tabId)
     }
@@ -173,7 +173,7 @@ class DefaultShareController(
     }
 
     override fun handleShareToDevice(device: Device) {
-        SyncAccount.sendTab.record(NoExtras())
+//        SyncAccount.sendTab.record(NoExtras())
         shareToDevicesWithRetry(listOf(device.id)) {
             sendTabUseCases.sendToDeviceAsync(device.id, shareData.toTabData())
         }
@@ -186,7 +186,7 @@ class DefaultShareController(
     }
 
     override fun handleSignIn() {
-        SyncAccount.signInToSendTab.record(NoExtras())
+//        SyncAccount.signInToSendTab.record(NoExtras())
         val directions = ShareFragmentDirections.actionGlobalTurnOnSync(
             entrypoint = fxaEntrypoint as FenixFxAEntryPoint,
         )

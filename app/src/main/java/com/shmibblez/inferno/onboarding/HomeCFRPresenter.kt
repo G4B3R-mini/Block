@@ -6,7 +6,7 @@ package com.shmibblez.inferno.onboarding
 
 import android.content.Context
 import android.view.View
-import androidx.compose.material.Text
+import androidx.compose.material3.Text
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.semantics
@@ -70,11 +70,11 @@ class HomeCFRPresenter(
             onDismiss = {
                 when (it) {
                     true -> {
-                        Onboarding.syncCfrExplicitDismissal.record(NoExtras())
+//                        Onboarding.syncCfrExplicitDismissal.record(NoExtras())
                         // Turn off the synced tab CFR after the CFR is shown.
                         context.settings().showSyncCFR = false
                     }
-                    false -> Onboarding.syncCfrImplicitDismissal.record(NoExtras())
+                    false -> {} // Onboarding.syncCfrImplicitDismissal.record(NoExtras())
                 }
             },
             text = {

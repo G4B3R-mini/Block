@@ -14,6 +14,8 @@
 //import com.shmibblez.inferno.R
 //import com.shmibblez.inferno.ext.settings
 //import com.shmibblez.inferno.perf.lazyMonitored
+//import mozilla.components.concept.push.PushService
+//
 ////import com.shmibblez.inferno.push.FirebasePushService
 //
 ///**
@@ -25,7 +27,7 @@
 //        pushConfig?.let { config ->
 //            AutoPushFeature(
 //                context = context,
-//                service = pushService,
+//                service = PushService, //pushService,
 //                config = config,
 //                crashReporter = crashReporter,
 //            )

@@ -147,35 +147,36 @@ class SaveToPDFMiddleware(
         mainScope.launch {
             tab?.engineState?.engineSession?.checkForPdfViewer(
                 onResult = { isPdf ->
-                    if (isPrint) {
-                        Events.printTapped.record(
-                            Events.PrintTappedExtra(
-                                source = telemetrySource(isPdf),
-                            ),
-                        )
-                        context.recordEventInNimbus("print_tapped")
-                    } else {
-                        Events.saveToPdfTapped.record(
-                            Events.SaveToPdfTappedExtra(
-                                source = telemetrySource(isPdf),
-                            ),
-                        )
-                    }
+//                    if (isPrint) {
+//                        Events.printTapped.record(
+//                            Events.PrintTappedExtra(
+//                                source = telemetrySource(isPdf),
+//                            ),
+//                        )
+                    // TODO: does this do anything
+//                        context.recordEventInNimbus("print_tapped")
+//                    } else {
+//                        Events.saveToPdfTapped.record(
+//                            Events.SaveToPdfTappedExtra(
+//                                source = telemetrySource(isPdf),
+//                            ),
+//                        )
+//                    }
                 },
                 onException = {
-                    if (isPrint) {
-                        Events.printTapped.record(
-                            Events.PrintTappedExtra(
-                                source = telemetrySource(null),
-                            ),
-                        )
-                    } else {
-                        Events.saveToPdfTapped.record(
-                            Events.SaveToPdfTappedExtra(
-                                source = telemetrySource(null),
-                            ),
-                        )
-                    }
+//                    if (isPrint) {
+//                        Events.printTapped.record(
+//                            Events.PrintTappedExtra(
+//                                source = telemetrySource(null),
+//                            ),
+//                        )
+//                    } else {
+//                        Events.saveToPdfTapped.record(
+//                            Events.SaveToPdfTappedExtra(
+//                                source = telemetrySource(null),
+//                            ),
+//                        )
+//                    }
                 },
             )
         }
@@ -191,34 +192,34 @@ class SaveToPDFMiddleware(
         mainScope.launch {
             tab?.engineState?.engineSession?.checkForPdfViewer(
                 onResult = { isPdf ->
-                    if (isPrint) {
-                        Events.printCompleted.record(
-                            Events.PrintCompletedExtra(
-                                source = telemetrySource(isPdf),
-                            ),
-                        )
-                    } else {
-                        Events.saveToPdfCompleted.record(
-                            Events.SaveToPdfCompletedExtra(
-                                source = telemetrySource(isPdf),
-                            ),
-                        )
-                    }
+//                    if (isPrint) {
+//                        Events.printCompleted.record(
+//                            Events.PrintCompletedExtra(
+//                                source = telemetrySource(isPdf),
+//                            ),
+//                        )
+//                    } else {
+//                        Events.saveToPdfCompleted.record(
+//                            Events.SaveToPdfCompletedExtra(
+//                                source = telemetrySource(isPdf),
+//                            ),
+//                        )
+//                    }
                 },
                 onException = {
-                    if (isPrint) {
-                        Events.printCompleted.record(
-                            Events.PrintCompletedExtra(
-                                source = telemetrySource(null),
-                            ),
-                        )
-                    } else {
-                        Events.saveToPdfCompleted.record(
-                            Events.SaveToPdfCompletedExtra(
-                                source = telemetrySource(null),
-                            ),
-                        )
-                    }
+//                    if (isPrint) {
+//                        Events.printCompleted.record(
+//                            Events.PrintCompletedExtra(
+//                                source = telemetrySource(null),
+//                            ),
+//                        )
+//                    } else {
+//                        Events.saveToPdfCompleted.record(
+//                            Events.SaveToPdfCompletedExtra(
+//                                source = telemetrySource(null),
+//                            ),
+//                        )
+//                    }
                 },
             )
         }
@@ -236,38 +237,38 @@ class SaveToPDFMiddleware(
         mainScope.launch {
             tab?.engineState?.engineSession?.checkForPdfViewer(
                 onResult = { isPdf ->
-                    if (isPrint) {
-                        Events.printFailure.record(
-                            Events.PrintFailureExtra(
-                                source = telemetrySource(isPdf),
-                                reason = telFailureReason,
-                            ),
-                        )
-                    } else {
-                        Events.saveToPdfFailure.record(
-                            Events.SaveToPdfFailureExtra(
-                                source = telemetrySource(isPdf),
-                                reason = telFailureReason,
-                            ),
-                        )
-                    }
+//                    if (isPrint) {
+//                        Events.printFailure.record(
+//                            Events.PrintFailureExtra(
+//                                source = telemetrySource(isPdf),
+//                                reason = telFailureReason,
+//                            ),
+//                        )
+//                    } else {
+//                        Events.saveToPdfFailure.record(
+//                            Events.SaveToPdfFailureExtra(
+//                                source = telemetrySource(isPdf),
+//                                reason = telFailureReason,
+//                            ),
+//                        )
+//                    }
                 },
                 onException = {
-                    if (isPrint) {
-                        Events.printFailure.record(
-                            Events.PrintFailureExtra(
-                                source = telemetrySource(null),
-                                reason = telFailureReason,
-                            ),
-                        )
-                    } else {
-                        Events.saveToPdfFailure.record(
-                            Events.SaveToPdfFailureExtra(
-                                source = telemetrySource(null),
-                                reason = telFailureReason,
-                            ),
-                        )
-                    }
+//                    if (isPrint) {
+//                        Events.printFailure.record(
+//                            Events.PrintFailureExtra(
+//                                source = telemetrySource(null),
+//                                reason = telFailureReason,
+//                            ),
+//                        )
+//                    } else {
+//                        Events.saveToPdfFailure.record(
+//                            Events.SaveToPdfFailureExtra(
+//                                source = telemetrySource(null),
+//                                reason = telFailureReason,
+//                            ),
+//                        )
+//                    }
                 },
             )
         }

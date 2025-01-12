@@ -80,10 +80,10 @@ import mozilla.components.browser.state.state.content.DownloadState
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.browser.thumbnails.BrowserThumbnails
 import mozilla.components.browser.toolbar.BrowserToolbar
-//import mozilla.components.compose.base.Divider
-//import mozilla.components.compose.cfr.CFRPopup
-//import mozilla.components.compose.cfr.CFRPopupLayout
-//import mozilla.components.compose.cfr.CFRPopupProperties
+import mozilla.components.compose.base.Divider
+import mozilla.components.compose.cfr.CFRPopup
+import mozilla.components.compose.cfr.CFRPopupLayout
+import mozilla.components.compose.cfr.CFRPopupProperties
 import mozilla.components.concept.base.crash.Breadcrumb
 import mozilla.components.concept.engine.permission.SitePermissions
 import mozilla.components.concept.engine.prompt.ShareData
@@ -200,7 +200,6 @@ import com.shmibblez.inferno.downloads.dialog.FirstPartyDownloadDialog
 import com.shmibblez.inferno.downloads.dialog.StartDownloadDialog
 import com.shmibblez.inferno.downloads.dialog.ThirdPartyDownloadDialog
 import com.shmibblez.inferno.ext.accessibilityManager
-import com.shmibblez.inferno.ext.breadcrumb
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.getPreferenceKey
 import com.shmibblez.inferno.ext.hideToolbar
@@ -387,15 +386,6 @@ abstract class BaseBrowserFragment :
 
         customTabSessionId = requireArguments().getString(EXTRA_SESSION_ID)
 
-        // Diagnostic breadcrumb for "Display already aquired" crash:
-        // https://github.com/mozilla-mobile/android-components/issues/7960
-        breadcrumb(
-            message = "onCreateView()",
-            data = mapOf(
-                "customTabSessionId" to customTabSessionId.toString(),
-            ),
-        )
-
         _binding = FragmentBrowserBinding.inflate(inflater, container, false)
 
         val activity = activity as HomeActivity
@@ -563,21 +553,19 @@ abstract class BaseBrowserFragment :
                 FirefoxTheme {
                     TabStrip(
                         onAddTabClick = {
-                            // TODO: fragment transaction
-//                            findNavController().navigate(
-//                                NavGraphDirections.actionGlobalHome(
-//                                    focusOnAddressBar = true,
-//                                ),
-//                            )
+                            findNavController().navigate(
+                                NavGraphDirections.actionGlobalHome(
+                                    focusOnAddressBar = true,
+                                ),
+                            )
                         },
                         onLastTabClose = { isPrivate ->
                             requireComponents.appStore.dispatch(
                                 AppAction.TabStripAction.UpdateLastTabClosed(isPrivate),
                             )
-                            // TODO: fragment transaction
-//                            findNavController().navigate(
-//                                BrowserFragmentDirections.actionGlobalHome(),
-//                            )
+                            findNavController().navigate(
+                                BrowserFragmentDirections.actionGlobalHome(),
+                            )
                         },
                         onSelectedTabClick = {},
                         onCloseTabClick = { isPrivate ->
@@ -585,10 +573,9 @@ abstract class BaseBrowserFragment :
                         },
                         onPrivateModeToggleClick = { mode ->
                             activity.browsingModeManager.mode = mode
-                            // TODO: fragment transaction
-//                            findNavController().navigate(
-//                                BrowserFragmentDirections.actionGlobalHome(),
-//                            )
+                            findNavController().navigate(
+                                BrowserFragmentDirections.actionGlobalHome(),
+                            )
                         },
                         onTabCounterClick = {
 //                            onTabCounterClicked(activity.browsingModeManager.mode)
@@ -948,13 +935,12 @@ abstract class BaseBrowserFragment :
                         onDismiss: () -> Unit,
                         onSuccess: () -> Unit,
                     ) {
-                        // TODO: fragment transaction
-//                        val directions = NavGraphDirections.actionGlobalShareFragment(
-//                            data = arrayOf(shareData),
-//                            showPage = true,
-//                            sessionId = getCurrentTab()?.id,
-//                        )
-//                        findNavController().navigate(directions)
+                        val directions = NavGraphDirections.actionGlobalShareFragment(
+                            data = arrayOf(shareData),
+                            showPage = true,
+                            sessionId = getCurrentTab()?.id,
+                        )
+                        findNavController().navigate(directions)
                     }
                 },
                 onNeedToRequestPermissions = { permissions ->
@@ -965,10 +951,9 @@ abstract class BaseBrowserFragment :
                         get() = binding.loginSelectBar
                     override val onManageLogins = {
                         browserAnimator.captureEngineViewAndDrawStatically {
-                            // TODO: fragment transaction
-//                            val directions =
-//                                NavGraphDirections.actionGlobalSavedLoginsAuthFragment()
-//                            findNavController().navigate(directions)
+                            val directions =
+                                NavGraphDirections.actionGlobalSavedLoginsAuthFragment()
+                            findNavController().navigate(directions)
                         }
                     }
                 },
@@ -1004,10 +989,9 @@ abstract class BaseBrowserFragment :
                     override val creditCardPickerView
                         get() = binding.creditCardSelectBar
                     override val onManageCreditCards = {
-                        // TODO: fragment transaction
-//                        val directions =
-//                            NavGraphDirections.actionGlobalAutofillSettingFragment()
-//                        findNavController().navigate(directions)
+                        val directions =
+                            NavGraphDirections.actionGlobalAutofillSettingFragment()
+                        findNavController().navigate(directions)
                     }
                     override val onSelectCreditCard = {
                         showBiometricPrompt(context)
@@ -1017,9 +1001,8 @@ abstract class BaseBrowserFragment :
                     override val addressPickerView
                         get() = binding.addressSelectBar
                     override val onManageAddresses = {
-                        // TODO: fragment transaction
-//                        val directions = NavGraphDirections.actionGlobalAutofillSettingFragment()
-//                        findNavController().navigate(directions)
+                        val directions = NavGraphDirections.actionGlobalAutofillSettingFragment()
+                        findNavController().navigate(directions)
                     }
                 },
                 androidPhotoPicker = AndroidPhotoPicker(
@@ -1515,13 +1498,12 @@ abstract class BaseBrowserFragment :
                                                 it.id
                                             )
                                         )
-                                        // TODO: fragment transaction
-//                                        findNavController().nav(
-//                                            R.id.browserFragment,
-//                                            BrowserFragmentDirections.actionGlobalMicrosurveyDialog(
-//                                                it.id
-//                                            ),
-//                                        )
+                                        findNavController().nav(
+                                            R.id.browserFragment,
+                                            BrowserFragmentDirections.actionGlobalMicrosurveyDialog(
+                                                it.id
+                                            ),
+                                        )
                                     },
                                     onCloseButtonClicked = {
                                         context.components.appStore.dispatch(
@@ -1591,7 +1573,7 @@ abstract class BaseBrowserFragment :
                     ThemeManager.resolveAttribute(R.attr.textPrimary, context),
                 ),
             )
-            recordClickEvent = { NavigationBar.browserMenuTapped.record(NoExtras()) }
+            recordClickEvent = { }
         }
         menuButton.setHighlightStatus()
         _menuButtonView = menuButton
@@ -1610,12 +1592,10 @@ abstract class BaseBrowserFragment :
                 popupAlignment = CFRPopup.PopupAlignment.BODY_TO_ANCHOR_START_WITH_OFFSET,
             ),
             onCFRShown = {
-                NavigationBar.navigationButtonsCfrShown.record(NoExtras())
                 context.settings().shouldShowNavigationButtonsCFR = false
                 context.settings().lastCfrShownTimeInMillis = System.currentTimeMillis()
             },
             onDismiss = {
-                NavigationBar.navigationButtonsCfrDismissed.record(NoExtras())
             },
             text = {
                 FirefoxTheme {
@@ -1670,13 +1650,11 @@ abstract class BaseBrowserFragment :
                         }
                         lastTimeNavigationButtonsClicked.longValue = currentTime
                     }
-                    NavigationBar.browserBackTapped.record(NoExtras())
                     browserToolbarInteractor.onBrowserToolbarMenuItemTapped(
                         ToolbarMenu.Item.Back(viewHistory = false),
                     )
                 },
                 onBackButtonLongPress = {
-                    NavigationBar.browserBackLongTapped.record(NoExtras())
                     browserToolbarInteractor.onBrowserToolbarMenuItemTapped(
                         ToolbarMenu.Item.Back(viewHistory = true),
                     )
@@ -1691,13 +1669,11 @@ abstract class BaseBrowserFragment :
                         }
                         lastTimeNavigationButtonsClicked.longValue = currentTime
                     }
-                    NavigationBar.browserForwardTapped.record(NoExtras())
                     browserToolbarInteractor.onBrowserToolbarMenuItemTapped(
                         ToolbarMenu.Item.Forward(viewHistory = false),
                     )
                 },
                 onForwardButtonLongPress = {
-                    NavigationBar.browserForwardLongTapped.record(NoExtras())
                     browserToolbarInteractor.onBrowserToolbarMenuItemTapped(
                         ToolbarMenu.Item.Forward(viewHistory = true),
                     )
@@ -1709,14 +1685,11 @@ abstract class BaseBrowserFragment :
                     browserToolbarInteractor.onNewTabButtonLongClicked()
                 },
                 onTabsButtonClick = {
-                    NavigationBar.browserTabTrayTapped.record(NoExtras())
                     onTabCounterClicked(activity.browsingModeManager.mode)
                 },
                 onTabsButtonLongPress = {
-                    NavigationBar.browserTabTrayLongTapped.record(NoExtras())
                 },
                 onMenuButtonClick = {
-                    NavigationBar.browserMenuTapped.record(NoExtras())
                     findNavController().nav(
                         R.id.browserFragment,
                         BrowserFragmentDirections.actionGlobalMenuDialogFragment(
@@ -2334,17 +2307,17 @@ abstract class BaseBrowserFragment :
                     position = null,
                 )
 
-                MetricsUtils.recordBookmarkMetrics(MetricsUtils.BookmarkAction.ADD, METRIC_SOURCE)
+//                MetricsUtils.recordBookmarkMetrics(MetricsUtils.BookmarkAction.ADD, METRIC_SOURCE)
                 showBookmarkSavedSnackbar(
                     message = getString(
                         R.string.bookmark_saved_in_folder_snackbar,
                         friendlyRootTitle(requireContext(), parentNode),
                     ),
                     onClick = {
-                        MetricsUtils.recordBookmarkMetrics(
-                            MetricsUtils.BookmarkAction.EDIT,
-                            TOAST_METRIC_SOURCE,
-                        )
+//                        MetricsUtils.recordBookmarkMetrics(
+//                            MetricsUtils.BookmarkAction.EDIT,
+//                            TOAST_METRIC_SOURCE,
+//                        )
                         findNavController().navigateWithBreadcrumb(
                             directions = BrowserFragmentDirections.actionGlobalBookmarkEditFragment(
                                 guid,
@@ -2352,7 +2325,6 @@ abstract class BaseBrowserFragment :
                             ),
                             navigateFrom = "BrowserFragment",
                             navigateTo = "ActionGlobalBookmarkEditFragment",
-                            crashReporter = requireContext().components.analytics.crashReporter,
                         )
                     },
                 )
@@ -2363,7 +2335,7 @@ abstract class BaseBrowserFragment :
                             snackBarParentView = binding.dynamicSnackbarContainer,
                             snackbarState = SnackbarState(
                                 message = getString(R.string.bookmark_invalid_url_error),
-                                duration = SnackbarDuration.Long,
+                                duration = SnackbarState.Duration.Preset.Long,
                             ),
                         ).show()
                     }
@@ -2377,7 +2349,7 @@ abstract class BaseBrowserFragment :
             snackBarParentView = binding.dynamicSnackbarContainer,
             snackbarState = SnackbarState(
                 message = message,
-                duration = SnackbarDuration.Long,
+                duration = SnackbarState.Duration.Preset.Long,
                 action = Action(
                     label = getString(R.string.edit_bookmark_snackbar_action),
                     onClick = onClick,
@@ -2399,7 +2371,6 @@ abstract class BaseBrowserFragment :
     }
 
     final override fun onPictureInPictureModeChanged(enabled: Boolean) {
-        if (enabled) MediaState.pictureInPicture.record(NoExtras())
         pipFeature?.onPictureInPictureModeChanged(enabled)
     }
 
@@ -2433,7 +2404,6 @@ abstract class BaseBrowserFragment :
             (view as? SwipeGestureLayout)?.isSwipeEnabled = false
             expandBrowserView()
 
-            MediaState.fullscreen.record(NoExtras())
         } else {
             activity.exitImmersiveMode(
                 unregisterOnApplyWindowInsetsListener = binding.engineView::removeWindowInsetsListener,
@@ -2549,12 +2519,6 @@ abstract class BaseBrowserFragment :
     override fun onDestroyView() {
         super.onDestroyView()
 
-        // Diagnostic breadcrumb for "Display already aquired" crash:
-        // https://github.com/mozilla-mobile/android-components/issues/7960
-        breadcrumb(
-            message = "onDestroyView()",
-        )
-
         binding.engineView.setActivityContext(null)
         requireContext().accessibilityManager.removeAccessibilityStateChangeListener(this)
 
@@ -2566,22 +2530,10 @@ abstract class BaseBrowserFragment :
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-
-        // Diagnostic breadcrumb for "Display already aquired" crash:
-        // https://github.com/mozilla-mobile/android-components/issues/7960
-        breadcrumb(
-            message = "onAttach()",
-        )
     }
 
     override fun onDetach() {
         super.onDetach()
-
-        // Diagnostic breadcrumb for "Display already aquired" crash:
-        // https://github.com/mozilla-mobile/android-components/issues/7960
-        breadcrumb(
-            message = "onDetach()",
-        )
     }
 
     internal fun showCannotOpenFileError(
@@ -2719,7 +2671,6 @@ abstract class BaseBrowserFragment :
     private fun navigateToSavedLoginsFragment() {
         val navController = findNavController()
         if (navController.currentDestination?.id == R.id.browserFragment) {
-            Logins.openLogins.record(NoExtras())
             val directions = BrowserFragmentDirections.actionLoginsListFragment()
             navController.navigate(directions)
         }

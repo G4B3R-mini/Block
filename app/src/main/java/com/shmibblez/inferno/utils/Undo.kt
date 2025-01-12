@@ -6,7 +6,7 @@ package com.shmibblez.inferno.utils
 
 import android.content.Context
 import android.view.View
-import androidx.compose.material.SnackbarDuration
+import androidx.compose.material3.SnackbarDuration
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay

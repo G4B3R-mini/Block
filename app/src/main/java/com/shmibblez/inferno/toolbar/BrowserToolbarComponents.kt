@@ -52,7 +52,7 @@ import com.shmibblez.inferno.browser.BrowserComponentMode
 import com.shmibblez.inferno.browser.getActivity
 import com.shmibblez.inferno.compose.sessionUseCases
 import com.shmibblez.inferno.ext.components
-import com.shmibblez.inferno.ext.share
+//import com.shmibblez.inferno.ext.share
 import com.shmibblez.inferno.settings.SettingsActivity
 import com.shmibblez.inferno.tabs.TabsTrayFragment
 import com.shmibblez.inferno.toolbar.ToolbarMenuItemsScopeInstance.DividerToolbarMenuItem
@@ -73,6 +73,7 @@ import mozilla.components.browser.state.selector.privateTabs
 import mozilla.components.browser.state.selector.selectedTab
 import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.feature.tabs.TabsUseCases
+import mozilla.components.support.ktx.android.content.share
 
 // TODO: test implementations
 

@@ -2,35 +2,6 @@
    - License, v. 2.0. If a copy of the MPL was not distributed with this
    - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
 <resources>
-    <string name="pref_key_autofill" translatable="false">pref_key_autofill</string>
-    <string name="pref_key_sign_in" translatable="false">pref_key_sign_in</string>
-    <string name="pref_key_pair_sign_in" translatable="false">pref_key_pair_sign_in</string>
-    <string name="pref_key_sign_out" translatable="false">pref_key_sign_out</string>
-    <string name="pref_key_sync_now" translatable="false">pref_key_sync_now</string>
-    <string name="pref_key_sync_manage_account" translatable="false">pref_key_sync_manage_account</string>
-    <string name="pref_key_firefox_account" translatable="false">pref_key_firefox_account</string>
-    <string name="pref_key_telemetry" translatable="false">pref_key_telemetry</string>
-    <string name="pref_key_make_default_browser" translatable="false">pref_key_make_default_browser</string>
-    <string name="pref_key_sync_history" translatable="false">pref_key_sync_history</string>
-    <string name="pref_key_sync_tabs" translatable="false">pref_key_sync_tabs</string>
-    <string name="pref_key_sync_passwords" translatable="false">pref_key_sync_passwords</string>
-    <string name="pref_key_remote_debugging" translatable="false">pref_key_remote_debugging</string>
-    <string name="pref_key_testing_mode" translatable="false">pref_key_testing_mode</string>
-    <string name="pref_key_about_page" translatable="false">pref_key_about_page</string>
-    <string name="pref_key_privacy" translatable="false">pref_key_privacy</string>
-    <string name="pref_key_tracking_protection_normal" translatable="false">pref_key_tracking_protection_normal</string>
-    <string name="pref_key_tracking_protection_private" translatable="false">pref_key_tracking_protection_private</string>
-    <string name="pref_key_global_privacy_control" translatable="false">pref_key_global_privacy_control</string>
-    <string name="pref_key_launch_external_app" translatable="false">pref_key_launch_external_app</string>
-    <string name="pref_key_override_amo_collection" translatable="false">pref_key_override_amo_collection</string>
-    <string name="pref_key_override_amo_user" translatable="false">pref_key_override_amo_user</string>
-    <string name="pref_key_compose_ui" translatable="false">pref_key_compose_ui</string>
-    <string name="pref_key_toolbar" translatable="false">pref_key_toolbar</string>
-    <string name="pref_key_tabs" translatable="false">pref_key_tabs</string>
-    <string name="pref_key_theme" translatable="false">pref_key_theme</string>
-
-
-
     <string name="pref_key_make_default_browser" translatable="false">pref_key_make_default_browser</string>
     <string name="pref_key_search_settings" translatable="false">pref_key_search_settings</string>
     <string name="pref_key_search_engine" translatable="false">pref_key_search_engine</string>
@@ -155,6 +126,9 @@
     <string name="pref_key_show_sponsored_suggestions" translatable="false">pref_key_show_sponsored_suggestions</string>
     <string name="pref_key_show_nonsponsored_suggestions" translatable="false">pref_key_show_nonsponsored_suggestions</string>
     <string name="pref_key_learn_about_fx_suggest" translatable="false">pref_key_learn_about_fx_suggest</string>
+
+    <!-- Searchbar Settings -->
+    <string name="pref_key_should_searchbar_cfr">pref_key_should_show_searchbar_cfr</string>
 
     <!-- Site Permissions Settings -->
     <string name="pref_key_site_permissions_description" translatable="false">pref_key_site_permissions_description</string>
@@ -382,8 +356,6 @@
     <string name="pref_key_camera_permissions_needed" translatable="false">pref_key_camera_permissions_needed</string>
     <string name="pref_key_inactive_tabs_category" translatable="false">pref_key_inactive_tabs_category</string>
     <string name="pref_key_inactive_tabs" translatable="false">pref_key_inactive_tabs</string>
-    <!-- Whether or not the Tabs Tray to Compose changes are shown -->
-    <string name="pref_key_enable_tabs_tray_to_compose" translatable="false">pref_key_enable_tabs_tray_to_compose</string>
 
     <string name="pref_key_return_to_browser" translatable="false">pref_key_return_to_browser</string>
 
@@ -403,6 +375,7 @@
     <string name="pref_key_nimbus_use_preview" translatable="false">pref_key_nimbus_use_preview</string>
     <string name="pref_key_history_metadata_feature" translatable="false">pref_key_history_metadata_feature</string>
     <string name="pref_key_custom_glean_server_url" translatable="false">pref_key_custom_glean_server_url</string>
+    <string name="pref_key_mars_api_enabled" translatable="false">pref_key_mars_api_enabled</string>
     <string name="pref_key_custom_sponsored_stories_parameters" translatable="false">pref_key_custom_sponsored_stories_parameters</string>
     <string name="pref_key_custom_sponsored_stories_parameters_enabled" translatable="false">pref_key_custom_sponsored_stories_parameters_enabled</string>
     <string name="pref_key_custom_sponsored_stories_site_id" translatable="false">pref_key_custom_sponsored_stories_site_id</string>
@@ -444,6 +417,7 @@
     <string name="pref_key_last_set_as_default_prompt_shown_time" translatable="false">pref_key_last_set_as_default_prompt_shown_time</string>
     <string name="pref_key_number_of_set_as_default_prompt_shown_times" translatable="false">pref_key_number_of_set_as_default_prompt_shown_times</string>
     <string name="pref_key_app_cold_start_count" translatable="false">pref_key_app_cold_start_count</string>
+    <string name="pref_key_app_is_onboarding_set_as_default_displayed" translatable="false">pref_key_app_is_onboarding_set_as_default_displayed</string>
 
     <string name="pref_key_desktop_browsing" translatable="false">pref_key_desktop_browsing</string>
     <string name="pref_key_category_content" translatable="false">pref_key_category_content</string>
@@ -460,5 +434,4 @@
 
     <!-- Glean usage profile id -->
     <string name="pref_key_glean_usage_profile_id" translatable="false">pref_key_glean_usage_profile_id</string>
-
 </resources>

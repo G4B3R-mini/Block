@@ -5,19 +5,22 @@
 package com.shmibblez.inferno.browser.tabstrip
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Card
-import androidx.compose.material.Text
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CardElevation
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import mozilla.components.compose.base.annotation.LightDarkPreview
+//import mozilla.components.compose.base.annotation.LightDarkPreview
 import com.shmibblez.inferno.theme.FirefoxTheme
 
 private val cardShape = RoundedCornerShape(8.dp)
@@ -37,18 +40,18 @@ fun TabStripCard(
     modifier: Modifier = Modifier,
     backgroundColor: Color = FirefoxTheme.colors.layer3,
     elevation: Dp = defaultTabStripCardElevation,
-    content: @Composable () -> Unit,
+    content: @Composable ColumnScope.() -> Unit,
 ) {
     Card(
         shape = cardShape,
-        backgroundColor = backgroundColor,
-        elevation = elevation,
+//        backgroundColor = backgroundColor,
+        elevation = CardDefaults.cardElevation(defaultElevation = elevation),
         modifier = modifier,
         content = content,
     )
 }
 
-@LightDarkPreview
+//@LightDarkPreview
 @Composable
 private fun TabStripCardPreview() {
     FirefoxTheme {

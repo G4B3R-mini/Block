@@ -23,10 +23,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.SnackbarDuration
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -628,7 +628,7 @@ class HomeFragment : Fragment() {
         }
 
         val menuButton = MenuButton(context)
-        menuButton.recordClickEvent = { NavigationBar.homeMenuTapped.record(NoExtras()) }
+        menuButton.recordClickEvent = {} // { NavigationBar.homeMenuTapped.record(NoExtras()) }
         HomeMenuView(
             context = context,
             lifecycleOwner = viewLifecycleOwner,
@@ -711,9 +711,9 @@ class HomeFragment : Fragment() {
                                 popupVerticalOffset = 10.dp,
                                 indicatorArrowStartOffset = 130.dp,
                             ),
-                            onCFRShown = { NavigationBar.navigationBarCfrShown.record(NoExtras()) },
+                            onCFRShown = {}, // { NavigationBar.navigationBarCfrShown.record(NoExtras()) },
                             onDismiss = {
-                                NavigationBar.navigationBarCfrDismissed.record(NoExtras())
+//                                NavigationBar.navigationBarCfrDismissed.record(NoExtras())
                                 homeScreenPopupManager.get()?.setNavbarCFRShown(true)
                             },
                             title = {
@@ -784,7 +784,7 @@ class HomeFragment : Fragment() {
                                     menuButton = menuButton,
                                     tabsCounterMenu = tabCounterMenu,
                                     onSearchButtonClick = {
-                                        NavigationBar.homeSearchTapped.record(NoExtras())
+//                                        NavigationBar.homeSearchTapped.record(NoExtras())
                                         val directions =
                                             NavGraphDirections.actionGlobalSearchDialog(
                                                 sessionId = null,
@@ -797,7 +797,7 @@ class HomeFragment : Fragment() {
                                         )
                                     },
                                     onTabsButtonClick = {
-                                        NavigationBar.homeTabTrayTapped.record(NoExtras())
+//                                        NavigationBar.homeTabTrayTapped.record(NoExtras())
                                         findNavController().nav(
                                             findNavController().currentDestination?.id,
                                             NavGraphDirections.actionGlobalTabsTrayFragment(
@@ -809,10 +809,10 @@ class HomeFragment : Fragment() {
                                         )
                                     },
                                     onTabsButtonLongPress = {
-                                        NavigationBar.homeTabTrayLongTapped.record(NoExtras())
+//                                        NavigationBar.homeTabTrayLongTapped.record(NoExtras())
                                     },
                                     onMenuButtonClick = {
-                                        NavigationBar.homeMenuTapped.record(NoExtras())
+//                                        NavigationBar.homeMenuTapped.record(NoExtras())
                                         findNavController().nav(
                                             findNavController().currentDestination?.id,
                                             HomeFragmentDirections.actionGlobalMenuDialogFragment(
@@ -1065,17 +1065,17 @@ class HomeFragment : Fragment() {
         val profilerStartTime = requireComponents.core.engine.profiler?.getProfilerTime()
 
         super.onViewCreated(view, savedInstanceState)
-        HomeScreen.homeScreenDisplayed.record(NoExtras())
+//        HomeScreen.homeScreenDisplayed.record(NoExtras())
 
         with(requireContext()) {
             if (settings().isExperimentationEnabled) {
-                recordEventInNimbus("home_screen_displayed")
+//                recordEventInNimbus("home_screen_displayed")
             }
         }
 
-        HomeScreen.homeScreenViewCount.add()
+//        HomeScreen.homeScreenViewCount.add()
         if (!browsingModeManager.mode.isPrivate) {
-            HomeScreen.standardHomepageViewCount.add()
+//            HomeScreen.standardHomepageViewCount.add()
         }
 
         observeSearchEngineNameChanges()
@@ -1102,7 +1102,7 @@ class HomeFragment : Fragment() {
 
         PrivateBrowsingButtonView(binding.privateBrowsingButton, browsingModeManager) { newMode ->
             sessionControlInteractor.onPrivateModeButtonClicked(newMode)
-            Homepage.privateModeIconTapped.record(mozilla.telemetry.glean.private.NoExtras())
+//            Homepage.privateModeIconTapped.record(mozilla.telemetry.glean.private.NoExtras())
         }
 
         consumeFrom(requireComponents.core.store) {
@@ -1240,16 +1240,16 @@ class HomeFragment : Fragment() {
                         onHome = true,
                         onAddTabClick = {
                             sessionControlInteractor.onNavigateSearch()
-                            TabStripMetrics.newTabTapped.record()
+//                            TabStripMetrics.newTabTapped.record()
                         },
                         onSelectedTabClick = {
                             (requireActivity() as HomeActivity).openToBrowser(BrowserDirection.FromHome)
-                            TabStripMetrics.selectTab.record()
+//                            TabStripMetrics.selectTab.record()
                         },
                         onLastTabClose = {},
                         onCloseTabClick = { isPrivate ->
                             showUndoSnackbar(requireContext().tabClosedUndoMessage(isPrivate))
-                            TabStripMetrics.closeTab.record()
+//                            TabStripMetrics.closeTab.record()
                         },
                         onPrivateModeToggleClick = { mode ->
                             browsingModeManager.mode = mode
@@ -1472,7 +1472,7 @@ class HomeFragment : Fragment() {
                     indicatorDirection = CFRPopup.IndicatorDirection.UP,
                 ),
                 onDismiss = {
-                    PrivateBrowsingShortcutCfr.cancel.record()
+//                    PrivateBrowsingShortcutCfr.cancel.record()
                     context.settings().showedPrivateModeContextualFeatureRecommender = true
                     context.settings().lastCfrShownTimeInMillis = System.currentTimeMillis()
                     dismissRecommendPrivateBrowsingShortcut()
@@ -1495,7 +1495,7 @@ class HomeFragment : Fragment() {
                     FirefoxTheme {
                         TextButton(
                             onClick = {
-                                PrivateBrowsingShortcutCfr.addShortcut.record(NoExtras())
+//                                PrivateBrowsingShortcutCfr.addShortcut.record(NoExtras())
                                 PrivateShortcutCreateManager.createPrivateShortcut(context)
                                 context.settings().showedPrivateModeContextualFeatureRecommender = true
                                 context.settings().lastCfrShownTimeInMillis = System.currentTimeMillis()
@@ -1521,7 +1521,7 @@ class HomeFragment : Fragment() {
                         }
                         TextButton(
                             onClick = {
-                                PrivateBrowsingShortcutCfr.cancel.record()
+//                                PrivateBrowsingShortcutCfr.cancel.record()
                                 context.settings().showedPrivateModeContextualFeatureRecommender = true
                                 context.settings().lastCfrShownTimeInMillis = System.currentTimeMillis()
                                 dismissRecommendPrivateBrowsingShortcut()
@@ -1681,7 +1681,7 @@ class HomeFragment : Fragment() {
     internal fun showSetAsDefaultBrowserPrompt() {
         requireComponents.appStore.dispatch(AppAction.UpdateWasNativeDefaultBrowserPromptShown(true))
         activity?.openSetDefaultBrowserOption().also {
-            Metrics.setAsDefaultBrowserNativePromptShown.record()
+//            Metrics.setAsDefaultBrowserNativePromptShown.record()
             requireContext().settings().setAsDefaultPromptCalled()
         }
     }

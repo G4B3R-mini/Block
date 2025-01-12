@@ -98,20 +98,13 @@ import com.shmibblez.inferno.components.appstate.AppAction
 import com.shmibblez.inferno.components.appstate.OrientationMode
 import com.shmibblez.inferno.crashes.CrashReporterBinding
 import com.shmibblez.inferno.crashes.UnsubmittedCrashDialog
-//import com.shmibblez.inferno.components.metrics.BreadcrumbsRecorder
-//import com.shmibblez.inferno.components.metrics.GrowthDataWorker
-//import com.shmibblez.inferno.components.metrics.fonts.FontEnumerationWorker
-//import com.shmibblez.inferno.crashes.CrashReporterBinding
-//import com.shmibblez.inferno.crashes.UnsubmittedCrashDialog
 import com.shmibblez.inferno.customtabs.ExternalAppBrowserActivity
 import com.shmibblez.inferno.databinding.ActivityHomeBinding
 import com.shmibblez.inferno.debugsettings.data.DefaultDebugSettingsRepository
 import com.shmibblez.inferno.debugsettings.ui.FenixOverlay
 import com.shmibblez.inferno.experiments.ResearchSurfaceDialogFragment
 import com.shmibblez.inferno.ext.alreadyOnDestination
-import com.shmibblez.inferno.ext.breadcrumb
 import com.shmibblez.inferno.ext.components
-import com.shmibblez.inferno.ext.getBreadcrumbMessage
 import com.shmibblez.inferno.ext.getIntentSessionId
 import com.shmibblez.inferno.ext.getIntentSource
 import com.shmibblez.inferno.ext.getNavDirections
@@ -293,16 +286,6 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
 
         // Checks if Activity is currently in PiP mode if launched from external intents, then exits it
         checkAndExitPiP()
-
-        // Diagnostic breadcrumb for "Display already aquired" crash:
-        // https://github.com/mozilla-mobile/android-components/issues/7960
-        breadcrumb(
-            message = "onCreate()",
-            data = mapOf(
-                "recreated" to (savedInstanceState != null).toString(),
-                "intent" to (intent?.action ?: "null"),
-            ),
-        )
 
         components.publicSuffixList.prefetch()
 
@@ -568,12 +551,6 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
     override fun onResume() {
         super.onResume()
 
-        // Diagnostic breadcrumb for "Display already aquired" crash:
-        // https://github.com/mozilla-mobile/android-components/issues/7960
-        breadcrumb(
-            message = "onResume()",
-        )
-
         lifecycleScope.launch(IO) {
             try {
                 if (settings().showContileFeature) {
@@ -611,12 +588,6 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
 
         super.onStart()
 
-        // Diagnostic breadcrumb for "Display already aquired" crash:
-        // https://github.com/mozilla-mobile/android-components/issues/7960
-        breadcrumb(
-            message = "onStart()",
-        )
-
         ProfilerMarkers.homeActivityOnStart(binding.rootContainer, components.core.engine.profiler)
         components.core.engine.profiler?.addMarker(
             MarkersActivityLifecycleCallbacks.MARKER_NAME,
@@ -627,15 +598,6 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
 
     final override fun onStop() {
         super.onStop()
-
-        // Diagnostic breadcrumb for "Display already aquired" crash:
-        // https://github.com/mozilla-mobile/android-components/issues/7960
-        breadcrumb(
-            message = "onStop()",
-            data = mapOf(
-                "finishing" to isFinishing.toString(),
-            ),
-        )
 
 //        if (FxNimbus.features.alternativeAppLauncherIcon.value().enabled) {
 //            // User has been enrolled in alternative app icon experiment.
@@ -669,15 +631,6 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
 
         super.onPause()
 
-        // Diagnostic breadcrumb for "Display already aquired" crash:
-        // https://github.com/mozilla-mobile/android-components/issues/7960
-        breadcrumb(
-            message = "onPause()",
-            data = mapOf(
-                "finishing" to isFinishing.toString(),
-            ),
-        )
-
         // Every time the application goes into the background, it is possible that the user
         // is about to change the browsers installed on their system. Therefore, we reset the cache of
         // all the installed browsers.
@@ -697,15 +650,6 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
     override fun onDestroy() {
         super.onDestroy()
 
-        // Diagnostic breadcrumb for "Display already aquired" crash:
-        // https://github.com/mozilla-mobile/android-components/issues/7960
-        breadcrumb(
-            message = "onDestroy()",
-            data = mapOf(
-                "finishing" to isFinishing.toString(),
-            ),
-        )
-
         components.core.contileTopSitesUpdater.stopPeriodicWork()
 //        components.core.pocketStoriesService.stopPeriodicStoriesRefresh()
 //        components.core.pocketStoriesService.stopPeriodicSponsoredStoriesRefresh()
@@ -722,12 +666,6 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
     final override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
 
-        // Diagnostic breadcrumb for "Display already aquired" crash:
-        // https://github.com/mozilla-mobile/android-components/issues/7960
-        breadcrumb(
-            message = "onConfigurationChanged()",
-        )
-
         components.appStore.dispatch(
             AppAction.OrientationChange(
                 orientation = OrientationMode.fromInteger(newConfig.orientation),
@@ -736,12 +674,6 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
     }
 
     final override fun recreate() {
-        // Diagnostic breadcrumb for "Display already aquired" crash:
-        // https://github.com/mozilla-mobile/android-components/issues/7960
-        breadcrumb(
-            message = "recreate()",
-        )
-
         super.recreate()
     }
 
@@ -759,15 +691,6 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
         if (this is ExternalAppBrowserActivity) {
             return
         }
-
-        // Diagnostic breadcrumb for "Display already aquired" crash:
-        // https://github.com/mozilla-mobile/android-components/issues/7960
-        breadcrumb(
-            message = "onNewIntent()",
-            data = mapOf(
-                "intent" to intent.action.toString(),
-            ),
-        )
 
         val tab = components.core.store.state.findActiveMediaTab()
         if (tab != null) {

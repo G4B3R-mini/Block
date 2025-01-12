@@ -42,10 +42,8 @@ import mozilla.components.service.fxa.sync.GlobalSyncableStoreProvider
 import mozilla.components.service.sync.autofill.AutofillCreditCardsAddressesStorage
 import mozilla.components.service.sync.logins.SyncableLoginsStorage
 import mozilla.components.support.utils.RunWhenReadyQueue
-//import mozilla.telemetry.glean.private.NoExtras
 import com.shmibblez.inferno.Config
 import com.shmibblez.inferno.FeatureFlags
-//import com.shmibblez.inferno.GleanMetrics.SyncAuth
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.maxActiveTime
@@ -71,8 +69,6 @@ private val DEFAULT_SYNCED_TABS_COMMANDS_EXTRA_FLUSH_DELAY = 5.seconds
 @Suppress("LongParameterList")
 class BackgroundServices(
     private val context: Context,
-//    private val push: Push,
-    crashReporter: CrashReporter,
     historyStorage: Lazy<PlacesHistoryStorage>,
     bookmarkStorage: Lazy<PlacesBookmarksStorage>,
     passwordsStorage: Lazy<SyncableLoginsStorage>,
@@ -149,8 +145,6 @@ class BackgroundServices(
         context,
     )
 
-    val accountAbnormalities = AccountAbnormalities(context, crashReporter, strictMode)
-
     val syncStore by lazyMonitored {
         SyncStore()
     }
@@ -158,7 +152,7 @@ class BackgroundServices(
     private lateinit var syncStoreSupport: SyncStoreSupport
 
     val accountManager by lazyMonitored {
-        makeAccountManager(context, serverConfig, deviceConfig, syncConfig, crashReporter)
+        makeAccountManager(context, serverConfig, deviceConfig, syncConfig)
     }
 
     val syncedTabsStorage by lazyMonitored {
@@ -190,7 +184,6 @@ class BackgroundServices(
         serverConfig: ServerConfig,
         deviceConfig: DeviceConfig,
         syncConfig: SyncConfig?,
-        crashReporter: CrashReporter?,
     ) = FxaAccountManager(
         context,
         serverConfig,
@@ -207,22 +200,11 @@ class BackgroundServices(
             // codes for certain scopes.
             SCOPE_SESSION,
         ),
-        crashReporter,
     ).also { accountManager ->
         // Register a telemetry account observer to keep track of FxA auth metrics.
         accountManager.register(telemetryAccountObserver)
 
-        // Register an "abnormal fxa behaviour" middleware to keep track of events such as
-        // unexpected logouts.
-        accountManager.register(accountAbnormalities)
-
         accountManager.register(AccountManagerReadyObserver(accountManagerAvailableQueue))
-
-//        // Enable push if it's configured.
-//        push.feature?.let { autoPushFeature ->
-//            FxaPushSupportFeature(context, accountManager, autoPushFeature, crashReporter)
-//                .initialize()
-//        }
 
         SendTabFeature(accountManager) { device, tabs ->
             notificationManager.showReceivedTabs(context, device, tabs)
