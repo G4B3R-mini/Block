@@ -20,8 +20,8 @@ import androidx.core.view.isVisible
 import mozilla.components.browser.state.state.CustomTabSessionState
 import mozilla.components.concept.engine.content.blocking.TrackerLog
 import mozilla.components.support.ktx.kotlin.tryGetHostFromUrl
-import mozilla.telemetry.glean.private.NoExtras
-import com.shmibblez.inferno.GleanMetrics.TrackingProtection
+//import mozilla.telemetry.glean.private.NoExtras
+//import com.shmibblez.inferno.GleanMetrics.TrackingProtection
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.databinding.ComponentTrackingProtectionPanelBinding
 import com.shmibblez.inferno.ext.addUnderline
@@ -286,7 +286,7 @@ class TrackingProtectionPanelView(
 
     override fun onClick(v: View) {
         val category = getCategory(v) ?: return
-        TrackingProtection.etpTrackerList.record(NoExtras())
+//        TrackingProtection.etpTrackerList.record(NoExtras())
         shouldFocusAccessibilityView = true
         interactor.openDetails(category, categoryBlocked = !isLoaded(v))
     }

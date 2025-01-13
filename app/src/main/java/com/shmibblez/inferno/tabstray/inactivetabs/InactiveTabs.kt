@@ -40,7 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import mozilla.components.browser.state.state.ContentState
 import mozilla.components.browser.state.state.TabSessionState
-import mozilla.components.compose.base.annotation.LightDarkPreview
+import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.annotation.LightDarkPreview
 import mozilla.components.compose.base.button.TextButton
 import mozilla.components.compose.cfr.CFRPopup
 import mozilla.components.compose.cfr.CFRPopupLayout

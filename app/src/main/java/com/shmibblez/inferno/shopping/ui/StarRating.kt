@@ -21,7 +21,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import mozilla.components.compose.base.annotation.LightDarkPreview
+import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.annotation.LightDarkPreview
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.theme.FirefoxTheme
 import kotlin.math.max

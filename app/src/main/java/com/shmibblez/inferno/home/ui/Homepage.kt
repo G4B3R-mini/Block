@@ -20,9 +20,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import mozilla.telemetry.glean.private.NoExtras
-import com.shmibblez.inferno.GleanMetrics.History
-import com.shmibblez.inferno.GleanMetrics.RecentlyVisitedHomepage
+//import mozilla.telemetry.glean.private.NoExtras
+//import com.shmibblez.inferno.GleanMetrics.History
+//import com.shmibblez.inferno.GleanMetrics.RecentlyVisitedHomepage
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.button.TertiaryButton
 import com.shmibblez.inferno.compose.home.HomeSectionHeader
@@ -256,12 +256,12 @@ private fun RecentlyVisitedSection(
         onRecentVisitClick = { recentlyVisitedItem, pageNumber ->
             when (recentlyVisitedItem) {
                 is RecentHistoryHighlight -> {
-                    RecentlyVisitedHomepage.historyHighlightOpened.record(NoExtras())
+//                    RecentlyVisitedHomepage.historyHighlightOpened.record(NoExtras())
                     interactor.onRecentHistoryHighlightClicked(recentlyVisitedItem)
                 }
 
                 is RecentHistoryGroup -> {
-                    RecentlyVisitedHomepage.searchGroupOpened.record(NoExtras())
+//                    RecentlyVisitedHomepage.searchGroupOpened.record(NoExtras())
                     History.recentSearchesTapped.record(
                         History.RecentSearchesTappedExtra(
                             pageNumber.toString(),

@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
@@ -46,6 +47,7 @@ fun PlaceholderCard(
 ) {
     FirefoxTheme {
         Card(
+            colors = CardDefaults.cardColors(containerColor = FirefoxTheme.colors.layer1),
             modifier = Modifier
                 .dashedBorder(
                     color = FirefoxTheme.colors.borderPrimary,
@@ -54,7 +56,6 @@ fun PlaceholderCard(
                     dashWidth = 4.dp,
                 )
                 .then(modifier),
-            backgroundColor = FirefoxTheme.colors.layer1,
         ) {
             Column(
                 Modifier

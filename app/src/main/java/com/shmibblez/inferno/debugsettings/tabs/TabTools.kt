@@ -37,8 +37,8 @@ import androidx.core.text.isDigitsOnly
 import mozilla.components.browser.state.action.TabListAction
 import mozilla.components.browser.state.state.createTab
 import mozilla.components.browser.state.store.BrowserStore
-import mozilla.components.compose.base.Divider
-import mozilla.components.compose.base.annotation.LightDarkPreview
+import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.Divider
+import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.annotation.LightDarkPreview
 import mozilla.components.lib.state.ext.observeAsState
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.TextField

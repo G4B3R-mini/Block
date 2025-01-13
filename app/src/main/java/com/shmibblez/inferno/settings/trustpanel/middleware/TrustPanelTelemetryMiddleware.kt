@@ -6,8 +6,8 @@ package com.shmibblez.inferno.settings.trustpanel.middleware
 
 import mozilla.components.lib.state.Middleware
 import mozilla.components.lib.state.MiddlewareContext
-import mozilla.telemetry.glean.private.NoExtras
-import com.shmibblez.inferno.GleanMetrics.TrackingProtection
+//import mozilla.telemetry.glean.private.NoExtras
+//import com.shmibblez.inferno.GleanMetrics.TrackingProtection
 import com.shmibblez.inferno.settings.trustpanel.store.TrustPanelAction
 import com.shmibblez.inferno.settings.trustpanel.store.TrustPanelState
 import com.shmibblez.inferno.settings.trustpanel.store.TrustPanelStore
@@ -29,7 +29,7 @@ class TrustPanelTelemetryMiddleware : Middleware<TrustPanelState, TrustPanelActi
 
         when (action) {
             TrustPanelAction.ToggleTrackingProtection -> if (currentState.isTrackingProtectionEnabled) {
-                TrackingProtection.exceptionAdded.record(NoExtras())
+//                TrackingProtection.exceptionAdded.record(NoExtras())
             }
 
             TrustPanelAction.Navigate.Back,

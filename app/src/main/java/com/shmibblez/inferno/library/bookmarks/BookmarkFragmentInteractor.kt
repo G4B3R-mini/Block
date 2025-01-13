@@ -6,8 +6,8 @@ package com.shmibblez.inferno.library.bookmarks
 
 import mozilla.components.concept.storage.BookmarkNode
 import mozilla.components.concept.storage.BookmarkNodeType
-import mozilla.telemetry.glean.private.NoExtras
-import com.shmibblez.inferno.GleanMetrics.BookmarksManagement
+//import mozilla.telemetry.glean.private.NoExtras
+//import com.shmibblez.inferno.GleanMetrics.BookmarksManagement
 import com.shmibblez.inferno.browser.browsingmode.BrowsingMode
 import com.shmibblez.inferno.components.metrics.MetricsUtils
 
@@ -43,7 +43,7 @@ class BookmarkFragmentInteractor(
     }
 
     override fun onSearch() {
-        BookmarksManagement.searchIconTapped.record(NoExtras())
+//        BookmarksManagement.searchIconTapped.record(NoExtras())
         bookmarksController.handleSearch()
     }
 
@@ -54,7 +54,7 @@ class BookmarkFragmentInteractor(
         require(item.type == BookmarkNodeType.ITEM)
         item.url?.let {
             bookmarksController.handleCopyUrl(item)
-            BookmarksManagement.copied.record(NoExtras())
+//            BookmarksManagement.copied.record(NoExtras())
         }
     }
 
@@ -62,7 +62,7 @@ class BookmarkFragmentInteractor(
         require(item.type == BookmarkNodeType.ITEM)
         item.url?.let {
             bookmarksController.handleBookmarkSharing(item)
-            BookmarksManagement.shared.record(NoExtras())
+//            BookmarksManagement.shared.record(NoExtras())
         }
     }
 
@@ -70,7 +70,7 @@ class BookmarkFragmentInteractor(
         require(item.type == BookmarkNodeType.ITEM)
         item.url?.let {
             bookmarksController.handleOpeningBookmark(item, BrowsingMode.Normal)
-            BookmarksManagement.openInNewTab.record(NoExtras())
+//            BookmarksManagement.openInNewTab.record(NoExtras())
         }
         MetricsUtils.recordBookmarkMetrics(
             MetricsUtils.BookmarkAction.OPEN,
@@ -82,7 +82,7 @@ class BookmarkFragmentInteractor(
         require(item.type == BookmarkNodeType.ITEM)
         item.url?.let {
             bookmarksController.handleOpeningBookmark(item, BrowsingMode.Private)
-            BookmarksManagement.openInPrivateTab.record(NoExtras())
+//            BookmarksManagement.openInPrivateTab.record(NoExtras())
         }
         MetricsUtils.recordBookmarkMetrics(
             MetricsUtils.BookmarkAction.OPEN,
@@ -138,7 +138,7 @@ class BookmarkFragmentInteractor(
         when (item.type) {
             BookmarkNodeType.ITEM -> {
                 bookmarksController.handleBookmarkTapped(item)
-                BookmarksManagement.open.record(NoExtras())
+//                BookmarksManagement.open.record(NoExtras())
                 MetricsUtils.recordBookmarkMetrics(
                     MetricsUtils.BookmarkAction.OPEN,
                     METRIC_SOURCE,

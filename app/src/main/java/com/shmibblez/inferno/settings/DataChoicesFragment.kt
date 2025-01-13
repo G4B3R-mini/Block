@@ -20,8 +20,8 @@ import com.shmibblez.inferno.ext.requireComponents
 import com.shmibblez.inferno.ext.settings
 import com.shmibblez.inferno.ext.showToolbar
 import com.shmibblez.inferno.nimbus.FxNimbus
-import com.shmibblez.inferno.nimbus.OnboardingCardData
-import com.shmibblez.inferno.nimbus.OnboardingCardType
+//import com.shmibblez.inferno.nimbus.OnboardingCardData
+//import com.shmibblez.inferno.nimbus.OnboardingCardType
 
 /**
  * Lets the user toggle telemetry on/off.

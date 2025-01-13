@@ -30,8 +30,8 @@ import mozilla.components.concept.base.images.ImageLoader
 import mozilla.components.concept.engine.mediasession.MediaSession
 import mozilla.components.support.ktx.kotlin.MAX_URI_LENGTH
 import mozilla.components.support.ktx.kotlin.toShortUrl
-import mozilla.telemetry.glean.private.NoExtras
-import com.shmibblez.inferno.GleanMetrics.Tab
+//import mozilla.telemetry.glean.private.NoExtras
+//import com.shmibblez.inferno.GleanMetrics.Tab
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.increaseTapArea
@@ -186,12 +186,12 @@ abstract class AbstractBrowserTabViewHolder(
             setOnClickListener {
                 when (sessionState?.mediaSessionState?.playbackState) {
                     MediaSession.PlaybackState.PLAYING -> {
-                        Tab.mediaPause.record(NoExtras())
+//                        Tab.mediaPause.record(NoExtras())
                         sessionState.mediaSessionState?.controller?.pause()
                     }
 
                     MediaSession.PlaybackState.PAUSED -> {
-                        Tab.mediaPlay.record(NoExtras())
+//                        Tab.mediaPlay.record(NoExtras())
                         sessionState.mediaSessionState?.controller?.play()
                     }
                     else -> throw AssertionError(

@@ -29,9 +29,9 @@ import com.shmibblez.inferno.compose.SwitchWithLabel
 import com.shmibblez.inferno.compose.TextField
 import com.shmibblez.inferno.compose.button.PrimaryButton
 import com.shmibblez.inferno.compose.list.TextListItem
-import com.shmibblez.inferno.debugsettings.gleandebugtools.GleanDebugToolsAction
-import com.shmibblez.inferno.debugsettings.gleandebugtools.GleanDebugToolsState
-import com.shmibblez.inferno.debugsettings.gleandebugtools.GleanDebugToolsStore
+//import com.shmibblez.inferno.debugsettings.gleandebugtools.GleanDebugToolsAction
+//import com.shmibblez.inferno.debugsettings.gleandebugtools.GleanDebugToolsState
+//import com.shmibblez.inferno.debugsettings.gleandebugtools.GleanDebugToolsStore
 import com.shmibblez.inferno.theme.FirefoxTheme
 
 /**

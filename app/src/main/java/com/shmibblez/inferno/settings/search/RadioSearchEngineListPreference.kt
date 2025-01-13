@@ -30,7 +30,7 @@ import mozilla.components.browser.state.state.selectedOrDefaultSearchEngine
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.lib.state.ext.flow
 import mozilla.components.support.ktx.android.view.toScope
-import com.shmibblez.inferno.GleanMetrics.Events
+//import com.shmibblez.inferno.GleanMetrics.Events
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.databinding.SearchEngineRadioButtonBinding
 import com.shmibblez.inferno.ext.components
@@ -150,7 +150,7 @@ class RadioSearchEngineListPreference @JvmOverloads constructor(
 
         context.components.useCases.searchUseCases.selectSearchEngine(engine)
 
-        Events.defaultEngineSelected.record(Events.DefaultEngineSelectedExtra(engine.telemetryName()))
+//        Events.defaultEngineSelected.record(Events.DefaultEngineSelectedExtra(engine.telemetryName()))
     }
 
     private fun editCustomSearchEngine(view: View, engine: SearchEngine) {

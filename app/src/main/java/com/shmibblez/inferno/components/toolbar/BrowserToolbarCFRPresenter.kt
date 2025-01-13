@@ -36,10 +36,10 @@ import mozilla.components.compose.cfr.CFRPopupProperties
 import mozilla.components.concept.engine.EngineSession.CookieBannerHandlingStatus
 import mozilla.components.lib.state.ext.flowScoped
 import mozilla.components.support.ktx.kotlinx.coroutines.flow.ifAnyChanged
-import mozilla.telemetry.glean.private.NoExtras
-import com.shmibblez.inferno.GleanMetrics.AddressToolbar
-import com.shmibblez.inferno.GleanMetrics.CookieBanners
-import com.shmibblez.inferno.GleanMetrics.TrackingProtection
+//import mozilla.telemetry.glean.private.NoExtras
+//import com.shmibblez.inferno.GleanMetrics.AddressToolbar
+//import com.shmibblez.inferno.GleanMetrics.CookieBanners
+//import com.shmibblez.inferno.GleanMetrics.TrackingProtection
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.tabstrip.isTabStripEnabled
 import com.shmibblez.inferno.ext.settings
@@ -186,10 +186,10 @@ class BrowserToolbarCFRPresenter(
                 },
             ),
             onDismiss = {
-                when (it) {
-                    true -> TrackingProtection.tcpCfrExplicitDismissal.record(NoExtras())
-                    false -> TrackingProtection.tcpCfrImplicitDismissal.record(NoExtras())
-                }
+//                when (it) {
+//                    true -> TrackingProtection.tcpCfrExplicitDismissal.record(NoExtras())
+//                    false -> TrackingProtection.tcpCfrImplicitDismissal.record(NoExtras())
+//                }
             },
             text = {
                 FirefoxTheme {
@@ -229,7 +229,7 @@ class BrowserToolbarCFRPresenter(
                 },
             ),
             onDismiss = {
-                CookieBanners.cfrDismissal.record(NoExtras())
+//                CookieBanners.cfrDismissal.record(NoExtras())
             },
             text = {
                 FirefoxTheme {
@@ -264,7 +264,7 @@ class BrowserToolbarCFRPresenter(
         ).run {
             popup = this
             show()
-            CookieBanners.cfrShown.record(NoExtras())
+//            CookieBanners.cfrShown.record(NoExtras())
         }
     }
 
@@ -290,7 +290,7 @@ class BrowserToolbarCFRPresenter(
                 indicatorArrowStartOffset = TAB_SWIPE_CFR_ARROW_OFFSET.dp,
             ),
             onDismiss = {
-                AddressToolbar.swipeCfrDismissed.record(NoExtras())
+//                AddressToolbar.swipeCfrDismissed.record(NoExtras())
                 popup = null
             },
             text = {
@@ -315,7 +315,7 @@ class BrowserToolbarCFRPresenter(
                 }
             },
         ).run {
-            AddressToolbar.swipeCfrShown.record(NoExtras())
+//            AddressToolbar.swipeCfrShown.record(NoExtras())
             popup = this
             show()
         }

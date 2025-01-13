@@ -41,7 +41,7 @@ import mozilla.components.lib.state.ext.flowScoped
 import mozilla.components.support.base.feature.UserInteractionHandler
 import mozilla.components.support.ktx.kotlin.toShortUrl
 import mozilla.components.ui.widgets.withCenterAlignedButtons
-import mozilla.telemetry.glean.private.NoExtras
+//import mozilla.telemetry.glean.private.NoExtras
 import com.shmibblez.inferno.BrowserDirection
 import com.shmibblez.inferno.HomeActivity
 import com.shmibblez.inferno.NavHostActivity
@@ -64,7 +64,7 @@ import com.shmibblez.inferno.library.history.state.bindings.MenuBinding
 import com.shmibblez.inferno.library.history.state.bindings.PendingDeletionBinding
 import com.shmibblez.inferno.tabstray.Page
 import com.shmibblez.inferno.utils.allowUndo
-import com.shmibblez.inferno.GleanMetrics.History as GleanHistory
+//import com.shmibblez.inferno.GleanMetrics.History as GleanHistory
 
 @SuppressWarnings("TooManyFunctions", "LargeClass")
 class HistoryFragment : LibraryPageFragment<History>(), UserInteractionHandler, MenuProvider {
@@ -156,7 +156,7 @@ class HistoryFragment : LibraryPageFragment<History>(), UserInteractionHandler, 
 
         historyProvider = DefaultPagedHistoryProvider(requireComponents.core.historyStorage)
 
-        GleanHistory.opened.record(NoExtras())
+//        GleanHistory.opened.record(NoExtras())
     }
 
     private fun showDeleteSnackbar(
@@ -285,7 +285,7 @@ class HistoryFragment : LibraryPageFragment<History>(), UserInteractionHandler, 
         }
         R.id.open_history_in_new_tabs_multi_select -> {
             openItemsInNewTab { selectedItem ->
-                GleanHistory.openedItemsInNewTabs.record(NoExtras())
+//                GleanHistory.openedItemsInNewTabs.record(NoExtras())
                 (selectedItem as? History.Regular)?.url ?: (selectedItem as? History.Metadata)?.url
             }
 
@@ -295,7 +295,7 @@ class HistoryFragment : LibraryPageFragment<History>(), UserInteractionHandler, 
         }
         R.id.open_history_in_private_tabs_multi_select -> {
             openItemsInNewTab(private = true) { selectedItem ->
-                GleanHistory.openedItemsInNewTabs.record(NoExtras())
+//                GleanHistory.openedItemsInNewTabs.record(NoExtras())
                 (selectedItem as? History.Regular)?.url ?: (selectedItem as? History.Metadata)?.url
             }
 
@@ -406,7 +406,7 @@ class HistoryFragment : LibraryPageFragment<History>(), UserInteractionHandler, 
     }
 
     private fun share(data: List<ShareData>) {
-        GleanHistory.shared.record(NoExtras())
+//        GleanHistory.shared.record(NoExtras())
         val directions = HistoryFragmentDirections.actionGlobalShareFragment(
             data = data.toTypedArray(),
         )
@@ -491,7 +491,7 @@ class HistoryFragment : LibraryPageFragment<History>(), UserInteractionHandler, 
                 setView(layout)
 
                 setNegativeButton(R.string.delete_browsing_data_prompt_cancel) { dialog: DialogInterface, _ ->
-                    GleanHistory.removePromptCancelled.record(NoExtras())
+//                    GleanHistory.removePromptCancelled.record(NoExtras())
                     dialog.cancel()
                 }
                 setPositiveButton(R.string.delete_browsing_data_prompt_allow) { dialog: DialogInterface, _ ->
@@ -505,7 +505,7 @@ class HistoryFragment : LibraryPageFragment<History>(), UserInteractionHandler, 
                     dialog.dismiss()
                 }
 
-                GleanHistory.removePromptOpened.record(NoExtras())
+//                GleanHistory.removePromptOpened.record(NoExtras())
             }.create().withCenterAlignedButtons()
     }
 

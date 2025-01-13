@@ -4,7 +4,7 @@
 
 package com.shmibblez.inferno.share
 
-import com.shmibblez.inferno.GleanMetrics.Events
+//import com.shmibblez.inferno.GleanMetrics.Events
 
 private const val TELEMETRY_OTHER = "other"
 

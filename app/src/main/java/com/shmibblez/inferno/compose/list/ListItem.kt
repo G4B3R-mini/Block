@@ -50,8 +50,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import mozilla.components.compose.base.Divider
-import mozilla.components.compose.base.annotation.LightDarkPreview
+import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.Divider
+import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.annotation.LightDarkPreview
 import mozilla.components.ui.colors.PhotonColors
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.Favicon

@@ -27,7 +27,7 @@ import mozilla.components.support.ktx.android.view.showKeyboard
 import mozilla.components.support.ktx.util.URLStringUtils
 import com.shmibblez.inferno.AuthenticationStatus
 import com.shmibblez.inferno.BiometricAuthenticationManager
-import com.shmibblez.inferno.GleanMetrics.Logins
+//import com.shmibblez.inferno.GleanMetrics.Logins
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.components.StoreProvider
 import com.shmibblez.inferno.databinding.FragmentAddLoginBinding

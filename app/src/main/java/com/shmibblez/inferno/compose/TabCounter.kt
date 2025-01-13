@@ -25,7 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import mozilla.components.compose.base.annotation.LightDarkPreview
+import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.annotation.LightDarkPreview
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.ext.toLocaleString
 import com.shmibblez.inferno.tabstray.TabsTrayTestTag

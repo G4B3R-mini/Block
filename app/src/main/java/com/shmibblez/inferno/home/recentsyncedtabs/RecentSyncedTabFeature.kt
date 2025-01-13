@@ -24,8 +24,8 @@ import mozilla.components.service.fxa.store.SyncStore
 import mozilla.components.service.fxa.sync.SyncReason
 import mozilla.components.support.base.feature.LifecycleAwareFeature
 import mozilla.components.support.ktx.kotlin.tryGetHostFromUrl
-import mozilla.telemetry.glean.GleanTimerId
-import com.shmibblez.inferno.GleanMetrics.RecentSyncedTabs
+//import mozilla.telemetry.glean.GleanTimerId
+//import com.shmibblez.inferno.GleanMetrics.RecentSyncedTabs
 import com.shmibblez.inferno.components.AppStore
 import com.shmibblez.inferno.components.appstate.AppAction
 import java.util.concurrent.TimeUnit

@@ -23,15 +23,15 @@ import mozilla.components.concept.sync.AccountObserver
 import mozilla.components.concept.sync.AuthType
 import mozilla.components.concept.sync.OAuthAccount
 import mozilla.components.support.ktx.android.content.getColorFromAttr
-import mozilla.telemetry.glean.private.NoExtras
+//import mozilla.telemetry.glean.private.NoExtras
 import com.shmibblez.inferno.Config
-import com.shmibblez.inferno.GleanMetrics.AppMenu
+//import com.shmibblez.inferno.GleanMetrics.AppMenu
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.components.accounts.AccountState
 import com.shmibblez.inferno.components.accounts.FenixAccountManager
 import com.shmibblez.inferno.components.toolbar.BrowserMenuSignIn
 import com.shmibblez.inferno.ext.components
-import com.shmibblez.inferno.nimbus.FxNimbus
+//import com.shmibblez.inferno.nimbus.FxNimbus
 import com.shmibblez.inferno.theme.ThemeManager
 import com.shmibblez.inferno.whatsnew.WhatsNew
 
@@ -185,7 +185,7 @@ class HomeMenu(
             primaryTextColor,
         ) {
             onItemTapped.invoke(Item.CustomizeHome)
-            AppMenu.customizeHomepage.record(NoExtras())
+//            AppMenu.customizeHomepage.record(NoExtras())
         }
 
         // Use nimbus to set the icon and title.

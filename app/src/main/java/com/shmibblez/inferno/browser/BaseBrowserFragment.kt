@@ -25,7 +25,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -80,11 +79,10 @@ import mozilla.components.browser.state.state.content.DownloadState
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.browser.thumbnails.BrowserThumbnails
 import mozilla.components.browser.toolbar.BrowserToolbar
-import mozilla.components.compose.base.Divider
+import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.Divider
 import mozilla.components.compose.cfr.CFRPopup
 import mozilla.components.compose.cfr.CFRPopupLayout
 import mozilla.components.compose.cfr.CFRPopupProperties
-import mozilla.components.concept.base.crash.Breadcrumb
 import mozilla.components.concept.engine.permission.SitePermissions
 import mozilla.components.concept.engine.prompt.ShareData
 import mozilla.components.concept.storage.LoginEntry
@@ -149,6 +147,7 @@ import com.shmibblez.inferno.FeatureFlags
 //import com.shmibblez.inferno.GleanMetrics.PullToRefreshInBrowser
 import com.shmibblez.inferno.HomeActivity
 import com.shmibblez.inferno.IntentReceiverActivity
+import com.shmibblez.inferno.NavGraphDirections
 //import com.shmibblez.inferno.NavGraphDirections
 import com.shmibblez.inferno.OnLongPressedListener
 import com.shmibblez.inferno.OpenInFirefoxBinding
@@ -161,7 +160,7 @@ import com.shmibblez.inferno.browser.tabstrip.TabStrip
 import com.shmibblez.inferno.browser.tabstrip.isTabStripEnabled
 import com.shmibblez.inferno.components.Components
 import com.shmibblez.inferno.components.FindInPageIntegration
-import com.shmibblez.inferno.components.LoginBarsIntegration
+import com.shmibblez.inferno.LoginBarsIntegration
 import com.shmibblez.inferno.components.StoreProvider
 import com.shmibblez.inferno.components.accounts.FxaWebChannelIntegration
 import com.shmibblez.inferno.components.appstate.AppAction

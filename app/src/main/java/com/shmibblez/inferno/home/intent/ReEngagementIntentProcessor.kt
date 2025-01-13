@@ -8,9 +8,9 @@ import android.content.Intent
 import androidx.navigation.NavController
 import androidx.navigation.navOptions
 import mozilla.components.concept.engine.EngineSession
-import mozilla.telemetry.glean.private.NoExtras
+//import mozilla.telemetry.glean.private.NoExtras
 import com.shmibblez.inferno.BrowserDirection
-import com.shmibblez.inferno.GleanMetrics.Events
+//import com.shmibblez.inferno.GleanMetrics.Events
 import com.shmibblez.inferno.HomeActivity
 import com.shmibblez.inferno.NavGraphDirections
 import com.shmibblez.inferno.R
@@ -35,7 +35,7 @@ class ReEngagementIntentProcessor(
     override fun process(intent: Intent, navController: NavController, out: Intent): Boolean {
         return when {
             isReEngagementNotificationIntent(intent) -> {
-                Events.reEngagementNotifTapped.record(NoExtras())
+//                Events.reEngagementNotifTapped.record(NoExtras())
 
                 when (settings.reEngagementNotificationType) {
                     ReEngagementNotificationWorker.NOTIFICATION_TYPE_B -> {

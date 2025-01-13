@@ -6,7 +6,7 @@ package com.shmibblez.inferno.ext
 
 import android.content.Context
 import androidx.preference.PreferenceManager
-import mozilla.telemetry.glean.config.Configuration
+//import mozilla.telemetry.glean.config.Configuration
 import com.shmibblez.inferno.BuildConfig
 import com.shmibblez.inferno.R
 

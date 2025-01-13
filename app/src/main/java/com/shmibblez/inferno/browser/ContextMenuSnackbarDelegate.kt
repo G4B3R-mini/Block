@@ -59,7 +59,7 @@ class ContextMenuSnackbarDelegate : SnackbarDelegate {
             snackBarParentView = snackBarParentView,
             snackbarState = SnackbarState(
                 message = text,
-                duration = SnackbarDuration.Short,
+                duration = SnackbarState.Duration.Preset.Short,
                 action = snackbarAction,
             ),
         ).show()

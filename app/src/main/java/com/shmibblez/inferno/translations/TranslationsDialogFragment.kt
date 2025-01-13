@@ -34,7 +34,7 @@ import mozilla.components.concept.engine.translate.TranslationError
 import mozilla.components.lib.state.ext.observeAsComposableState
 import mozilla.components.support.base.feature.ViewBoundFeatureWrapper
 import com.shmibblez.inferno.BrowserDirection
-import com.shmibblez.inferno.GleanMetrics.Translations
+//import com.shmibblez.inferno.GleanMetrics.Translations
 import com.shmibblez.inferno.HomeActivity
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.components.AppStore
@@ -43,7 +43,7 @@ import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.requireComponents
 import com.shmibblez.inferno.ext.runIfFragmentIsAttached
 import com.shmibblez.inferno.ext.settings
-import com.shmibblez.inferno.nimbus.FxNimbus
+//import com.shmibblez.inferno.nimbus.FxNimbus
 import com.shmibblez.inferno.settings.SupportUtils
 import com.shmibblez.inferno.theme.FirefoxTheme
 import com.shmibblez.inferno.translations.preferences.downloadlanguages.DownloadLanguageFileDialog
@@ -432,7 +432,7 @@ class TranslationsDialogFragment : BottomSheetDialogFragment() {
             },
             onBackClicked = onBackClicked,
             onTranslationSettingsClicked = {
-                Translations.action.record(Translations.ActionExtra("global_settings"))
+//                Translations.action.record(Translations.ActionExtra("global_settings"))
                 findNavController().navigate(
                     TranslationsDialogFragmentDirections
                         .actionTranslationsDialogFragmentToTranslationSettingsFragment(),

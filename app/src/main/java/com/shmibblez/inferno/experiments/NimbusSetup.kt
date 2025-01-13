@@ -15,7 +15,6 @@ import org.mozilla.experiments.nimbus.NimbusInterface
 import org.mozilla.experiments.nimbus.internal.NimbusException
 import com.shmibblez.inferno.BuildConfig
 import com.shmibblez.inferno.R
-import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.settings
 import com.shmibblez.inferno.messaging.CustomAttributeProvider
 import com.shmibblez.inferno.nimbus.FxNimbus
@@ -86,12 +85,12 @@ private fun Context.reportError(message: String, e: Throwable) {
         logger.error("Nimbus error: $message", e)
     }
     if (e !is NimbusException || e.isReportableError()) {
-        @Suppress("TooGenericExceptionCaught")
-        try {
-            this.components.analytics.crashReporter.submitCaughtException(e)
-        } catch (e: Throwable) {
-            logger.error(message, e)
-        }
+//        @Suppress("TooGenericExceptionCaught")
+//        try {
+//            this.components.analytics.crashReporter.submitCaughtException(e)
+//        } catch (e: Throwable) {
+//            logger.error(message, e)
+//        }
     }
 }
 

@@ -81,7 +81,7 @@ open class DefaultToolbarMenu(
         get() = store.state.selectedTab
 
     override val menuBuilder by lazy {
-        FxNimbus.features.print.recordExposure()
+//        FxNimbus.features.print.recordExposure()
         WebExtensionBrowserMenuBuilder(
             items = coreMenuItems,
             endOfMenuAlwaysVisible = shouldUseBottomToolbar,
@@ -202,13 +202,15 @@ open class DefaultToolbarMenu(
     @VisibleForTesting(otherwise = PRIVATE)
     fun shouldShowTranslations(): Boolean {
         val isEngineSupported = store.state.translationEngine.isEngineSupported
-        if (isEngineSupported == true) {
-            FxNimbus.features.translations.recordExposure()
-        }
-        return selectedSession?.let {
-            isEngineSupported == true &&
-                FxNimbus.features.translations.value().mainFlowBrowserMenuEnabled
-        } ?: false
+//        if (isEngineSupported == true) {
+////            FxNimbus.features.translations.recordExposure()
+//        }
+        return false
+        // TODO:
+//        selectedSession?.let {
+//            isEngineSupported == true && false
+////               TODO: FxNimbus.features.translations.value().mainFlowBrowserMenuEnabled
+//        } ?: false
     }
     // End of predicates //
 
@@ -443,7 +445,8 @@ open class DefaultToolbarMenu(
                 addAppToHomeScreenItem.apply { visible = ::canAddAppToHomescreen },
                 if (shouldShowTopSites) addRemoveTopSitesItem else null,
                 saveToCollectionItem,
-                if (FxNimbus.features.print.value().browserPrintEnabled) printPageItem else null,
+                // TODO: nimbus print page
+//                if (FxNimbus.features.print.value().browserPrintEnabled) printPageItem else null,
                 BrowserMenuDivider(),
                 settingsItem,
                 if (shouldDeleteDataOnQuit) deleteDataOnQuit else null,

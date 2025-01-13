@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -25,7 +26,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import mozilla.components.compose.base.annotation.LightDarkPreview
+import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.annotation.LightDarkPreview
 import com.shmibblez.inferno.compose.ext.thenConditional
 import com.shmibblez.inferno.theme.FirefoxTheme
 
@@ -150,10 +151,10 @@ fun ListItemTabSurface(
         )
 
     Card(
+        colors = CardDefaults.cardColors(containerColor = backgroundColor),
         modifier = modifier,
         shape = RoundedCornerShape(8.dp),
-        backgroundColor = backgroundColor,
-        elevation = 6.dp,
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
     ) {
         Row(
             modifier = Modifier.padding(contentPadding),

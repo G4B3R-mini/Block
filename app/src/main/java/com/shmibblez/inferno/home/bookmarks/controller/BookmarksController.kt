@@ -11,7 +11,7 @@ import mozilla.components.concept.engine.EngineSession
 import mozilla.components.concept.engine.EngineSession.LoadUrlFlags.Companion.ALLOW_JAVASCRIPT_URL
 import mozilla.components.feature.tabs.TabsUseCases
 import com.shmibblez.inferno.BrowserDirection
-import com.shmibblez.inferno.GleanMetrics.HomeBookmarks
+//import com.shmibblez.inferno.GleanMetrics.HomeBookmarks
 import com.shmibblez.inferno.HomeActivity
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.components.AppStore

@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -28,7 +29,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import mozilla.components.compose.base.annotation.FlexibleWindowLightDarkPreview
+import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.annotation.FlexibleWindowLightDarkPreview
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.LinkText
 import com.shmibblez.inferno.compose.LinkTextState
@@ -52,13 +53,13 @@ internal fun ExtensionsSubmenuBanner(
     onClick: () -> Unit,
 ) {
     Card(
+        colors = CardDefaults.cardColors(containerColor = FirefoxTheme.colors.layer1),
         modifier = Modifier.fillMaxWidth(),
-        backgroundColor = FirefoxTheme.colors.layer1,
         border = BorderStroke(
             width = 0.5.dp,
             color = FirefoxTheme.colors.borderPrimary,
         ),
-        elevation = 0.dp,
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         shape = ROUNDED_CORNER_SHAPE,
     ) {
         if (FirefoxTheme.windowSize.isNotSmall()) {

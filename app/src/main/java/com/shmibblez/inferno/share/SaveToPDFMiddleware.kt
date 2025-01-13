@@ -17,7 +17,7 @@ import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.lib.state.Action
 import mozilla.components.lib.state.Middleware
 import mozilla.components.lib.state.MiddlewareContext
-import com.shmibblez.inferno.GleanMetrics.Events
+//import com.shmibblez.inferno.GleanMetrics.Events
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.StandardSnackbarError
 import com.shmibblez.inferno.components.appstate.AppAction

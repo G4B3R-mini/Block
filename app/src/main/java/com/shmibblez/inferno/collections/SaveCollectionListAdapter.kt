@@ -60,6 +60,6 @@ class CollectionViewHolder(private val binding: CollectionsListItemBinding) : Vi
     }
 
     companion object {
-        const val LAYOUT_ID = R.layout.collections_list_item
+        var LAYOUT_ID = R.layout.collections_list_item
     }
 }

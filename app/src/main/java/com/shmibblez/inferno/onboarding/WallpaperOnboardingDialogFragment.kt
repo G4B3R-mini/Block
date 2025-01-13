@@ -20,8 +20,8 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import kotlinx.coroutines.launch
 import mozilla.components.lib.state.ext.observeAsComposableState
-import mozilla.telemetry.glean.private.NoExtras
-import com.shmibblez.inferno.GleanMetrics.Wallpapers
+//import mozilla.telemetry.glean.private.NoExtras
+//import com.shmibblez.inferno.GleanMetrics.Wallpapers
 import com.shmibblez.inferno.NavGraphDirections
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.core.Action
@@ -83,7 +83,7 @@ class WallpaperOnboardingDialogFragment : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         requireContext().settings().showWallpaperOnboarding = false
-        Wallpapers.onboardingOpened.record(NoExtras())
+//        Wallpapers.onboardingOpened.record(NoExtras())
     }
 
     override fun onCreateView(
@@ -111,7 +111,7 @@ class WallpaperOnboardingDialogFragment : BottomSheetDialogFragment() {
                     onExploreMoreButtonClicked = {
                         val directions = NavGraphDirections.actionGlobalWallpaperSettingsFragment()
                         findNavController().navigate(directions)
-                        Wallpapers.onboardingExploreMoreClick.record(NoExtras())
+//                        Wallpapers.onboardingExploreMoreClick.record(NoExtras())
                     },
                     loadWallpaperResource = { wallpaperUseCases.loadThumbnail(it) },
                     onSelectWallpaper = {

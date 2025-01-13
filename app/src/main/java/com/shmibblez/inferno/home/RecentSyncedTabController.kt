@@ -6,7 +6,7 @@ package com.shmibblez.inferno.home.recentsyncedtabs.controller
 
 import androidx.navigation.NavController
 import mozilla.components.feature.tabs.TabsUseCases
-import com.shmibblez.inferno.GleanMetrics.RecentSyncedTabs
+//import com.shmibblez.inferno.GleanMetrics.RecentSyncedTabs
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.components.AppStore
 import com.shmibblez.inferno.components.appstate.AppAction

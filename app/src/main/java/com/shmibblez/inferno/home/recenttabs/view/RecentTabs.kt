@@ -51,7 +51,7 @@ import androidx.compose.ui.unit.sp
 import mozilla.components.browser.icons.compose.Loader
 import mozilla.components.browser.icons.compose.Placeholder
 import mozilla.components.browser.icons.compose.WithIcon
-//import mozilla.components.compose.base.annotation.LightDarkPreview
+//import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.annotation.LightDarkPreview
 //import mozilla.components.compose.base.utils.inComposePreview
 import mozilla.components.support.ktx.kotlin.trimmed
 import mozilla.components.ui.colors.PhotonColors

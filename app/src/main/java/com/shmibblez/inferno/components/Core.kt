@@ -109,7 +109,7 @@ import com.shmibblez.inferno.historymetadata.DefaultHistoryMetadataService
 import com.shmibblez.inferno.historymetadata.HistoryMetadataMiddleware
 import com.shmibblez.inferno.historymetadata.HistoryMetadataService
 import com.shmibblez.inferno.media.MediaSessionService
-//import com.shmibblez.inferno.nimbus.FxNimbus
+import com.shmibblez.inferno.nimbus.FxNimbus
 import com.shmibblez.inferno.perf.StrictModeManager
 import com.shmibblez.inferno.perf.lazyMonitored
 import com.shmibblez.inferno.settings.SupportUtils
@@ -137,8 +137,7 @@ class Core(
     val engine: Engine by lazyMonitored {
         val defaultSettings = DefaultSettings(
             requestInterceptor = requestInterceptor,
-            remoteDebuggingEnabled = context.settings().isRemoteDebuggingEnabled &&
-                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.M,
+            remoteDebuggingEnabled = context.settings().isRemoteDebuggingEnabled && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M,
             testingModeEnabled = false,
             trackingProtectionPolicy = trackingProtectionPolicyFactory.createTrackingProtectionPolicy(),
             historyTrackingDelegate = HistoryDelegate(lazyHistoryStorage),
@@ -155,19 +154,17 @@ class Core(
             ),
             httpsOnlyMode = context.settings().getHttpsOnlyMode(),
             globalPrivacyControlEnabled = context.settings().shouldEnableGlobalPrivacyControl,
-            fingerprintingProtection = false,
-//            if (FxNimbus.features.fingerprintingProtection.value().enabled) {
-//                FxNimbus.features.fingerprintingProtection.value().enabledNormal
-//            } else {
-//                context.settings().blockSuspectedFingerprinters
-//            },
-            fingerprintingProtectionPrivateBrowsing = false,
-//            if (FxNimbus.features.fingerprintingProtection.value().enabled) {
-//                FxNimbus.features.fingerprintingProtection.value().enabledPrivate
-//            } else {
-//                context.settings().blockSuspectedFingerprintersPrivateBrowsing
-//            },
-            fdlibmMathEnabled = false, // FxNimbus.features.fingerprintingProtection.value().fdlibmMath,
+            fingerprintingProtection = if (FxNimbus.features.fingerprintingProtection.value().enabled) {
+                FxNimbus.features.fingerprintingProtection.value().enabledNormal
+            } else {
+                context.settings().blockSuspectedFingerprinters
+            },
+            fingerprintingProtectionPrivateBrowsing = if (FxNimbus.features.fingerprintingProtection.value().enabled) {
+                FxNimbus.features.fingerprintingProtection.value().enabledPrivate
+            } else {
+                context.settings().blockSuspectedFingerprintersPrivateBrowsing
+            },
+            fdlibmMathEnabled = FxNimbus.features.fingerprintingProtection.value().fdlibmMath,
             cookieBannerHandlingMode = context.settings().getCookieBannerHandling(),
             cookieBannerHandlingModePrivateBrowsing = context.settings()
                 .getCookieBannerHandlingPrivateMode(),
@@ -175,29 +172,29 @@ class Core(
             cookieBannerHandlingGlobalRules = context.settings().shouldEnableCookieBannerGlobalRules,
             cookieBannerHandlingGlobalRulesSubFrames = context.settings().shouldEnableCookieBannerGlobalRulesSubFrame,
             emailTrackerBlockingPrivateBrowsing = true,
-            userCharacteristicPingCurrentVersion = 0, //FxNimbus.features.userCharacteristics.value().currentVersion,
+            userCharacteristicPingCurrentVersion = FxNimbus.features.userCharacteristics.value().currentVersion,
             getDesktopMode = {
                 store.state.desktopMode
             },
             webContentIsolationStrategy = WebContentIsolationStrategy.ISOLATE_HIGH_VALUE,
-            fetchPriorityEnabled = false, //FxNimbus.features.networking.value().fetchPriorityEnabled,
-            parallelMarkingEnabled = false, //FxNimbus.features.javascript.value().parallelMarkingEnabled,
+            fetchPriorityEnabled = FxNimbus.features.networking.value().fetchPriorityEnabled,
+            parallelMarkingEnabled = FxNimbus.features.javascript.value().parallelMarkingEnabled,
         )
 
         // Apply fingerprinting protection overrides if the feature is enabled in Nimbus
-//        if (FxNimbus.features.fingerprintingProtection.value().enabled) {
-//            defaultSettings.fingerprintingProtectionOverrides =
-//                FxNimbus.features.fingerprintingProtection.value().overrides
-//        }
+        if (FxNimbus.features.fingerprintingProtection.value().enabled) {
+            defaultSettings.fingerprintingProtectionOverrides =
+                FxNimbus.features.fingerprintingProtection.value().overrides
+        }
 
-        // Apply third-party cookie blocking settings if the Nimbus feature is
-        // enabled.
-//        if (FxNimbus.features.thirdPartyCookieBlocking.value().enabled) {
-//            defaultSettings.cookieBehaviorOptInPartitioning =
-//                FxNimbus.features.thirdPartyCookieBlocking.value().enabledNormal
-//            defaultSettings.cookieBehaviorOptInPartitioningPBM =
-//                FxNimbus.features.thirdPartyCookieBlocking.value().enabledPrivate
-//        }
+//         Apply third-party cookie blocking settings if the Nimbus feature is
+//         enabled.
+        if (FxNimbus.features.thirdPartyCookieBlocking.value().enabled) {
+            defaultSettings.cookieBehaviorOptInPartitioning =
+                FxNimbus.features.thirdPartyCookieBlocking.value().enabledNormal
+            defaultSettings.cookieBehaviorOptInPartitioningPBM =
+                FxNimbus.features.thirdPartyCookieBlocking.value().enabledPrivate
+        }
 
         GeckoEngine(
             context,
@@ -304,48 +301,47 @@ class Core(
      * The [BrowserStore] holds the global [BrowserState].
      */
     val store by lazyMonitored {
-//        val searchExtraParamsNimbus = FxNimbus.features.searchExtraParams.value()
-//        val searchExtraParams = searchExtraParamsNimbus.takeIf { it.enabled }?.run {
-//            SearchExtraParams(
-//                searchEngine,
-//                featureEnabler.keys.firstOrNull(),
-//                featureEnabler.values.firstOrNull(),
-//                channelId.keys.first(),
-//                channelId.values.first(),
-//            )
-//        }
-        val middlewareList =
-            mutableListOf(
-                LastAccessMiddleware(),
-                RecentlyClosedMiddleware(recentlyClosedTabsStorage, RECENTLY_CLOSED_MAX),
-                DownloadMiddleware(context, DownloadService::class.java),
-                ReaderViewMiddleware(),
-//                TelemetryMiddleware(context, context.settings(), metrics, crashReporter),
-                ThumbnailsMiddleware(thumbnailStorage),
-                UndoMiddleware(context.getUndoDelay()),
-                RegionMiddleware(context, locationService),
-                SearchMiddleware(
-                    context = context,
-                    additionalBundledSearchEngineIds = listOf("reddit", "youtube"),
-                    migration = SearchMigration(context),
-//                    searchExtraParams = searchExtraParams,
-                ),
-                RecordingDevicesMiddleware(context, context.components.notificationsDelegate),
-                PromptMiddleware(),
-//                AdsTelemetryMiddleware(adsTelemetry),
-                LastMediaAccessMiddleware(),
-                HistoryMetadataMiddleware(historyMetadataService),
-                SessionPrioritizationMiddleware(),
-                SaveToPDFMiddleware(context),
-                FxSuggestFactsMiddleware(),
-                FileUploadsDirCleanerMiddleware(fileUploadsDirCleaner),
-                DesktopModeMiddleware(
-                    repository = DefaultDesktopModeRepository(
-                        context = context,
-                    ),
-                    engine = engine,
-                ),
+        val searchExtraParamsNimbus = FxNimbus.features.searchExtraParams.value()
+        val searchExtraParams = searchExtraParamsNimbus.takeIf { it.enabled }?.run {
+            SearchExtraParams(
+                searchEngine,
+                featureEnabler.keys.firstOrNull(),
+                featureEnabler.values.firstOrNull(),
+                channelId.keys.first(),
+                channelId.values.first(),
             )
+        }
+        val middlewareList = mutableListOf(
+            LastAccessMiddleware(),
+            RecentlyClosedMiddleware(recentlyClosedTabsStorage, RECENTLY_CLOSED_MAX),
+            DownloadMiddleware(context, DownloadService::class.java),
+            ReaderViewMiddleware(),
+//                TelemetryMiddleware(context, context.settings(), metrics, crashReporter),
+            ThumbnailsMiddleware(thumbnailStorage),
+            UndoMiddleware(context.getUndoDelay()),
+            RegionMiddleware(context, locationService),
+            SearchMiddleware(
+                context = context,
+                additionalBundledSearchEngineIds = listOf("reddit", "youtube"),
+                migration = SearchMigration(context),
+//                    searchExtraParams = searchExtraParams,
+            ),
+            RecordingDevicesMiddleware(context, context.components.notificationsDelegate),
+            PromptMiddleware(),
+//                AdsTelemetryMiddleware(adsTelemetry),
+            LastMediaAccessMiddleware(),
+            HistoryMetadataMiddleware(historyMetadataService),
+            SessionPrioritizationMiddleware(),
+            SaveToPDFMiddleware(context),
+            FxSuggestFactsMiddleware(),
+            FileUploadsDirCleanerMiddleware(fileUploadsDirCleaner),
+            DesktopModeMiddleware(
+                repository = DefaultDesktopModeRepository(
+                    context = context,
+                ),
+                engine = engine,
+            ),
+        )
 
         BrowserStore(
             initialState = BrowserState(
@@ -485,13 +481,12 @@ class Core(
     val bookmarksStorage: PlacesBookmarksStorage get() = lazyBookmarksStorage.value
     val passwordsStorage: SyncableLoginsStorage get() = lazyPasswordsStorage.value
     val autofillStorage: AutofillCreditCardsAddressesStorage get() = lazyAutofillStorage.value
-    val domainsAutocompleteProvider: BaseDomainAutocompleteProvider? get() = null
-
-    //        if (FxNimbus.features.suggestShippedDomains.value().enabled) {
-//            lazyDomainsAutocompleteProvider.value
-//        } else {
-//            null
-//        }
+    val domainsAutocompleteProvider: BaseDomainAutocompleteProvider?
+        get() = if (FxNimbus.features.suggestShippedDomains.value().enabled) {
+            lazyDomainsAutocompleteProvider.value
+        } else {
+            null
+        }
     val sessionAutocompleteProvider: SessionAutocompleteProvider get() = lazySessionAutocompleteProvider.value
 
     val tabCollectionStorage by lazyMonitored {
@@ -639,12 +634,11 @@ class Core(
      * See https://github.com/mozilla-mobile/fenix/issues/8324
      * Also, this needs revision. See https://github.com/mozilla-mobile/fenix/issues/19155
      */
-    private fun getSecureAbove22Preferences() =
-        SecureAbove22Preferences(
-            context = context,
-            name = KEY_STORAGE_NAME,
-            forceInsecure = !Config.channel.isNightlyOrDebug,
-        )
+    private fun getSecureAbove22Preferences() = SecureAbove22Preferences(
+        context = context,
+        name = KEY_STORAGE_NAME,
+        forceInsecure = !Config.channel.isNightlyOrDebug,
+    )
 
     // Temporary. See https://github.com/mozilla-mobile/fenix/issues/19155
     private val lazySecurePrefs = lazyMonitored { getSecureAbove22Preferences() }
@@ -656,8 +650,7 @@ class Core(
      */
     fun getPreferredColorScheme(): PreferredColorScheme {
         val inDark =
-            (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) ==
-                    Configuration.UI_MODE_NIGHT_YES
+            (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
         return when {
             context.settings().shouldUseDarkTheme -> PreferredColorScheme.Dark
             context.settings().shouldUseLightTheme -> PreferredColorScheme.Light

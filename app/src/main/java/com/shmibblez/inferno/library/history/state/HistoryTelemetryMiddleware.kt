@@ -6,12 +6,12 @@ package com.shmibblez.inferno.library.history.state
 
 import mozilla.components.lib.state.Middleware
 import mozilla.components.lib.state.MiddlewareContext
-import mozilla.telemetry.glean.private.NoExtras
+//import mozilla.telemetry.glean.private.NoExtras
 import com.shmibblez.inferno.library.history.History
 import com.shmibblez.inferno.library.history.HistoryFragmentAction
 import com.shmibblez.inferno.library.history.HistoryFragmentState
 import com.shmibblez.inferno.library.history.RemoveTimeFrame
-import com.shmibblez.inferno.GleanMetrics.History as GleanHistory
+//import com.shmibblez.inferno.GleanMetrics.History as GleanHistory
 
 /**
  * A [Middleware] for recording telemetry based on [HistoryFragmentAction]s that are dispatched to
@@ -42,20 +42,20 @@ class HistoryTelemetryMiddleware(
                                 ),
                             )
                         }
-                        is History.Group -> GleanHistory.searchTermGroupTapped.record(NoExtras())
+                        is History.Group -> {} // GleanHistory.searchTermGroupTapped.record(NoExtras())
                         else -> Unit
                     }
                 }
             }
             is HistoryFragmentAction.DeleteItems -> {
-                for (item in action.items) {
-                    GleanHistory.removed.record(NoExtras())
-                }
+//                for (item in action.items) {
+//                    GleanHistory.removed.record(NoExtras())
+//                }
             }
             is HistoryFragmentAction.DeleteTimeRange -> when (action.timeFrame) {
-                RemoveTimeFrame.LastHour -> GleanHistory.removedLastHour.record(NoExtras())
-                RemoveTimeFrame.TodayAndYesterday -> GleanHistory.removedTodayAndYesterday.record(NoExtras())
-                null -> GleanHistory.removedAll.record(NoExtras())
+                RemoveTimeFrame.LastHour -> {} // GleanHistory.removedLastHour.record(NoExtras())
+                RemoveTimeFrame.TodayAndYesterday -> {} // GleanHistory.removedTodayAndYesterday.record(NoExtras())
+                null -> {} // GleanHistory.removedAll.record(NoExtras())
             }
             else -> Unit
         }

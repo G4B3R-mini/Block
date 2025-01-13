@@ -33,9 +33,9 @@ import mozilla.components.feature.accounts.push.SendTabUseCases
 import mozilla.components.feature.session.SessionUseCases
 import mozilla.components.feature.share.RecentAppsStorage
 import mozilla.components.support.ktx.kotlin.isExtensionUrl
-import mozilla.telemetry.glean.private.NoExtras
-import com.shmibblez.inferno.GleanMetrics.Events
-import com.shmibblez.inferno.GleanMetrics.SyncAccount
+//import mozilla.telemetry.glean.private.NoExtras
+//import com.shmibblez.inferno.GleanMetrics.Events
+//import com.shmibblez.inferno.GleanMetrics.SyncAccount
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.components.AppStore
 import com.shmibblez.inferno.components.accounts.FenixFxAEntryPoint

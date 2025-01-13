@@ -13,7 +13,7 @@ import mozilla.components.lib.state.State
 import com.shmibblez.inferno.browser.StandardSnackbarError
 import com.shmibblez.inferno.browser.browsingmode.BrowsingMode
 import com.shmibblez.inferno.components.appstate.readerview.ReaderViewState
-import com.shmibblez.inferno.components.appstate.recommendations.ContentRecommendationsState
+//import com.shmibblez.inferno.components.appstate.recommendations.ContentRecommendationsState
 import com.shmibblez.inferno.components.appstate.shopping.ShoppingState
 import com.shmibblez.inferno.components.appstate.snackbar.SnackbarState
 import com.shmibblez.inferno.components.appstate.webcompat.WebCompatState
@@ -25,6 +25,8 @@ import com.shmibblez.inferno.home.recentvisits.RecentlyVisitedItem
 import com.shmibblez.inferno.library.history.PendingDeletionHistory
 import com.shmibblez.inferno.messaging.MessagingState
 import com.shmibblez.inferno.search.SearchDialogFragment
+import com.shmibblez.inferno.wallpapers.WallpaperState
+
 //import com.shmibblez.inferno.wallpapers.WallpaperState
 
 /**
@@ -84,7 +86,7 @@ data class AppState(
     val recentSyncedTabState: RecentSyncedTabState = RecentSyncedTabState.None,
     val bookmarks: List<Bookmark> = emptyList(),
     val recentHistory: List<RecentlyVisitedItem> = emptyList(),
-    val recommendationState: ContentRecommendationsState = ContentRecommendationsState(),
+//    val recommendationState: ContentRecommendationsState = ContentRecommendationsState(),
     val messaging: MessagingState = MessagingState(),
     val pendingDeletionHistoryItems: Set<PendingDeletionHistory> = emptySet(),
     val wallpaperState: WallpaperState = WallpaperState.default,

@@ -68,6 +68,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.addons.WebExtensionPromptFeature
+import com.shmibblez.inferno.components.toolbar.ToolbarIntegration
 import com.shmibblez.inferno.downloads.DownloadService
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.containsQueryParameters
@@ -152,7 +153,6 @@ import mozilla.components.browser.toolbar.BrowserToolbar as BrowserToolbarCompat
 //  - change from datastore preferences to datastore
 //    - switch from: implementation "androidx.datastore:datastore-preferences:1.1.1"
 //      to: implementation "androidx.datastore:datastore:1.1.1"
-//  - in components/Core.kt, implement FxNimbus fingerprint protection
 //  - create Mozilla Location Service (MLS) token and put in components/Core.kt
 //  - BuildConfig.MLS_TOKEN
 //  - color scheme, search for FirefoxTheme usages

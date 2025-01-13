@@ -6,7 +6,7 @@ package com.shmibblez.inferno.onboarding.store
 
 import mozilla.components.lib.state.Middleware
 import mozilla.components.lib.state.MiddlewareContext
-import com.shmibblez.inferno.GleanMetrics.Onboarding
+//import com.shmibblez.inferno.GleanMetrics.Onboarding
 
 /**
  * [Middleware] for recording telemetry based on [PrivacyPreferencesAction]s.

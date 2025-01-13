@@ -85,7 +85,6 @@ import mozilla.components.support.webextensions.WebExtensionSupport
 import com.shmibblez.inferno.components.Components
 import com.shmibblez.inferno.components.Core
 import com.shmibblez.inferno.components.appstate.AppAction
-//import com.shmibblez.inferno.components.initializeGlean
 //import com.shmibblez.inferno.components.metrics.MozillaProductDetector
 //import com.shmibblez.inferno.components.startMetricsIfEnabled
 //import com.shmibblez.inferno.distributions.getDistributionId
@@ -97,7 +96,7 @@ import com.shmibblez.inferno.ext.containsQueryParameters
 import com.shmibblez.inferno.ext.settings
 import com.shmibblez.inferno.lifecycle.StoreLifecycleObserver
 import com.shmibblez.inferno.lifecycle.VisibilityLifecycleObserver
-//import com.shmibblez.inferno.nimbus.FxNimbus
+import com.shmibblez.inferno.nimbus.FxNimbus
 //import com.shmibblez.inferno.onboarding.MARKETING_CHANNEL_ID
 //import com.shmibblez.inferno.perf.ApplicationExitInfoMetrics
 import com.shmibblez.inferno.perf.MarkersActivityLifecycleCallbacks
@@ -178,15 +177,15 @@ open class BrowserApplication : LocaleAwareApplication(), Provider {
 //        }
     }
 
-//    @OptIn(DelicateCoroutinesApi::class) // GlobalScope usage
-//    @VisibleForTesting
-//    protected open fun initializeGlean() {
-//        // We avoid blocking the main thread on startup by setting startup metrics on the background thread.
-//        val store = components.core.store
-//        GlobalScope.launch(IO) {
-//            setStartupMetrics(store, settings)
-//        }
-//    }
+    @OptIn(DelicateCoroutinesApi::class) // GlobalScope usage
+    @VisibleForTesting
+    protected open fun initializeGlean() {
+        // We avoid blocking the main thread on startup by setting startup metrics on the background thread.
+        val store = components.core.store
+        GlobalScope.launch(IO) {
+            setStartupMetrics() // (store, settings)
+        }
+    }
 
 //    @VisibleForTesting
 //    protected open fun setupInAllProcesses() {
@@ -211,6 +210,8 @@ open class BrowserApplication : LocaleAwareApplication(), Provider {
             components.strictMode.resetAfter(StrictMode.allowThreadDiskReads()) {
                 components.core.engine.warmUp()
             }
+
+            initializeGlean()
 
             // Attention: Do not invoke any code from a-s in this scope.
             val megazordSetup = finishSetupMegazord()
@@ -444,11 +445,11 @@ open class BrowserApplication : LocaleAwareApplication(), Provider {
 
     protected open fun initializeNimbus() {
         beginSetupMegazord()
-//
-//        // This lazily constructs the Nimbus object…
-//        val nimbus = components.nimbus.sdk
-//        // … which we then can populate the feature configuration.
-//        FxNimbus.initialize { nimbus }
+
+        // This lazily constructs the Nimbus object…
+        val nimbus = components.nimbus.sdk
+        // … which we then can populate the feature configuration.
+        FxNimbus.initialize { nimbus }
     }
 
     /**
@@ -629,22 +630,23 @@ open class BrowserApplication : LocaleAwareApplication(), Provider {
         }
     }
 
-//    /**
-//     * This function is called right after Glean is initialized. Part of this function depends on
-//     * shared preferences to be updated so the correct value is sent with the metrics ping.
-//     *
-//     * The reason we're using shared preferences to track these values is due to the limitations of
-//     * the current metrics ping design. The values set here will be sent in every metrics ping even
-//     * if these values have not changed since the last startup.
-//     */
-//    @Suppress("ComplexMethod", "LongMethod")
-//    @VisibleForTesting
-//    internal fun setStartupMetrics(
+    /**
+     * This function is called right after Glean is initialized. Part of this function depends on
+     * shared preferences to be updated so the correct value is sent with the metrics ping.
+     *
+     * The reason we're using shared preferences to track these values is due to the limitations of
+     * the current metrics ping design. The values set here will be sent in every metrics ping even
+     * if these values have not changed since the last startup.
+     */
+    @Suppress("ComplexMethod", "LongMethod")
+    @VisibleForTesting
+    internal fun setStartupMetrics(
 //        browserStore: BrowserStore,
 //        settings: Settings,
-//        browsersCache: BrowsersCache = BrowsersCache,
+        browsersCache: BrowsersCache = BrowsersCache,
 //        mozillaProductDetector: MozillaProductDetector = MozillaProductDetector,
-//    ) {
+    ) {
+        // TODO: need to use metrics for visited sites, bookmarks, etc
 //        setPreferenceMetrics(settings)
 //        with(Metrics) {
 //            // Set this early to guarantee it's in every ping from here on.
@@ -733,13 +735,15 @@ open class BrowserApplication : LocaleAwareApplication(), Provider {
 //            ramMoreThanThreshold.set(isDeviceRamAboveThreshold)
 //            deviceTotalRam.set(getDeviceTotalRAM())
 //        }
-//
+
+        // TODO: need to use glean for android autofill
 //        with(AndroidAutofill) {
 //            val autofillUseCases = AutofillUseCases()
 //            supported.set(autofillUseCases.isSupported(applicationContext))
 //            enabled.set(autofillUseCases.isEnabled(applicationContext))
 //        }
-//
+
+        // todo: need to use glean for search default engine
 //        browserStore.waitForSelectedOrDefaultSearchEngine { searchEngine ->
 //            searchEngine?.let {
 //                val sendSearchUrl =
@@ -760,16 +764,17 @@ open class BrowserApplication : LocaleAwareApplication(), Provider {
 //                migrateTopicSpecificSearchEngines()
 //            }
 //        }
-//
+
 //        setAutofillMetrics()
-//
+
+        // TODO: need to use glean for shopping settings
 //        with(ShoppingSettings) {
 //            componentOptedOut.set(!settings.isReviewQualityCheckEnabled)
 //            nimbusDisabledShopping.set(!FxNimbus.features.shoppingExperience.value().enabled)
 //            userHasOnboarded.set(settings.reviewQualityCheckOptInTimeInMillis != 0L)
 //            disabledAds.set(!settings.isReviewQualityCheckProductRecommendationsEnabled)
 //        }
-//    }
+    }
 
     @VisibleForTesting
     internal fun getDeviceTotalRAM(): Long {

@@ -22,9 +22,9 @@ import mozilla.components.browser.state.state.recover.RecoverableTab
 import mozilla.components.lib.state.ext.consumeFrom
 import mozilla.components.lib.state.ext.flowScoped
 import mozilla.components.support.base.feature.UserInteractionHandler
-import mozilla.telemetry.glean.private.NoExtras
+//import mozilla.telemetry.glean.private.NoExtras
 import com.shmibblez.inferno.BrowserDirection
-import com.shmibblez.inferno.GleanMetrics.RecentlyClosedTabs
+//import com.shmibblez.inferno.GleanMetrics.RecentlyClosedTabs
 import com.shmibblez.inferno.HomeActivity
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.browsingmode.BrowsingMode
@@ -71,7 +71,7 @@ class RecentlyClosedFragment :
         return when (item.itemId) {
             R.id.close_history -> {
                 close()
-                RecentlyClosedTabs.menuClose.record(NoExtras())
+//                RecentlyClosedTabs.menuClose.record(NoExtras())
                 true
             }
             R.id.share_history_multi_select -> {
@@ -97,7 +97,7 @@ class RecentlyClosedFragment :
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        RecentlyClosedTabs.opened.record(NoExtras())
+//        RecentlyClosedTabs.opened.record(NoExtras())
     }
 
     override fun onCreateView(

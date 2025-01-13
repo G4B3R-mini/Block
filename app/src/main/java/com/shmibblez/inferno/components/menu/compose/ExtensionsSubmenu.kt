@@ -30,13 +30,13 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import mozilla.components.compose.base.Divider
-import mozilla.components.compose.base.annotation.LightDarkPreview
 import mozilla.components.feature.addons.Addon
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.components.menu.compose.header.SubmenuHeader
 import com.shmibblez.inferno.components.menu.store.WebExtensionMenuItem
 import com.shmibblez.inferno.compose.list.TextListItem
+import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.Divider
+import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.annotation.LightDarkPreview
 import com.shmibblez.inferno.theme.FirefoxTheme
 import com.shmibblez.inferno.theme.Theme
 

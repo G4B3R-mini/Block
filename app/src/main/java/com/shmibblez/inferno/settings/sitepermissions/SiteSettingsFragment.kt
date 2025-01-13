@@ -14,9 +14,9 @@ import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceScreen
 import androidx.preference.SwitchPreference
 import mozilla.components.browser.state.action.DefaultDesktopModeAction
-import mozilla.telemetry.glean.private.NoExtras
+//import mozilla.telemetry.glean.private.NoExtras
 import com.shmibblez.inferno.Config
-import com.shmibblez.inferno.GleanMetrics.Autoplay
+//import com.shmibblez.inferno.GleanMetrics.Autoplay
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.desktopmode.DefaultDesktopModeFeatureFlagImpl
 import com.shmibblez.inferno.ext.components
@@ -115,7 +115,7 @@ class SiteSettingsFragment : PreferenceFragmentCompat() {
             .actionSitePermissionsToManagePhoneFeatures(phoneFeature)
 
         if (phoneFeature == PhoneFeature.AUTOPLAY_AUDIBLE) {
-            Autoplay.visitedSetting.record(NoExtras())
+//            Autoplay.visitedSetting.record(NoExtras())
         }
         context?.let {
             Navigation.findNavController(requireView()).navigateWithBreadcrumb(

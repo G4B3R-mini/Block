@@ -14,10 +14,10 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import mozilla.components.compose.base.utils.inComposePreview
 import mozilla.components.support.images.compose.loader.ImageLoader
 import mozilla.components.support.images.compose.loader.WithImage
 import com.shmibblez.inferno.components.components
+import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.utils.inComposePreview
 import com.shmibblez.inferno.theme.FirefoxTheme
 
 /**

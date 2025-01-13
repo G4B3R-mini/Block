@@ -11,8 +11,8 @@ import mozilla.components.browser.menu.item.SimpleBrowserMenuItem
 import mozilla.components.browser.state.selector.normalTabs
 import mozilla.components.browser.state.selector.privateTabs
 import mozilla.components.browser.state.store.BrowserStore
-import mozilla.telemetry.glean.private.NoExtras
-import com.shmibblez.inferno.GleanMetrics.TabsTray
+//import mozilla.telemetry.glean.private.NoExtras
+//import com.shmibblez.inferno.GleanMetrics.TabsTray
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.tabstray.ext.isNormalModeSelected
 import com.shmibblez.inferno.tabstray.ext.isPrivateModeSelected
@@ -63,7 +63,7 @@ class TabsTrayMenu(
                 context.getString(R.string.tab_tray_menu_item_share),
                 textColorResource = R.color.fx_mobile_text_color_primary,
             ) {
-                TabsTray.shareAllTabs.record(NoExtras())
+//                TabsTray.shareAllTabs.record(NoExtras())
                 onItemTapped.invoke(Item.ShareAllTabs)
             }.apply { visible = shouldShowSelectOrShare },
 
@@ -92,7 +92,7 @@ class TabsTrayMenu(
                 context.getString(R.string.tab_tray_menu_item_close),
                 textColorResource = R.color.fx_mobile_text_color_primary,
             ) {
-                TabsTray.closeAllTabs.record(NoExtras())
+//                TabsTray.closeAllTabs.record(NoExtras())
                 onItemTapped.invoke(Item.CloseAllTabs)
             }.apply { visible = { checkOpenTabs } },
         )

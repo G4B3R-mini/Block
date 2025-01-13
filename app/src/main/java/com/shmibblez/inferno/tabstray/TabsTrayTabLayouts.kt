@@ -37,7 +37,7 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
 import mozilla.components.browser.state.state.ContentState
 import mozilla.components.browser.state.state.TabSessionState
-import mozilla.components.compose.base.annotation.LightDarkPreview
+import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.annotation.LightDarkPreview
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.SwipeToDismissState
 import com.shmibblez.inferno.compose.tabstray.TabGridItem

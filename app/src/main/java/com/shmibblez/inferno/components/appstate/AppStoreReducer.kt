@@ -4,12 +4,13 @@
 
 package com.shmibblez.inferno.components.appstate
 
+import android.annotation.SuppressLint
 import androidx.annotation.VisibleForTesting
 import mozilla.components.lib.crash.store.crashReducer
 import com.shmibblez.inferno.browser.browsingmode.BrowsingMode
 import com.shmibblez.inferno.components.AppStore
 import com.shmibblez.inferno.components.appstate.readerview.ReaderViewStateReducer
-import com.shmibblez.inferno.components.appstate.recommendations.ContentRecommendationsReducer
+//import com.shmibblez.inferno.components.appstate.recommendations.ContentRecommendationsReducer
 import com.shmibblez.inferno.components.appstate.reducer.FindInPageStateReducer
 import com.shmibblez.inferno.components.appstate.shopping.ShoppingStateReducer
 import com.shmibblez.inferno.components.appstate.snackbar.SnackbarState
@@ -26,6 +27,7 @@ import com.shmibblez.inferno.share.ShareActionReducer
  * Reducer for [AppStore].
  */
 internal object AppStoreReducer {
+    @SuppressLint("VisibleForTests")
     @Suppress("LongMethod")
     fun reduce(state: AppState, action: AppAction): AppState = when (action) {
         is AppAction.UpdateInactiveExpanded ->
@@ -203,10 +205,10 @@ internal object AppStoreReducer {
             state.copy(wasNativeDefaultBrowserPromptShown = action.wasShown)
         }
 
-        is AppAction.ContentRecommendationsAction -> ContentRecommendationsReducer.reduce(
-            state = state,
-            action = action,
-        )
+//        is AppAction.ContentRecommendationsAction -> ContentRecommendationsReducer.reduce(
+//            state = state,
+//            action = action,
+//        )
 
         is AppAction.WebCompatAction -> WebCompatReducer.reduce(state = state, action = action)
     }

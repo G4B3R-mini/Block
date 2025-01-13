@@ -29,7 +29,7 @@ import mozilla.components.support.base.log.logger.Logger
 import mozilla.components.support.utils.BrowsersCache
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.components.accounts.FenixFxAEntryPoint
-import com.shmibblez.inferno.components.initializeGlean
+//import com.shmibblez.inferno.components.initializeGlean
 import com.shmibblez.inferno.components.lazyStore
 import com.shmibblez.inferno.components.startMetricsIfEnabled
 import com.shmibblez.inferno.compose.LinkTextState

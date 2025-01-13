@@ -9,9 +9,9 @@ import mozilla.components.browser.state.selector.getNormalOrPrivateTabs
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.concept.engine.prompt.ShareData
 import mozilla.components.service.fxa.manager.FxaAccountManager
-import mozilla.telemetry.glean.private.NoExtras
-import com.shmibblez.inferno.GleanMetrics.Events
-import com.shmibblez.inferno.GleanMetrics.TabsTray
+//import mozilla.telemetry.glean.private.NoExtras
+//import com.shmibblez.inferno.GleanMetrics.Events
+//import com.shmibblez.inferno.GleanMetrics.TabsTray
 import com.shmibblez.inferno.components.accounts.FenixFxAEntryPoint
 import com.shmibblez.inferno.home.HomeFragment
 import com.shmibblez.inferno.tabstray.ext.isActiveDownload
@@ -72,7 +72,7 @@ class DefaultNavigationInteractor(
 ) : NavigationInteractor {
 
     override fun onTabTrayDismissed() {
-        TabsTray.closed.record(NoExtras())
+//        TabsTray.closed.record(NoExtras())
         dismissTabTray()
     }
 
@@ -97,7 +97,7 @@ class DefaultNavigationInteractor(
         navController.navigate(
             TabsTrayFragmentDirections.actionGlobalRecentlyClosed(),
         )
-        Events.recentlyClosedTabsOpened.record(NoExtras())
+//        Events.recentlyClosedTabsOpened.record(NoExtras())
     }
 
     override fun onShareTabsOfTypeClicked(private: Boolean) {

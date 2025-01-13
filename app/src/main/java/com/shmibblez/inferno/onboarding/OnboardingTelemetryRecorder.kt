@@ -4,7 +4,7 @@
 
 package com.shmibblez.inferno.onboarding
 
-import com.shmibblez.inferno.GleanMetrics.Onboarding
+//import com.shmibblez.inferno.GleanMetrics.Onboarding
 import com.shmibblez.inferno.onboarding.view.OnboardingPageUiData
 
 /**
@@ -30,7 +30,7 @@ class OnboardingTelemetryRecorder {
      * Records "onboarding_started" telemetry event.
      */
     fun onOnboardingStarted() {
-        Onboarding.started.record()
+//        Onboarding.started.record()
     }
 
     /**
@@ -379,28 +379,28 @@ class OnboardingTelemetryRecorder {
      * Records when the terms of service link is clicked.
      */
     fun onTermsOfServiceLinkClick() {
-        Onboarding.termsOfServiceCard.record()
+//        Onboarding.termsOfServiceCard.record()
     }
 
     /**
      * Records when the privacy notice link clicked.
      */
     fun onTermsOfServicePrivacyNoticeLinkClick() {
-        Onboarding.termsOfServicePrivacyNoticeLinkClicked.record()
+//        Onboarding.termsOfServicePrivacyNoticeLinkClicked.record()
     }
 
     /**
      * Records when the manage privacy preferences link clicked.
      */
     fun onTermsOfServiceManagePrivacyPreferencesLinkClick() {
-        Onboarding.termsOfServiceManageLinkClicked.record()
+//        Onboarding.termsOfServiceManageLinkClicked.record()
     }
 
     /**
      * Records when the accept terms button clicked.
      */
     fun onTermsOfServiceManagerAcceptTermsButtonClick() {
-        Onboarding.termsOfServiceAccepted.record()
+//        Onboarding.termsOfServiceAccepted.record()
     }
 
     companion object {

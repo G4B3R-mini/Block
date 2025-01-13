@@ -17,7 +17,7 @@ import mozilla.components.concept.storage.UpdatableAddressFields
 import mozilla.components.support.ktx.android.view.hideKeyboard
 import mozilla.components.support.ktx.android.view.showKeyboard
 import mozilla.components.ui.widgets.withCenterAlignedButtons
-import com.shmibblez.inferno.GleanMetrics.Addresses
+//import com.shmibblez.inferno.GleanMetrics.Addresses
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.databinding.FragmentAddressEditorBinding
 import com.shmibblez.inferno.ext.placeCursorAtEnd

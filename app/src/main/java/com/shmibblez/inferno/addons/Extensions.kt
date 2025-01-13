@@ -5,6 +5,7 @@
 package com.shmibblez.inferno.addons
 
 import android.view.View
+import androidx.compose.material3.SnackbarDefaults
 import androidx.compose.material3.SnackbarDuration
 import mozilla.components.feature.addons.Addon
 import mozilla.components.feature.addons.ui.AddonsManagerAdapterDelegate
@@ -13,6 +14,7 @@ import com.shmibblez.inferno.BuildConfig
 import com.shmibblez.inferno.HomeActivity
 import com.shmibblez.inferno.compose.snackbar.Snackbar
 import com.shmibblez.inferno.compose.snackbar.SnackbarState
+import com.shmibblez.inferno.compose.snackbar.toMillis
 import com.shmibblez.inferno.settings.SupportUtils
 
 /**
@@ -22,7 +24,7 @@ import com.shmibblez.inferno.settings.SupportUtils
  * @param text The text to display in the [Snackbar].
  * @param duration The duration to show the [Snackbar] for.
  */
-internal fun showSnackBar(view: View, text: String, duration: SnackbarDuration = SnackbarDuration.Short) {
+internal fun showSnackBar(view: View, text: String, duration: SnackbarState.Duration = SnackbarState.Duration.Preset.Short) {
     Snackbar.make(
         snackBarParentView = view,
         snackbarState = SnackbarState(

@@ -48,9 +48,9 @@ import mozilla.components.support.base.feature.UserInteractionHandler
 import mozilla.components.support.base.feature.ViewBoundFeatureWrapper
 import mozilla.components.support.ktx.kotlin.toShortUrl
 import mozilla.components.ui.widgets.withCenterAlignedButtons
-import mozilla.telemetry.glean.private.NoExtras
+//import mozilla.telemetry.glean.private.NoExtras
 import com.shmibblez.inferno.BrowserDirection
-import com.shmibblez.inferno.GleanMetrics.BookmarksManagement
+//import com.shmibblez.inferno.GleanMetrics.BookmarksManagement
 import com.shmibblez.inferno.HomeActivity
 import com.shmibblez.inferno.NavGraphDirections
 import com.shmibblez.inferno.NavHostActivity
@@ -363,14 +363,14 @@ class BookmarkFragment : LibraryPageFragment<BookmarkNode>(), UserInteractionHan
                 openItemsInNewTab { node -> node.url }
 
                 showTabTray()
-                BookmarksManagement.openInNewTabs.record(NoExtras())
+//                BookmarksManagement.openInNewTabs.record(NoExtras())
                 true
             }
             R.id.open_bookmarks_in_private_tabs_multi_select -> {
                 openItemsInNewTab(private = true) { node -> node.url }
 
                 showTabTray(openInPrivate = true)
-                BookmarksManagement.openInPrivateTabs.record(NoExtras())
+//                BookmarksManagement.openInPrivateTabs.record(NoExtras())
                 true
             }
             R.id.share_bookmark_multi_select -> {
@@ -589,11 +589,11 @@ class BookmarkFragment : LibraryPageFragment<BookmarkNode>(), UserInteractionHan
             }
             when (event) {
                 BookmarkRemoveType.FOLDER ->
-                    BookmarksManagement.folderRemove.record(NoExtras())
+//                    BookmarksManagement.folderRemove.record(NoExtras())
                 BookmarkRemoveType.MULTIPLE ->
-                    BookmarksManagement.multiRemoved.record(NoExtras())
+//                    BookmarksManagement.multiRemoved.record(NoExtras())
                 BookmarkRemoveType.SINGLE ->
-                    BookmarksManagement.removed.record(NoExtras())
+//                    BookmarksManagement.removed.record(NoExtras())
             }
             refreshBookmarks()
         }

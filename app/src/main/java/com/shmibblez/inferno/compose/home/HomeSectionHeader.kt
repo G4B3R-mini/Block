@@ -23,7 +23,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import mozilla.components.compose.base.utils.inComposePreview
+import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.utils.inComposePreview
 import mozilla.components.lib.state.ext.observeAsComposableState
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.components.components

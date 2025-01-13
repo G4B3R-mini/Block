@@ -11,7 +11,7 @@ import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.concept.engine.shopping.ProductAnalysis
 import mozilla.components.concept.engine.shopping.ProductRecommendation
 import mozilla.components.support.base.log.logger.Logger
-import com.shmibblez.inferno.GleanMetrics.Shopping
+//import com.shmibblez.inferno.GleanMetrics.Shopping
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -135,13 +135,13 @@ class DefaultReviewQualityCheckService(
                         tab.engineState.engineSession?.requestProductRecommendations(
                             url = tab.content.url,
                             onResult = {
-                                if (it.isEmpty()) {
-                                    if (shouldRecordAvailableTelemetry) {
-                                        Shopping.surfaceNoAdsAvailable.record()
-                                    }
-                                } else {
-                                    Shopping.adsExposure.record()
-                                }
+//                                if (it.isEmpty()) {
+//                                    if (shouldRecordAvailableTelemetry) {
+//                                        Shopping.surfaceNoAdsAvailable.record()
+//                                    }
+//                                } else {
+//                                    Shopping.adsExposure.record()
+//                                }
                                 // Return the first available recommendation since ui requires only
                                 // one recommendation.
                                 continuation.resume(

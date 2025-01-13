@@ -926,10 +926,10 @@
             android:name="selectedTabCollectionId"
             android:defaultValue="-1L"
             app:argType="long" />
-<!--        <argument-->
-<!--            android:name="saveCollectionStep"-->
-<!--            app:argType="com.shmibblez.inferno.collections.SaveCollectionStep"-->
-<!--            app:nullable="false" />-->
+        <argument
+            android:name="saveCollectionStep"
+            app:argType="com.shmibblez.inferno.collections.SaveCollectionStep"
+            app:nullable="false" />
     </dialog>
 
     <dialog

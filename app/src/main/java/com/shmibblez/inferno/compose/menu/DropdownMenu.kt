@@ -40,7 +40,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import mozilla.components.compose.base.Divider
+import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.Divider
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.button.PrimaryButton
 import com.shmibblez.inferno.compose.menu.MenuItem.FixedItem.Level
@@ -211,7 +211,7 @@ private fun FlexibleDropdownMenuItem(
         enabled = enabled,
         contentPadding = contentPadding,
         interactionSource = interactionSource,
-        content = {
+        text = {
             Row(
                 horizontalArrangement = Arrangement.spacedBy(ItemHorizontalSpaceBetween),
                 verticalAlignment = Alignment.CenterVertically,

@@ -40,7 +40,7 @@
 //import androidx.compose.ui.unit.DpOffset
 //import androidx.compose.ui.unit.dp
 //import androidx.compose.ui.unit.times
-////import mozilla.components.compose.base.Divider
+////import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.Divider
 ////import mozilla.components.compose.base.annotation.FlexibleWindowLightDarkPreview
 //import com.shmibblez.inferno.R
 //import com.shmibblez.inferno.theme.FirefoxTheme

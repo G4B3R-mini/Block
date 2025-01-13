@@ -46,9 +46,9 @@ import mozilla.components.support.ktx.android.view.hideKeyboard
 import mozilla.components.support.ktx.android.view.showKeyboard
 import mozilla.components.support.ktx.kotlin.toShortUrl
 import mozilla.components.ui.widgets.withCenterAlignedButtons
-import mozilla.telemetry.glean.private.NoExtras
+//import mozilla.telemetry.glean.private.NoExtras
 import com.shmibblez.inferno.BrowserDirection
-import com.shmibblez.inferno.GleanMetrics.BookmarksManagement
+//import com.shmibblez.inferno.GleanMetrics.BookmarksManagement
 import com.shmibblez.inferno.HomeActivity
 import com.shmibblez.inferno.NavHostActivity
 import com.shmibblez.inferno.R
@@ -357,7 +357,7 @@ class EditBookmarkFragment : Fragment(R.layout.fragment_edit_bookmark), MenuProv
                     // Use fragment's lifecycle; the view may be gone by the time dialog is interacted with.
                     lifecycleScope.launch(IO) {
                         requireComponents.core.bookmarksStorage.deleteNode(args.guidToEdit)
-                        BookmarksManagement.removed.record(NoExtras())
+//                        BookmarksManagement.removed.record(NoExtras())
                         MetricsUtils.recordBookmarkMetrics(MetricsUtils.BookmarkAction.DELETE, METRIC_SOURCE)
 
                         launch(Main) {
@@ -393,14 +393,14 @@ class EditBookmarkFragment : Fragment(R.layout.fragment_edit_bookmark), MenuProv
             try {
                 requireComponents.let { components ->
                     if (title != bookmarkNode?.title || url != bookmarkNode?.url) {
-                        BookmarksManagement.edited.record(NoExtras())
+//                        BookmarksManagement.edited.record(NoExtras())
                     }
                     val parentGuid =
                         sharedViewModel.selectedFolder?.guid ?: bookmarkNode!!.parentGuid
                     val parentChanged = initialParentGuid != parentGuid
                     // Only track the 'moved' event if new parent was selected.
                     if (parentChanged) {
-                        BookmarksManagement.moved.record(NoExtras())
+//                        BookmarksManagement.moved.record(NoExtras())
                     }
                     components.core.bookmarksStorage.updateNode(
                         args.guidToEdit,

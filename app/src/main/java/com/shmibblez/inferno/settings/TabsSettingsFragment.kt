@@ -9,9 +9,9 @@ import android.view.View
 import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreference
-import mozilla.telemetry.glean.private.NoExtras
-import com.shmibblez.inferno.GleanMetrics.Events
-import com.shmibblez.inferno.GleanMetrics.Tabs
+//import mozilla.telemetry.glean.private.NoExtras
+//import com.shmibblez.inferno.GleanMetrics.Events
+//import com.shmibblez.inferno.GleanMetrics.Tabs
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.ext.settings
 import com.shmibblez.inferno.ext.showToolbar
@@ -36,7 +36,7 @@ class TabsSettingsFragment : PreferenceFragmentCompat() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        Tabs.settingOpened.record(NoExtras())
+//        Tabs.settingOpened.record(NoExtras())
     }
 
     override fun onResume() {
@@ -95,11 +95,11 @@ class TabsSettingsFragment : PreferenceFragmentCompat() {
     }
 
     private fun sendTabViewTelemetry() {
-        if (listRadioButton.isChecked && !gridRadioButton.isChecked) {
-            Events.tabViewChanged.record(Events.TabViewChangedExtra("list"))
-        } else {
-            Events.tabViewChanged.record(Events.TabViewChangedExtra("grid"))
-        }
+//        if (listRadioButton.isChecked && !gridRadioButton.isChecked) {
+//            Events.tabViewChanged.record(Events.TabViewChangedExtra("list"))
+//        } else {
+//            Events.tabViewChanged.record(Events.TabViewChangedExtra("grid"))
+//        }
     }
 
     private fun enableInactiveTabsSetting() {

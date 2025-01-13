@@ -6,8 +6,8 @@ package com.shmibblez.inferno.home.recenttabs.controller
 
 import androidx.navigation.NavController
 import mozilla.components.feature.tabs.TabsUseCases.SelectTabUseCase
-import mozilla.telemetry.glean.private.NoExtras
-import com.shmibblez.inferno.GleanMetrics.RecentTabs
+//import mozilla.telemetry.glean.private.NoExtras
+//import com.shmibblez.inferno.GleanMetrics.RecentTabs
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.components.AppStore
 import com.shmibblez.inferno.components.appstate.AppAction

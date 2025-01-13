@@ -10,8 +10,8 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.LifecycleOwner
 import mozilla.components.lib.state.ext.observeAsComposableState
-import mozilla.telemetry.glean.private.NoExtras
-import com.shmibblez.inferno.GleanMetrics.HomeBookmarks
+//import mozilla.telemetry.glean.private.NoExtras
+//import com.shmibblez.inferno.GleanMetrics.HomeBookmarks
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.components.components
 import com.shmibblez.inferno.compose.ComposeViewHolder

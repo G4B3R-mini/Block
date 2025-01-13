@@ -46,19 +46,18 @@ fun NavController.navigateWithBreadcrumb(
     directions: NavDirections,
     navigateFrom: String,
     navigateTo: String,
-    crashReporter: CrashReporter,
 ) {
     try {
         this.navigate(directions)
     } catch (e: IllegalArgumentException) {
-        crashReporter.recordCrashBreadcrumb(
-            Breadcrumb(
-                "Navigation - " +
-                    "where we are: $currentDestination," + "where we are going: $navigateTo, " +
-                    "where we thought we were: $navigateFrom",
-            ),
-        )
-        crashReporter.submitCaughtException(e)
+//        crashReporter.recordCrashBreadcrumb(
+//            Breadcrumb(
+//                "Navigation - " +
+//                    "where we are: $currentDestination," + "where we are going: $navigateTo, " +
+//                    "where we thought we were: $navigateFrom",
+//            ),
+//        )
+//        crashReporter.submitCaughtException(e)
     }
 }
 

@@ -19,7 +19,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.ExperimentalMaterialApi
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -80,8 +80,9 @@ private val UNFOCUSED_INDICATOR_LINE_THICKNESS_DP = 1.dp
  * called. Note that this IME action may be different from what you specified in
  * [KeyboardOptions.imeAction].
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Suppress("LongMethod")
-@OptIn(ExperimentalMaterialApi::class)
+//@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun TextField(
     value: String,
@@ -106,7 +107,7 @@ fun TextField(
 
     // We use the Material textFieldColors for the indicator line as it keeps track of error
     // and focused states
-    val indicatorLineColors = TextFieldDefaults.textFieldColors(
+    val indicatorLineColors = TextFieldDefaults.colors(
         focusedIndicatorColor = colors.focusedIndicatorColor,
         unfocusedIndicatorColor = colors.unfocusedIndicatorColor,
         errorIndicatorColor = colors.errorIndicatorColor,

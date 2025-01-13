@@ -18,11 +18,11 @@ import mozilla.components.concept.engine.prompt.ShareData
 import mozilla.components.feature.tabs.TabsUseCases
 import mozilla.components.support.ktx.kotlin.isUrl
 import mozilla.components.ui.tabcounter.TabCounterMenu
-import mozilla.telemetry.glean.private.NoExtras
-import com.shmibblez.inferno.GleanMetrics.Events
-import com.shmibblez.inferno.GleanMetrics.NavigationBar
-import com.shmibblez.inferno.GleanMetrics.ReaderMode
-import com.shmibblez.inferno.GleanMetrics.Translations
+//import mozilla.telemetry.glean.private.NoExtras
+//import com.shmibblez.inferno.GleanMetrics.Events
+//import com.shmibblez.inferno.GleanMetrics.NavigationBar
+//import com.shmibblez.inferno.GleanMetrics.ReaderMode
+//import com.shmibblez.inferno.GleanMetrics.Translations
 import com.shmibblez.inferno.HomeActivity
 import com.shmibblez.inferno.NavGraphDirections
 import com.shmibblez.inferno.R
@@ -141,7 +141,7 @@ class DefaultBrowserToolbarController(
     }
 
     override fun handleToolbarClick() {
-        Events.searchBarTapped.record(Events.SearchBarTappedExtra("BROWSER"))
+//        Events.searchBarTapped.record(Events.SearchBarTappedExtra("BROWSER"))
         // If we're displaying awesomebar search results, Home screen will not be visible (it's
         // covered up with the search results). So, skip the navigation event in that case.
         // If we don't, there's a visual flickr as we navigate to Home and then display search
@@ -175,10 +175,10 @@ class DefaultBrowserToolbarController(
     override fun handleReaderModePressed(enabled: Boolean) {
         if (enabled) {
             readerModeController.showReaderView()
-            ReaderMode.opened.record(NoExtras())
+//            ReaderMode.opened.record(NoExtras())
         } else {
             readerModeController.hideReaderView()
-            ReaderMode.closed.record(NoExtras())
+//            ReaderMode.closed.record(NoExtras())
         }
     }
 
@@ -220,7 +220,7 @@ class DefaultBrowserToolbarController(
     }
 
     override fun handleHomeButtonClick() {
-        Events.browserToolbarHomeTapped.record(NoExtras())
+//        Events.browserToolbarHomeTapped.record(NoExtras())
         browserAnimator.captureEngineViewAndDrawStatically {
             navController.navigate(
                 BrowserFragmentDirections.actionGlobalHome(),
@@ -229,14 +229,14 @@ class DefaultBrowserToolbarController(
     }
 
     override fun handleEraseButtonClick() {
-        Events.browserToolbarEraseTapped.record(NoExtras())
+//        Events.browserToolbarEraseTapped.record(NoExtras())
         homeViewModel.sessionToDelete = HomeFragment.ALL_PRIVATE_TABS
         val directions = BrowserFragmentDirections.actionGlobalHome()
         navController.navigate(directions)
     }
 
     override fun handleTranslationsButtonClick() {
-        Translations.action.record(Translations.ActionExtra("main_flow_toolbar"))
+//        Translations.action.record(Translations.ActionExtra("main_flow_toolbar"))
 
         appStore.dispatch(SnackbarAction.SnackbarDismissed)
 
@@ -271,7 +271,7 @@ class DefaultBrowserToolbarController(
             )
         }
 
-        NavigationBar.browserNewTabTapped.record(NoExtras())
+//        NavigationBar.browserNewTabTapped.record(NoExtras())
 
         browserAnimator.captureEngineViewAndDrawStatically {
             navController.navigate(
@@ -281,7 +281,7 @@ class DefaultBrowserToolbarController(
     }
 
     override fun handleNewTabButtonLongClick() {
-        NavigationBar.browserNewTabLongTapped.record(NoExtras())
+//        NavigationBar.browserNewTabLongTapped.record(NoExtras())
     }
 
     override fun handleMenuButtonClicked(

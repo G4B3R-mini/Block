@@ -14,7 +14,7 @@ import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.browser.storage.sync.PlacesHistoryStorage
 import mozilla.components.concept.engine.prompt.ShareData
 import mozilla.components.feature.tabs.TabsUseCases
-import mozilla.telemetry.glean.private.NoExtras
+//import mozilla.telemetry.glean.private.NoExtras
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.components.AppStore
 import com.shmibblez.inferno.components.appstate.AppAction
@@ -25,7 +25,7 @@ import com.shmibblez.inferno.library.historymetadata.HistoryMetadataGroupFragmen
 import com.shmibblez.inferno.library.historymetadata.HistoryMetadataGroupFragmentAction
 import com.shmibblez.inferno.library.historymetadata.HistoryMetadataGroupFragmentDirections
 import com.shmibblez.inferno.library.historymetadata.HistoryMetadataGroupFragmentStore
-import com.shmibblez.inferno.GleanMetrics.History as GleanHistory
+//import com.shmibblez.inferno.GleanMetrics.History as GleanHistory
 
 /**
  * An interface that handles the view manipulation of the history metadata group in the History
@@ -109,7 +109,7 @@ class DefaultHistoryMetadataGroupController(
     override fun handleOpen(item: History.Metadata) {
         selectOrAddUseCase.invoke(item.url, item.historyMetadataKey)
         navController.navigate(R.id.browserFragment)
-        GleanHistory.searchTermGroupOpenTab.record(NoExtras())
+//        GleanHistory.searchTermGroupOpenTab.record(NoExtras())
     }
 
     override fun handleSelect(item: History.Metadata) {
@@ -155,7 +155,7 @@ class DefaultHistoryMetadataGroupController(
                 items.forEach {
                     store.dispatch(HistoryMetadataGroupFragmentAction.Delete(it))
                     context.components.core.historyStorage.deleteVisitsFor(it.url)
-                    GleanHistory.searchTermGroupRemoveTab.record(NoExtras())
+//                    GleanHistory.searchTermGroupRemoveTab.record(NoExtras())
                 }
                 // The method is called for both single and multiple items.
                 // In case all items have been deleted, we have to disband the search group.
@@ -181,7 +181,7 @@ class DefaultHistoryMetadataGroupController(
             browserStore.dispatch(
                 HistoryMetadataAction.DisbandSearchGroupAction(searchTerm = searchTerm),
             )
-            GleanHistory.searchTermGroupRemoveAll.record(NoExtras())
+//            GleanHistory.searchTermGroupRemoveAll.record(NoExtras())
             allDeletedSnackbar.invoke()
             launch(Main) {
                 navController.popBackStack(R.id.historyFragment, false)

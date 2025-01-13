@@ -16,9 +16,9 @@ import mozilla.components.compose.browser.awesomebar.AwesomeBarDefaults
 import mozilla.components.compose.browser.awesomebar.AwesomeBarOrientation
 import mozilla.components.concept.awesomebar.AwesomeBar
 import mozilla.components.support.ktx.android.view.hideKeyboard
-import mozilla.telemetry.glean.private.NoExtras
-import com.shmibblez.inferno.GleanMetrics.BookmarksManagement
-import com.shmibblez.inferno.GleanMetrics.History
+//import mozilla.telemetry.glean.private.NoExtras
+//import com.shmibblez.inferno.GleanMetrics.BookmarksManagement
+//import com.shmibblez.inferno.GleanMetrics.History
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.settings
 import com.shmibblez.inferno.theme.FirefoxTheme
@@ -65,14 +65,14 @@ class AwesomeBarWrapper @JvmOverloads constructor(
                 onSuggestionClicked = { suggestion ->
                     context.components.core.store.dispatch(AwesomeBarAction.SuggestionClicked(suggestion))
                     suggestion.onSuggestionClicked?.invoke()
-                    when {
-                        suggestion.flags.contains(AwesomeBar.Suggestion.Flag.HISTORY) -> {
-                            History.searchResultTapped.record(NoExtras())
-                        }
-                        suggestion.flags.contains(AwesomeBar.Suggestion.Flag.BOOKMARK) -> {
-                            BookmarksManagement.searchResultTapped.record(NoExtras())
-                        }
-                    }
+//                    when {
+//                        suggestion.flags.contains(AwesomeBar.Suggestion.Flag.HISTORY) -> {
+//                            History.searchResultTapped.record(NoExtras())
+//                        }
+//                        suggestion.flags.contains(AwesomeBar.Suggestion.Flag.BOOKMARK) -> {
+//                            BookmarksManagement.searchResultTapped.record(NoExtras())
+//                        }
+//                    }
                     onStopListener?.invoke()
                 },
                 onAutoComplete = { suggestion ->

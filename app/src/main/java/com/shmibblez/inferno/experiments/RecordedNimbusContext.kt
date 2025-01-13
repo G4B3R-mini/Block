@@ -14,7 +14,7 @@ import org.mozilla.experiments.nimbus.NimbusDeviceInfo
 import org.mozilla.experiments.nimbus.internal.JsonObject
 import org.mozilla.experiments.nimbus.internal.RecordedContext
 import org.mozilla.experiments.nimbus.internal.getCalculatedAttributes
-import com.shmibblez.inferno.GleanMetrics.NimbusSystem
+//import com.shmibblez.inferno.GleanMetrics.NimbusSystem
 import com.shmibblez.inferno.ext.settings
 import java.io.File
 

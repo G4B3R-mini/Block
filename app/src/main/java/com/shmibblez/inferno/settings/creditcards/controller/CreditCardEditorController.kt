@@ -13,8 +13,8 @@ import kotlinx.coroutines.launch
 import mozilla.components.concept.storage.NewCreditCardFields
 import mozilla.components.concept.storage.UpdatableCreditCardFields
 import mozilla.components.service.sync.autofill.AutofillCreditCardsAddressesStorage
-import mozilla.telemetry.glean.private.NoExtras
-import com.shmibblez.inferno.GleanMetrics.CreditCards
+//import mozilla.telemetry.glean.private.NoExtras
+//import com.shmibblez.inferno.GleanMetrics.CreditCards
 import com.shmibblez.inferno.settings.creditcards.CreditCardEditorFragment
 import com.shmibblez.inferno.settings.creditcards.interactor.CreditCardEditorInteractor
 
@@ -100,7 +100,7 @@ class DefaultCreditCardEditorController(
             lifecycleScope.launch(Dispatchers.Main) {
                 navController.popBackStack()
             }
-            CreditCards.modified.record(NoExtras())
+//            CreditCards.modified.record(NoExtras())
         }
     }
 }

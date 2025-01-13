@@ -15,8 +15,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import mozilla.components.lib.publicsuffixlist.PublicSuffixList
 import mozilla.components.support.ktx.kotlin.toShortUrl
-import mozilla.telemetry.glean.private.NoExtras
-import com.shmibblez.inferno.GleanMetrics.CookieBanners
+//import mozilla.telemetry.glean.private.NoExtras
+//import com.shmibblez.inferno.GleanMetrics.CookieBanners
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.databinding.ComponentCookieBannerDetailsPanelBinding
 import com.shmibblez.inferno.trackingprotection.CookieBannerUIMode
@@ -79,7 +79,7 @@ class CookieBannerHandlingDetailsView(
             onDismiss.invoke()
         }
         binding.cancelButton.setOnClickListener {
-            CookieBanners.reportSiteCancelButton.record(NoExtras())
+//            CookieBanners.reportSiteCancelButton.record(NoExtras())
             interactor.onBackPressed()
         }
     }

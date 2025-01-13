@@ -19,7 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import mozilla.components.compose.base.annotation.LightDarkPreview
+import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.annotation.LightDarkPreview
 import com.shmibblez.inferno.theme.FirefoxTheme
 
 /**
@@ -44,7 +44,8 @@ fun RadioButton(
         colors = RadioButtonDefaults.colors(
             selectedColor = FirefoxTheme.colors.formSelected,
             unselectedColor = FirefoxTheme.colors.formDefault,
-            disabledColor = FirefoxTheme.colors.formDisabled,
+            disabledSelectedColor = FirefoxTheme.colors.formDisabled,
+            disabledUnselectedColor = FirefoxTheme.colors.formDisabled,
         ),
         onClick = onClick,
     )

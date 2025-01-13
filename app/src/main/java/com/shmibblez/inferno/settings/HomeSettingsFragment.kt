@@ -11,7 +11,7 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreference
 import com.shmibblez.inferno.FeatureFlags
-import com.shmibblez.inferno.GleanMetrics.CustomizeHome
+//import com.shmibblez.inferno.GleanMetrics.CustomizeHome
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.components.appstate.AppAction.ContentRecommendationsAction
 import com.shmibblez.inferno.ext.components

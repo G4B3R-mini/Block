@@ -16,9 +16,9 @@ import mozilla.components.concept.engine.permission.SitePermissions
 import mozilla.components.feature.session.SessionUseCases.ReloadUrlUseCase
 import mozilla.components.support.base.feature.OnNeedToRequestPermissions
 import mozilla.components.support.ktx.kotlin.getOrigin
-import mozilla.telemetry.glean.private.NoExtras
-import com.shmibblez.inferno.GleanMetrics.CookieBanners
-import com.shmibblez.inferno.GleanMetrics.TrackingProtection
+//import mozilla.telemetry.glean.private.NoExtras
+//import com.shmibblez.inferno.GleanMetrics.CookieBanners
+//import com.shmibblez.inferno.GleanMetrics.TrackingProtection
 import com.shmibblez.inferno.NavGraphDirections
 import com.shmibblez.inferno.components.PermissionStorage
 import com.shmibblez.inferno.ext.components
@@ -197,7 +197,7 @@ class DefaultQuickSettingsController(
             if (isEnabled) {
                 trackingProtectionUseCases.removeException(session.id)
             } else {
-                TrackingProtection.exceptionAdded.record(NoExtras())
+//                TrackingProtection.exceptionAdded.record(NoExtras())
                 trackingProtectionUseCases.addException(session.id)
             }
 
@@ -212,7 +212,7 @@ class DefaultQuickSettingsController(
     }
 
     override fun handleCookieBannerHandlingDetailsClicked() {
-        CookieBanners.visitedPanel.record(NoExtras())
+//        CookieBanners.visitedPanel.record(NoExtras())
 
         navController.popBackStack()
 

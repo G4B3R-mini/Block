@@ -22,9 +22,9 @@ import mozilla.components.concept.engine.cookiehandling.CookieBannersStorage
 import mozilla.components.concept.engine.permission.SitePermissions
 import mozilla.components.feature.session.SessionUseCases
 import mozilla.components.lib.publicsuffixlist.PublicSuffixList
-import mozilla.telemetry.glean.private.NoExtras
-import com.shmibblez.inferno.GleanMetrics.CookieBanners
-import com.shmibblez.inferno.GleanMetrics.Pings
+//import mozilla.telemetry.glean.private.NoExtras
+//import com.shmibblez.inferno.GleanMetrics.CookieBanners
+//import com.shmibblez.inferno.GleanMetrics.Pings
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.addons.showSnackBar
 import com.shmibblez.inferno.browser.BrowserFragmentDirections
@@ -124,7 +124,7 @@ class DefaultCookieBannerDetailsController(
                     uri = tab.content.url,
                     privateBrowsing = tab.content.private,
                 )
-                CookieBanners.exceptionRemoved.record(NoExtras())
+//                CookieBanners.exceptionRemoved.record(NoExtras())
                 cookieBannerUIMode = CookieBannerUIMode.ENABLE
             } else {
                 clearSiteData(tab)
@@ -132,7 +132,7 @@ class DefaultCookieBannerDetailsController(
                     uri = tab.content.url,
                     privateBrowsing = tab.content.private,
                 )
-                CookieBanners.exceptionAdded.record(NoExtras())
+//                CookieBanners.exceptionAdded.record(NoExtras())
                 cookieBannerUIMode = CookieBannerUIMode.DISABLE
             }
             protectionsStore.dispatch(
@@ -148,7 +148,7 @@ class DefaultCookieBannerDetailsController(
         val tab = requireNotNull(browserStore.state.findTabOrCustomTab(sessionId)) {
             "A session is required to report site domain"
         }
-        CookieBanners.reportDomainSiteButton.record(NoExtras())
+//        CookieBanners.reportDomainSiteButton.record(NoExtras())
         ioScope.launch {
             val siteDomain = getTabDomain(tab)
             siteDomain?.let { domain ->

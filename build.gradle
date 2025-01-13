@@ -5,6 +5,7 @@ import io.gitlab.arturbosch.detekt.Detekt
 buildscript {
     repositories {
         google()
+        maven { url "https://maven.mozilla.org/maven2" }
         if (project.hasProperty("googleRepo")) {
             maven {
                 name "Google"
@@ -26,7 +27,11 @@ buildscript {
         }
     }
     dependencies {
-        classpath (libs.androidx.navigation.safe.args.gradle.plugin)
+        classpath(libs.androidx.navigation.safe.args.gradle.plugin)
+//        classpath libs.mozilla.tooling.nimbus.gradle
+        classpath libs.tooling.nimbus.gradle.app.services
+        // TODO: fix this
+//        classpath "${ApplicationServicesConfig.groupId}:tooling-nimbus-gradle:${ApplicationServicesConfig.version}"
     }
 }
 
@@ -34,8 +39,8 @@ plugins {
     alias libs.plugins.android.application apply false
     alias libs.plugins.compose.compiler apply false
     alias libs.plugins.dependency.analysis
-            alias libs.plugins.detekt
-            alias libs.plugins.kotlin.android apply false
+    alias libs.plugins.detekt
+    alias libs.plugins.kotlin.android apply false
 }
 
 allprojects {
@@ -122,7 +127,7 @@ subprojects {
                     }
 
                     def fileFilter = ['**/R.class', '**/R$*.class', '**/BuildConfig.*', '**/Manifest*.*',
-                        '**/*Test*.*', 'android/**/*.*', '**/*$[0-9].*']
+                                      '**/*Test*.*', 'android/**/*.*', '**/*$[0-9].*']
                     def kotlinDebugTree = fileTree(dir: "$project.buildDir/tmp/kotlin-classes/debug", excludes: fileFilter)
                     def javaDebugTree = fileTree(dir: "$project.buildDir/intermediates/classes/debug", excludes: fileFilter)
                     def mainSrc = "$project.projectDir/src/main/java"
@@ -130,7 +135,7 @@ subprojects {
                     sourceDirectories = files([mainSrc])
                     classDirectories = files([kotlinDebugTree, javaDebugTree])
                     executionData = fileTree(dir: project.buildDir, includes: [
-                    'jacoco/testDebugUnitTest.exec', 'outputs/code-coverage/connected/*coverage.ec'
+                            'jacoco/testDebugUnitTest.exec', 'outputs/code-coverage/connected/*coverage.ec'
                     ])
                 }
 

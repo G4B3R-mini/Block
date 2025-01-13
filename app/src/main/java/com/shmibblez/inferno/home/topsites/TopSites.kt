@@ -49,9 +49,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import mozilla.components.compose.base.annotation.LightDarkPreview
+import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.annotation.LightDarkPreview
 import mozilla.components.feature.top.sites.TopSite
-import com.shmibblez.inferno.GleanMetrics.Pings
+//import com.shmibblez.inferno.GleanMetrics.Pings
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.ContextualMenu
 import com.shmibblez.inferno.compose.Favicon
@@ -63,7 +63,7 @@ import com.shmibblez.inferno.settings.SupportUtils
 import com.shmibblez.inferno.theme.FirefoxTheme
 import com.shmibblez.inferno.wallpapers.WallpaperState
 import kotlin.math.ceil
-import com.shmibblez.inferno.GleanMetrics.TopSites as TopSitesMetrics
+//import com.shmibblez.inferno.GleanMetrics.TopSites as TopSitesMetrics
 
 private const val TOP_SITES_PER_PAGE = 8
 private const val TOP_SITES_PER_ROW = 4

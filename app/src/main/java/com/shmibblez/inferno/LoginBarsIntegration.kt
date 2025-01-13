@@ -2,14 +2,14 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package com.shmibblez.inferno.components
+package com.shmibblez.inferno
 
 import android.view.View
 import androidx.coordinatorlayout.widget.CoordinatorLayout
-import mozilla.components.feature.prompts.concept.ExpandablePrompt
-import mozilla.components.feature.prompts.concept.ToggleablePrompt
-import mozilla.components.feature.prompts.login.LoginSelectBar
-import mozilla.components.feature.prompts.login.SuggestStrongPasswordBar
+import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.concept.ExpandablePrompt
+import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.concept.ToggleablePrompt
+import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.login.LoginSelectBar
+import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.login.SuggestStrongPasswordBar
 import com.shmibblez.inferno.browser.LoginSelectBarBehavior
 import com.shmibblez.inferno.utils.Settings
 

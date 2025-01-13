@@ -15,7 +15,7 @@ import mozilla.components.feature.toolbar.ToolbarAutocompleteFeature
 import mozilla.components.support.ktx.android.content.getColorFromAttr
 import mozilla.components.support.ktx.android.content.res.resolveAttribute
 import mozilla.components.support.ktx.android.view.hideKeyboard
-import com.shmibblez.inferno.GleanMetrics.Events
+//import com.shmibblez.inferno.GleanMetrics.Events
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.tabstrip.isTabStripEnabled
 import com.shmibblez.inferno.components.Components
@@ -128,7 +128,7 @@ class ToolbarView(
                     }
 
                     override fun onInputCleared() {
-                        Events.browserToolbarInputCleared.record()
+//                        Events.browserToolbarInputCleared.record()
                     }
                 },
             )

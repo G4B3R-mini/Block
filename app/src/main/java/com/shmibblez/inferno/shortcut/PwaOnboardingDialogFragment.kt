@@ -11,7 +11,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
-import com.shmibblez.inferno.GleanMetrics.ProgressiveWebApp
+//import com.shmibblez.inferno.GleanMetrics.ProgressiveWebApp
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.databinding.FragmentPwaOnboardingBinding
 import com.shmibblez.inferno.ext.requireComponents
@@ -37,7 +37,7 @@ class PwaOnboardingDialogFragment : DialogFragment() {
         val binding = FragmentPwaOnboardingBinding.bind(view)
 
         binding.cancelButton.setOnClickListener {
-            ProgressiveWebApp.onboardingCancel.record()
+//            ProgressiveWebApp.onboardingCancel.record()
             dismiss()
         }
         binding.addButton.setOnClickListener {

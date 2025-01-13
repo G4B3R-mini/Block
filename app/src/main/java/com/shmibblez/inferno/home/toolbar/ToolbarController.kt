@@ -9,7 +9,7 @@ import mozilla.components.browser.state.state.selectedOrDefaultSearchEngine
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.support.ktx.kotlin.isUrl
 import com.shmibblez.inferno.BrowserDirection
-import com.shmibblez.inferno.GleanMetrics.Events
+//import com.shmibblez.inferno.GleanMetrics.Events
 import com.shmibblez.inferno.HomeActivity
 import com.shmibblez.inferno.NavGraphDirections
 import com.shmibblez.inferno.browser.BrowserAnimator
@@ -56,7 +56,7 @@ class DefaultToolbarController(
         )
 
         if (clipboardText.isUrl() || searchEngine == null) {
-            Events.enteredUrl.record(Events.EnteredUrlExtra(autocomplete = false))
+//            Events.enteredUrl.record(Events.EnteredUrlExtra(autocomplete = false))
         } else {
             val searchAccessPoint = MetricsUtils.Source.ACTION
             MetricsUtils.recordSearchMetrics(
@@ -87,6 +87,6 @@ class DefaultToolbarController(
             BrowserAnimator.getToolbarNavOptions(activity),
         )
 
-        Events.searchBarTapped.record(Events.SearchBarTappedExtra("HOME"))
+//        Events.searchBarTapped.record(Events.SearchBarTappedExtra("HOME"))
     }
 }

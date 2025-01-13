@@ -42,7 +42,7 @@ class StandardSnackbarErrorBinding(
                             snackBarParentView = view,
                             snackbarState = SnackbarState(
                                 message = standardSnackbarError.message,
-                                duration = SnackbarDuration.Indefinite,
+                                duration = SnackbarState.Duration.Preset.Indefinite,
                                 type = SnackbarState.Type.Warning,
                                 action = Action(
                                     label = context.getString(R.string.standard_snackbar_error_dismiss),

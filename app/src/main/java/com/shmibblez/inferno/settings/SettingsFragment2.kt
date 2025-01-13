@@ -42,15 +42,15 @@ import mozilla.components.feature.addons.ui.AddonFilePicker
 import mozilla.components.support.base.feature.ViewBoundFeatureWrapper
 import mozilla.components.support.ktx.android.view.showKeyboard
 import mozilla.components.ui.widgets.withCenterAlignedButtons
-import mozilla.telemetry.glean.private.NoExtras
+//import mozilla.telemetry.glean.private.NoExtras
 import com.shmibblez.inferno.BrowserDirection
 import com.shmibblez.inferno.Config
 import com.shmibblez.inferno.FeatureFlags
-import com.shmibblez.inferno.GleanMetrics.Addons
-import com.shmibblez.inferno.GleanMetrics.CookieBanners
-import com.shmibblez.inferno.GleanMetrics.Events
-import com.shmibblez.inferno.GleanMetrics.TrackingProtection
-import com.shmibblez.inferno.GleanMetrics.Translations
+//import com.shmibblez.inferno.GleanMetrics.Addons
+//import com.shmibblez.inferno.GleanMetrics.CookieBanners
+//import com.shmibblez.inferno.GleanMetrics.Events
+//import com.shmibblez.inferno.GleanMetrics.TrackingProtection
+//import com.shmibblez.inferno.GleanMetrics.Translations
 import com.shmibblez.inferno.HomeActivity
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.components.accounts.FenixFxAEntryPoint
@@ -70,7 +70,7 @@ import com.shmibblez.inferno.snackbar.FenixSnackbarDelegate
 import com.shmibblez.inferno.snackbar.SnackbarBinding
 import com.shmibblez.inferno.utils.Settings
 import kotlin.system.exitProcess
-import com.shmibblez.inferno.GleanMetrics.Settings as SettingsMetrics
+//import com.shmibblez.inferno.GleanMetrics.Settings as SettingsMetrics
 
 @Suppress("LargeClass", "TooManyFunctions")
 class SettingsFragment : PreferenceFragmentCompat() {
@@ -156,7 +156,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
                 try {
                     if (key in booleanPreferenceTelemetryAllowList) {
                         val enabled = sharedPreferences.getBoolean(key, false)
-                        Events.preferenceToggled.record(Events.PreferenceToggledExtra(enabled, key))
+//                        Events.preferenceToggled.record(Events.PreferenceToggledExtra(enabled, key))
                     }
                 } catch (e: ClassCastException) {
                     // The setting is not a boolean, not tracked
@@ -331,12 +331,12 @@ class SettingsFragment : PreferenceFragmentCompat() {
             }
 
             resources.getString(R.string.pref_key_passwords) -> {
-                SettingsMetrics.passwords.record()
+//                SettingsMetrics.passwords.record()
                 SettingsFragmentDirections.actionSettingsFragmentToSavedLoginsAuthFragment()
             }
 
             resources.getString(R.string.pref_key_credit_cards) -> {
-                SettingsMetrics.autofill.record()
+//                SettingsMetrics.autofill.record()
                 SettingsFragmentDirections.actionSettingsFragmentToAutofillSettingFragment()
             }
 
@@ -349,7 +349,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
             }
 
             resources.getString(R.string.pref_key_translation) -> {
-                Translations.action.record(Translations.ActionExtra("global_settings_from_preferences"))
+//                Translations.action.record(Translations.ActionExtra("global_settings_from_preferences"))
                 SettingsFragmentDirections.actionSettingsFragmentToTranslationsSettingsFragment()
             }
 
@@ -363,7 +363,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
             }
 
             resources.getString(R.string.pref_key_tracking_protection_settings) -> {
-                TrackingProtection.etpSettings.record(NoExtras())
+//                TrackingProtection.etpSettings.record(NoExtras())
                 SettingsFragmentDirections.actionSettingsFragmentToTrackingProtectionFragment()
             }
 
@@ -390,7 +390,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
             /* Advanced preferences */
             resources.getString(R.string.pref_key_addons) -> {
-                Addons.openAddonsInSettings.record(NoExtras())
+//                Addons.openAddonsInSettings.record(NoExtras())
                 SettingsFragmentDirections.actionSettingsFragmentToAddonsFragment()
             }
 
@@ -754,7 +754,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
                     settings.shouldUseCookieBannerPrivateMode = newValue as Boolean
                     val mode = settings.getCookieBannerHandlingPrivateMode()
                     engineSettings.cookieBannerHandlingModePrivateBrowsing = mode
-                    CookieBanners.settingChangedPmb.record(CookieBanners.SettingChangedPmbExtra(metricTag))
+//                    CookieBanners.settingChangedPmb.record(CookieBanners.SettingChangedPmbExtra(metricTag))
                     requireContext().components.useCases.sessionUseCases.reload()
                     return super.onPreferenceChange(preference, newValue)
                 }

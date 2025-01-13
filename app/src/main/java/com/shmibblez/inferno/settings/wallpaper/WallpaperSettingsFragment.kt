@@ -16,9 +16,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import kotlinx.coroutines.launch
 import mozilla.components.lib.state.ext.observeAsComposableState
-import mozilla.telemetry.glean.private.NoExtras
+//import mozilla.telemetry.glean.private.NoExtras
 import com.shmibblez.inferno.BrowserDirection
-import com.shmibblez.inferno.GleanMetrics.Wallpapers
+//import com.shmibblez.inferno.GleanMetrics.Wallpapers
 import com.shmibblez.inferno.HomeActivity
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.browsingmode.BrowsingMode
@@ -45,7 +45,7 @@ class WallpaperSettingsFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
-        Wallpapers.wallpaperSettingsOpened.record(NoExtras())
+//        Wallpapers.wallpaperSettingsOpened.record(NoExtras())
         val wallpaperSettings = ComposeView(requireContext()).apply {
             setContent {
                 FirefoxTheme {

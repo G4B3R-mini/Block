@@ -30,12 +30,12 @@ import mozilla.components.feature.top.sites.TopSite
 import mozilla.components.support.base.feature.ViewBoundFeatureWrapper
 import mozilla.components.support.utils.ManufacturerCodes
 import mozilla.components.ui.widgets.withCenterAlignedButtons
-import mozilla.telemetry.glean.private.NoExtras
-import com.shmibblez.inferno.GleanMetrics.AppMenu
-import com.shmibblez.inferno.GleanMetrics.Collections
-import com.shmibblez.inferno.GleanMetrics.Events
-import com.shmibblez.inferno.GleanMetrics.ReaderMode
-import com.shmibblez.inferno.GleanMetrics.Translations
+//import mozilla.telemetry.glean.private.NoExtras
+//import com.shmibblez.inferno.GleanMetrics.AppMenu
+//import com.shmibblez.inferno.GleanMetrics.Collections
+//import com.shmibblez.inferno.GleanMetrics.Events
+//import com.shmibblez.inferno.GleanMetrics.ReaderMode
+//import com.shmibblez.inferno.GleanMetrics.Translations
 import com.shmibblez.inferno.HomeActivity
 import com.shmibblez.inferno.NavGraphDirections
 import com.shmibblez.inferno.R
@@ -158,7 +158,7 @@ class DefaultBrowserToolbarMenuController(
             }
             is ToolbarMenu.Item.CustomizeReaderView -> {
                 readerModeController.showControls()
-                ReaderMode.appearance.record(NoExtras())
+//                ReaderMode.appearance.record(NoExtras())
             }
             is ToolbarMenu.Item.Back -> {
                 if (item.viewHistory) {
@@ -313,11 +313,11 @@ class DefaultBrowserToolbarMenuController(
                 )
             }
             is ToolbarMenu.Item.SaveToCollection -> {
-                Collections.saveButton.record(
-                    Collections.SaveButtonExtra(
-                        TELEMETRY_BROWSER_IDENTIFIER,
-                    ),
-                )
+//                Collections.saveButton.record(
+//                    Collections.SaveButtonExtra(
+//                        TELEMETRY_BROWSER_IDENTIFIER,
+//                    ),
+//                )
 
                 currentSession?.let { currentSession ->
                     val directions =
@@ -396,7 +396,7 @@ class DefaultBrowserToolbarMenuController(
             }
 
             ToolbarMenu.Item.Translate -> {
-                Translations.action.record(Translations.ActionExtra("main_flow_browser"))
+//                Translations.action.record(Translations.ActionExtra("main_flow_browser"))
                 val directions =
                     BrowserFragmentDirections.actionBrowserFragmentToTranslationsDialogFragment()
                 navController.navigateSafe(R.id.browserFragment, directions)
@@ -406,85 +406,85 @@ class DefaultBrowserToolbarMenuController(
 
     @Suppress("ComplexMethod", "LongMethod")
     private fun trackToolbarItemInteraction(item: ToolbarMenu.Item) {
-        when (item) {
-            is ToolbarMenu.Item.OpenInFenix ->
-                Events.browserMenuAction.record(Events.BrowserMenuActionExtra("open_in_fenix"))
-            is ToolbarMenu.Item.InstallPwaToHomeScreen ->
-                Events.browserMenuAction.record(Events.BrowserMenuActionExtra("add_to_homescreen"))
-            is ToolbarMenu.Item.Quit ->
-                Events.browserMenuAction.record(Events.BrowserMenuActionExtra("quit"))
-            is ToolbarMenu.Item.OpenInApp ->
-                Events.browserMenuAction.record(Events.BrowserMenuActionExtra("open_in_app"))
-            is ToolbarMenu.Item.CustomizeReaderView ->
-                Events.browserMenuAction.record(Events.BrowserMenuActionExtra("reader_mode_appearance"))
-            is ToolbarMenu.Item.Back -> {
-                if (item.viewHistory) {
-                    Events.browserMenuAction.record(Events.BrowserMenuActionExtra("back_long_press"))
-                } else {
-                    Events.browserMenuAction.record(Events.BrowserMenuActionExtra("back"))
-                }
-            }
-            is ToolbarMenu.Item.Forward ->
-                if (item.viewHistory) {
-                    Events.browserMenuAction.record(Events.BrowserMenuActionExtra("forward_long_press"))
-                } else {
-                    Events.browserMenuAction.record(Events.BrowserMenuActionExtra("forward"))
-                }
-            is ToolbarMenu.Item.Reload ->
-                Events.browserMenuAction.record(Events.BrowserMenuActionExtra("reload"))
-            is ToolbarMenu.Item.Stop ->
-                Events.browserMenuAction.record(Events.BrowserMenuActionExtra("stop"))
-            is ToolbarMenu.Item.Share ->
-                Events.browserMenuAction.record(Events.BrowserMenuActionExtra("share"))
-            is ToolbarMenu.Item.Settings ->
-                Events.browserMenuAction.record(Events.BrowserMenuActionExtra("settings"))
-            is ToolbarMenu.Item.RequestDesktop ->
-                if (item.isChecked) {
-                    Events.browserMenuAction.record(Events.BrowserMenuActionExtra("desktop_view_on"))
-                } else {
-                    Events.browserMenuAction.record(Events.BrowserMenuActionExtra("desktop_view_off"))
-                }
-            is ToolbarMenu.Item.OpenInRegularTab ->
-                Events.browserMenuAction.record(Events.BrowserMenuActionExtra("open_in_regular_tab"))
-            is ToolbarMenu.Item.FindInPage ->
-                Events.browserMenuAction.record(Events.BrowserMenuActionExtra("find_in_page"))
-            is ToolbarMenu.Item.SaveToCollection ->
-                Events.browserMenuAction.record(Events.BrowserMenuActionExtra("save_to_collection"))
-            is ToolbarMenu.Item.AddToTopSites ->
-                Events.browserMenuAction.record(Events.BrowserMenuActionExtra("add_to_top_sites"))
-            is ToolbarMenu.Item.PrintContent ->
-                Events.browserMenuAction.record(Events.BrowserMenuActionExtra("print_content"))
-            is ToolbarMenu.Item.AddToHomeScreen ->
-                Events.browserMenuAction.record(Events.BrowserMenuActionExtra("add_to_homescreen"))
-            is ToolbarMenu.Item.SyncAccount -> {
-                Events.browserMenuAction.record(Events.BrowserMenuActionExtra("sync_account"))
-                AppMenu.signIntoSync.add()
-            }
-            is ToolbarMenu.Item.Bookmark ->
-                Events.browserMenuAction.record(Events.BrowserMenuActionExtra("bookmark"))
-            is ToolbarMenu.Item.AddonsManager ->
-                Events.browserMenuAction.record(Events.BrowserMenuActionExtra("addons_manager"))
-            is ToolbarMenu.Item.Bookmarks ->
-                Events.browserMenuAction.record(Events.BrowserMenuActionExtra("bookmarks"))
-            is ToolbarMenu.Item.History ->
-                Events.browserMenuAction.record(Events.BrowserMenuActionExtra("history"))
-            is ToolbarMenu.Item.Passwords ->
-                Events.browserMenuAction.record(Events.BrowserMenuActionExtra("passwords"))
-            is ToolbarMenu.Item.Downloads ->
-                Events.browserMenuAction.record(Events.BrowserMenuActionExtra("downloads"))
-            is ToolbarMenu.Item.NewTab ->
-                Events.browserMenuAction.record(Events.BrowserMenuActionExtra("new_tab"))
-            is ToolbarMenu.Item.SetDefaultBrowser ->
-                Events.browserMenuAction.record(Events.BrowserMenuActionExtra("set_default_browser"))
-            is ToolbarMenu.Item.RemoveFromTopSites ->
-                Events.browserMenuAction.record(Events.BrowserMenuActionExtra("remove_from_top_sites"))
-
-            ToolbarMenu.Item.Translate -> Events.browserMenuAction.record(
-                Events.BrowserMenuActionExtra(
-                    "translate",
-                ),
-            )
-        }
+//        when (item) {
+//            is ToolbarMenu.Item.OpenInFenix -> {}
+////                Events.browserMenuAction.record(Events.BrowserMenuActionExtra("open_in_fenix"))
+//            is ToolbarMenu.Item.InstallPwaToHomeScreen -> {}
+////                Events.browserMenuAction.record(Events.BrowserMenuActionExtra("add_to_homescreen"))
+//            is ToolbarMenu.Item.Quit -> {}
+////                Events.browserMenuAction.record(Events.BrowserMenuActionExtra("quit"))
+//            is ToolbarMenu.Item.OpenInApp -> {}
+////                Events.browserMenuAction.record(Events.BrowserMenuActionExtra("open_in_app"))
+//            is ToolbarMenu.Item.CustomizeReaderView -> {}
+////                Events.browserMenuAction.record(Events.BrowserMenuActionExtra("reader_mode_appearance"))
+//            is ToolbarMenu.Item.Back -> {
+////                if (item.viewHistory) {
+////                    Events.browserMenuAction.record(Events.BrowserMenuActionExtra("back_long_press"))
+////                } else {
+////                    Events.browserMenuAction.record(Events.BrowserMenuActionExtra("back"))
+////                }
+//            }
+//            is ToolbarMenu.Item.Forward -> {}
+////                if (item.viewHistory) {
+////                    Events.browserMenuAction.record(Events.BrowserMenuActionExtra("forward_long_press"))
+////                } else {
+////                    Events.browserMenuAction.record(Events.BrowserMenuActionExtra("forward"))
+////                }
+//            is ToolbarMenu.Item.Reload -> {}
+////                Events.browserMenuAction.record(Events.BrowserMenuActionExtra("reload"))
+//            is ToolbarMenu.Item.Stop -> {}
+////                Events.browserMenuAction.record(Events.BrowserMenuActionExtra("stop"))
+//            is ToolbarMenu.Item.Share -> {}
+////                Events.browserMenuAction.record(Events.BrowserMenuActionExtra("share"))
+//            is ToolbarMenu.Item.Settings -> {}
+////                Events.browserMenuAction.record(Events.BrowserMenuActionExtra("settings"))
+//            is ToolbarMenu.Item.RequestDesktop ->
+////                if (item.isChecked) {
+////                    Events.browserMenuAction.record(Events.BrowserMenuActionExtra("desktop_view_on"))
+////                } else {
+////                    Events.browserMenuAction.record(Events.BrowserMenuActionExtra("desktop_view_off"))
+////                }
+//            is ToolbarMenu.Item.OpenInRegularTab ->
+//                Events.browserMenuAction.record(Events.BrowserMenuActionExtra("open_in_regular_tab"))
+//            is ToolbarMenu.Item.FindInPage ->
+//                Events.browserMenuAction.record(Events.BrowserMenuActionExtra("find_in_page"))
+//            is ToolbarMenu.Item.SaveToCollection ->
+//                Events.browserMenuAction.record(Events.BrowserMenuActionExtra("save_to_collection"))
+//            is ToolbarMenu.Item.AddToTopSites ->
+//                Events.browserMenuAction.record(Events.BrowserMenuActionExtra("add_to_top_sites"))
+//            is ToolbarMenu.Item.PrintContent ->
+//                Events.browserMenuAction.record(Events.BrowserMenuActionExtra("print_content"))
+//            is ToolbarMenu.Item.AddToHomeScreen ->
+//                Events.browserMenuAction.record(Events.BrowserMenuActionExtra("add_to_homescreen"))
+//            is ToolbarMenu.Item.SyncAccount -> {
+//                Events.browserMenuAction.record(Events.BrowserMenuActionExtra("sync_account"))
+//                AppMenu.signIntoSync.add()
+//            }
+//            is ToolbarMenu.Item.Bookmark ->
+//                Events.browserMenuAction.record(Events.BrowserMenuActionExtra("bookmark"))
+//            is ToolbarMenu.Item.AddonsManager ->
+//                Events.browserMenuAction.record(Events.BrowserMenuActionExtra("addons_manager"))
+//            is ToolbarMenu.Item.Bookmarks ->
+//                Events.browserMenuAction.record(Events.BrowserMenuActionExtra("bookmarks"))
+//            is ToolbarMenu.Item.History ->
+//                Events.browserMenuAction.record(Events.BrowserMenuActionExtra("history"))
+//            is ToolbarMenu.Item.Passwords ->
+//                Events.browserMenuAction.record(Events.BrowserMenuActionExtra("passwords"))
+//            is ToolbarMenu.Item.Downloads ->
+//                Events.browserMenuAction.record(Events.BrowserMenuActionExtra("downloads"))
+//            is ToolbarMenu.Item.NewTab ->
+//                Events.browserMenuAction.record(Events.BrowserMenuActionExtra("new_tab"))
+//            is ToolbarMenu.Item.SetDefaultBrowser ->
+//                Events.browserMenuAction.record(Events.BrowserMenuActionExtra("set_default_browser"))
+//            is ToolbarMenu.Item.RemoveFromTopSites ->
+//                Events.browserMenuAction.record(Events.BrowserMenuActionExtra("remove_from_top_sites"))
+//
+//            ToolbarMenu.Item.Translate -> Events.browserMenuAction.record(
+//                Events.BrowserMenuActionExtra(
+//                    "translate",
+//                ),
+//            )
+//        }
     }
 
     companion object {

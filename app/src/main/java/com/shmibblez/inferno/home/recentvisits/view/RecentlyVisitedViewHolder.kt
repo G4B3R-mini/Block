@@ -10,9 +10,9 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.LifecycleOwner
 import mozilla.components.lib.state.ext.observeAsComposableState
-import mozilla.telemetry.glean.private.NoExtras
-import com.shmibblez.inferno.GleanMetrics.History
-import com.shmibblez.inferno.GleanMetrics.RecentlyVisitedHomepage
+//import mozilla.telemetry.glean.private.NoExtras
+//import com.shmibblez.inferno.GleanMetrics.History
+//import com.shmibblez.inferno.GleanMetrics.RecentlyVisitedHomepage
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.components.components
 import com.shmibblez.inferno.compose.ComposeViewHolder
@@ -61,11 +61,11 @@ class RecentlyVisitedViewHolder(
             onRecentVisitClick = { recentlyVisitedItem, pageNumber ->
                 when (recentlyVisitedItem) {
                     is RecentHistoryHighlight -> {
-                        RecentlyVisitedHomepage.historyHighlightOpened.record(NoExtras())
+//                        RecentlyVisitedHomepage.historyHighlightOpened.record(NoExtras())
                         interactor.onRecentHistoryHighlightClicked(recentlyVisitedItem)
                     }
                     is RecentHistoryGroup -> {
-                        RecentlyVisitedHomepage.searchGroupOpened.record(NoExtras())
+//                        RecentlyVisitedHomepage.searchGroupOpened.record(NoExtras())
                         History.recentSearchesTapped.record(
                             History.RecentSearchesTappedExtra(
                                 pageNumber.toString(),

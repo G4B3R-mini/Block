@@ -29,11 +29,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import mozilla.components.compose.base.annotation.LightDarkPreview
-import mozilla.telemetry.glean.private.NoExtras
+import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.annotation.LightDarkPreview
+//import mozilla.telemetry.glean.private.NoExtras
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.theme.FirefoxTheme
-import com.shmibblez.inferno.GleanMetrics.Onboarding as OnboardingMetrics
+//import com.shmibblez.inferno.GleanMetrics.Onboarding as OnboardingMetrics
 
 /**
  * Enum that represents the onboarding screen that is displayed.
@@ -75,7 +75,7 @@ fun UpgradeOnboarding(
                     primaryButton = Action(
                         text = stringResource(id = R.string.onboarding_home_get_started_button),
                         onClick = {
-                            OnboardingMetrics.welcomeGetStartedClicked.record(NoExtras())
+//                            OnboardingMetrics.welcomeGetStartedClicked.record(NoExtras())
                             if (isSyncSignIn) {
                                 onDismiss()
                             } else {
@@ -84,7 +84,7 @@ fun UpgradeOnboarding(
                         },
                     ),
                     onRecordImpressionEvent = {
-                        OnboardingMetrics.welcomeCardImpression.record(NoExtras())
+//                        OnboardingMetrics.welcomeCardImpression.record(NoExtras())
                     },
                 )
                 UpgradeOnboardingState.SyncSignIn -> OnboardingPageState(
@@ -94,27 +94,27 @@ fun UpgradeOnboarding(
                     primaryButton = Action(
                         text = stringResource(id = R.string.onboarding_home_sign_in_button),
                         onClick = {
-                            OnboardingMetrics.syncSignInClicked.record(NoExtras())
+//                            OnboardingMetrics.syncSignInClicked.record(NoExtras())
                             onSignInButtonClick()
                         },
                     ),
                     secondaryButton = Action(
                         text = stringResource(id = R.string.onboarding_home_skip_button),
                         onClick = {
-                            OnboardingMetrics.syncSkipClicked.record(NoExtras())
+//                            OnboardingMetrics.syncSkipClicked.record(NoExtras())
                             onDismiss()
                         },
                     ),
                     onRecordImpressionEvent = {
-                        OnboardingMetrics.syncCardImpression.record(NoExtras())
+//                        OnboardingMetrics.syncCardImpression.record(NoExtras())
                     },
                 )
             },
             onDismiss = {
-                when (onboardingState) {
-                    UpgradeOnboardingState.Welcome -> OnboardingMetrics.welcomeCloseClicked.record(NoExtras())
-                    UpgradeOnboardingState.SyncSignIn -> OnboardingMetrics.syncCloseClicked.record(NoExtras())
-                }
+//                when (onboardingState) {
+//                    UpgradeOnboardingState.Welcome -> OnboardingMetrics.welcomeCloseClicked.record(NoExtras())
+//                    UpgradeOnboardingState.SyncSignIn -> OnboardingMetrics.syncCloseClicked.record(NoExtras())
+//                }
                 onDismiss()
             },
             modifier = Modifier.weight(1f),

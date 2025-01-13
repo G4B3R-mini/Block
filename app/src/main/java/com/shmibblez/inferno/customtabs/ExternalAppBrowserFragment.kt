@@ -30,8 +30,8 @@ import mozilla.components.feature.pwa.feature.WebAppHideToolbarFeature
 import mozilla.components.feature.pwa.feature.WebAppSiteControlsFeature
 import mozilla.components.support.base.feature.ViewBoundFeatureWrapper
 import mozilla.components.support.ktx.android.arch.lifecycle.addObservers
-import mozilla.telemetry.glean.private.NoExtras
-import com.shmibblez.inferno.GleanMetrics.NavigationBar
+//import mozilla.telemetry.glean.private.NoExtras
+//import com.shmibblez.inferno.GleanMetrics.NavigationBar
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.BaseBrowserFragment
 import com.shmibblez.inferno.browser.ContextMenuSnackbarDelegate
@@ -254,7 +254,7 @@ class ExternalAppBrowserFragment : BaseBrowserFragment() {
             toolbar = browserToolbarView,
         )
         navbarIntegration.navbarMenu.apply {
-            recordClickEvent = { NavigationBar.customMenuTapped.record(NoExtras()) }
+            recordClickEvent = {} // { NavigationBar.customMenuTapped.record(NoExtras()) }
         }
 
         val openLinkInPrivate = requireContext().settings().openLinksInAPrivateTab
@@ -281,25 +281,25 @@ class ExternalAppBrowserFragment : BaseBrowserFragment() {
                         browserStore = requireComponents.core.store,
                         menuButton = navbarIntegration.navbarMenu,
                         onBackButtonClick = {
-                            NavigationBar.customBackTapped.record(NoExtras())
+//                            NavigationBar.customBackTapped.record(NoExtras())
                             browserToolbarInteractor.onBrowserToolbarMenuItemTapped(
                                 ToolbarMenu.Item.Back(viewHistory = false),
                             )
                         },
                         onBackButtonLongPress = {
-                            NavigationBar.customBackLongTapped.record(NoExtras())
+//                            NavigationBar.customBackLongTapped.record(NoExtras())
                             browserToolbarInteractor.onBrowserToolbarMenuItemTapped(
                                 ToolbarMenu.Item.Back(viewHistory = true),
                             )
                         },
                         onForwardButtonClick = {
-                            NavigationBar.customForwardTapped.record(NoExtras())
+//                            NavigationBar.customForwardTapped.record(NoExtras())
                             browserToolbarInteractor.onBrowserToolbarMenuItemTapped(
                                 ToolbarMenu.Item.Forward(viewHistory = false),
                             )
                         },
                         onForwardButtonLongPress = {
-                            NavigationBar.customForwardLongTapped.record(NoExtras())
+//                            NavigationBar.customForwardLongTapped.record(NoExtras())
                             browserToolbarInteractor.onBrowserToolbarMenuItemTapped(
                                 ToolbarMenu.Item.Forward(viewHistory = true),
                             )

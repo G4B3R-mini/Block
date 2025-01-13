@@ -16,10 +16,10 @@ import mozilla.appservices.fxaclient.contentUrl
 import mozilla.appservices.places.BookmarkRoot
 import mozilla.components.browser.menu.view.MenuButton
 import mozilla.components.concept.sync.FxAEntryPoint
-import mozilla.telemetry.glean.private.NoExtras
+//import mozilla.telemetry.glean.private.NoExtras
 import com.shmibblez.inferno.BrowserDirection
-import com.shmibblez.inferno.GleanMetrics.Events
-import com.shmibblez.inferno.GleanMetrics.HomeScreen
+//import com.shmibblez.inferno.GleanMetrics.Events
+//import com.shmibblez.inferno.GleanMetrics.HomeScreen
 import com.shmibblez.inferno.HomeActivity
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.components.accounts.AccountState
@@ -32,7 +32,7 @@ import com.shmibblez.inferno.settings.deletebrowsingdata.deleteAndQuit
 import com.shmibblez.inferno.theme.ThemeManager
 import com.shmibblez.inferno.whatsnew.WhatsNew
 import java.lang.ref.WeakReference
-import com.shmibblez.inferno.GleanMetrics.HomeMenu as HomeMenuMetrics
+//import com.shmibblez.inferno.GleanMetrics.HomeMenu as HomeMenuMetrics
 
 /**
  * Helper class for building the [HomeMenu].

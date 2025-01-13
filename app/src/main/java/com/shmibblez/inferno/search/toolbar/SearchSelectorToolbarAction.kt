@@ -22,8 +22,8 @@ import mozilla.components.lib.state.ext.flow
 import mozilla.components.support.ktx.android.content.getColorFromAttr
 import mozilla.components.support.ktx.android.content.res.resolveAttribute
 import mozilla.components.support.ktx.android.view.toScope
-import mozilla.telemetry.glean.private.NoExtras
-import com.shmibblez.inferno.GleanMetrics.UnifiedSearch
+//import mozilla.telemetry.glean.private.NoExtras
+//import com.shmibblez.inferno.GleanMetrics.UnifiedSearch
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.ext.settings
 import com.shmibblez.inferno.search.SearchDialogFragmentStore
@@ -67,7 +67,7 @@ class SearchSelectorToolbarAction(
                     Orientation.DOWN
                 }
 
-                UnifiedSearch.searchMenuTapped.record(NoExtras())
+//                UnifiedSearch.searchMenuTapped.record(NoExtras())
                 menu.menuController.show(
                     anchor = it.findViewById(R.id.search_selector),
                     orientation = orientation,

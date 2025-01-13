@@ -50,10 +50,10 @@ import mozilla.components.support.base.feature.ViewBoundFeatureWrapper
 import mozilla.components.support.ktx.android.util.dpToPx
 import mozilla.components.support.ktx.android.view.setNavigationBarColorCompat
 import mozilla.components.support.utils.ext.isLandscape
-import mozilla.telemetry.glean.private.NoExtras
+//import mozilla.telemetry.glean.private.NoExtras
 import com.shmibblez.inferno.BrowserDirection
 import com.shmibblez.inferno.Config
-import com.shmibblez.inferno.GleanMetrics.Events
+//import com.shmibblez.inferno.GleanMetrics.Events
 import com.shmibblez.inferno.HomeActivity
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.components.components
@@ -66,7 +66,6 @@ import com.shmibblez.inferno.components.menu.compose.SaveSubmenu
 import com.shmibblez.inferno.components.menu.compose.ToolsSubmenu
 import com.shmibblez.inferno.components.menu.middleware.MenuDialogMiddleware
 import com.shmibblez.inferno.components.menu.middleware.MenuNavigationMiddleware
-import com.shmibblez.inferno.components.menu.middleware.MenuTelemetryMiddleware
 import com.shmibblez.inferno.components.menu.store.BrowserMenuState
 import com.shmibblez.inferno.components.menu.store.MenuAction
 import com.shmibblez.inferno.components.menu.store.MenuState
@@ -109,7 +108,7 @@ class MenuDialogFragment : BottomSheetDialogFragment() {
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        Events.toolbarMenuVisible.record(NoExtras())
+//        Events.toolbarMenuVisible.record(NoExtras())
 
         return super.onCreateDialog(savedInstanceState).apply {
             setOnShowListener {
@@ -251,9 +250,9 @@ class MenuDialogFragment : BottomSheetDialogFragment() {
                                 scope = coroutineScope,
                                 customTab = customTab,
                             ),
-                            MenuTelemetryMiddleware(
-                                accessPoint = args.accesspoint,
-                            ),
+//                            MenuTelemetryMiddleware(
+//                                accessPoint = args.accesspoint,
+//                            ),
                         ),
                     )
                 }
@@ -295,16 +294,17 @@ class MenuDialogFragment : BottomSheetDialogFragment() {
                     val isTranslationEngineSupported =
                         browserStore.state.translationEngine.isEngineSupported ?: false
                     val isTranslationSupported =
-                        isTranslationEngineSupported &&
-                            FxNimbus.features.translations.value().mainFlowBrowserMenuEnabled
+                        isTranslationEngineSupported
+//                                && FxNimbus.features.translations.value().mainFlowBrowserMenuEnabled
                     val isPdf = selectedTab?.content?.isPdf ?: false
                     val isReaderable = selectedTab?.readerState?.readerable ?: false
                     val supportedLanguages = components.core.store.state.translationEngine.supportedLanguages
                     val translateLanguageCode = selectedTab?.translationsState?.translationEngineState
                         ?.requestedTranslationPair?.toLanguage
                     val isExtensionsProcessDisabled = browserStore.state.extensionsProcessDisabled
-                    val isWebCompatReporterSupported =
-                        FxNimbus.features.menuRedesign.value().reportSiteIssue
+                    val isWebCompatReporterSupported = false
+                    // TODO: fix this
+//                        FxNimbus.features.menuRedesign.value().reportSiteIssue
 
                     val isDesktopMode by store.observeAsState(initialValue = false) { state ->
                         state.isDesktopMode
@@ -495,11 +495,11 @@ class MenuDialogFragment : BottomSheetDialogFragment() {
                                             store.dispatch(MenuAction.Navigate.ManageExtensions)
                                         } else {
                                             contentState = Route.ExtensionsMenu
-                                            Events.browserMenuAction.record(
-                                                Events.BrowserMenuActionExtra(
-                                                    item = "extensions_submenu",
-                                                ),
-                                            )
+//                                            Events.browserMenuAction.record(
+//                                                Events.BrowserMenuActionExtra(
+//                                                    item = "extensions_submenu",
+//                                                ),
+//                                            )
                                         }
                                     },
                                     onBookmarksMenuClick = {
@@ -717,11 +717,11 @@ class MenuDialogFragment : BottomSheetDialogFragment() {
                                         store.dispatch(MenuAction.Navigate.DiscoverMoreExtensions)
                                     },
                                     webExtensionMenuItemClick = {
-                                        Events.browserMenuAction.record(
-                                            Events.BrowserMenuActionExtra(
-                                                item = "web_extension_browser_action_clicked",
-                                            ),
-                                        )
+//                                        Events.browserMenuAction.record(
+//                                            Events.BrowserMenuActionExtra(
+//                                                item = "web_extension_browser_action_clicked",
+//                                            ),
+//                                        )
                                     },
                                 )
                             }

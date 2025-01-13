@@ -16,8 +16,8 @@ import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.concept.menu.Orientation
 import mozilla.components.lib.state.helpers.AbstractBinding
 import mozilla.components.support.ktx.android.content.getColorFromAttr
-import mozilla.telemetry.glean.private.NoExtras
-import com.shmibblez.inferno.GleanMetrics.UnifiedSearch
+//import mozilla.telemetry.glean.private.NoExtras
+//import com.shmibblez.inferno.GleanMetrics.UnifiedSearch
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.databinding.FragmentHomeBinding
 import com.shmibblez.inferno.ext.increaseTapAreaVertically
@@ -45,7 +45,7 @@ class SearchSelectorBinding(
                     Orientation.DOWN
                 }
 
-                UnifiedSearch.searchMenuTapped.record(NoExtras())
+//                UnifiedSearch.searchMenuTapped.record(NoExtras())
 
                 searchSelectorMenu.menuController.show(
                     anchor = it.findViewById(R.id.search_selector),

@@ -17,7 +17,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import mozilla.components.compose.base.Divider
+import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.Divider
 import com.shmibblez.inferno.theme.FirefoxTheme
 
 /**

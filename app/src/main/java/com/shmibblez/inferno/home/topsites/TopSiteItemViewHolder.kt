@@ -27,8 +27,8 @@ import kotlinx.coroutines.withContext
 import mozilla.components.feature.top.sites.TopSite
 import mozilla.components.lib.state.ext.flowScoped
 import mozilla.components.support.ktx.android.content.getColorFromAttr
-import com.shmibblez.inferno.GleanMetrics.Pings
-import com.shmibblez.inferno.GleanMetrics.TopSites
+//import com.shmibblez.inferno.GleanMetrics.Pings
+//import com.shmibblez.inferno.GleanMetrics.TopSites
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.components.AppStore
 import com.shmibblez.inferno.databinding.TopSiteItemBinding

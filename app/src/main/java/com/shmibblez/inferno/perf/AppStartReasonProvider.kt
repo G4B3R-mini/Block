@@ -13,7 +13,7 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
 import mozilla.components.support.base.log.logger.Logger
-import com.shmibblez.inferno.GleanMetrics.Metrics
+//import com.shmibblez.inferno.GleanMetrics.Metrics
 import com.shmibblez.inferno.android.DefaultActivityLifecycleCallbacks
 import com.shmibblez.inferno.perf.AppStartReasonProvider.StartReason
 

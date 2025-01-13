@@ -5,8 +5,8 @@
 package com.shmibblez.inferno.settings.creditcards.interactor
 
 import mozilla.components.concept.storage.CreditCard
-import mozilla.telemetry.glean.private.NoExtras
-import com.shmibblez.inferno.GleanMetrics.CreditCards
+//import mozilla.telemetry.glean.private.NoExtras
+//import com.shmibblez.inferno.GleanMetrics.CreditCards
 import com.shmibblez.inferno.settings.creditcards.controller.CreditCardsManagementController
 
 /**
@@ -41,11 +41,11 @@ class DefaultCreditCardsManagementInteractor(
 
     override fun onSelectCreditCard(creditCard: CreditCard) {
         controller.handleCreditCardClicked(creditCard)
-        CreditCards.managementCardTapped.record(NoExtras())
+//        CreditCards.managementCardTapped.record(NoExtras())
     }
 
     override fun onAddCreditCardClick() {
         controller.handleAddCreditCardClicked()
-        CreditCards.managementAddTapped.record(NoExtras())
+//        CreditCards.managementAddTapped.record(NoExtras())
     }
 }

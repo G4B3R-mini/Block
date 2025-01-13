@@ -39,9 +39,9 @@ import mozilla.components.lib.state.ext.observe
 import mozilla.components.support.base.feature.UserInteractionHandler
 import mozilla.components.support.base.log.logger.Logger
 import mozilla.components.support.ktx.kotlinx.coroutines.flow.ifAnyChanged
-import mozilla.telemetry.glean.private.NoExtras
+//import mozilla.telemetry.glean.private.NoExtras
 import com.shmibblez.inferno.BrowserDirection
-import com.shmibblez.inferno.GleanMetrics.TrackingProtection
+//import com.shmibblez.inferno.GleanMetrics.TrackingProtection
 import com.shmibblez.inferno.HomeActivity
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.components.StoreProvider
@@ -149,7 +149,7 @@ class TrackingProtectionPanelDialogFragment : AppCompatDialogFragment(), UserInt
     }
 
     private fun openTrackingProtectionSettings() {
-        TrackingProtection.panelSettings.record(NoExtras())
+//        TrackingProtection.panelSettings.record(NoExtras())
         nav(
             R.id.trackingProtectionPanelDialogFragment,
             TrackingProtectionPanelDialogFragmentDirections.actionGlobalTrackingProtectionFragment(),

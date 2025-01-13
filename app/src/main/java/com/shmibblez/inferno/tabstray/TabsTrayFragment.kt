@@ -37,9 +37,9 @@ import mozilla.components.feature.accounts.push.CloseTabsUseCases
 import mozilla.components.feature.downloads.ui.DownloadCancelDialogFragment
 import mozilla.components.feature.tabs.tabstray.TabsFeature
 import mozilla.components.support.base.feature.ViewBoundFeatureWrapper
-import mozilla.telemetry.glean.private.NoExtras
+//import mozilla.telemetry.glean.private.NoExtras
 import com.shmibblez.inferno.Config
-import com.shmibblez.inferno.GleanMetrics.TabsTray
+//import com.shmibblez.inferno.GleanMetrics.TabsTray
 import com.shmibblez.inferno.HomeActivity
 import com.shmibblez.inferno.NavGraphDirections
 import com.shmibblez.inferno.R
@@ -358,19 +358,19 @@ class TabsTrayFragment : AppCompatDialogFragment() {
                                 requireContext().settings().canShowCfr
                         },
                         onInactiveTabsCFRShown = {
-                            TabsTray.inactiveTabsCfrVisible.record(NoExtras())
+//                            TabsTray.inactiveTabsCfrVisible.record(NoExtras())
                         },
                         onInactiveTabsCFRClick = {
                             requireContext().settings().shouldShowInactiveTabsOnboardingPopup = false
                             requireContext().settings().lastCfrShownTimeInMillis = System.currentTimeMillis()
                             navigationInteractor.onTabSettingsClicked()
-                            TabsTray.inactiveTabsCfrSettings.record(NoExtras())
+//                            TabsTray.inactiveTabsCfrSettings.record(NoExtras())
                             onTabsTrayDismissed()
                         },
                         onInactiveTabsCFRDismiss = {
                             requireContext().settings().shouldShowInactiveTabsOnboardingPopup = false
                             requireContext().settings().lastCfrShownTimeInMillis = System.currentTimeMillis()
-                            TabsTray.inactiveTabsCfrDismissed.record(NoExtras())
+//                            TabsTray.inactiveTabsCfrDismissed.record(NoExtras())
                         },
                     )
                 }
@@ -428,7 +428,7 @@ class TabsTrayFragment : AppCompatDialogFragment() {
     @Suppress("LongMethod")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        TabsTray.opened.record(NoExtras())
+//        TabsTray.opened.record(NoExtras())
 
         val rootView = if (requireContext().settings().enableTabsTrayToCompose) {
             tabsTrayComposeBinding.root
@@ -781,7 +781,7 @@ class TabsTrayFragment : AppCompatDialogFragment() {
     internal fun setupMenu(navigationInteractor: NavigationInteractor) {
         tabsTrayBinding.tabTrayOverflow.setOnClickListener { anchor ->
 
-            TabsTray.menuOpened.record(NoExtras())
+//            TabsTray.menuOpened.record(NoExtras())
 
             val menu = getTrayMenu(
                 context = requireContext(),
@@ -961,7 +961,7 @@ class TabsTrayFragment : AppCompatDialogFragment() {
         context?.components?.analytics?.crashReporter?.recordCrashBreadcrumb(
             Breadcrumb("TabsTrayFragment onTabsTrayDismissed"),
         )
-        TabsTray.closed.record(NoExtras())
+//        TabsTray.closed.record(NoExtras())
         dismissAllowingStateLoss()
     }
 

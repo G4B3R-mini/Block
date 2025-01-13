@@ -21,8 +21,8 @@ import mozilla.components.browser.state.selector.findCustomTab
 import mozilla.components.browser.state.selector.selectedTab
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.support.base.log.logger.Logger
-import mozilla.telemetry.glean.private.NoExtras
-import com.shmibblez.inferno.GleanMetrics.Events
+//import mozilla.telemetry.glean.private.NoExtras
+//import com.shmibblez.inferno.GleanMetrics.Events
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.snackbar.Snackbar
 import com.shmibblez.inferno.compose.snackbar.SnackbarState
@@ -104,7 +104,7 @@ object ToolbarPopupWindow {
                         ).show()
                     }
                 }
-                Events.copyUrlTapped.record(NoExtras())
+//                Events.copyUrlTapped.record(NoExtras())
             }
         }
 

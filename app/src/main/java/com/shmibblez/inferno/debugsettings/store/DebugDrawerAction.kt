@@ -5,7 +5,7 @@
 package com.shmibblez.inferno.debugsettings.store
 
 import mozilla.components.lib.state.Action
-import com.shmibblez.inferno.debugsettings.gleandebugtools.ui.GleanDebugToolsScreen
+//import com.shmibblez.inferno.debugsettings.gleandebugtools.ui.GleanDebugToolsScreen
 import com.shmibblez.inferno.debugsettings.ui.DebugDrawerHome
 import com.shmibblez.inferno.debugsettings.addresses.AddressesTools as AddressesScreen
 import com.shmibblez.inferno.debugsettings.cfrs.CfrTools as CfrToolsScreen

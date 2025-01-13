@@ -5,9 +5,9 @@
 package com.shmibblez.inferno.settings.logins.controller
 
 import androidx.navigation.NavController
-import mozilla.telemetry.glean.private.NoExtras
+//import mozilla.telemetry.glean.private.NoExtras
 import com.shmibblez.inferno.BrowserDirection
-import com.shmibblez.inferno.GleanMetrics.Logins
+//import com.shmibblez.inferno.GleanMetrics.Logins
 import com.shmibblez.inferno.settings.SupportUtils
 import com.shmibblez.inferno.settings.logins.LoginsAction
 import com.shmibblez.inferno.settings.logins.LoginsFragmentStore
@@ -38,16 +38,16 @@ class LoginsListController(
 ) {
 
     fun handleItemClicked(item: SavedLogin) {
-        Logins.managementLoginsTapped.record(NoExtras())
+//        Logins.managementLoginsTapped.record(NoExtras())
         loginsFragmentStore.dispatch(LoginsAction.LoginSelected(item))
-        Logins.openIndividualLogin.record(NoExtras())
+//        Logins.openIndividualLogin.record(NoExtras())
         navController.navigate(
             SavedLoginsFragmentDirections.actionSavedLoginsFragmentToLoginDetailFragment(item.guid),
         )
     }
 
     fun handleAddLoginClicked() {
-        Logins.managementAddTapped.record(NoExtras())
+//        Logins.managementAddTapped.record(NoExtras())
         addLoginCallback.invoke()
         navController.navigate(
             SavedLoginsFragmentDirections.actionSavedLoginsFragmentToAddLoginFragment(),

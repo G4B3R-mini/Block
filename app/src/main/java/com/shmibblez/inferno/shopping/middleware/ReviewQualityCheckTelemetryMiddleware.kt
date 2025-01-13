@@ -10,8 +10,8 @@ import mozilla.components.browser.state.selector.selectedTab
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.lib.state.MiddlewareContext
 import mozilla.components.lib.state.Store
-import com.shmibblez.inferno.GleanMetrics.Shopping
-import com.shmibblez.inferno.GleanMetrics.ShoppingSettings
+//import com.shmibblez.inferno.GleanMetrics.Shopping
+//import com.shmibblez.inferno.GleanMetrics.ShoppingSettings
 import com.shmibblez.inferno.components.AppStore
 import com.shmibblez.inferno.components.appstate.AppAction.ShoppingAction
 import com.shmibblez.inferno.components.appstate.shopping.ShoppingState
@@ -60,89 +60,89 @@ class ReviewQualityCheckTelemetryMiddleware(
     ) {
         when (action) {
             is ReviewQualityCheckAction.OptIn -> {
-                Shopping.surfaceOptInAccepted.record()
-                ShoppingSettings.userHasOnboarded.set(true)
+//                Shopping.surfaceOptInAccepted.record()
+//                ShoppingSettings.userHasOnboarded.set(true)
             }
 
             is ReviewQualityCheckAction.OptOut -> {
-                ShoppingSettings.componentOptedOut.set(true)
+//                ShoppingSettings.componentOptedOut.set(true)
             }
 
             is ReviewQualityCheckAction.BottomSheetClosed -> {
-                Shopping.surfaceClosed.record(
-                    Shopping.SurfaceClosedExtra(action.source.sourceName),
-                )
+//                Shopping.surfaceClosed.record(
+//                    Shopping.SurfaceClosedExtra(action.source.sourceName),
+//                )
             }
 
             is ReviewQualityCheckAction.BottomSheetDisplayed -> {
-                Shopping.surfaceDisplayed.record(
-                    Shopping.SurfaceDisplayedExtra(action.view.state),
-                )
+//                Shopping.surfaceDisplayed.record(
+//                    Shopping.SurfaceDisplayedExtra(action.view.state),
+//                )
             }
 
             is ReviewQualityCheckAction.OpenExplainerLearnMoreLink -> {
-                Shopping.surfaceReviewQualityExplainerUrlClicked.record()
+//                Shopping.surfaceReviewQualityExplainerUrlClicked.record()
             }
 
             is ReviewQualityCheckAction.OpenOnboardingLearnMoreLink -> {
-                Shopping.surfaceLearnMoreClicked.record()
+//                Shopping.surfaceLearnMoreClicked.record()
             }
 
             is ReviewQualityCheckAction.OpenOnboardingPrivacyPolicyLink -> {
-                Shopping.surfaceShowPrivacyPolicyClicked.record()
+//                Shopping.surfaceShowPrivacyPolicyClicked.record()
             }
 
             is ReviewQualityCheckAction.OpenOnboardingTermsLink -> {
-                Shopping.surfaceShowTermsClicked.record()
+//                Shopping.surfaceShowTermsClicked.record()
             }
 
             is ReviewQualityCheckAction.NotNowClicked -> {
-                Shopping.surfaceNotNowClicked.record()
+//                Shopping.surfaceNotNowClicked.record()
             }
 
             is ReviewQualityCheckAction.ExpandCollapseHighlights -> {
                 val state = store.state
-                if (state is ReviewQualityCheckState.OptedIn && state.isHighlightsExpanded) {
-                    Shopping.surfaceShowMoreRecentReviewsClicked.record()
-                }
+//                if (state is ReviewQualityCheckState.OptedIn && state.isHighlightsExpanded) {
+//                    Shopping.surfaceShowMoreRecentReviewsClicked.record()
+//                }
             }
 
             is ReviewQualityCheckAction.ExpandCollapseSettings -> {
                 val state = store.state
-                if (state is ReviewQualityCheckState.OptedIn && state.isSettingsExpanded) {
-                    Shopping.surfaceExpandSettings.record()
-                }
+//                if (state is ReviewQualityCheckState.OptedIn && state.isSettingsExpanded) {
+//                    Shopping.surfaceExpandSettings.record()
+//                }
             }
 
             is ReviewQualityCheckAction.NoAnalysisDisplayed -> {
-                Shopping.surfaceNoReviewReliabilityAvailable.record()
+//                Shopping.surfaceNoReviewReliabilityAvailable.record()
             }
 
             is ReviewQualityCheckAction.UpdateProductReview -> {
                 val state = store.state
-                if (state.isStaleAnalysis() && !action.restoreAnalysis) {
-                    Shopping.surfaceStaleAnalysisShown.record()
-                }
+//                if (state.isStaleAnalysis() && !action.restoreAnalysis) {
+//                    Shopping.surfaceStaleAnalysisShown.record()
+//                }
             }
 
             is ReviewQualityCheckAction.AnalyzeProduct -> {
-                Shopping.surfaceAnalyzeReviewsNoneAvailableClicked.record()
+//                Shopping.surfaceAnalyzeReviewsNoneAvailableClicked.record()
             }
 
             is ReviewQualityCheckAction.ReanalyzeProduct -> {
-                Shopping.surfaceReanalyzeClicked.record()
+//                Shopping.surfaceReanalyzeClicked.record()
             }
 
             is ReviewQualityCheckAction.ReportProductBackInStock -> {
-                Shopping.surfaceReactivatedButtonClicked.record()
+//                Shopping.surfaceReactivatedButtonClicked.record()
             }
 
             is ReviewQualityCheckAction.OptOutCompleted -> {
-                Shopping.surfaceOnboardingDisplayed.record()
+//                Shopping.surfaceOnboardingDisplayed.record()
             }
 
             is ReviewQualityCheckAction.OpenPoweredByLink -> {
-                Shopping.surfacePoweredByFakespotLinkClicked.record()
+//                Shopping.surfacePoweredByFakespotLinkClicked.record()
             }
 
             is ReviewQualityCheckAction.RecommendedProductImpression -> {
@@ -157,7 +157,7 @@ class ReviewQualityCheckTelemetryMiddleware(
                         appStore.state.shoppingState.recordedProductRecommendationImpressions
 
                     if (!recordedImpressions.contains(key)) {
-                        Shopping.surfaceAdsImpression.record()
+//                        Shopping.surfaceAdsImpression.record()
                         scope.launch {
                             val result =
                                 telemetryService.recordRecommendedProductImpression(action.productAid)
@@ -170,7 +170,7 @@ class ReviewQualityCheckTelemetryMiddleware(
             }
 
             is ReviewQualityCheckAction.RecommendedProductClick -> {
-                Shopping.surfaceAdsClicked.record()
+//                Shopping.surfaceAdsClicked.record()
                 scope.launch {
                     telemetryService.recordRecommendedProductClick(action.productAid)
                 }
@@ -186,11 +186,11 @@ class ReviewQualityCheckTelemetryMiddleware(
                     } else {
                         ACTION_DISABLED
                     }
-                    Shopping.surfaceAdsSettingToggled.record(
-                        Shopping.SurfaceAdsSettingToggledExtra(
-                            action = toggleAction,
-                        ),
-                    )
+//                    Shopping.surfaceAdsSettingToggled.record(
+//                        Shopping.SurfaceAdsSettingToggledExtra(
+//                            action = toggleAction,
+//                        ),
+//                    )
                 }
             }
         }

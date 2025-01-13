@@ -7,8 +7,8 @@ package com.shmibblez.inferno.home.intent
 import android.content.Intent
 import androidx.navigation.NavController
 import androidx.navigation.navOptions
-import mozilla.telemetry.glean.private.NoExtras
-import com.shmibblez.inferno.GleanMetrics.SearchWidget
+//import mozilla.telemetry.glean.private.NoExtras
+//import com.shmibblez.inferno.GleanMetrics.SearchWidget
 import com.shmibblez.inferno.HomeActivity
 import com.shmibblez.inferno.NavGraphDirections
 import com.shmibblez.inferno.R
@@ -26,7 +26,7 @@ class StartSearchIntentProcessor : HomeIntentProcessor {
         return if (event != null) {
             val source = when (event) {
                 SEARCH_WIDGET -> {
-                    SearchWidget.newTabButton.record(NoExtras())
+//                    SearchWidget.newTabButton.record(NoExtras())
                     MetricsUtils.Source.WIDGET
                 }
                 STATIC_SHORTCUT_NEW_TAB,

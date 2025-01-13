@@ -7,8 +7,8 @@ package com.shmibblez.inferno.compose
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
-import androidx.compose.material3.ContentAlpha
-import androidx.compose.material3.LocalContentAlpha
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
@@ -39,12 +39,18 @@ fun IconButton(
                 enabled = enabled,
                 role = Role.Button,
                 interactionSource = interactionSource,
-                indication = ripple(bounded = false, radius = RippleRadius, color = FirefoxTheme.colors.ripple),
+                indication = ripple(
+                    bounded = false, radius = RippleRadius, color = FirefoxTheme.colors.ripple
+                ),
             ),
         contentAlignment = Alignment.Center,
     ) {
-        val contentAlpha = if (enabled) LocalContentAlpha.current else ContentAlpha.disabled
-        CompositionLocalProvider(LocalContentAlpha provides contentAlpha, content = content)
+        val contentAlpha = if (enabled) LocalContentColor.current.alpha else 0.38f
+        CompositionLocalProvider(
+            LocalContentColor provides MaterialTheme.colorScheme.onSurface.copy(
+                alpha = contentAlpha
+            ), content = content
+        )//LocalContentAlpha provides contentAlpha, content = content)
     }
 }
 

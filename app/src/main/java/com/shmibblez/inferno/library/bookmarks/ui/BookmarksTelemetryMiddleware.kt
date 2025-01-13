@@ -6,8 +6,8 @@ package com.shmibblez.inferno.library.bookmarks.ui
 
 import mozilla.components.lib.state.Middleware
 import mozilla.components.lib.state.MiddlewareContext
-import mozilla.telemetry.glean.private.NoExtras
-import com.shmibblez.inferno.GleanMetrics.BookmarksManagement
+//import mozilla.telemetry.glean.private.NoExtras
+//import com.shmibblez.inferno.GleanMetrics.BookmarksManagement
 import com.shmibblez.inferno.components.metrics.MetricsUtils
 
 private const val EDIT_SCREEN_METRIC_SOURCE = "bookmark_edit_page"
@@ -26,23 +26,23 @@ internal class BookmarksTelemetryMiddleware : Middleware<BookmarksState, Bookmar
         when (action) {
             BackClicked -> preReductionState.handleBackClick()
             is BookmarksListMenuAction.Bookmark.CopyClicked -> {
-                BookmarksManagement.copied.record(NoExtras())
+//                BookmarksManagement.copied.record(NoExtras())
             }
             DeletionDialogAction.DeleteTapped -> {
                 val deletedItems = preReductionState.bookmarkItems.filter {
                     it.guid in preReductionState.bookmarksDeletionDialogState.guidsToDelete
                 }
                 if (deletedItems.any { it is BookmarkItem.Folder }) {
-                    BookmarksManagement.folderRemove.record(NoExtras())
+//                    BookmarksManagement.folderRemove.record(NoExtras())
                 }
 
                 if (deletedItems.size > 1) {
-                    BookmarksManagement.multiRemoved.record(NoExtras())
+//                    BookmarksManagement.multiRemoved.record(NoExtras())
                 }
             }
             is BookmarkClicked -> {
                 if (preReductionState.selectedItems.isEmpty()) {
-                    BookmarksManagement.open.record(NoExtras())
+//                    BookmarksManagement.open.record(NoExtras())
                     MetricsUtils.recordBookmarkMetrics(
                         MetricsUtils.BookmarkAction.OPEN,
                         LIST_SCREEN_METRIC_SOURCE,
@@ -50,42 +50,42 @@ internal class BookmarksTelemetryMiddleware : Middleware<BookmarksState, Bookmar
                 }
             }
             is BookmarksListMenuAction.Folder.OpenAllInNormalTabClicked -> {
-                BookmarksManagement.openAllInNewTabs.record(NoExtras())
+//                BookmarksManagement.openAllInNewTabs.record(NoExtras())
                 MetricsUtils.recordBookmarkMetrics(
                     MetricsUtils.BookmarkAction.OPEN,
                     LIST_SCREEN_METRIC_SOURCE,
                 )
             }
             is BookmarksListMenuAction.Folder.OpenAllInPrivateTabClicked -> {
-                BookmarksManagement.openInPrivateTabs.record(NoExtras())
+//                BookmarksManagement.openInPrivateTabs.record(NoExtras())
                 MetricsUtils.recordBookmarkMetrics(
                     MetricsUtils.BookmarkAction.OPEN,
                     LIST_SCREEN_METRIC_SOURCE,
                 )
             }
             is BookmarksListMenuAction.Bookmark.OpenInNormalTabClicked -> {
-                BookmarksManagement.openInNewTab.record(NoExtras())
+//                BookmarksManagement.openInNewTab.record(NoExtras())
                 MetricsUtils.recordBookmarkMetrics(
                     MetricsUtils.BookmarkAction.OPEN,
                     LIST_SCREEN_METRIC_SOURCE,
                 )
             }
             is BookmarksListMenuAction.Bookmark.OpenInPrivateTabClicked -> {
-                BookmarksManagement.openInPrivateTab.record(NoExtras())
+//                BookmarksManagement.openInPrivateTab.record(NoExtras())
                 MetricsUtils.recordBookmarkMetrics(
                     MetricsUtils.BookmarkAction.OPEN,
                     LIST_SCREEN_METRIC_SOURCE,
                 )
             }
             BookmarksListMenuAction.MultiSelect.OpenInNormalTabsClicked -> {
-                BookmarksManagement.openInNewTabs.record(NoExtras())
+//                BookmarksManagement.openInNewTabs.record(NoExtras())
                 MetricsUtils.recordBookmarkMetrics(
                     MetricsUtils.BookmarkAction.OPEN,
                     LIST_SCREEN_METRIC_SOURCE,
                 )
             }
             BookmarksListMenuAction.MultiSelect.OpenInPrivateTabsClicked -> {
-                BookmarksManagement.openInPrivateTabs.record(NoExtras())
+//                BookmarksManagement.openInPrivateTabs.record(NoExtras())
                 MetricsUtils.recordBookmarkMetrics(
                     MetricsUtils.BookmarkAction.OPEN,
                     LIST_SCREEN_METRIC_SOURCE,
@@ -94,7 +94,7 @@ internal class BookmarksTelemetryMiddleware : Middleware<BookmarksState, Bookmar
             SnackbarAction.Dismissed -> {
                 val snackSnate = preReductionState.bookmarksSnackbarState
                 if (snackSnate is BookmarksSnackbarState.UndoDeletion && snackSnate.guidsToDelete.size == 1) {
-                    BookmarksManagement.removed.record(NoExtras())
+//                    BookmarksManagement.removed.record(NoExtras())
                     val source = if (preReductionState.bookmarksEditFolderState != null) {
                         EDIT_SCREEN_METRIC_SOURCE
                     } else {
@@ -104,14 +104,14 @@ internal class BookmarksTelemetryMiddleware : Middleware<BookmarksState, Bookmar
                 }
             }
             SearchClicked -> {
-                BookmarksManagement.searchIconTapped.record(NoExtras())
+//                BookmarksManagement.searchIconTapped.record(NoExtras())
             }
             is BookmarksListMenuAction.Bookmark.ShareClicked -> {
-                BookmarksManagement.shared.record(NoExtras())
+//                BookmarksManagement.shared.record(NoExtras())
             }
             BookmarksListMenuAction.MultiSelect.ShareClicked -> {
-                preReductionState.selectedItems.filterIsInstance<BookmarkItem.Bookmark>()
-                    .forEach { BookmarksManagement.shared.record(NoExtras()) }
+//                preReductionState.selectedItems.filterIsInstance<BookmarkItem.Bookmark>()
+//                    .forEach{}// { BookmarksManagement.shared.record(NoExtras()) }
             }
             is BookmarksListMenuAction.Folder.DeleteClicked,
             CloseClicked,
@@ -161,27 +161,27 @@ internal class BookmarksTelemetryMiddleware : Middleware<BookmarksState, Bookmar
     private fun BookmarksState.handleBackClick() {
         when {
             bookmarksEditBookmarkState != null -> {
-                BookmarksManagement.edited.record(NoExtras())
-                MetricsUtils.recordBookmarkMetrics(
-                    MetricsUtils.BookmarkAction.EDIT,
-                    EDIT_SCREEN_METRIC_SOURCE,
-                )
-                if (bookmarksEditBookmarkState.folder != currentFolder) {
-                    BookmarksManagement.moved.record(NoExtras())
-                }
+//                BookmarksManagement.edited.record(NoExtras())
+//                MetricsUtils.recordBookmarkMetrics(
+//                    MetricsUtils.BookmarkAction.EDIT,
+//                    EDIT_SCREEN_METRIC_SOURCE,
+//                )
+//                if (bookmarksEditBookmarkState.folder != currentFolder) {
+//                    BookmarksManagement.moved.record(NoExtras())
+//                }
             }
 
             bookmarksAddFolderState != null -> {
-                if (bookmarksAddFolderState.folderBeingAddedTitle != "") {
-                    BookmarksManagement.folderAdd.record(NoExtras())
-                }
+//                if (bookmarksAddFolderState.folderBeingAddedTitle != "") {
+//                    BookmarksManagement.folderAdd.record(NoExtras())
+//                }
             }
 
             bookmarksSelectFolderState != null -> {
                 if (bookmarksMultiselectMoveState != null &&
                     bookmarksMultiselectMoveState.destination != currentFolder.guid
                 ) {
-                    BookmarksManagement.moved.record(NoExtras())
+//                    BookmarksManagement.moved.record(NoExtras())
                 }
             }
         }

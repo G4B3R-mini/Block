@@ -19,7 +19,7 @@ import androidx.navigation.compose.rememberNavController
 import mozilla.components.browser.state.state.BrowserState
 import mozilla.components.browser.state.state.createTab
 import mozilla.components.browser.state.store.BrowserStore
-import mozilla.components.compose.base.annotation.LightDarkPreview
+import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.annotation.LightDarkPreview
 import mozilla.components.concept.storage.LoginsStorage
 import mozilla.components.lib.state.ext.observeAsState
 import com.shmibblez.inferno.debugsettings.addresses.AddressesDebugLocalesRepository
@@ -30,10 +30,10 @@ import com.shmibblez.inferno.debugsettings.cfrs.CfrToolsPreferencesMiddleware
 import com.shmibblez.inferno.debugsettings.cfrs.CfrToolsState
 import com.shmibblez.inferno.debugsettings.cfrs.CfrToolsStore
 import com.shmibblez.inferno.debugsettings.cfrs.DefaultCfrPreferencesRepository
-import com.shmibblez.inferno.debugsettings.gleandebugtools.DefaultGleanDebugToolsStorage
-import com.shmibblez.inferno.debugsettings.gleandebugtools.GleanDebugToolsMiddleware
-import com.shmibblez.inferno.debugsettings.gleandebugtools.GleanDebugToolsState
-import com.shmibblez.inferno.debugsettings.gleandebugtools.GleanDebugToolsStore
+//import com.shmibblez.inferno.debugsettings.gleandebugtools.DefaultGleanDebugToolsStorage
+//import com.shmibblez.inferno.debugsettings.gleandebugtools.GleanDebugToolsMiddleware
+//import com.shmibblez.inferno.debugsettings.gleandebugtools.GleanDebugToolsState
+//import com.shmibblez.inferno.debugsettings.gleandebugtools.GleanDebugToolsStore
 import com.shmibblez.inferno.debugsettings.logins.FakeLoginsStorage
 import com.shmibblez.inferno.debugsettings.logins.LoginsTools
 import com.shmibblez.inferno.debugsettings.navigation.DebugDrawerRoute

@@ -14,10 +14,10 @@ import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceScreen
 import androidx.preference.SwitchPreference
 import com.shmibblez.inferno.FeatureFlags
-import com.shmibblez.inferno.GleanMetrics.AppTheme
-import com.shmibblez.inferno.GleanMetrics.CustomizationSettings
-import com.shmibblez.inferno.GleanMetrics.PullToRefreshInBrowser
-import com.shmibblez.inferno.GleanMetrics.ToolbarSettings
+//import com.shmibblez.inferno.GleanMetrics.AppTheme
+//import com.shmibblez.inferno.GleanMetrics.CustomizationSettings
+//import com.shmibblez.inferno.GleanMetrics.PullToRefreshInBrowser
+//import com.shmibblez.inferno.GleanMetrics.ToolbarSettings
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.tabstrip.isTabStripEnabled
 import com.shmibblez.inferno.components.toolbar.ToolbarPosition

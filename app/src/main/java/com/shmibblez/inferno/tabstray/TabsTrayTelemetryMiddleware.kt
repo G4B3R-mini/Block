@@ -6,9 +6,9 @@ package com.shmibblez.inferno.tabstray
 
 import mozilla.components.lib.state.Middleware
 import mozilla.components.lib.state.MiddlewareContext
-import mozilla.telemetry.glean.private.NoExtras
-import com.shmibblez.inferno.GleanMetrics.Metrics
-import com.shmibblez.inferno.GleanMetrics.TabsTray
+//import mozilla.telemetry.glean.private.NoExtras
+//import com.shmibblez.inferno.GleanMetrics.Metrics
+//import com.shmibblez.inferno.GleanMetrics.TabsTray
 
 /**
  * Middleware that records telemetry events for the Tabs Tray feature.
@@ -29,30 +29,30 @@ class TabsTrayTelemetryMiddleware : Middleware<TabsTrayState, TabsTrayAction> {
                 if (shouldReportInactiveTabMetrics) {
                     shouldReportInactiveTabMetrics = false
 
-                    TabsTray.hasInactiveTabs.record(TabsTray.HasInactiveTabsExtra(action.tabs.size))
+//                    TabsTray.hasInactiveTabs.record(TabsTray.HasInactiveTabsExtra(action.tabs.size))
                     Metrics.inactiveTabsCount.set(action.tabs.size.toLong())
                 }
             }
             is TabsTrayAction.EnterSelectMode -> {
-                TabsTray.enterMultiselectMode.record(TabsTray.EnterMultiselectModeExtra(false))
+//                TabsTray.enterMultiselectMode.record(TabsTray.EnterMultiselectModeExtra(false))
             }
             is TabsTrayAction.AddSelectTab -> {
-                TabsTray.enterMultiselectMode.record(TabsTray.EnterMultiselectModeExtra(true))
+//                TabsTray.enterMultiselectMode.record(TabsTray.EnterMultiselectModeExtra(true))
             }
             is TabsTrayAction.TabAutoCloseDialogShown -> {
-                TabsTray.autoCloseSeen.record(NoExtras())
+//                TabsTray.autoCloseSeen.record(NoExtras())
             }
             is TabsTrayAction.ShareAllNormalTabs -> {
-                TabsTray.shareAllTabs.record(NoExtras())
+//                TabsTray.shareAllTabs.record(NoExtras())
             }
             is TabsTrayAction.ShareAllPrivateTabs -> {
-                TabsTray.shareAllTabs.record(NoExtras())
+//                TabsTray.shareAllTabs.record(NoExtras())
             }
             is TabsTrayAction.CloseAllNormalTabs -> {
-                TabsTray.closeAllTabs.record(NoExtras())
+//                TabsTray.closeAllTabs.record(NoExtras())
             }
             is TabsTrayAction.CloseAllPrivateTabs -> {
-                TabsTray.closeAllTabs.record(NoExtras())
+//                TabsTray.closeAllTabs.record(NoExtras())
             }
             else -> {
                 // no-op

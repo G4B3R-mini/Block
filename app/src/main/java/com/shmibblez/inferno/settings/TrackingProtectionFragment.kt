@@ -13,7 +13,7 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreference
 import com.shmibblez.inferno.BrowserDirection
-import com.shmibblez.inferno.GleanMetrics.TrackingProtection
+//import com.shmibblez.inferno.GleanMetrics.TrackingProtection
 import com.shmibblez.inferno.HomeActivity
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.ext.components
@@ -131,7 +131,7 @@ class TrackingProtectionFragment : PreferenceFragmentCompat() {
         radio.onClickListener {
             updateCustomOptionsVisibility()
             updateTrackingProtectionPolicy()
-            TrackingProtection.etpSettingChanged.record(TrackingProtection.EtpSettingChangedExtra(mode.name))
+//            TrackingProtection.etpSettingChanged.record(TrackingProtection.EtpSettingChangedExtra(mode.name))
         }
 
         radio.onInfoClickListener {

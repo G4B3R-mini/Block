@@ -4,7 +4,7 @@
 
 package com.shmibblez.inferno.debugsettings.gleandebugtools
 
-import mozilla.telemetry.glean.Glean
+//import mozilla.telemetry.glean.Glean
 
 /**
  * A storage used to access the Glean APIs.

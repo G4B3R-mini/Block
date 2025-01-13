@@ -26,7 +26,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
-import mozilla.components.compose.base.annotation.LightDarkPreview
+import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.annotation.LightDarkPreview
 import mozilla.components.feature.tab.collections.Tab
 import com.shmibblez.inferno.R.drawable
 import com.shmibblez.inferno.R.string
@@ -54,7 +54,7 @@ private val BOTTOM_TAB_SHAPE = RoundedCornerShape(bottomStart = 8.dp, bottomEnd 
  * @param onClick Invoked when the user click on the tab.
  * @param onRemove Invoked when the user removes the tab informing also if the tab was swiped to be removed.
  */
-@OptIn(ExperimentalMaterialApi::class)
+//@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun CollectionItem(
     tab: Tab,

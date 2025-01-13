@@ -12,8 +12,8 @@ import mozilla.components.browser.state.selector.privateTabs
 import mozilla.components.browser.state.state.BrowserState
 import mozilla.components.ui.tabcounter.TabCounter
 import mozilla.components.ui.tabcounter.TabCounterMenu
-import mozilla.telemetry.glean.private.NoExtras
-import com.shmibblez.inferno.GleanMetrics.StartOnHome
+//import mozilla.telemetry.glean.private.NoExtras
+//import com.shmibblez.inferno.GleanMetrics.StartOnHome
 import com.shmibblez.inferno.NavGraphDirections
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.browsingmode.BrowsingMode
@@ -43,7 +43,7 @@ class TabCounterView(
         setupLongPressMenu()
 
         tabCounter.setOnClickListener {
-            StartOnHome.openTabsTray.record(NoExtras())
+//            StartOnHome.openTabsTray.record(NoExtras())
 
             navController.nav(
                 navController.currentDestination?.id,

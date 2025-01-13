@@ -17,7 +17,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import mozilla.components.compose.base.annotation.LightDarkPreview
 import mozilla.components.feature.addons.Addon
 import mozilla.components.feature.addons.ui.displayName
 import mozilla.components.feature.addons.ui.summary
@@ -25,6 +24,7 @@ import com.shmibblez.inferno.R
 import com.shmibblez.inferno.components.menu.MenuDialogTestTag.RECOMMENDED_ADDON_ITEM
 import com.shmibblez.inferno.components.menu.MenuDialogTestTag.RECOMMENDED_ADDON_ITEM_TITLE
 import com.shmibblez.inferno.compose.list.FaviconListItem
+import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.annotation.LightDarkPreview
 import com.shmibblez.inferno.theme.FirefoxTheme
 import com.shmibblez.inferno.translations.rotationAnimation
 

@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -27,7 +28,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import mozilla.components.compose.base.annotation.LightDarkPreview
+import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.annotation.LightDarkPreview
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.button.PrimaryButton
 import com.shmibblez.inferno.theme.FirefoxTheme
@@ -55,6 +56,7 @@ fun MessageCard(
     onCloseButtonClick: () -> Unit,
 ) {
     Card(
+        colors = CardDefaults.cardColors(containerColor = messageColors.backgroundColor),
         modifier = Modifier
             .padding(vertical = 16.dp)
             .then(
@@ -65,7 +67,6 @@ fun MessageCard(
                 },
             ),
         shape = RoundedCornerShape(8.dp),
-        backgroundColor = messageColors.backgroundColor,
     ) {
         Column(
             Modifier

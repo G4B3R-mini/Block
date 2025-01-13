@@ -2,6 +2,7 @@
 # Android Components
 activityCompose = "1.9.3"
 android-components = "134.0.20241117092920"
+compose-base-v = "135.0b3"
 browser-search = "75.0.9"
 pagingCommon = "3.3.5"
 tooling-nimbus-gradle = "111.0.20230213143237"
@@ -57,6 +58,7 @@ okhttp = "4.12.0"
 pagingCommonAndroid = "3.3.5"
 coreSplashscreen = "1.0.1"
 navigationUiKtx = "2.8.5"
+toolingNimbusGradleAppService = "134.0"
 
 [libraries]
 # Kotlin
@@ -139,7 +141,7 @@ mozilla-browser-thumbnails = { group = "org.mozilla.components", name = "browser
 mozilla-browser-toolbar = { group = "org.mozilla.components", name = "browser-toolbar", version.ref = "android-components" }
 
 mozilla-compose-awesomebar = { group = "org.mozilla.components", name = "compose-awesomebar", version.ref = "android-components" }
-mozilla-compose-base = { group = "org.mozilla.components", name = "compose-base", version.ref = "android-components" }
+mozilla-compose-base = { group = "org.mozilla.components", name = "compose-base", version.ref = "compose-base-v" }
 mozilla-compose-cfr = { group = "org.mozilla.components", name = "compose-cfr", version.ref = "android-components" }
 
 mozilla-concept-awesomebar = { group = "org.mozilla.components", name = "concept-awesomebar", version.ref = "android-components" }
@@ -218,6 +220,7 @@ mozilla-ui-widgets = { group = "org.mozilla.components", name = "ui-widgets", ve
 androidx-paging-common-android = { group = "androidx.paging", name = "paging-common-android", version.ref = "pagingCommonAndroid" }
 androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "coreSplashscreen" }
 androidx-navigation-ui-ktx = { group = "androidx.navigation", name = "navigation-ui-ktx", version.ref = "navigationUiKtx" }
+tooling-nimbus-gradle-app-services = { module = "org.mozilla.appservices:tooling-nimbus-gradle", version.ref = "toolingNimbusGradleAppService" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "android-gradle-plugin" }

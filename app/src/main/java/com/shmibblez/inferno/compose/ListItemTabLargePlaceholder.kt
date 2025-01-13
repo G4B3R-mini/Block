@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -48,12 +49,12 @@ fun ListItemTabLargePlaceholder(
     onClick: () -> Unit = { },
 ) {
     Card(
+        colors = CardDefaults.cardColors(containerColor = backgroundColor),
         modifier = Modifier
             .size(ITEM_WIDTH.dp, ITEM_HEIGHT.dp)
             .clickable { onClick() },
         shape = RoundedCornerShape(8.dp),
-        backgroundColor = backgroundColor,
-        elevation = 6.dp,
+        elevation = CardDefaults.cardElevation(defaultElevation= 6.dp),
     ) {
         Column(
             modifier = Modifier

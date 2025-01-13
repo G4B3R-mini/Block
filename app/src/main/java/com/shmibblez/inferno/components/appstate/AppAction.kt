@@ -14,17 +14,17 @@ import mozilla.components.lib.crash.store.CrashAction
 import mozilla.components.lib.state.Action
 import mozilla.components.service.nimbus.messaging.Message
 import mozilla.components.service.nimbus.messaging.MessageSurfaceId
-import mozilla.components.service.pocket.PocketStory
-import mozilla.components.service.pocket.PocketStory.ContentRecommendation
-import mozilla.components.service.pocket.PocketStory.PocketSponsoredStory
+//import mozilla.components.service.pocket.PocketStory
+//import mozilla.components.service.pocket.PocketStory.ContentRecommendation
+//import mozilla.components.service.pocket.PocketStory.PocketSponsoredStory
 import com.shmibblez.inferno.browser.StandardSnackbarError
 import com.shmibblez.inferno.browser.browsingmode.BrowsingMode
 import com.shmibblez.inferno.components.AppStore
 import com.shmibblez.inferno.components.appstate.shopping.ShoppingState
 import com.shmibblez.inferno.components.appstate.webcompat.WebCompatState
 import com.shmibblez.inferno.home.bookmarks.Bookmark
-import com.shmibblez.inferno.home.pocket.PocketRecommendedStoriesCategory
-import com.shmibblez.inferno.home.pocket.PocketRecommendedStoriesSelectedCategory
+//import com.shmibblez.inferno.home.pocket.PocketRecommendedStoriesCategory
+//import com.shmibblez.inferno.home.pocket.PocketRecommendedStoriesSelectedCategory
 import com.shmibblez.inferno.home.recentsyncedtabs.RecentSyncedTab
 import com.shmibblez.inferno.home.recentsyncedtabs.RecentSyncedTabState
 import com.shmibblez.inferno.home.recenttabs.RecentTab
@@ -509,68 +509,68 @@ sealed class AppAction : Action {
         data object Reset : ReaderViewAction()
     }
 
-    /**
-     * [AppAction]s related to the content recommendations feature.
-     */
-    sealed class ContentRecommendationsAction : AppAction() {
-        /**
-         * [ContentRecommendationsAction] dispatched when content recommendations were fetched.
-         *
-         * @property recommendations The new list of [ContentRecommendation] that was fetched.
-         */
-        data class ContentRecommendationsFetched(
-            val recommendations: List<ContentRecommendation>,
-        ) : ContentRecommendationsAction()
-
-        /**
-         * Indicates the given [categoryName] was selected by the user.
-         */
-        data class SelectPocketStoriesCategory(val categoryName: String) :
-            ContentRecommendationsAction()
-
-        /**
-         * Indicates the given [categoryName] was deselected by the user.
-         */
-        data class DeselectPocketStoriesCategory(val categoryName: String) :
-            ContentRecommendationsAction()
-
-        /**
-         * Indicates the given [storiesShown] were seen by the user.
-         */
-        data class PocketStoriesShown(val storiesShown: List<PocketStory>) :
-            ContentRecommendationsAction()
-
-        /**
-         * Cleans all in-memory data about Pocket stories and categories.
-         */
-        data object PocketStoriesClean : ContentRecommendationsAction()
-
-        /**
-         * Replaces the current list of Pocket sponsored stories.
-         *
-         * @property sponsoredStories The new list of [PocketSponsoredStory] that was fetched.
-         * @property showContentRecommendations Whether or not to show Merino content
-         * recommendations.
-         */
-        data class PocketSponsoredStoriesChange(
-            val sponsoredStories: List<PocketSponsoredStory>,
-            val showContentRecommendations: Boolean,
-        ) : ContentRecommendationsAction()
-
-        /**
-         * Replaces the list of available Pocket recommended stories categories.
-         */
-        data class PocketStoriesCategoriesChange(val storiesCategories: List<PocketRecommendedStoriesCategory>) :
-            ContentRecommendationsAction()
-
-        /**
-         * Restores the list of Pocket recommended stories categories selections.
-         */
-        data class PocketStoriesCategoriesSelectionsChange(
-            val storiesCategories: List<PocketRecommendedStoriesCategory>,
-            val categoriesSelected: List<PocketRecommendedStoriesSelectedCategory>,
-        ) : ContentRecommendationsAction()
-    }
+//    /**
+//     * [AppAction]s related to the content recommendations feature.
+//     */
+//    sealed class ContentRecommendationsAction : AppAction() {
+//        /**
+//         * [ContentRecommendationsAction] dispatched when content recommendations were fetched.
+//         *
+//         * @property recommendations The new list of [ContentRecommendation] that was fetched.
+//         */
+//        data class ContentRecommendationsFetched(
+//            val recommendations: List<ContentRecommendation>,
+//        ) : ContentRecommendationsAction()
+//
+//        /**
+//         * Indicates the given [categoryName] was selected by the user.
+//         */
+//        data class SelectPocketStoriesCategory(val categoryName: String) :
+//            ContentRecommendationsAction()
+//
+//        /**
+//         * Indicates the given [categoryName] was deselected by the user.
+//         */
+//        data class DeselectPocketStoriesCategory(val categoryName: String) :
+//            ContentRecommendationsAction()
+//
+//        /**
+//         * Indicates the given [storiesShown] were seen by the user.
+//         */
+//        data class PocketStoriesShown(val storiesShown: List<PocketStory>) :
+//            ContentRecommendationsAction()
+//
+//        /**
+//         * Cleans all in-memory data about Pocket stories and categories.
+//         */
+//        data object PocketStoriesClean : ContentRecommendationsAction()
+//
+//        /**
+//         * Replaces the current list of Pocket sponsored stories.
+//         *
+//         * @property sponsoredStories The new list of [PocketSponsoredStory] that was fetched.
+//         * @property showContentRecommendations Whether or not to show Merino content
+//         * recommendations.
+//         */
+//        data class PocketSponsoredStoriesChange(
+//            val sponsoredStories: List<PocketSponsoredStory>,
+//            val showContentRecommendations: Boolean,
+//        ) : ContentRecommendationsAction()
+//
+//        /**
+//         * Replaces the list of available Pocket recommended stories categories.
+//         */
+//        data class PocketStoriesCategoriesChange(val storiesCategories: List<PocketRecommendedStoriesCategory>) :
+//            ContentRecommendationsAction()
+//
+//        /**
+//         * Restores the list of Pocket recommended stories categories selections.
+//         */
+//        data class PocketStoriesCategoriesSelectionsChange(
+//            val storiesCategories: List<PocketRecommendedStoriesCategory>,
+//            val categoriesSelected: List<PocketRecommendedStoriesSelectedCategory>,
+//        ) : ContentRecommendationsAction()
+//    }
 
     /**
      * [AppAction]s related to the Web Compat feature.

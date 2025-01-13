@@ -22,9 +22,9 @@ import mozilla.components.service.fxa.manager.SCOPE_SYNC
 import mozilla.components.support.ktx.android.content.hasCamera
 import mozilla.components.support.ktx.android.content.isPermissionGranted
 import mozilla.components.support.ktx.android.view.hideKeyboard
-import mozilla.telemetry.glean.private.NoExtras
+//import mozilla.telemetry.glean.private.NoExtras
 import com.shmibblez.inferno.Config
-import com.shmibblez.inferno.GleanMetrics.SyncAuth
+//import com.shmibblez.inferno.GleanMetrics.SyncAuth
 import com.shmibblez.inferno.HomeActivity
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.components.appstate.AppAction
@@ -75,10 +75,9 @@ class TurnOnSyncFragment : Fragment(), AccountObserver {
                 directions = directions,
                 navigateFrom = "TurnOnSyncFragment",
                 navigateTo = "ActionTurnOnSyncFragmentToPairFragment",
-                crashReporter = it.components.analytics.crashReporter,
             )
         }
-        SyncAuth.scanPairing.record(NoExtras())
+//        SyncAuth.scanPairing.record(NoExtras())
     }
 
     private val createAccountClickListener = View.OnClickListener {
@@ -88,7 +87,7 @@ class TurnOnSyncFragment : Fragment(), AccountObserver {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         requireComponents.backgroundServices.accountManager.register(this, owner = this)
-        SyncAuth.opened.record(NoExtras())
+//        SyncAuth.opened.record(NoExtras())
 
         // App can be installed on devices with no camera modules. Like Android TV boxes.
         // Let's skip presenting the option to sign in by scanning a qr code in this case
@@ -101,7 +100,7 @@ class TurnOnSyncFragment : Fragment(), AccountObserver {
 
     override fun onDestroy() {
         super.onDestroy()
-        SyncAuth.closed.record(NoExtras())
+//        SyncAuth.closed.record(NoExtras())
     }
 
     override fun onResume() {
@@ -176,7 +175,7 @@ class TurnOnSyncFragment : Fragment(), AccountObserver {
             entrypoint = args.entrypoint,
             setOf(SCOPE_PROFILE, SCOPE_SYNC),
         )
-        SyncAuth.useEmail.record(NoExtras())
+//        SyncAuth.useEmail.record(NoExtras())
         // TODO The sign-in web content populates session history,
         // so pressing "back" after signing in won't take us back into the settings screen, but rather up the
         // session history stack.

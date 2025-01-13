@@ -15,8 +15,8 @@ import androidx.work.WorkManager
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import mozilla.components.support.base.ids.SharedIdsHelper
-import mozilla.telemetry.glean.private.NoExtras
-import com.shmibblez.inferno.GleanMetrics.Events
+//import mozilla.telemetry.glean.private.NoExtras
+//import com.shmibblez.inferno.GleanMetrics.Events
 import com.shmibblez.inferno.HomeActivity
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.ext.components
@@ -61,7 +61,7 @@ class ReEngagementNotificationWorker(
         // re-engagement notification should only be shown once
         settings.reEngagementNotificationShown = true
 
-        Events.reEngagementNotifShown.record(NoExtras())
+//        Events.reEngagementNotifShown.record(NoExtras())
 
         return Result.success()
     }

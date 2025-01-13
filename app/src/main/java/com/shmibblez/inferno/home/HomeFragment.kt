@@ -74,7 +74,7 @@ import mozilla.components.browser.state.state.BrowserState
 import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.browser.state.state.selectedOrDefaultSearchEngine
 import mozilla.components.browser.state.store.BrowserStore
-import mozilla.components.compose.base.Divider
+import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.Divider
 import mozilla.components.compose.cfr.CFRPopup
 import mozilla.components.compose.cfr.CFRPopupLayout
 import mozilla.components.compose.cfr.CFRPopupProperties
@@ -96,13 +96,13 @@ import mozilla.components.support.base.feature.ViewBoundFeatureWrapper
 import mozilla.components.support.utils.BrowsersCache
 import mozilla.components.ui.colors.PhotonColors
 import mozilla.components.ui.tabcounter.TabCounterMenu
-import mozilla.telemetry.glean.private.NoExtras
+//import mozilla.telemetry.glean.private.NoExtras
 import com.shmibblez.inferno.BrowserDirection
-import com.shmibblez.inferno.GleanMetrics.HomeScreen
-import com.shmibblez.inferno.GleanMetrics.Homepage
-import com.shmibblez.inferno.GleanMetrics.Metrics
-import com.shmibblez.inferno.GleanMetrics.NavigationBar
-import com.shmibblez.inferno.GleanMetrics.PrivateBrowsingShortcutCfr
+//import com.shmibblez.inferno.GleanMetrics.HomeScreen
+//import com.shmibblez.inferno.GleanMetrics.Homepage
+//import com.shmibblez.inferno.GleanMetrics.Metrics
+//import com.shmibblez.inferno.GleanMetrics.NavigationBar
+//import com.shmibblez.inferno.GleanMetrics.PrivateBrowsingShortcutCfr
 import com.shmibblez.inferno.HomeActivity
 import com.shmibblez.inferno.NavGraphDirections
 import com.shmibblez.inferno.R
@@ -183,7 +183,7 @@ import com.shmibblez.inferno.utils.Settings.Companion.TOP_SITES_PROVIDER_MAX_THR
 import com.shmibblez.inferno.utils.allowUndo
 import com.shmibblez.inferno.wallpapers.Wallpaper
 import java.lang.ref.WeakReference
-import com.shmibblez.inferno.GleanMetrics.TabStrip as TabStripMetrics
+//import com.shmibblez.inferno.GleanMetrics.TabStrip as TabStripMetrics
 
 @Suppress("TooManyFunctions", "LargeClass")
 class HomeFragment : Fragment() {

@@ -11,8 +11,8 @@ import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreference
 import mozilla.components.feature.autofill.preference.AutofillPreference
 import mozilla.components.service.fxa.SyncEngine
-import mozilla.telemetry.glean.private.NoExtras
-import com.shmibblez.inferno.GleanMetrics.Logins
+//import mozilla.telemetry.glean.private.NoExtras
+//import com.shmibblez.inferno.GleanMetrics.Logins
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.components.accounts.FenixFxAEntryPoint
 import com.shmibblez.inferno.ext.components
@@ -113,7 +113,7 @@ class SavedLoginsAuthFragment : PreferenceFragmentCompat() {
 
     private fun navigateToSavedLoginsFragment() {
         if (findNavController().currentDestination?.id == R.id.savedLoginsAuthFragment) {
-            Logins.openLogins.record(NoExtras())
+//            Logins.openLogins.record(NoExtras())
             val directions =
                 SavedLoginsAuthFragmentDirections.actionSavedLoginsAuthFragmentToLoginsListFragment()
             findNavController().navigate(directions)

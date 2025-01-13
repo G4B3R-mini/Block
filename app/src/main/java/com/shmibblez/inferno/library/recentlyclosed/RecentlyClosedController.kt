@@ -14,9 +14,9 @@ import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.concept.engine.prompt.ShareData
 import mozilla.components.feature.recentlyclosed.RecentlyClosedTabsStorage
 import mozilla.components.feature.tabs.TabsUseCases
-import mozilla.telemetry.glean.private.NoExtras
+//import mozilla.telemetry.glean.private.NoExtras
 import com.shmibblez.inferno.BrowserDirection
-import com.shmibblez.inferno.GleanMetrics.RecentlyClosedTabs
+//import com.shmibblez.inferno.GleanMetrics.RecentlyClosedTabs
 import com.shmibblez.inferno.HomeActivity
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.browsingmode.BrowsingMode
@@ -51,36 +51,36 @@ class DefaultRecentlyClosedController(
     }
 
     override fun handleOpen(tabs: Set<TabState>, mode: BrowsingMode?) {
-        if (mode == BrowsingMode.Normal) {
-            RecentlyClosedTabs.menuOpenInNormalTab.record(NoExtras())
-        } else if (mode == BrowsingMode.Private) {
-            RecentlyClosedTabs.menuOpenInPrivateTab.record(NoExtras())
-        }
+//        if (mode == BrowsingMode.Normal) {
+//            RecentlyClosedTabs.menuOpenInNormalTab.record(NoExtras())
+//        } else if (mode == BrowsingMode.Private) {
+//            RecentlyClosedTabs.menuOpenInPrivateTab.record(NoExtras())
+//        }
         recentlyClosedStore.dispatch(RecentlyClosedFragmentAction.DeselectAll)
         tabs.forEach { tab -> handleOpen(tab, mode) }
     }
 
     override fun handleSelect(tab: TabState) {
-        if (recentlyClosedStore.state.selectedTabs.isEmpty()) {
-            RecentlyClosedTabs.enterMultiselect.record(NoExtras())
-        }
+//        if (recentlyClosedStore.state.selectedTabs.isEmpty()) {
+//            RecentlyClosedTabs.enterMultiselect.record(NoExtras())
+//        }
         recentlyClosedStore.dispatch(RecentlyClosedFragmentAction.Select(tab))
     }
 
     override fun handleDeselect(tab: TabState) {
-        if (recentlyClosedStore.state.selectedTabs.size == 1) {
-            RecentlyClosedTabs.exitMultiselect.record(NoExtras())
-        }
+//        if (recentlyClosedStore.state.selectedTabs.size == 1) {
+//            RecentlyClosedTabs.exitMultiselect.record(NoExtras())
+//        }
         recentlyClosedStore.dispatch(RecentlyClosedFragmentAction.Deselect(tab))
     }
 
     override fun handleDelete(tab: TabState) {
-        RecentlyClosedTabs.deleteTab.record(NoExtras())
+//        RecentlyClosedTabs.deleteTab.record(NoExtras())
         browserStore.dispatch(RecentlyClosedAction.RemoveClosedTabAction(tab))
     }
 
     override fun handleDelete(tabs: Set<TabState>) {
-        RecentlyClosedTabs.menuDelete.record(NoExtras())
+//        RecentlyClosedTabs.menuDelete.record(NoExtras())
         recentlyClosedStore.dispatch(RecentlyClosedFragmentAction.DeselectAll)
         tabs.forEach { tab ->
             browserStore.dispatch(RecentlyClosedAction.RemoveClosedTabAction(tab))
@@ -88,7 +88,7 @@ class DefaultRecentlyClosedController(
     }
 
     override fun handleNavigateToHistory() {
-        RecentlyClosedTabs.showFullHistory.record(NoExtras())
+//        RecentlyClosedTabs.showFullHistory.record(NoExtras())
         navController.navigate(
             RecentlyClosedFragmentDirections.actionGlobalHistoryFragment(),
             NavOptions.Builder().setPopUpTo(R.id.historyFragment, true).build(),
@@ -96,7 +96,7 @@ class DefaultRecentlyClosedController(
     }
 
     override fun handleShare(tabs: Set<TabState>) {
-        RecentlyClosedTabs.menuShare.record(NoExtras())
+//        RecentlyClosedTabs.menuShare.record(NoExtras())
         val shareData = tabs.map { ShareData(url = it.url, title = it.title) }
         navController.navigate(
             RecentlyClosedFragmentDirections.actionGlobalShareFragment(
@@ -107,7 +107,7 @@ class DefaultRecentlyClosedController(
 
     override fun handleRestore(item: TabState) {
         lifecycleScope.launch {
-            RecentlyClosedTabs.openTab.record(NoExtras())
+//            RecentlyClosedTabs.openTab.record(NoExtras())
             tabsUseCases.restore(item, recentlyClosedTabsStorage.engineStateStorage())
 
             browserStore.dispatch(
@@ -122,11 +122,11 @@ class DefaultRecentlyClosedController(
 
     override fun handleBackPressed(): Boolean {
         return if (recentlyClosedStore.state.selectedTabs.isNotEmpty()) {
-            RecentlyClosedTabs.exitMultiselect.record(NoExtras())
+//            RecentlyClosedTabs.exitMultiselect.record(NoExtras())
             recentlyClosedStore.dispatch(RecentlyClosedFragmentAction.DeselectAll)
             true
         } else {
-            RecentlyClosedTabs.closed.record(NoExtras())
+//            RecentlyClosedTabs.closed.record(NoExtras())
             false
         }
     }

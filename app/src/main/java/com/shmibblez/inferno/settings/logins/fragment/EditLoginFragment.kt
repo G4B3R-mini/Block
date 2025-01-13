@@ -26,10 +26,10 @@ import androidx.navigation.fragment.navArgs
 import com.google.android.material.textfield.TextInputLayout
 import mozilla.components.lib.state.ext.consumeFrom
 import mozilla.components.support.ktx.android.view.hideKeyboard
-import mozilla.telemetry.glean.private.NoExtras
+//import mozilla.telemetry.glean.private.NoExtras
 import com.shmibblez.inferno.AuthenticationStatus
 import com.shmibblez.inferno.BiometricAuthenticationManager
-import com.shmibblez.inferno.GleanMetrics.Logins
+//import com.shmibblez.inferno.GleanMetrics.Logins
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.components.StoreProvider
 import com.shmibblez.inferno.databinding.FragmentEditLoginBinding
@@ -370,7 +370,7 @@ class EditLoginFragment : Fragment(R.layout.fragment_edit_login), MenuProvider {
                 binding.usernameText.text.toString(),
                 binding.passwordText.text.toString(),
             )
-            Logins.saveEditedLogin.record(NoExtras())
+//            Logins.saveEditedLogin.record(NoExtras())
             Logins.modified.add()
             true
         }

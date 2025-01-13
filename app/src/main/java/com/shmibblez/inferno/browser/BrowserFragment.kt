@@ -59,7 +59,7 @@ import com.shmibblez.inferno.ext.requireComponents
 import com.shmibblez.inferno.ext.runIfFragmentIsAttached
 import com.shmibblez.inferno.ext.settings
 import com.shmibblez.inferno.home.HomeFragment
-//import com.shmibblez.inferno.nimbus.FxNimbus
+import com.shmibblez.inferno.nimbus.FxNimbus
 import com.shmibblez.inferno.settings.quicksettings.protections.cookiebanners.getCookieBannerUIMode
 import com.shmibblez.inferno.shopping.DefaultShoppingExperienceFeature
 import com.shmibblez.inferno.shopping.ReviewQualityCheckFeature
@@ -179,11 +179,11 @@ class BrowserFragment : BaseBrowserFragment(), UserInteractionHandler {
     }
 
     private fun initTranslationsAction(context: Context, view: View) {
-//        if (
-//            !FxNimbus.features.translations.value().mainFlowToolbarEnabled
-//        ) {
-//            return
-//        }
+        if (
+            !FxNimbus.features.translations.value().mainFlowToolbarEnabled
+        ) {
+            return
+        }
 
         val translationsAction = Toolbar.ActionButton(
             AppCompatResources.getDrawable(

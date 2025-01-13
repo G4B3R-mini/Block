@@ -29,11 +29,11 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import mozilla.components.lib.state.ext.consumeFrom
 import mozilla.components.ui.widgets.withCenterAlignedButtons
-import mozilla.telemetry.glean.private.NoExtras
+//import mozilla.telemetry.glean.private.NoExtras
 import com.shmibblez.inferno.AuthenticationStatus
 import com.shmibblez.inferno.BiometricAuthenticationManager
 import com.shmibblez.inferno.BrowserDirection
-import com.shmibblez.inferno.GleanMetrics.Logins
+//import com.shmibblez.inferno.GleanMetrics.Logins
 import com.shmibblez.inferno.HomeActivity
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.SecureFragment
@@ -208,14 +208,14 @@ class LoginDetailFragment : SecureFragment(R.layout.fragment_login_detail), Menu
         binding.copyUsername.setOnClickListener {
             interactor.onCopyUsername(args.savedLoginId)
             showCopiedSnackbar(view = it, copiedItem = it.context.getString(R.string.logins_username_copied))
-            Logins.copyLogin.record(NoExtras())
+//            Logins.copyLogin.record(NoExtras())
         }
 
         binding.passwordText.text = login?.password
         binding.copyPassword.setOnClickListener {
             interactor.onCopyPassword(args.savedLoginId)
             showCopiedSnackbar(view = it, copiedItem = it.context.getString(R.string.logins_password_copied))
-            Logins.copyLogin.record(NoExtras())
+//            Logins.copyLogin.record(NoExtras())
         }
     }
 
@@ -267,7 +267,7 @@ class LoginDetailFragment : SecureFragment(R.layout.fragment_login_detail), Menu
     }
 
     private fun editLogin() {
-        Logins.openLoginEditor.record(NoExtras())
+//        Logins.openLoginEditor.record(NoExtras())
         val directions =
             LoginDetailFragmentDirections.actionLoginDetailFragmentToEditLoginFragment(
                 login!!,
@@ -283,7 +283,7 @@ class LoginDetailFragment : SecureFragment(R.layout.fragment_login_detail), Menu
                     dialog.cancel()
                 }
                 setPositiveButton(R.string.dialog_delete_positive) { dialog: DialogInterface, _ ->
-                    Logins.deleteSavedLogin.record(NoExtras())
+//                    Logins.deleteSavedLogin.record(NoExtras())
                     Logins.deleted.add()
                     interactor.onDeleteLogin(args.savedLoginId)
 

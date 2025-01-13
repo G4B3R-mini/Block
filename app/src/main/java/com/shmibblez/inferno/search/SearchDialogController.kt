@@ -21,8 +21,8 @@ import mozilla.components.feature.tabs.TabsUseCases
 import mozilla.components.support.ktx.kotlin.isUrl
 import mozilla.components.ui.widgets.withCenterAlignedButtons
 import com.shmibblez.inferno.BrowserDirection
-import com.shmibblez.inferno.GleanMetrics.Events
-import com.shmibblez.inferno.GleanMetrics.UnifiedSearch
+//import com.shmibblez.inferno.GleanMetrics.Events
+//import com.shmibblez.inferno.GleanMetrics.UnifiedSearch
 import com.shmibblez.inferno.HomeActivity
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.components.Core
@@ -126,7 +126,7 @@ class SearchDialogController(
         )
 
         if (url.isUrl() || searchEngine == null) {
-            Events.enteredUrl.record(Events.EnteredUrlExtra(autocomplete = false))
+//            Events.enteredUrl.record(Events.EnteredUrlExtra(autocomplete = false))
         } else {
             val searchAccessPoint = when (fragmentStore.state.searchAccessPoint) {
                 MetricsUtils.Source.NONE -> MetricsUtils.Source.ACTION
@@ -185,7 +185,7 @@ class SearchDialogController(
             flags = flags,
         )
 
-        Events.enteredUrl.record(Events.EnteredUrlExtra(autocomplete = false))
+//        Events.enteredUrl.record(Events.EnteredUrlExtra(autocomplete = false))
 
         store.dispatch(AwesomeBarAction.EngagementFinished(abandoned = false))
     }
@@ -258,7 +258,7 @@ class SearchDialogController(
             }
         }
 
-        UnifiedSearch.engineSelected.record(UnifiedSearch.EngineSelectedExtra(searchEngine.telemetryName()))
+//        UnifiedSearch.engineSelected.record(UnifiedSearch.EngineSelectedExtra(searchEngine.telemetryName()))
     }
 
     override fun handleClickSearchEngineSettings() {

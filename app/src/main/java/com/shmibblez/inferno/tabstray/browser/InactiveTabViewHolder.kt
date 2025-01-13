@@ -14,7 +14,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.lifecycle.LifecycleOwner
 import mozilla.components.lib.state.ext.observeAsComposableState
-import mozilla.telemetry.glean.private.NoExtras
+//import mozilla.telemetry.glean.private.NoExtras
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.components.components
 import com.shmibblez.inferno.compose.ComposeViewHolder
@@ -25,7 +25,7 @@ import com.shmibblez.inferno.tabstray.TabsTrayState
 import com.shmibblez.inferno.tabstray.TabsTrayStore
 import com.shmibblez.inferno.tabstray.TrayPagerAdapter
 import com.shmibblez.inferno.tabstray.inactivetabs.InactiveTabsList
-import com.shmibblez.inferno.GleanMetrics.TabsTray as TabsTrayMetrics
+//import com.shmibblez.inferno.GleanMetrics.TabsTray as TabsTrayMetrics
 
 /**
  * The [ComposeViewHolder] for displaying the section of inactive tabs in [TrayPagerAdapter].
@@ -54,7 +54,7 @@ class InactiveTabViewHolder(
         var showAutoClosePrompt by remember { mutableStateOf(showInactiveTabsAutoCloseDialog) }
 
         if (showInactiveTabsAutoCloseDialog) {
-            TabsTrayMetrics.autoCloseSeen.record(NoExtras())
+//            TabsTrayMetrics.autoCloseSeen.record(NoExtras())
         }
 
         if (inactiveTabs.isNotEmpty()) {

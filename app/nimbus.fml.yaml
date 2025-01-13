@@ -9,12 +9,14 @@ channels:
   - beta
   - nightly
   - developer
+  - debug
 includes:
-  - onboarding.fml.yaml
+#  - onboarding.fml.yaml
   - pbm.fml.yaml
   - messaging-fenix.fml.yaml
 import:
-  - path: ../../android-components/components/browser/engine-gecko/geckoview.fml.yaml
+  - path: geckoview.fml.yaml
+# TODO: fix this: - path: ../../android-components/components/browser/engine-gecko/geckoview.fml.yaml
     channel: release
     features:
       pdfjs:
@@ -23,7 +25,8 @@ import:
           download-button: true,
           open-in-app-button: true
         }
-  - path: ../../android-components/components/feature/fxsuggest/fxsuggest.fml.yaml
+  - path : fxsuggest.fml.yaml
+# TODO: fix this - path: ../../android-components/components/feature/fxsuggest/fxsuggest.fml.yaml
     channel: release
     features:
       awesomebar-suggestion-provider:

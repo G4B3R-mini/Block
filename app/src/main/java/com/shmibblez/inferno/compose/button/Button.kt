@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ButtonElevation
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,8 +24,9 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-//import mozilla.components.compose.base.annotation.LightDarkPreview
+//import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.annotation.LightDarkPreview
 import com.shmibblez.inferno.R
+import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.annotation.LightDarkPreview
 import com.shmibblez.inferno.theme.FirefoxTheme
 
 const val DEFAULT_MAX_LINES = 2
@@ -63,9 +65,9 @@ private fun Button(
         modifier = modifier,
         enabled = enabled,
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
-        elevation = ButtonDefaults.elevation(defaultElevation = 0.dp, pressedElevation = 0.dp),
+        elevation = ButtonDefaults.elevatedButtonElevation(defaultElevation = 0.dp, pressedElevation = 0.dp),
         colors = ButtonDefaults.outlinedButtonColors(
-            backgroundColor = backgroundColor,
+            containerColor = backgroundColor,
         ),
     ) {
         icon?.let { painter ->

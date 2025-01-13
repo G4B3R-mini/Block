@@ -27,7 +27,7 @@ import com.shmibblez.inferno.R
 import com.shmibblez.inferno.databinding.FragmentShareBinding
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.requireComponents
-import com.shmibblez.inferno.nimbus.FxNimbus
+//import com.shmibblez.inferno.nimbus.FxNimbus
 import com.shmibblez.inferno.theme.FirefoxTheme
 import com.shmibblez.inferno.theme.Theme
 

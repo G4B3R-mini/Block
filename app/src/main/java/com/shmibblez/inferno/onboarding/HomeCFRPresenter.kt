@@ -17,8 +17,8 @@ import androidx.core.content.ContextCompat.getColor
 import androidx.recyclerview.widget.RecyclerView
 import mozilla.components.compose.cfr.CFRPopup
 import mozilla.components.compose.cfr.CFRPopupProperties
-import mozilla.telemetry.glean.private.NoExtras
-import com.shmibblez.inferno.GleanMetrics.Onboarding
+//import mozilla.telemetry.glean.private.NoExtras
+//import com.shmibblez.inferno.GleanMetrics.Onboarding
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.ext.settings
 import com.shmibblez.inferno.home.recentsyncedtabs.view.RecentSyncedTabViewHolder
@@ -93,7 +93,7 @@ class HomeCFRPresenter(
             },
         ).show()
 
-        Onboarding.synCfrShown.record(NoExtras())
+//        Onboarding.synCfrShown.record(NoExtras())
     }
 
     /**

@@ -29,11 +29,11 @@ import mozilla.components.feature.accounts.push.CloseTabsUseCases
 import mozilla.components.feature.downloads.ui.DownloadCancelDialogFragment
 import mozilla.components.feature.tabs.TabsUseCases
 import mozilla.components.lib.state.DelicateAction
-import mozilla.telemetry.glean.private.NoExtras
+//import mozilla.telemetry.glean.private.NoExtras
 import com.shmibblez.inferno.BrowserDirection
-import com.shmibblez.inferno.GleanMetrics.Collections
-import com.shmibblez.inferno.GleanMetrics.Events
-import com.shmibblez.inferno.GleanMetrics.TabsTray
+//import com.shmibblez.inferno.GleanMetrics.Collections
+//import com.shmibblez.inferno.GleanMetrics.Events
+//import com.shmibblez.inferno.GleanMetrics.TabsTray
 import com.shmibblez.inferno.HomeActivity
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.browsingmode.BrowsingMode
@@ -55,7 +55,7 @@ import com.shmibblez.inferno.tabstray.ext.isSelect
 import com.shmibblez.inferno.utils.Settings
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.CoroutineContext
-import com.shmibblez.inferno.GleanMetrics.Tab as GleanTab
+//import com.shmibblez.inferno.GleanMetrics.Tab as GleanTab
 
 /**
  * Controller for handling any actions in the tabs tray.
@@ -275,13 +275,13 @@ class DefaultTabsTrayController(
     override fun handleTrayScrollingToPosition(position: Int, smoothScroll: Boolean) {
         val page = Page.positionToPage(position)
 
-        if (page != tabsTrayStore.state.selectedPage) {
-            when (page) {
-                Page.NormalTabs -> TabsTray.normalModeTapped.record(NoExtras())
-                Page.PrivateTabs -> TabsTray.privateModeTapped.record(NoExtras())
-                Page.SyncedTabs -> TabsTray.syncedModeTapped.record(NoExtras())
-            }
-        }
+//        if (page != tabsTrayStore.state.selectedPage) {
+//            when (page) {
+//                Page.NormalTabs -> TabsTray.normalModeTapped.record(NoExtras())
+//                Page.PrivateTabs -> TabsTray.privateModeTapped.record(NoExtras())
+//                Page.SyncedTabs -> TabsTray.syncedModeTapped.record(NoExtras())
+//            }
+//        }
 
         selectTabPosition(position, smoothScroll)
         tabsTrayStore.dispatch(TabsTrayAction.PageSelected(page))
@@ -335,7 +335,7 @@ class DefaultTabsTrayController(
                     dismissTabsTrayAndNavigateHome(tabId)
                 }
             }
-            TabsTray.closedExistingTab.record(TabsTray.ClosedExistingTabExtra(source ?: "unknown"))
+//            TabsTray.closedExistingTab.record(TabsTray.ClosedExistingTabExtra(source ?: "unknown"))
         }
 
         tabsTrayStore.dispatch(TabsTrayAction.ExitSelectMode)
@@ -344,7 +344,7 @@ class DefaultTabsTrayController(
     override fun handleDeleteSelectedTabsClicked() {
         val tabs = tabsTrayStore.state.mode.selectedTabs
 
-        TabsTray.closeSelectedTabs.record(TabsTray.CloseSelectedTabsExtra(tabCount = tabs.size))
+//        TabsTray.closeSelectedTabs.record(TabsTray.CloseSelectedTabsExtra(tabCount = tabs.size))
 
         deleteMultipleTabs(tabs)
 
@@ -418,7 +418,7 @@ class DefaultTabsTrayController(
     override fun handleBookmarkSelectedTabsClicked() {
         val tabs = tabsTrayStore.state.mode.selectedTabs
 
-        TabsTray.bookmarkSelectedTabs.record(TabsTray.BookmarkSelectedTabsExtra(tabCount = tabs.size))
+//        TabsTray.bookmarkSelectedTabs.record(TabsTray.BookmarkSelectedTabsExtra(tabCount = tabs.size))
 
         // We don't combine the context with lifecycleScope so that our jobs are not cancelled
         // if we leave the fragment, i.e. we still want the bookmarks to be added if the
@@ -455,8 +455,8 @@ class DefaultTabsTrayController(
     override fun handleAddSelectedTabsToCollectionClicked() {
         val tabs = tabsTrayStore.state.mode.selectedTabs
 
-        TabsTray.selectedTabsToCollection.record(TabsTray.SelectedTabsToCollectionExtra(tabCount = tabs.size))
-        TabsTray.saveToCollection.record(NoExtras())
+//        TabsTray.selectedTabsToCollection.record(TabsTray.SelectedTabsToCollectionExtra(tabCount = tabs.size))
+//        TabsTray.saveToCollection.record(NoExtras())
 
         tabsTrayStore.dispatch(TabsTrayAction.ExitSelectMode)
 
@@ -497,7 +497,7 @@ class DefaultTabsTrayController(
     override fun handleShareSelectedTabsClicked() {
         val tabs = tabsTrayStore.state.mode.selectedTabs
 
-        TabsTray.shareSelectedTabs.record(TabsTray.ShareSelectedTabsExtra(tabCount = tabs.size))
+//        TabsTray.shareSelectedTabs.record(TabsTray.ShareSelectedTabsExtra(tabCount = tabs.size))
 
         val data = tabs.map {
             ShareData(url = it.content.url, title = it.content.title)
@@ -510,11 +510,11 @@ class DefaultTabsTrayController(
 
     @VisibleForTesting
     internal fun sendNewTabEvent(isPrivateModeSelected: Boolean) {
-        if (isPrivateModeSelected) {
-            TabsTray.newPrivateTabTapped.record(NoExtras())
-        } else {
-            TabsTray.newTabTapped.record(NoExtras())
-        }
+//        if (isPrivateModeSelected) {
+//            TabsTray.newPrivateTabTapped.record(NoExtras())
+//        } else {
+//            TabsTray.newTabTapped.record(NoExtras())
+//        }
     }
 
     @VisibleForTesting
@@ -526,12 +526,12 @@ class DefaultTabsTrayController(
     override fun handleMediaClicked(tab: SessionState) {
         when (tab.mediaSessionState?.playbackState) {
             PlaybackState.PLAYING -> {
-                GleanTab.mediaPause.record(NoExtras())
+//                GleanTab.mediaPause.record(NoExtras())
                 tab.mediaSessionState?.controller?.pause()
             }
 
             PlaybackState.PAUSED -> {
-                GleanTab.mediaPlay.record(NoExtras())
+//                GleanTab.mediaPlay.record(NoExtras())
                 tab.mediaSessionState?.controller?.play()
             }
             else -> throw AssertionError(
@@ -541,7 +541,7 @@ class DefaultTabsTrayController(
     }
 
     override fun handleSyncedTabClicked(tab: Tab) {
-        Events.syncedTabOpened.record(NoExtras())
+//        Events.syncedTabOpened.record(NoExtras())
 
         dismissTray()
         activity.openToBrowserAndLoad(
@@ -562,7 +562,7 @@ class DefaultTabsTrayController(
 
     override fun handleTabLongClick(tab: TabSessionState): Boolean {
         return if (tab.isNormalTab() && tabsTrayStore.state.mode.selectedTabs.isEmpty()) {
-            Collections.longPress.record(NoExtras())
+//            Collections.longPress.record(NoExtras())
             tabsTrayStore.dispatch(TabsTrayAction.AddSelectTab(tab))
             true
         } else {
@@ -574,7 +574,7 @@ class DefaultTabsTrayController(
         val selected = tabsTrayStore.state.mode.selectedTabs
         when {
             selected.isEmpty() && tabsTrayStore.state.mode.isSelect().not() -> {
-                TabsTray.openedExistingTab.record(TabsTray.OpenedExistingTabExtra(source ?: "unknown"))
+//                TabsTray.openedExistingTab.record(TabsTray.OpenedExistingTabExtra(source ?: "unknown"))
                 tabsUseCases.selectTab(tab.id)
                 val mode = BrowsingMode.fromBoolean(tab.content.private)
                 browsingModeManager.mode = mode
@@ -613,15 +613,15 @@ class DefaultTabsTrayController(
     override fun handleInactiveTabsHeaderClicked(expanded: Boolean) {
         appStore.dispatch(AppAction.UpdateInactiveExpanded(expanded))
 
-        when (expanded) {
-            true -> TabsTray.inactiveTabsExpanded.record(NoExtras())
-            false -> TabsTray.inactiveTabsCollapsed.record(NoExtras())
-        }
+//        when (expanded) {
+//            true -> TabsTray.inactiveTabsExpanded.record(NoExtras())
+//            false -> TabsTray.inactiveTabsCollapsed.record(NoExtras())
+//        }
     }
 
     override fun handleInactiveTabsAutoCloseDialogDismiss() {
         markDialogAsShown()
-        TabsTray.autoCloseDimissed.record(NoExtras())
+//        TabsTray.autoCloseDimissed.record(NoExtras())
     }
 
     override fun handleEnableInactiveTabsAutoCloseClicked() {
@@ -630,12 +630,12 @@ class DefaultTabsTrayController(
         settings.closeTabsAfterOneWeek = false
         settings.closeTabsAfterOneDay = false
         settings.manuallyCloseTabs = false
-        TabsTray.autoCloseTurnOnClicked.record(NoExtras())
+//        TabsTray.autoCloseTurnOnClicked.record(NoExtras())
     }
 
     override fun handleDeleteAllInactiveTabsClicked() {
         val numTabs: Int
-        TabsTray.closeAllInactiveTabs.record(NoExtras())
+//        TabsTray.closeAllInactiveTabs.record(NoExtras())
         browserStore.state.potentialInactiveTabs.map { it.id }.let {
             tabsUseCases.removeTabs(it)
             numTabs = it.size

@@ -16,8 +16,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import mozilla.components.lib.state.ext.consumeFrom
 import mozilla.components.lib.state.ext.observeAsComposableState
-import mozilla.telemetry.glean.private.NoExtras
-import com.shmibblez.inferno.GleanMetrics.Addresses
+//import mozilla.telemetry.glean.private.NoExtras
+//import com.shmibblez.inferno.GleanMetrics.Addresses
 import com.shmibblez.inferno.components.StoreProvider
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.settings.address.controller.DefaultAddressManagementController
@@ -63,11 +63,11 @@ class AddressManagementFragment : Fragment() {
                         addresses = addresses.value ?: emptyList(),
                         onAddressClick = {
                             interactor.onSelectAddress(it)
-                            Addresses.managementAddressTapped.record(NoExtras())
+//                            Addresses.managementAddressTapped.record(NoExtras())
                         },
                         onAddAddressButtonClick = {
                             interactor.onAddAddressButtonClick()
-                            Addresses.managementAddTapped.record(NoExtras())
+//                            Addresses.managementAddTapped.record(NoExtras())
                         },
                     )
                 }

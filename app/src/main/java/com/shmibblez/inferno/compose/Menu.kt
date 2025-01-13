@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenu
@@ -38,7 +39,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import mozilla.components.compose.base.annotation.LightDarkPreview
+import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.annotation.LightDarkPreview
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.button.PrimaryButton
 import com.shmibblez.inferno.theme.FirefoxTheme
@@ -112,41 +113,38 @@ private fun Menu(
                             columnHeightDp = with(localDensity) { coordinates.size.height.toDp() }
                         }
                         .semantics { if (item.isChecked) traversalIndex = -1f },
+                    text = {
+                        if (hasCheckedItems || canShowCheckItems) {
+                            if (item.isChecked) {
+                                selectedItemIndex = index
+                                Icon(
+                                    painter = painterResource(id = R.drawable.mozac_ic_checkmark_24),
+                                    modifier = Modifier.size(24.dp),
+                                    contentDescription = null,
+                                    tint = FirefoxTheme.colors.iconPrimary,
+                                )
+                            } else {
+                                Spacer(
+                                    modifier = Modifier.size(24.dp),
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(12.dp))
+                        }
+                        Text(
+                            text = item.title,
+                            color = item.color ?: FirefoxTheme.colors.textPrimary,
+                            maxLines = 1,
+                            style = FirefoxTheme.typography.subtitle1,
+                            modifier = Modifier
+                                .wrapContentHeight()
+                                .align(Alignment.CenterHorizontally),
+                        )
+                    },
                     onClick = {
                         onDismissRequest()
                         item.onClick()
                     },
-                ) {
-                    if (hasCheckedItems || canShowCheckItems) {
-                        if (item.isChecked) {
-                            selectedItemIndex = index
-                            Icon(
-                                painter = painterResource(id = R.drawable.mozac_ic_checkmark_24),
-                                modifier = Modifier
-                                    .size(24.dp),
-                                contentDescription = null,
-                                tint = FirefoxTheme.colors.iconPrimary,
-                            )
-                        } else {
-                            Spacer(
-                                modifier = Modifier
-                                    .size(24.dp),
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.width(12.dp))
-                    }
-
-                    Text(
-                        text = item.title,
-                        color = item.color ?: FirefoxTheme.colors.textPrimary,
-                        maxLines = 1,
-                        style = FirefoxTheme.typography.subtitle1,
-                        modifier = Modifier
-                            .fillMaxHeight()
-                            .align(Alignment.CenterVertically),
-                    )
-                }
+                )
             }
         }
     }
@@ -165,8 +163,7 @@ private fun Menu(
 @Deprecated(
     message = "Use DropdownMenu instead with updated parameters and MenuItem type",
     replaceWith = ReplaceWith(
-        expression = "DropdownMenu( menuItems = menuItems, expanded = showMenu, modifier = modifier," +
-            " offset = offset, onDismissRequest = onDismissRequest)",
+        expression = "DropdownMenu( menuItems = menuItems, expanded = showMenu, modifier = modifier," + " offset = offset, onDismissRequest = onDismissRequest)",
         imports = ["com.shmibblez.inferno.compose.menu.DropdownMenu", "com.shmibblez.inferno.compose.menu.MenuItem"],
     ),
     level = DeprecationLevel.WARNING,

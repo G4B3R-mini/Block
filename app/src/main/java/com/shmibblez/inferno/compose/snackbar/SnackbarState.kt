@@ -5,16 +5,42 @@
 package com.shmibblez.inferno.compose.snackbar
 
 import androidx.compose.material3.SnackbarDuration
+import androidx.compose.ui.platform.AccessibilityManager
 import com.google.android.material.snackbar.Snackbar.LENGTH_INDEFINITE
 import com.google.android.material.snackbar.Snackbar.LENGTH_LONG
 import com.google.android.material.snackbar.Snackbar.LENGTH_SHORT
 import com.shmibblez.inferno.compose.core.Action
+import com.shmibblez.inferno.compose.snackbar.SnackbarState.Duration.Preset.Indefinite
+import com.shmibblez.inferno.compose.snackbar.SnackbarState.Duration.Preset.Short
 import com.shmibblez.inferno.compose.snackbar.SnackbarState.Type
+import kotlin.math.abs
 
 private val defaultDuration = SnackbarState.Duration.Preset.Short
 private val defaultType = Type.Default
 private val defaultAction: Action? = null
 private val defaultOnDismiss: () -> Unit = {}
+
+// TODO: magic numbers adjustment
+fun SnackbarDuration.toMillis(
+    hasAction: Boolean,
+    accessibilityManager: AccessibilityManager?
+): Long {
+    val original =
+        when (this) {
+            SnackbarDuration.Indefinite -> Long.MAX_VALUE
+            SnackbarDuration.Long -> 10000L
+            SnackbarDuration.Short -> 4000L
+        }
+    if (accessibilityManager == null) {
+        return original
+    }
+    return accessibilityManager.calculateRecommendedTimeoutMillis(
+        original,
+        containsIcons = true,
+        containsText = true,
+        containsControls = hasAction
+    )
+}
 
 /**
  * The data to display within a Snackbar.
@@ -38,13 +64,38 @@ data class SnackbarState(
      */
     sealed interface Duration {
 
+        fun toSnackbarDuration(): SnackbarDuration {
+            if (this is Preset) {
+                return when (this) {
+                    Indefinite -> SnackbarDuration.Indefinite
+                    Preset.Long -> SnackbarDuration.Long
+                    Short -> SnackbarDuration.Long
+                }
+            } else if (this is Custom) {
+                val durations = arrayOf(4000, 10000, Int.MAX_VALUE)
+                var duration = durations[0]
+                for (n in durations)
+                    if (abs(duration - n) < abs(this.durationMs - n))
+                        duration = n
+                return when (duration) {
+                    4000 -> SnackbarDuration.Short
+                    10000 -> SnackbarDuration.Long
+                    Int.MAX_VALUE -> SnackbarDuration.Indefinite
+                    else -> {
+                        throw Error("this should not happen")
+                    }
+                }
+            }
+            throw Error("this should not happen")
+        }
+
         /**
          * A predefined display duration.
          */
         enum class Preset(val durationMs: Int) : Duration {
             Indefinite(durationMs = Int.MAX_VALUE),
             Long(durationMs = 10000),
-            Short(durationMs = 4000),
+            Short(durationMs = 4000);
         }
 
         /**
@@ -52,7 +103,8 @@ data class SnackbarState(
          *
          * @property durationMs The duration in milliseconds.
          */
-        data class Custom(val durationMs: Int) : Duration
+        data class Custom(val durationMs: Int) : Duration {
+        }
     }
 
     /**

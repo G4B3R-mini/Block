@@ -24,7 +24,7 @@ import androidx.navigation.fragment.navArgs
 import mozilla.components.feature.sitepermissions.SitePermissionsRules
 import mozilla.components.feature.sitepermissions.SitePermissionsRules.Action.ALLOWED
 import mozilla.components.feature.sitepermissions.SitePermissionsRules.Action.BLOCKED
-import com.shmibblez.inferno.GleanMetrics.Autoplay
+//import com.shmibblez.inferno.GleanMetrics.Autoplay
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.databinding.FragmentManageSitePermissionsFeaturePhoneBinding
 import com.shmibblez.inferno.ext.components
@@ -213,9 +213,9 @@ class SitePermissionsManagePhoneFeatureFragment : Fragment() {
             else -> return
         }
 
-        autoplaySetting.toAutoplayMetricsExtraKey()?.let { extraKey ->
-            Autoplay.settingChanged.record(Autoplay.SettingChangedExtra(extraKey))
-        }
+//        autoplaySetting.toAutoplayMetricsExtraKey()?.let { extraKey ->
+//            Autoplay.settingChanged.record(Autoplay.SettingChangedExtra(extraKey))
+//        }
 
         settings.setSitePermissionsPhoneFeatureAction(AUTOPLAY_AUDIBLE, audible)
         settings.setSitePermissionsPhoneFeatureAction(AUTOPLAY_INAUDIBLE, inaudible)

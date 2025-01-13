@@ -129,6 +129,7 @@ import com.shmibblez.inferno.home.intent.StartSearchIntentProcessor
 import com.shmibblez.inferno.library.bookmarks.DesktopFolders
 import com.shmibblez.inferno.messaging.FenixMessageSurfaceId
 import com.shmibblez.inferno.messaging.MessageNotificationWorker
+import com.shmibblez.inferno.nimbus.FxNimbus
 //import com.shmibblez.inferno.nimbus.FxNimbus
 import com.shmibblez.inferno.onboarding.ReEngagementNotificationWorker
 import com.shmibblez.inferno.perf.MarkersActivityLifecycleCallbacks
@@ -300,38 +301,36 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
             isLauncherIntent = intent.toSafeIntent().isLauncherIntent,
         )
 
-//        SplashScreenManager(
-//            splashScreenOperation = FetchExperimentsOperation(
-//                storage = DefaultExperimentsOperationStorage(components.settings),
-//                nimbus = components.nimbus.sdk,
-//            ),
-////            if (FxNimbus.features.splashScreen.value().offTrainOnboarding) {
-////                ApplyExperimentsOperation(
-////                    storage = DefaultExperimentsOperationStorage(components.settings),
-////                    nimbus = components.nimbus.sdk,
-////                )
-////            } else {
-////                FetchExperimentsOperation(
-////                    storage = DefaultExperimentsOperationStorage(components.settings),
-////                    nimbus = components.nimbus.sdk,
-////                )
-////            },
-//            splashScreenTimeout = 0, // FxNimbus.features.splashScreen.value().maximumDurationMs.toLong(),
-//            isDeviceSupported = { Build.VERSION.SDK_INT > Build.VERSION_CODES.M },
-//            storage = DefaultSplashScreenStorage(components.settings),
-//            showSplashScreen = { installSplashScreen().setKeepOnScreenCondition(it) },
-//            onSplashScreenFinished = { result ->
+        SplashScreenManager(
+            splashScreenOperation =
+            if (FxNimbus.features.splashScreen.value().offTrainOnboarding) {
+                ApplyExperimentsOperation(
+                    storage = DefaultExperimentsOperationStorage(components.settings),
+                    nimbus = components.nimbus.sdk,
+                )
+            } else {
+                FetchExperimentsOperation(
+                    storage = DefaultExperimentsOperationStorage(components.settings),
+                    nimbus = components.nimbus.sdk,
+                )
+            },
+            splashScreenTimeout = FxNimbus.features.splashScreen.value().maximumDurationMs.toLong(),
+            isDeviceSupported = { Build.VERSION.SDK_INT > Build.VERSION_CODES.M },
+            storage = DefaultSplashScreenStorage(components.settings),
+            showSplashScreen = { installSplashScreen().setKeepOnScreenCondition(it) },
+            onSplashScreenFinished = { result ->
+                // TODO: splash screen?
 //                if (result.sendTelemetry) {
 //                    SplashScreen.firstLaunchExtended.record(
 //                        SplashScreen.FirstLaunchExtendedExtra(dataFetched = result.wasDataFetched),
 //                    )
 //                }
-//
-//                if (savedInstanceState == null && shouldShowOnboarding) {
-//                    navHost.navController.navigate(NavGraphDirections.actionGlobalOnboarding())
-//                }
-//            },
-//        ).showSplashScreen()
+
+                if (savedInstanceState == null && shouldShowOnboarding) {
+                    navHost.navController.navigate(NavGraphDirections.actionGlobalOnboarding())
+                }
+            },
+        ).showSplashScreen()
 
         lifecycleScope.launch {
             val debugSettingsRepository = DefaultDebugSettingsRepository(
@@ -599,17 +598,17 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
     final override fun onStop() {
         super.onStop()
 
-//        if (FxNimbus.features.alternativeAppLauncherIcon.value().enabled) {
-//            // User has been enrolled in alternative app icon experiment.
-//            with(applicationContext) {
-//                changeAppLauncherIcon(
-//                    context = this,
-//                    appAlias = ComponentName(this, "$packageName.App"),
-//                    alternativeAppAlias = ComponentName(this, "$packageName.AlternativeApp"),
-//                    resetToDefault = FxNimbus.features.alternativeAppLauncherIcon.value().resetToDefault,
-//                )
-//            }
-//        }
+        if (FxNimbus.features.alternativeAppLauncherIcon.value().enabled) {
+            // User has been enrolled in alternative app icon experiment.
+            with(applicationContext) {
+                changeAppLauncherIcon(
+                    context = this,
+                    appAlias = ComponentName(this, "$packageName.App"),
+                    alternativeAppAlias = ComponentName(this, "$packageName.AlternativeApp"),
+                    resetToDefault = FxNimbus.features.alternativeAppLauncherIcon.value().resetToDefault,
+                )
+            }
+        }
     }
 
     final override fun onPause() {
