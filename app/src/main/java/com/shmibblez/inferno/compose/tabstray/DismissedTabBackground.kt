@@ -14,7 +14,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
-import androidx.compose.material3.DismissDirection
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -38,14 +39,14 @@ import com.shmibblez.inferno.theme.FirefoxTheme
  */
 @Composable
 fun DismissedTabBackground(
-    dismissDirection: DismissDirection?,
+    dismissDirection: SwipeToDismissBoxValue?,
     shape: Shape,
 ) {
     Card(
+        colors = CardDefaults.cardColors(containerColor = FirefoxTheme.colors.layer3),
         modifier = Modifier.fillMaxSize(),
-        backgroundColor = FirefoxTheme.colors.layer3,
         shape = shape,
-        elevation = 0.dp,
+        elevation = CardDefaults.cardElevation(defaultElevation =  0.dp),
     ) {
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -58,7 +59,7 @@ fun DismissedTabBackground(
                     .padding(horizontal = 32.dp)
                     // Only show the delete icon for where the swipe starts.
                     .alpha(
-                        if (dismissDirection == DismissDirection.StartToEnd || dismissDirection == null) 1f else 0f,
+                        if (dismissDirection == SwipeToDismissBoxValue.StartToEnd || dismissDirection == null) 1f else 0f,
                     ),
                 tint = FirefoxTheme.colors.iconCritical,
             )
@@ -70,7 +71,7 @@ fun DismissedTabBackground(
                     .padding(horizontal = 32.dp)
                     // Only show the delete icon for where the swipe starts.
                     .alpha(
-                        if (dismissDirection == DismissDirection.EndToStart || dismissDirection == null) 1f else 0f,
+                        if (dismissDirection == SwipeToDismissBoxValue.EndToStart || dismissDirection == null) 1f else 0f,
                     ),
                 tint = FirefoxTheme.colors.iconCritical,
             )
@@ -85,7 +86,7 @@ private fun DismissedTabBackgroundPreview() {
         Column {
             Box(modifier = Modifier.height(56.dp)) {
                 DismissedTabBackground(
-                    dismissDirection = DismissDirection.StartToEnd,
+                    dismissDirection = SwipeToDismissBoxValue.StartToEnd,
                     shape = RoundedCornerShape(0.dp),
                 )
             }
@@ -94,7 +95,7 @@ private fun DismissedTabBackgroundPreview() {
 
             Box(modifier = Modifier.height(56.dp)) {
                 DismissedTabBackground(
-                    dismissDirection = DismissDirection.EndToStart,
+                    dismissDirection = SwipeToDismissBoxValue.EndToStart,
                     shape = RoundedCornerShape(bottomStart = 8.dp, bottomEnd = 8.dp),
                 )
             }

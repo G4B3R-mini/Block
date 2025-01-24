@@ -157,6 +157,7 @@ class NormalBrowserPageViewHolder(
     }
 
     companion object {
-        const val LAYOUT_ID = R.layout.normal_browser_tray_list
+        val LAYOUT_ID
+ = R.layout.normal_browser_tray_list
     }
 }

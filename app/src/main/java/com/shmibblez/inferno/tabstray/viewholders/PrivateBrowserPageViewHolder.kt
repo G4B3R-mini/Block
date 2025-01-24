@@ -56,6 +56,7 @@ class PrivateBrowserPageViewHolder(
     }
 
     companion object {
-        const val LAYOUT_ID = R.layout.private_browser_tray_list
+        val LAYOUT_ID
+ = R.layout.private_browser_tray_list
     }
 }

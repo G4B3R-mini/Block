@@ -41,6 +41,7 @@ class CreditCardsManagementView(
     }
 
     companion object {
-        const val LAYOUT_ID = R.layout.component_credit_cards
+        val LAYOUT_ID
+ = R.layout.component_credit_cards
     }
 }

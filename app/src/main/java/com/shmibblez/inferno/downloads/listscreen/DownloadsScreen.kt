@@ -35,7 +35,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import mozilla.components.browser.state.state.content.DownloadState
-import mozilla.components.compose.base.annotation.FlexibleWindowLightDarkPreview
+import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.annotation.FlexibleWindowLightDarkPreview
 import mozilla.components.lib.state.ext.observeAsState
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.list.SelectableListItem

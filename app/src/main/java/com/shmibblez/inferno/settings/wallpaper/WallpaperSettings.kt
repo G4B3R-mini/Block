@@ -46,7 +46,7 @@ import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextDecoration
-import mozilla.components.compose.base.annotation.FlexibleWindowLightDarkPreview
+import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.annotation.FlexibleWindowLightDarkPreview
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.ClickableSubstringLink
 import com.shmibblez.inferno.compose.ext.debouncedClickable
@@ -270,7 +270,7 @@ private fun WallpaperThumbnailItem(
                 .then(contentDescriptionModifier),
             shape = RoundedCornerShape(size = FirefoxTheme.size.corner.large),
             border = border,
-            elevation = FirefoxTheme.size.elevation.medium,
+            shadowElevation = FirefoxTheme.size.elevation.medium,
         ) {
             if (bitmap == null) {
                 Spacer(

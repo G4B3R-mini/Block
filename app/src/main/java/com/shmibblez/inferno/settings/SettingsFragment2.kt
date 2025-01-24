@@ -73,7 +73,7 @@ import kotlin.system.exitProcess
 //import com.shmibblez.inferno.GleanMetrics.Settings as SettingsMetrics
 
 @Suppress("LargeClass", "TooManyFunctions")
-class SettingsFragment : PreferenceFragmentCompat() {
+class SettingsFragment2 : PreferenceFragmentCompat() {
 
     private val args by navArgs<SettingsFragmentArgs>()
     private lateinit var accountUiView: AccountUiView
@@ -297,7 +297,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
             /* Top level account preferences.
             Note: Only ONE of these preferences is visible at a time. */
             resources.getString(R.string.pref_key_sign_in) -> {
-                SettingsMetrics.signIntoSync.add()
+//                SettingsMetrics.signIntoSync.add()
                 SettingsFragmentDirections.actionSettingsFragmentToTurnOnSyncFragment(
                     entrypoint = FenixFxAEntryPoint.SettingsMenu,
                 )
@@ -481,10 +481,11 @@ class SettingsFragment : PreferenceFragmentCompat() {
                 SettingsFragmentDirections.actionSettingsFragmentToSecretInfoSettingsFragment()
             }
 
-            // Only displayed when secret settings are enabled
-            resources.getString(R.string.pref_key_nimbus_experiments) -> {
-                SettingsFragmentDirections.actionSettingsFragmentToNimbusExperimentsFragment()
-            }
+            // TODO: nimbus
+//            // Only displayed when secret settings are enabled
+//            resources.getString(R.string.pref_key_nimbus_experiments) -> {
+//                SettingsFragmentDirections.actionSettingsFragmentToNimbusExperimentsFragment()
+//            }
 
             // Only displayed when secret settings are enabled
             resources.getString(R.string.pref_key_start_profiler) -> {
@@ -554,7 +555,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         setupInstallAddonFromFilePreference(requireContext().settings())
         setupAmoCollectionOverridePreference(requireContext().settings())
         setupGeckoLogsPreference(requireContext().settings())
-        setupAllowDomesticChinaFxaServerPreference()
+//        setupAllowDomesticChinaFxaServerPreference()
         setupHttpsOnlyPreferences()
         setupNotificationPreference()
         setupSearchPreference()
@@ -602,7 +603,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         val enabled =
             requireComponents.backgroundServices.accountManager.authenticatedAccount() == null
         val checked = settings.allowDomesticChinaFxaServer
-        val visible = Config.channel.isMozillaOnline
+        val visible = false // Config.channel.isMozillaOnline
         preferenceAllowDomesticChinaServer?.apply {
             isEnabled = enabled
             isChecked = checked
@@ -652,35 +653,35 @@ class SettingsFragment : PreferenceFragmentCompat() {
             }
     }
 
-    private fun setupAllowDomesticChinaFxaServerPreference() {
-        val allowDomesticChinaFxAServer = getPreferenceKey(R.string.pref_key_allow_domestic_china_fxa_server)
-        val preferenceAllowDomesticChinaFxAServer = findPreference<SwitchPreference>(allowDomesticChinaFxAServer)
-        val visible = Config.channel.isMozillaOnline
-
-        preferenceAllowDomesticChinaFxAServer?.apply {
-            isVisible = visible
-        }
-
-        if (visible) {
-            preferenceAllowDomesticChinaFxAServer?.onPreferenceChangeListener =
-                Preference.OnPreferenceChangeListener { preference, newValue ->
-                    preference.context.settings().preferences.edit()
-                        .putBoolean(preference.key, newValue as Boolean).apply()
-                    updateFxAAllowDomesticChinaServerMenu()
-                    Toast.makeText(
-                        context,
-                        getString(R.string.toast_override_account_sync_server_done),
-                        Toast.LENGTH_LONG,
-                    ).show()
-                    Handler(Looper.getMainLooper()).postDelayed(
-                        {
-                            exitProcess(0)
-                        },
-                        FXA_SYNC_OVERRIDE_EXIT_DELAY,
-                    )
-                }
-        }
-    }
+//    private fun setupAllowDomesticChinaFxaServerPreference() {
+//        val allowDomesticChinaFxAServer = getPreferenceKey(R.string.pref_key_allow_domestic_china_fxa_server)
+//        val preferenceAllowDomesticChinaFxAServer = findPreference<SwitchPreference>(allowDomesticChinaFxAServer)
+//        val visible = false // Config.channel.isMozillaOnline
+//
+//        preferenceAllowDomesticChinaFxAServer?.apply {
+//            isVisible = visible
+//        }
+//
+//        if (visible) {
+//            preferenceAllowDomesticChinaFxAServer?.onPreferenceChangeListener =
+//                Preference.OnPreferenceChangeListener { preference, newValue ->
+//                    preference.context.settings().preferences.edit()
+//                        .putBoolean(preference.key, newValue as Boolean).apply()
+//                    updateFxAAllowDomesticChinaServerMenu()
+//                    Toast.makeText(
+//                        context,
+//                        getString(R.string.toast_override_account_sync_server_done),
+//                        Toast.LENGTH_LONG,
+//                    ).show()
+//                    Handler(Looper.getMainLooper()).postDelayed(
+//                        {
+//                            exitProcess(0)
+//                        },
+//                        FXA_SYNC_OVERRIDE_EXIT_DELAY,
+//                    )
+//                }
+//        }
+//    }
 
     @VisibleForTesting
     internal fun setupNotificationPreference() {

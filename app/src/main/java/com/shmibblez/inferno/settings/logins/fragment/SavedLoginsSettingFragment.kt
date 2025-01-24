@@ -33,13 +33,13 @@ class SavedLoginsSettingFragment : PreferenceFragmentCompat() {
         val preferenceSave = requirePreference<RadioButtonPreference>(R.string.pref_key_save_logins)
         preferenceSave.onPreferenceChangeListener = object : SharedPreferenceUpdater() {
             override fun onPreferenceChange(preference: Preference, newValue: Any?): Boolean {
-                if (newValue == true) {
-                    Logins.saveLoginsSettingChanged.record(
-                        Logins.SaveLoginsSettingChangedExtra(
-                            Setting.ASK_TO_SAVE.name,
-                        ),
-                    )
-                }
+//                if (newValue == true) {
+//                    Logins.saveLoginsSettingChanged.record(
+//                        Logins.SaveLoginsSettingChangedExtra(
+//                            Setting.ASK_TO_SAVE.name,
+//                        ),
+//                    )
+//                }
                 // We want to reload the current session here so we can try to fill the current page
                 context?.components?.useCases?.sessionUseCases?.reload?.invoke()
                 return super.onPreferenceChange(preference, newValue)
@@ -52,13 +52,13 @@ class SavedLoginsSettingFragment : PreferenceFragmentCompat() {
         val preferenceNeverSave = requirePreference<RadioButtonPreference>(R.string.pref_key_never_save_logins)
         preferenceNeverSave.onPreferenceChangeListener = object : SharedPreferenceUpdater() {
             override fun onPreferenceChange(preference: Preference, newValue: Any?): Boolean {
-                if (newValue == true) {
-                    Logins.saveLoginsSettingChanged.record(
-                        Logins.SaveLoginsSettingChangedExtra(
-                            Setting.NEVER_SAVE.name,
-                        ),
-                    )
-                }
+//                if (newValue == true) {
+//                    Logins.saveLoginsSettingChanged.record(
+//                        Logins.SaveLoginsSettingChangedExtra(
+//                            Setting.NEVER_SAVE.name,
+//                        ),
+//                    )
+//                }
                 // We want to reload the current session here so we don't save any currently inserted login
                 context?.components?.useCases?.sessionUseCases?.reload?.invoke()
                 return super.onPreferenceChange(preference, newValue)

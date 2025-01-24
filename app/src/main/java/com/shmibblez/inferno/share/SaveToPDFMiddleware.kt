@@ -22,7 +22,7 @@ import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.StandardSnackbarError
 import com.shmibblez.inferno.components.appstate.AppAction
 import com.shmibblez.inferno.ext.components
-import com.shmibblez.inferno.ext.recordEventInNimbus
+//import com.shmibblez.inferno.ext.recordEventInNimbus
 import org.mozilla.geckoview.GeckoSession
 import org.mozilla.geckoview.GeckoSession.GeckoPrintException.ERROR_NO_ACTIVITY_CONTEXT
 import org.mozilla.geckoview.GeckoSession.GeckoPrintException.ERROR_NO_ACTIVITY_CONTEXT_DELEGATE

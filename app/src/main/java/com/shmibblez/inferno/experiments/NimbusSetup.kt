@@ -42,10 +42,10 @@ fun createNimbus(context: Context, urlString: String?): NimbusApi {
         context.settings().isFirstNimbusRun = false
     }
 
-    val recordedNimbusContext = RecordedNimbusContext.create(
-        context = context,
-        isFirstRun = isAppFirstRun,
-    )
+//    val recordedNimbusContext = RecordedNimbusContext.create(
+//        context = context,
+//        isFirstRun = isAppFirstRun,
+//    )
 
     // The name "fenix" here corresponds to the app_name defined for the family of apps
     // that encompasses all of the channels for the Fenix app.  This is defined upstream in
@@ -74,7 +74,7 @@ fun createNimbus(context: Context, urlString: String?): NimbusApi {
         onFetchCallback = {
             context.settings().nimbusExperimentsFetched = true
         }
-        recordedContext = recordedNimbusContext
+//        recordedContext = recordedNimbusContext
     }.build(appInfo).also { nimbusApi ->
         nimbusApi.recordIsReady(FxNimbus.features.nimbusIsReady.value().eventCount)
     }

@@ -8,14 +8,14 @@ import mozilla.components.feature.tab.collections.Tab
 import mozilla.components.feature.tab.collections.TabCollection
 import mozilla.components.feature.top.sites.TopSite
 import mozilla.components.service.nimbus.messaging.Message
-import mozilla.components.service.pocket.PocketStory
+//import mozilla.components.service.pocket.PocketStory
 import com.shmibblez.inferno.browser.browsingmode.BrowsingMode
 import com.shmibblez.inferno.components.appstate.AppState
 import com.shmibblez.inferno.home.bookmarks.Bookmark
 import com.shmibblez.inferno.home.bookmarks.controller.BookmarksController
 import com.shmibblez.inferno.home.interactor.HomepageInteractor
-import com.shmibblez.inferno.home.pocket.PocketRecommendedStoriesCategory
-import com.shmibblez.inferno.home.pocket.controller.PocketStoriesController
+//import com.shmibblez.inferno.home.pocket.PocketRecommendedStoriesCategory
+//import com.shmibblez.inferno.home.pocket.controller.PocketStoriesController
 import com.shmibblez.inferno.home.privatebrowsing.controller.PrivateBrowsingController
 import com.shmibblez.inferno.home.recentsyncedtabs.RecentSyncedTab
 import com.shmibblez.inferno.home.recentsyncedtabs.controller.RecentSyncedTabController
@@ -223,7 +223,7 @@ class SessionControlInteractor(
     private val recentSyncedTabController: RecentSyncedTabController,
     private val bookmarksController: BookmarksController,
     private val recentVisitsController: RecentVisitsController,
-    private val pocketStoriesController: PocketStoriesController,
+//    private val pocketStoriesController: PocketStoriesController,
     private val privateBrowsingController: PrivateBrowsingController,
     private val searchSelectorController: SearchSelectorController,
     private val toolbarController: ToolbarController,
@@ -383,29 +383,29 @@ class SessionControlInteractor(
         controller.handleCustomizeHomeTapped()
     }
 
-    override fun onStoryShown(storyShown: PocketStory, storyPosition: Pair<Int, Int>) {
-        pocketStoriesController.handleStoryShown(storyShown, storyPosition)
-    }
-
-    override fun onStoriesShown(storiesShown: List<PocketStory>) {
-        pocketStoriesController.handleStoriesShown(storiesShown)
-    }
-
-    override fun onCategoryClicked(categoryClicked: PocketRecommendedStoriesCategory) {
-        pocketStoriesController.handleCategoryClick(categoryClicked)
-    }
-
-    override fun onStoryClicked(storyClicked: PocketStory, storyPosition: Pair<Int, Int>) {
-        pocketStoriesController.handleStoryClicked(storyClicked, storyPosition)
-    }
-
-    override fun onLearnMoreClicked(link: String) {
-        pocketStoriesController.handleLearnMoreClicked(link)
-    }
-
-    override fun onDiscoverMoreClicked(link: String) {
-        pocketStoriesController.handleDiscoverMoreClicked(link)
-    }
+//    override fun onStoryShown(storyShown: PocketStory, storyPosition: Pair<Int, Int>) {
+//        pocketStoriesController.handleStoryShown(storyShown, storyPosition)
+//    }
+//
+//    override fun onStoriesShown(storiesShown: List<PocketStory>) {
+//        pocketStoriesController.handleStoriesShown(storiesShown)
+//    }
+//
+//    override fun onCategoryClicked(categoryClicked: PocketRecommendedStoriesCategory) {
+//        pocketStoriesController.handleCategoryClick(categoryClicked)
+//    }
+//
+//    override fun onStoryClicked(storyClicked: PocketStory, storyPosition: Pair<Int, Int>) {
+//        pocketStoriesController.handleStoryClicked(storyClicked, storyPosition)
+//    }
+//
+//    override fun onLearnMoreClicked(link: String) {
+//        pocketStoriesController.handleLearnMoreClicked(link)
+//    }
+//
+//    override fun onDiscoverMoreClicked(link: String) {
+//        pocketStoriesController.handleDiscoverMoreClicked(link)
+//    }
 
     override fun reportSessionMetrics(state: AppState) {
         controller.handleReportSessionMetrics(state)

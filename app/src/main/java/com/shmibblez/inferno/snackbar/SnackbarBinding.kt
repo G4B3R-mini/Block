@@ -229,7 +229,7 @@ class SnackbarBinding(
                     ),
                     navigateFrom = "BrowserFragment",
                     navigateTo = "ActionGlobalBookmarkEditFragment",
-                    crashReporter = view.context.components.analytics.crashReporter,
+//                    crashReporter = view.context.components.analytics.crashReporter,
                 )
             }
         }.onFailure {

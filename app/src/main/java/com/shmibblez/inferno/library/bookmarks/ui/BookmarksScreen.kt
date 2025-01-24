@@ -62,7 +62,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
 import mozilla.appservices.places.BookmarkRoot
-import mozilla.components.compose.base.annotation.FlexibleWindowLightDarkPreview
+import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.annotation.FlexibleWindowLightDarkPreview
 import mozilla.components.lib.state.ext.observeAsState
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.ContextualMenu

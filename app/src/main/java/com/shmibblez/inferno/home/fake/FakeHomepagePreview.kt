@@ -15,11 +15,11 @@ import mozilla.components.feature.tab.collections.Tab
 import mozilla.components.feature.tab.collections.TabCollection
 import mozilla.components.feature.top.sites.TopSite
 import mozilla.components.service.nimbus.messaging.Message
-import mozilla.components.service.pocket.PocketStory
-import mozilla.components.service.pocket.PocketStory.PocketRecommendedStory
-import mozilla.components.service.pocket.PocketStory.PocketSponsoredStory
-import mozilla.components.service.pocket.PocketStory.PocketSponsoredStoryCaps
-import mozilla.components.service.pocket.PocketStory.PocketSponsoredStoryShim
+//import mozilla.components.service.pocket.PocketStory
+//import mozilla.components.service.pocket.PocketStory.PocketRecommendedStory
+//import mozilla.components.service.pocket.PocketStory.PocketSponsoredStory
+//import mozilla.components.service.pocket.PocketStory.PocketSponsoredStoryCaps
+//import mozilla.components.service.pocket.PocketStory.PocketSponsoredStoryShim
 import com.shmibblez.inferno.browser.browsingmode.BrowsingMode
 import com.shmibblez.inferno.components.appstate.AppState
 import com.shmibblez.inferno.compose.SelectableChipColors
@@ -27,8 +27,8 @@ import com.shmibblez.inferno.home.bookmarks.Bookmark
 import com.shmibblez.inferno.home.bookmarks.interactor.BookmarksInteractor
 import com.shmibblez.inferno.home.collections.CollectionsState
 import com.shmibblez.inferno.home.interactor.HomepageInteractor
-import com.shmibblez.inferno.home.pocket.PocketRecommendedStoriesCategory
-import com.shmibblez.inferno.home.pocket.PocketState
+//import com.shmibblez.inferno.home.pocket.PocketRecommendedStoriesCategory
+//import com.shmibblez.inferno.home.pocket.PocketState
 import com.shmibblez.inferno.home.privatebrowsing.interactor.PrivateBrowsingInteractor
 import com.shmibblez.inferno.home.recentsyncedtabs.RecentSyncedTab
 import com.shmibblez.inferno.home.recentsyncedtabs.interactor.RecentSyncedTabInteractor
@@ -77,23 +77,23 @@ internal object FakeHomepagePreview {
 
             override fun openCustomizeHomePage() { /* no op */ }
 
-            override fun onStoryShown(
-                storyShown: PocketStory,
-                storyPosition: Pair<Int, Int>,
-            ) { /* no op */ }
-
-            override fun onStoriesShown(storiesShown: List<PocketStory>) { /* no op */ }
-
-            override fun onCategoryClicked(categoryClicked: PocketRecommendedStoriesCategory) { /* no op */ }
-
-            override fun onStoryClicked(
-                storyClicked: PocketStory,
-                storyPosition: Pair<Int, Int>,
-            ) { /* no op */ }
-
-            override fun onLearnMoreClicked(link: String) { /* no op */ }
-
-            override fun onDiscoverMoreClicked(link: String) { /* no op */ }
+//            override fun onStoryShown(
+//                storyShown: PocketStory,
+//                storyPosition: Pair<Int, Int>,
+//            ) { /* no op */ }
+//
+//            override fun onStoriesShown(storiesShown: List<PocketStory>) { /* no op */ }
+//
+//            override fun onCategoryClicked(categoryClicked: PocketRecommendedStoriesCategory) { /* no op */ }
+//
+//            override fun onStoryClicked(
+//                storyClicked: PocketStory,
+//                storyPosition: Pair<Int, Int>,
+//            ) { /* no op */ }
+//
+//            override fun onLearnMoreClicked(link: String) { /* no op */ }
+//
+//            override fun onDiscoverMoreClicked(link: String) { /* no op */ }
 
             override fun onMenuItemTapped(item: SearchSelectorMenu.Item) { /* no op */ }
 
@@ -343,51 +343,51 @@ internal object FakeHomepagePreview {
         }
     }
 
-    @Composable
-    internal fun pocketState(limit: Int = 1) = PocketState(
-        stories = mutableListOf<PocketStory>().apply {
-            for (index in 0 until limit) {
-                when (index % 2 == 0) {
-                    true -> add(
-                        PocketRecommendedStory(
-                            title = "This is a ${"very ".repeat(index)} long title",
-                            publisher = "Publisher",
-                            url = "https://story$index.com",
-                            imageUrl = "",
-                            timeToRead = index,
-                            category = "Category #$index",
-                            timesShown = index.toLong(),
-                        ),
-                    )
-
-                    false -> add(
-                        PocketSponsoredStory(
-                            id = index,
-                            title = "This is a ${"very ".repeat(index)} long title",
-                            url = "https://sponsored-story$index.com",
-                            imageUrl = "",
-                            sponsor = "Mozilla",
-                            shim = PocketSponsoredStoryShim("", ""),
-                            priority = index,
-                            caps = PocketSponsoredStoryCaps(
-                                flightCount = index,
-                                flightPeriod = index * 2,
-                                lifetimeCount = index * 3,
-                            ),
-                        ),
-                    )
-                }
-            }
-        },
-        categories = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor"
-            .split(" ")
-            .map { PocketRecommendedStoriesCategory(it) },
-        categoriesSelections = emptyList(),
-        showContentRecommendations = false,
-        categoryColors = SelectableChipColors.buildColors(),
-        textColor = FirefoxTheme.colors.textPrimary,
-        linkTextColor = FirefoxTheme.colors.textAccent,
-    )
+//    @Composable
+//    internal fun pocketState(limit: Int = 1) = PocketState(
+//        stories = mutableListOf<PocketStory>().apply {
+//            for (index in 0 until limit) {
+//                when (index % 2 == 0) {
+//                    true -> add(
+//                        PocketRecommendedStory(
+//                            title = "This is a ${"very ".repeat(index)} long title",
+//                            publisher = "Publisher",
+//                            url = "https://story$index.com",
+//                            imageUrl = "",
+//                            timeToRead = index,
+//                            category = "Category #$index",
+//                            timesShown = index.toLong(),
+//                        ),
+//                    )
+//
+//                    false -> add(
+//                        PocketSponsoredStory(
+//                            id = index,
+//                            title = "This is a ${"very ".repeat(index)} long title",
+//                            url = "https://sponsored-story$index.com",
+//                            imageUrl = "",
+//                            sponsor = "Mozilla",
+//                            shim = PocketSponsoredStoryShim("", ""),
+//                            priority = index,
+//                            caps = PocketSponsoredStoryCaps(
+//                                flightCount = index,
+//                                flightPeriod = index * 2,
+//                                lifetimeCount = index * 3,
+//                            ),
+//                        ),
+//                    )
+//                }
+//            }
+//        },
+//        categories = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor"
+//            .split(" ")
+//            .map { PocketRecommendedStoriesCategory(it) },
+//        categoriesSelections = emptyList(),
+//        showContentRecommendations = false,
+//        categoryColors = SelectableChipColors.buildColors(),
+//        textColor = FirefoxTheme.colors.textPrimary,
+//        linkTextColor = FirefoxTheme.colors.textAccent,
+//    )
 
     private const val URL = "mozilla.com"
 

@@ -54,13 +54,13 @@ class DefaultRecentSyncedTabController(
     private val appStore: AppStore,
 ) : RecentSyncedTabController {
     override fun handleRecentSyncedTabClick(tab: RecentSyncedTab) {
-        RecentSyncedTabs.recentSyncedTabOpened[tab.deviceType.name.lowercase()].add()
+//        RecentSyncedTabs.recentSyncedTabOpened[tab.deviceType.name.lowercase()].add()
         tabsUseCase.selectOrAddTab(tab.url)
         navController.navigate(R.id.browserFragment)
     }
 
     override fun handleSyncedTabShowAllClicked() {
-        RecentSyncedTabs.showAllSyncedTabsClicked.add()
+//        RecentSyncedTabs.showAllSyncedTabsClicked.add()
         navController.navigate(
             HomeFragmentDirections.actionGlobalTabsTrayFragment(
                 page = Page.SyncedTabs,

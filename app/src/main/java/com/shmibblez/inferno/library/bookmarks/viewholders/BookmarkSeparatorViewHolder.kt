@@ -13,6 +13,7 @@ import com.shmibblez.inferno.R
  */
 class BookmarkSeparatorViewHolder(view: View) : RecyclerView.ViewHolder(view) {
     companion object {
-        const val LAYOUT_ID = R.layout.library_separator
+        val LAYOUT_ID
+ = R.layout.library_separator
     }
 }

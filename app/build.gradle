@@ -9,6 +9,7 @@ plugins {
     alias libs.plugins.dependency.analysis
     alias libs.plugins.kotlin.android
     id 'androidx.navigation.safeargs.kotlin'
+    id 'kotlin-parcelize'
 }
 
 apply from: "$project.rootDir/automation/gradle/versionCode.gradle"
@@ -559,6 +560,7 @@ dependencies {
     implementation libs.androidx.paging.common.android
     implementation libs.androidx.core.splashscreen
     implementation libs.androidx.navigation.ui.ktx
+    implementation libs.androidx.paging.runtime.ktx
 
     testImplementation libs.androidx.paging.common
 
@@ -577,6 +579,7 @@ dependencies {
 //    implementation 'androidx.compose.runtime:runtime-rxjava2'
 
     implementation libs.google.material
+    implementation libs.accompanist.drawablepainter
 
     implementation libs.kotlinx.coroutines.core
 
@@ -632,6 +635,7 @@ dependencies {
     implementation libs.mozilla.feature.recentlyclosed
     implementation libs.mozilla.feature.search
     implementation libs.mozilla.feature.session
+    implementation libs.mozilla.feature.share
     implementation libs.mozilla.feature.sitepermissions
     implementation libs.mozilla.feature.syncedtabs
     implementation libs.mozilla.feature.tab.collections

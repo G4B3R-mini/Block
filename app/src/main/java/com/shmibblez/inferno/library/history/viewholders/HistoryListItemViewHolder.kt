@@ -162,6 +162,7 @@ class HistoryListItemViewHolder(
 
     companion object {
         const val DISABLED_BUTTON_ALPHA = 0.7f
-        const val LAYOUT_ID = R.layout.history_list_item
+        val LAYOUT_ID
+ = R.layout.history_list_item
     }
 }

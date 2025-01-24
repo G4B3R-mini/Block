@@ -79,12 +79,12 @@ class WallpaperSettingsFragment : Fragment() {
                                 newTab = true,
                                 from = BrowserDirection.FromWallpaper,
                             )
-                            Wallpapers.learnMoreLinkClick.record(
-                                Wallpapers.LearnMoreLinkClickExtra(
-                                    url = url,
-                                    collectionName = collectionName,
-                                ),
-                            )
+//                            Wallpapers.learnMoreLinkClick.record(
+//                                Wallpapers.LearnMoreLinkClickExtra(
+//                                    url = url,
+//                                    collectionName = collectionName,
+//                                ),
+//                            )
                         },
                     )
                 }
@@ -119,13 +119,13 @@ class WallpaperSettingsFragment : Fragment() {
                     ),
                 ).show()
 
-                Wallpapers.wallpaperSelected.record(
-                    Wallpapers.WallpaperSelectedExtra(
-                        name = wallpaper.name,
-                        source = "settings",
-                        themeCollection = wallpaper.collection.name,
-                    ),
-                )
+//                Wallpapers.wallpaperSelected.record(
+//                    Wallpapers.WallpaperSelectedExtra(
+//                        name = wallpaper.name,
+//                        source = "settings",
+//                        themeCollection = wallpaper.collection.name,
+//                    ),
+//                )
             }
             Wallpaper.ImageFileState.Error -> {
                 Snackbar.make(

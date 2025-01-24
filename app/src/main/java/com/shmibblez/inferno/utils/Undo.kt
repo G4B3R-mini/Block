@@ -14,6 +14,7 @@ import kotlinx.coroutines.launch
 import com.shmibblez.inferno.compose.core.Action
 import com.shmibblez.inferno.compose.snackbar.Snackbar
 import com.shmibblez.inferno.compose.snackbar.SnackbarState
+import com.shmibblez.inferno.compose.snackbar.toSnackbarStateDuration
 import com.shmibblez.inferno.ext.settings
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -66,7 +67,7 @@ fun CoroutineScope.allowUndo(
                 snackBarParentView = view,
                 snackbarState = SnackbarState(
                     message = message,
-                    duration = SnackbarDuration.Indefinite,
+                    duration = SnackbarDuration.Indefinite.toSnackbarStateDuration(),
                     action = Action(
                         label = undoActionTitle,
                         onClick = {

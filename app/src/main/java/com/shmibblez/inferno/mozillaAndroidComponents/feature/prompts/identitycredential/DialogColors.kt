@@ -4,8 +4,8 @@
 
 package com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.identitycredential
 
-import androidx.compose.material.ContentAlpha
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.ContentAlpha
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 

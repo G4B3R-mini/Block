@@ -12,11 +12,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.AbstractComposeView
 import androidx.core.view.isVisible
-import com.shmibblez.inferno.mozillaAndroidComponents.concept.storage.Login
+import mozilla.components.concept.storage.Login
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.concept.AutocompletePrompt
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.concept.ExpandablePrompt
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.concept.SelectablePromptView
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.concept.ToggleablePrompt
+import mozilla.components.feature.prompts.login.LoginSelectBar
 
 /**
  * A customizable multiple login selection bar implementing [SelectablePromptView].

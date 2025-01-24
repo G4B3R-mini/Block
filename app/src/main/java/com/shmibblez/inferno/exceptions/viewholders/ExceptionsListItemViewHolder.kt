@@ -39,6 +39,6 @@ class ExceptionsListItemViewHolder<T : Any>(
     }
 
     companion object {
-        const val LAYOUT_ID = R.layout.site_list_item
+        val LAYOUT_ID = R.layout.site_list_item
     }
 }

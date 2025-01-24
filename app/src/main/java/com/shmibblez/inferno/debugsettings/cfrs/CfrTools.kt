@@ -19,7 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import mozilla.components.compose.base.annotation.FlexibleWindowLightDarkPreview
+import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.annotation.FlexibleWindowLightDarkPreview
 import mozilla.components.lib.state.ext.observeAsState
 import com.shmibblez.inferno.FeatureFlags
 import com.shmibblez.inferno.R

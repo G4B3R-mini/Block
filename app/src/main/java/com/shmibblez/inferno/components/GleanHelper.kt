@@ -16,7 +16,7 @@
 //import com.shmibblez.inferno.GleanMetrics.Pings
 //import com.shmibblez.inferno.ext.getCustomGleanServerUrlIfAvailable
 //import com.shmibblez.inferno.ext.setCustomEndpointIfAvailable
-//import com.shmibblez.inferno.nimbus.FxNimbus
+import com.shmibblez.inferno.nimbus.FxNimbus
 //
 ///**
 // * Helper function to initialize Glean.

@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.ModalDrawer
+import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
@@ -138,7 +138,7 @@ fun DebugOverlay(
             // Force the drawer to always open from the opposite side of the screen. We need to reset
             // this below with `drawerContent` to ensure the content follows the correct direction.
             CompositionLocalProvider(LocalLayoutDirection provides sheetLayoutDirection) {
-                ModalDrawer(
+                ModalNavigationDrawer(
                     drawerContent = {
                         CompositionLocalProvider(LocalLayoutDirection provides currentLayoutDirection) {
                             DebugDrawer(
@@ -148,7 +148,7 @@ fun DebugOverlay(
                             )
                         }
                     },
-                    drawerBackgroundColor = FirefoxTheme.colors.layer1,
+//                    drawerBackgroundColor = FirefoxTheme.colors.layer1,
                     scrimColor = FirefoxTheme.colors.layerScrim,
                     drawerState = drawerState,
                     content = {},

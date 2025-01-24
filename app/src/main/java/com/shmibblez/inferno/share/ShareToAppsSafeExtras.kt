@@ -40,10 +40,10 @@ private val allowedTelemetryPackages = setOf(
     "com.shmibblez.inferno.COPY_LINK_TO_CLIPBOARD",
 )
 
-internal fun getShareToAppSafeExtra(appPackage: String): Events.ShareToAppExtra {
-    return if (allowedTelemetryPackages.contains(appPackage)) {
-        Events.ShareToAppExtra(appPackage)
-    } else {
-        Events.ShareToAppExtra(TELEMETRY_OTHER)
-    }
-}
+//internal fun getShareToAppSafeExtra(appPackage: String): Events.ShareToAppExtra {
+//    return if (allowedTelemetryPackages.contains(appPackage)) {
+//        Events.ShareToAppExtra(appPackage)
+//    } else {
+//        Events.ShareToAppExtra(TELEMETRY_OTHER)
+//    }
+//}

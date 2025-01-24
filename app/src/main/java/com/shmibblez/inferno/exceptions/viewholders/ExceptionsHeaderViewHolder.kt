@@ -25,6 +25,6 @@ class ExceptionsHeaderViewHolder(
     }
 
     companion object {
-        const val LAYOUT_ID = R.layout.exceptions_description
+        val LAYOUT_ID = R.layout.exceptions_description
     }
 }

@@ -75,27 +75,27 @@ fun FenixOverlay(
                 ),
             ),
         ),
-        gleanDebugToolsStore = GleanDebugToolsStore(
-            middlewares = listOf(
-                GleanDebugToolsMiddleware(
-                    gleanDebugToolsStorage = DefaultGleanDebugToolsStorage(),
-                    clipboardHandler = context.components.clipboardHandler,
-                    openDebugView = { debugViewLink ->
-                        val intent = Intent(Intent.ACTION_VIEW)
-                        intent.data = Uri.parse(debugViewLink)
-                        context.startActivity(intent)
-                    },
-                    showToast = { resId ->
-                        val toast = Toast.makeText(
-                            context,
-                            context.getString(resId),
-                            Toast.LENGTH_LONG,
-                        )
-                        toast.show()
-                    },
-                ),
-            ),
-        ),
+//        gleanDebugToolsStore = GleanDebugToolsStore(
+//            middlewares = listOf(
+//                GleanDebugToolsMiddleware(
+//                    gleanDebugToolsStorage = DefaultGleanDebugToolsStorage(),
+//                    clipboardHandler = context.components.clipboardHandler,
+//                    openDebugView = { debugViewLink ->
+//                        val intent = Intent(Intent.ACTION_VIEW)
+//                        intent.data = Uri.parse(debugViewLink)
+//                        context.startActivity(intent)
+//                    },
+//                    showToast = { resId ->
+//                        val toast = Toast.makeText(
+//                            context,
+//                            context.getString(resId),
+//                            Toast.LENGTH_LONG,
+//                        )
+//                        toast.show()
+//                    },
+//                ),
+//            ),
+//        ),
         loginsStorage = loginsStorage,
         addressesDebugLocalesRepository = context.components.strictMode.resetAfter(StrictMode.allowThreadDiskReads()) {
             SharedPrefsAddressesDebugLocalesRepository(
@@ -120,7 +120,7 @@ fun FenixOverlay(
 private fun FenixOverlay(
     browserStore: BrowserStore,
     cfrToolsStore: CfrToolsStore,
-    gleanDebugToolsStore: GleanDebugToolsStore,
+//    gleanDebugToolsStore: GleanDebugToolsStore,
     loginsStorage: LoginsStorage,
     addressesDebugLocalesRepository: AddressesDebugLocalesRepository,
     inactiveTabsEnabled: Boolean,
@@ -144,7 +144,7 @@ private fun FenixOverlay(
             debugDrawerStore = debugDrawerStore,
             browserStore = browserStore,
             cfrToolsStore = cfrToolsStore,
-            gleanDebugToolsStore = gleanDebugToolsStore,
+//            gleanDebugToolsStore = gleanDebugToolsStore,
             inactiveTabsEnabled = inactiveTabsEnabled,
             loginsStorage = loginsStorage,
             addressesDebugLocalesRepository = addressesDebugLocalesRepository,
@@ -181,7 +181,7 @@ private fun FenixOverlayPreview() {
             BrowserState(selectedTabId = selectedTab.id, tabs = listOf(selectedTab)),
         ),
         cfrToolsStore = CfrToolsStore(),
-        gleanDebugToolsStore = GleanDebugToolsStore(),
+//        gleanDebugToolsStore = GleanDebugToolsStore(),
         inactiveTabsEnabled = true,
         loginsStorage = FakeLoginsStorage(),
         addressesDebugLocalesRepository = FakeAddressesDebugLocalesRepository(),

@@ -28,6 +28,7 @@ import mozilla.components.lib.publicsuffixlist.PublicSuffixList
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.addons.showSnackBar
 import com.shmibblez.inferno.browser.BrowserFragmentDirections
+import com.shmibblez.inferno.compose.snackbar.toSnackbarStateDuration
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.getRootView
 import com.shmibblez.inferno.ext.runIfFragmentIsAttached
@@ -154,8 +155,9 @@ class DefaultCookieBannerDetailsController(
             siteDomain?.let { domain ->
                 withContext(Dispatchers.Main) {
                     protectionsStore.dispatch(ProtectionsAction.RequestReportSiteDomain(domain))
-                    CookieBanners.reportSiteDomain.set(domain)
-                    Pings.cookieBannerReportSite.submit()
+                    // TODO: cookies
+//                    CookieBanners.reportSiteDomain.set(domain)
+//                    Pings.cookieBannerReportSite.submit()
                     protectionsStore.dispatch(
                         ProtectionsAction.UpdateCookieBannerMode(
                             cookieBannerUIMode = CookieBannerUIMode.REQUEST_UNSUPPORTED_SITE_SUBMITTED,
@@ -165,7 +167,7 @@ class DefaultCookieBannerDetailsController(
                         showSnackBar(
                             view,
                             context.getString(R.string.cookie_banner_handling_report_site_snack_bar_text_2),
-                            SnackbarDuration.Long,
+                            SnackbarDuration.Long.toSnackbarStateDuration(),
                         )
                     }
                     withContext(Dispatchers.IO) {

@@ -4,6 +4,7 @@
 
 package com.shmibblez.inferno.settings.address.view
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.DialogInterface
 import android.view.View
@@ -98,10 +99,10 @@ class AddressEditorView(
 
         if (address != null) {
             interactor.onUpdateAddress(address.guid, addressFields)
-            Addresses.updated.add()
+//            Addresses.updated.add()
         } else {
             interactor.onSaveAddress(addressFields)
-            Addresses.saved.add()
+//            Addresses.saved.add()
         }
     }
 
@@ -113,12 +114,13 @@ class AddressEditorView(
             }
             setPositiveButton(R.string.addressess_confirm_dialog_ok_button) { _, _ ->
                 interactor.onDeleteAddress(guid)
-                Addresses.deleted.add()
+//                Addresses.deleted.add()
             }
             create().withCenterAlignedButtons()
         }.show()
     }
 
+    @SuppressLint("VisibleForTests")
     private fun bindDropdowns() {
         val adapter = ArrayAdapter(
             binding.root.context,
@@ -158,7 +160,7 @@ class AddressEditorView(
         }
     }
 
-    private fun bindSubregionDropdown(country: Country) {
+    private fun bindSubregionDropdown(@SuppressLint("VisibleForTests") country: Country) {
         val subregions = country.subregions
         val selectedSubregion = address?.addressLevel1?.takeIf { it in subregions }
             ?: subregions.first()

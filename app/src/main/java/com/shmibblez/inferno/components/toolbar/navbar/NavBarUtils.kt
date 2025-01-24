@@ -7,10 +7,10 @@ package com.shmibblez.inferno.components.toolbar.navbar
 import android.content.Context
 import android.view.View
 import android.view.ViewGroup
-//import mozilla.components.compose.base.theme.AcornWindowSize
 import com.shmibblez.inferno.components.toolbar.ToolbarContainerView
 import com.shmibblez.inferno.components.toolbar.ToolbarPosition
 import com.shmibblez.inferno.ext.settings
+import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.theme.AcornWindowSize
 
 /**
  * Returns true if navigation bar should be displayed. The returned value depends on the feature state, as well as the
@@ -18,7 +18,7 @@ import com.shmibblez.inferno.ext.settings
  * NB: don't use it with the app context – it doesn't get recreated when a foldable changes its modes.
  */
 fun Context.shouldAddNavigationBar(
-    isWindowSmall: Boolean = true, //TODO: AcornWindowSize.getWindowSize(this) == AcornWindowSize.Small,
+    isWindowSmall: Boolean = AcornWindowSize.getWindowSize(this) == AcornWindowSize.Small,
 ) = settings().navigationToolbarEnabled && isWindowSmall
 
 /**

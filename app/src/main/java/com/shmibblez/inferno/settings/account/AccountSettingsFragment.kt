@@ -45,6 +45,7 @@ import com.shmibblez.inferno.components.StoreProvider
 import com.shmibblez.inferno.components.accounts.FenixFxAEntryPoint
 import com.shmibblez.inferno.compose.snackbar.Snackbar
 import com.shmibblez.inferno.compose.snackbar.SnackbarState
+import com.shmibblez.inferno.compose.snackbar.toSnackbarStateDuration
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.getPreferenceKey
 import com.shmibblez.inferno.ext.requireComponents
@@ -327,7 +328,9 @@ class AccountSettingsFragment : PreferenceFragmentCompat() {
             isChecked = syncEnginesStatus.getOrElse(SyncEngine.Tabs) { true }
         }
         requirePreference<CheckBoxPreference>(R.string.pref_key_sync_address).apply {
-            isVisible = FeatureFlags.syncAddressesFeature
+            // TODO:
+//              isVisible = FeatureFlags.syncAddressesFeature
+            isVisible = FeatureFlags.SYNC_ADDRESSES_FEATURE
             isEnabled = syncEnginesStatus.containsKey(SyncEngine.Addresses)
             isChecked = syncEnginesStatus.getOrElse(SyncEngine.Addresses) { true }
         }
@@ -375,8 +378,8 @@ class AccountSettingsFragment : PreferenceFragmentCompat() {
         return Preference.OnPreferenceClickListener {
             viewLifecycleOwner.lifecycleScope.launch(Main) {
                 context?.let {
-                    var acct = accountManager.authenticatedAccount()
-                    var url = acct?.getManageAccountURL(FenixFxAEntryPoint.SettingsMenu)
+                    val acct = accountManager.authenticatedAccount()
+                    val url = acct?.getManageAccountURL(FenixFxAEntryPoint.SettingsMenu)
                     if (url != null) {
                         val intent = SupportUtils.createCustomTabIntent(it, url)
                         startActivity(intent)
@@ -408,7 +411,7 @@ class AccountSettingsFragment : PreferenceFragmentCompat() {
                     snackBarParentView = requireView(),
                     snackbarState = SnackbarState(
                         message = getString(R.string.empty_device_name_error),
-                        duration = SnackbarDuration.Long,
+                        duration = SnackbarDuration.Long.toSnackbarStateDuration(),
                     ),
                 ).show()
             }

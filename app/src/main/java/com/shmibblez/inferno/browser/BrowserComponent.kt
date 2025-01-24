@@ -381,6 +381,7 @@ fun BrowserComponent(
         /**
          * mozilla integrations setup
          */
+        /*
         fun mozSetup(): Unit {
             sessionFeature.set(
                 feature = SessionFeature(
@@ -740,7 +741,7 @@ fun BrowserComponent(
 //            )
 //            }
         }
-        mozSetup()
+        mozSetup() */
         engineView!!.setDynamicToolbarMaxHeight(bottomBarHeightDp.toPx() - bottomBarOffsetPx.value.toInt())
     }
 

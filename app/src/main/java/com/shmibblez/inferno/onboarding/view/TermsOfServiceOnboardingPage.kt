@@ -28,7 +28,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import mozilla.components.compose.base.annotation.FlexibleWindowLightDarkPreview
+import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.annotation.FlexibleWindowLightDarkPreview
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.LinkText
 import com.shmibblez.inferno.compose.LinkTextState

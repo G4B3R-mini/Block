@@ -67,6 +67,7 @@ class HistoryMetadataGroupItemViewHolder(
     }
 
     companion object {
-        const val LAYOUT_ID = R.layout.history_metadata_group_list_item
+        val LAYOUT_ID
+ = R.layout.history_metadata_group_list_item
     }
 }

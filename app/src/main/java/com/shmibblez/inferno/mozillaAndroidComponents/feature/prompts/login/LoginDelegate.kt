@@ -4,8 +4,8 @@
 
 package com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.login
 
-import com.shmibblez.inferno.mozillaAndroidComponents.concept.storage.Login
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.concept.AutocompletePrompt
+import mozilla.components.concept.storage.Login
 
 /**
  * Delegate to display the login select prompt and related callbacks

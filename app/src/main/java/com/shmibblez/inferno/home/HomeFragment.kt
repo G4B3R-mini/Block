@@ -115,7 +115,7 @@ import com.shmibblez.inferno.components.Components
 import com.shmibblez.inferno.components.PrivateShortcutCreateManager
 import com.shmibblez.inferno.components.TabCollectionStorage
 import com.shmibblez.inferno.components.appstate.AppAction
-import com.shmibblez.inferno.components.appstate.AppAction.ContentRecommendationsAction
+//import com.shmibblez.inferno.components.appstate.AppAction.ContentRecommendationsAction
 import com.shmibblez.inferno.components.appstate.AppAction.MessagingAction
 import com.shmibblez.inferno.components.appstate.AppAction.MessagingAction.MicrosurveyAction
 import com.shmibblez.inferno.components.components
@@ -127,6 +127,7 @@ import com.shmibblez.inferno.components.toolbar.navbar.shouldAddNavigationBar
 import com.shmibblez.inferno.components.toolbar.navbar.updateNavBarForConfigurationChange
 import com.shmibblez.inferno.compose.snackbar.Snackbar
 import com.shmibblez.inferno.compose.snackbar.SnackbarState
+import com.shmibblez.inferno.compose.snackbar.toSnackbarStateDuration
 import com.shmibblez.inferno.databinding.FragmentHomeBinding
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.containsQueryParameters
@@ -134,7 +135,7 @@ import com.shmibblez.inferno.ext.hideToolbar
 import com.shmibblez.inferno.ext.isToolbarAtBottom
 import com.shmibblez.inferno.ext.nav
 import com.shmibblez.inferno.ext.openSetDefaultBrowserOption
-import com.shmibblez.inferno.ext.recordEventInNimbus
+//import com.shmibblez.inferno.ext.recordEventInNimbus
 import com.shmibblez.inferno.ext.requireComponents
 import com.shmibblez.inferno.ext.scaleToBottomOfView
 import com.shmibblez.inferno.ext.settings
@@ -142,8 +143,8 @@ import com.shmibblez.inferno.ext.tabClosedUndoMessage
 import com.shmibblez.inferno.ext.updateMicrosurveyPromptForConfigurationChange
 import com.shmibblez.inferno.home.bookmarks.BookmarksFeature
 import com.shmibblez.inferno.home.bookmarks.controller.DefaultBookmarksController
-import com.shmibblez.inferno.home.pocket.PocketRecommendedStoriesCategory
-import com.shmibblez.inferno.home.pocket.controller.DefaultPocketStoriesController
+//import com.shmibblez.inferno.home.pocket.PocketRecommendedStoriesCategory
+//import com.shmibblez.inferno.home.pocket.controller.DefaultPocketStoriesController
 import com.shmibblez.inferno.home.privatebrowsing.controller.DefaultPrivateBrowsingController
 import com.shmibblez.inferno.home.recentsyncedtabs.RecentSyncedTabFeature
 import com.shmibblez.inferno.home.recentsyncedtabs.controller.DefaultRecentSyncedTabController
@@ -182,6 +183,7 @@ import com.shmibblez.inferno.theme.FirefoxTheme
 import com.shmibblez.inferno.utils.Settings.Companion.TOP_SITES_PROVIDER_MAX_THRESHOLD
 import com.shmibblez.inferno.utils.allowUndo
 import com.shmibblez.inferno.wallpapers.Wallpaper
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import java.lang.ref.WeakReference
 //import com.shmibblez.inferno.GleanMetrics.TabStrip as TabStripMetrics
 
@@ -239,7 +241,7 @@ class HomeFragment : Fragment() {
                     snackBarParentView = binding.dynamicSnackbarContainer,
                     snackbarState = SnackbarState(
                         message = it.context.getString(message),
-                        duration = SnackbarDuration.Long,
+                        duration = SnackbarDuration.Long.toSnackbarStateDuration(),
                     ),
                 ).show()
             }
@@ -276,6 +278,7 @@ class HomeFragment : Fragment() {
     private val searchSelectorMenuBinding = ViewBoundFeatureWrapper<SearchSelectorMenuBinding>()
     private val homeScreenPopupManager = ViewBoundFeatureWrapper<HomeScreenPopupManager>()
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         // DO NOT ADD ANYTHING ABOVE THIS getProfilerTime CALL!
         val profilerStartTime = requireComponents.core.engine.profiler?.getProfilerTime()
@@ -299,6 +302,7 @@ class HomeFragment : Fragment() {
         )
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Suppress("LongMethod")
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -322,39 +326,39 @@ class HomeFragment : Fragment() {
         components.appStore.dispatch(AppAction.ModeChange(browsingModeManager.mode))
 
         lifecycleScope.launch(IO) {
-            // Show Merino content recommendations.
-            val showContentRecommendations = requireContext().settings().showContentRecommendations
-            // Show Pocket recommended stories.
-            val showPocketRecommendationsFeature =
-                requireContext().settings().showPocketRecommendationsFeature
-            // Show sponsored stories if recommended stories are enabled.
-            val showSponsoredStories = requireContext().settings().showPocketSponsoredStories &&
-                (showContentRecommendations || showPocketRecommendationsFeature)
+//            // Show Merino content recommendations.
+//            val showContentRecommendations = requireContext().settings().showContentRecommendations
+//            // Show Pocket recommended stories.
+//            val showPocketRecommendationsFeature =
+//                requireContext().settings().showPocketRecommendationsFeature
+//            // Show sponsored stories if recommended stories are enabled.
+//            val showSponsoredStories = requireContext().settings().showPocketSponsoredStories &&
+//                (showContentRecommendations || showPocketRecommendationsFeature)
 
-            if (showContentRecommendations) {
-                components.appStore.dispatch(
-                    ContentRecommendationsAction.ContentRecommendationsFetched(
-                        recommendations = components.core.pocketStoriesService.getContentRecommendations(),
-                    ),
-                )
-            } else if (showPocketRecommendationsFeature) {
-                val categories = components.core.pocketStoriesService.getStories()
-                    .groupBy { story -> story.category }
-                    .map { (category, stories) -> PocketRecommendedStoriesCategory(category, stories) }
+//            if (showContentRecommendations) {
+//                components.appStore.dispatch(
+//                    ContentRecommendationsAction.ContentRecommendationsFetched(
+//                        recommendations = components.core.pocketStoriesService.getContentRecommendations(),
+//                    ),
+//                )
+//            } else if (showPocketRecommendationsFeature) {
+//                val categories = components.core.pocketStoriesService.getStories()
+//                    .groupBy { story -> story.category }
+//                    .map { (category, stories) -> PocketRecommendedStoriesCategory(category, stories) }
+//
+//                components.appStore.dispatch(ContentRecommendationsAction.PocketStoriesCategoriesChange(categories))
+//            } else {
+//                components.appStore.dispatch(ContentRecommendationsAction.PocketStoriesClean)
+//            }
 
-                components.appStore.dispatch(ContentRecommendationsAction.PocketStoriesCategoriesChange(categories))
-            } else {
-                components.appStore.dispatch(ContentRecommendationsAction.PocketStoriesClean)
-            }
-
-            if (showSponsoredStories) {
-                components.appStore.dispatch(
-                    ContentRecommendationsAction.PocketSponsoredStoriesChange(
-                        sponsoredStories = components.core.pocketStoriesService.getSponsoredStories(),
-                        showContentRecommendations = showContentRecommendations,
-                    ),
-                )
-            }
+//            if (showSponsoredStories) {
+//                components.appStore.dispatch(
+//                    ContentRecommendationsAction.PocketSponsoredStoriesChange(
+//                        sponsoredStories = components.core.pocketStoriesService.getSponsoredStories(),
+//                        showContentRecommendations = showContentRecommendations,
+//                    ),
+//                )
+//            }
         }
 
         if (requireContext().settings().isExperimentationEnabled) {
@@ -502,11 +506,11 @@ class HomeFragment : Fragment() {
                 scope = viewLifecycleOwner.lifecycleScope,
                 store = components.core.store,
             ),
-            pocketStoriesController = DefaultPocketStoriesController(
-                homeActivity = activity,
-                appStore = components.appStore,
-                settings = components.settings,
-            ),
+//            pocketStoriesController = DefaultPocketStoriesController(
+//                homeActivity = activity,
+//                appStore = components.appStore,
+//                settings = components.settings,
+//            ),
             privateBrowsingController = DefaultPrivateBrowsingController(
                 activity = activity,
                 appStore = components.appStore,
@@ -614,7 +618,7 @@ class HomeFragment : Fragment() {
         activity: HomeActivity,
         isConfigChange: Boolean = false,
     ) {
-        NavigationBar.homeInitializeTimespan.start()
+//        NavigationBar.homeInitializeTimespan.start()
 
         val context = requireContext()
         val isToolbarAtBottom = context.isToolbarAtBottom()
@@ -828,7 +832,7 @@ class HomeFragment : Fragment() {
             },
         )
 
-        NavigationBar.homeInitializeTimespan.stop()
+//        NavigationBar.homeInitializeTimespan.stop()
     }
 
     @VisibleForTesting
@@ -955,6 +959,7 @@ class HomeFragment : Fragment() {
     /**
      * Listens for the microsurvey message and initializes the microsurvey prompt if one is available.
      */
+    @OptIn(ExperimentalCoroutinesApi::class)
     private fun listenForMicrosurveyMessage(context: Context) {
         binding.root.consumeFrom(context.components.appStore, viewLifecycleOwner) { state ->
             state.messaging.messageToShow[FenixMessageSurfaceId.MICROSURVEY]?.let { message ->
@@ -1029,6 +1034,7 @@ class HomeFragment : Fragment() {
      * data in our store. The [View.consumeFrom] coroutine dispatch
      * doesn't get run right away which means that we won't draw on the first layout pass.
      */
+    @OptIn(ExperimentalCoroutinesApi::class)
     private fun updateSessionControlView() {
         if (browsingModeManager.mode == BrowsingMode.Private) {
             binding.root.consumeFrom(requireContext().components.appStore, viewLifecycleOwner) {
@@ -1059,6 +1065,7 @@ class HomeFragment : Fragment() {
         binding.homeAppBar.setExpanded(true)
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Suppress("LongMethod", "ComplexMethod")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         // DO NOT ADD ANYTHING ABOVE THIS getProfilerTime CALL!
@@ -1068,15 +1075,15 @@ class HomeFragment : Fragment() {
 //        HomeScreen.homeScreenDisplayed.record(NoExtras())
 
         with(requireContext()) {
-            if (settings().isExperimentationEnabled) {
+//            if (settings().isExperimentationEnabled) {
 //                recordEventInNimbus("home_screen_displayed")
-            }
+//            }
         }
 
 //        HomeScreen.homeScreenViewCount.add()
-        if (!browsingModeManager.mode.isPrivate) {
+//        if (!browsingModeManager.mode.isPrivate) {
 //            HomeScreen.standardHomepageViewCount.add()
-        }
+//        }
 
         observeSearchEngineNameChanges()
         observeWallpaperUpdates()
@@ -1392,9 +1399,10 @@ class HomeFragment : Fragment() {
         // We only want this observer live just before we navigate away to the collection creation screen
         requireComponents.core.tabCollectionStorage.unregister(collectionStorageObserver)
 
-        lifecycleScope.launch(IO) {
-            requireComponents.reviewPromptController.promptReview(requireActivity())
-        }
+        // TODO: review prompt system
+//        lifecycleScope.launch(IO) {
+//            requireComponents.reviewPromptController.promptReview(requireActivity())
+//        }
     }
 
     @VisibleForTesting
@@ -1501,7 +1509,7 @@ class HomeFragment : Fragment() {
                                 context.settings().lastCfrShownTimeInMillis = System.currentTimeMillis()
                                 dismissRecommendPrivateBrowsingShortcut()
                             },
-                            colors = ButtonDefaults.buttonColors(backgroundColor = PhotonColors.LightGrey30),
+                            colors = ButtonDefaults.buttonColors(containerColor = PhotonColors.LightGrey30),
                             shape = RoundedCornerShape(8.dp),
                             modifier = Modifier
                                 .padding(top = 16.dp)
@@ -1574,7 +1582,7 @@ class HomeFragment : Fragment() {
                 snackBarParentView = binding.dynamicSnackbarContainer,
                 snackbarState = SnackbarState(
                     message = view.context.getString(R.string.snackbar_collection_renamed),
-                    duration = SnackbarDuration.Long,
+                    duration = SnackbarDuration.Long.toSnackbarStateDuration(),
                 ),
             ).show()
         }

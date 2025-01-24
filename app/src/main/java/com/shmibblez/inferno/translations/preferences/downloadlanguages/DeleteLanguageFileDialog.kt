@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.annotation.LightDarkPreview
-import mozilla.components.compose.base.button.TextButton
+import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.button.TextButton
 import mozilla.components.feature.downloads.toMegabyteOrKilobyteString
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.theme.FirefoxTheme
@@ -99,7 +99,7 @@ fun DeleteLanguageFileDialog(
                 onClick = { onCancel() },
             )
         },
-        backgroundColor = FirefoxTheme.colors.layer2,
+        containerColor = FirefoxTheme.colors.layer2,
     )
 }
 

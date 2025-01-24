@@ -39,7 +39,8 @@ class TopSiteViewHolder(
     }
 
     companion object {
-        const val LAYOUT_ID = R.layout.component_top_sites
+        val LAYOUT_ID
+ = R.layout.component_top_sites
         const val SPAN_COUNT = 4
     }
 }

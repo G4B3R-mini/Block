@@ -49,10 +49,10 @@ enum class DebugDrawerRoute(val route: String, @StringRes val title: Int) {
         route = "cfr_tools",
         title = R.string.debug_drawer_cfr_tools_title,
     ),
-    GleanDebugTools(
-        route = "glean_debug_tools",
-        title = R.string.glean_debug_tools_title,
-    ),
+//    GleanDebugTools(
+//        route = "glean_debug_tools",
+//        title = R.string.glean_debug_tools_title,
+//    ),
     ;
 
     companion object {
@@ -62,7 +62,7 @@ enum class DebugDrawerRoute(val route: String, @StringRes val title: Int) {
          * @param debugDrawerStore [DebugDrawerStore] used to dispatch navigation actions.
          * @param browserStore [BrowserStore] used to access [BrowserState].
          * @param cfrToolsStore [CfrToolsStore] used to access [CfrToolsState].
-         * @param gleanDebugToolsStore [GleanDebugToolsStore] used to dispatch glean debug tools actions.
+//         * @param gleanDebugToolsStore [GleanDebugToolsStore] used to dispatch glean debug tools actions.
          * @param loginsStorage [LoginsStorage] used to access logins for [LoginsScreen].
          * @param addressesDebugLocalesRepository used to control storage for [AddressesTools].
          * @param inactiveTabsEnabled Whether the inactive tabs feature is enabled.
@@ -71,7 +71,7 @@ enum class DebugDrawerRoute(val route: String, @StringRes val title: Int) {
             debugDrawerStore: DebugDrawerStore,
             browserStore: BrowserStore,
             cfrToolsStore: CfrToolsStore,
-            gleanDebugToolsStore: GleanDebugToolsStore,
+//            gleanDebugToolsStore: GleanDebugToolsStore,
             loginsStorage: LoginsStorage,
             addressesDebugLocalesRepository: AddressesDebugLocalesRepository,
             inactiveTabsEnabled: Boolean,
@@ -122,14 +122,14 @@ enum class DebugDrawerRoute(val route: String, @StringRes val title: Int) {
                         }
                     }
 
-                    GleanDebugTools -> {
-                        onClick = {
-                            debugDrawerStore.dispatch(DebugDrawerAction.NavigateTo.GleanDebugTools)
-                        }
-                        content = {
-                            GleanDebugToolsScreen(gleanDebugToolsStore = gleanDebugToolsStore)
-                        }
-                    }
+//                    GleanDebugTools -> {
+//                        onClick = {
+//                            debugDrawerStore.dispatch(DebugDrawerAction.NavigateTo.GleanDebugTools)
+//                        }
+//                        content = {
+//                            GleanDebugToolsScreen(gleanDebugToolsStore = gleanDebugToolsStore)
+//                        }
+//                    }
                 }
 
                 DebugDrawerDestination(

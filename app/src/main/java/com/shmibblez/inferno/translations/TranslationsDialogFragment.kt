@@ -43,7 +43,7 @@ import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.requireComponents
 import com.shmibblez.inferno.ext.runIfFragmentIsAttached
 import com.shmibblez.inferno.ext.settings
-//import com.shmibblez.inferno.nimbus.FxNimbus
+import com.shmibblez.inferno.nimbus.FxNimbus
 import com.shmibblez.inferno.settings.SupportUtils
 import com.shmibblez.inferno.theme.FirefoxTheme
 import com.shmibblez.inferno.translations.preferences.downloadlanguages.DownloadLanguageFileDialog
@@ -176,11 +176,11 @@ class TranslationsDialogFragment : BottomSheetDialogFragment() {
                                         showPageSettings = FxNimbus.features.translations.value().pageSettingsEnabled,
                                         translationsDialogState = it,
                                         onSettingClicked = {
-                                            Translations.action.record(
-                                                Translations.ActionExtra(
-                                                    "page_settings",
-                                                ),
-                                            )
+//                                            Translations.action.record(
+//                                                Translations.ActionExtra(
+//                                                    "page_settings",
+//                                                ),
+//                                            )
                                             translationsVisibility = false
                                         },
                                         onShowDownloadLanguageFileDialog = {

@@ -58,7 +58,8 @@ class AccountDeviceViewHolder(
     }
 
     companion object {
-        const val LAYOUT_ID = R.layout.account_share_list_item
+        val LAYOUT_ID
+ = R.layout.account_share_list_item
 
         /**
          * Returns a triple with the name, icon drawable resource, and background color drawable resource

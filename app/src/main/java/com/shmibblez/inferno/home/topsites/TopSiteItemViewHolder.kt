@@ -198,6 +198,7 @@ class TopSiteItemViewHolder(
     }
 
     companion object {
-        const val LAYOUT_ID = R.layout.top_site_item
+        val LAYOUT_ID
+ = R.layout.top_site_item
     }
 }

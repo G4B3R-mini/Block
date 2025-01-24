@@ -34,7 +34,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.annotation.LightDarkPreview
-import mozilla.components.compose.base.button.TextButton
+import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.button.TextButton
 import mozilla.components.concept.engine.translate.Language
 import mozilla.components.concept.engine.translate.TranslationError
 import com.shmibblez.inferno.R

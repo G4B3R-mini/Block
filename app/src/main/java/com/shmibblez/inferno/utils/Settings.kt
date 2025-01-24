@@ -36,13 +36,17 @@ import com.shmibblez.inferno.FeatureFlags
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.browsingmode.BrowsingMode
 import com.shmibblez.inferno.browser.tabstrip.isTabStripEnabled
-import com.shmibblez.inferno.components.metrics.MozillaProductDetector
 import com.shmibblez.inferno.components.settings.counterPreference
 import com.shmibblez.inferno.components.settings.featureFlagPreference
 import com.shmibblez.inferno.components.settings.lazyFeatureFlagPreference
+//import com.shmibblez.inferno.components.metrics.MozillaProductDetector
+//import com.shmibblez.inferno.components.settings.counterPreference
+//import com.shmibblez.inferno.components.settings.featureFlagPreference
+//import com.shmibblez.inferno.components.settings.lazyFeatureFlagPreference
 import com.shmibblez.inferno.components.toolbar.ToolbarPosition
 import com.shmibblez.inferno.components.toolbar.navbar.shouldAddNavigationBar
 import com.shmibblez.inferno.debugsettings.addresses.SharedPrefsAddressesDebugLocalesRepository
+//import com.shmibblez.inferno.debugsettings.addresses.SharedPrefsAddressesDebugLocalesRepository
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.getPreferenceKey
 import com.shmibblez.inferno.nimbus.CookieBannersSection
@@ -62,6 +66,7 @@ import com.shmibblez.inferno.settings.registerOnSharedPreferenceChangeListener
 import com.shmibblez.inferno.settings.sitepermissions.AUTOPLAY_BLOCK_ALL
 import com.shmibblez.inferno.settings.sitepermissions.AUTOPLAY_BLOCK_AUDIBLE
 import com.shmibblez.inferno.wallpapers.Wallpaper
+import mozilla.components.support.locale.LocaleManager
 import java.security.InvalidParameterException
 import java.util.UUID
 
@@ -136,9 +141,9 @@ class Settings(private val appContext: Context) : PreferencesHolder {
         }
     }
 
-    @VisibleForTesting
-    internal val isCrashReportEnabledInBuild: Boolean =
-        BuildConfig.CRASH_REPORTING && Config.channel.isReleased
+//    @VisibleForTesting
+//    internal val isCrashReportEnabledInBuild: Boolean =
+//        BuildConfig.CRASH_REPORTING && Config.channel.isReleased
 
     override val preferences: SharedPreferences =
         appContext.getSharedPreferences(FENIX_PREFERENCES, MODE_PRIVATE)
@@ -327,12 +332,12 @@ class Settings(private val appContext: Context) : PreferencesHolder {
         default = true,
     )
 
-    val isCrashReportingEnabled: Boolean
-        get() = isCrashReportEnabledInBuild &&
-            preferences.getBoolean(
-                appContext.getPreferenceKey(R.string.pref_key_crash_reporter),
-                true,
-            )
+//    val isCrashReportingEnabled: Boolean
+//        get() = isCrashReportEnabledInBuild &&
+//            preferences.getBoolean(
+//                appContext.getPreferenceKey(R.string.pref_key_crash_reporter),
+//                true,
+//            )
 
     val isRemoteDebuggingEnabled by booleanPreference(
         appContext.getPreferenceKey(R.string.pref_key_remote_debugging),
@@ -1305,19 +1310,19 @@ class Settings(private val appContext: Context) : PreferencesHolder {
     val shouldShowPrivateModeCfr: Boolean
         get() {
             if (!canShowCfr) return false
-            val focusInstalled = MozillaProductDetector
-                .getInstalledMozillaProducts(appContext as Application)
-                .contains(MozillaProductDetector.MozillaProducts.FOCUS.productName)
+//            val focusInstalled = MozillaProductDetector
+//                .getInstalledMozillaProducts(appContext as Application)
+//                .contains(MozillaProductDetector.MozillaProducts.FOCUS.productName)
 
-            val showCondition = if (focusInstalled) {
-                numTimesPrivateModeOpened.value >= CFR_COUNT_CONDITION_FOCUS_INSTALLED
-            } else {
-                numTimesPrivateModeOpened.value >= CFR_COUNT_CONDITION_FOCUS_NOT_INSTALLED
-            }
-
-            if (showCondition && !showedPrivateModeContextualFeatureRecommender) {
-                return true
-            }
+//            val showCondition = if (focusInstalled) {
+//                numTimesPrivateModeOpened.value >= CFR_COUNT_CONDITION_FOCUS_INSTALLED
+//            } else {
+//                numTimesPrivateModeOpened.value >= CFR_COUNT_CONDITION_FOCUS_NOT_INSTALLED
+//            }
+//
+//            if (showCondition && !showedPrivateModeContextualFeatureRecommender) {
+//                return true
+//            }
 
             return false
         }
@@ -1718,21 +1723,21 @@ class Settings(private val appContext: Context) : PreferencesHolder {
         default = setOf(),
     )
 
-    /**
-     * Returns whether onboarding should be shown to the user.
-     *
-     * @param hasUserBeenOnboarded Boolean to indicate whether the user has been onboarded.
-     * @param isLauncherIntent Boolean to indicate whether the app was launched on tapping on the
-     * app icon.
-     */
-    fun shouldShowOnboarding(hasUserBeenOnboarded: Boolean, isLauncherIntent: Boolean): Boolean {
-        return if (!hasUserBeenOnboarded && isLauncherIntent) {
-            FxNimbus.features.junoOnboarding.recordExposure()
-            true
-        } else {
-            false
-        }
-    }
+//    /**
+//     * Returns whether onboarding should be shown to the user.
+//     *
+//     * @param hasUserBeenOnboarded Boolean to indicate whether the user has been onboarded.
+//     * @param isLauncherIntent Boolean to indicate whether the app was launched on tapping on the
+//     * app icon.
+//     */
+//    fun shouldShowOnboarding(hasUserBeenOnboarded: Boolean, isLauncherIntent: Boolean): Boolean {
+//        return if (!hasUserBeenOnboarded && isLauncherIntent) {
+//            FxNimbus.features.junoOnboarding.recordExposure()
+//            true
+//        } else {
+//            false
+//        }
+//    }
 
     val feltPrivateBrowsingEnabled by lazyFeatureFlagPreference(
         key = appContext.getPreferenceKey(R.string.pref_key_should_enable_felt_privacy),

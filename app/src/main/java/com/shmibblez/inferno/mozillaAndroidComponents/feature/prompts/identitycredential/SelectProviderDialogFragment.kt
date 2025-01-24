@@ -12,9 +12,9 @@ import android.view.View
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AlertDialog
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.darkColors
-import androidx.compose.material.lightColors
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColors
+import androidx.compose.material3.lightColors
 import androidx.compose.ui.platform.ComposeView
 import com.shmibblez.inferno.mozillaAndroidComponents.concept.identitycredential.Provider
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.dialog.KEY_PROMPT_UID

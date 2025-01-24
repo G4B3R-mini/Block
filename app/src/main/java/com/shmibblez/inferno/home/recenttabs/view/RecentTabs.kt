@@ -52,7 +52,7 @@ import mozilla.components.browser.icons.compose.Loader
 import mozilla.components.browser.icons.compose.Placeholder
 import mozilla.components.browser.icons.compose.WithIcon
 //import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.annotation.LightDarkPreview
-//import mozilla.components.compose.base.utils.inComposePreview
+//import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.utils.inComposePreview
 import mozilla.components.support.ktx.kotlin.trimmed
 import mozilla.components.ui.colors.PhotonColors
 import com.shmibblez.inferno.components.components

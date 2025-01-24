@@ -4,6 +4,7 @@
 
 package com.shmibblez.inferno.downloads.dialog
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Dialog
 import android.text.method.ScrollingMovementMethod
@@ -55,9 +56,9 @@ abstract class StartDownloadDialog(
      * @param container The [ViewGroup] in which the download view will be inflated.
      */
     fun show(container: ViewGroup): StartDownloadDialog {
-        activity.components.analytics.crashReporter.recordCrashBreadcrumb(
-            Breadcrumb("StartDownloadDialog show"),
-        )
+//        activity.components.analytics.crashReporter.recordCrashBreadcrumb(
+//            Breadcrumb("StartDownloadDialog show"),
+//        )
         this.container = container
 
         val dialogParent = container.parent as? ViewGroup
@@ -93,9 +94,9 @@ abstract class StartDownloadDialog(
      * @param callback The callback for when the view is dismissed.
      */
     fun onDismiss(callback: () -> Unit): StartDownloadDialog {
-        activity.components.analytics.crashReporter.recordCrashBreadcrumb(
-            Breadcrumb("StartDownloadDialog onDismiss"),
-        )
+//        activity.components.analytics.crashReporter.recordCrashBreadcrumb(
+//            Breadcrumb("StartDownloadDialog onDismiss"),
+//        )
         this.onDismiss = callback
         return this
     }
@@ -188,11 +189,12 @@ class FirstPartyDownloadDialog(
             // Ensure the title of the dialog is focused and read by talkback first.
             dialog.root.viewTreeObserver.addOnGlobalLayoutListener(
                 object : OnGlobalLayoutListener {
+                    @SuppressLint("AccessibilityFocus")
                     override fun onGlobalLayout() {
                         dialog.root.viewTreeObserver.removeOnGlobalLayoutListener(this)
                         dialog.title.run {
                             sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_SELECTED)
-                            performAccessibilityAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS, null)
+//                            performAccessibilityAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS, null)
                         }
                     }
                 },

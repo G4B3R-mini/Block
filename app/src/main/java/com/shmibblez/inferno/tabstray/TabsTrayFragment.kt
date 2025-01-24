@@ -4,6 +4,7 @@
 
 package com.shmibblez.inferno.tabstray
 
+import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.Context
 import android.content.res.Configuration
@@ -48,6 +49,7 @@ import com.shmibblez.inferno.components.StoreProvider
 import com.shmibblez.inferno.compose.core.Action
 import com.shmibblez.inferno.compose.snackbar.Snackbar
 import com.shmibblez.inferno.compose.snackbar.SnackbarState
+import com.shmibblez.inferno.compose.snackbar.toSnackbarStateDuration
 import com.shmibblez.inferno.databinding.ComponentTabstray2Binding
 import com.shmibblez.inferno.databinding.ComponentTabstray3Binding
 import com.shmibblez.inferno.databinding.ComponentTabstray3FabBinding
@@ -132,18 +134,18 @@ class TabsTrayFragment : AppCompatDialogFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        context?.components?.analytics?.crashReporter?.recordCrashBreadcrumb(
-            Breadcrumb("TabsTrayFragment dismissTabsTray"),
-        )
+//        context?.components?.analytics?.crashReporter?.recordCrashBreadcrumb(
+//            Breadcrumb("TabsTrayFragment dismissTabsTray"),
+//        )
         setStyle(STYLE_NO_TITLE, R.style.TabTrayDialogStyle)
     }
 
     @Suppress("LongMethod")
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val args by navArgs<TabsTrayFragmentArgs>()
-        args.accessPoint.takeIf { it != TabsTrayAccessPoint.None }?.let {
-            TabsTray.accessPoint[it.name.lowercase()].add()
-        }
+//        args.accessPoint.takeIf { it != TabsTrayAccessPoint.None }?.let {
+//            TabsTray.accessPoint[it.name.lowercase()].add()
+//        }
         val initialMode = if (args.enterMultiselect) {
             TabsTrayState.Mode.Select(emptySet())
         } else {
@@ -212,18 +214,18 @@ class TabsTrayFragment : AppCompatDialogFragment() {
             controller = tabsTrayController,
         )
 
-        context?.components?.analytics?.crashReporter?.recordCrashBreadcrumb(
-            Breadcrumb("TabsTrayFragment onCreateDialog"),
-        )
+//        context?.components?.analytics?.crashReporter?.recordCrashBreadcrumb(
+//            Breadcrumb("TabsTrayFragment onCreateDialog"),
+//        )
         tabsTrayDialog = TabsTrayDialog(requireContext(), theme) { tabsTrayInteractor }
         return tabsTrayDialog
     }
 
     override fun onPause() {
         super.onPause()
-        context?.components?.analytics?.crashReporter?.recordCrashBreadcrumb(
-            Breadcrumb("TabsTrayFragment onPause"),
-        )
+//        context?.components?.analytics?.crashReporter?.recordCrashBreadcrumb(
+//            Breadcrumb("TabsTrayFragment onPause"),
+//        )
         dialog?.window?.setWindowAnimations(R.style.DialogFragmentRestoreAnimation)
     }
 
@@ -405,9 +407,9 @@ class TabsTrayFragment : AppCompatDialogFragment() {
 
     override fun onStart() {
         super.onStart()
-        context?.components?.analytics?.crashReporter?.recordCrashBreadcrumb(
-            Breadcrumb("TabsTrayFragment onStart"),
-        )
+//        context?.components?.analytics?.crashReporter?.recordCrashBreadcrumb(
+//            Breadcrumb("TabsTrayFragment onStart"),
+//        )
         findPreviousDialogFragment()?.let { dialog ->
             dialog.onAcceptClicked = ::onCancelDownloadWarningAccepted
         }
@@ -415,9 +417,9 @@ class TabsTrayFragment : AppCompatDialogFragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        context?.components?.analytics?.crashReporter?.recordCrashBreadcrumb(
-            Breadcrumb("TabsTrayFragment onDestroyView"),
-        )
+//        context?.components?.analytics?.crashReporter?.recordCrashBreadcrumb(
+//            Breadcrumb("TabsTrayFragment onDestroyView"),
+//        )
         _tabsTrayBinding = null
         _tabsTrayDialogBinding = null
         _fabButtonBinding = null
@@ -639,6 +641,7 @@ class TabsTrayFragment : AppCompatDialogFragment() {
         }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
 
@@ -659,9 +662,9 @@ class TabsTrayFragment : AppCompatDialogFragment() {
 
     @VisibleForTesting
     internal fun showCancelledDownloadWarning(downloadCount: Int, tabId: String?, source: String?) {
-        context?.components?.analytics?.crashReporter?.recordCrashBreadcrumb(
-            Breadcrumb("DownloadCancelDialogFragment show"),
-        )
+//        context?.components?.analytics?.crashReporter?.recordCrashBreadcrumb(
+//            Breadcrumb("DownloadCancelDialogFragment show"),
+//        )
         val dialog = DownloadCancelDialogFragment.newInstance(
             downloadCount = downloadCount,
             tabId = tabId,
@@ -845,9 +848,9 @@ class TabsTrayFragment : AppCompatDialogFragment() {
     internal fun dismissTabsTray() {
         // This should always be the last thing we do because nothing (e.g. telemetry)
         // is guaranteed after that.
-        context?.components?.analytics?.crashReporter?.recordCrashBreadcrumb(
-            Breadcrumb("TabsTrayFragment dismissTabsTray"),
-        )
+//        context?.components?.analytics?.crashReporter?.recordCrashBreadcrumb(
+//            Breadcrumb("TabsTrayFragment dismissTabsTray"),
+//        )
         dismissAllowingStateLoss()
     }
 
@@ -872,7 +875,7 @@ class TabsTrayFragment : AppCompatDialogFragment() {
                             }
                         },
                     ),
-                    duration = SnackbarDuration.Long,
+                    duration = SnackbarDuration.Long.toSnackbarStateDuration(),
                     action = Action(
                         label = getString(R.string.create_collection_view),
                         onClick = {
@@ -908,7 +911,7 @@ class TabsTrayFragment : AppCompatDialogFragment() {
             snackBarParentView = requireView(),
             snackbarState = SnackbarState(
                 message = getString(displayResId, displayFolderTitle),
-                duration = SnackbarDuration.Long,
+                duration = SnackbarDuration.Long.toSnackbarStateDuration(),
                 action = Action(
                     label = getString(R.string.create_collection_view),
                     onClick = {
@@ -938,7 +941,7 @@ class TabsTrayFragment : AppCompatDialogFragment() {
             snackBarParentView = tabsTrayComposeBinding.root,
             snackbarState = SnackbarState(
                 message = getString(R.string.inactive_tabs_auto_close_message_snackbar),
-                duration = SnackbarDuration.Long,
+                duration = SnackbarDuration.Long.toSnackbarStateDuration(),
             ),
         )
     }
@@ -958,9 +961,9 @@ class TabsTrayFragment : AppCompatDialogFragment() {
     }
 
     private fun onTabsTrayDismissed() {
-        context?.components?.analytics?.crashReporter?.recordCrashBreadcrumb(
-            Breadcrumb("TabsTrayFragment onTabsTrayDismissed"),
-        )
+//        context?.components?.analytics?.crashReporter?.recordCrashBreadcrumb(
+//            Breadcrumb("TabsTrayFragment onTabsTrayDismissed"),
+//        )
 //        TabsTray.closed.record(NoExtras())
         dismissAllowingStateLoss()
     }

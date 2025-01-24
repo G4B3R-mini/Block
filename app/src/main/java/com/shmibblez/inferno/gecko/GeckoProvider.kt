@@ -62,29 +62,29 @@ object GeckoProvider {
         }
 
         // Add safebrowsing providers for China
-        if (Config.channel.isMozillaOnline) {
-            val mozcn = SafeBrowsingProvider
-                .withName("mozcn")
-                .version("2.2")
-                .lists("m6eb-phish-shavar", "m6ib-phish-shavar")
-                .updateUrl(CN_UPDATE_URL)
-                .getHashUrl(CN_GET_HASH_URL)
-                .build()
-
-            runtimeSettings.contentBlocking.setSafeBrowsingProviders(
-                mozcn,
-                // Keep the existing configuration
-                ContentBlocking.GOOGLE_SAFE_BROWSING_PROVIDER,
-                ContentBlocking.GOOGLE_LEGACY_SAFE_BROWSING_PROVIDER,
-            )
-
-            runtimeSettings.contentBlocking.setSafeBrowsingPhishingTable(
-                "m6eb-phish-shavar",
-                "m6ib-phish-shavar",
-                // Existing configuration
-                "goog-phish-proto",
-            )
-        }
+//        if (Config.channel.isMozillaOnline) {
+//            val mozcn = SafeBrowsingProvider
+//                .withName("mozcn")
+//                .version("2.2")
+//                .lists("m6eb-phish-shavar", "m6ib-phish-shavar")
+//                .updateUrl(CN_UPDATE_URL)
+//                .getHashUrl(CN_GET_HASH_URL)
+//                .build()
+//
+//            runtimeSettings.contentBlocking.setSafeBrowsingProviders(
+//                mozcn,
+//                // Keep the existing configuration
+//                ContentBlocking.GOOGLE_SAFE_BROWSING_PROVIDER,
+//                ContentBlocking.GOOGLE_LEGACY_SAFE_BROWSING_PROVIDER,
+//            )
+//
+//            runtimeSettings.contentBlocking.setSafeBrowsingPhishingTable(
+//                "m6eb-phish-shavar",
+//                "m6ib-phish-shavar",
+//                // Existing configuration
+//                "goog-phish-proto",
+//            )
+//        }
 
         val geckoRuntime = GeckoRuntime.create(context, runtimeSettings)
 

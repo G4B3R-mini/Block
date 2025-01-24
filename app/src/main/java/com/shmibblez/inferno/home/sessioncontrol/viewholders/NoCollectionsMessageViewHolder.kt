@@ -105,6 +105,6 @@ class NoCollectionsMessageViewHolder(
     }
 
     companion object {
-        const val LAYOUT_ID = R.layout.no_collections_message
+        var LAYOUT_ID = R.layout.no_collections_message
     }
 }

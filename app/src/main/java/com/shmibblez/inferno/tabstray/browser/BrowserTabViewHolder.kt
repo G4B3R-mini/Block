@@ -72,7 +72,8 @@ sealed class BrowserTabViewHolder(itemView: View) : RecyclerView.ViewHolder(item
         }
 
         companion object {
-            const val LAYOUT_ID = R.layout.tab_tray_grid_item
+            val LAYOUT_ID
+ = R.layout.tab_tray_grid_item
         }
     }
 
@@ -116,7 +117,8 @@ sealed class BrowserTabViewHolder(itemView: View) : RecyclerView.ViewHolder(item
         }
 
         companion object {
-            const val LAYOUT_ID = R.layout.tab_tray_item
+            val LAYOUT_ID
+ = R.layout.tab_tray_item
         }
     }
 }

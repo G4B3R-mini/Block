@@ -13,7 +13,7 @@ import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.feature.search.ext.waitForSelectedOrDefaultSearchEngine
 import com.shmibblez.inferno.BrowserDirection
 import com.shmibblez.inferno.HomeActivity
-import com.shmibblez.inferno.components.metrics.MetricsUtils
+//import com.shmibblez.inferno.components.metrics.MetricsUtils
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.widget.VoiceSearchActivity.Companion.SPEECH_PROCESSING
 
@@ -50,12 +50,12 @@ class SpeechProcessingIntentProcessor(
 
     private fun launchToBrowser(searchEngine: SearchEngine, text: String) {
         activity.components.strictMode.resetAfter(StrictMode.allowThreadDiskReads()) {
-            MetricsUtils.recordSearchMetrics(
-                searchEngine,
-                searchEngine == store.state.search.selectedOrDefaultSearchEngine,
-                MetricsUtils.Source.WIDGET,
-                activity.components.nimbus.events,
-            )
+//            MetricsUtils.recordSearchMetrics(
+//                searchEngine,
+//                searchEngine == store.state.search.selectedOrDefaultSearchEngine,
+////                MetricsUtils.Source.WIDGET,
+//                activity.components.nimbus.events,
+//            )
         }
 
         activity.openToBrowserAndLoad(

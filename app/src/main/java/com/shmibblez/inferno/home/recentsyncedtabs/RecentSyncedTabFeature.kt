@@ -52,7 +52,7 @@ class RecentSyncedTabFeature(
     private val coroutineScope: CoroutineScope,
 ) : LifecycleAwareFeature {
 
-    private var syncStartId: GleanTimerId? = null
+//    private var syncStartId: GleanTimerId? = null
     private var lastSyncedTabs: List<RecentSyncedTab>? = null
 
     override fun start() {
@@ -98,8 +98,8 @@ class RecentSyncedTabFeature(
     }
 
     private fun dispatchLoading() {
-        syncStartId?.let { RecentSyncedTabs.recentSyncedTabTimeToLoad.cancel(it) }
-        syncStartId = RecentSyncedTabs.recentSyncedTabTimeToLoad.start()
+//        syncStartId?.let { RecentSyncedTabs.recentSyncedTabTimeToLoad.cancel(it) }
+//        syncStartId = RecentSyncedTabs.recentSyncedTabTimeToLoad.start()
         if (appStore.state.recentSyncedTabState == RecentSyncedTabState.None) {
             appStore.dispatch(AppAction.RecentSyncedTabStateChange(RecentSyncedTabState.Loading))
         }
@@ -155,7 +155,7 @@ class RecentSyncedTabFeature(
                 AppAction.RecentSyncedTabStateChange(RecentSyncedTabState.None),
             )
         } else {
-            recordMetrics(syncedTabs.first(), lastSyncedTabs?.first())
+//            recordMetrics(syncedTabs.first(), lastSyncedTabs?.first())
             appStore.dispatch(
                 AppAction.RecentSyncedTabStateChange(RecentSyncedTabState.Success(syncedTabs)),
             )
@@ -169,19 +169,19 @@ class RecentSyncedTabFeature(
         }
     }
 
-    private fun recordMetrics(
-        tab: RecentSyncedTab,
-        lastSyncedTab: RecentSyncedTab?,
-    ) {
-        RecentSyncedTabs.recentSyncedTabShown[tab.deviceType.name.lowercase()].add()
-        syncStartId?.let {
-            RecentSyncedTabs.recentSyncedTabTimeToLoad.stopAndAccumulate(it)
-            syncStartId = null
-        }
-        if (tab == lastSyncedTab) {
-            RecentSyncedTabs.latestSyncedTabIsStale.add()
-        }
-    }
+//    private fun recordMetrics(
+//        tab: RecentSyncedTab,
+//        lastSyncedTab: RecentSyncedTab?,
+//    ) {
+//        RecentSyncedTabs.recentSyncedTabShown[tab.deviceType.name.lowercase()].add()
+//        syncStartId?.let {
+//            RecentSyncedTabs.recentSyncedTabTimeToLoad.stopAndAccumulate(it)
+//            syncStartId = null
+//        }
+//        if (tab == lastSyncedTab) {
+//            RecentSyncedTabs.latestSyncedTabIsStale.add()
+//        }
+//    }
 
     private fun isSyncedTabsEngineEnabled(): Boolean {
         return SyncEnginesStorage(context).getStatus()[SyncEngine.Tabs] ?: true

@@ -18,11 +18,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -33,7 +35,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
-import mozilla.components.compose.base.button.TextButton
+import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.button.TextButton
 import mozilla.components.lib.state.ext.observeAsState
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.Dropdown
@@ -53,7 +55,7 @@ private const val PROBLEM_DESCRIPTION_MAX_LINES = 6
  * @param store [WebCompatReporterStore] used to manage the state of the Web Compat Reporter feature.
  */
 @Suppress("LongMethod")
-@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
+@SuppressLint("UnusedMaterialScaffoldPaddingParameter", "UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun WebCompatReporter(
     store: WebCompatReporterStore,
@@ -72,10 +74,11 @@ fun WebCompatReporter(
                 },
             )
         },
-        backgroundColor = FirefoxTheme.colors.layer2,
+        containerColor = FirefoxTheme.colors.layer2,
     ) {
         Column(
-            modifier = Modifier.verticalScroll(rememberScrollState())
+            modifier = Modifier
+                .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp, vertical = 12.dp),
         ) {
             Text(
@@ -118,7 +121,11 @@ fun WebCompatReporter(
             TextField(
                 value = state.problemDescription,
                 onValueChange = {
-                    store.dispatch(WebCompatReporterAction.ProblemDescriptionChanged(newProblemDescription = it))
+                    store.dispatch(
+                        WebCompatReporterAction.ProblemDescriptionChanged(
+                            newProblemDescription = it
+                        )
+                    )
                 },
                 placeholder = "",
                 errorText = "",
@@ -135,7 +142,8 @@ fun WebCompatReporter(
                 modifier = Modifier
                     .clickable {
                         store.dispatch(WebCompatReporterAction.SendMoreInfoClicked)
-                    }.padding(vertical = 16.dp),
+                    }
+                    .padding(vertical = 16.dp),
                 style = FirefoxTheme.typography.body2,
                 color = FirefoxTheme.colors.textAccent,
                 textDecoration = TextDecoration.Underline,
@@ -167,12 +175,13 @@ fun WebCompatReporter(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TempAppBar(
     onBackClick: () -> Unit,
 ) {
     TopAppBar(
-        backgroundColor = FirefoxTheme.colors.layer1,
+        colors = TopAppBarDefaults.topAppBarColors(containerColor = FirefoxTheme.colors.layer1),
         title = {
             Text(
                 text = stringResource(id = R.string.webcompat_reporter_screen_title),
@@ -207,12 +216,7 @@ private class WebCompatPreviewParameterProvider : PreviewParameterProvider<WebCo
             WebCompatReporterState(
                 enteredUrl = "www.example.com/url_parameters_that_break_the_page",
                 reason = WebCompatReporterState.BrokenSiteReason.Slow,
-                problemDescription = "The site wouldn’t load and after I tried xyz it still wouldn’t " +
-                    "load and then again site wouldn’t load and after I tried xyz it still wouldn’t " +
-                    "load and then again site wouldn’t load and after I tried xyz it still wouldn’t " +
-                    "load and then again site wouldn’t load and after I tried xyz it still wouldn’t " +
-                    "load and then again site wouldn’t load and after I tried xyz it still wouldn’t " +
-                    "load and then again ",
+                problemDescription = "The site wouldn’t load and after I tried xyz it still wouldn’t " + "load and then again site wouldn’t load and after I tried xyz it still wouldn’t " + "load and then again site wouldn’t load and after I tried xyz it still wouldn’t " + "load and then again site wouldn’t load and after I tried xyz it still wouldn’t " + "load and then again site wouldn’t load and after I tried xyz it still wouldn’t " + "load and then again ",
             ),
         )
 }

@@ -4,6 +4,7 @@
 
 package com.shmibblez.inferno.tabstray.browser
 
+import android.annotation.SuppressLint
 import android.view.View
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.runtime.Composable
@@ -20,6 +21,7 @@ import com.shmibblez.inferno.components.components
 import com.shmibblez.inferno.compose.ComposeViewHolder
 import com.shmibblez.inferno.compose.snackbar.Snackbar
 import com.shmibblez.inferno.compose.snackbar.SnackbarState
+import com.shmibblez.inferno.compose.snackbar.toSnackbarStateDuration
 import com.shmibblez.inferno.tabstray.TabsTrayFragment.Companion.ELEVATION
 import com.shmibblez.inferno.tabstray.TabsTrayState
 import com.shmibblez.inferno.tabstray.TabsTrayStore
@@ -86,12 +88,13 @@ class InactiveTabViewHolder(
     override val allowPrivateTheme: Boolean
         get() = false
 
+    @SuppressLint("VisibleForTests")
     private fun showConfirmationSnackbar() {
         Snackbar.make(
             snackBarParentView = composeView.rootView,
             snackbarState = SnackbarState(
                 message = composeView.context.getString(R.string.inactive_tabs_auto_close_message_snackbar),
-                duration = SnackbarDuration.Long,
+                duration = SnackbarDuration.Long.toSnackbarStateDuration(),
             ),
         ).apply {
             view.elevation = ELEVATION

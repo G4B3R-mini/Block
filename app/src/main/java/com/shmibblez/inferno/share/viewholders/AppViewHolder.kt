@@ -35,6 +35,7 @@ class AppViewHolder(
     }
 
     companion object {
-        const val LAYOUT_ID = R.layout.app_share_list_item
+        val LAYOUT_ID
+ = R.layout.app_share_list_item
     }
 }

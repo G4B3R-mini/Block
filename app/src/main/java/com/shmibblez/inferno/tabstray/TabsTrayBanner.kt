@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-@file:Suppress("Deprecation") // https://bugzilla.mozilla.org/show_bug.cgi?id=1927715
+// https://bugzilla.mozilla.org/show_bug.cgi?id=1927715
 
 package com.shmibblez.inferno.tabstray
 
@@ -18,7 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalContentAlpha
+//import androidx.compose.material3.LocalContentAlpha
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
@@ -216,7 +216,7 @@ private fun TabPageBanner(
             TabRow(
                 selectedTabIndex = selectedPage.ordinal,
                 modifier = Modifier.fillMaxWidth(MAX_WIDTH_TAB_ROW_PERCENT),
-                backgroundColor = Color.Transparent,
+                containerColor = Color.Transparent,
                 contentColor = selectedColor,
                 divider = {},
             ) {
@@ -229,7 +229,7 @@ private fun TabPageBanner(
                     selectedContentColor = selectedColor,
                     unselectedContentColor = inactiveColor,
                 ) {
-                    val tabCounterAlpha = LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
+                    val tabCounterAlpha = LocalContentColor.current.copy(alpha = LocalContentColor.current.alpha)
                     TabCounter(
                         tabCount = normalTabCount,
                         textColor = tabCounterAlpha,

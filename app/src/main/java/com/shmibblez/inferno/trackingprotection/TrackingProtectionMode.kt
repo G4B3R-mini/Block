@@ -15,7 +15,6 @@ enum class TrackingProtectionMode(
     @StringRes val titleRes: Int,
     @StringRes val contentDescriptionRes: Int,
 ) : Parcelable {
-
     STANDARD(
         preferenceKey = R.string.pref_key_tracking_protection_standard_option,
         titleRes = R.string.preference_enhanced_tracking_protection_standard_default_1,

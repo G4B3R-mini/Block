@@ -23,7 +23,6 @@ import mozilla.components.browser.state.selector.findCustomTabOrSelectedTab
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.browser.toolbar.BrowserToolbar
 import mozilla.components.browser.toolbar.display.DisplayToolbar
-import mozilla.components.compose.base.theme.AcornWindowSize
 import mozilla.components.feature.customtabs.CustomTabsColorsConfig
 import mozilla.components.feature.customtabs.CustomTabsToolbarButtonConfig
 import mozilla.components.feature.customtabs.CustomTabsToolbarFeature
@@ -45,6 +44,7 @@ import com.shmibblez.inferno.components.toolbar.interactor.BrowserToolbarInterac
 import com.shmibblez.inferno.components.toolbar.navbar.shouldAddNavigationBar
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.settings
+import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.theme.AcornWindowSize
 import com.shmibblez.inferno.utils.Settings
 
 @Suppress("LongParameterList")

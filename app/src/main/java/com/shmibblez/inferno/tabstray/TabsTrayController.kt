@@ -471,21 +471,22 @@ class DefaultTabsTrayController(
             onPositiveButtonClick = { id, isNewCollection ->
 
                 // If collection is null, a new one was created.
-                if (isNewCollection) {
-                    Collections.saved.record(
-                        Collections.SavedExtra(
-                            browserStore.state.normalTabs.size.toString(),
-                            tabs.size.toString(),
-                        ),
-                    )
-                } else {
-                    Collections.tabsAdded.record(
-                        Collections.TabsAddedExtra(
-                            browserStore.state.normalTabs.size.toString(),
-                            tabs.size.toString(),
-                        ),
-                    )
-                }
+                // TODO: collection
+//                if (isNewCollection) {
+//                    Collections.saved.record(
+//                        Collections.SavedExtra(
+//                            browserStore.state.normalTabs.size.toString(),
+//                            tabs.size.toString(),
+//                        ),
+//                    )
+//                } else {
+//                    Collections.tabsAdded.record(
+//                        Collections.TabsAddedExtra(
+//                            browserStore.state.normalTabs.size.toString(),
+//                            tabs.size.toString(),
+//                        ),
+//                    )
+//                }
                 id?.apply {
                     showCollectionSnackbar(tabs.size, isNewCollection)
                 }
@@ -601,12 +602,12 @@ class DefaultTabsTrayController(
     }
 
     override fun handleInactiveTabClicked(tab: TabSessionState) {
-        TabsTray.openInactiveTab.add()
+//        TabsTray.openInactiveTab.add()
         handleTabSelected(tab, TrayPagerAdapter.INACTIVE_TABS_FEATURE_NAME)
     }
 
     override fun handleCloseInactiveTabClicked(tab: TabSessionState) {
-        TabsTray.closeInactiveTab.add()
+//        TabsTray.closeInactiveTab.add()
         handleTabDeletion(tab.id, TrayPagerAdapter.INACTIVE_TABS_FEATURE_NAME)
     }
 

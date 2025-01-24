@@ -79,7 +79,7 @@ class CrashReporterController(
             job = GlobalScope.launch(Dispatchers.IO) {
                 val crashes = appStore.state.nonFatalCrashes
                 crashes.forEach {
-                    components.analytics.crashReporter.submitReport(it)
+//                    components.analytics.crashReporter.submitReport(it)
                     appStore.dispatch(AppAction.RemoveNonFatalCrash(it))
                 }
             }

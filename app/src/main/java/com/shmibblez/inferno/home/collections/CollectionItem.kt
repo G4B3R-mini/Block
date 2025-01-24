@@ -10,11 +10,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
-import androidx.compose.material3.DismissDirection.EndToStart
-import androidx.compose.material3.DismissDirection.StartToEnd
-import androidx.compose.material3.ExperimentalMaterialApi
-import androidx.compose.material3.SwipeToDismiss
-import androidx.compose.material3.rememberDismissState
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue.EndToStart
+import androidx.compose.material3.SwipeToDismissBoxValue.StartToEnd
+import androidx.compose.material3.SwipeToDismissBoxValue
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -32,6 +33,7 @@ import com.shmibblez.inferno.R.drawable
 import com.shmibblez.inferno.R.string
 import com.shmibblez.inferno.compose.list.FaviconListItem
 import com.shmibblez.inferno.compose.tabstray.DismissedTabBackground
+import com.shmibblez.inferno.ext.isDismissed
 import com.shmibblez.inferno.ext.toShortUrl
 import com.shmibblez.inferno.home.fake.FakeHomepagePreview
 import com.shmibblez.inferno.theme.FirefoxTheme
@@ -62,15 +64,15 @@ fun CollectionItem(
     onClick: () -> Unit,
     onRemove: (Boolean) -> Unit,
 ) {
-    val dismissState = rememberDismissState()
+    val dismissState = rememberSwipeToDismissBoxState()
 
     if (dismissState.isDismissed(StartToEnd) || dismissState.isDismissed(EndToStart)) {
         onRemove(true)
     }
 
-    SwipeToDismiss(
+    SwipeToDismissBox(
         state = dismissState,
-        background = {
+        backgroundContent = {
             DismissedTabBackground(
                 dismissDirection = dismissState.dismissDirection,
                 shape = if (isLastInCollection) BOTTOM_TAB_SHAPE else MIDDLE_TAB_SHAPE,
@@ -83,7 +85,7 @@ fun CollectionItem(
         val clippingModifier by remember {
             derivedStateOf {
                 try {
-                    if (dismissState.progress.fraction != 1f) Modifier else Modifier.clipTop()
+                    if (dismissState.progress != 1f) Modifier else Modifier.clipTop()
                 } catch (e: NoSuchElementException) {
                     // `androidx.compose.material3.Swipeable.findBounds` couldn't find anchors.
                     // Happened once in testing when deleting a tab. Could not reproduce afterwards.
@@ -93,11 +95,11 @@ fun CollectionItem(
         }
 
         Card(
+            colors = CardDefaults.cardColors(containerColor = FirefoxTheme.colors.layer2),
             modifier = clippingModifier
                 .fillMaxWidth(),
             shape = if (isLastInCollection) BOTTOM_TAB_SHAPE else MIDDLE_TAB_SHAPE,
-            backgroundColor = FirefoxTheme.colors.layer2,
-            elevation = 5.dp,
+            elevation = CardDefaults.cardElevation(defaultElevation = 5.dp),
         ) {
             FaviconListItem(
                 label = tab.title,

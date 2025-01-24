@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.Divider
 import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.annotation.LightDarkPreview
-import mozilla.components.compose.base.utils.inComposePreview
+import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.utils.inComposePreview
 import mozilla.components.support.ktx.android.content.appName
 import mozilla.components.support.ktx.android.content.appVersionName
 import com.shmibblez.inferno.R

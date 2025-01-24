@@ -130,7 +130,6 @@ import com.shmibblez.inferno.library.bookmarks.DesktopFolders
 import com.shmibblez.inferno.messaging.FenixMessageSurfaceId
 import com.shmibblez.inferno.messaging.MessageNotificationWorker
 import com.shmibblez.inferno.nimbus.FxNimbus
-//import com.shmibblez.inferno.nimbus.FxNimbus
 import com.shmibblez.inferno.onboarding.ReEngagementNotificationWorker
 import com.shmibblez.inferno.perf.MarkersActivityLifecycleCallbacks
 import com.shmibblez.inferno.perf.MarkersFragmentLifecycleCallbacks
@@ -155,6 +154,7 @@ import com.shmibblez.inferno.theme.StatusBarColorManager
 import com.shmibblez.inferno.theme.ThemeManager
 import com.shmibblez.inferno.utils.Settings
 import com.shmibblez.inferno.utils.changeAppLauncherIcon
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import java.lang.ref.WeakReference
 import java.util.Locale
 
@@ -266,6 +266,7 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
         dispatcher = onBackPressedDispatcher,
     )
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Suppress("ComplexMethod")
     final override fun onCreate(savedInstanceState: Bundle?) {
         // DO NOT MOVE ANYTHING ABOVE THIS getProfilerTime CALL.
@@ -296,10 +297,10 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
 
         binding = ActivityHomeBinding.inflate(layoutInflater)
 
-        val shouldShowOnboarding = settings().shouldShowOnboarding(
-            hasUserBeenOnboarded = components.fenixOnboarding.userHasBeenOnboarded(),
-            isLauncherIntent = intent.toSafeIntent().isLauncherIntent,
-        )
+//        val shouldShowOnboarding = settings().shouldShowOnboarding(
+//            hasUserBeenOnboarded = components.fenixOnboarding.userHasBeenOnboarded(),
+//            isLauncherIntent = intent.toSafeIntent().isLauncherIntent,
+//        )
 
         SplashScreenManager(
             splashScreenOperation =
@@ -326,9 +327,9 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
 //                    )
 //                }
 
-                if (savedInstanceState == null && shouldShowOnboarding) {
-                    navHost.navController.navigate(NavGraphDirections.actionGlobalOnboarding())
-                }
+//                if (savedInstanceState == null && shouldShowOnboarding) {
+//                    navHost.navController.navigate(NavGraphDirections.actionGlobalOnboarding())
+//                }
             },
         ).showSplashScreen()
 
@@ -378,28 +379,28 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
             it.start()
         }
 
-        if (!shouldShowOnboarding) {
-            lifecycleScope.launch(IO) {
-                showFullscreenMessageIfNeeded(applicationContext)
-            }
-
-            // Unless the activity is recreated, navigate to home first (without rendering it)
-            // to add it to the back stack.
-            if (savedInstanceState == null) {
-                navigateToHome(navHost.navController)
-            }
-
-            if (!shouldStartOnHome() && shouldNavigateToBrowserOnColdStart(savedInstanceState)) {
-                navigateToBrowserOnColdStart()
-            }
-//            else {
-//                StartOnHome.enterHomeScreen.record(NoExtras())
+//        if (!shouldShowOnboarding) {
+//            lifecycleScope.launch(IO) {
+//                showFullscreenMessageIfNeeded(applicationContext)
 //            }
-
-//            if (settings().showHomeOnboardingDialog && components.fenixOnboarding.userHasBeenOnboarded()) {
-//                navHost.navController.navigate(NavGraphDirections.actionGlobalHomeOnboardingDialog())
+//
+//            // Unless the activity is recreated, navigate to home first (without rendering it)
+//            // to add it to the back stack.
+//            if (savedInstanceState == null) {
+//                navigateToHome(navHost.navController)
 //            }
-        }
+//
+//            if (!shouldStartOnHome() && shouldNavigateToBrowserOnColdStart(savedInstanceState)) {
+//                navigateToBrowserOnColdStart()
+//            }
+////            else {
+////                StartOnHome.enterHomeScreen.record(NoExtras())
+////            }
+//
+////            if (settings().showHomeOnboardingDialog && components.fenixOnboarding.userHasBeenOnboarded()) {
+////                navHost.navController.navigate(NavGraphDirections.actionGlobalHomeOnboardingDialog())
+////            }
+//        }
 
         Performance.processIntentIfPerformanceTest(intent, this)
 
@@ -566,7 +567,7 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
 //                Events.defaultBrowserChanged.record(NoExtras())
 //            }
 
-            collectOSNavigationTelemetry()
+//            collectOSNavigationTelemetry()
 //            GrowthDataWorker.sendActivatedSignalIfNeeded(applicationContext)
 //            FontEnumerationWorker.sendActivatedSignalIfNeeded(applicationContext)
             ReEngagementNotificationWorker.setReEngagementNotificationIfNeeded(applicationContext)
@@ -782,7 +783,6 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
                 return
             }
         }
-        @Suppress("DEPRECATION")
         super.onActivityResult(requestCode, resultCode, data)
     }
 
@@ -1288,17 +1288,17 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
         messaging.onMessageDisplayed(nextMessage, currentBootUniqueIdentifier)
     }
 
-    @VisibleForTesting
-    @SuppressLint("NewApi") // The Android Q check is done in the systemGesturesInsets property getter
-    internal fun collectOSNavigationTelemetry() {
-        binding.root.doOnAttach {
-            val systemGestureInsets = binding.root.systemGesturesInsets
-
-            val isUsingGesturesNavigation =
-                (systemGestureInsets?.left ?: 0) > 0 && (systemGestureInsets?.right ?: 0) > 0
-//            NavigationBar.osNavigationUsesGestures.set(isUsingGesturesNavigation)
-        }
-    }
+//    @VisibleForTesting
+//    @SuppressLint("NewApi") // The Android Q check is done in the systemGesturesInsets property getter
+//    internal fun collectOSNavigationTelemetry() {
+//        binding.root.doOnAttach {
+////            val systemGestureInsets = binding.root.systemGesturesInsets
+////
+////            val isUsingGesturesNavigation =
+////                (systemGestureInsets?.left ?: 0) > 0 && (systemGestureInsets?.right ?: 0) > 0
+////            NavigationBar.osNavigationUsesGestures.set(isUsingGesturesNavigation)
+//        }
+//    }
 
     private fun showCrashReporter() {
         if (!settings().useNewCrashReporterDialog) {

@@ -10,6 +10,7 @@ import com.google.android.material.snackbar.Snackbar.LENGTH_INDEFINITE
 import com.google.android.material.snackbar.Snackbar.LENGTH_LONG
 import com.google.android.material.snackbar.Snackbar.LENGTH_SHORT
 import com.shmibblez.inferno.compose.core.Action
+import com.shmibblez.inferno.compose.snackbar.SnackbarState.Duration.Preset
 import com.shmibblez.inferno.compose.snackbar.SnackbarState.Duration.Preset.Indefinite
 import com.shmibblez.inferno.compose.snackbar.SnackbarState.Duration.Preset.Short
 import com.shmibblez.inferno.compose.snackbar.SnackbarState.Type
@@ -42,6 +43,14 @@ fun SnackbarDuration.toMillis(
     )
 }
 
+fun SnackbarDuration.toSnackbarStateDuration(): SnackbarState.Duration {
+    return when (this) {
+        SnackbarDuration.Short -> Short
+        SnackbarDuration.Long -> Preset.Long
+        SnackbarDuration.Indefinite -> Indefinite
+    }
+}
+
 /**
  * The data to display within a Snackbar.
  *
@@ -64,30 +73,30 @@ data class SnackbarState(
      */
     sealed interface Duration {
 
-        fun toSnackbarDuration(): SnackbarDuration {
-            if (this is Preset) {
-                return when (this) {
-                    Indefinite -> SnackbarDuration.Indefinite
-                    Preset.Long -> SnackbarDuration.Long
-                    Short -> SnackbarDuration.Long
-                }
-            } else if (this is Custom) {
-                val durations = arrayOf(4000, 10000, Int.MAX_VALUE)
-                var duration = durations[0]
-                for (n in durations)
-                    if (abs(duration - n) < abs(this.durationMs - n))
-                        duration = n
-                return when (duration) {
-                    4000 -> SnackbarDuration.Short
-                    10000 -> SnackbarDuration.Long
-                    Int.MAX_VALUE -> SnackbarDuration.Indefinite
-                    else -> {
-                        throw Error("this should not happen")
-                    }
-                }
-            }
-            throw Error("this should not happen")
-        }
+//        fun toSnackbarDuration(): SnackbarDuration {
+//            if (this is Preset) {
+//                return when (this) {
+//                    Indefinite -> SnackbarDuration.Indefinite
+//                    Preset.Long -> SnackbarDuration.Long
+//                    Short -> SnackbarDuration.Long
+//                }
+//            } else if (this is Custom) {
+//                val durations = arrayOf(4000, 10000, Int.MAX_VALUE)
+//                var duration = durations[0]
+//                for (n in durations)
+//                    if (abs(duration - n) < abs(this.durationMs - n))
+//                        duration = n
+//                return when (duration) {
+//                    4000 -> SnackbarDuration.Short
+//                    10000 -> SnackbarDuration.Long
+//                    Int.MAX_VALUE -> SnackbarDuration.Indefinite
+//                    else -> {
+//                        throw Error("this should not happen")
+//                    }
+//                }
+//            }
+//            throw Error("this should not happen")
+//        }
 
         /**
          * A predefined display duration.

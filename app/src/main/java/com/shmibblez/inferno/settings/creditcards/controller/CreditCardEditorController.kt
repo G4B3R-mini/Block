@@ -76,7 +76,7 @@ class DefaultCreditCardEditorController(
                 lifecycleScope.launch(Dispatchers.Main) {
                     navController.popBackStack()
                 }
-                CreditCards.deleted.add()
+//                CreditCards.deleted.add()
             }
             dialog.dismiss()
         }
@@ -89,7 +89,7 @@ class DefaultCreditCardEditorController(
             lifecycleScope.launch(Dispatchers.Main) {
                 navController.popBackStack()
             }
-            CreditCards.saved.add()
+//            CreditCards.saved.add()
         }
     }
 

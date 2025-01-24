@@ -27,7 +27,7 @@ import com.shmibblez.inferno.R
 import com.shmibblez.inferno.databinding.FragmentShareBinding
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.requireComponents
-//import com.shmibblez.inferno.nimbus.FxNimbus
+import com.shmibblez.inferno.nimbus.FxNimbus
 import com.shmibblez.inferno.theme.FirefoxTheme
 import com.shmibblez.inferno.theme.Theme
 
@@ -49,17 +49,17 @@ class ShareFragment : AppCompatDialogFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        context?.components?.analytics?.crashReporter?.recordCrashBreadcrumb(
-            Breadcrumb("ShareFragment onCreate"),
-        )
+//        context?.components?.analytics?.crashReporter?.recordCrashBreadcrumb(
+//            Breadcrumb("ShareFragment onCreate"),
+//        )
         setStyle(STYLE_NO_TITLE, R.style.ShareDialogStyle)
     }
 
     override fun onPause() {
         super.onPause()
-        context?.components?.analytics?.crashReporter?.recordCrashBreadcrumb(
-            Breadcrumb("ShareFragment dismiss"),
-        )
+//        context?.components?.analytics?.crashReporter?.recordCrashBreadcrumb(
+//            Breadcrumb("ShareFragment dismiss"),
+//        )
         consumePrompt { onDismiss() }
         dismiss()
     }
@@ -155,9 +155,9 @@ class ShareFragment : AppCompatDialogFragment() {
     }
 
     override fun onDestroy() {
-        context?.components?.analytics?.crashReporter?.recordCrashBreadcrumb(
-            Breadcrumb("ShareFragment onDestroy"),
-        )
+//        context?.components?.analytics?.crashReporter?.recordCrashBreadcrumb(
+//            Breadcrumb("ShareFragment onDestroy"),
+//        )
         setFragmentResult(RESULT_KEY, Bundle())
         // Clear the stored result in case there is no listener with the same key set.
         clearFragmentResult(RESULT_KEY)

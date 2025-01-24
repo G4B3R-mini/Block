@@ -31,7 +31,8 @@ import com.shmibblez.inferno.components.accounts.AccountState
 import com.shmibblez.inferno.components.accounts.FenixAccountManager
 import com.shmibblez.inferno.components.toolbar.BrowserMenuSignIn
 import com.shmibblez.inferno.ext.components
-//import com.shmibblez.inferno.nimbus.FxNimbus
+import com.shmibblez.inferno.nimbus.FxNimbus
+import com.shmibblez.inferno.nimbus.FxNimbus
 import com.shmibblez.inferno.theme.ThemeManager
 import com.shmibblez.inferno.whatsnew.WhatsNew
 
@@ -152,12 +153,12 @@ class HomeMenu(
             onItemTapped.invoke(Item.Extensions)
         }
 
-        val manageAccountAndDevicesItem = SimpleBrowserMenuItem(
-            context.getString(R.string.browser_menu_manage_account_and_devices),
-            textColorResource = primaryTextColor,
-        ) {
-            onItemTapped.invoke(Item.ManageAccountAndDevices)
-        }
+//        val manageAccountAndDevicesItem = SimpleBrowserMenuItem(
+//            context.getString(R.string.browser_menu_manage_account_and_devices),
+//            textColorResource = primaryTextColor,
+//        ) {
+//            onItemTapped.invoke(Item.ManageAccountAndDevices)
+//        }
 
         val whatsNewItem = BrowserMenuHighlightableItem(
             context.getString(R.string.browser_menu_whats_new),
@@ -223,7 +224,7 @@ class HomeMenu(
             extensionsItem,
             syncSignInMenuItem,
             accountAuthItem,
-            if (Config.channel.isMozillaOnline) manageAccountAndDevicesItem else null,
+//            if (Config.channel.isMozillaOnline) manageAccountAndDevicesItem else null,
             BrowserMenuDivider(),
             BrowserMenuDivider(),
             whatsNewItem,

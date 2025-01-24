@@ -26,6 +26,7 @@ import mozilla.components.support.base.log.logger.Logger
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.snackbar.Snackbar
 import com.shmibblez.inferno.compose.snackbar.SnackbarState
+import com.shmibblez.inferno.compose.snackbar.toSnackbarStateDuration
 import com.shmibblez.inferno.databinding.BrowserToolbarPopupWindowBinding
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.isToolbarAtBottom
@@ -99,7 +100,7 @@ object ToolbarPopupWindow {
                             snackBarParentView = snackbarParent,
                             snackbarState = SnackbarState(
                                 message = context.getString(R.string.browser_toolbar_url_copied_to_clipboard_snackbar),
-                                duration = SnackbarDuration.Long,
+                                duration = SnackbarDuration.Long.toSnackbarStateDuration(),
                             ),
                         ).show()
                     }

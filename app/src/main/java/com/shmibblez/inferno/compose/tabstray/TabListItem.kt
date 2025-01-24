@@ -16,12 +16,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -247,12 +249,12 @@ private fun Thumbnail(
                     .size(size = 40.dp)
                     .align(alignment = Alignment.Center),
                 shape = CircleShape,
-                backgroundColor = FirefoxTheme.colors.layerAccent,
+                colors = CardDefaults.cardColors(containerColor =FirefoxTheme.colors.layerAccent ),
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.mozac_ic_checkmark_24),
                     modifier = Modifier
-                        .matchParentSize()
+                        .fillMaxSize()
                         .padding(all = 8.dp),
                     contentDescription = null,
                     tint = colorResource(id = R.color.mozac_ui_icons_fill),

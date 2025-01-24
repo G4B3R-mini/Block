@@ -374,7 +374,7 @@ class AddLoginFragment : Fragment(R.layout.fragment_add_login), MenuProvider {
                 binding.usernameText.text.toString(),
                 binding.passwordText.text.toString(),
             )
-            Logins.saved.add()
+//            Logins.saved.add()
             true
         }
         else -> false

@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -200,8 +201,8 @@ private fun ProtectionPanelBanner(
         modifier = Modifier
             .padding(start = 8.dp, top = 8.dp, end = 8.dp)
             .fillMaxWidth(),
-        backgroundColor = backgroundColor,
-        elevation = 0.dp,
+        colors = CardDefaults.cardColors(containerColor = backgroundColor),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         shape = ROUNDED_CORNER_SHAPE,
     ) {
         Row(

@@ -3217,4 +3217,6 @@
     <string name="certificate_warning_push_notification_pnw2_message" tools:ignore="UnusedResources">Update before March 14 to keep using add-ons and other features.</string>
     <!-- Push notification message about old Firefox version -->
     <string name="certificate_warning_push_notification_pnw3_message" tools:ignore="UnusedResources">Some features will stop working tomorrow.</string>
+    <string name="synced_tabs_connect_to_sync_account">Connect to sync account</string>
+    <string name="menu_action_close_tabs_private">Close private tabs</string>
 </resources>

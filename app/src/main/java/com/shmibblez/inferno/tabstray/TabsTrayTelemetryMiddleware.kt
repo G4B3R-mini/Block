@@ -30,7 +30,7 @@ class TabsTrayTelemetryMiddleware : Middleware<TabsTrayState, TabsTrayAction> {
                     shouldReportInactiveTabMetrics = false
 
 //                    TabsTray.hasInactiveTabs.record(TabsTray.HasInactiveTabsExtra(action.tabs.size))
-                    Metrics.inactiveTabsCount.set(action.tabs.size.toLong())
+//                    Metrics.inactiveTabsCount.set(action.tabs.size.toLong())
                 }
             }
             is TabsTrayAction.EnterSelectMode -> {

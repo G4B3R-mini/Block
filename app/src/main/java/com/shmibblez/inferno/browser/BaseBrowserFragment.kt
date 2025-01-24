@@ -105,10 +105,10 @@ import mozilla.components.feature.prompts.dialog.GestureNavUtils
 import mozilla.components.feature.prompts.file.AndroidPhotoPicker
 import mozilla.components.feature.prompts.identitycredential.DialogColors
 import mozilla.components.feature.prompts.identitycredential.DialogColorsProvider
-import mozilla.components.feature.prompts.login.LoginDelegate
+import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.login.LoginDelegate
 import mozilla.components.feature.prompts.login.PasswordGeneratorDialogColors
 import mozilla.components.feature.prompts.login.PasswordGeneratorDialogColorsProvider
-import mozilla.components.feature.prompts.login.SuggestStrongPasswordDelegate
+import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.login.SuggestStrongPasswordDelegate
 import mozilla.components.feature.prompts.share.ShareDelegate
 import mozilla.components.feature.readerview.ReaderViewFeature
 import mozilla.components.feature.search.SearchFeature

@@ -116,6 +116,7 @@ class BookmarkNodeViewHolder(
     }
 
     companion object {
-        const val LAYOUT_ID = R.layout.bookmark_list_item
+        val LAYOUT_ID
+ = R.layout.bookmark_list_item
     }
 }

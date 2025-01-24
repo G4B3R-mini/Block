@@ -19,7 +19,7 @@ import kotlinx.coroutines.withContext
 import mozilla.components.browser.state.state.CustomTabSessionState
 import mozilla.components.browser.state.state.ExternalAppType
 import mozilla.components.browser.state.state.SessionState
-import mozilla.components.compose.base.theme.AcornWindowSize
+import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.theme.AcornWindowSize
 import mozilla.components.concept.engine.permission.SitePermissions
 import mozilla.components.feature.contextmenu.ContextMenuCandidate
 import mozilla.components.feature.customtabs.CustomTabWindowFeature
@@ -236,7 +236,7 @@ class ExternalAppBrowserFragment : BaseBrowserFragment() {
 
     @Suppress("LongMethod")
     private fun initializeNavBar() {
-        NavigationBar.customTabInitializeTimespan.start()
+//        NavigationBar.customTabInitializeTimespan.start()
 
         // Update the contents of the bottomToolbarContainer with the CustomTabNavBar configuration
         // only if a navbar should be used and it was initialized in the parent.
@@ -305,13 +305,13 @@ class ExternalAppBrowserFragment : BaseBrowserFragment() {
                             )
                         },
                         onOpenInBrowserButtonClick = {
-                            NavigationBar.customOpenInFenixTapped.record(NoExtras())
+//                            NavigationBar.customOpenInFenixTapped.record(NoExtras())
                             browserToolbarInteractor.onBrowserToolbarMenuItemTapped(
                                 ToolbarMenu.Item.OpenInFenix,
                             )
                         },
                         onMenuButtonClick = {
-                            NavigationBar.customMenuTapped.record(NoExtras())
+//                            NavigationBar.customMenuTapped.record(NoExtras())
                             nav(
                                 R.id.externalAppBrowserFragment,
                                 ExternalAppBrowserFragmentDirections.actionGlobalMenuDialogFragment(
@@ -331,6 +331,6 @@ class ExternalAppBrowserFragment : BaseBrowserFragment() {
             }
         }
 
-        NavigationBar.customTabInitializeTimespan.stop()
+//        NavigationBar.customTabInitializeTimespan.stop()
     }
 }

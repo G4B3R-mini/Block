@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import mozilla.components.browser.icons.IconRequest
 import mozilla.components.browser.icons.compose.Placeholder
 import mozilla.components.browser.icons.compose.WithIcon
-//import mozilla.components.compose.base.utils.inComposePreview
+//import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.utils.inComposePreview
 import com.shmibblez.inferno.components.components
 import com.shmibblez.inferno.theme.FirefoxTheme
 

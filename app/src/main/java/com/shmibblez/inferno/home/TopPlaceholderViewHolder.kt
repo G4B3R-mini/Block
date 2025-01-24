@@ -19,6 +19,6 @@ class TopPlaceholderViewHolder(
     fun bind() = Unit
 
     companion object {
-        const val LAYOUT_ID = R.layout.top_placeholder_item
+        val LAYOUT_ID = R.layout.top_placeholder_item
     }
 }

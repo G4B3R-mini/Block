@@ -50,7 +50,7 @@ fun DeterminateProgressIndicator(
         modifier = modifier,
         progress = floatState.value,
         color = FirefoxTheme.colors.layerAccent,
-        backgroundColor = FirefoxTheme.colors.actionTertiary,
+        trackColor = FirefoxTheme.colors.actionTertiary, // background color
         strokeWidth = ProgressIndicatorWidth,
         strokeCap = StrokeCap.Butt,
     )

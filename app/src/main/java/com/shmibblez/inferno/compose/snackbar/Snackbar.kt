@@ -20,6 +20,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.Text
@@ -42,7 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import kotlinx.coroutines.launch
-import mozilla.components.compose.base.button.TextButton
+import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.button.TextButton
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.components.SnackbarBehavior
 import com.shmibblez.inferno.compose.button.PrimaryButton
@@ -111,7 +113,7 @@ class Snackbar private constructor(
                 if (parent.context.settings().accessibilityServicesEnabled) {
                     LENGTH_ACCESSIBLE
                 } else {
-                    snackbarState.duration.toIntegerSnackbarDuration()
+                    snackbarState.durationMs
                 }
 
             return Snackbar(
@@ -238,9 +240,9 @@ internal fun Snackbar(
             .testTag(SNACKBAR_TEST_TAG),
     ) {
         Card(
+            colors = CardDefaults.cardColors(containerColor = colors.backgroundColor),
             shape = RoundedCornerShape(size = 8.dp),
-            backgroundColor = colors.backgroundColor,
-            elevation = 4.dp,
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -330,7 +332,7 @@ private fun SnackbarHostPreview() {
                         snackbarHostState.showSnackbar(
                             snackbarState = SnackbarState(
                                 message = "Default snackbar",
-                                duration = SnackbarDuration.Short,
+                                duration = SnackbarDuration.Short.toSnackbarStateDuration(),
                                 type = Type.Default,
                                 action = Action(
                                     label = "click me",
@@ -351,7 +353,7 @@ private fun SnackbarHostPreview() {
                         snackbarHostState.showSnackbar(
                             snackbarState = SnackbarState(
                                 message = "Warning snackbar",
-                                duration = SnackbarDuration.Short,
+                                duration = SnackbarDuration.Short.toSnackbarStateDuration(),
                                 type = Type.Warning,
                                 action = Action(
                                     label = "click me",

@@ -39,8 +39,8 @@ class SiteSettingsFragment : PreferenceFragmentCompat() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.site_permissions_preferences, rootKey)
 
-        val preferenceDescription = requirePreference<Preference>(R.string.pref_key_site_permissions_description)
-        preferenceDescription.isVisible = Config.channel.isMozillaOnline
+//        val preferenceDescription = requirePreference<Preference>(R.string.pref_key_site_permissions_description)
+//        preferenceDescription.isVisible = Config.channel.isMozillaOnline
 
         // This should be setup in onCreatePreferences so we setup only once when the fragment is created
         bindDesktopMode()
@@ -114,15 +114,15 @@ class SiteSettingsFragment : PreferenceFragmentCompat() {
         val directions = SiteSettingsFragmentDirections
             .actionSitePermissionsToManagePhoneFeatures(phoneFeature)
 
-        if (phoneFeature == PhoneFeature.AUTOPLAY_AUDIBLE) {
+//        if (phoneFeature == PhoneFeature.AUTOPLAY_AUDIBLE) {
 //            Autoplay.visitedSetting.record(NoExtras())
-        }
+//        }
         context?.let {
             Navigation.findNavController(requireView()).navigateWithBreadcrumb(
                 directions = directions,
                 navigateFrom = "SitePermissionsFragment",
                 navigateTo = "ActionSitePermissionsToManagePhoneFeatures",
-                crashReporter = it.components.analytics.crashReporter,
+//                crashReporter = it.components.analytics.crashReporter,
             )
         }
     }

@@ -34,7 +34,7 @@ import com.shmibblez.inferno.home.collections.Collections
 import com.shmibblez.inferno.home.collections.CollectionsState
 import com.shmibblez.inferno.home.fake.FakeHomepagePreview
 import com.shmibblez.inferno.home.interactor.HomepageInteractor
-import com.shmibblez.inferno.home.pocket.ui.PocketSection
+//import com.shmibblez.inferno.home.pocket.ui.PocketSection
 import com.shmibblez.inferno.home.recentsyncedtabs.view.RecentSyncedTab
 import com.shmibblez.inferno.home.recenttabs.RecentTab
 import com.shmibblez.inferno.home.recenttabs.interactor.RecentTabInteractor
@@ -140,13 +140,13 @@ internal fun Homepage(
 
                     CollectionsSection(collectionsState = collectionsState, interactor = interactor)
 
-                    if (showPocketStories) {
-                        PocketSection(
-                            state = pocketState,
-                            cardBackgroundColor = cardBackgroundColor,
-                            interactor = interactor,
-                        )
-                    }
+//                    if (showPocketStories) {
+//                        PocketSection(
+//                            state = pocketState,
+//                            cardBackgroundColor = cardBackgroundColor,
+//                            interactor = interactor,
+//                        )
+//                    }
 
                     if (showCustomizeHome) {
                         CustomizeHomeButton(
@@ -262,11 +262,12 @@ private fun RecentlyVisitedSection(
 
                 is RecentHistoryGroup -> {
 //                    RecentlyVisitedHomepage.searchGroupOpened.record(NoExtras())
-                    History.recentSearchesTapped.record(
-                        History.RecentSearchesTappedExtra(
-                            pageNumber.toString(),
-                        ),
-                    )
+                    // TODO: history
+//                    History.recentSearchesTapped.record(
+//                        History.RecentSearchesTappedExtra(
+//                            pageNumber.toString(),
+//                        ),
+//                    )
                     interactor.onRecentHistoryGroupClicked(recentlyVisitedItem)
                 }
             }
@@ -329,13 +330,13 @@ private fun HomepagePreview() {
                 bookmarks = FakeHomepagePreview.bookmarks(),
                 recentlyVisited = FakeHomepagePreview.recentHistory(),
                 collectionsState = CollectionsState.Placeholder(true),
-                pocketState = FakeHomepagePreview.pocketState(),
+//                pocketState = FakeHomepagePreview.pocketState(),
                 showTopSites = true,
                 showRecentTabs = true,
                 showRecentSyncedTab = true,
                 showBookmarks = true,
                 showRecentlyVisited = true,
-                showPocketStories = true,
+//                showPocketStories = true,
                 topSiteColors = TopSiteColors.colors(),
                 cardBackgroundColor = WallpaperState.default.cardBackgroundColor,
                 buttonTextColor = WallpaperState.default.buttonTextColor,

@@ -56,7 +56,8 @@ class CreditCardItemViewHolder(
     }
 
     companion object {
-        const val LAYOUT_ID = R.layout.credit_card_list_item
+        val LAYOUT_ID
+ = R.layout.credit_card_list_item
 
         // Date format pattern for the credit card expiry date.
         private const val DATE_PATTERN = "MM/yyyy"

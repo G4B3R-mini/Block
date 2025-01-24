@@ -31,6 +31,7 @@ class AboutItemViewHolder(
     }
 
     companion object {
-        const val LAYOUT_ID = R.layout.about_list_item
+        val LAYOUT_ID
+ = R.layout.about_list_item
     }
 }

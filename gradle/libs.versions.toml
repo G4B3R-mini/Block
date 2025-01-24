@@ -1,5 +1,6 @@
 [versions]
 # Android Components
+accompanistDrawablepainter = "0.37.0"
 activityCompose = "1.9.3"
 android-components = "134.0.20241117092920"
 compose-base-v = "135.0b3"
@@ -59,9 +60,11 @@ pagingCommonAndroid = "3.3.5"
 coreSplashscreen = "1.0.1"
 navigationUiKtx = "2.8.5"
 toolingNimbusGradleAppService = "134.0"
+pagingRuntimeKtx = "3.3.5"
 
 [libraries]
 # Kotlin
+accompanist-drawablepainter = { module = "com.google.accompanist:accompanist-drawablepainter", version.ref = "accompanistDrawablepainter" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 androidx-navigation-fragment = { module = "androidx.navigation:navigation-fragment", version.ref = "navigationCompose" }
@@ -177,6 +180,7 @@ mozilla-feature-readerview = { group = "org.mozilla.components", name = "feature
 mozilla-feature-recentlyclosed = { group = "org.mozilla.components", name = "feature-recentlyclosed", version.ref = "android-components" }
 mozilla-feature-search = { group = "org.mozilla.components", name = "feature-search", version.ref = "android-components" }
 mozilla-feature-session = { group = "org.mozilla.components", name = "feature-session", version.ref = "android-components" }
+mozilla-feature-share = { group = "org.mozilla.components", name = "feature-share", version.ref = "android-components" }
 mozilla-feature-sitepermissions = { group = "org.mozilla.components", name = "feature-sitepermissions", version.ref = "android-components" }
 mozilla-feature-syncedtabs = { group = "org.mozilla.components", name = "feature-syncedtabs", version.ref = "android-components" }
 mozilla-feature-tab-collections = { group = "org.mozilla.components", name = "feature-tab-collections", version.ref = "android-components" }
@@ -221,6 +225,7 @@ androidx-paging-common-android = { group = "androidx.paging", name = "paging-com
 androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "coreSplashscreen" }
 androidx-navigation-ui-ktx = { group = "androidx.navigation", name = "navigation-ui-ktx", version.ref = "navigationUiKtx" }
 tooling-nimbus-gradle-app-services = { module = "org.mozilla.appservices:tooling-nimbus-gradle", version.ref = "toolingNimbusGradleAppService" }
+androidx-paging-runtime-ktx = { group = "androidx.paging", name = "paging-runtime-ktx", version.ref = "pagingRuntimeKtx" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "android-gradle-plugin" }

@@ -161,7 +161,7 @@ class SearchEngineFragment : PreferenceFragmentCompat() {
                         directions = directions,
                         navigateFrom = "SearchEngineFragment",
                         navigateTo = "ActionSearchEngineFragmentToSearchShortcutsFragment",
-                        it.components.analytics.crashReporter,
+//                        it.components.analytics.crashReporter,
                     )
                 }
             }

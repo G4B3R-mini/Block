@@ -14,7 +14,7 @@ import com.shmibblez.inferno.ext.shouldShowRecentSyncedTabs
 import com.shmibblez.inferno.ext.shouldShowRecentTabs
 import com.shmibblez.inferno.home.bookmarks.Bookmark
 import com.shmibblez.inferno.home.collections.CollectionsState
-import com.shmibblez.inferno.home.pocket.PocketState
+//import com.shmibblez.inferno.home.pocket.PocketState
 import com.shmibblez.inferno.home.recentsyncedtabs.RecentSyncedTab
 import com.shmibblez.inferno.home.recentsyncedtabs.RecentSyncedTabState
 import com.shmibblez.inferno.home.recenttabs.RecentTab
@@ -64,13 +64,13 @@ internal sealed class HomepageState {
         val bookmarks: List<Bookmark>,
         val recentlyVisited: List<RecentlyVisitedItem>,
         val collectionsState: CollectionsState,
-        val pocketState: PocketState,
+//        val pocketState: PocketState,
         val showTopSites: Boolean,
         val showRecentTabs: Boolean,
         val showRecentSyncedTab: Boolean,
         val showBookmarks: Boolean,
         val showRecentlyVisited: Boolean,
-        val showPocketStories: Boolean,
+//        val showPocketStories: Boolean,
         val topSiteColors: TopSiteColors,
         val cardBackgroundColor: Color,
         val buttonBackgroundColor: Color,
@@ -81,7 +81,7 @@ internal sealed class HomepageState {
          * Whether to show customize home button.
          */
         val showCustomizeHome: Boolean
-            get() = showTopSites || showRecentTabs || showBookmarks || showRecentlyVisited || showPocketStories
+            get() = showTopSites || showRecentTabs || showBookmarks || showRecentlyVisited // || showPocketStories
     }
 
     companion object {
@@ -122,14 +122,14 @@ internal sealed class HomepageState {
                             browserState = components.core.store.state,
                             browsingModeManager = browsingModeManager,
                         ),
-                        pocketState = PocketState.build(appState, settings),
+//                        pocketState = PocketState.build(appState, settings),
                         showTopSites = settings.showTopSitesFeature && topSites.isNotEmpty(),
                         showRecentTabs = shouldShowRecentTabs(settings),
                         showBookmarks = settings.showBookmarksHomeFeature && bookmarks.isNotEmpty(),
                         showRecentSyncedTab = shouldShowRecentSyncedTabs(),
                         showRecentlyVisited = settings.historyMetadataUIFeature && recentHistory.isNotEmpty(),
-                        showPocketStories = settings.showPocketRecommendationsFeature &&
-                            recommendationState.pocketStories.isNotEmpty(),
+//                        showPocketStories = settings.showPocketRecommendationsFeature &&
+//                            recommendationState.pocketStories.isNotEmpty(),
                         topSiteColors = TopSiteColors.colors(wallpaperState = wallpaperState),
                         cardBackgroundColor = wallpaperState.cardBackgroundColor,
                         buttonBackgroundColor = wallpaperState.buttonBackgroundColor,

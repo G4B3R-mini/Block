@@ -127,7 +127,7 @@ class SavedLoginsAuthFragment : PreferenceFragmentCompat() {
             directions = directions,
             navigateFrom = "SavedLoginsAuthFragment",
             navigateTo = "ActionSavedLoginsAuthFragmentToSavedLoginsSettingFragment",
-            crashReporter = requireComponents.analytics.crashReporter,
+//            crashReporter = requireComponents.analytics.crashReporter,
         )
     }
 

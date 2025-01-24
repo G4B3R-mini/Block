@@ -23,7 +23,6 @@ import mozilla.components.browser.state.state.SessionState
 import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.browser.thumbnails.BrowserThumbnails
 import mozilla.components.browser.toolbar.BrowserToolbar
-//import mozilla.components.compose.base.theme.AcornWindowSize
 import mozilla.components.concept.engine.permission.SitePermissions
 import mozilla.components.concept.toolbar.Toolbar
 import mozilla.components.feature.app.links.AppLinksUseCases

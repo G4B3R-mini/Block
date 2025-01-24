@@ -20,12 +20,12 @@ sealed class DebugDrawerAction : Action {
     /**
      * [DebugDrawerAction] fired when the user opens the drawer.
      */
-    object DrawerOpened : DebugDrawerAction()
+    data object DrawerOpened : DebugDrawerAction()
 
     /**
      * [DebugDrawerAction] fired when the user closes the drawer.
      */
-    object DrawerClosed : DebugDrawerAction()
+    data object DrawerClosed : DebugDrawerAction()
 
     /**
      * [DebugDrawerAction] fired when a navigation event occurs for a specific destination.
@@ -35,17 +35,17 @@ sealed class DebugDrawerAction : Action {
         /**
          * [NavigateTo] action fired when the debug drawer needs to navigate to [DebugDrawerHome].
          */
-        object Home : NavigateTo()
+        data object Home : NavigateTo()
 
         /**
          * [NavigateTo] action fired when the debug drawer needs to navigate to [TabToolsScreen].
          */
-        object TabTools : NavigateTo()
+        data object TabTools : NavigateTo()
 
         /**
          * [NavigateTo] action fired when the debug drawer needs to navigate to [LoginsScreen].
          */
-        object Logins : NavigateTo()
+        data object Logins : NavigateTo()
 
         /**
          * [NavigateTo] action fired when the debug drawer needs to navigate to [AddressesScreen].
@@ -55,16 +55,16 @@ sealed class DebugDrawerAction : Action {
         /**
          * [NavigateTo] action fired when the debug drawer needs to navigate to [CfrToolsScreen].
          */
-        object CfrTools : NavigateTo()
+        data object CfrTools : NavigateTo()
 
-        /**
-         * [NavigateTo] action fired when the debug drawer needs to navigate to [GleanDebugToolsScreen].
-         */
-        object GleanDebugTools : NavigateTo()
+//        /**
+//         * [NavigateTo] action fired when the debug drawer needs to navigate to [GleanDebugToolsScreen].
+//         */
+//        object GleanDebugTools : NavigateTo()
     }
 
     /**
      * [DebugDrawerAction] fired when a back navigation event occurs.
      */
-    object OnBackPressed : DebugDrawerAction()
+    data object OnBackPressed : DebugDrawerAction()
 }
