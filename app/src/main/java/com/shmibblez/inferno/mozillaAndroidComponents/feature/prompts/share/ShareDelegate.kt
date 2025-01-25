@@ -5,8 +5,8 @@
 package com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.share
 
 import android.content.Context
-import com.shmibblez.inferno.mozillaAndroidComponents.concept.engine.prompt.ShareData
-import com.shmibblez.inferno.mozillaAndroidComponents.support.ktx.android.content.share
+import mozilla.components.concept.engine.prompt.ShareData
+import mozilla.components.support.ktx.android.content.share
 
 /**
  * Delegate to display a share prompt.

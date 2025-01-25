@@ -102,11 +102,12 @@ class SecretSettingsFragment : PreferenceFragmentCompat() {
             onPreferenceChangeListener = SharedPreferenceUpdater()
         }
 
-        requirePreference<SwitchPreference>(R.string.pref_key_pocket_content_recommendations).apply {
-            isVisible = Config.channel.isNightlyOrDebug
-            isChecked = context.settings().showContentRecommendations
-            onPreferenceChangeListener = SharedPreferenceUpdater()
-        }
+        // TODO: pocket
+//        requirePreference<SwitchPreference>(R.string.pref_key_pocket_content_recommendations).apply {
+//            isVisible = Config.channel.isNightlyOrDebug
+//            isChecked = context.settings().showContentRecommendations
+//            onPreferenceChangeListener = SharedPreferenceUpdater()
+//        }
 
         requirePreference<SwitchPreference>(R.string.pref_key_enable_unified_trust_panel).apply {
             isVisible = Config.channel.isNightlyOrDebug
@@ -115,7 +116,7 @@ class SecretSettingsFragment : PreferenceFragmentCompat() {
         }
 
         requirePreference<SwitchPreference>(R.string.pref_key_enable_fxsuggest).apply {
-            isVisible = FeatureFlags.fxSuggest
+            isVisible = true // FeatureFlags.fxSuggest
             isChecked = context.settings().enableFxSuggest
             onPreferenceChangeListener = object : Preference.OnPreferenceChangeListener {
                 override fun onPreferenceChange(preference: Preference, newValue: Any?): Boolean {
@@ -148,16 +149,16 @@ class SecretSettingsFragment : PreferenceFragmentCompat() {
                 onPreferenceChangeListener =
                     Preference.OnPreferenceChangeListener { _, newValue ->
                         debugSettingsRepository.setDebugDrawerEnabled(enabled = newValue as Boolean)
-                        DebugDrawerMetrics.debugDrawerEnabled.set(newValue)
+//                        DebugDrawerMetrics.debugDrawerEnabled.set(newValue)
                         true
                     }
             }
         }
 
-        // for performance reasons, this is only available in Nightly or Debug builds
-        requirePreference<EditTextPreference>(R.string.pref_key_custom_glean_server_url).apply {
-            isVisible = Config.channel.isNightlyOrDebug && BuildConfig.GLEAN_CUSTOM_URL.isNullOrEmpty()
-        }
+//        // for performance reasons, this is only available in Nightly or Debug builds
+//        requirePreference<EditTextPreference>(R.string.pref_key_custom_glean_server_url).apply {
+//            isVisible = Config.channel.isNightlyOrDebug && BuildConfig.GLEAN_CUSTOM_URL.isNullOrEmpty()
+//        }
 
         requirePreference<Preference>(R.string.pref_key_custom_sponsored_stories_parameters).apply {
             isVisible = Config.channel.isNightlyOrDebug

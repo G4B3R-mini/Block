@@ -8,9 +8,9 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.shmibblez.inferno.mozillaAndroidComponents.concept.storage.CreditCardEntry
-import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.R
-import com.shmibblez.inferno.mozillaAndroidComponents.support.utils.creditCardIssuerNetwork
+import mozilla.components.concept.storage.CreditCardEntry
+import mozilla.components.feature.prompts.R
+import mozilla.components.support.utils.creditCardIssuerNetwork
 
 /**
  * View holder for displaying a credit card item.

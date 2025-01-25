@@ -19,7 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.annotation.FlexibleWindowLightDarkPreview
+import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.annotation.FlexibleWindowLightDarkPreview
 import mozilla.components.lib.state.ext.observeAsState
 import com.shmibblez.inferno.FeatureFlags
 import com.shmibblez.inferno.R
@@ -107,7 +107,7 @@ private fun ResetCfrTool(
                 },
             )
 
-            if (FeatureFlags.navigationToolbarEnabled) {
+//            if (FeatureFlags.navigationToolbarEnabled) {
                 CfrToggle(
                     title = stringResource(R.string.debug_drawer_cfr_tools_homepage_nav_toolbar_title),
                     description = stringResource(R.string.debug_drawer_cfr_tools_homepage_nav_toolbar_description),
@@ -116,7 +116,7 @@ private fun ResetCfrTool(
                         cfrToolsStore.dispatch(CfrToolsAction.HomepageNavToolbarShownToggled)
                     },
                 )
-            }
+//            }
 
             CfrToggle(
                 title = stringResource(R.string.debug_drawer_cfr_tools_homepage_sync_title),
@@ -163,7 +163,7 @@ private fun ResetCfrTool(
                 text = stringResource(R.string.debug_drawer_cfr_tools_toolbar_cfr_title),
             )
 
-            if (FeatureFlags.navigationToolbarEnabled) {
+//            if (FeatureFlags.navigationToolbarEnabled) {
                 CfrToggle(
                     title = stringResource(R.string.debug_drawer_cfr_tools_navigation_buttons_title),
                     description = stringResource(R.string.debug_drawer_cfr_tools_navigation_buttons_description),
@@ -173,7 +173,7 @@ private fun ResetCfrTool(
                         cfrToolsStore.dispatch(CfrToolsAction.NavButtonsShownToggled)
                     },
                 )
-            }
+//            }
         }
 
         Column(

@@ -17,7 +17,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.core.text.HtmlCompat
 import androidx.core.text.getSpans
-import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.R
+import mozilla.components.feature.prompts.R
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.dialog.AbstractPromptTextDialogFragment
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.dialog.KEY_MESSAGE
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.dialog.KEY_PROMPT_UID

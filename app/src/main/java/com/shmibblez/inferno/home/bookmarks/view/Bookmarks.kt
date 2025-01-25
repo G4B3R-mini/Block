@@ -42,8 +42,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import mozilla.components.browser.icons.compose.Loader
 import mozilla.components.browser.icons.compose.Placeholder
-import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.annotation.LightDarkPreview
-import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.utils.inComposePreview
+import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.annotation.LightDarkPreview
+import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.utils.inComposePreview
 import mozilla.components.ui.colors.PhotonColors
 import com.shmibblez.inferno.components.components
 import com.shmibblez.inferno.compose.ContextualMenu

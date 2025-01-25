@@ -10,7 +10,7 @@ import android.view.View
 import android.widget.NumberPicker
 import android.widget.ScrollView
 import androidx.annotation.VisibleForTesting
-import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.R
+import mozilla.components.feature.prompts.R
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.ext.hour
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.ext.maxHour
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.ext.maxMillisecond
@@ -24,7 +24,7 @@ import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.ext.minSec
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.ext.minute
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.ext.now
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.ext.second
-import com.shmibblez.inferno.mozillaAndroidComponents.support.utils.TimePicker.shouldShowMillisecondsPicker
+import mozilla.components.support.utils.TimePicker.shouldShowMillisecondsPicker
 import java.util.Calendar
 
 /**

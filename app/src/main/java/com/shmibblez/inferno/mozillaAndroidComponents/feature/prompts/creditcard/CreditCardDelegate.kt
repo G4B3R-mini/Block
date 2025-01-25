@@ -4,7 +4,7 @@
 
 package com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.creditcard
 
-import com.shmibblez.inferno.mozillaAndroidComponents.concept.storage.CreditCardEntry
+import mozilla.components.concept.storage.CreditCardEntry
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.concept.AutocompletePrompt
 
 /**

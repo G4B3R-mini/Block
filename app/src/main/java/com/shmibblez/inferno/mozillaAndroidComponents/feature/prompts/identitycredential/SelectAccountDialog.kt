@@ -27,11 +27,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.annotation.LightDarkPreview
-import com.shmibblez.inferno.mozillaAndroidComponents.concept.identitycredential.Account
-import com.shmibblez.inferno.mozillaAndroidComponents.concept.identitycredential.Provider
-import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.R
+import mozilla.components.concept.identitycredential.Account
+import mozilla.components.concept.identitycredential.Provider
+import mozilla.components.feature.prompts.R
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.identitycredential.previews.DialogPreviewMaterialTheme
-import com.shmibblez.inferno.mozillaAndroidComponents.support.ktx.kotlin.base64ToBitmap
+import mozilla.components.support.ktx.kotlin.base64ToBitmap
 
 /**
  * A Federated Credential Management dialog for selecting an account.

@@ -16,8 +16,8 @@ import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.R
-import com.shmibblez.inferno.mozillaAndroidComponents.ui.widgets.withCenterAlignedButtons
+import mozilla.components.feature.prompts.R
+import mozilla.components.ui.widgets.withCenterAlignedButtons
 
 private const val KEY_SELECTED_COLOR = "KEY_SELECTED_COLOR"
 

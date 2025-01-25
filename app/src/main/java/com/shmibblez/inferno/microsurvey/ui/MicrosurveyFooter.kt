@@ -18,7 +18,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
-import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.annotation.LightDarkPreview
+import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.annotation.LightDarkPreview
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.LinkText
 import com.shmibblez.inferno.compose.LinkTextState

@@ -73,7 +73,7 @@ private val DEFAULT_SYNCED_TABS_COMMANDS_EXTRA_FLUSH_DELAY = 5.seconds
 class BackgroundServices(
     private val context: Context,
 //    private val push: Push,
-    crashReporter: CrashReporter,
+//    crashReporter: CrashReporter,
     historyStorage: Lazy<PlacesHistoryStorage>,
     bookmarkStorage: Lazy<PlacesBookmarksStorage>,
     passwordsStorage: Lazy<SyncableLoginsStorage>,
@@ -150,7 +150,11 @@ class BackgroundServices(
         context,
     )
 
-    val accountAbnormalities = AccountAbnormalities(context, crashReporter, strictMode)
+    val accountAbnormalities = AccountAbnormalities(
+        context,
+//        crashReporter,
+        strictMode
+    )
 
     val syncStore by lazyMonitored {
         SyncStore()
@@ -159,11 +163,16 @@ class BackgroundServices(
     private lateinit var syncStoreSupport: SyncStoreSupport
 
     val accountManager by lazyMonitored {
-        makeAccountManager(context, serverConfig, deviceConfig, syncConfig, crashReporter)
+        makeAccountManager(context, serverConfig, deviceConfig, syncConfig) //, crashReporter)
     }
 
     val syncedTabsStorage by lazyMonitored {
-        SyncedTabsStorage(accountManager, context.components.core.store, remoteTabsStorage.value, maxActiveTime)
+        SyncedTabsStorage(
+            accountManager,
+            context.components.core.store,
+            remoteTabsStorage.value,
+            maxActiveTime
+        )
     }
     val syncedTabsAutocompleteProvider by lazyMonitored {
         SyncedTabsAutocompleteProvider(syncedTabsStorage)
@@ -191,7 +200,7 @@ class BackgroundServices(
         serverConfig: ServerConfig,
         deviceConfig: DeviceConfig,
         syncConfig: SyncConfig?,
-        crashReporter: CrashReporter?,
+//        crashReporter: CrashReporter?,
     ) = FxaAccountManager(
         context,
         serverConfig,
@@ -208,7 +217,7 @@ class BackgroundServices(
             // codes for certain scopes.
             SCOPE_SESSION,
         ),
-        crashReporter,
+//        crashReporter,
     ).also { accountManager ->
         // Register a telemetry account observer to keep track of FxA auth metrics.
         accountManager.register(telemetryAccountObserver)

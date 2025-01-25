@@ -29,7 +29,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.annotation.LightDarkPreview
+import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.annotation.LightDarkPreview
 //import mozilla.telemetry.glean.private.NoExtras
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.theme.FirefoxTheme

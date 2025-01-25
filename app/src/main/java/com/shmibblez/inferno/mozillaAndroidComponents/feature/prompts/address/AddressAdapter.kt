@@ -12,8 +12,8 @@ import androidx.annotation.VisibleForTesting
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.shmibblez.inferno.mozillaAndroidComponents.concept.storage.Address
-import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.R
+import mozilla.components.concept.storage.Address
+import mozilla.components.feature.prompts.R
 
 @VisibleForTesting
 internal object AddressDiffCallback : DiffUtil.ItemCallback<Address>() {

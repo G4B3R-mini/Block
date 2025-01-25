@@ -66,11 +66,11 @@ class RecentlyVisitedViewHolder(
                     }
                     is RecentHistoryGroup -> {
 //                        RecentlyVisitedHomepage.searchGroupOpened.record(NoExtras())
-                        History.recentSearchesTapped.record(
-                            History.RecentSearchesTappedExtra(
-                                pageNumber.toString(),
-                            ),
-                        )
+//                        History.recentSearchesTapped.record(
+//                            History.RecentSearchesTappedExtra(
+//                                pageNumber.toString(),
+//                            ),
+//                        )
                         interactor.onRecentHistoryGroupClicked(recentlyVisitedItem)
                     }
                 }

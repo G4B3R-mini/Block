@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package com.shmibblez.inferno.mozillaAndroidComponents.base.compose.utils
+package com.shmibblez.inferno.mozillaAndroidComponents.compose.base.utils
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalInspectionMode

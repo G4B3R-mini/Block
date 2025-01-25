@@ -5,7 +5,7 @@
 package com.shmibblez.inferno.home.interactor
 
 import com.shmibblez.inferno.home.bookmarks.interactor.BookmarksInteractor
-import com.shmibblez.inferno.home.pocket.interactor.PocketStoriesInteractor
+//import com.shmibblez.inferno.home.pocket.interactor.PocketStoriesInteractor
 import com.shmibblez.inferno.home.privatebrowsing.interactor.PrivateBrowsingInteractor
 import com.shmibblez.inferno.home.recentsyncedtabs.interactor.RecentSyncedTabInteractor
 import com.shmibblez.inferno.home.recenttabs.interactor.RecentTabInteractor
@@ -33,7 +33,7 @@ interface HomepageInteractor :
     BookmarksInteractor,
     RecentVisitsInteractor,
     CustomizeHomeIteractor,
-    PocketStoriesInteractor,
+//    PocketStoriesInteractor,
     PrivateBrowsingInteractor,
     SearchSelectorInteractor,
     WallpaperInteractor

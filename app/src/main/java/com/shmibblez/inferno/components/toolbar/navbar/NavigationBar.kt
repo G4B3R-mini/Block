@@ -37,8 +37,8 @@ import mozilla.components.browser.state.selector.normalTabs
 import mozilla.components.browser.state.selector.privateTabs
 import mozilla.components.browser.state.selector.selectedTab
 import mozilla.components.browser.state.store.BrowserStore
-import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.Divider
-import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.annotation.LightDarkPreview
+import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.Divider
+import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.annotation.LightDarkPreview
 import mozilla.components.lib.state.ext.observeAsComposableState
 import mozilla.components.lib.state.ext.observeAsState
 import mozilla.components.ui.tabcounter.TabCounterMenu

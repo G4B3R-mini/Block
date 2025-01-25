@@ -9,7 +9,7 @@ import mozilla.components.concept.storage.BookmarkNodeType
 //import mozilla.telemetry.glean.private.NoExtras
 //import com.shmibblez.inferno.GleanMetrics.BookmarksManagement
 import com.shmibblez.inferno.browser.browsingmode.BrowsingMode
-import com.shmibblez.inferno.components.metrics.MetricsUtils
+//import com.shmibblez.inferno.components.metrics.MetricsUtils
 
 /**
  * Interactor for the Bookmarks screen.
@@ -32,10 +32,10 @@ class BookmarkFragmentInteractor(
 
     override fun onEditPressed(node: BookmarkNode) {
         bookmarksController.handleBookmarkEdit(node)
-        MetricsUtils.recordBookmarkMetrics(
-            MetricsUtils.BookmarkAction.EDIT,
-            METRIC_SOURCE,
-        )
+//        MetricsUtils.recordBookmarkMetrics(
+//            MetricsUtils.BookmarkAction.EDIT,
+//            METRIC_SOURCE,
+//        )
     }
 
     override fun onAllBookmarksDeselected() {
@@ -72,10 +72,10 @@ class BookmarkFragmentInteractor(
             bookmarksController.handleOpeningBookmark(item, BrowsingMode.Normal)
 //            BookmarksManagement.openInNewTab.record(NoExtras())
         }
-        MetricsUtils.recordBookmarkMetrics(
-            MetricsUtils.BookmarkAction.OPEN,
-            METRIC_SOURCE,
-        )
+//        MetricsUtils.recordBookmarkMetrics(
+//            MetricsUtils.BookmarkAction.OPEN,
+//            METRIC_SOURCE,
+//        )
     }
 
     override fun onOpenInPrivateTab(item: BookmarkNode) {
@@ -84,28 +84,28 @@ class BookmarkFragmentInteractor(
             bookmarksController.handleOpeningBookmark(item, BrowsingMode.Private)
 //            BookmarksManagement.openInPrivateTab.record(NoExtras())
         }
-        MetricsUtils.recordBookmarkMetrics(
-            MetricsUtils.BookmarkAction.OPEN,
-            METRIC_SOURCE,
-        )
+//        MetricsUtils.recordBookmarkMetrics(
+//            MetricsUtils.BookmarkAction.OPEN,
+//            METRIC_SOURCE,
+//        )
     }
 
     override fun onOpenAllInNewTabs(folder: BookmarkNode) {
         require(folder.type == BookmarkNodeType.FOLDER)
         bookmarksController.handleOpeningFolderBookmarks(folder, BrowsingMode.Normal)
-        MetricsUtils.recordBookmarkMetrics(
-            MetricsUtils.BookmarkAction.OPEN,
-            METRIC_SOURCE,
-        )
+//        MetricsUtils.recordBookmarkMetrics(
+//            MetricsUtils.BookmarkAction.OPEN,
+//            METRIC_SOURCE,
+//        )
     }
 
     override fun onOpenAllInPrivateTabs(folder: BookmarkNode) {
         require(folder.type == BookmarkNodeType.FOLDER)
         bookmarksController.handleOpeningFolderBookmarks(folder, BrowsingMode.Private)
-        MetricsUtils.recordBookmarkMetrics(
-            MetricsUtils.BookmarkAction.OPEN,
-            METRIC_SOURCE,
-        )
+//        MetricsUtils.recordBookmarkMetrics(
+//            MetricsUtils.BookmarkAction.OPEN,
+//            METRIC_SOURCE,
+//        )
     }
 
     override fun onDelete(nodes: Set<BookmarkNode>) {
@@ -119,10 +119,10 @@ class BookmarkFragmentInteractor(
             BookmarkNodeType.FOLDER -> BookmarkRemoveType.FOLDER
             null -> BookmarkRemoveType.MULTIPLE
         }
-        MetricsUtils.recordBookmarkMetrics(
-            MetricsUtils.BookmarkAction.DELETE,
-            METRIC_SOURCE,
-        )
+//        MetricsUtils.recordBookmarkMetrics(
+//            MetricsUtils.BookmarkAction.DELETE,
+//            METRIC_SOURCE,
+//        )
         if (eventType == BookmarkRemoveType.FOLDER) {
             bookmarksController.handleBookmarkFolderDeletion(nodes)
         } else {
@@ -139,10 +139,10 @@ class BookmarkFragmentInteractor(
             BookmarkNodeType.ITEM -> {
                 bookmarksController.handleBookmarkTapped(item)
 //                BookmarksManagement.open.record(NoExtras())
-                MetricsUtils.recordBookmarkMetrics(
-                    MetricsUtils.BookmarkAction.OPEN,
-                    METRIC_SOURCE,
-                )
+//                MetricsUtils.recordBookmarkMetrics(
+//                    MetricsUtils.BookmarkAction.OPEN,
+//                    METRIC_SOURCE,
+//                )
             }
             BookmarkNodeType.FOLDER -> bookmarksController.handleBookmarkExpand(item)
             BookmarkNodeType.SEPARATOR -> throw IllegalStateException("Cannot open separators")

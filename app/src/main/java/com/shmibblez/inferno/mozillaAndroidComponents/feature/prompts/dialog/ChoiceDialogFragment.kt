@@ -16,10 +16,10 @@ import androidx.annotation.VisibleForTesting.Companion.PRIVATE
 import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.shmibblez.inferno.mozillaAndroidComponents.concept.engine.prompt.Choice
-import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.R
-import com.shmibblez.inferno.mozillaAndroidComponents.support.utils.ext.getParcelableArrayCompat
-import com.shmibblez.inferno.mozillaAndroidComponents.ui.widgets.withCenterAlignedButtons
+import mozilla.components.concept.engine.prompt.Choice
+import mozilla.components.feature.prompts.R
+import mozilla.components.support.utils.ext.getParcelableArrayCompat
+import mozilla.components.ui.widgets.withCenterAlignedButtons
 
 private const val KEY_CHOICES = "KEY_CHOICES"
 private const val KEY_DIALOG_TYPE = "KEY_DIALOG_TYPE"

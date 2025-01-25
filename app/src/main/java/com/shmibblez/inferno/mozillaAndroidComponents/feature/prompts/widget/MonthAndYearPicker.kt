@@ -9,7 +9,7 @@ import android.content.Context
 import android.widget.NumberPicker
 import android.widget.ScrollView
 import androidx.annotation.VisibleForTesting
-import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.R
+import mozilla.components.feature.prompts.R
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.ext.month
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.ext.now
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.ext.year

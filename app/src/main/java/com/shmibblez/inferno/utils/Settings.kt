@@ -1662,13 +1662,13 @@ class Settings(private val appContext: Context) : PreferencesHolder {
         persistDefaultIfNotExists = true,
     )
 
-    /**
-     * Indicates if Merino content recommendations should be shown.
-     */
-    var showContentRecommendations by booleanPreference(
-        key = appContext.getPreferenceKey(R.string.pref_key_pocket_content_recommendations),
-        default = FeatureFlags.merinoContentRecommendations,
-    )
+//    /**
+//     * Indicates if Merino content recommendations should be shown.
+//     */
+//    var showContentRecommendations by booleanPreference(
+//        key = appContext.getPreferenceKey(R.string.pref_key_pocket_content_recommendations),
+//        default = FeatureFlags.merinoContentRecommendations,
+//    )
 
     /**
      *  Whether or not to display the Pocket sponsored stories parameter secret settings.
@@ -1877,7 +1877,7 @@ class Settings(private val appContext: Context) : PreferencesHolder {
      */
     var enableTabsTrayToCompose by booleanPreference(
         key = appContext.getPreferenceKey(R.string.pref_key_enable_tabs_tray_to_compose),
-        default = FeatureFlags.composeTabsTray,
+        default = true // FeatureFlags.composeTabsTray,
     )
 
     /**
@@ -1885,7 +1885,7 @@ class Settings(private val appContext: Context) : PreferencesHolder {
      */
     var enableComposeTopSites by booleanPreference(
         key = appContext.getPreferenceKey(R.string.pref_key_enable_compose_top_sites),
-        default = FeatureFlags.composeTopSites,
+        default = true // FeatureFlags.composeTopSites,
     )
 
     /**
@@ -1893,7 +1893,7 @@ class Settings(private val appContext: Context) : PreferencesHolder {
      */
     var enableComposeHomepage by booleanPreference(
         key = appContext.getPreferenceKey(R.string.pref_key_enable_compose_homepage),
-        default = FeatureFlags.composeHomepage,
+        default = true // FeatureFlags.composeHomepage,
     )
 
     /**
@@ -1910,7 +1910,7 @@ class Settings(private val appContext: Context) : PreferencesHolder {
      */
     var enableHomepageAsNewTab by booleanPreference(
         key = appContext.getPreferenceKey(R.string.pref_key_enable_homepage_as_new_tab),
-        default = FeatureFlags.homepageAsNewTab,
+        default = true // FeatureFlags.homepageAsNewTab,
     )
 
     /**
@@ -1918,7 +1918,7 @@ class Settings(private val appContext: Context) : PreferencesHolder {
      */
     var enableUnifiedTrustPanel by booleanPreference(
         key = appContext.getPreferenceKey(R.string.pref_key_enable_unified_trust_panel),
-        default = FeatureFlags.unifiedTrustPanel,
+        default = true // FeatureFlags.unifiedTrustPanel,
     )
 
     /**
@@ -1961,7 +1961,7 @@ class Settings(private val appContext: Context) : PreferencesHolder {
     /**
      * Indicates if the new Search settings UI is enabled.
      */
-    var enableUnifiedSearchSettingsUI: Boolean = showUnifiedSearchFeature && FeatureFlags.unifiedSearchSettings
+    var enableUnifiedSearchSettingsUI: Boolean = showUnifiedSearchFeature // && FeatureFlags.unifiedSearchSettings
 
     /**
      * Indicates if hidden engines were restored due to migration to unified search settings UI.
@@ -1979,7 +1979,7 @@ class Settings(private val appContext: Context) : PreferencesHolder {
     var enableFxSuggest by lazyFeatureFlagPreference(
         key = appContext.getPreferenceKey(R.string.pref_key_enable_fxsuggest),
         default = { FxNimbus.features.fxSuggest.value().enabled },
-        featureFlag = FeatureFlags.fxSuggest,
+        featureFlag = true // FeatureFlags.fxSuggest,
     )
 
     /**
@@ -2003,7 +2003,7 @@ class Settings(private val appContext: Context) : PreferencesHolder {
     var showSponsoredSuggestions by lazyFeatureFlagPreference(
         key = appContext.getPreferenceKey(R.string.pref_key_show_sponsored_suggestions),
         default = { enableFxSuggest },
-        featureFlag = FeatureFlags.fxSuggest,
+        featureFlag = false // FeatureFlags.fxSuggest,
     )
 
     /**
@@ -2014,7 +2014,7 @@ class Settings(private val appContext: Context) : PreferencesHolder {
     var showNonSponsoredSuggestions by lazyFeatureFlagPreference(
         key = appContext.getPreferenceKey(R.string.pref_key_show_nonsponsored_suggestions),
         default = { enableFxSuggest },
-        featureFlag = FeatureFlags.fxSuggest,
+        featureFlag = true // FeatureFlags.fxSuggest,
     )
 
     /**

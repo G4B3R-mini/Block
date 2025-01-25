@@ -11,11 +11,11 @@ import mozilla.components.service.nimbus.messaging.JexlAttributeProvider
 import mozilla.components.support.base.ext.areNotificationsEnabledSafe
 import mozilla.components.support.utils.BrowsersCache
 import org.json.JSONObject
-import com.shmibblez.inferno.components.metrics.UTMParams.Companion.UTM_CAMPAIGN
-import com.shmibblez.inferno.components.metrics.UTMParams.Companion.UTM_CONTENT
-import com.shmibblez.inferno.components.metrics.UTMParams.Companion.UTM_MEDIUM
-import com.shmibblez.inferno.components.metrics.UTMParams.Companion.UTM_SOURCE
-import com.shmibblez.inferno.components.metrics.UTMParams.Companion.UTM_TERM
+//import com.shmibblez.inferno.components.metrics.UTMParams.Companion.UTM_CAMPAIGN
+//import com.shmibblez.inferno.components.metrics.UTMParams.Companion.UTM_CONTENT
+//import com.shmibblez.inferno.components.metrics.UTMParams.Companion.UTM_MEDIUM
+//import com.shmibblez.inferno.components.metrics.UTMParams.Companion.UTM_SOURCE
+//import com.shmibblez.inferno.components.metrics.UTMParams.Companion.UTM_TERM
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.settings
 import java.text.SimpleDateFormat
@@ -79,11 +79,11 @@ object CustomAttributeProvider : JexlAttributeProvider {
                 "adjust_ad_group" to settings.adjustAdGroup,
                 "adjust_creative" to settings.adjustCreative,
 
-                UTM_SOURCE to settings.utmSource,
-                UTM_MEDIUM to settings.utmMedium,
-                UTM_CAMPAIGN to settings.utmCampaign,
-                UTM_TERM to settings.utmTerm,
-                UTM_CONTENT to settings.utmContent,
+//                UTM_SOURCE to settings.utmSource,
+//                UTM_MEDIUM to settings.utmMedium,
+//                UTM_CAMPAIGN to settings.utmCampaign,
+//                UTM_TERM to settings.utmTerm,
+//                UTM_CONTENT to settings.utmContent,
 
                 "are_notifications_enabled" to NotificationManagerCompat.from(context)
                     .areNotificationsEnabledSafe(),

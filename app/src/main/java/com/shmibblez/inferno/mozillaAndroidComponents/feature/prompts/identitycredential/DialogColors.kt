@@ -4,7 +4,8 @@
 
 package com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.identitycredential
 
-import androidx.compose.material3.ContentAlpha
+//import androidx.compose.material3.ContentAlpha
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
@@ -28,9 +29,9 @@ data class DialogColors(
          */
         @Composable
         fun default(
-            title: Color = MaterialTheme.colors.onBackground,
-            description: Color = MaterialTheme.colors.onBackground.copy(
-                alpha = ContentAlpha.medium,
+            title: Color = MaterialTheme.colorScheme.onBackground,
+            description: Color = MaterialTheme.colorScheme.onBackground.copy(
+                alpha = LocalContentColor.current.alpha // ContentAlpha.medium,
             ),
         ) = DialogColors(
             title,

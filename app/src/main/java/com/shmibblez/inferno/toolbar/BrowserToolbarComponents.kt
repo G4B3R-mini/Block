@@ -53,7 +53,6 @@ import com.shmibblez.inferno.browser.getActivity
 import com.shmibblez.inferno.compose.sessionUseCases
 import com.shmibblez.inferno.ext.components
 //import com.shmibblez.inferno.ext.share
-import com.shmibblez.inferno.settings.SettingsActivity
 import com.shmibblez.inferno.tabs.TabsTrayFragment
 import com.shmibblez.inferno.toolbar.ToolbarMenuItemsScopeInstance.DividerToolbarMenuItem
 import com.shmibblez.inferno.toolbar.ToolbarMenuItemsScopeInstance.FindInPageToolbarMenuItem
@@ -619,9 +618,10 @@ object ToolbarMenuItemsScopeInstance : ToolbarMenuItemsScope {
     @Composable
     override fun SettingsToolbarMenuItem() {
         fun showSettings(context: Context) {
-            val intent = Intent(context, SettingsActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            context.startActivity(intent)
+            // FIXME: TODO: see if settings page is fragment or activity
+//            val intent = Intent(context, SettingsActivity::class.java)
+//            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+//            context.startActivity(intent)
         }
 
         val context = LocalContext.current

@@ -32,7 +32,6 @@ import com.shmibblez.inferno.components.accounts.FenixAccountManager
 import com.shmibblez.inferno.components.toolbar.BrowserMenuSignIn
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.nimbus.FxNimbus
-import com.shmibblez.inferno.nimbus.FxNimbus
 import com.shmibblez.inferno.theme.ThemeManager
 import com.shmibblez.inferno.whatsnew.WhatsNew
 

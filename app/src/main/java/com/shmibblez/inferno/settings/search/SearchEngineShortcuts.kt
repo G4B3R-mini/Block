@@ -43,7 +43,7 @@ import mozilla.components.browser.state.state.BrowserState
 import mozilla.components.browser.state.state.SearchState
 import mozilla.components.browser.state.state.availableSearchEngines
 import mozilla.components.browser.state.store.BrowserStore
-import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.annotation.LightDarkPreview
+import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.annotation.LightDarkPreview
 import mozilla.components.lib.state.ext.observeAsComposableState
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.menu.DropdownMenu

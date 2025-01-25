@@ -2,11 +2,11 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package com.shmibblez.inferno.mozillaAndroidComponents.base.compose.annotation
+package com.shmibblez.inferno.mozillaAndroidComponents.compose.base.annotation
 
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
-import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.theme.AcornWindowSize
+import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.theme.AcornWindowSize
 
 /**
  * A wrapper annotation for creating a preview that renders a preview for each value of [AcornWindowSize].

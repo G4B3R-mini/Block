@@ -36,15 +36,15 @@ import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import com.shmibblez.inferno.mozillaAndroidComponents.concept.storage.LoginEntry
-import com.shmibblez.inferno.mozillaAndroidComponents.concept.storage.LoginValidationDelegate.Result
-import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.R
+import mozilla.components.concept.storage.LoginEntry
+import mozilla.components.concept.storage.LoginValidationDelegate.Result
+import mozilla.components.feature.prompts.R
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.ext.onDone
-import com.shmibblez.inferno.mozillaAndroidComponents.support.base.log.logger.Logger
-import com.shmibblez.inferno.mozillaAndroidComponents.support.ktx.android.content.res.resolveAttribute
-import com.shmibblez.inferno.mozillaAndroidComponents.support.ktx.android.view.hideKeyboard
-import com.shmibblez.inferno.mozillaAndroidComponents.support.ktx.android.view.toScope
-import com.shmibblez.inferno.mozillaAndroidComponents.support.utils.ext.getParcelableCompat
+import mozilla.components.support.base.log.logger.Logger
+import mozilla.components.support.ktx.android.content.res.resolveAttribute
+import mozilla.components.support.ktx.android.view.hideKeyboard
+import mozilla.components.support.ktx.android.view.toScope
+import mozilla.components.support.utils.ext.getParcelableCompat
 import kotlin.reflect.KProperty
 import com.google.android.material.R as MaterialR
 

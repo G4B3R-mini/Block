@@ -13,7 +13,7 @@ import com.shmibblez.inferno.onboarding.ManagePrivacyPreferencesDialog
 import com.shmibblez.inferno.onboarding.store.DefaultPrivacyPreferencesRepository
 import com.shmibblez.inferno.onboarding.store.PrivacyPreferencesMiddleware
 import com.shmibblez.inferno.onboarding.store.PrivacyPreferencesStore
-import com.shmibblez.inferno.onboarding.store.PrivacyPreferencesTelemetryMiddleware
+//import com.shmibblez.inferno.onboarding.store.PrivacyPreferencesTelemetryMiddleware
 import com.shmibblez.inferno.theme.FirefoxTheme
 
 /**
@@ -33,7 +33,7 @@ class ManagePrivacyPreferencesDialogFragment(
                         lifecycleOwner = viewLifecycleOwner,
                     ),
                 ),
-                PrivacyPreferencesTelemetryMiddleware(),
+//                PrivacyPreferencesTelemetryMiddleware(),
             ),
         )
     }

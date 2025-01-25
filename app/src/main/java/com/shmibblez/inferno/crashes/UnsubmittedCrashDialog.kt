@@ -33,7 +33,7 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.DialogFragment
-import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.annotation.LightDarkPreview
+import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.annotation.LightDarkPreview
 import mozilla.components.lib.crash.store.CrashAction
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.theme.FirefoxTheme

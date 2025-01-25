@@ -13,7 +13,7 @@ import androidx.preference.SwitchPreference
 import com.shmibblez.inferno.FeatureFlags
 //import com.shmibblez.inferno.GleanMetrics.CustomizeHome
 import com.shmibblez.inferno.R
-import com.shmibblez.inferno.components.appstate.AppAction.ContentRecommendationsAction
+//import com.shmibblez.inferno.components.appstate.AppAction.ContentRecommendationsAction
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.navigateWithBreadcrumb
 import com.shmibblez.inferno.ext.settings
@@ -40,12 +40,12 @@ class HomeSettingsFragment : PreferenceFragmentCompat() {
             isChecked = context.settings().showTopSitesFeature
             onPreferenceChangeListener = object : SharedPreferenceUpdater() {
                 override fun onPreferenceChange(preference: Preference, newValue: Any?): Boolean {
-                    CustomizeHome.preferenceToggled.record(
-                        CustomizeHome.PreferenceToggledExtra(
-                            newValue as Boolean,
-                            "most_visited_sites",
-                        ),
-                    )
+//                    CustomizeHome.preferenceToggled.record(
+//                        CustomizeHome.PreferenceToggledExtra(
+//                            newValue as Boolean,
+//                            "most_visited_sites",
+//                        ),
+//                    )
 
                     return super.onPreferenceChange(preference, newValue)
                 }
@@ -56,12 +56,12 @@ class HomeSettingsFragment : PreferenceFragmentCompat() {
             isChecked = context.settings().showContileFeature
             onPreferenceChangeListener = object : SharedPreferenceUpdater() {
                 override fun onPreferenceChange(preference: Preference, newValue: Any?): Boolean {
-                    CustomizeHome.preferenceToggled.record(
-                        CustomizeHome.PreferenceToggledExtra(
-                            newValue as Boolean,
-                            "contile",
-                        ),
-                    )
+//                    CustomizeHome.preferenceToggled.record(
+//                        CustomizeHome.PreferenceToggledExtra(
+//                            newValue as Boolean,
+//                            "contile",
+//                        ),
+//                    )
 
                     return super.onPreferenceChange(preference, newValue)
                 }
@@ -72,12 +72,12 @@ class HomeSettingsFragment : PreferenceFragmentCompat() {
             isChecked = context.settings().showRecentTabsFeature
             onPreferenceChangeListener = object : SharedPreferenceUpdater() {
                 override fun onPreferenceChange(preference: Preference, newValue: Any?): Boolean {
-                    CustomizeHome.preferenceToggled.record(
-                        CustomizeHome.PreferenceToggledExtra(
-                            newValue as Boolean,
-                            "jump_back_in",
-                        ),
-                    )
+//                    CustomizeHome.preferenceToggled.record(
+//                        CustomizeHome.PreferenceToggledExtra(
+//                            newValue as Boolean,
+//                            "jump_back_in",
+//                        ),
+//                    )
 
                     return super.onPreferenceChange(preference, newValue)
                 }
@@ -88,12 +88,12 @@ class HomeSettingsFragment : PreferenceFragmentCompat() {
             isChecked = context.settings().showBookmarksHomeFeature
             onPreferenceChangeListener = object : SharedPreferenceUpdater() {
                 override fun onPreferenceChange(preference: Preference, newValue: Any?): Boolean {
-                    CustomizeHome.preferenceToggled.record(
-                        CustomizeHome.PreferenceToggledExtra(
-                            newValue as Boolean,
-                            "bookmarks",
-                        ),
-                    )
+//                    CustomizeHome.preferenceToggled.record(
+//                        CustomizeHome.PreferenceToggledExtra(
+//                            newValue as Boolean,
+//                            "bookmarks",
+//                        ),
+//                    )
 
                     return super.onPreferenceChange(preference, newValue)
                 }
@@ -109,12 +109,12 @@ class HomeSettingsFragment : PreferenceFragmentCompat() {
             )
             onPreferenceChangeListener = object : SharedPreferenceUpdater() {
                 override fun onPreferenceChange(preference: Preference, newValue: Any?): Boolean {
-                    CustomizeHome.preferenceToggled.record(
-                        CustomizeHome.PreferenceToggledExtra(
-                            newValue as Boolean,
-                            "pocket",
-                        ),
-                    )
+//                    CustomizeHome.preferenceToggled.record(
+//                        CustomizeHome.PreferenceToggledExtra(
+//                            newValue as Boolean,
+//                            "pocket",
+//                        ),
+//                    )
 
                     return super.onPreferenceChange(preference, newValue)
                 }
@@ -126,20 +126,21 @@ class HomeSettingsFragment : PreferenceFragmentCompat() {
             isChecked = context.settings().showPocketSponsoredStories
             onPreferenceChangeListener = object : SharedPreferenceUpdater() {
                 override fun onPreferenceChange(preference: Preference, newValue: Any?): Boolean {
-                    when (newValue) {
-                        true -> {
-                            context.components.core.pocketStoriesService.startPeriodicSponsoredStoriesRefresh()
-                        }
-                        false -> {
-                            context.components.core.pocketStoriesService.deleteProfile()
-                            context.components.appStore.dispatch(
-                                ContentRecommendationsAction.PocketSponsoredStoriesChange(
-                                    sponsoredStories = emptyList(),
-                                    showContentRecommendations = context.settings().showContentRecommendations,
-                                ),
-                            )
-                        }
-                    }
+                    // TODO: pocket
+//                    when (newValue) {
+//                        true -> {
+//                            context.components.core.pocketStoriesService.startPeriodicSponsoredStoriesRefresh()
+//                        }
+//                        false -> {
+//                            context.components.core.pocketStoriesService.deleteProfile()
+//                            context.components.appStore.dispatch(
+//                                ContentRecommendationsAction.PocketSponsoredStoriesChange(
+//                                    sponsoredStories = emptyList(),
+//                                    showContentRecommendations = context.settings().showContentRecommendations,
+//                                ),
+//                            )
+//                        }
+//                    }
 
                     return super.onPreferenceChange(preference, newValue)
                 }
@@ -150,12 +151,12 @@ class HomeSettingsFragment : PreferenceFragmentCompat() {
             isChecked = context.settings().historyMetadataUIFeature
             onPreferenceChangeListener = object : SharedPreferenceUpdater() {
                 override fun onPreferenceChange(preference: Preference, newValue: Any?): Boolean {
-                    CustomizeHome.preferenceToggled.record(
-                        CustomizeHome.PreferenceToggledExtra(
-                            newValue as Boolean,
-                            "recently_visited",
-                        ),
-                    )
+//                    CustomizeHome.preferenceToggled.record(
+//                        CustomizeHome.PreferenceToggledExtra(
+//                            newValue as Boolean,
+//                            "recently_visited",
+//                        ),
+//                    )
 
                     return super.onPreferenceChange(preference, newValue)
                 }
@@ -175,7 +176,7 @@ class HomeSettingsFragment : PreferenceFragmentCompat() {
                     directions = HomeSettingsFragmentDirections.actionHomeSettingsFragmentToWallpaperSettingsFragment(),
                     navigateFrom = "HomeSettingsFragment",
                     navigateTo = "ActionHomeSettingsFragmentToWallpaperSettingsFragment",
-                    crashReporter = context.components.analytics.crashReporter,
+//                    crashReporter = context.components.analytics.crashReporter,
                 )
                 true
             }

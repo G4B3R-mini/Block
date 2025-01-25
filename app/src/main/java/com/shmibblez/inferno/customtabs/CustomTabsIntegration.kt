@@ -44,7 +44,7 @@ import com.shmibblez.inferno.components.toolbar.interactor.BrowserToolbarInterac
 import com.shmibblez.inferno.components.toolbar.navbar.shouldAddNavigationBar
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.settings
-import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.theme.AcornWindowSize
+import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.theme.AcornWindowSize
 import com.shmibblez.inferno.utils.Settings
 
 @Suppress("LongParameterList")

@@ -35,8 +35,8 @@ import com.shmibblez.inferno.R
 import com.shmibblez.inferno.components.menu.compose.header.SubmenuHeader
 import com.shmibblez.inferno.components.menu.store.WebExtensionMenuItem
 import com.shmibblez.inferno.compose.list.TextListItem
-import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.Divider
-import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.annotation.LightDarkPreview
+import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.Divider
+import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.annotation.LightDarkPreview
 import com.shmibblez.inferno.theme.FirefoxTheme
 import com.shmibblez.inferno.theme.Theme
 

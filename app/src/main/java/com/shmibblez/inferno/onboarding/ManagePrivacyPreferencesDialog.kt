@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -24,7 +25,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.annotation.FlexibleWindowLightDarkPreviewimport mozilla.components.lib.state.ext.observeAsState
+import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.annotation.FlexibleWindowLightDarkPreview
+import mozilla.components.lib.state.ext.observeAsState
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.LinkText
 import com.shmibblez.inferno.compose.LinkTextState
@@ -51,7 +53,7 @@ fun ManagePrivacyPreferencesDialog(
         properties = DialogProperties(dismissOnClickOutside = false),
     ) {
         Card(
-            backgroundColor = FirefoxTheme.colors.layer2,
+            colors = CardDefaults.cardColors(containerColor = FirefoxTheme.colors.layer2),
             shape = RoundedCornerShape(8.dp),
         ) {
             Column(Modifier.padding(16.dp)) {

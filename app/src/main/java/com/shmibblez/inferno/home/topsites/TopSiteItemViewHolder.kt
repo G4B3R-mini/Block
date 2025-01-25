@@ -179,10 +179,10 @@ class TopSiteItemViewHolder(
 //            ),
 //        )
 
-        topSite.id?.let { TopSites.contileTileId.set(it) }
-        topSite.title?.let { TopSites.contileAdvertiser.set(it.lowercase()) }
-        TopSites.contileReportingUrl.set(topSite.impressionUrl)
-        Pings.topsitesImpression.submit()
+//        topSite.id?.let { TopSites.contileTileId.set(it) }
+//        topSite.title?.let { TopSites.contileAdvertiser.set(it.lowercase()) }
+//        TopSites.contileReportingUrl.set(topSite.impressionUrl)
+//        Pings.topsitesImpression.submit()
     }
 
     @SuppressLint("ClickableViewAccessibility")

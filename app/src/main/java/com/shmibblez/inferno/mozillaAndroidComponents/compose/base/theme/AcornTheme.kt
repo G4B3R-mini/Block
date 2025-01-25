@@ -4,7 +4,7 @@
 
 @file:Suppress("MagicNumber")
 
-package com.shmibblez.inferno.mozillaAndroidComponents.base.compose.theme
+package com.shmibblez.inferno.mozillaAndroidComponents.compose.base.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme

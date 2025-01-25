@@ -4,7 +4,7 @@
 
 package com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.login
 
-import androidx.compose.material3.ContentAlpha
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
@@ -38,15 +38,15 @@ data class PasswordGeneratorDialogColors(
          */
         @Composable
         fun default(
-            title: Color = MaterialTheme.colors.onBackground,
-            description: Color = MaterialTheme.colors.onBackground.copy(
-                alpha = ContentAlpha.medium,
+            title: Color = MaterialTheme.colorScheme.onBackground,
+            description: Color = MaterialTheme.colorScheme.onBackground.copy(
+                alpha = LocalContentColor.current.alpha, // ContentAlpha.medium,
             ),
-            background: Color = MaterialTheme.colors.primary,
-            cancelText: Color = MaterialTheme.colors.primary,
-            confirmButton: Color = MaterialTheme.colors.primary,
-            passwordBox: Color = MaterialTheme.colors.primary,
-            boxBorder: Color = MaterialTheme.colors.primary,
+            background: Color = MaterialTheme.colorScheme.primary,
+            cancelText: Color = MaterialTheme.colorScheme.primary,
+            confirmButton: Color = MaterialTheme.colorScheme.primary,
+            passwordBox: Color = MaterialTheme.colorScheme.primary,
+            boxBorder: Color = MaterialTheme.colorScheme.primary,
         ) = PasswordGeneratorDialogColors(
             title = title,
             description = description,

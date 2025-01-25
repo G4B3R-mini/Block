@@ -55,7 +55,7 @@ import com.shmibblez.inferno.R
 import com.shmibblez.inferno.components.StoreProvider
 import com.shmibblez.inferno.components.accounts.FenixFxAEntryPoint
 import com.shmibblez.inferno.components.appstate.AppAction.BookmarkAction
-import com.shmibblez.inferno.components.metrics.MetricsUtils
+//import com.shmibblez.inferno.components.metrics.MetricsUtils
 import com.shmibblez.inferno.databinding.FragmentEditBookmarkBinding
 import com.shmibblez.inferno.ext.bookmarkStorage
 import com.shmibblez.inferno.ext.components
@@ -358,7 +358,7 @@ class EditBookmarkFragment : Fragment(R.layout.fragment_edit_bookmark), MenuProv
                     lifecycleScope.launch(IO) {
                         requireComponents.core.bookmarksStorage.deleteNode(args.guidToEdit)
 //                        BookmarksManagement.removed.record(NoExtras())
-                        MetricsUtils.recordBookmarkMetrics(MetricsUtils.BookmarkAction.DELETE, METRIC_SOURCE)
+//                        MetricsUtils.recordBookmarkMetrics(MetricsUtils.BookmarkAction.DELETE, METRIC_SOURCE)
 
                         launch(Main) {
                             Navigation.findNavController(requireActivity(), R.id.container)

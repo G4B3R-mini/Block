@@ -16,8 +16,8 @@ import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.inputmethod.EditorInfoCompat.IME_FLAG_NO_PERSONALIZED_LEARNING
-import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.R
-import com.shmibblez.inferno.mozillaAndroidComponents.ui.widgets.withCenterAlignedButtons
+import mozilla.components.feature.prompts.R
+import mozilla.components.ui.widgets.withCenterAlignedButtons
 
 private const val KEY_USER_EDIT_TEXT = "KEY_USER_EDIT_TEXT"
 private const val KEY_LABEL_INPUT = "KEY_LABEL_INPUT"

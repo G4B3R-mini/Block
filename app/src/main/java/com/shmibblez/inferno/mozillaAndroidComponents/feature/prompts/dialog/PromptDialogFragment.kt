@@ -5,9 +5,9 @@
 package com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.dialog
 
 import androidx.fragment.app.DialogFragment
-import com.shmibblez.inferno.mozillaAndroidComponents.concept.engine.prompt.PromptRequest
-import com.shmibblez.inferno.mozillaAndroidComponents.concept.storage.CreditCardValidationDelegate
-import com.shmibblez.inferno.mozillaAndroidComponents.concept.storage.LoginValidationDelegate
+import mozilla.components.concept.engine.prompt.PromptRequest
+import mozilla.components.concept.storage.CreditCardValidationDelegate
+import mozilla.components.concept.storage.LoginValidationDelegate
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.login.LoginExceptions
 
 internal const val KEY_SESSION_ID = "KEY_SESSION_ID"

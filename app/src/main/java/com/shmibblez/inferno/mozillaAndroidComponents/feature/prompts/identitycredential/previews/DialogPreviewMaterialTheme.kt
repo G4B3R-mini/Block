@@ -6,19 +6,19 @@ package com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.identityc
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColors
-import androidx.compose.material3.lightColors
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import com.shmibblez.inferno.mozillaAndroidComponents.ui.colors.PhotonColors
+import mozilla.components.ui.colors.PhotonColors
 
 @Composable
 internal fun DialogPreviewMaterialTheme(content: @Composable () -> Unit) {
     val colors = if (!isSystemInDarkTheme()) {
-        lightColors()
+        lightColorScheme()
     } else {
-        darkColors(background = PhotonColors.DarkGrey30)
+        darkColorScheme(background = PhotonColors.DarkGrey30)
     }
-    MaterialTheme(colors = colors) {
+    MaterialTheme(colorScheme = colors) {
         content()
     }
 }

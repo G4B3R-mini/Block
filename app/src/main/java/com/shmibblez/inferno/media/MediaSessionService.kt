@@ -15,6 +15,6 @@ import com.shmibblez.inferno.ext.components
  */
 class MediaSessionService : AbstractMediaSessionService() {
     override val store: BrowserStore by lazy { components.core.store }
-    override val crashReporter: CrashReporting by lazy { components.analytics.crashReporter }
+    override val crashReporter = null // CrashReporting by lazy { components.analytics.crashReporter }
     override val notificationsDelegate: NotificationsDelegate by lazy { components.notificationsDelegate }
 }

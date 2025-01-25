@@ -22,9 +22,9 @@ import com.shmibblez.inferno.home.bookmarks.view.BookmarksHeaderViewHolder
 import com.shmibblez.inferno.home.bookmarks.view.BookmarksViewHolder
 import com.shmibblez.inferno.home.collections.CollectionViewHolder
 import com.shmibblez.inferno.home.collections.TabInCollectionViewHolder
-import com.shmibblez.inferno.home.pocket.view.PocketCategoriesViewHolder
-import com.shmibblez.inferno.home.pocket.view.PocketRecommendationsHeaderViewHolder
-import com.shmibblez.inferno.home.pocket.view.PocketStoriesViewHolder
+//import com.shmibblez.inferno.home.pocket.view.PocketCategoriesViewHolder
+//import com.shmibblez.inferno.home.pocket.view.PocketRecommendationsHeaderViewHolder
+//import com.shmibblez.inferno.home.pocket.view.PocketStoriesViewHolder
 import com.shmibblez.inferno.home.recentsyncedtabs.view.RecentSyncedTabViewHolder
 import com.shmibblez.inferno.home.recenttabs.view.RecentTabViewHolder
 import com.shmibblez.inferno.home.recenttabs.view.RecentTabsHeaderViewHolder
@@ -165,11 +165,11 @@ sealed class AdapterItem(@LayoutRes val viewType: Int) {
      */
     object Bookmarks : AdapterItem(BookmarksViewHolder.LAYOUT_ID)
 
-    object PocketStoriesItem : AdapterItem(PocketStoriesViewHolder.LAYOUT_ID)
-    object PocketCategoriesItem : AdapterItem(PocketCategoriesViewHolder.LAYOUT_ID)
-    object PocketRecommendationsFooterItem : AdapterItem(PocketRecommendationsHeaderViewHolder.LAYOUT_ID)
-
-    object BottomSpacer : AdapterItem(BottomSpacerViewHolder.LAYOUT_ID)
+//    object PocketStoriesItem : AdapterItem(PocketStoriesViewHolder.LAYOUT_ID)
+//    object PocketCategoriesItem : AdapterItem(PocketCategoriesViewHolder.LAYOUT_ID)
+//    object PocketRecommendationsFooterItem : AdapterItem(PocketRecommendationsHeaderViewHolder.LAYOUT_ID)
+//
+//    object BottomSpacer : AdapterItem(BottomSpacerViewHolder.LAYOUT_ID)
 
     /**
      * True if this item represents the same value as other. Used by [AdapterItemDiffCallback].
@@ -222,21 +222,21 @@ class SessionControlAdapter(
                 viewLifecycleOwner = viewLifecycleOwner,
                 interactor = interactor,
             )
-            PocketStoriesViewHolder.LAYOUT_ID -> return PocketStoriesViewHolder(
-                composeView = ComposeView(parent.context),
-                viewLifecycleOwner = viewLifecycleOwner,
-                interactor = interactor,
-            )
-            PocketCategoriesViewHolder.LAYOUT_ID -> return PocketCategoriesViewHolder(
-                composeView = ComposeView(parent.context),
-                viewLifecycleOwner = viewLifecycleOwner,
-                interactor = interactor,
-            )
-            PocketRecommendationsHeaderViewHolder.LAYOUT_ID -> return PocketRecommendationsHeaderViewHolder(
-                composeView = ComposeView(parent.context),
-                viewLifecycleOwner = viewLifecycleOwner,
-                interactor = interactor,
-            )
+//            PocketStoriesViewHolder.LAYOUT_ID -> return PocketStoriesViewHolder(
+//                composeView = ComposeView(parent.context),
+//                viewLifecycleOwner = viewLifecycleOwner,
+//                interactor = interactor,
+//            )
+//            PocketCategoriesViewHolder.LAYOUT_ID -> return PocketCategoriesViewHolder(
+//                composeView = ComposeView(parent.context),
+//                viewLifecycleOwner = viewLifecycleOwner,
+//                interactor = interactor,
+//            )
+//            PocketRecommendationsHeaderViewHolder.LAYOUT_ID -> return PocketRecommendationsHeaderViewHolder(
+//                composeView = ComposeView(parent.context),
+//                viewLifecycleOwner = viewLifecycleOwner,
+//                interactor = interactor,
+//            )
             BookmarksViewHolder.LAYOUT_ID -> return BookmarksViewHolder(
                 composeView = ComposeView(parent.context),
                 viewLifecycleOwner = viewLifecycleOwner,
@@ -327,9 +327,9 @@ class SessionControlAdapter(
             is RecentSyncedTabViewHolder,
             is RecentTabsHeaderViewHolder,
             is PrivateBrowsingDescriptionViewHolder,
-            is PocketCategoriesViewHolder,
-            is PocketRecommendationsHeaderViewHolder,
-            is PocketStoriesViewHolder,
+//            is PocketCategoriesViewHolder,
+//            is PocketRecommendationsHeaderViewHolder,
+//            is PocketStoriesViewHolder,
             is TopSitesViewHolder,
             -> {
                 // no op
@@ -404,7 +404,7 @@ class SessionControlAdapter(
             is BookmarksViewHolder,
             is RecentTabViewHolder,
             is RecentSyncedTabViewHolder,
-            is PocketStoriesViewHolder,
+//            is PocketStoriesViewHolder,
             -> {
                 // no-op. This ViewHolder receives the HomeStore as argument and will observe that
                 // without the need for us to manually update from here the data to be displayed.

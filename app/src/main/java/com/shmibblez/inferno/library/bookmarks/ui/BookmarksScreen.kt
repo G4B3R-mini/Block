@@ -30,12 +30,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -62,7 +64,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
 import mozilla.appservices.places.BookmarkRoot
-import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.annotation.FlexibleWindowLightDarkPreview
+import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.annotation.FlexibleWindowLightDarkPreview
 import mozilla.components.lib.state.ext.observeAsState
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.ContextualMenu
@@ -229,7 +231,7 @@ private fun BookmarksList(
         topBar = {
             BookmarksListTopBar(store = store)
         },
-        backgroundColor = FirefoxTheme.colors.layer1,
+        containerColor = FirefoxTheme.colors.layer1,
     ) { paddingValues ->
         val emptyListState = state.emptyListState()
         if (emptyListState != null) {
@@ -332,6 +334,7 @@ private fun BookmarksList(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Suppress("LongMethod")
 @Composable
 private fun BookmarksListTopBar(
@@ -368,7 +371,7 @@ private fun BookmarksListTopBar(
 
     Box {
         TopAppBar(
-            backgroundColor = backgroundColor,
+            colors = TopAppBarDefaults.topAppBarColors(containerColor = backgroundColor),
             title = {
                 Text(
                     color = textColor,
@@ -523,7 +526,7 @@ private fun WarnDialog(
                     )
                 }
             },
-            backgroundColor = FirefoxTheme.colors.layer2,
+            containerColor = FirefoxTheme.colors.layer2,
         )
     }
 }
@@ -561,7 +564,7 @@ private fun AlertDialogDeletionWarning(
                 )
             }
         },
-        backgroundColor = FirefoxTheme.colors.layer2,
+        containerColor = FirefoxTheme.colors.layer2,
     )
 }
 
@@ -587,7 +590,7 @@ private fun SelectFolderScreen(
                 },
             )
         },
-        backgroundColor = FirefoxTheme.colors.layer1,
+        containerColor = FirefoxTheme.colors.layer1,
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
@@ -634,13 +637,14 @@ private fun SelectFolderScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SelectFolderTopBar(
     onBackClick: () -> Unit,
     onNewFolderClick: (() -> Unit)?,
 ) {
     TopAppBar(
-        backgroundColor = FirefoxTheme.colors.layer1,
+        colors = TopAppBarDefaults.topAppBarColors(containerColor = FirefoxTheme.colors.layer1),
         title = {
             Text(
                 text = stringResource(R.string.bookmark_select_folder_fragment_label),
@@ -738,7 +742,7 @@ private fun EmptyList(
             if (state is EmptyListState.NotAuthenticated) {
                 TextButton(
                     onClick = { dispatcher(SignIntoSyncClicked) },
-                    colors = ButtonDefaults.buttonColors(backgroundColor = FirefoxTheme.colors.actionPrimary),
+                    colors = ButtonDefaults.buttonColors(containerColor = FirefoxTheme.colors.actionPrimary),
                     shape = RoundedCornerShape(4.dp),
                     modifier = Modifier
                         .heightIn(36.dp)
@@ -887,7 +891,7 @@ private fun EditFolderScreen(
                 onDeleteClick = { store.dispatch(EditFolderAction.DeleteClicked) },
             )
         },
-        backgroundColor = FirefoxTheme.colors.layer1,
+        containerColor = FirefoxTheme.colors.layer1,
     ) { paddingValues ->
         Column(modifier = Modifier.padding(paddingValues)) {
             TextField(
@@ -921,13 +925,14 @@ private fun EditFolderScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun EditFolderTopBar(
     onBackClick: () -> Unit,
     onDeleteClick: () -> Unit,
 ) {
     TopAppBar(
-        backgroundColor = FirefoxTheme.colors.layer1,
+        colors = TopAppBarDefaults.topAppBarColors(containerColor = FirefoxTheme.colors.layer1),
         title = {
             Text(
                 text = stringResource(R.string.edit_bookmark_folder_fragment_title),
@@ -964,7 +969,7 @@ private fun AddFolderScreen(
     val state by store.observeAsState(store.state.bookmarksAddFolderState) { it.bookmarksAddFolderState }
     Scaffold(
         topBar = { AddFolderTopBar(onBackClick = { store.dispatch(BackClicked) }) },
-        backgroundColor = FirefoxTheme.colors.layer1,
+        containerColor = FirefoxTheme.colors.layer1,
     ) { paddingValues ->
         Column(modifier = Modifier.padding(paddingValues)) {
             TextField(
@@ -1004,10 +1009,11 @@ private fun AddFolderScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AddFolderTopBar(onBackClick: () -> Unit) {
     TopAppBar(
-        backgroundColor = FirefoxTheme.colors.layer1,
+        colors =TopAppBarDefaults.topAppBarColors(containerColor =  FirefoxTheme.colors.layer1),
         title = {
             Text(
                 text = stringResource(R.string.bookmark_add_folder),
@@ -1043,7 +1049,7 @@ private fun EditBookmarkScreen(
                 onDeleteClicked = { store.dispatch(EditBookmarkAction.DeleteClicked) },
             )
         },
-        backgroundColor = FirefoxTheme.colors.layer1,
+        containerColor = FirefoxTheme.colors.layer1,
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -1180,13 +1186,14 @@ private fun ClearableTextField(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun EditBookmarkTopBar(
     onBackClick: () -> Unit,
     onDeleteClicked: () -> Unit,
 ) {
     TopAppBar(
-        backgroundColor = FirefoxTheme.colors.layer1,
+        colors = TopAppBarDefaults.topAppBarColors(containerColor = FirefoxTheme.colors.layer1),
         title = {
             Text(
                 text = stringResource(R.string.edit_bookmark_fragment_title),

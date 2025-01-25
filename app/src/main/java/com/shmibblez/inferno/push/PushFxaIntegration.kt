@@ -18,7 +18,7 @@ import mozilla.components.feature.push.PushScope
 import mozilla.components.service.fxa.manager.FxaAccountManager
 import mozilla.components.service.fxa.manager.ext.withConstellation
 import com.shmibblez.inferno.components.BackgroundServices
-import com.shmibblez.inferno.components.Push
+//import com.shmibblez.inferno.components.Push
 
 /**
  * A lazy initializer for FxaAccountManager if it isn't already initialized.

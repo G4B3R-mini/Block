@@ -109,11 +109,12 @@ class HistoryFragment : LibraryPageFragment<History>(), UserInteractionHandler, 
         historyStore = StoreProvider.get(this) {
             HistoryFragmentStore(
                 initialState = HistoryFragmentState.initial,
-                middleware = listOf(
-                    HistoryTelemetryMiddleware(
-                        isInPrivateMode = requireComponents.appStore.state.mode == BrowsingMode.Private,
-                    ),
-                ),
+                middleware = emptyList()
+//                listOf(
+//                    HistoryTelemetryMiddleware(
+//                        isInPrivateMode = requireComponents.appStore.state.mode == BrowsingMode.Private,
+//                    ),
+//                ),
             )
         }
         _historyView = HistoryView(

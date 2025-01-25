@@ -6,13 +6,13 @@ package com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts
 
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
-import com.shmibblez.inferno.mozillaAndroidComponents.browser.state.action.BrowserAction
-import com.shmibblez.inferno.mozillaAndroidComponents.browser.state.action.ContentAction
-import com.shmibblez.inferno.mozillaAndroidComponents.browser.state.selector.findTab
-import com.shmibblez.inferno.mozillaAndroidComponents.browser.state.state.BrowserState
-import com.shmibblez.inferno.mozillaAndroidComponents.concept.engine.prompt.PromptRequest
-import com.shmibblez.inferno.mozillaAndroidComponents.lib.state.Middleware
-import com.shmibblez.inferno.mozillaAndroidComponents.lib.state.MiddlewareContext
+import mozilla.components.browser.state.action.BrowserAction
+import mozilla.components.browser.state.action.ContentAction
+import mozilla.components.browser.state.selector.findTab
+import mozilla.components.browser.state.state.BrowserState
+import mozilla.components.concept.engine.prompt.PromptRequest
+import mozilla.components.lib.state.Middleware
+import mozilla.components.lib.state.MiddlewareContext
 
 /**
  * [Middleware] implementation for managing [PromptRequest]s.

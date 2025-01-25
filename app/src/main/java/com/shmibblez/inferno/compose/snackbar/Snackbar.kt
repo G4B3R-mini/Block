@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarDuration
@@ -44,7 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import kotlinx.coroutines.launch
-import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.button.TextButton
+import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.button.TextButton
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.components.SnackbarBehavior
 import com.shmibblez.inferno.compose.button.PrimaryButton

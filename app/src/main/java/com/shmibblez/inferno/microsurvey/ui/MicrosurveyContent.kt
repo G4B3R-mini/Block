@@ -20,6 +20,7 @@ import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -31,7 +32,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
-import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.annotation.LightDarkPreview
+import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.annotation.LightDarkPreview
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.list.RadioButtonListItem
 import com.shmibblez.inferno.theme.FirefoxTheme
@@ -59,9 +60,9 @@ fun MicrosurveyContent(
 ) {
     Card(
         border = BorderStroke(1.dp, FirefoxTheme.colors.borderPrimary),
-        elevation = 0.dp,
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         shape = shape,
-        backgroundColor = backgroundColor,
+        colors = CardDefaults.cardColors(containerColor = backgroundColor),
         modifier = Modifier
             .wrapContentHeight()
             .fillMaxWidth()

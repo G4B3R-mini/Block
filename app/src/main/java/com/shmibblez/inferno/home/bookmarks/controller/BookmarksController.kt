@@ -70,11 +70,11 @@ class DefaultBookmarksController(
             navController.navigate(R.id.browserFragment)
         }
 
-        HomeBookmarks.bookmarkClicked.add()
+//        HomeBookmarks.bookmarkClicked.add()
     }
 
     override fun handleShowAllBookmarksClicked() {
-        HomeBookmarks.showAllBookmarks.add()
+//        HomeBookmarks.showAllBookmarks.add()
         navController.navigate(
             HomeFragmentDirections.actionGlobalBookmarkFragment(BookmarkRoot.Mobile.id),
         )

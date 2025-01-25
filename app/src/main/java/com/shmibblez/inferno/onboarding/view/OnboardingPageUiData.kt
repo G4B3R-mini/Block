@@ -5,7 +5,7 @@
 package com.shmibblez.inferno.onboarding.view
 
 import androidx.annotation.DrawableRes
-import com.shmibblez.inferno.nimbus.OnboardingCardData
+//import com.shmibblez.inferno.nimbus.OnboardingCardData
 
 /**
  * Model containing the required data from a raw [OnboardingCardData] object in a UI state.

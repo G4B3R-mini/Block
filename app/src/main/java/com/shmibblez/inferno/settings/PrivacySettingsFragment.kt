@@ -31,10 +31,10 @@ class PrivacySettingsFragment : PreferenceFragmentCompat() {
 
         prefTelemetry?.onPreferenceChangeListener = getChangeListenerForTelemetry()
         prefTrackingProtectionNormal?.onPreferenceChangeListener = getChangeListenerForTrackingProtection { enabled ->
-            requireComponents.core.createTrackingProtectionPolicy(normalMode = enabled)
+            requireComponents.core.trackingProtectionPolicyFactory.createTrackingProtectionPolicy(normalMode = enabled)
         }
         prefTrackingProtectionPrivate?.onPreferenceChangeListener = getChangeListenerForTrackingProtection { enabled ->
-            requireComponents.core.createTrackingProtectionPolicy(privateMode = enabled)
+            requireComponents.core.trackingProtectionPolicyFactory.createTrackingProtectionPolicy(privateMode = enabled)
         }
 
         globalPrivacyControl?.onPreferenceChangeListener = getChangeListenerForGPC { enabled ->

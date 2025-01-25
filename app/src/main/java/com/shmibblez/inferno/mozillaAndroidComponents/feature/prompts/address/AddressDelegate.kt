@@ -4,7 +4,7 @@
 
 package com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.address
 
-import com.shmibblez.inferno.mozillaAndroidComponents.concept.storage.Address
+import mozilla.components.concept.storage.Address
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.concept.AutocompletePrompt
 
 /**

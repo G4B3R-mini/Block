@@ -10,8 +10,8 @@ import android.view.ViewGroup
 import android.widget.CheckedTextView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.shmibblez.inferno.mozillaAndroidComponents.concept.engine.prompt.Choice
-import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.R
+import mozilla.components.concept.engine.prompt.Choice
+import mozilla.components.feature.prompts.R
 
 /**
  * RecyclerView adapter for displaying choice items.

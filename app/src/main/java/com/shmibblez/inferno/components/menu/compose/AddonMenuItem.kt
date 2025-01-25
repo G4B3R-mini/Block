@@ -24,7 +24,7 @@ import com.shmibblez.inferno.R
 import com.shmibblez.inferno.components.menu.MenuDialogTestTag.RECOMMENDED_ADDON_ITEM
 import com.shmibblez.inferno.components.menu.MenuDialogTestTag.RECOMMENDED_ADDON_ITEM_TITLE
 import com.shmibblez.inferno.compose.list.FaviconListItem
-import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.annotation.LightDarkPreview
+import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.annotation.LightDarkPreview
 import com.shmibblez.inferno.theme.FirefoxTheme
 import com.shmibblez.inferno.translations.rotationAnimation
 

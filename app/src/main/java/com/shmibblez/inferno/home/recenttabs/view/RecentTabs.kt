@@ -64,9 +64,9 @@ import com.shmibblez.inferno.compose.text.Text
 import com.shmibblez.inferno.home.fake.FakeHomepagePreview
 import com.shmibblez.inferno.home.recenttabs.RecentTab
 import com.shmibblez.inferno.theme.FirefoxTheme
-import com.shmibblez.inferno.theme.layer2
-import com.shmibblez.inferno.theme.textPrimary
-import com.shmibblez.inferno.theme.textSecondary
+//import com.shmibblez.inferno.theme.layer2
+//import com.shmibblez.inferno.theme.textPrimary
+//import com.shmibblez.inferno.theme.textSecondary
 
 private const val THUMBNAIL_SIZE = 108
 

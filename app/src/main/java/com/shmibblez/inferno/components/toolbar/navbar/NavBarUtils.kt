@@ -10,7 +10,7 @@ import android.view.ViewGroup
 import com.shmibblez.inferno.components.toolbar.ToolbarContainerView
 import com.shmibblez.inferno.components.toolbar.ToolbarPosition
 import com.shmibblez.inferno.ext.settings
-import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.theme.AcornWindowSize
+import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.theme.AcornWindowSize
 
 /**
  * Returns true if navigation bar should be displayed. The returned value depends on the feature state, as well as the

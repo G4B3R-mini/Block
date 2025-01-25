@@ -23,7 +23,7 @@ import android.widget.DatePicker
 import android.widget.TimePicker
 import androidx.annotation.VisibleForTesting
 import androidx.annotation.VisibleForTesting.Companion.PRIVATE
-import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.R
+import mozilla.components.feature.prompts.R
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.ext.day
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.ext.hour
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.ext.millisecond
@@ -34,9 +34,9 @@ import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.ext.toCale
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.ext.year
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.widget.MonthAndYearPicker
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.widget.TimePrecisionPicker
-import com.shmibblez.inferno.mozillaAndroidComponents.support.utils.TimePicker.shouldShowSecondsPicker
-import com.shmibblez.inferno.mozillaAndroidComponents.support.utils.ext.getSerializableCompat
-import com.shmibblez.inferno.mozillaAndroidComponents.ui.widgets.withCenterAlignedButtons
+import mozilla.components.support.utils.TimePicker.shouldShowSecondsPicker
+import mozilla.components.support.utils.ext.getSerializableCompat
+import mozilla.components.ui.widgets.withCenterAlignedButtons
 import java.util.Calendar
 import java.util.Date
 

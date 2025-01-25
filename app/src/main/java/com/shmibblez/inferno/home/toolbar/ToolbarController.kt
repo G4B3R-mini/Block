@@ -13,7 +13,7 @@ import com.shmibblez.inferno.BrowserDirection
 import com.shmibblez.inferno.HomeActivity
 import com.shmibblez.inferno.NavGraphDirections
 import com.shmibblez.inferno.browser.BrowserAnimator
-import com.shmibblez.inferno.components.metrics.MetricsUtils
+//import com.shmibblez.inferno.components.metrics.MetricsUtils
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.nav
 
@@ -55,17 +55,17 @@ class DefaultToolbarController(
             engine = searchEngine,
         )
 
-        if (clipboardText.isUrl() || searchEngine == null) {
-//            Events.enteredUrl.record(Events.EnteredUrlExtra(autocomplete = false))
-        } else {
-            val searchAccessPoint = MetricsUtils.Source.ACTION
-            MetricsUtils.recordSearchMetrics(
-                searchEngine,
-                searchEngine == store.state.search.selectedOrDefaultSearchEngine,
-                searchAccessPoint,
-                activity.components.nimbus.events,
-            )
-        }
+//        if (clipboardText.isUrl() || searchEngine == null) {
+////            Events.enteredUrl.record(Events.EnteredUrlExtra(autocomplete = false))
+//        } else {
+//            val searchAccessPoint = MetricsUtils.Source.ACTION
+//            MetricsUtils.recordSearchMetrics(
+//                searchEngine,
+//                searchEngine == store.state.search.selectedOrDefaultSearchEngine,
+//                searchAccessPoint,
+//                activity.components.nimbus.events,
+//            )
+//        }
     }
     override fun handlePaste(clipboardText: String) {
         val directions = NavGraphDirections.actionGlobalSearchDialog(

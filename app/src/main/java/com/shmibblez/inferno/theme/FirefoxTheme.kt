@@ -7,26 +7,22 @@ package com.shmibblez.inferno.theme
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
-import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.theme.AcornColors
-import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.theme.AcornSize
-import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.theme.AcornSpace
-import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.theme.AcornTheme
-import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.theme.AcornTypography
-import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.theme.darkColorPalette
-import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.theme.lightColorPalette
-import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.theme.privateColorPalette
-import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.utils.inComposePreview
+import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.theme.AcornColors
+import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.theme.AcornSize
+import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.theme.AcornSpace
+import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.theme.AcornTheme
+import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.theme.AcornTypography
+import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.theme.darkColorPalette
+import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.theme.lightColorPalette
+import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.theme.privateColorPalette
+import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.utils.inComposePreview
 import com.shmibblez.inferno.ext.settings
 //import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.theme.AcornColors
 //import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.theme.AcornSize
 //import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.theme.AcornSpace
 //import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.theme.AcornTheme
 //import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.theme.AcornTypography
-import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.theme.AcornWindowSize
-import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.theme.lightColorPalette
-import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.theme.darkColorPalette
-import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.theme.privateColorPalette
-import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.utils.inComposePreview
+import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.theme.AcornWindowSize
 
 /**
  * The theme for Mozilla Firefox for Android (Fenix).

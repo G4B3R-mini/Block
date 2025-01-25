@@ -25,6 +25,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -49,7 +50,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.annotation.LightDarkPreview
+import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.annotation.LightDarkPreview
 import mozilla.components.feature.top.sites.TopSite
 //import com.shmibblez.inferno.GleanMetrics.Pings
 import com.shmibblez.inferno.R
@@ -394,8 +395,8 @@ private fun TopSiteFaviconCard(
     Card(
         modifier = Modifier.size(TOP_SITES_FAVICON_CARD_SIZE.dp),
         shape = RoundedCornerShape(8.dp),
-        backgroundColor = backgroundColor,
-        elevation = 6.dp,
+        colors = CardDefaults.cardColors(containerColor = backgroundColor),
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
     ) {
         Box(contentAlignment = Alignment.Center) {
             Surface(
@@ -515,10 +516,10 @@ private fun submitTopSitesImpressionPing(topSite: TopSite.Provided, position: In
 //        ),
 //    )
 
-    topSite.id?.let { TopSitesMetrics.contileTileId.set(it) }
-    topSite.title?.let { TopSitesMetrics.contileAdvertiser.set(it.lowercase()) }
-    TopSitesMetrics.contileReportingUrl.set(topSite.impressionUrl)
-    Pings.topsitesImpression.submit()
+//    topSite.id?.let { TopSitesMetrics.contileTileId.set(it) }
+//    topSite.title?.let { TopSitesMetrics.contileAdvertiser.set(it.lowercase()) }
+//    TopSitesMetrics.contileReportingUrl.set(topSite.impressionUrl)
+//    Pings.topsitesImpression.submit()
 }
 
 @Composable

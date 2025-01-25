@@ -33,7 +33,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import mozilla.components.browser.storage.sync.TabEntry
-import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.Divider
+import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.Divider
 import mozilla.components.feature.syncedtabs.view.SyncedTabsView
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.button.PrimaryButton

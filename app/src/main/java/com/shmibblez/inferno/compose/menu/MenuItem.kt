@@ -8,7 +8,7 @@ import androidx.annotation.DrawableRes
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.Divider
+import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.Divider
 import com.shmibblez.inferno.compose.text.Text
 
 /**

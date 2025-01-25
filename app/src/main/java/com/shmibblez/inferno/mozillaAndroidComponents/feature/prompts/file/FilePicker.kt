@@ -18,21 +18,21 @@ import androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia
 import androidx.annotation.VisibleForTesting
 import androidx.annotation.VisibleForTesting.Companion.PRIVATE
 import androidx.fragment.app.Fragment
-import com.shmibblez.inferno.mozillaAndroidComponents.browser.state.selector.findCustomTabOrSelectedTab
-import com.shmibblez.inferno.mozillaAndroidComponents.browser.state.store.BrowserStore
-import com.shmibblez.inferno.mozillaAndroidComponents.concept.engine.prompt.PromptRequest
-import com.shmibblez.inferno.mozillaAndroidComponents.concept.engine.prompt.PromptRequest.File
-import com.shmibblez.inferno.mozillaAndroidComponents.concept.engine.prompt.isPhotoRequest
-import com.shmibblez.inferno.mozillaAndroidComponents.concept.engine.prompt.isVideoRequest
+import mozilla.components.browser.state.selector.findCustomTabOrSelectedTab
+import mozilla.components.browser.state.store.BrowserStore
+import mozilla.components.concept.engine.prompt.PromptRequest
+import mozilla.components.concept.engine.prompt.PromptRequest.File
+import mozilla.components.concept.engine.prompt.isPhotoRequest
+import mozilla.components.concept.engine.prompt.isVideoRequest
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.PromptContainer
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.consumePromptFrom
-import com.shmibblez.inferno.mozillaAndroidComponents.support.base.feature.OnNeedToRequestPermissions
-import com.shmibblez.inferno.mozillaAndroidComponents.support.base.feature.PermissionsFeature
-import com.shmibblez.inferno.mozillaAndroidComponents.support.base.log.logger.Logger
-import com.shmibblez.inferno.mozillaAndroidComponents.support.ktx.android.content.isPermissionGranted
-import com.shmibblez.inferno.mozillaAndroidComponents.support.ktx.android.net.getFileName
-import com.shmibblez.inferno.mozillaAndroidComponents.support.ktx.android.net.isUnderPrivateAppDirectory
-import com.shmibblez.inferno.mozillaAndroidComponents.support.utils.ext.getParcelableExtraCompat
+import mozilla.components.support.base.feature.OnNeedToRequestPermissions
+import mozilla.components.support.base.feature.PermissionsFeature
+import mozilla.components.support.base.log.logger.Logger
+import mozilla.components.support.ktx.android.content.isPermissionGranted
+import mozilla.components.support.ktx.android.net.getFileName
+import mozilla.components.support.ktx.android.net.isUnderPrivateAppDirectory
+import mozilla.components.support.utils.ext.getParcelableExtraCompat
 
 /**
  * The image capture intent doesn't return the URI where the image is saved,

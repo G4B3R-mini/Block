@@ -46,7 +46,7 @@ import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextDecoration
-import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.annotation.FlexibleWindowLightDarkPreview
+import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.annotation.FlexibleWindowLightDarkPreview
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.ClickableSubstringLink
 import com.shmibblez.inferno.compose.ext.debouncedClickable

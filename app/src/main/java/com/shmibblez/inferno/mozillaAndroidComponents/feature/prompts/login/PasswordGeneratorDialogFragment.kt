@@ -13,14 +13,14 @@ import android.widget.FrameLayout
 import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColors
-import androidx.compose.material3.lightColors
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.shmibblez.inferno.mozillaAndroidComponents.concept.storage.Login
-import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.R
+import mozilla.components.concept.storage.Login
+import mozilla.components.feature.prompts.R
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.dialog.KEY_PROMPT_UID
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.dialog.KEY_SESSION_ID
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.dialog.PromptDialogFragment
@@ -68,7 +68,7 @@ internal class PasswordGeneratorDialogFragment : PromptDialogFragment() {
     ): View = ComposeView(requireContext()).apply {
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
-            val colors = if (isSystemInDarkTheme()) darkColors() else lightColors()
+            val colors = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()
             MaterialTheme(colors) {
                 if (generatedPassword.isNotEmpty() && currentUrl.isNotEmpty()) {
                     PasswordGeneratorBottomSheet(

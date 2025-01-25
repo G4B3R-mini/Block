@@ -59,6 +59,7 @@ import com.shmibblez.inferno.components.StoreProvider
 import com.shmibblez.inferno.components.accounts.FenixFxAEntryPoint
 import com.shmibblez.inferno.compose.snackbar.Snackbar
 import com.shmibblez.inferno.compose.snackbar.SnackbarState
+import com.shmibblez.inferno.compose.snackbar.toSnackbarStateDuration
 import com.shmibblez.inferno.databinding.FragmentBookmarkBinding
 import com.shmibblez.inferno.ext.bookmarkStorage
 import com.shmibblez.inferno.ext.components
@@ -74,7 +75,7 @@ import com.shmibblez.inferno.library.bookmarks.ui.BookmarksScreen
 import com.shmibblez.inferno.library.bookmarks.ui.BookmarksState
 import com.shmibblez.inferno.library.bookmarks.ui.BookmarksStore
 import com.shmibblez.inferno.library.bookmarks.ui.BookmarksSyncMiddleware
-import com.shmibblez.inferno.library.bookmarks.ui.BookmarksTelemetryMiddleware
+//import com.shmibblez.inferno.library.bookmarks.ui.BookmarksTelemetryMiddleware
 import com.shmibblez.inferno.library.bookmarks.ui.LifecycleHolder
 import com.shmibblez.inferno.snackbar.FenixSnackbarDelegate
 import com.shmibblez.inferno.snackbar.SnackbarBinding
@@ -124,7 +125,7 @@ class BookmarkFragment : LibraryPageFragment<BookmarkNode>(), UserInteractionHan
                         BookmarksStore(
                             initialState = BookmarksState.default,
                             middleware = listOf(
-                                BookmarksTelemetryMiddleware(),
+//                                BookmarksTelemetryMiddleware(),
                                 BookmarksSyncMiddleware(requireComponents.backgroundServices.syncStore, lifecycleScope),
                                 BookmarksMiddleware(
                                     bookmarksStorage = requireContext().bookmarkStorage,
@@ -264,7 +265,7 @@ class BookmarkFragment : LibraryPageFragment<BookmarkNode>(), UserInteractionHan
                 snackBarParentView = it,
                 snackbarState = SnackbarState(
                     message = text,
-                    duration = SnackbarDuration.Long,
+                    duration = SnackbarDuration.Long.toSnackbarStateDuration(),
                 ),
             ).show()
         }
@@ -587,14 +588,14 @@ class BookmarkFragment : LibraryPageFragment<BookmarkNode>(), UserInteractionHan
                     async { context.bookmarkStorage.deleteNode(it.guid) }
                 }.awaitAll()
             }
-            when (event) {
-                BookmarkRemoveType.FOLDER ->
-//                    BookmarksManagement.folderRemove.record(NoExtras())
-                BookmarkRemoveType.MULTIPLE ->
-//                    BookmarksManagement.multiRemoved.record(NoExtras())
-                BookmarkRemoveType.SINGLE ->
-//                    BookmarksManagement.removed.record(NoExtras())
-            }
+//            when (event) {
+//                BookmarkRemoveType.FOLDER ->
+////                    BookmarksManagement.folderRemove.record(NoExtras())
+//                BookmarkRemoveType.MULTIPLE ->
+////                    BookmarksManagement.multiRemoved.record(NoExtras())
+//                BookmarkRemoveType.SINGLE ->
+////                    BookmarksManagement.removed.record(NoExtras())
+//            }
             refreshBookmarks()
         }
     }

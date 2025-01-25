@@ -13,17 +13,17 @@ import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AlertDialog
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColors
-import androidx.compose.material3.lightColors
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.platform.ComposeView
-import com.shmibblez.inferno.mozillaAndroidComponents.concept.identitycredential.Account
-import com.shmibblez.inferno.mozillaAndroidComponents.concept.identitycredential.Provider
+import mozilla.components.concept.identitycredential.Account
+import mozilla.components.concept.identitycredential.Provider
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.dialog.KEY_PROMPT_UID
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.dialog.KEY_SESSION_ID
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.dialog.KEY_SHOULD_DISMISS_ON_LOAD
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.dialog.PromptDialogFragment
-import com.shmibblez.inferno.mozillaAndroidComponents.support.utils.ext.getParcelableArrayListCompat
-import com.shmibblez.inferno.mozillaAndroidComponents.support.utils.ext.getParcelableCompat
+import mozilla.components.support.utils.ext.getParcelableArrayListCompat
+import mozilla.components.support.utils.ext.getParcelableCompat
 
 private const val KEY_ACCOUNTS = "KEY_ACCOUNTS"
 private const val KEY_PROVIDER = "KEY_PROVIDER"
@@ -63,7 +63,7 @@ internal class SelectAccountDialogFragment : PromptDialogFragment() {
     internal fun createDialogContentView(): View {
         return ComposeView(requireContext()).apply {
             setContent {
-                val colors = if (isSystemInDarkTheme()) darkColors() else lightColors()
+                val colors = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()
                 MaterialTheme(colors) {
                     SelectAccountDialog(
                         provider = provider,

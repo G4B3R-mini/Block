@@ -16,7 +16,7 @@ import mozilla.components.lib.state.Store
 import com.shmibblez.inferno.HomeActivity
 import com.shmibblez.inferno.browser.browsingmode.BrowsingMode
 import com.shmibblez.inferno.components.Components
-import com.shmibblez.inferno.components.metrics.MetricsUtils
+//import com.shmibblez.inferno.components.metrics.MetricsUtils
 import com.shmibblez.inferno.utils.Settings
 
 /**
@@ -134,7 +134,7 @@ data class SearchFragmentState(
     val showNonSponsoredSuggestions: Boolean,
     val tabId: String?,
     val pastedText: String? = null,
-    val searchAccessPoint: MetricsUtils.Source,
+//    val searchAccessPoint: MetricsUtils.Source,
     val clipboardHasUrl: Boolean = false,
 ) : State
 
@@ -146,7 +146,7 @@ fun createInitialSearchFragmentState(
     components: Components,
     tabId: String?,
     pastedText: String?,
-    searchAccessPoint: MetricsUtils.Source,
+//    searchAccessPoint: MetricsUtils.Source,
     searchEngine: SearchEngine? = null,
 ): SearchFragmentState {
     val settings = components.settings
@@ -189,7 +189,7 @@ fun createInitialSearchFragmentState(
             settings.enableFxSuggest && settings.showNonSponsoredSuggestions,
         tabId = tabId,
         pastedText = pastedText,
-        searchAccessPoint = searchAccessPoint,
+//        searchAccessPoint = searchAccessPoint,
     )
 }
 

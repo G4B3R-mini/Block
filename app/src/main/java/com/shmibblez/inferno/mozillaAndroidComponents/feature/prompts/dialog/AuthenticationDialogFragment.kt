@@ -17,8 +17,8 @@ import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.annotation.VisibleForTesting.Companion.PRIVATE
 import androidx.appcompat.app.AlertDialog
-import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.R
-import com.shmibblez.inferno.mozillaAndroidComponents.ui.widgets.withCenterAlignedButtons
+import mozilla.components.feature.prompts.R
+import mozilla.components.ui.widgets.withCenterAlignedButtons
 
 private const val KEY_USERNAME_EDIT_TEXT = "KEY_USERNAME_EDIT_TEXT"
 private const val KEY_PASSWORD_EDIT_TEXT = "KEY_PASSWORD_EDIT_TEXT"

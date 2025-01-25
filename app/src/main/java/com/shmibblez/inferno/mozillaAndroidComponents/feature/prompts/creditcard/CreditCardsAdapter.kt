@@ -8,7 +8,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
-import com.shmibblez.inferno.mozillaAndroidComponents.concept.storage.CreditCardEntry
+import mozilla.components.concept.storage.CreditCardEntry
 
 /**
  * Adapter for a list of credit cards to be displayed.

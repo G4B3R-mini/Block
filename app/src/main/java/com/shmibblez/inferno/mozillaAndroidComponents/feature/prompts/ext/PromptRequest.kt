@@ -4,11 +4,11 @@
 
 package com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.ext
 
-import com.shmibblez.inferno.mozillaAndroidComponents.concept.engine.prompt.PromptRequest
-import com.shmibblez.inferno.mozillaAndroidComponents.concept.engine.prompt.PromptRequest.Alert
-import com.shmibblez.inferno.mozillaAndroidComponents.concept.engine.prompt.PromptRequest.Confirm
-import com.shmibblez.inferno.mozillaAndroidComponents.concept.engine.prompt.PromptRequest.Popup
-import com.shmibblez.inferno.mozillaAndroidComponents.concept.engine.prompt.PromptRequest.TextPrompt
+import mozilla.components.concept.engine.prompt.PromptRequest
+import mozilla.components.concept.engine.prompt.PromptRequest.Alert
+import mozilla.components.concept.engine.prompt.PromptRequest.Confirm
+import mozilla.components.concept.engine.prompt.PromptRequest.Popup
+import mozilla.components.concept.engine.prompt.PromptRequest.TextPrompt
 import kotlin.reflect.KClass
 
 /**

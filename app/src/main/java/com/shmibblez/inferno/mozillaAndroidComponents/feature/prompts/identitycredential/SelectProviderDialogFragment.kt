@@ -13,15 +13,15 @@ import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AlertDialog
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColors
-import androidx.compose.material3.lightColors
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.platform.ComposeView
-import com.shmibblez.inferno.mozillaAndroidComponents.concept.identitycredential.Provider
+import mozilla.components.concept.identitycredential.Provider
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.dialog.KEY_PROMPT_UID
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.dialog.KEY_SESSION_ID
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.dialog.KEY_SHOULD_DISMISS_ON_LOAD
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.dialog.PromptDialogFragment
-import com.shmibblez.inferno.mozillaAndroidComponents.support.utils.ext.getParcelableArrayListCompat
+import mozilla.components.support.utils.ext.getParcelableArrayListCompat
 
 private const val KEY_PROVIDERS = "KEY_PROVIDERS"
 
@@ -52,7 +52,7 @@ internal class SelectProviderDialogFragment : PromptDialogFragment() {
     internal fun createDialogContentView(): View {
         return ComposeView(requireContext()).apply {
             setContent {
-                val colors = if (isSystemInDarkTheme()) darkColors() else lightColors()
+                val colors = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()
                 MaterialTheme(colors) {
                     SelectProviderDialog(
                         providers = providers,

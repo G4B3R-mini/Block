@@ -55,7 +55,7 @@ internal abstract class AbnormalFxaEvent : Exception() {
  */
 class AccountAbnormalities(
     context: Context,
-    private val crashReporter: CrashReporter,
+//    private val crashReporter: CrashReporter,
     strictMode: StrictModeManager,
 ) : AccountObserver {
     companion object {
@@ -104,9 +104,9 @@ class AccountAbnormalities(
 
             logger.warn("Missing expected account on startup")
 
-            crashReporter.submitCaughtException(
-                AbnormalFxaEvent.MissingExpectedAccountAfterStartup(),
-            )
+//            crashReporter.submitCaughtException(
+//                AbnormalFxaEvent.MissingExpectedAccountAfterStartup(),
+//            )
         }
     }
 
@@ -118,10 +118,10 @@ class AccountAbnormalities(
             "userRequestedLogout before account manager was configured"
         }
 
-        // Expecting to have seen an onAuthenticated callback before a logout can be triggered.
-        if (!onAuthenticatedCalled) {
-            crashReporter.submitCaughtException(AbnormalFxaEvent.LogoutWithoutAuth())
-        }
+//        // Expecting to have seen an onAuthenticated callback before a logout can be triggered.
+//        if (!onAuthenticatedCalled) {
+//            crashReporter.submitCaughtException(AbnormalFxaEvent.LogoutWithoutAuth())
+//        }
 
         // If we're not already in the process of logging out, do nothing.
         synchronized(this) {
@@ -135,7 +135,7 @@ class AccountAbnormalities(
 
         // Otherwise, this is an unexpected logout request - there shouldn't be a legitimate way for
         // the user to request multiple overlapping logouts. Log an exception.
-        crashReporter.submitCaughtException(AbnormalFxaEvent.OverlappingFxaLogoutRequest())
+//        crashReporter.submitCaughtException(AbnormalFxaEvent.OverlappingFxaLogoutRequest())
     }
 
     override fun onAuthenticated(account: OAuthAccount, authType: AuthType) {
@@ -166,6 +166,6 @@ class AccountAbnormalities(
 
         // Otherwise, this is an unexpected logout event - all logout events are expected to be
         // user-triggered. Log an exception.
-        crashReporter.submitCaughtException(AbnormalFxaEvent.UnexpectedFxaLogout())
+//        crashReporter.submitCaughtException(AbnormalFxaEvent.UnexpectedFxaLogout())
     }
 }

@@ -258,17 +258,18 @@ class BrowserToolbarView(
      * Updates the visibility of the menu in the toolbar.
      */
     fun updateMenuVisibility(isVisible: Boolean) {
-        with(view) {
-            if (isVisible) {
-                showMenuButton()
-                setDisplayHorizontalPadding(0)
-            } else {
-                hideMenuButton()
-                setDisplayHorizontalPadding(
-                    context.resources.getDimensionPixelSize(R.dimen.browser_fragment_display_toolbar_padding),
-                )
-            }
-        }
+        // TODO: fix
+//        with(view) {
+//            if (isVisible) {
+//                showMenuButton()
+//                setDisplayHorizontalPadding(0)
+//            } else {
+//                hideMenuButton()
+//                setDisplayHorizontalPadding(
+//                    context.resources.getDimensionPixelSize(R.dimen.browser_fragment_display_toolbar_padding),
+//                )
+//            }
+//        }
     }
 
     /**

@@ -4,16 +4,16 @@
 
 package com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.address
 
-import com.shmibblez.inferno.mozillaAndroidComponents.browser.state.action.ContentAction
-import com.shmibblez.inferno.mozillaAndroidComponents.browser.state.store.BrowserStore
-import com.shmibblez.inferno.mozillaAndroidComponents.concept.engine.prompt.PromptRequest
-import com.shmibblez.inferno.mozillaAndroidComponents.concept.storage.Address
+import mozilla.components.browser.state.action.ContentAction
+import mozilla.components.browser.state.store.BrowserStore
+import mozilla.components.concept.engine.prompt.PromptRequest
+import mozilla.components.concept.storage.Address
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.concept.AutocompletePrompt
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.concept.SelectablePromptView
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.consumePromptFrom
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.facts.emitAddressAutofillDismissedFact
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.facts.emitAddressAutofillShownFact
-import com.shmibblez.inferno.mozillaAndroidComponents.support.base.log.logger.Logger
+import mozilla.components.support.base.log.logger.Logger
 
 /**
  * Interactor that implements [SelectablePromptView.Listener] and notifies the feature about actions

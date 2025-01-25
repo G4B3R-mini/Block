@@ -17,10 +17,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -39,10 +39,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.withStyledAttributes
 import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.annotation.LightDarkPreview
-import com.shmibblez.inferno.mozillaAndroidComponents.concept.storage.Login
-import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.R
-import com.shmibblez.inferno.mozillaAndroidComponents.support.ktx.android.content.getColorFromAttr
-import com.shmibblez.inferno.mozillaAndroidComponents.ui.icons.R as iconsR
+import mozilla.components.concept.storage.Login
+import mozilla.components.feature.prompts.R
+import mozilla.components.support.ktx.android.content.getColorFromAttr
+import mozilla.components.ui.icons.R as iconsR
 
 private val Login.passwordDisplay: String
     get() = "•".repeat(password.length)
@@ -107,13 +107,13 @@ private fun LoginListItem(
         Text(
             text = login.username,
             color = loginPickerColors.primary,
-            style = MaterialTheme.typography.body1,
+            style = MaterialTheme.typography.bodyLarge,
         )
 
         Text(
             text = login.passwordDisplay,
             color = loginPickerColors.primary,
-            style = MaterialTheme.typography.body2,
+            style = MaterialTheme.typography.bodyMedium,
         )
     }
 }
@@ -165,7 +165,7 @@ private fun LoginPickerHeader(
             text = stringResource(id = R.string.mozac_feature_prompts_saved_logins_2),
             color = loginPickerColors.header,
             fontSize = 16.sp,
-            style = MaterialTheme.typography.subtitle2,
+            style = MaterialTheme.typography.titleSmall,
             modifier = Modifier.weight(1f),
         )
 
@@ -206,7 +206,7 @@ private fun LoginPickerFooter(
         Text(
             text = stringResource(id = R.string.mozac_feature_prompts_manage_logins_2),
             color = loginPickerColors.primary,
-            style = MaterialTheme.typography.subtitle2,
+            style = MaterialTheme.typography.titleSmall,
         )
 
         Spacer(Modifier.fillMaxWidth())
@@ -262,7 +262,7 @@ fun LoginPicker(
                         loginPickerColors = loginPickerColors,
                         onListItemClicked = { onLoginSelected(login) },
                     )
-                    Divider()
+                    VerticalDivider()
                 }
             }
 
@@ -294,8 +294,8 @@ private fun LoginPreview() {
         onLoginSelected = { },
         onManagePasswordClicked = { },
         loginPickerColors = LoginPickerColors(
-            primary = MaterialTheme.colors.primary,
-            header = MaterialTheme.colors.onBackground,
+            primary = MaterialTheme.colorScheme.primary,
+            header = MaterialTheme.colorScheme.onBackground,
         ),
     )
 }

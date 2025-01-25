@@ -32,9 +32,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.R
+import mozilla.components.feature.prompts.R
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.identitycredential.previews.DialogPreviewMaterialTheme
-import com.shmibblez.inferno.mozillaAndroidComponents.ui.icons.R as iconsR
+import mozilla.components.ui.icons.R as iconsR
 
 private val FONT_SIZE = 16.sp
 private val LINE_HEIGHT = 24.sp
@@ -165,7 +165,7 @@ private fun StrongPasswordBottomSheetButtons(
         TextButton(
             onClick = { onCancelDialog() },
             shape = RectangleShape,
-            colors = ButtonDefaults.buttonColors(backgroundColor = colors.background),
+            colors = ButtonDefaults.buttonColors(containerColor = colors.background),
             modifier = Modifier.height(48.dp),
         ) {
             Text(
@@ -183,7 +183,7 @@ private fun StrongPasswordBottomSheetButtons(
         Button(
             onClick = { onUsePassword() },
             shape = RectangleShape,
-            colors = ButtonDefaults.buttonColors(backgroundColor = colors.confirmButton),
+            colors = ButtonDefaults.buttonColors(containerColor = colors.confirmButton),
             modifier = Modifier.height(48.dp),
         ) {
             Text(

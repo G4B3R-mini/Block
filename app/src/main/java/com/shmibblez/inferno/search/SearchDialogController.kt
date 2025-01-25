@@ -26,8 +26,8 @@ import com.shmibblez.inferno.BrowserDirection
 import com.shmibblez.inferno.HomeActivity
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.components.Core
-import com.shmibblez.inferno.components.metrics.MetricsUtils
-import com.shmibblez.inferno.crashes.CrashListActivity
+//import com.shmibblez.inferno.components.metrics.MetricsUtils
+//import com.shmibblez.inferno.crashes.CrashListActivity
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.navigateSafe
 import com.shmibblez.inferno.ext.telemetryName
@@ -80,11 +80,12 @@ class SearchDialogController(
         }
 
         when (url) {
+            // TODO: crashes
             "about:crashes" -> {
                 // The list of past crashes can be accessed via "settings > about", but desktop and
                 // fennec users may be used to navigating to "about:crashes". So we intercept this here
                 // and open the crash list activity instead.
-                activity.startActivity(Intent(activity, CrashListActivity::class.java))
+//                activity.startActivity(Intent(activity, CrashListActivity::class.java))
                 store.dispatch(AwesomeBarAction.EngagementFinished(abandoned = false))
             }
             "about:addons" -> {
@@ -125,21 +126,21 @@ class SearchDialogController(
             forceSearch = !isDefaultEngine,
         )
 
-        if (url.isUrl() || searchEngine == null) {
-//            Events.enteredUrl.record(Events.EnteredUrlExtra(autocomplete = false))
-        } else {
-            val searchAccessPoint = when (fragmentStore.state.searchAccessPoint) {
-                MetricsUtils.Source.NONE -> MetricsUtils.Source.ACTION
-                else -> fragmentStore.state.searchAccessPoint
-            }
-
-            MetricsUtils.recordSearchMetrics(
-                searchEngine,
-                isDefaultEngine,
-                searchAccessPoint,
-                activity.components.nimbus.events,
-            )
-        }
+//        if (url.isUrl() || searchEngine == null) {
+////            Events.enteredUrl.record(Events.EnteredUrlExtra(autocomplete = false))
+//        } else {
+////            val searchAccessPoint = when (fragmentStore.state.searchAccessPoint) {
+//////                MetricsUtils.Source.NONE -> MetricsUtils.Source.ACTION
+////                else -> fragmentStore.state.searchAccessPoint
+////            }
+//
+////            MetricsUtils.recordSearchMetrics(
+////                searchEngine,
+////                isDefaultEngine,
+////                searchAccessPoint,
+////                activity.components.nimbus.events,
+////            )
+//        }
 
         store.dispatch(AwesomeBarAction.EngagementFinished(abandoned = false))
     }
@@ -207,19 +208,19 @@ class SearchDialogController(
             forceSearch = true,
         )
 
-        val searchAccessPoint = when (fragmentStore.state.searchAccessPoint) {
-            MetricsUtils.Source.NONE -> MetricsUtils.Source.SUGGESTION
-            else -> fragmentStore.state.searchAccessPoint
-        }
+//        val searchAccessPoint = when (fragmentStore.state.searchAccessPoint) {
+////            MetricsUtils.Source.NONE -> MetricsUtils.Source.SUGGESTION
+//            else -> fragmentStore.state.searchAccessPoint
+//        }
 
-        if (searchEngine != null) {
-            MetricsUtils.recordSearchMetrics(
-                searchEngine,
-                searchEngine == store.state.search.selectedOrDefaultSearchEngine,
-                searchAccessPoint,
-                activity.components.nimbus.events,
-            )
-        }
+//        if (searchEngine != null) {
+//            MetricsUtils.recordSearchMetrics(
+//                searchEngine,
+//                searchEngine == store.state.search.selectedOrDefaultSearchEngine,
+//                searchAccessPoint,
+//                activity.components.nimbus.events,
+//            )
+//        }
 
         store.dispatch(AwesomeBarAction.EngagementFinished(abandoned = false))
     }

@@ -12,8 +12,8 @@ import androidx.annotation.StyleableRes
 import androidx.core.content.ContextCompat
 import androidx.core.content.withStyledAttributes
 import com.google.android.material.textfield.TextInputLayout
-import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.R
-import com.shmibblez.inferno.mozillaAndroidComponents.support.ktx.android.content.getColorFromAttr
+import mozilla.components.feature.prompts.R
+import mozilla.components.support.ktx.android.content.getColorFromAttr
 
 internal class LoginPanelTextInputLayout(
     context: Context,

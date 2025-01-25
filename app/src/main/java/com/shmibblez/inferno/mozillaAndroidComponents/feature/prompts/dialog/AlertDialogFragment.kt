@@ -8,7 +8,7 @@ import android.app.Dialog
 import android.content.DialogInterface
 import android.os.Bundle
 import androidx.appcompat.app.AlertDialog
-import com.shmibblez.inferno.mozillaAndroidComponents.ui.widgets.withCenterAlignedButtons
+import mozilla.components.ui.widgets.withCenterAlignedButtons
 
 /**
  * [android.support.v4.app.DialogFragment] implementation to display web Alerts with native dialogs.

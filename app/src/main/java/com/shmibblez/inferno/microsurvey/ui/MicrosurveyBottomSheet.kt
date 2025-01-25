@@ -31,7 +31,7 @@ import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
-import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.annotation.LightDarkPreview
+import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.annotation.LightDarkPreview
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.BottomSheetHandle
 import com.shmibblez.inferno.theme.FirefoxTheme
@@ -62,7 +62,7 @@ fun MicrosurveyBottomSheet(
     var isSubmitted by remember { mutableStateOf(false) }
 
     Scaffold(
-        backgroundColor = FirefoxTheme.colors.layer1,
+        containerColor = FirefoxTheme.colors.layer1,
         topBar = {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,

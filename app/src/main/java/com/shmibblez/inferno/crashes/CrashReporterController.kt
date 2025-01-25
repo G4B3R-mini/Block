@@ -75,7 +75,7 @@ class CrashReporterController(
     @OptIn(DelicateCoroutinesApi::class) // GlobalScope usage
     internal fun submitPendingNonFatalCrashesIfNecessary(reportCrashes: Boolean): Job? {
         var job: Job? = null
-        if (reportCrashes && settings.isCrashReportingEnabled) {
+        if (reportCrashes ) { //&& settings.isCrashReportingEnabled) {
             job = GlobalScope.launch(Dispatchers.IO) {
                 val crashes = appStore.state.nonFatalCrashes
                 crashes.forEach {

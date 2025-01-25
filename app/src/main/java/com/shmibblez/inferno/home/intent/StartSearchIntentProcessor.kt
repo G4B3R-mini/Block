@@ -12,7 +12,7 @@ import androidx.navigation.navOptions
 import com.shmibblez.inferno.HomeActivity
 import com.shmibblez.inferno.NavGraphDirections
 import com.shmibblez.inferno.R
-import com.shmibblez.inferno.components.metrics.MetricsUtils
+//import com.shmibblez.inferno.components.metrics.MetricsUtils
 import com.shmibblez.inferno.ext.nav
 
 /**
@@ -27,13 +27,13 @@ class StartSearchIntentProcessor : HomeIntentProcessor {
             val source = when (event) {
                 SEARCH_WIDGET -> {
 //                    SearchWidget.newTabButton.record(NoExtras())
-                    MetricsUtils.Source.WIDGET
+//                    MetricsUtils.Source.WIDGET
                 }
                 STATIC_SHORTCUT_NEW_TAB,
                 STATIC_SHORTCUT_NEW_PRIVATE_TAB,
                 PRIVATE_BROWSING_PINNED_SHORTCUT,
                 -> {
-                    MetricsUtils.Source.SHORTCUT
+//                    MetricsUtils.Source.SHORTCUT
                 }
                 else -> null
             }
@@ -43,7 +43,7 @@ class StartSearchIntentProcessor : HomeIntentProcessor {
             val directions = source?.let {
                 NavGraphDirections.actionGlobalSearchDialog(
                     sessionId = null,
-                    searchAccessPoint = it,
+//                    searchAccessPoint = it,
                 )
             }
             directions?.let {

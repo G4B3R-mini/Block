@@ -4,12 +4,12 @@
 
 package com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.login
 
-import com.shmibblez.inferno.mozillaAndroidComponents.browser.state.action.ContentAction
-import com.shmibblez.inferno.mozillaAndroidComponents.browser.state.store.BrowserStore
-import com.shmibblez.inferno.mozillaAndroidComponents.concept.engine.prompt.PromptRequest
+import mozilla.components.browser.state.action.ContentAction
+import mozilla.components.browser.state.store.BrowserStore
+import mozilla.components.concept.engine.prompt.PromptRequest
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.concept.PasswordPromptView
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.consumePromptFrom
-import com.shmibblez.inferno.mozillaAndroidComponents.support.base.log.logger.Logger
+import mozilla.components.support.base.log.logger.Logger
 
 /**
  * Displays a [PasswordPromptView] for a site after receiving a [PromptRequest.SelectLoginPrompt]

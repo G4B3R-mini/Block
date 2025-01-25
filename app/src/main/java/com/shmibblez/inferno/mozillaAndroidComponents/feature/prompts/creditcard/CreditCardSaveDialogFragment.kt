@@ -23,19 +23,19 @@ import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import com.shmibblez.inferno.mozillaAndroidComponents.concept.storage.CreditCardEntry
-import com.shmibblez.inferno.mozillaAndroidComponents.concept.storage.CreditCardValidationDelegate.Result
-import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.R
+import mozilla.components.concept.storage.CreditCardEntry
+import mozilla.components.concept.storage.CreditCardValidationDelegate.Result
+import mozilla.components.feature.prompts.R
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.dialog.KEY_PROMPT_UID
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.dialog.KEY_SESSION_ID
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.dialog.KEY_SHOULD_DISMISS_ON_LOAD
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.dialog.PromptDialogFragment
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.facts.emitCreditCardAutofillCreatedFact
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.facts.emitCreditCardAutofillUpdatedFact
-import com.shmibblez.inferno.mozillaAndroidComponents.support.ktx.android.content.appName
-import com.shmibblez.inferno.mozillaAndroidComponents.support.ktx.android.view.toScope
-import com.shmibblez.inferno.mozillaAndroidComponents.support.utils.creditCardIssuerNetwork
-import com.shmibblez.inferno.mozillaAndroidComponents.support.utils.ext.getParcelableCompat
+import mozilla.components.support.ktx.android.content.appName
+import mozilla.components.support.ktx.android.view.toScope
+import mozilla.components.support.utils.creditCardIssuerNetwork
+import mozilla.components.support.utils.ext.getParcelableCompat
 
 private const val KEY_CREDIT_CARD = "KEY_CREDIT_CARD"
 

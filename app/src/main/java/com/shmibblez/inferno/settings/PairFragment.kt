@@ -77,13 +77,13 @@ class PairFragment : Fragment(R.layout.fragment_pair), UserInteractionHandler {
                     )
                 },
                 scanMessage =
-                if (requireContext().settings().allowDomesticChinaFxaServer &&
-                    com.shmibblez.inferno.Config.channel.isMozillaOnline
-                ) {
-                    R.string.pair_instructions_2_cn
-                } else {
-                    R.string.pair_instructions_2
-                },
+//                if (requireContext().settings().allowDomesticChinaFxaServer &&
+//                    com.shmibblez.inferno.Config.channel.isMozillaOnline
+//                ) {
+//                    R.string.pair_instructions_2_cn
+//                } else {
+                R.string.pair_instructions_2,
+//                },
             ),
             owner = this,
             view = view,

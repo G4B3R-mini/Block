@@ -12,8 +12,8 @@ import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import com.shmibblez.inferno.mozillaAndroidComponents.concept.engine.prompt.PromptRequest.File.Companion.DEFAULT_UPLOADS_DIR_NAME
-import com.shmibblez.inferno.mozillaAndroidComponents.support.base.log.logger.Logger
+import mozilla.components.concept.engine.prompt.PromptRequest.File.Companion.DEFAULT_UPLOADS_DIR_NAME
+import mozilla.components.support.base.log.logger.Logger
 import java.io.File
 import java.io.IOException
 

@@ -109,11 +109,11 @@ class CustomizationFragment : PreferenceFragmentCompat() {
     private fun bindDarkTheme() {
         radioDarkTheme = requirePreference(R.string.pref_key_dark_theme)
         radioDarkTheme.onClickListener {
-            AppTheme.darkThemeSelected.record(
-                AppTheme.DarkThemeSelectedExtra(
-                    "SETTINGS",
-                ),
-            )
+//            AppTheme.darkThemeSelected.record(
+//                AppTheme.DarkThemeSelectedExtra(
+//                    "SETTINGS",
+//                ),
+//            )
             setNewTheme(AppCompatDelegate.MODE_NIGHT_YES)
         }
     }
@@ -140,20 +140,20 @@ class CustomizationFragment : PreferenceFragmentCompat() {
     private fun setupToolbarCategory() {
         val topPreference = requirePreference<RadioButtonPreference>(R.string.pref_key_toolbar_top)
         topPreference.onClickListener {
-            ToolbarSettings.changedPosition.record(
-                ToolbarSettings.ChangedPositionExtra(
-                    Position.TOP.name,
-                ),
-            )
+//            ToolbarSettings.changedPosition.record(
+//                ToolbarSettings.ChangedPositionExtra(
+//                    Position.TOP.name,
+//                ),
+//            )
         }
 
         val bottomPreference = requirePreference<RadioButtonPreference>(R.string.pref_key_toolbar_bottom)
         bottomPreference.onClickListener {
-            ToolbarSettings.changedPosition.record(
-                ToolbarSettings.ChangedPositionExtra(
-                    Position.BOTTOM.name,
-                ),
-            )
+//            ToolbarSettings.changedPosition.record(
+//                ToolbarSettings.ChangedPositionExtra(
+//                    Position.BOTTOM.name,
+//                ),
+//            )
         }
 
         val toolbarPosition = requireContext().settings().toolbarPosition
@@ -165,7 +165,7 @@ class CustomizationFragment : PreferenceFragmentCompat() {
 
     private fun setupGesturesCategory(isSwipeToolbarToSwitchTabsVisible: Boolean) {
         requirePreference<SwitchPreference>(R.string.pref_key_website_pull_to_refresh).apply {
-            isVisible = FeatureFlags.pullToRefreshEnabled
+            isVisible = true // FeatureFlags.pullToRefreshEnabled
             isChecked = context.settings().isPullToRefreshEnabledInBrowser
             onPreferenceChangeListener = SharedPreferenceUpdater()
         }
@@ -181,14 +181,14 @@ class CustomizationFragment : PreferenceFragmentCompat() {
     }
 
     override fun onPreferenceTreeClick(preference: Preference): Boolean {
-        when (preference.key) {
-            resources.getString(R.string.pref_key_website_pull_to_refresh) -> {
-                PullToRefreshInBrowser.enabled.set(requireContext().settings().isPullToRefreshEnabledInBrowser)
-            }
-            resources.getString(R.string.pref_key_dynamic_toolbar) -> {
-                CustomizationSettings.dynamicToolbar.set(requireContext().settings().isDynamicToolbarEnabled)
-            }
-        }
+//        when (preference.key) {
+//            resources.getString(R.string.pref_key_website_pull_to_refresh) -> {
+//                PullToRefreshInBrowser.enabled.set(requireContext().settings().isPullToRefreshEnabledInBrowser)
+//            }
+//            resources.getString(R.string.pref_key_dynamic_toolbar) -> {
+//                CustomizationSettings.dynamicToolbar.set(requireContext().settings().isDynamicToolbarEnabled)
+//            }
+//        }
         return super.onPreferenceTreeClick(preference)
     }
 

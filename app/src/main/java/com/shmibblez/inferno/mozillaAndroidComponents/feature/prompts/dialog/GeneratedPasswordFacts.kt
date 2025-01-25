@@ -4,17 +4,17 @@
 
 package com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.dialog
 
-import com.shmibblez.inferno.mozillaAndroidComponents.support.base.Component
-import com.shmibblez.inferno.mozillaAndroidComponents.support.base.facts.Action
-import com.shmibblez.inferno.mozillaAndroidComponents.support.base.facts.Fact
-import com.shmibblez.inferno.mozillaAndroidComponents.support.base.facts.collect
+import mozilla.components.support.base.Component
+import mozilla.components.support.base.facts.Action
+import mozilla.components.support.base.facts.Fact
+import mozilla.components.support.base.facts.collect
 
 /**
- * Facts emitted for telemetry related to [com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.login.PasswordGeneratorDialogFragment]
+ * Facts emitted for telemetry related to [mozilla.components.feature.prompts.login.PasswordGeneratorDialogFragment]
  */
 class GeneratedPasswordFacts {
     /**
-     * Items that specify how the [com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.login.PasswordGeneratorDialogFragment]
+     * Items that specify how the [mozilla.components.feature.prompts.login.PasswordGeneratorDialogFragment]
      * was interacted with
      */
     object Items {

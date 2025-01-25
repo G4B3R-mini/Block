@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,7 +27,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.annotation.LightDarkPreview
+import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.annotation.LightDarkPreview
 import com.shmibblez.inferno.compose.button.RadioButton
 import com.shmibblez.inferno.theme.FirefoxTheme
 
@@ -37,8 +38,8 @@ import com.shmibblez.inferno.theme.FirefoxTheme
 fun ProfilerDialogueCard(content: @Composable () -> Unit) {
     FirefoxTheme {
         Card(
-            elevation = 8.dp,
-            backgroundColor = FirefoxTheme.colors.layer2,
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+            colors = CardDefaults.cardColors(containerColor = FirefoxTheme.colors.layer2),
             shape = RoundedCornerShape(12.dp),
         ) {
             content()

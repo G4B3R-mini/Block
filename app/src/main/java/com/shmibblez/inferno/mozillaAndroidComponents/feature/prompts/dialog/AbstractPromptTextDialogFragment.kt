@@ -13,7 +13,7 @@ import android.widget.TextView
 import androidx.annotation.IdRes
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
-import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.R
+import mozilla.components.feature.prompts.R
 
 internal const val KEY_MANY_ALERTS = "KEY_MANY_ALERTS"
 internal const val KEY_USER_CHECK_BOX = "KEY_USER_CHECK_BOX"

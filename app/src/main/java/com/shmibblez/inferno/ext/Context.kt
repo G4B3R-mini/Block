@@ -21,7 +21,7 @@ import com.shmibblez.inferno.R
 import com.shmibblez.inferno.components.Components
 //import com.shmibblez.inferno.components.metrics.MetricController
 import com.shmibblez.inferno.components.toolbar.ToolbarPosition
-import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.theme.AcornWindowSize
+import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.theme.AcornWindowSize
 import com.shmibblez.inferno.settings.advanced.getSelectedLocale
 import com.shmibblez.inferno.utils.isLargeScreenSize
 import java.lang.String.format

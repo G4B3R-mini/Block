@@ -4,10 +4,7 @@
 
 package com.shmibblez.inferno.debugsettings.ui
 
-import android.content.Intent
-import android.net.Uri
 import android.os.StrictMode
-import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -19,7 +16,7 @@ import androidx.navigation.compose.rememberNavController
 import mozilla.components.browser.state.state.BrowserState
 import mozilla.components.browser.state.state.createTab
 import mozilla.components.browser.state.store.BrowserStore
-import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.annotation.LightDarkPreview
+import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.annotation.LightDarkPreview
 import mozilla.components.concept.storage.LoginsStorage
 import mozilla.components.lib.state.ext.observeAsState
 import com.shmibblez.inferno.debugsettings.addresses.AddressesDebugLocalesRepository

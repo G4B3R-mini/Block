@@ -27,8 +27,8 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.annotation.LightDarkPreview
-import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.button.TextButton
+import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.annotation.LightDarkPreview
+import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.button.TextButton
 import mozilla.components.feature.downloads.toMegabyteOrKilobyteString
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.button.PrimaryButton

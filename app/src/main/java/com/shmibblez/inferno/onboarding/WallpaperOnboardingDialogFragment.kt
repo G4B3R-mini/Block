@@ -69,16 +69,16 @@ class WallpaperOnboardingDialogFragment : BottomSheetDialogFragment() {
         activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
     }
 
-    override fun onDismiss(dialog: DialogInterface) {
-        super.onDismiss(dialog)
-
-        val currentWallpaper = requireContext().components.appStore.state.wallpaperState.currentWallpaper
-        Wallpapers.onboardingClosed.record(
-            Wallpapers.OnboardingClosedExtra(
-                isSelected = currentWallpaper.name != Wallpaper.defaultName,
-            ),
-        )
-    }
+//    override fun onDismiss(dialog: DialogInterface) {
+//        super.onDismiss(dialog)
+//
+//        val currentWallpaper = requireContext().components.appStore.state.wallpaperState.currentWallpaper
+//        Wallpapers.onboardingClosed.record(
+//            Wallpapers.OnboardingClosedExtra(
+//                isSelected = currentWallpaper.name != Wallpaper.defaultName,
+//            ),
+//        )
+//    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -132,13 +132,13 @@ class WallpaperOnboardingDialogFragment : BottomSheetDialogFragment() {
     ) {
         when (result) {
             Wallpaper.ImageFileState.Downloaded -> {
-                Wallpapers.wallpaperSelected.record(
-                    Wallpapers.WallpaperSelectedExtra(
-                        name = wallpaper.name,
-                        source = "onboarding",
-                        themeCollection = wallpaper.collection.name,
-                    ),
-                )
+//                Wallpapers.wallpaperSelected.record(
+//                    Wallpapers.WallpaperSelectedExtra(
+//                        name = wallpaper.name,
+//                        source = "onboarding",
+//                        themeCollection = wallpaper.collection.name,
+//                    ),
+//                )
             }
             Wallpaper.ImageFileState.Error -> {
                 Snackbar.make(

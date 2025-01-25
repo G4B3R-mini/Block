@@ -4,10 +4,10 @@
 
 package com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.facts
 
-import com.shmibblez.inferno.mozillaAndroidComponents.support.base.Component
-import com.shmibblez.inferno.mozillaAndroidComponents.support.base.facts.Action
-import com.shmibblez.inferno.mozillaAndroidComponents.support.base.facts.Fact
-import com.shmibblez.inferno.mozillaAndroidComponents.support.base.facts.collect
+import mozilla.components.support.base.Component
+import mozilla.components.support.base.facts.Action
+import mozilla.components.support.base.facts.Fact
+import mozilla.components.support.base.facts.collect
 
 /**
  * Facts emitted for different events related to the prompt feature.

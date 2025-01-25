@@ -21,8 +21,8 @@ import androidx.core.graphics.BlendModeCompat.SRC_IN
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.R
-import com.shmibblez.inferno.mozillaAndroidComponents.support.utils.ColorUtils
+import mozilla.components.feature.prompts.R
+import mozilla.components.support.utils.ColorUtils
 
 /**
  * Represents an item in the [BasicColorAdapter] list.

@@ -17,14 +17,14 @@ import androidx.core.widget.ImageViewCompat
 import androidx.core.widget.TextViewCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.shmibblez.inferno.mozillaAndroidComponents.concept.storage.CreditCardEntry
-import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.R
+import mozilla.components.concept.storage.CreditCardEntry
+import mozilla.components.feature.prompts.R
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.concept.AutocompletePrompt
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.concept.SelectablePromptView
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.concept.ToggleablePrompt
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.facts.emitCreditCardAutofillExpandedFact
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.facts.emitSuccessfulCreditCardAutofillSuccessFact
-import com.shmibblez.inferno.mozillaAndroidComponents.support.ktx.android.view.hideKeyboard
+import mozilla.components.support.ktx.android.view.hideKeyboard
 
 /**
  * A customizable "Select credit card" bar implementing [SelectablePromptView].

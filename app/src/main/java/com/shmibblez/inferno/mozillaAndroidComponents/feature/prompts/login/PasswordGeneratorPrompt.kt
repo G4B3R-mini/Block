@@ -27,10 +27,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.withStyledAttributes
-import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.R
+import mozilla.components.feature.prompts.R
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.identitycredential.previews.DialogPreviewMaterialTheme
-import com.shmibblez.inferno.mozillaAndroidComponents.support.ktx.android.content.getColorFromAttr
-import com.shmibblez.inferno.mozillaAndroidComponents.ui.icons.R as iconsR
+import mozilla.components.support.ktx.android.content.getColorFromAttr
+import mozilla.components.ui.icons.R as iconsR
 
 private val Context.primaryColor: Color
     get() = Color(getColorFromAttr(android.R.attr.textColorPrimary))
@@ -100,7 +100,7 @@ fun PasswordGeneratorPrompt(
             text = stringResource(id = R.string.mozac_feature_prompts_suggest_strong_password_2),
             color = colors.headerText,
             fontSize = 16.sp,
-            style = MaterialTheme.typography.subtitle2,
+            style = MaterialTheme.typography.titleSmall,
         )
     }
 }
@@ -112,8 +112,8 @@ private fun PasswordGeneratorPromptPreview() {
         PasswordGeneratorPrompt(
             onGeneratedPasswordPromptClick = {},
             colors = PasswordGeneratorPromptColors(
-                primaryText = MaterialTheme.colors.primary,
-                headerText = MaterialTheme.colors.onBackground,
+                primaryText = MaterialTheme.colorScheme.primary,
+                headerText = MaterialTheme.colorScheme.onBackground,
             ),
             modifier = Modifier.background(Color.White),
         )

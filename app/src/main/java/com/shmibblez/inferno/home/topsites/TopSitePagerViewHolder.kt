@@ -32,11 +32,11 @@ class TopSitePagerViewHolder(
     private val topSitesPageChangeCallback = object : ViewPager2.OnPageChangeCallback() {
         override fun onPageSelected(position: Int) {
             if (currentPage != position) {
-                TopSites.swipeCarousel.record(
-                    TopSites.SwipeCarouselExtra(
-                        position.toString(),
-                    ),
-                )
+//                TopSites.swipeCarousel.record(
+//                    TopSites.SwipeCarouselExtra(
+//                        position.toString(),
+//                    ),
+//                )
             }
 
             pageIndicator.setSelection(position)

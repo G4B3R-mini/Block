@@ -9,7 +9,7 @@ import androidx.navigation.NavController
 import androidx.navigation.navOptions
 import com.shmibblez.inferno.NavGraphDirections
 import com.shmibblez.inferno.R
-import com.shmibblez.inferno.components.metrics.MetricsUtils
+//import com.shmibblez.inferno.components.metrics.MetricsUtils
 import com.shmibblez.inferno.ext.nav
 
 /**
@@ -26,7 +26,7 @@ class AssistIntentProcessor : HomeIntentProcessor {
             sessionId = null,
             // Will follow this up with adding `ASSIST` as a search source.
             // https://bugzilla.mozilla.org/show_bug.cgi?id=1808043
-            searchAccessPoint = MetricsUtils.Source.NONE,
+//            searchAccessPoint = MetricsUtils.Source.NONE,
         )
 
         val options = navOptions {
