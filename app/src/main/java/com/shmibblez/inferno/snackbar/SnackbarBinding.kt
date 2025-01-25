@@ -30,6 +30,7 @@ import com.shmibblez.inferno.components.appstate.snackbar.SnackbarState
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.navigateWithBreadcrumb
 import com.shmibblez.inferno.library.bookmarks.friendlyRootTitle
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /**
  * A binding for observing the [SnackbarState] in the [AppStore] and displaying the snackbar.
@@ -45,6 +46,7 @@ import com.shmibblez.inferno.library.bookmarks.friendlyRootTitle
  * @param ioDispatcher The [CoroutineDispatcher] used for background operations executed when
  * the user starts a snackbar action.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 @Suppress("LongParameterList")
 class SnackbarBinding(
     private val context: Context,
@@ -60,6 +62,7 @@ class SnackbarBinding(
     private val currentSession
         get() = browserStore.state.findCustomTabOrSelectedTab(customTabSessionId)
 
+    @ExperimentalCoroutinesApi
     @Suppress("LongMethod", "ComplexMethod")
     override suspend fun onState(flow: Flow<AppState>) {
         flow.map { state -> state.snackbarState }

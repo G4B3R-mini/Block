@@ -29,7 +29,7 @@ import mozilla.components.feature.syncedtabs.SyncedTabsAutocompleteProvider
 import mozilla.components.feature.syncedtabs.commands.SyncedTabsCommands
 import mozilla.components.feature.syncedtabs.commands.SyncedTabsCommandsFlushScheduler
 import mozilla.components.feature.syncedtabs.storage.SyncedTabsStorage
-import mozilla.components.lib.crash.CrashReporter
+//import mozilla.components.lib.crash.CrashReporter
 import mozilla.components.service.fxa.PeriodicSyncConfig
 import mozilla.components.service.fxa.ServerConfig
 import mozilla.components.service.fxa.SyncConfig

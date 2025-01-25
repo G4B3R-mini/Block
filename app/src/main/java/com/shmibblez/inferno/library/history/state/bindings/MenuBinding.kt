@@ -9,10 +9,12 @@ import kotlinx.coroutines.flow.distinctUntilChangedBy
 import mozilla.components.lib.state.helpers.AbstractBinding
 import com.shmibblez.inferno.library.history.HistoryFragmentState
 import com.shmibblez.inferno.library.history.HistoryFragmentStore
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /**
  * A binding to map state updates to menu updates.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 class MenuBinding(
     store: HistoryFragmentStore,
     val invalidateOptionsMenu: () -> Unit,

@@ -33,7 +33,6 @@ import mozilla.components.browser.state.selector.normalTabs
 import mozilla.components.browser.state.selector.privateTabs
 import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.browser.state.store.BrowserStore
-import mozilla.components.concept.base.crash.Breadcrumb
 import mozilla.components.feature.accounts.push.CloseTabsUseCases
 import mozilla.components.feature.downloads.ui.DownloadCancelDialogFragment
 import mozilla.components.feature.tabs.tabstray.TabsFeature
@@ -547,7 +546,7 @@ class TabsTrayFragment : AppCompatDialogFragment() {
                 feature = SelectionBannerBinding(
                     context = requireContext(),
                     binding = tabsTrayBinding,
-                    store = tabsTrayStore,
+                    tabsTrayStore = tabsTrayStore,
                     interactor = tabsTrayInteractor,
                     backgroundView = tabsTrayBinding.topBar,
                     showOnSelectViews = VisibilityModifier(
@@ -580,7 +579,7 @@ class TabsTrayFragment : AppCompatDialogFragment() {
             tabsTrayInactiveTabsOnboardingBinding.set(
                 feature = TabsTrayInactiveTabsOnboardingBinding(
                     context = requireContext(),
-                    store = requireComponents.core.store,
+                    browserStore = requireComponents.core.store,
                     tabsTrayBinding = tabsTrayBinding,
                     settings = requireComponents.settings,
                     navigationInteractor = navigationInteractor,

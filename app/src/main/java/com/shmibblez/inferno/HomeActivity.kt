@@ -19,6 +19,7 @@ import android.os.StrictMode
 import android.text.TextUtils
 import android.text.format.DateUtils
 import android.util.AttributeSet
+import android.util.Log
 import android.view.ActionMode
 import android.view.KeyEvent
 import android.view.LayoutInflater
@@ -271,6 +272,7 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
     final override fun onCreate(savedInstanceState: Bundle?) {
         // DO NOT MOVE ANYTHING ABOVE THIS getProfilerTime CALL.
         val startTimeProfiler = components.core.engine.profiler?.getProfilerTime()
+        Log.d("HomeActivity", "onCreate()")
 
         // Setup nimbus-cli tooling. This is a NOOP when launching normally.
         components.nimbus.sdk.initializeTooling(applicationContext, intent)
@@ -293,7 +295,8 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
 
         // Changing a language on the Language screen restarts the activity, but the activity keeps
         // the old layout direction. We have to update the direction manually.
-        window.decorView.layoutDirection = TextUtils.getLayoutDirectionFromLocale(Locale.getDefault())
+        window.decorView.layoutDirection =
+            TextUtils.getLayoutDirectionFromLocale(Locale.getDefault())
 
         binding = ActivityHomeBinding.inflate(layoutInflater)
 
@@ -302,36 +305,36 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
 //            isLauncherIntent = intent.toSafeIntent().isLauncherIntent,
 //        )
 
-        SplashScreenManager(
-            splashScreenOperation =
-            if (FxNimbus.features.splashScreen.value().offTrainOnboarding) {
-                ApplyExperimentsOperation(
-                    storage = DefaultExperimentsOperationStorage(components.settings),
-                    nimbus = components.nimbus.sdk,
-                )
-            } else {
-                FetchExperimentsOperation(
-                    storage = DefaultExperimentsOperationStorage(components.settings),
-                    nimbus = components.nimbus.sdk,
-                )
-            },
-            splashScreenTimeout = FxNimbus.features.splashScreen.value().maximumDurationMs.toLong(),
-            isDeviceSupported = { Build.VERSION.SDK_INT > Build.VERSION_CODES.M },
-            storage = DefaultSplashScreenStorage(components.settings),
-            showSplashScreen = { installSplashScreen().setKeepOnScreenCondition(it) },
-            onSplashScreenFinished = { result ->
-                // TODO: splash screen?
-//                if (result.sendTelemetry) {
-//                    SplashScreen.firstLaunchExtended.record(
-//                        SplashScreen.FirstLaunchExtendedExtra(dataFetched = result.wasDataFetched),
-//                    )
-//                }
-
-//                if (savedInstanceState == null && shouldShowOnboarding) {
-//                    navHost.navController.navigate(NavGraphDirections.actionGlobalOnboarding())
-//                }
-            },
-        ).showSplashScreen()
+//        SplashScreenManager(
+//            splashScreenOperation =
+//            if (FxNimbus.features.splashScreen.value().offTrainOnboarding) {
+//                ApplyExperimentsOperation(
+//                    storage = DefaultExperimentsOperationStorage(components.settings),
+//                    nimbus = components.nimbus.sdk,
+//                )
+//            } else {
+//                FetchExperimentsOperation(
+//                    storage = DefaultExperimentsOperationStorage(components.settings),
+//                    nimbus = components.nimbus.sdk,
+//                )
+//            },
+//            splashScreenTimeout = FxNimbus.features.splashScreen.value().maximumDurationMs.toLong(),
+//            isDeviceSupported = { Build.VERSION.SDK_INT > Build.VERSION_CODES.M },
+//            storage = DefaultSplashScreenStorage(components.settings),
+//            showSplashScreen = { installSplashScreen().setKeepOnScreenCondition(it) },
+//            onSplashScreenFinished = { result ->
+//                // TODO: splash screen?
+////                if (result.sendTelemetry) {
+////                    SplashScreen.firstLaunchExtended.record(
+////                        SplashScreen.FirstLaunchExtendedExtra(dataFetched = result.wasDataFetched),
+////                    )
+////                }
+//
+////                if (savedInstanceState == null && shouldShowOnboarding) {
+////                    navHost.navController.navigate(NavGraphDirections.actionGlobalOnboarding())
+////                }
+//            },
+//        ).showSplashScreen()
 
         lifecycleScope.launch {
             val debugSettingsRepository = DefaultDebugSettingsRepository(
@@ -550,6 +553,7 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
     @Suppress("TooGenericExceptionCaught")
     override fun onResume() {
         super.onResume()
+        Log.d("HomeActivity", "onResume()")
 
         lifecycleScope.launch(IO) {
             try {
@@ -586,6 +590,8 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
         // DO NOT MOVE ANYTHING ABOVE THIS getProfilerTime CALL.
         val startProfilerTime = components.core.engine.profiler?.getProfilerTime()
 
+        Log.d("HomeActivity", "onStart()")
+
         super.onStart()
 
         ProfilerMarkers.homeActivityOnStart(binding.rootContainer, components.core.engine.profiler)
@@ -598,6 +604,7 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
 
     final override fun onStop() {
         super.onStop()
+        Log.d("HomeActivity", "onStop()")
 
         if (FxNimbus.features.alternativeAppLauncherIcon.value().enabled) {
             // User has been enrolled in alternative app icon experiment.
@@ -613,6 +620,7 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
     }
 
     final override fun onPause() {
+        Log.d("HomeActivity", "onPause()")
         // We should return to the browser if there were normal tabs when we left the app
         settings().shouldReturnToBrowser =
             components.core.store.state.getNormalOrPrivateTabs(private = false).isNotEmpty()
@@ -642,6 +650,7 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onProvideAssistContent(outContent: AssistContent?) {
         super.onProvideAssistContent(outContent)
+        Log.d("HomeActivity", "onProvideAssistContent()")
         val currentTabUrl = components.core.store.state.selectedTab?.content?.url
         outContent?.webUri = currentTabUrl?.let { Uri.parse(it) }
     }
@@ -650,6 +659,8 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
     override fun onDestroy() {
         super.onDestroy()
 
+        Log.d("HomeActivity", "onDestroy()")
+
         components.core.contileTopSitesUpdater.stopPeriodicWork()
 //        components.core.pocketStoriesService.stopPeriodicStoriesRefresh()
 //        components.core.pocketStoriesService.stopPeriodicSponsoredStoriesRefresh()
@@ -657,7 +668,8 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
         privateNotificationObserver?.stop()
         components.notificationsDelegate.unBindActivity(this)
 
-        val activityStartedWithLink = startupPathProvider.startupPathForActivity == StartupPathProvider.StartupPath.VIEW
+        val activityStartedWithLink =
+            startupPathProvider.startupPathForActivity == StartupPathProvider.StartupPath.VIEW
         if (this !is ExternalAppBrowserActivity && !activityStartedWithLink) {
             stopMediaSession()
         }
@@ -665,6 +677,8 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
 
     final override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
+
+        Log.d("HomeActivity", "onConfigurationChanged()")
 
         components.appStore.dispatch(
             AppAction.OrientationChange(
@@ -675,6 +689,7 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
 
     final override fun recreate() {
         super.recreate()
+        Log.d("HomeActivity", "recreate()")
     }
 
     /**
@@ -682,13 +697,16 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
      */
     final override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
+        Log.d("HomeActivity", "onNewIntent()")
         handleNewIntent(intent)
         startupPathProvider.onIntentReceived(intent)
     }
 
     @VisibleForTesting
     internal fun handleNewIntent(intent: Intent) {
+        Log.d("HomeActivity", "handleNewIntent()")
         if (this is ExternalAppBrowserActivity) {
+            Log.d("HomeActivity", "handleNewActivity(), from external app -> exit")
             return
         }
 
@@ -726,6 +744,7 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
         attrs: AttributeSet,
     ): View? = when (name) {
         EngineView::class.java.name -> components.core.engine.createView(context, attrs).apply {
+            Log.d("HomeActivity", "onCreateView() EngineView()")
             selectionActionDelegate = DefaultSelectionActionDelegate(
                 BrowserStoreSearchAdapter(
                     components.core.store,
@@ -738,7 +757,11 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
                 actionSorter = ::actionSorter,
             )
         }.asView()
-        else -> super.onCreateView(parent, name, context, attrs)
+
+        else -> {
+            Log.d("HomeActivity", "onCreateView() -> super()")
+            super.onCreateView(parent, name, context, attrs)
+        }
     }
 
     final override fun onActionModeStarted(mode: ActionMode?) {
@@ -1221,9 +1244,9 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
         // First time opening this activity in the task.
         // Cold start / start from Recents after back press.
         return activityIcicle == null &&
-            // Activity was restarted from Recents after it was destroyed by Android while in background
-            // in cases of memory pressure / "Don't keep activities".
-            startingIntent.flags and Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY == 0
+                // Activity was restarted from Recents after it was destroyed by Android while in background
+                // in cases of memory pressure / "Don't keep activities".
+                startingIntent.flags and Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY == 0
     }
 
     /**
@@ -1254,7 +1277,7 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
 
     private fun shouldNavigateToBrowserOnColdStart(savedInstanceState: Bundle?): Boolean {
         return isActivityColdStarted(intent, savedInstanceState) &&
-            !processIntent(intent)
+                !processIntent(intent)
     }
 
     private suspend fun showFullscreenMessageIfNeeded(context: Context) {
@@ -1305,7 +1328,13 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
             return
         }
         UnsubmittedCrashDialog(
-            dispatcher = { action -> components.appStore.dispatch(AppAction.CrashActionWrapper(action)) },
+            dispatcher = { action ->
+                components.appStore.dispatch(
+                    AppAction.CrashActionWrapper(
+                        action
+                    )
+                )
+            },
         ).show(supportFragmentManager, UnsubmittedCrashDialog.TAG)
     }
 

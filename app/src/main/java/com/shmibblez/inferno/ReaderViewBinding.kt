@@ -16,6 +16,7 @@ import com.shmibblez.inferno.components.appstate.readerview.ReaderViewState.Acti
 import com.shmibblez.inferno.components.appstate.readerview.ReaderViewState.Dismiss
 import com.shmibblez.inferno.components.appstate.readerview.ReaderViewState.None
 import com.shmibblez.inferno.components.appstate.readerview.ReaderViewState.ShowControls
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /**
  * A binding for observing [AppState.readerViewState] in the [AppStore] and toggling the
@@ -25,6 +26,7 @@ import com.shmibblez.inferno.components.appstate.readerview.ReaderViewState.Show
  * @param readerMenuController The [ReaderModeController] that will used for toggling the reader
  * view feature and controls.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 class ReaderViewBinding(
     private val appStore: AppStore,
     private val readerMenuController: ReaderModeController,

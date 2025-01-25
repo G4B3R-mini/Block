@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.distinctUntilChangedBy
 import mozilla.components.lib.state.helpers.AbstractBinding
 import com.shmibblez.inferno.components.AppStore
 import com.shmibblez.inferno.components.appstate.AppState
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /**
  * Binding to update the [TabsTrayStore] by listening to changes to [AppState].
@@ -17,6 +18,7 @@ import com.shmibblez.inferno.components.appstate.AppState
  * @param appStore [AppStore] used to listen for changes to [AppState].
  * @param tabsTrayStore [TabsTrayStore] used to listen for changes to [TabsTrayState].
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 class InactiveTabsBinding(
     appStore: AppStore,
     private val tabsTrayStore: TabsTrayStore,

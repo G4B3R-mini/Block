@@ -8,8 +8,8 @@ import android.view.View
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.concept.ExpandablePrompt
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.concept.ToggleablePrompt
-import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.login.LoginSelectBar
-import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.login.SuggestStrongPasswordBar
+import mozilla.components.feature.prompts.login.LoginSelectBar
+import mozilla.components.feature.prompts.login.SuggestStrongPasswordBar
 import com.shmibblez.inferno.browser.LoginSelectBarBehavior
 import com.shmibblez.inferno.utils.Settings
 
@@ -26,9 +26,9 @@ class LoginBarsIntegration(
     private val onLoginsBarHidden: () -> Unit,
 ) {
     init {
-        loginsBar.toggleablePromptListener = loginsBar.createToggleListener()
-        loginsBar.expandablePromptListener = loginsBar.createExpandedListener()
-        passwordBar.toggleablePromptListener = passwordBar.createToggleListener()
+//        loginsBar.toggleablePromptListener = loginsBar.createToggleListener()
+//        loginsBar.expandablePromptListener = loginsBar.createExpandedListener()
+//        passwordBar.toggleablePromptListener = passwordBar.createToggleListener()
     }
 
     var isVisible: Boolean = false

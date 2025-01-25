@@ -20,10 +20,12 @@ import com.shmibblez.inferno.R
 import com.shmibblez.inferno.search.ext.searchEngineShortcuts
 import com.shmibblez.inferno.search.toolbar.SearchSelectorInteractor
 import com.shmibblez.inferno.search.toolbar.SearchSelectorMenu
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /**
  * A binding that updates the search engine menu items in the search selector menu.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 class SearchSelectorMenuBinding(
     private val context: Context,
     private val interactor: SearchSelectorInteractor,

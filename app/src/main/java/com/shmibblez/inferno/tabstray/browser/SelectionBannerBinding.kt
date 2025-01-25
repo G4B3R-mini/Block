@@ -30,7 +30,7 @@ import com.shmibblez.inferno.tabstray.ext.showWithTheme
  *
  * @param context An Android context.
  * @param binding The binding used to display the view.
- * @param store [TabsTrayStore] used to listen for changes to [TabsTrayState] and dispatch actions.
+ * @param tabsTrayStore [TabsTrayStore] used to listen for changes to [TabsTrayState] and dispatch actions.
  * @param interactor [TabsTrayInteractor] for responding to user actions.
  * @param backgroundView The background view that we want to alter when changing [Mode].
  * @param showOnSelectViews A variable list of views that will be made visible when in select mode.
@@ -41,12 +41,12 @@ import com.shmibblez.inferno.tabstray.ext.showWithTheme
 class SelectionBannerBinding(
     private val context: Context,
     private val binding: ComponentTabstray2Binding,
-    private val store: TabsTrayStore,
+    private val tabsTrayStore: TabsTrayStore,
     private val interactor: TabsTrayInteractor,
     private val backgroundView: View,
     private val showOnSelectViews: VisibilityModifier,
     private val showOnNormalViews: VisibilityModifier,
-) : AbstractBinding<TabsTrayState>(store) {
+) : AbstractBinding<TabsTrayState>(tabsTrayStore) {
 
     /**
      * A holder of views that will be used by having their [View.setVisibility] modified.
@@ -91,13 +91,13 @@ class SelectionBannerBinding(
         }
 
         tabsTrayMultiselectItemsBinding.collectMultiSelect.setOnClickListener {
-            if (store.state.mode.selectedTabs.isNotEmpty()) {
+            if (tabsTrayStore.state.mode.selectedTabs.isNotEmpty()) {
                 interactor.onAddSelectedTabsToCollectionClicked()
             }
         }
 
         binding.exitMultiSelect.setOnClickListener {
-            store.dispatch(ExitSelectMode)
+            tabsTrayStore.dispatch(ExitSelectMode)
         }
 
         tabsTrayMultiselectItemsBinding.menuMultiSelect.setOnClickListener { anchor ->

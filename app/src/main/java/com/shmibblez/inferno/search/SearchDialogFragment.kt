@@ -726,6 +726,7 @@ class SearchDialogFragment : AppCompatDialogFragment(), UserInteractionHandler {
         )
     }
 
+    @Deprecated("Deprecated in Java")
     @Suppress("DEPRECATION")
     // https://github.com/mozilla-mobile/fenix/issues/19920
     override fun onRequestPermissionsResult(

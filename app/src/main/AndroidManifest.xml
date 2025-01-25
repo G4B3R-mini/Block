@@ -62,7 +62,7 @@
         android:supportsRtl="true"
         android:theme="@style/NormalTheme"
         android:usesCleartextTraffic="true"
-        tools:ignore="UnusedAttribute">
+        tools:ignore="DataExtractionRules,UnusedAttribute">
 
         <profileable
             android:shell="true"
@@ -78,7 +78,7 @@
         <activity-alias
             android:name="${applicationId}.App"
             android:exported="true"
-            android:targetActivity=".${targetActivity}">
+            android:targetActivity=".HomeActivity"> <!-- ${targetActivity}"> -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -96,7 +96,7 @@
             android:exported="true"
             android:icon="@mipmap/ic_launcher_alternative"
             android:roundIcon="@mipmap/ic_launcher_round_alternative"
-            android:targetActivity=".${targetActivity}">
+            android:targetActivity=".HomeActivity"> <!-- ${targetActivity}"> -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -322,9 +322,9 @@
 
         </activity>
 
-        <activity
-            android:name=".crashes.CrashListActivity"
-            android:exported="false" />
+<!--        <activity-->
+<!--            android:name=".crashes.CrashListActivity"-->
+<!--            android:exported="false" />-->
 
         <activity
             android:name=".widget.VoiceSearchActivity"

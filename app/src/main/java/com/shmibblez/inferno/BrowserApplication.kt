@@ -11,6 +11,7 @@ import android.os.Build
 import android.os.Build.VERSION.SDK_INT
 import android.os.StrictMode
 import android.os.SystemClock
+import android.util.Log
 import android.util.Log.INFO
 //import androidx.annotation.OpenForTesting
 import androidx.annotation.VisibleForTesting
@@ -49,7 +50,7 @@ import mozilla.components.feature.fxsuggest.GlobalFxSuggestDependencyProvider
 import mozilla.components.feature.syncedtabs.commands.GlobalSyncedTabsCommandsProvider
 import mozilla.components.feature.top.sites.TopSitesFrecencyConfig
 import mozilla.components.feature.top.sites.TopSitesProviderConfig
-import mozilla.components.lib.crash.CrashReporter
+//import mozilla.components.lib.crash.CrashReporter
 //import mozilla.components.service.fxa.manager.SyncEnginesStorage
 //import mozilla.components.service.sync.logins.LoginsApiException
 //import mozilla.components.support.base.ext.areNotificationsEnabledSafe
@@ -149,6 +150,7 @@ open class BrowserApplication : LocaleAwareApplication(), Provider {
      * Initializes Fenix and all required subsystems such as Nimbus, Glean and Gecko.
      */
     fun initialize() {
+        Log.d("BrowserApplication", "initialize()")
         // We measure ourselves to avoid a call into Glean before its loaded.
         val start = SystemClock.elapsedRealtimeNanos()
 
@@ -181,10 +183,10 @@ open class BrowserApplication : LocaleAwareApplication(), Provider {
     @VisibleForTesting
     protected open fun initializeGlean() {
         // We avoid blocking the main thread on startup by setting startup metrics on the background thread.
-        val store = components.core.store
-        GlobalScope.launch(IO) {
-            setStartupMetrics() // (store, settings)
-        }
+//        val store = components.core.store
+//        GlobalScope.launch(IO) {
+//            setStartupMetrics() // (store, settings)
+//        }
     }
 
 //    @VisibleForTesting
@@ -211,7 +213,7 @@ open class BrowserApplication : LocaleAwareApplication(), Provider {
                 components.core.engine.warmUp()
             }
 
-            initializeGlean()
+//            initializeGlean()
 
             // Attention: Do not invoke any code from a-s in this scope.
             val megazordSetup = finishSetupMegazord()
@@ -239,8 +241,10 @@ open class BrowserApplication : LocaleAwareApplication(), Provider {
             // to invoke parts of itself that require complete megazord initialization
             // before that process completes, we wait here, if necessary.
             if (!megazordSetup.isCompleted) {
+                Log.d("BrowserApplication", "megazord setup block")
                 runBlockingIncrement { megazordSetup.await() }
             }
+            Log.d("BrowserApplication", "megazord setup complete")
         }
 
         setupLeakCanary()
@@ -271,6 +275,7 @@ open class BrowserApplication : LocaleAwareApplication(), Provider {
 
     @OptIn(DelicateCoroutinesApi::class) // GlobalScope usage
     private fun restoreBrowserState() = GlobalScope.launch(Dispatchers.Main) {
+        Log.d("BrowserApplication", "restoreBrowserState()")
         val store = components.core.store
         val sessionStorage = components.core.sessionStorage
 
@@ -285,6 +290,7 @@ open class BrowserApplication : LocaleAwareApplication(), Provider {
     }
 
     private fun restoreDownloads() {
+        Log.d("BrowserApplication", "restoreDownloads()")
         components.useCases.downloadUseCases.restoreDownloads()
     }
 
@@ -491,6 +497,7 @@ open class BrowserApplication : LocaleAwareApplication(), Provider {
 
     @VisibleForTesting
     internal fun restoreMessaging() {
+        Log.d("BrowserApplication", "restoreMessaging()")
         if (settings().isExperimentationEnabled) {
             components.appStore.dispatch(AppAction.MessagingAction.Restore)
         }

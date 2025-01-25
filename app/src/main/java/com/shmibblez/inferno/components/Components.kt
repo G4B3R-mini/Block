@@ -53,6 +53,9 @@ import com.shmibblez.inferno.utils.ClipboardHandler
 import com.shmibblez.inferno.utils.Settings
 import com.shmibblez.inferno.wifi.WifiConnectionMonitor
 import mozilla.components.lib.crash.CrashReporter
+import mozilla.components.lib.crash.service.CrashReporterService
+import mozilla.components.lib.crash.service.MozillaSocorroService
+//import mozilla.components.lib.crash.CrashReporter
 import java.util.concurrent.TimeUnit
 
 private const val AMO_COLLECTION_MAX_CACHE_AGE = 2 * 24 * 60L // Two days in minutes
@@ -72,7 +75,13 @@ class Components(private val context: Context) {
             notificationManagerCompat,
         )
     }
-    val crashReporter = CrashReporter(context, notificationsDelegate = notificationsDelegate)
+    val crashReporter = CrashReporter(
+        context, notificationsDelegate = notificationsDelegate, services = listOf(
+            MozillaSocorroService(
+                applicationContext = context, appName = "Inferno Browser"
+            )
+        )
+    )
     val backgroundServices by lazyMonitored {
         BackgroundServices(
             context,
@@ -87,20 +96,12 @@ class Components(private val context: Context) {
     }
     val services by lazyMonitored {
         Services(
-            context,
-            core.store,
-            backgroundServices.accountManager
+            context, core.store, backgroundServices.accountManager
         )
     }
 
-    //    val core by lazyMonitored { Core(context, analytics.crashReporter, strictMode) }
-    val core by lazyMonitored {
-        Core(
-            context,
-            crashReporter,
-            strictMode
-        )
-    }
+
+    val core by lazyMonitored { Core(context, crashReporter, strictMode) }
 
     val useCases by lazyMonitored {
         UseCases(
@@ -144,9 +145,7 @@ class Components(private val context: Context) {
             )
         }
         // Use build config otherwise
-        else if (!BuildConfig.AMO_COLLECTION_USER.isNullOrEmpty() &&
-            !BuildConfig.AMO_COLLECTION_NAME.isNullOrEmpty()
-        ) {
+        else if (!BuildConfig.AMO_COLLECTION_USER.isNullOrEmpty() && !BuildConfig.AMO_COLLECTION_NAME.isNullOrEmpty()) {
             AMOAddonsProvider(
                 context,
                 core.client,
@@ -159,9 +158,7 @@ class Components(private val context: Context) {
         // Fall back to defaults
         else {
             AMOAddonsProvider(
-                context,
-                core.client,
-                maxCacheAgeInMinutes = AMO_COLLECTION_MAX_CACHE_AGE
+                context, core.client, maxCacheAgeInMinutes = AMO_COLLECTION_MAX_CACHE_AGE
             )
         }
     }
@@ -220,8 +217,7 @@ class Components(private val context: Context) {
     val startupActivityLog by lazyMonitored { StartupActivityLog() }
     val startupStateProvider by lazyMonitored {
         StartupStateProvider(
-            startupActivityLog,
-            appStartReasonProvider
+            startupActivityLog, appStartReasonProvider
         )
     }
 
@@ -276,5 +272,4 @@ class Components(private val context: Context) {
  * Returns the [Components] object from within a [Composable].
  */
 val components: Components
-    @Composable
-    get() = LocalContext.current.components
+    @Composable get() = LocalContext.current.components

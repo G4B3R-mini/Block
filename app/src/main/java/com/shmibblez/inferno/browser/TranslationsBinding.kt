@@ -18,6 +18,7 @@ import mozilla.components.concept.engine.translate.initialToLanguage
 import mozilla.components.lib.state.helpers.AbstractBinding
 import com.shmibblez.inferno.translations.TranslationDialogBottomSheet
 import com.shmibblez.inferno.translations.TranslationsFlowState
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /**
  * A binding for observing [TranslationsState] changes
@@ -29,6 +30,7 @@ import com.shmibblez.inferno.translations.TranslationsFlowState
  * @param onShowTranslationsDialog Invoked when [TranslationDialogBottomSheet]
  * should be automatically shown to the user.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 class TranslationsBinding(
     private val browserStore: BrowserStore,
     private val onTranslationsActionUpdated: (TranslationsIconState) -> Unit,

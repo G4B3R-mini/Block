@@ -47,11 +47,11 @@ fun DeterminateProgressIndicator(
     )
 
     CircularProgressIndicator(
+        progress = { floatState.value },
         modifier = modifier,
-        progress = floatState.value,
         color = FirefoxTheme.colors.layerAccent,
-        trackColor = FirefoxTheme.colors.actionTertiary, // background color
         strokeWidth = ProgressIndicatorWidth,
+        trackColor = FirefoxTheme.colors.actionTertiary, // background color
         strokeCap = StrokeCap.Butt,
     )
 }

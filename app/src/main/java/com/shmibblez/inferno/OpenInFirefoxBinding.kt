@@ -15,6 +15,7 @@ import mozilla.components.support.base.feature.ViewBoundFeatureWrapper
 import com.shmibblez.inferno.components.AppStore
 import com.shmibblez.inferno.components.appstate.AppAction
 import com.shmibblez.inferno.components.appstate.AppState
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /**
  * A binding for observing [AppState.openInFirefoxRequested] in the [AppStore] and opening the tab in the browser.
@@ -27,6 +28,7 @@ import com.shmibblez.inferno.components.appstate.AppState
  * @param openInFenixIntent The [Intent] used to open the tab in the browser.
  * @param sessionFeature The [SessionFeature] used to release the session from the EngineView.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 class OpenInFirefoxBinding(
     private val activity: HomeActivity,
     private val appStore: AppStore,

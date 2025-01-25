@@ -13,10 +13,12 @@ import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.lib.state.helpers.AbstractBinding
 import com.shmibblez.inferno.components.AppStore
 import com.shmibblez.inferno.components.appstate.AppAction
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /**
  * Binding to update the [AppStore] based on changes to [BrowserState].
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 class BrowserStoreBinding(
     browserStore: BrowserStore,
     private val appStore: AppStore,

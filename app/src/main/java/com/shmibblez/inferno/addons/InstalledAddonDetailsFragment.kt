@@ -37,7 +37,7 @@ import com.shmibblez.inferno.databinding.FragmentInstalledAddOnDetailsBinding
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.runIfFragmentIsAttached
 import com.shmibblez.inferno.ext.showToolbar
-import mozilla.components.lib.crash.CrashReporter
+//import mozilla.components.lib.crash.CrashReporter
 
 /**
  * An activity to show the details of a installed add-on.
@@ -130,15 +130,15 @@ class InstalledAddonDetailsFragment : Fragment() {
                     }
                 }
             } catch (e: AddonManagerException) {
-                val crashReporter = CrashReporter(context!!, notificationsDelegate = context!!.components.notificationsDelegate) // context?.components?.analytics?.crashReporter
-                breadcrumb?.let {
-                    crashReporter?.recordCrashBreadcrumb(it)
-                }
-                crashReporter?.submitCaughtException(e)
-                lifecycleScope.launch(Dispatchers.Main) {
-                    logger.error("Unable to bind addon", e)
-                    showUnableToQueryAddonsMessage()
-                }
+//                val crashReporter = CrashReporter(context!!, notificationsDelegate = context!!.components.notificationsDelegate) // context?.components?.analytics?.crashReporter
+//                breadcrumb?.let {
+//                    crashReporter?.recordCrashBreadcrumb(it)
+//                }
+//                crashReporter?.submitCaughtException(e)
+//                lifecycleScope.launch(Dispatchers.Main) {
+//                    logger.error("Unable to bind addon", e)
+//                    showUnableToQueryAddonsMessage()
+//                }
             }
         }
     }

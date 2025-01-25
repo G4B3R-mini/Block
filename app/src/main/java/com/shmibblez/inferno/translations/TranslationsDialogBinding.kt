@@ -20,12 +20,14 @@ import mozilla.components.concept.engine.translate.initialToLanguage
 import mozilla.components.lib.state.helpers.AbstractBinding
 import mozilla.components.support.locale.LocaleManager
 import com.shmibblez.inferno.utils.LocaleUtils
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import java.util.Locale
 
 /**
  * Helper for observing Translation state from both [BrowserState.translationEngine]
  * and [TabSessionState.translationsState].
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 class TranslationsDialogBinding(
     browserStore: BrowserStore,
     private val translationsDialogStore: TranslationsDialogStore,

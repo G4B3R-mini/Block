@@ -21,6 +21,7 @@ import com.shmibblez.inferno.components.menu.store.MenuAction
 import com.shmibblez.inferno.components.menu.store.MenuState
 import com.shmibblez.inferno.components.menu.store.MenuStore
 import com.shmibblez.inferno.components.menu.store.WebExtensionMenuItem
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /**
  * Helper for observing Extension state from both [BrowserState.extensions]
@@ -31,6 +32,7 @@ import com.shmibblez.inferno.components.menu.store.WebExtensionMenuItem
  * @param iconSize for [WebExtensionMenuItem].
  * @param onDismiss Callback invoked to dismiss the menu dialog.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 class WebExtensionsMenuBinding(
     browserStore: BrowserStore,
     private val menuStore: MenuStore,

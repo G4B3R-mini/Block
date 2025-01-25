@@ -12,7 +12,7 @@ import androidx.annotation.VisibleForTesting
 import mozilla.components.concept.sync.AccountObserver
 import mozilla.components.concept.sync.AuthType
 import mozilla.components.concept.sync.OAuthAccount
-import mozilla.components.lib.crash.CrashReporter
+//import mozilla.components.lib.crash.CrashReporter
 import mozilla.components.support.base.log.logger.Logger
 import com.shmibblez.inferno.perf.StrictModeManager
 

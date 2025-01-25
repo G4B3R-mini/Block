@@ -11,10 +11,12 @@ import mozilla.components.browser.tabstray.TabsTray
 import mozilla.components.lib.state.helpers.AbstractBinding
 import com.shmibblez.inferno.tabstray.TabsTrayState
 import com.shmibblez.inferno.tabstray.TabsTrayStore
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /**
  * A normal tabs observer that updates the provided [TabsTray].
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 class NormalTabsBinding(
     store: TabsTrayStore,
     private val browserStore: BrowserStore,

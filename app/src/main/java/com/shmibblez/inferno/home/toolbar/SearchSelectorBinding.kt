@@ -23,10 +23,12 @@ import com.shmibblez.inferno.databinding.FragmentHomeBinding
 import com.shmibblez.inferno.ext.increaseTapAreaVertically
 import com.shmibblez.inferno.ext.settings
 import com.shmibblez.inferno.search.toolbar.SearchSelectorMenu
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /**
  * A binding that shows the search engine in the search selector button.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 class SearchSelectorBinding(
     private val context: Context,
     private val binding: FragmentHomeBinding,

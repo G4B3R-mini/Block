@@ -601,16 +601,16 @@ abstract class BaseBrowserFragment :
             },
         )
 
-//        val shouldAddNavigationBar =
-//            context.shouldAddNavigationBar() && webAppToolbarShouldBeVisible
-//        if (shouldAddNavigationBar) {
-//            initializeNavBar(
-//                browserToolbar = browserToolbarView.view,
-//                view = view,
-//                context = context,
-//                activity = activity,
-//            )
-//        }
+        val shouldAddNavigationBar =
+            context.shouldAddNavigationBar() && webAppToolbarShouldBeVisible
+        if (shouldAddNavigationBar) {
+            initializeNavBar(
+                browserToolbar = browserToolbarView.view,
+                view = view,
+                context = context,
+                activity = activity,
+            )
+        }
 
         if (context.settings().microsurveyFeatureEnabled) {
             listenForMicrosurveyMessage(context)

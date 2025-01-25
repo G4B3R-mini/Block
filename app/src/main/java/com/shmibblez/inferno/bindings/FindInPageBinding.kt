@@ -11,6 +11,7 @@ import mozilla.components.lib.state.helpers.AbstractBinding
 import com.shmibblez.inferno.components.AppStore
 import com.shmibblez.inferno.components.appstate.AppAction.FindInPageAction
 import com.shmibblez.inferno.components.appstate.AppState
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /**
  * A binding for observing the [AppState.showFindInPage] state in the [AppStore] and displaying
@@ -19,6 +20,7 @@ import com.shmibblez.inferno.components.appstate.AppState
  * @param appStore The [AppStore] used to observe [AppState.showFindInPage].
  * @param onFindInPageLaunch Invoked when the find in page feature should be launched.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 class FindInPageBinding(
     private val appStore: AppStore,
     private val onFindInPageLaunch: () -> Unit,

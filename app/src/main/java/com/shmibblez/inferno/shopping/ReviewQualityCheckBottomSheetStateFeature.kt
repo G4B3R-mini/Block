@@ -12,6 +12,7 @@ import mozilla.components.lib.state.helpers.AbstractBinding
 import com.shmibblez.inferno.shopping.store.BottomSheetViewState
 import com.shmibblez.inferno.shopping.store.ReviewQualityCheckState
 import com.shmibblez.inferno.shopping.store.ReviewQualityCheckStore
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /**
  * View-bound feature that requests the bottom sheet state to be changed to expanded or collapsed when
@@ -21,11 +22,13 @@ import com.shmibblez.inferno.shopping.store.ReviewQualityCheckStore
  * @param isScreenReaderEnabled Used to fully expand bottom sheet when a screen reader is on.
  * @param onRequestStateUpdate Callback to request the bottom sheet to be updated.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 class ReviewQualityCheckBottomSheetStateFeature(
     store: ReviewQualityCheckStore,
     private val isScreenReaderEnabled: Boolean,
     private val onRequestStateUpdate: (expanded: BottomSheetViewState) -> Unit,
 ) : AbstractBinding<ReviewQualityCheckState>(store) {
+    @ExperimentalCoroutinesApi
     override suspend fun onState(flow: Flow<ReviewQualityCheckState>) {
         if (isScreenReaderEnabled) {
             onRequestStateUpdate(BottomSheetViewState.FULL_VIEW)

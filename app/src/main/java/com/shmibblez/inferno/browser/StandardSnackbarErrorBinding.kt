@@ -18,6 +18,7 @@ import com.shmibblez.inferno.components.appstate.AppState
 import com.shmibblez.inferno.compose.core.Action
 import com.shmibblez.inferno.compose.snackbar.Snackbar
 import com.shmibblez.inferno.compose.snackbar.SnackbarState
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /**
  * A binding that shows standard snackbar errors.
@@ -26,6 +27,7 @@ import com.shmibblez.inferno.compose.snackbar.SnackbarState
  * @param snackbarParent [ViewGroup] in which to find a suitable parent for displaying the snackbar.
  * @param appStore The [AppStore] containing information about when to show a snackbar styled for errors.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 class StandardSnackbarErrorBinding(
     private val context: Context,
     private val snackbarParent: ViewGroup,

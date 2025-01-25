@@ -57,6 +57,7 @@ import com.shmibblez.inferno.search.SearchDialogFragment
 import com.shmibblez.inferno.theme.FirefoxTheme
 import com.shmibblez.inferno.theme.Theme
 import com.shmibblez.inferno.theme.ThemeManager
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /**
  * Top-level UI for displaying the navigation bar.
@@ -83,6 +84,7 @@ import com.shmibblez.inferno.theme.ThemeManager
  * informing if the navigation bar is visible.
  * @param isMenuRedesignEnabled Whether or not the menu redesign is enabled.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 @Suppress("LongParameterList")
 @Composable
 fun BrowserNavBar(
@@ -182,6 +184,7 @@ fun BrowserNavBar(
  * @param onMenuButtonClick Invoked when the user clicks on the menu button in the navigation bar.
  * @param isMenuRedesignEnabled Whether or not the menu redesign is enabled.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 @Suppress("LongParameterList")
 @Composable
 fun HomeNavBar(
@@ -286,6 +289,7 @@ fun HomeNavBar(
  * informing if the navigation bar is visible.
  * @param isMenuRedesignEnabled Whether or not the menu redesign is enabled.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 @Composable
 @Suppress("LongParameterList")
 fun CustomTabNavBar(

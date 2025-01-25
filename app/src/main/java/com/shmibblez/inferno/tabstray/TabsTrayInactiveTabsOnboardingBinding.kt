@@ -36,11 +36,11 @@ import com.shmibblez.inferno.utils.Settings
 @OptIn(ExperimentalCoroutinesApi::class)
 class TabsTrayInactiveTabsOnboardingBinding(
     private val context: Context,
-    private val store: BrowserStore,
+    private val browserStore: BrowserStore,
     private val tabsTrayBinding: ComponentTabstray2Binding?,
     private val settings: Settings,
     private val navigationInteractor: NavigationInteractor,
-) : AbstractBinding<BrowserState>(store) {
+) : AbstractBinding<BrowserState>(browserStore) {
 
     private lateinit var inactiveTabsDialog: Dialog
 
@@ -52,7 +52,7 @@ class TabsTrayInactiveTabsOnboardingBinding(
             .distinctUntilChanged()
             .collect {
                 val inactiveTabsList =
-                    if (settings.inactiveTabsAreEnabled) { store.state.potentialInactiveTabs } else { emptyList() }
+                    if (settings.inactiveTabsAreEnabled) { browserStore.state.potentialInactiveTabs } else { emptyList() }
                 if (inactiveTabsList.isNotEmpty() && shouldShowOnboardingForInactiveTabs()) {
                     createInactiveCFR()
                 }

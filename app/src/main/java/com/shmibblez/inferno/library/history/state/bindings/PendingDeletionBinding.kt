@@ -10,10 +10,12 @@ import mozilla.components.lib.state.helpers.AbstractBinding
 import com.shmibblez.inferno.components.AppStore
 import com.shmibblez.inferno.components.appstate.AppState
 import com.shmibblez.inferno.library.history.HistoryView
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /**
  * A binding to map updates of history items that are binding deletion to the view.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 class PendingDeletionBinding(
     appStore: AppStore,
     private val view: HistoryView,
