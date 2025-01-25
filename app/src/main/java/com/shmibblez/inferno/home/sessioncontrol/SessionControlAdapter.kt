@@ -168,8 +168,8 @@ sealed class AdapterItem(@LayoutRes val viewType: Int) {
 //    object PocketStoriesItem : AdapterItem(PocketStoriesViewHolder.LAYOUT_ID)
 //    object PocketCategoriesItem : AdapterItem(PocketCategoriesViewHolder.LAYOUT_ID)
 //    object PocketRecommendationsFooterItem : AdapterItem(PocketRecommendationsHeaderViewHolder.LAYOUT_ID)
-//
-//    object BottomSpacer : AdapterItem(BottomSpacerViewHolder.LAYOUT_ID)
+
+    object BottomSpacer : AdapterItem(BottomSpacerViewHolder.LAYOUT_ID)
 
     /**
      * True if this item represents the same value as other. Used by [AdapterItemDiffCallback].

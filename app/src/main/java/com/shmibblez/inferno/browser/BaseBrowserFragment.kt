@@ -105,10 +105,10 @@ import mozilla.components.feature.prompts.dialog.GestureNavUtils
 import mozilla.components.feature.prompts.file.AndroidPhotoPicker
 import mozilla.components.feature.prompts.identitycredential.DialogColors
 import mozilla.components.feature.prompts.identitycredential.DialogColorsProvider
-import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.login.LoginDelegate
+import mozilla.components.feature.prompts.login.LoginDelegate
 import mozilla.components.feature.prompts.login.PasswordGeneratorDialogColors
 import mozilla.components.feature.prompts.login.PasswordGeneratorDialogColorsProvider
-import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.login.SuggestStrongPasswordDelegate
+import mozilla.components.feature.prompts.login.SuggestStrongPasswordDelegate
 import mozilla.components.feature.prompts.share.ShareDelegate
 import mozilla.components.feature.readerview.ReaderViewFeature
 import mozilla.components.feature.search.SearchFeature
@@ -232,6 +232,7 @@ import com.shmibblez.inferno.theme.FirefoxTheme
 import com.shmibblez.inferno.theme.ThemeManager
 import com.shmibblez.inferno.utils.allowUndo
 import com.shmibblez.inferno.wifi.SitePermissionsWifiIntegration
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import java.lang.ref.WeakReference
 import kotlin.coroutines.cancellation.CancellationException
 import mozilla.components.ui.widgets.behavior.EngineViewClippingBehavior as OldEngineViewClippingBehavior
@@ -374,6 +375,7 @@ abstract class BaseBrowserFragment :
         return promptsFeature.get()
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @CallSuper
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -415,6 +417,7 @@ abstract class BaseBrowserFragment :
         return binding.root
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     final override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         // DO NOT ADD ANYTHING ABOVE THIS getProfilerTime CALL!
         val profilerStartTime = requireComponents.core.engine.profiler?.getProfilerTime()
@@ -1384,8 +1387,7 @@ abstract class BaseBrowserFragment :
 
     @VisibleForTesting
     internal fun shouldPullToRefreshBeEnabled(inFullScreen: Boolean): Boolean {
-        return FeatureFlags.pullToRefreshEnabled &&
-                requireContext().settings().isPullToRefreshEnabledInBrowser &&
+        return /* FeatureFlags.pullToRefreshEnabled && */ requireContext().settings().isPullToRefreshEnabledInBrowser &&
                 !inFullScreen
     }
 
@@ -1878,6 +1880,7 @@ abstract class BaseBrowserFragment :
     /**
      * Listens for the microsurvey message and initializes the microsurvey prompt if one is available.
      */
+    @OptIn(ExperimentalCoroutinesApi::class)
     private fun listenForMicrosurveyMessage(context: Context) {
         binding.root.consumeFrom(context.components.appStore, viewLifecycleOwner) { state ->
             state.messaging.messageToShow[FenixMessageSurfaceId.MICROSURVEY]?.let { message ->
@@ -2119,6 +2122,7 @@ abstract class BaseBrowserFragment :
     /**
      * Forwards permission grant results to one of the features.
      */
+    @Deprecated("Deprecated in Java")
     final override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<String>,

@@ -23,10 +23,10 @@ import mozilla.components.browser.state.selector.findCustomTabOrSelectedTab
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.browser.toolbar.BrowserToolbar
 import mozilla.components.browser.toolbar.display.DisplayToolbar
-import mozilla.components.feature.customtabs.CustomTabsColorsConfig
-import mozilla.components.feature.customtabs.CustomTabsToolbarButtonConfig
-import mozilla.components.feature.customtabs.CustomTabsToolbarFeature
-import mozilla.components.feature.customtabs.CustomTabsToolbarListeners
+import com.shmibblez.inferno.mozillaAndroidComponents.feature.customtabs.CustomTabsColorsConfig
+import com.shmibblez.inferno.mozillaAndroidComponents.feature.customtabs.CustomTabsToolbarButtonConfig
+import com.shmibblez.inferno.mozillaAndroidComponents.feature.customtabs.CustomTabsToolbarFeature
+import com.shmibblez.inferno.mozillaAndroidComponents.feature.customtabs.CustomTabsToolbarListeners
 import mozilla.components.feature.tabs.CustomTabsUseCases
 import mozilla.components.lib.state.ext.flow
 import mozilla.components.support.base.feature.LifecycleAwareFeature

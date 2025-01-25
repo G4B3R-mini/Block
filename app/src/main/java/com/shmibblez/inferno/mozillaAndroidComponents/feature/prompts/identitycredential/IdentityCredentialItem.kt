@@ -84,7 +84,7 @@ internal fun IdentityCredentialItem(
 private fun ProviderItemPreview() {
     DialogPreviewMaterialTheme {
         IdentityCredentialItem(
-            modifier = Modifier.background(MaterialTheme.colors.background),
+            modifier = Modifier.background(MaterialTheme.colorScheme.background),
             title = "Title",
             description = "Description",
             onClick = {},

@@ -90,7 +90,7 @@ private object LayoutPrimitives {
  * @property medium Placeholder for detekt.
  * @property large Placeholder for detekt.
  * @property xLarge Placeholder for detekt.
-*/
+ */
 data class AcornCorner(
     val small: Dp = LayoutPrimitives.cornerRadiusSmall,
     val medium: Dp = LayoutPrimitives.cornersRadiusMedium,
@@ -285,8 +285,7 @@ enum class AcornWindowSize(
      */
     Large(
         windowWidthMax = Dp.Infinity,
-    ),
-    ;
+    ), ;
 
     /**
      * Helper function to determine when to make UI differences for layouts in
@@ -397,7 +396,7 @@ private fun AcornLayoutPreview() {
                     },
                     modifier = Modifier.width(200.dp),
                     colors = ButtonDefaults.outlinedButtonColors(
-                        backgroundColor = AcornTheme.colors.actionPrimary,
+                        containerColor = AcornTheme.colors.actionPrimary,
                     ),
                 ) {
                     Text(
@@ -413,7 +412,7 @@ private fun AcornLayoutPreview() {
                     },
                     modifier = Modifier.width(200.dp),
                     colors = ButtonDefaults.outlinedButtonColors(
-                        backgroundColor = AcornTheme.colors.actionPrimary,
+                        containerColor = AcornTheme.colors.actionPrimary,
                     ),
                 ) {
                     Text(
@@ -429,7 +428,7 @@ private fun AcornLayoutPreview() {
                     },
                     modifier = Modifier.width(200.dp),
                     colors = ButtonDefaults.outlinedButtonColors(
-                        backgroundColor = AcornTheme.colors.actionPrimary,
+                        containerColor = AcornTheme.colors.actionPrimary,
                     ),
                 ) {
                     Text(

@@ -4,6 +4,7 @@
 
 package com.shmibblez.inferno.library.history
 
+import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.DialogInterface
 import android.os.Bundle
@@ -59,7 +60,7 @@ import com.shmibblez.inferno.ext.requireComponents
 import com.shmibblez.inferno.ext.runIfFragmentIsAttached
 import com.shmibblez.inferno.ext.setTextColor
 import com.shmibblez.inferno.library.LibraryPageFragment
-import com.shmibblez.inferno.library.history.state.HistoryTelemetryMiddleware
+//import com.shmibblez.inferno.library.history.state.HistoryTelemetryMiddleware
 import com.shmibblez.inferno.library.history.state.bindings.MenuBinding
 import com.shmibblez.inferno.library.history.state.bindings.PendingDeletionBinding
 import com.shmibblez.inferno.tabstray.Page
@@ -484,6 +485,7 @@ class HistoryFragment : LibraryPageFragment<History>(), UserInteractionHandler, 
     internal class DeleteConfirmationDialogFragment(
         private val onDeleteTimeRange: (selectedTimeFrame: RemoveTimeFrame?) -> Unit,
     ) : DialogFragment() {
+        @SuppressLint("InflateParams")
         override fun onCreateDialog(savedInstanceState: Bundle?): Dialog =
             AlertDialog.Builder(requireContext()).apply {
                 val layout = getLayoutInflater().inflate(R.layout.delete_history_time_range_dialog, null)
