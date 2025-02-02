@@ -181,9 +181,9 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
 
     private var isToolbarInflated = false
 
-//    private val webExtensionPopupObserver by lazy {
-//        WebExtensionPopupObserver(components.core.store, ::openPopup)
-//    }
+    private val webExtensionPopupObserver by lazy {
+        WebExtensionPopupObserver(components.core.store, ::openPopup)
+    }
 
     val webExtensionPromptFeature by lazy {
         WebExtensionPromptFeature(
@@ -305,36 +305,36 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
 //            isLauncherIntent = intent.toSafeIntent().isLauncherIntent,
 //        )
 
-//        SplashScreenManager(
-//            splashScreenOperation =
-//            if (FxNimbus.features.splashScreen.value().offTrainOnboarding) {
-//                ApplyExperimentsOperation(
-//                    storage = DefaultExperimentsOperationStorage(components.settings),
-//                    nimbus = components.nimbus.sdk,
-//                )
-//            } else {
-//                FetchExperimentsOperation(
-//                    storage = DefaultExperimentsOperationStorage(components.settings),
-//                    nimbus = components.nimbus.sdk,
-//                )
-//            },
-//            splashScreenTimeout = FxNimbus.features.splashScreen.value().maximumDurationMs.toLong(),
-//            isDeviceSupported = { Build.VERSION.SDK_INT > Build.VERSION_CODES.M },
-//            storage = DefaultSplashScreenStorage(components.settings),
-//            showSplashScreen = { installSplashScreen().setKeepOnScreenCondition(it) },
-//            onSplashScreenFinished = { result ->
-//                // TODO: splash screen?
-////                if (result.sendTelemetry) {
-////                    SplashScreen.firstLaunchExtended.record(
-////                        SplashScreen.FirstLaunchExtendedExtra(dataFetched = result.wasDataFetched),
-////                    )
-////                }
-//
-////                if (savedInstanceState == null && shouldShowOnboarding) {
-////                    navHost.navController.navigate(NavGraphDirections.actionGlobalOnboarding())
-////                }
-//            },
-//        ).showSplashScreen()
+        SplashScreenManager(
+            splashScreenOperation =
+            if (FxNimbus.features.splashScreen.value().offTrainOnboarding) {
+                ApplyExperimentsOperation(
+                    storage = DefaultExperimentsOperationStorage(components.settings),
+                    nimbus = components.nimbus.sdk,
+                )
+            } else {
+                FetchExperimentsOperation(
+                    storage = DefaultExperimentsOperationStorage(components.settings),
+                    nimbus = components.nimbus.sdk,
+                )
+            },
+            splashScreenTimeout = FxNimbus.features.splashScreen.value().maximumDurationMs.toLong(),
+            isDeviceSupported = { Build.VERSION.SDK_INT > Build.VERSION_CODES.M },
+            storage = DefaultSplashScreenStorage(components.settings),
+            showSplashScreen = { installSplashScreen().setKeepOnScreenCondition(it) },
+            onSplashScreenFinished = { result ->
+                // TODO: splash screen?
+//                if (result.sendTelemetry) {
+//                    SplashScreen.firstLaunchExtended.record(
+//                        SplashScreen.FirstLaunchExtendedExtra(dataFetched = result.wasDataFetched),
+//                    )
+//                }
+
+//                if (savedInstanceState == null && shouldShowOnboarding) {
+//                    navHost.navController.navigate(NavGraphDirections.actionGlobalOnboarding())
+//                }
+            },
+        ).showSplashScreen()
 
         lifecycleScope.launch {
             val debugSettingsRepository = DefaultDebugSettingsRepository(
@@ -383,26 +383,26 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
         }
 
 //        if (!shouldShowOnboarding) {
-//            lifecycleScope.launch(IO) {
-//                showFullscreenMessageIfNeeded(applicationContext)
-//            }
+            lifecycleScope.launch(IO) {
+                showFullscreenMessageIfNeeded(applicationContext)
+            }
 //
 //            // Unless the activity is recreated, navigate to home first (without rendering it)
 //            // to add it to the back stack.
-//            if (savedInstanceState == null) {
-//                navigateToHome(navHost.navController)
+            if (savedInstanceState == null) {
+                navigateToHome(navHost.navController)
+            }
+//
+            if (!shouldStartOnHome() && shouldNavigateToBrowserOnColdStart(savedInstanceState)) {
+                navigateToBrowserOnColdStart()
+            }
+//            else {
+//                StartOnHome.enterHomeScreen.record(NoExtras())
 //            }
 //
-//            if (!shouldStartOnHome() && shouldNavigateToBrowserOnColdStart(savedInstanceState)) {
-//                navigateToBrowserOnColdStart()
+//            if (settings().showHomeOnboardingDialog && components.fenixOnboarding.userHasBeenOnboarded()) {
+//                navHost.navController.navigate(NavGraphDirections.actionGlobalHomeOnboardingDialog())
 //            }
-////            else {
-////                StartOnHome.enterHomeScreen.record(NoExtras())
-////            }
-//
-////            if (settings().showHomeOnboardingDialog && components.fenixOnboarding.userHasBeenOnboarded()) {
-////                navHost.navController.navigate(NavGraphDirections.actionGlobalHomeOnboardingDialog())
-////            }
 //        }
 
         Performance.processIntentIfPerformanceTest(intent, this)
@@ -436,7 +436,7 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
         supportActionBar?.hide()
 
         lifecycle.addObservers(
-//            webExtensionPopupObserver,
+            webExtensionPopupObserver,
             extensionsProcessDisabledForegroundController,
             extensionsProcessDisabledBackgroundController,
             serviceWorkerSupport,
@@ -479,22 +479,22 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
 //        // To assess whether the Pocket stories are to be downloaded or not multiple SharedPreferences
 //        // are read possibly needing to load them on the current thread. Move that to a background thread.
 //        lifecycleScope.launch(IO) {
-////            if (settings().showPocketRecommendationsFeature) {
-////                components.core.pocketStoriesService.startPeriodicStoriesRefresh()
-////            }
+//            if (settings().showPocketRecommendationsFeature) {
+//                components.core.pocketStoriesService.startPeriodicStoriesRefresh()
+//            }
 //
-////            if (settings().showPocketSponsoredStories) {
-////                components.core.pocketStoriesService.startPeriodicSponsoredStoriesRefresh()
-////                // If the secret setting for sponsored stories parameters is set,
-////                // force refresh the sponsored Pocket stories.
-////                if (settings().useCustomConfigurationForSponsoredStories) {
-////                    components.core.pocketStoriesService.refreshSponsoredStories()
-////                }
-////            }
+//            if (settings().showPocketSponsoredStories) {
+//                components.core.pocketStoriesService.startPeriodicSponsoredStoriesRefresh()
+//                // If the secret setting for sponsored stories parameters is set,
+//                // force refresh the sponsored Pocket stories.
+//                if (settings().useCustomConfigurationForSponsoredStories) {
+//                    components.core.pocketStoriesService.refreshSponsoredStories()
+//                }
+//            }
 //
-////            if (settings().showContentRecommendations) {
-////                components.core.pocketStoriesService.startPeriodicContentRecommendationsRefresh()
-////            }
+//            if (settings().showContentRecommendations) {
+//                components.core.pocketStoriesService.startPeriodicContentRecommendationsRefresh()
+//            }
 //        }
 
         components.backgroundServices.accountManagerAvailableQueue.runIfReadyOrQueue {
@@ -1206,13 +1206,13 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
         return DefaultThemeManager(browsingModeManager.mode, this)
     }
 
-//    private fun openPopup(webExtensionState: WebExtensionState) {
-//        val action = NavGraphDirections.actionGlobalWebExtensionActionPopupFragment(
-//            webExtensionId = webExtensionState.id,
-//            webExtensionTitle = webExtensionState.name,
-//        )
-//        navHost.navController.navigate(action)
-//    }
+    private fun openPopup(webExtensionState: WebExtensionState) {
+        val action = NavGraphDirections.actionGlobalWebExtensionActionPopupFragment(
+            webExtensionId = webExtensionState.id,
+            webExtensionTitle = webExtensionState.name,
+        )
+        navHost.navController.navigate(action)
+    }
 
     /**
      * The root container is null at this point, so let the HomeActivity know that
@@ -1315,11 +1315,11 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
 //    @SuppressLint("NewApi") // The Android Q check is done in the systemGesturesInsets property getter
 //    internal fun collectOSNavigationTelemetry() {
 //        binding.root.doOnAttach {
-////            val systemGestureInsets = binding.root.systemGesturesInsets
-////
-////            val isUsingGesturesNavigation =
-////                (systemGestureInsets?.left ?: 0) > 0 && (systemGestureInsets?.right ?: 0) > 0
-////            NavigationBar.osNavigationUsesGestures.set(isUsingGesturesNavigation)
+//            val systemGestureInsets = binding.root.systemGesturesInsets
+//
+//            val isUsingGesturesNavigation =
+//                (systemGestureInsets?.left ?: 0) > 0 && (systemGestureInsets?.right ?: 0) > 0
+//            NavigationBar.osNavigationUsesGestures.set(isUsingGesturesNavigation)
 //        }
 //    }
 
@@ -1349,6 +1349,6 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
 
         // PWA must have been used within last 30 days to be considered "recently used" for the
         // telemetry purposes.
-        private const val PWA_RECENTLY_USED_THRESHOLD = DateUtils.DAY_IN_MILLIS * 30L
+//        private const val PWA_RECENTLY_USED_THRESHOLD = DateUtils.DAY_IN_MILLIS * 30L
     }
 }

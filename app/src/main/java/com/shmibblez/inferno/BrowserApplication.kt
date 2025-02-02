@@ -120,6 +120,8 @@ import kotlin.math.roundToLong
 private const val RAM_THRESHOLD_MEGABYTES = 1024
 private const val BYTES_TO_MEGABYTES_CONVERSION = 1024.0 * 1024.0
 
+// TODO: check if anything important commented out
+
 /**
  *The main application class for Fenix. Records data to measure initialization performance.
  *  Installs [CrashReporter], initializes [Glean]  in fenix builds and setup Megazord in the main process.
