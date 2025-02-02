@@ -311,7 +311,7 @@ class HomeFragment : Fragment() {
 
         components.appStore.dispatch(AppAction.ModeChange(browsingModeManager.mode))
 
-        lifecycleScope.launch(IO) {
+//        lifecycleScope.launch(IO) {
 //            // Show Merino content recommendations.
 //            val showContentRecommendations = requireContext().settings().showContentRecommendations
 //            // Show Pocket recommended stories.
@@ -345,7 +345,7 @@ class HomeFragment : Fragment() {
 //                    ),
 //                )
 //            }
-        }
+//        }
 
         if (requireContext().settings().isExperimentationEnabled) {
             messagingFeatureHomescreen.set(
