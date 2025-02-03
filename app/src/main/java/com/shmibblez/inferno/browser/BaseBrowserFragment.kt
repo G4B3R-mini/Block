@@ -839,6 +839,7 @@ abstract class BaseBrowserFragment :
 
         downloadFeature.onDownloadStopped = { downloadState, _, downloadJobStatus ->
             handleOnDownloadFinished(
+                context = context,
                 downloadState = downloadState,
                 downloadJobStatus = downloadJobStatus,
                 tryAgain = downloadFeature::tryAgain,

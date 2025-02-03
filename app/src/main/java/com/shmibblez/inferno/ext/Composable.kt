@@ -2,20 +2,28 @@ package com.shmibblez.inferno.ext
 
 import android.annotation.SuppressLint
 import android.content.Context
+import androidx.annotation.MainThread
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.shmibblez.inferno.browser.getActivity
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.consumeEach
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import mozilla.components.lib.state.Action
 import mozilla.components.lib.state.State
 import mozilla.components.lib.state.Store
 import mozilla.components.lib.state.ext.channel
+import mozilla.components.lib.state.ext.consumeFlow
+import mozilla.components.lib.state.ext.flow
+import mozilla.components.support.ktx.android.view.toScope
 
 @SuppressLint("ComposableNaming")
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -55,4 +63,39 @@ fun <S : State, A : Action> consumeFrom(
             }
         }
     }
+}
+
+@MainThread
+fun <S : State, A : Action> consumeFlow(
+    from: Store<S, A>,
+    owner: LifecycleOwner,
+    context: Context,
+    coroutineScope: CoroutineScope,
+    block: suspend (Flow<S>) -> Unit,
+) {
+//    val fragment = this
+//    val view = checkNotNull(view) { "Fragment has no view yet. Call from onViewCreated()." }
+
+    // It's important to create the flow here directly instead of in the coroutine below,
+    // as otherwise the fragment could be removed before the subscription is created.
+    // This would cause us to create an unnecessary subscription leaking the fragment,
+    // as we only unsubscribe on destroy which already happened.
+    val flow = from.flow(owner)
+
+//    val scope = view.toScope()
+//    scope.launch {
+    coroutineScope.launch {
+        val filtered = flow.filter {
+            // We ignore state updates if the fragment does not have an activity or view
+            // attached anymore.
+            // See comment in [consumeFrom] above.
+            context.getActivity() != null // && fragment.view != null
+        }
+
+        block(filtered)
+    }
+}
+
+fun isLargeWindow(context: Context): Boolean {
+    return context.isLargeWindow()
 }

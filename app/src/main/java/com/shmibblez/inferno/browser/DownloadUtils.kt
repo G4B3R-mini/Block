@@ -4,13 +4,15 @@
 
 package com.shmibblez.inferno.browser
 
+import android.content.Context
 import mozilla.components.browser.state.state.content.DownloadState
 import mozilla.components.browser.state.state.content.DownloadState.Status
 import mozilla.components.concept.toolbar.ScrollableToolbar
 import mozilla.components.feature.downloads.AbstractFetchDownloadService
 import com.shmibblez.inferno.downloads.dialog.DynamicDownloadDialog
 
-internal fun BaseBrowserFragment.handleOnDownloadFinished(
+internal fun handleOnDownloadFinished(
+    context: Context,
     downloadState: DownloadState,
     downloadJobStatus: Status,
     tryAgain: (String) -> Unit,
@@ -20,7 +22,8 @@ internal fun BaseBrowserFragment.handleOnDownloadFinished(
     if (shouldShowCompletedDownloadDialog(downloadState, downloadJobStatus)) {
         val safeContext = context ?: return
         val onCannotOpenFile: (DownloadState) -> Unit = {
-            showCannotOpenFileError(binding.dynamicSnackbarContainer, safeContext, it)
+            // todo: snackbar
+//            showCannotOpenFileError(binding.dynamicSnackbarContainer, safeContext, it)
         }
         if (downloadState.openInApp && downloadJobStatus == Status.COMPLETED) {
             val fileWasOpened = AbstractFetchDownloadService.openFile(
@@ -37,16 +40,17 @@ internal fun BaseBrowserFragment.handleOnDownloadFinished(
                 downloadJobStatus,
             )
 
-            val dynamicDownloadDialog = DynamicDownloadDialog(
-                context = safeContext,
-                downloadState = downloadState,
-                didFail = downloadJobStatus == Status.FAILED,
-                tryAgain = tryAgain,
-                onCannotOpenFile = onCannotOpenFile,
-                binding = binding.viewDynamicDownloadDialog,
-            ) { sharedViewModel.downloadDialogState.remove(downloadState.sessionId) }
-
-            dynamicDownloadDialog.show()
+            // todo: dialog for downloads
+//            val dynamicDownloadDialog = DynamicDownloadDialog(
+//                context = safeContext,
+//                downloadState = downloadState,
+//                didFail = downloadJobStatus == Status.FAILED,
+//                tryAgain = tryAgain,
+//                onCannotOpenFile = onCannotOpenFile,
+//                binding = binding.viewDynamicDownloadDialog,
+//            ) { sharedViewModel.downloadDialogState.remove(downloadState.sessionId) }
+//
+//            dynamicDownloadDialog.show()
             browserToolbars.forEach { it.expand() }
         }
     }
