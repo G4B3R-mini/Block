@@ -4,7 +4,6 @@
 
 package com.shmibblez.inferno
 
-import android.annotation.SuppressLint
 import android.app.assist.AssistContent
 import android.content.ComponentName
 import android.content.Context
@@ -17,7 +16,6 @@ import android.os.Build
 import android.os.Bundle
 import android.os.StrictMode
 import android.text.TextUtils
-import android.text.format.DateUtils
 import android.util.AttributeSet
 import android.util.Log
 import android.view.ActionMode
@@ -35,13 +33,11 @@ import androidx.appcompat.app.ActionBar
 import androidx.appcompat.widget.Toolbar
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.core.view.doOnAttach
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.Job
@@ -79,7 +75,6 @@ import mozilla.components.support.locale.LocaleAwareAppCompatActivity
 import mozilla.components.support.utils.BootUtils
 import mozilla.components.support.utils.BrowsersCache
 import mozilla.components.support.utils.ManufacturerCodes
-import mozilla.components.support.utils.SafeIntent
 import mozilla.components.support.utils.toSafeIntent
 import mozilla.components.support.webextensions.WebExtensionPopupObserver
 //import mozilla.telemetry.glean.private.NoExtras
@@ -107,14 +102,12 @@ import com.shmibblez.inferno.experiments.ResearchSurfaceDialogFragment
 import com.shmibblez.inferno.ext.alreadyOnDestination
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.getIntentSessionId
-import com.shmibblez.inferno.ext.getIntentSource
 import com.shmibblez.inferno.ext.getNavDirections
 import com.shmibblez.inferno.ext.hasTopDestination
 import com.shmibblez.inferno.ext.nav
 //import com.shmibblez.inferno.ext.recordEventInNimbus
 import com.shmibblez.inferno.ext.setNavigationIcon
 import com.shmibblez.inferno.ext.settings
-import com.shmibblez.inferno.ext.systemGesturesInsets
 import com.shmibblez.inferno.extension.WebExtensionPromptFeature
 import com.shmibblez.inferno.home.HomeFragment
 import com.shmibblez.inferno.home.intent.AssistIntentProcessor
@@ -142,7 +135,6 @@ import com.shmibblez.inferno.perf.StartupTimeline
 //import com.shmibblez.inferno.perf.StartupTypeTelemetry
 import com.shmibblez.inferno.session.PrivateNotificationService
 import com.shmibblez.inferno.settings.SupportUtils
-import com.shmibblez.inferno.shortcut.NewTabShortcutIntentProcessor.Companion.ACTION_OPEN_PRIVATE_TAB
 import com.shmibblez.inferno.splashscreen.ApplyExperimentsOperation
 import com.shmibblez.inferno.splashscreen.DefaultExperimentsOperationStorage
 import com.shmibblez.inferno.splashscreen.DefaultSplashScreenStorage
@@ -1052,7 +1044,7 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
     }
 
     fun openToBrowser(from: BrowserDirection, customTabSessionId: String? = null) {
-        if (navHost.navController.alreadyOnDestination(R.id.browserFragment)) return
+        if (navHost.navController.alreadyOnDestination(R.id.browserComponentWrapperFragment)) return
         @IdRes val fragmentId = if (from.fragmentId != 0) from.fragmentId else null
         val directions = getNavDirections(from, customTabSessionId)
         if (directions != null) {

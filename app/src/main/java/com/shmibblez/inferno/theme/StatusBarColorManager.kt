@@ -9,7 +9,7 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.navigation.fragment.NavHostFragment
-import com.shmibblez.inferno.browser.BrowserFragment
+import com.shmibblez.inferno.browser.BrowserComponentWrapperFragment
 import com.shmibblez.inferno.browser.tabstrip.isTabStripEnabled
 import com.shmibblez.inferno.customtabs.ExternalAppBrowserFragment
 import com.shmibblez.inferno.home.HomeFragment
@@ -41,5 +41,5 @@ class StatusBarColorManager(
     }
 
     private fun isTabStripRelatedFragment(fragment: Fragment) =
-        fragment is HomeFragment || fragment is BrowserFragment || fragment is SearchDialogFragment
+        fragment is HomeFragment || fragment is BrowserComponentWrapperFragment || fragment is SearchDialogFragment
 }

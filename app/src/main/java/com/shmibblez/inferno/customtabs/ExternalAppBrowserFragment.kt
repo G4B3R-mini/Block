@@ -51,6 +51,8 @@ import com.shmibblez.inferno.settings.quicksettings.protections.cookiebanners.ge
 import com.shmibblez.inferno.theme.FirefoxTheme
 import com.shmibblez.inferno.theme.Theme
 
+// TODO: create ExternalAppBrowserComponent and replace this [IMPORTANT]
+
 /**
  * Fragment used for browsing the web within external apps.
  */

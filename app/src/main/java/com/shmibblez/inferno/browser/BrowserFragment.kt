@@ -8,7 +8,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.os.StrictMode
 import android.view.View
-import android.view.ViewGroup
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
@@ -346,7 +345,7 @@ class BrowserFragment : BaseBrowserFragment(), UserInteractionHandler {
                         ShoppingAction.ShoppingSheetStateUpdated(expanded = true),
                     )
                     findNavController().navigate(
-                        BrowserFragmentDirections.actionBrowserFragmentToReviewQualityCheckDialogFragment(),
+                        BrowserComponentWrapperFragmentDirections.actionBrowserFragmentToReviewQualityCheckDialogFragment(),
                     )
                 },
             )
@@ -744,7 +743,7 @@ class BrowserFragment : BaseBrowserFragment(), UserInteractionHandler {
                         val isTrackingProtectionEnabled =
                             tab.trackingProtection.enabled && !hasTrackingProtectionException
                         val directions = if (requireContext().settings().enableUnifiedTrustPanel) {
-                            BrowserFragmentDirections.actionBrowserFragmentToTrustPanelFragment(
+                            BrowserComponentWrapperFragmentDirections.actionBrowserFragmentToTrustPanelFragment(
                                 sessionId = tab.id,
                                 url = tab.content.url,
                                 title = tab.content.title,
@@ -756,7 +755,7 @@ class BrowserFragment : BaseBrowserFragment(), UserInteractionHandler {
                                 cookieBannerUIMode = cookieBannerUIMode,
                             )
                         } else {
-                            BrowserFragmentDirections.actionBrowserFragmentToQuickSettingsSheetDialogFragment(
+                            BrowserComponentWrapperFragmentDirections.actionBrowserFragmentToQuickSettingsSheetDialogFragment(
                                 sessionId = tab.id,
                                 url = tab.content.url,
                                 title = tab.content.title,
@@ -769,7 +768,7 @@ class BrowserFragment : BaseBrowserFragment(), UserInteractionHandler {
                                 cookieBannerUIMode = cookieBannerUIMode,
                             )
                         }
-                        nav(R.id.browserFragment, directions)
+                        nav(R.id.browserComponentWrapperFragment, directions)
                     }
                 }
             }
@@ -813,7 +812,7 @@ class BrowserFragment : BaseBrowserFragment(), UserInteractionHandler {
                             label = getString(R.string.create_collection_view),
                             onClick = {
                                 findNavController().navigate(
-                                    BrowserFragmentDirections.actionGlobalHome(
+                                    BrowserComponentWrapperFragmentDirections.actionGlobalHome(
                                         focusOnAddressBar = false,
                                         scrollToCollection = true,
                                     ),

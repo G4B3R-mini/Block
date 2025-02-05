@@ -21,7 +21,6 @@ import mozilla.components.browser.state.search.SearchEngine
 import mozilla.components.browser.state.selector.getNormalOrPrivateTabs
 import mozilla.components.browser.state.state.availableSearchEngines
 import mozilla.components.browser.state.state.searchEngines
-import mozilla.components.browser.state.state.selectedOrDefaultSearchEngine
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.concept.engine.Engine
 import mozilla.components.concept.engine.prompt.ShareData
@@ -424,7 +423,7 @@ class DefaultSessionControlController(
                 selectTabUseCase.invoke(existingTabForUrl.id)
             }
 
-            navController.navigate(R.id.browserFragment)
+            navController.navigate(R.id.browserComponentWrapperFragment)
         }
     }
 

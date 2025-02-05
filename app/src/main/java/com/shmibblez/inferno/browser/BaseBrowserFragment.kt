@@ -139,7 +139,6 @@ import mozilla.components.support.locale.ActivityContextWrapper
 import mozilla.components.ui.widgets.withCenterAlignedButtons
 //import mozilla.telemetry.glean.private.NoExtras
 import com.shmibblez.inferno.BuildConfig
-import com.shmibblez.inferno.FeatureFlags
 //import com.shmibblez.inferno.GleanMetrics.Events
 //import com.shmibblez.inferno.GleanMetrics.Logins
 //import com.shmibblez.inferno.GleanMetrics.MediaState
@@ -566,7 +565,7 @@ abstract class BaseBrowserFragment :
                                 AppAction.TabStripAction.UpdateLastTabClosed(isPrivate),
                             )
                             findNavController().navigate(
-                                BrowserFragmentDirections.actionGlobalHome(),
+                                BrowserComponentWrapperFragmentDirections.actionGlobalHome(),
                             )
                         },
                         onSelectedTabClick = {},
@@ -576,7 +575,7 @@ abstract class BaseBrowserFragment :
                         onPrivateModeToggleClick = { mode ->
                             activity.browsingModeManager.mode = mode
                             findNavController().navigate(
-                                BrowserFragmentDirections.actionGlobalHome(),
+                                BrowserComponentWrapperFragmentDirections.actionGlobalHome(),
                             )
                         },
                         onTabCounterClick = {
@@ -1501,8 +1500,8 @@ abstract class BaseBrowserFragment :
                                             )
                                         )
                                         findNavController().nav(
-                                            R.id.browserFragment,
-                                            BrowserFragmentDirections.actionGlobalMicrosurveyDialog(
+                                            R.id.browserComponentWrapperFragment,
+                                            BrowserComponentWrapperFragmentDirections.actionGlobalMicrosurveyDialog(
                                                 it.id
                                             ),
                                         )
@@ -1693,8 +1692,8 @@ abstract class BaseBrowserFragment :
                 },
                 onMenuButtonClick = {
                     findNavController().nav(
-                        R.id.browserFragment,
-                        BrowserFragmentDirections.actionGlobalMenuDialogFragment(
+                        R.id.browserComponentWrapperFragment,
+                        BrowserComponentWrapperFragmentDirections.actionGlobalMenuDialogFragment(
                             accesspoint = MenuAccessPoint.Browser,
                         ),
                     )
@@ -1709,8 +1708,8 @@ abstract class BaseBrowserFragment :
     private fun onTabCounterClicked(browsingMode: BrowsingMode) {
         thumbnailsFeature.get()?.requestScreenshot()
         findNavController().nav(
-            R.id.browserFragment,
-            BrowserFragmentDirections.actionGlobalTabsTrayFragment(
+            R.id.browserComponentWrapperFragment,
+            BrowserComponentWrapperFragmentDirections.actionGlobalTabsTrayFragment(
                 page = when (browsingMode) {
                     BrowsingMode.Normal -> Page.NormalTabs
                     BrowsingMode.Private -> Page.PrivateTabs
@@ -1773,8 +1772,8 @@ abstract class BaseBrowserFragment :
                                             )
                                         )
                                         findNavController().nav(
-                                            R.id.browserFragment,
-                                            BrowserFragmentDirections.actionGlobalMicrosurveyDialog(
+                                            R.id.browserComponentWrapperFragment,
+                                            BrowserComponentWrapperFragmentDirections.actionGlobalMicrosurveyDialog(
                                                 it.id
                                             ),
                                         )
@@ -2283,8 +2282,8 @@ abstract class BaseBrowserFragment :
             // Bookmark exists, go to edit fragment
             withContext(Main) {
                 nav(
-                    R.id.browserFragment,
-                    BrowserFragmentDirections.actionGlobalBookmarkEditFragment(existing.guid, true),
+                    R.id.browserComponentWrapperFragment,
+                    BrowserComponentWrapperFragmentDirections.actionGlobalBookmarkEditFragment(existing.guid, true),
                 )
             }
         } else {
@@ -2323,7 +2322,7 @@ abstract class BaseBrowserFragment :
 //                            TOAST_METRIC_SOURCE,
 //                        )
                         findNavController().navigateWithBreadcrumb(
-                            directions = BrowserFragmentDirections.actionGlobalBookmarkEditFragment(
+                            directions = BrowserComponentWrapperFragmentDirections.actionGlobalBookmarkEditFragment(
                                 guid,
                                 true,
                             ),
@@ -2674,8 +2673,8 @@ abstract class BaseBrowserFragment :
 
     private fun navigateToSavedLoginsFragment() {
         val navController = findNavController()
-        if (navController.currentDestination?.id == R.id.browserFragment) {
-            val directions = BrowserFragmentDirections.actionLoginsListFragment()
+        if (navController.currentDestination?.id == R.id.browserComponentWrapperFragment) {
+            val directions = BrowserComponentWrapperFragmentDirections.actionLoginsListFragment()
             navController.navigate(directions)
         }
     }

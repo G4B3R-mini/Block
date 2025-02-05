@@ -108,7 +108,7 @@ class DefaultHistoryMetadataGroupController(
 
     override fun handleOpen(item: History.Metadata) {
         selectOrAddUseCase.invoke(item.url, item.historyMetadataKey)
-        navController.navigate(R.id.browserFragment)
+        navController.navigate(R.id.browserComponentWrapperFragment)
 //        GleanHistory.searchTermGroupOpenTab.record(NoExtras())
     }
 

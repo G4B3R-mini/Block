@@ -61,7 +61,7 @@ class PwaOnboardingObserver(
     @VisibleForTesting
     internal fun navigateToPwaOnboarding() {
         navController.nav(
-            R.id.browserFragment,
+            R.id.browserComponentWrapperFragment,
             BrowserFragmentDirections.actionBrowserFragmentToPwaOnboardingDialogFragment(),
         )
     }

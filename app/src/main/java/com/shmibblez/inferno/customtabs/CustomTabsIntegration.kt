@@ -35,7 +35,7 @@ import mozilla.components.support.utils.ColorUtils.calculateAlphaFromPercentage
 //import mozilla.telemetry.glean.private.NoExtras
 //import com.shmibblez.inferno.GleanMetrics.NavigationBar
 import com.shmibblez.inferno.R
-import com.shmibblez.inferno.browser.BrowserFragment.Companion.OPEN_IN_ACTION_WEIGHT
+import com.shmibblez.inferno.browser.OPEN_IN_ACTION_WEIGHT
 import com.shmibblez.inferno.components.AppStore
 import com.shmibblez.inferno.components.menu.MenuAccessPoint
 import com.shmibblez.inferno.components.toolbar.BrowserToolbarView

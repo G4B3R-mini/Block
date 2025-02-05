@@ -164,7 +164,7 @@ class MenuNavigationMiddleware(
                             R.id.menuDialogFragment,
                             MenuDialogFragmentDirections.actionMenuDialogFragmentToCreateShortcutFragment(),
                             navOptions = NavOptions.Builder()
-                                .setPopUpTo(R.id.browserFragment, false)
+                                .setPopUpTo(R.id.browserComponentWrapperFragment, false)
                                 .build(),
                         )
                     }
@@ -184,7 +184,7 @@ class MenuNavigationMiddleware(
                                 },
                             ),
                             navOptions = NavOptions.Builder()
-                                .setPopUpTo(R.id.browserFragment, false)
+                                .setPopUpTo(R.id.browserComponentWrapperFragment, false)
                                 .build(),
                         )
                     }
@@ -194,7 +194,7 @@ class MenuNavigationMiddleware(
                     R.id.menuDialogFragment,
                     MenuDialogFragmentDirections.actionMenuDialogFragmentToTranslationsDialogFragment(),
                     navOptions = NavOptions.Builder()
-                        .setPopUpTo(R.id.browserFragment, false)
+                        .setPopUpTo(R.id.browserComponentWrapperFragment, false)
                         .build(),
                 )
 
@@ -213,7 +213,7 @@ class MenuNavigationMiddleware(
                         val popUpToId = if (customTab != null) {
                             R.id.externalAppBrowserFragment
                         } else {
-                            R.id.browserFragment
+                            R.id.browserComponentWrapperFragment
                         }
 
                         navController.nav(

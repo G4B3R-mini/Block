@@ -8,7 +8,7 @@ import android.content.Context
 import androidx.appcompat.content.res.AppCompatResources
 import mozilla.components.browser.toolbar.BrowserToolbar
 import com.shmibblez.inferno.R
-import com.shmibblez.inferno.browser.BrowserFragment.Companion.SHARE_WEIGHT
+import com.shmibblez.inferno.browser.SHARE_WEIGHT
 import com.shmibblez.inferno.theme.ThemeManager
 
 /**

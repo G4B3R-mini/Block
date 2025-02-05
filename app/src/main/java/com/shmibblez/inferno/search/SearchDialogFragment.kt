@@ -382,7 +382,7 @@ class SearchDialogFragment : AppCompatDialogFragment(), UserInteractionHandler {
 
         // When displayed above browser or home screen, dismisses keyboard when touching scrim area
         when (getPreviousDestination()?.destination?.id) {
-            R.id.browserFragment -> {
+            R.id.browserComponentWrapperFragment -> {
                 binding.searchWrapper.setOnTouchListener { _, _ ->
                     if (toolbarView.view.url.isEmpty()) {
                         dismissAllowingStateLoss()

@@ -117,7 +117,7 @@ class DefaultBrowserToolbarController(
 
     override fun handleToolbarPaste(text: String) {
         navController.nav(
-            R.id.browserFragment,
+            R.id.browserComponentWrapperFragment,
             BrowserFragmentDirections.actionGlobalSearchDialog(
                 sessionId = currentSession?.id,
                 pastedText = text,
@@ -242,7 +242,7 @@ class DefaultBrowserToolbarController(
 
         val directions =
             BrowserFragmentDirections.actionBrowserFragmentToTranslationsDialogFragment()
-        navController.navigateSafe(R.id.browserFragment, directions)
+        navController.navigateSafe(R.id.browserComponentWrapperFragment, directions)
     }
 
     override fun onShareActionClicked() {

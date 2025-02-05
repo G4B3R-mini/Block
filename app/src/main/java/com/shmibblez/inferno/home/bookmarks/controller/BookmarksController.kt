@@ -67,7 +67,7 @@ class DefaultBookmarksController(
             )
         } else {
             selectTabUseCase.invoke(existingTabForBookmark.id)
-            navController.navigate(R.id.browserFragment)
+            navController.navigate(R.id.browserComponentWrapperFragment)
         }
 
 //        HomeBookmarks.bookmarkClicked.add()

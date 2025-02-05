@@ -100,8 +100,6 @@ import com.shmibblez.inferno.HomeActivity
 import com.shmibblez.inferno.IntentReceiverActivity
 import com.shmibblez.inferno.NavGraphDirections
 import com.shmibblez.inferno.R
-import com.shmibblez.inferno.browser.BrowserFragment.Companion.REVIEW_QUALITY_CHECK_WEIGHT
-import com.shmibblez.inferno.browser.BrowserFragment.Companion.TRANSLATIONS_WEIGHT
 import com.shmibblez.inferno.browser.browsingmode.BrowsingMode
 import com.shmibblez.inferno.browser.tabstrip.isTabStripEnabled
 import com.shmibblez.inferno.components.Components
@@ -1279,7 +1277,7 @@ fun BrowserComponent(
 //                            AppAction.TabStripAction.UpdateLastTabClosed(isPrivate),
 //                        )
 //                        navController.navigate(
-//                            BrowserFragmentDirections.actionGlobalHome(),
+//                            BrowserComponentWrapperFragmentDirections.actionGlobalHome(),
 //                        )
 //                    },
 //                    onSelectedTabClick = {},
@@ -1289,7 +1287,7 @@ fun BrowserComponent(
 //                    onPrivateModeToggleClick = { mode ->
 //                        activity.browsingModeManager.mode = mode
 //                        navController.navigate(
-//                            BrowserFragmentDirections.actionGlobalHome(),
+//                            BrowserComponentWrapperFragmentDirections.actionGlobalHome(),
 //                        )
 //                    },
 //                    onTabCounterClick = {
@@ -2679,7 +2677,7 @@ private fun initializeNavBar(
 //                                    )
 //                                    navController.nav(
 //                                        R.id.browserFragment,
-//                                        BrowserFragmentDirections.actionGlobalMicrosurveyDialog(
+//                                        BrowserComponentWrapperFragmentDirections.actionGlobalMicrosurveyDialog(
 //                                            it.id
 //                                        ),
 //                                    )
@@ -2869,7 +2867,7 @@ internal fun NavigationButtonsCFR(
 //            onMenuButtonClick = {
 //                navController.nav(
 //                    R.id.browserFragment,
-//                    BrowserFragmentDirections.actionGlobalMenuDialogFragment(
+//                    BrowserComponentWrapperFragmentDirections.actionGlobalMenuDialogFragment(
 //                        accesspoint = MenuAccessPoint.Browser,
 //                    ),
 //                )
@@ -2890,8 +2888,8 @@ private fun onTabCounterClicked(
 ) {
     thumbnailsFeature.get()?.requestScreenshot()
     navController.nav(
-        R.id.browserFragment,
-        BrowserFragmentDirections.actionGlobalTabsTrayFragment(
+        R.id.browserComponentWrapperFragment,
+        BrowserComponentWrapperFragmentDirections.actionGlobalTabsTrayFragment(
             page = when (browsingMode) {
                 BrowsingMode.Normal -> Page.NormalTabs
                 BrowsingMode.Private -> Page.PrivateTabs
@@ -2961,7 +2959,7 @@ private fun initializeMicrosurveyPrompt(context: Context, view: View, fullScreen
 //                                    )
 //                                    navController.nav(
 //                                        R.id.browserFragment,
-//                                        BrowserFragmentDirections.actionGlobalMicrosurveyDialog(
+//                                        BrowserComponentWrapperFragmentDirections.actionGlobalMicrosurveyDialog(
 //                                            it.id
 //                                        ),
 //                                    )
@@ -3448,8 +3446,8 @@ private suspend fun bookmarkTapped(
         withContext(Main) {
             nav(
                 navController,
-                R.id.browserFragment,
-                BrowserFragmentDirections.actionGlobalBookmarkEditFragment(existing.guid, true),
+                R.id.browserComponentWrapperFragment,
+                BrowserComponentWrapperFragmentDirections.actionGlobalBookmarkEditFragment(existing.guid, true),
             )
         }
     } else {
@@ -3486,7 +3484,7 @@ private suspend fun bookmarkTapped(
 //                            TOAST_METRIC_SOURCE,
 //                        )
                     navController.navigateWithBreadcrumb(
-                        directions = BrowserFragmentDirections.actionGlobalBookmarkEditFragment(
+                        directions = BrowserComponentWrapperFragmentDirections.actionGlobalBookmarkEditFragment(
                             guid,
                             true,
                         ),
@@ -3840,8 +3838,8 @@ private fun removeLastSavedGeneratedPassword(setLastSavedGeneratedPassword: (Str
 }
 
 private fun navigateToSavedLoginsFragment(navController: NavController) {
-    if (navController.currentDestination?.id == R.id.browserFragment) {
-        val directions = BrowserFragmentDirections.actionLoginsListFragment()
+    if (navController.currentDestination?.id == R.id.browserComponentWrapperFragment) {
+        val directions = BrowserComponentWrapperFragmentDirections.actionLoginsListFragment()
         navController.navigate(directions)
     }
 }
@@ -4048,7 +4046,7 @@ private fun initReviewQualityCheck(
                 ShoppingAction.ShoppingSheetStateUpdated(expanded = true),
             )
             navController.navigate(
-                BrowserFragmentDirections.actionBrowserFragmentToReviewQualityCheckDialogFragment(),
+                BrowserComponentWrapperFragmentDirections.actionBrowserFragmentToReviewQualityCheckDialogFragment(),
             )
         },
     )
@@ -4421,7 +4419,7 @@ fun navToQuickSettingsSheet(
 //                    val isTrackingProtectionEnabled =
 //                        tab.trackingProtection.enabled && !hasTrackingProtectionException
 //                    val directions = if (context.settings().enableUnifiedTrustPanel) {
-//                        BrowserFragmentDirections.actionBrowserFragmentToTrustPanelFragment(
+//                        BrowserComponentWrapperFragmentDirections.actionBrowserFragmentToTrustPanelFragment(
 //                            sessionId = tab.id,
 //                            url = tab.content.url,
 //                            title = tab.content.title,
@@ -4433,7 +4431,7 @@ fun navToQuickSettingsSheet(
 //                            cookieBannerUIMode = cookieBannerUIMode,
 //                        )
 //                    } else {
-//                        BrowserFragmentDirections.actionBrowserFragmentToQuickSettingsSheetDialogFragment(
+//                        BrowserComponentWrapperFragmentDirections.actionBrowserFragmentToQuickSettingsSheetDialogFragment(
 //                            sessionId = tab.id,
 //                            url = tab.content.url,
 //                            title = tab.content.title,
@@ -4500,7 +4498,7 @@ private fun collectionStorageObserver(
 //                            label = context.getString(R.string.create_collection_view),
 //                            onClick = {
 //                                navController.navigate(
-//                                    BrowserFragmentDirections.actionGlobalHome(
+//                                    BrowserComponentWrapperFragmentDirections.actionGlobalHome(
 //                                        focusOnAddressBar = false,
 //                                        scrollToCollection = true,
 //                                    ),

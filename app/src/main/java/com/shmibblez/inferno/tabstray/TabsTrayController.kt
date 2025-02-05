@@ -15,7 +15,6 @@ import mozilla.components.browser.state.action.DebugAction
 import mozilla.components.browser.state.action.LastAccessAction
 import mozilla.components.browser.state.selector.findTab
 import mozilla.components.browser.state.selector.getNormalOrPrivateTabs
-import mozilla.components.browser.state.selector.normalTabs
 import mozilla.components.browser.state.state.BrowserState
 import mozilla.components.browser.state.state.SessionState
 import mozilla.components.browser.state.state.TabSessionState
@@ -293,10 +292,10 @@ class DefaultTabsTrayController(
     override fun handleNavigateToBrowser() {
         dismissTray()
 
-        if (navController.currentDestination?.id == R.id.browserFragment) {
+        if (navController.currentDestination?.id == R.id.browserComponentWrapperFragment) {
             return
-        } else if (!navController.popBackStack(R.id.browserFragment, false)) {
-            navController.navigate(R.id.browserFragment)
+        } else if (!navController.popBackStack(R.id.browserComponentWrapperFragment, false)) {
+            navController.navigate(R.id.browserComponentWrapperFragment)
         }
     }
 

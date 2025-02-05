@@ -140,7 +140,7 @@ class TranslationSettingsFragment : Fragment(), UserInteractionHandler {
     }
 
     override fun onBackPressed(): Boolean {
-        return if (findNavController().previousBackStackEntry?.destination?.id == R.id.browserFragment) {
+        return if (findNavController().previousBackStackEntry?.destination?.id == R.id.browserComponentWrapperFragment) {
             findNavController().navigate(
                 TranslationSettingsFragmentDirections.actionTranslationSettingsFragmentToTranslationsDialogFragment(
                     translationsDialogAccessPoint = TranslationsDialogAccessPoint.TranslationsOptions,

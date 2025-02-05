@@ -21,7 +21,8 @@
             app:layout_constraintHeight_min="1dp"
             app:layout_constraintBottom_toTopOf="@+id/addressSelectBar"
             app:layout_constraintTop_toTopOf="parent"
-            tools:context="browser.BrowserFragment">
+            tools:context="browser.BrowserComponentWrapperFragment">
+<!--            tools:context="browser.BrowserFragment">-->
 
             <mozilla.components.ui.widgets.VerticalSwipeRefreshLayout
                 android:id="@+id/swipeRefresh"

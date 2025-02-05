@@ -19,7 +19,7 @@ abstract class LibraryPageFragment<T> : Fragment() {
     abstract val selectedItems: Set<T>
 
     protected fun close() {
-        if (!findNavController().popBackStack(R.id.browserFragment, false)) {
+        if (!findNavController().popBackStack(R.id.browserComponentWrapperFragment, false)) {
             findNavController().popBackStack(R.id.homeFragment, false)
         }
     }
