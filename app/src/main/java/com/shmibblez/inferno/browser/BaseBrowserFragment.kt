@@ -2571,6 +2571,7 @@ abstract class BaseBrowserFragment :
     }
 
     override fun onAccessibilityStateChanged(enabled: Boolean) {
+        registerForActivityResult {  }
         if (_browserToolbarView != null) {
             browserToolbarView.setToolbarBehavior(enabled)
         }

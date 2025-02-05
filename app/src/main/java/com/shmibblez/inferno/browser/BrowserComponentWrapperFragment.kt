@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.accessibility.AccessibilityManager
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import com.shmibblez.inferno.R
@@ -18,7 +19,8 @@ class OnActivityResultModel(
     val resultCode: Int
 )
 
-class BrowserComponentWrapperFragment : Fragment(), UserInteractionHandler, ActivityResultHandler {
+class BrowserComponentWrapperFragment : Fragment(), UserInteractionHandler, ActivityResultHandler,
+    AccessibilityManager.AccessibilityStateChangeListener {
     private val baseComposeView: ComposeView
         get() = requireView().findViewById(R.id.baseComposeView)
 
@@ -89,5 +91,9 @@ class BrowserComponentWrapperFragment : Fragment(), UserInteractionHandler, Acti
     override fun onBackPressed(): Boolean {
 //        TODO("Not yet implemented")
         return false
+    }
+
+    override fun onAccessibilityStateChanged(enabled: Boolean) {
+        // todo: make toolbar unscrollable if true
     }
 }

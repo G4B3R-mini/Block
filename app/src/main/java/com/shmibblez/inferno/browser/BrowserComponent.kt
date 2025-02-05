@@ -45,6 +45,10 @@ import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.SnackbarVisuals
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -118,12 +122,15 @@ import com.shmibblez.inferno.components.toolbar.ToolbarPosition
 import com.shmibblez.inferno.components.toolbar.interactor.BrowserToolbarInteractor
 import com.shmibblez.inferno.components.toolbar.navbar.shouldAddNavigationBar
 import com.shmibblez.inferno.components.toolbar.ui.createShareBrowserAction
+import com.shmibblez.inferno.compose.snackbar.AcornSnackbarHostState
 import com.shmibblez.inferno.compose.snackbar.Snackbar
+import com.shmibblez.inferno.compose.snackbar.SnackbarHost
 import com.shmibblez.inferno.compose.snackbar.SnackbarState
 import com.shmibblez.inferno.customtabs.ExternalAppBrowserActivity
 import com.shmibblez.inferno.downloads.DownloadService
 import com.shmibblez.inferno.downloads.dialog.DynamicDownloadDialog
 import com.shmibblez.inferno.downloads.dialog.StartDownloadDialog
+import com.shmibblez.inferno.ext.accessibilityManager
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.consumeFlow
 import com.shmibblez.inferno.ext.getPreferenceKey
@@ -159,6 +166,7 @@ import com.shmibblez.inferno.theme.FirefoxTheme
 import com.shmibblez.inferno.theme.ThemeManager
 import com.shmibblez.inferno.toolbar.BrowserToolbar
 import com.shmibblez.inferno.toolbar.ToolbarBottomMenuSheet
+import com.shmibblez.inferno.utils.allowUndo
 import com.shmibblez.inferno.wifi.SitePermissionsWifiIntegration
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -261,6 +269,20 @@ import mozilla.components.browser.toolbar.BrowserToolbar as BrowserToolbarCompat
 
 // todo: implement [BrowserFragment], [BaseBrowserFragment]
 // todo: implement layout from fragment_browser.xml
+// todo: from fragment_browser.xml, for below views first wrap views with AndroidView, then
+//  progressively implement in compose
+//   implement CrashContentView
+//   implement startDownloadDialogContaier
+//   implement dynamicSnackbarContainer
+//   implement loginSelectBar
+//   implement suggestStrongPasswordBar
+//   implement AddressSelectBara
+//   implement CreditCardSelectBar
+//   implement TabPreview
+// TODO: start with snackbar
+
+// todo: test
+//   - savedLoginsLauncher
 
 // TODO:
 //  - implement composable FindInPageBar
@@ -376,6 +398,7 @@ fun BrowserComponent(
     val view = LocalView.current
     val localConfiguration = LocalConfiguration.current
     val parentFragmentManager = context.getActivity()!!.supportFragmentManager
+    val snackbarHostState = remember { AcornSnackbarHostState() }
 
     // browser state observer setup
     val localLifecycleOwner = LocalLifecycleOwner.current
@@ -405,18 +428,22 @@ fun BrowserComponent(
     val windowFeature = ViewBoundFeatureWrapper<WindowFeature>()
 //    val openInAppOnboardingObserver = ViewBoundFeatureWrapper<OpenInAppOnboardingObserver>()
     val reviewQualityCheckFeature = ViewBoundFeatureWrapper<ReviewQualityCheckFeature>()
-    val translationsBinding = ViewBoundFeatureWrapper<TranslationsBinding>()
+//    val translationsBinding = ViewBoundFeatureWrapper<TranslationsBinding>()
 
-    var readerModeAvailable = remember{mutableStateOf(false)}
-    val (reviewQualityCheckAvailable, setReviewQualityCheckAvailable) = remember{mutableStateOf(false)}
-    var translationsAvailable = remember{mutableStateOf(false)}
+    var readerModeAvailable = remember { mutableStateOf(false) }
+    val (reviewQualityCheckAvailable, setReviewQualityCheckAvailable) = remember {
+        mutableStateOf(
+            false
+        )
+    }
+    var translationsAvailable = remember { mutableStateOf(false) }
 
     var pwaOnboardingObserver: PwaOnboardingObserver? = null
 
-    @VisibleForTesting var leadingAction: BrowserToolbar.Button? = null
-    var forwardAction: BrowserToolbar.TwoStateButton? = null
-    var backAction: BrowserToolbar.TwoStateButton? = null
-    var refreshAction: BrowserToolbar.TwoStateButton? = null
+//    @VisibleForTesting var leadingAction: BrowserToolbar.Button? = null
+//    var forwardAction: BrowserToolbar.TwoStateButton? = null
+//    var backAction: BrowserToolbar.TwoStateButton? = null
+//    var refreshAction: BrowserToolbar.TwoStateButton? = null
     var isTablet: Boolean = false/* BrowserFragment  vars */
 
     /* BaseBrowserFragment vars */
@@ -453,21 +480,22 @@ fun BrowserComponent(
 //    @VisibleForTesting
 //    var _menuButtonView: MenuButton? = null
 
-    val readerViewFeature = remember{ ViewBoundFeatureWrapper<ReaderViewFeature>() }
-    val thumbnailsFeature = remember{ ViewBoundFeatureWrapper<BrowserThumbnails>() }
+    val readerViewFeature = remember { ViewBoundFeatureWrapper<ReaderViewFeature>() }
+    val thumbnailsFeature = remember { ViewBoundFeatureWrapper<BrowserThumbnails>() }
 
     @VisibleForTesting val messagingFeatureMicrosurvey = ViewBoundFeatureWrapper<MessagingFeature>()
 
-    val sessionFeature = remember{ ViewBoundFeatureWrapper<SessionFeature>() }
-    val contextMenuFeature = remember{ ViewBoundFeatureWrapper<ContextMenuFeature>() }
-    val downloadsFeature = remember{ ViewBoundFeatureWrapper<DownloadsFeature>() }
-    val shareDownloadsFeature = remember{ ViewBoundFeatureWrapper<ShareDownloadFeature>() }
-    val copyDownloadsFeature = remember{ ViewBoundFeatureWrapper<CopyDownloadFeature>() }
-    val promptsFeature = remember{ ViewBoundFeatureWrapper<PromptFeature>() }
+    val sessionFeature = remember { ViewBoundFeatureWrapper<SessionFeature>() }
+    val contextMenuFeature = remember { ViewBoundFeatureWrapper<ContextMenuFeature>() }
+    val downloadsFeature = remember { ViewBoundFeatureWrapper<DownloadsFeature>() }
+    val shareDownloadsFeature = remember { ViewBoundFeatureWrapper<ShareDownloadFeature>() }
+    val copyDownloadsFeature = remember { ViewBoundFeatureWrapper<CopyDownloadFeature>() }
+    val promptsFeature = remember { ViewBoundFeatureWrapper<PromptFeature>() }
 //    lateinit var loginBarsIntegration: LoginBarsIntegration
 
 //    @VisibleForTesting
-    val findInPageIntegration = ViewBoundFeatureWrapper<com.shmibblez.inferno.components.FindInPageIntegration>()
+    val findInPageIntegration =
+        ViewBoundFeatureWrapper<com.shmibblez.inferno.components.FindInPageIntegration>()
     val toolbarIntegration = ViewBoundFeatureWrapper<ToolbarIntegration>()
     val bottomToolbarContainerIntegration =
         ViewBoundFeatureWrapper<BottomToolbarContainerIntegration>()
@@ -505,7 +533,10 @@ fun BrowserComponent(
 
     val currentStartDownloadDialog by remember { mutableStateOf<StartDownloadDialog?>(null) }
 
-    lateinit var savedLoginsLauncher: ActivityResultLauncher<Intent>
+    var savedLoginsLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            navigateToSavedLoginsFragment(navController)
+        } // ActivityResultLauncher<Intent>
 
     val (lastSavedGeneratedPassword, setLastSavedGeneratedPassword) = remember {
         mutableStateOf<String?>(
@@ -549,126 +580,6 @@ fun BrowserComponent(
         }
     }
 
-    DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            when (event) {
-                Lifecycle.Event.ON_CREATE -> {
-//                    super.onCreate(savedInstanceState)
-                    // todo: registerForActivityResult
-//                    savedLoginsLauncher = registerForActivityResult { navigateToSavedLoginsFragment() }
-
-                }
-
-                Lifecycle.Event.ON_DESTROY -> {
-//                    super.onDestroyView()
-//                    binding.engineView.setActivityContext(null)
-                    // todo: accessibility
-//                    context.accessibilityManager.removeAccessibilityStateChangeListener(this)
-
-//                    _bottomToolbarContainerView = null
-//                    _browserToolbarView = null
-//                    _browserToolbarInteractor = null
-//                    _binding = null
-
-
-                    isTablet = false
-                    leadingAction = null
-                    forwardAction = null
-                    backAction = null
-                    refreshAction = null
-                }
-
-                Lifecycle.Event.ON_START -> {
-//                    super.onStart()
-//                    val context = context
-                    val settings = context.settings()
-
-                    if (!settings.userKnowsAboutPwas) {
-                        pwaOnboardingObserver = PwaOnboardingObserver(
-                            store = context.components.core.store,
-                            lifecycleOwner = lifecycleOwner,
-                            navController = navController,
-                            settings = settings,
-                            webAppUseCases = context.components.useCases.webAppUseCases,
-                        ).also {
-                            it.start()
-                        }
-                    }
-
-                    subscribeToTabCollections(context, lifecycleOwner)
-                    updateLastBrowseActivity(context)
-                }
-
-                Lifecycle.Event.ON_STOP -> {
-//                    super.onStop()
-                    initUIJob?.cancel()
-                    currentStartDownloadDialog?.dismiss()
-
-                    context.components.core.store.state.findTabOrCustomTabOrSelectedTab(
-                        customTabSessionId
-                    )?.let { session ->
-                        // If we didn't enter PiP, exit full screen on stop
-                        if (!session.content.pictureInPictureEnabled && fullScreenFeature.onBackPressed()) {
-                            fullScreenChanged(false, context)
-                        }
-                    }
-
-                    updateLastBrowseActivity(context)
-                    updateHistoryMetadata(context)
-                    pwaOnboardingObserver?.stop()
-                }
-
-                Lifecycle.Event.ON_PAUSE -> {
-//                    super.onPause()
-                    if (navController.currentDestination?.id != R.id.searchDialogFragment) {
-                        view?.hideKeyboard()
-                    }
-
-                    context.components.services.appLinksInterceptor.updateFragmentManger(
-                        fragmentManager = null,
-                    )
-                }
-
-                Lifecycle.Event.ON_RESUME -> {
-                    val components = context.components
-
-                    val preferredColorScheme = components.core.getPreferredColorScheme()
-                    if (components.core.engine.settings.preferredColorScheme != preferredColorScheme) {
-                        components.core.engine.settings.preferredColorScheme = preferredColorScheme
-                        components.useCases.sessionUseCases.reload()
-                    }
-                    hideToolbar(context)
-
-                    components.services.appLinksInterceptor.updateFragmentManger(
-                        fragmentManager = parentFragmentManager,
-                    )
-                    context?.settings()?.shouldOpenLinksInApp(customTabSessionId != null)
-                        ?.let { openLinksInExternalApp ->
-                            components.services.appLinksInterceptor.updateLaunchInApp {
-                                openLinksInExternalApp
-                            }
-                        }
-
-                    evaluateMessagesForMicrosurvey(components)
-
-                    context.components.core.tabCollectionStorage.register(
-                        collectionStorageObserver(context, navController, view),
-                        lifecycleOwner,
-                    )
-                }
-
-                else -> {
-
-                }
-            }
-
-        }
-        lifecycleOwner.lifecycle.addObserver(observer)
-
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
-        }
-    }
 
     // browser display mode
     val (browserMode, setBrowserMode) = remember {
@@ -1716,7 +1627,11 @@ fun BrowserComponent(
                             lastSavedGeneratedPassword,
                         )
                     },
-                    removeLastSavedGeneratedPassword = { removeLastSavedGeneratedPassword(setLastSavedGeneratedPassword) },
+                    removeLastSavedGeneratedPassword = {
+                        removeLastSavedGeneratedPassword(
+                            setLastSavedGeneratedPassword
+                        )
+                    },
                     creditCardDelegate = object : CreditCardDelegate {
                         // todo: credit card delegate
 //                        override val creditCardPickerView
@@ -1880,13 +1795,19 @@ fun BrowserComponent(
                     context.components.useCases.sessionUseCases,
                     customTabSessionId,
                     { viewportFitChange(it, context) },
-                        { fullScreenChanged(false, context) },
+                    { fullScreenChanged(false, context) },
                 ),
                 owner = lifecycleOwner,
                 view = view,
             )
 
-            closeFindInPageBarOnNavigation(store, lifecycleOwner, context, coroutineScope, findInPageIntegration)
+            closeFindInPageBarOnNavigation(
+                store,
+                lifecycleOwner,
+                context,
+                coroutineScope,
+                findInPageIntegration
+            )
 
             store.flowScoped(lifecycleOwner) { flow ->
                 flow.mapNotNull { state -> state.findTabOrCustomTabOrSelectedTab(customTabSessionId) }
@@ -1986,8 +1907,21 @@ fun BrowserComponent(
             updateBrowserToolbarMenuVisibility()
 
             initReaderMode(context, view)
-            initTranslationsAction(context, view, browserToolbarInteractor!!, translationsAvailable.value)
-            initReviewQualityCheck(context, lifecycleOwner, view, navController, setReviewQualityCheckAvailable, reviewQualityCheckAvailable, reviewQualityCheckFeature )
+            initTranslationsAction(
+                context,
+                view,
+                browserToolbarInteractor!!,
+                translationsAvailable.value
+            )
+            initReviewQualityCheck(
+                context,
+                lifecycleOwner,
+                view,
+                navController,
+                setReviewQualityCheckAvailable,
+                reviewQualityCheckAvailable,
+                reviewQualityCheckFeature
+            )
             initSharePageAction(context, browserToolbarInteractor)
             initReloadAction(context)
 
@@ -2029,10 +1963,23 @@ fun BrowserComponent(
             // We currently only need this observer to navigate to home
             // in case all tabs have been removed on startup. No need to
             // this if we have a known session to display.
-            observeRestoreComplete(context.components.core.store, context, lifecycleOwner, coroutineScope, navController)
+            observeRestoreComplete(
+                context.components.core.store,
+                context,
+                lifecycleOwner,
+                coroutineScope,
+                navController
+            )
         }
 
-        observeTabSelection(context.components.core.store, context, lifecycleOwner, coroutineScope, currentStartDownloadDialog, browserInitialized)
+        observeTabSelection(
+            context.components.core.store,
+            context,
+            lifecycleOwner,
+            coroutineScope,
+            currentStartDownloadDialog,
+            browserInitialized
+        )
 
         if (!context.components.fenixOnboarding.userHasBeenOnboarded()) {
             observeTabSource(context.components.core.store, context, lifecycleOwner, coroutineScope)
@@ -2057,7 +2004,127 @@ fun BrowserComponent(
         )/* BaseBrowserFragment onViewCreated */
     }
 
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_CREATE -> {
+//                    super.onCreate(savedInstanceState)
+//                    savedLoginsLauncher = registerForActivityResult { navigateToSavedLoginsFragment(navController) }
+                }
+
+                Lifecycle.Event.ON_DESTROY -> {
+//                    super.onDestroyView()
+                    engineView!!.setActivityContext(null)
+                    context.accessibilityManager.removeAccessibilityStateChangeListener(view.findFragment<BrowserComponentWrapperFragment>())
+
+//                    _bottomToolbarContainerView = null
+//                    _browserToolbarView = null
+//                    _browserToolbarInteractor = null
+//                    _binding = null
+
+
+                    isTablet = false
+//                    leadingAction = null
+//                    forwardAction = null
+//                    backAction = null
+//                    refreshAction = null
+                }
+
+                Lifecycle.Event.ON_START -> {
+//                    super.onStart()
+//                    val context = context
+                    val settings = context.settings()
+
+                    if (!settings.userKnowsAboutPwas) {
+                        pwaOnboardingObserver = PwaOnboardingObserver(
+                            store = context.components.core.store,
+                            lifecycleOwner = lifecycleOwner,
+                            navController = navController,
+                            settings = settings,
+                            webAppUseCases = context.components.useCases.webAppUseCases,
+                        ).also {
+                            it.start()
+                        }
+                    }
+
+                    subscribeToTabCollections(context, lifecycleOwner)
+                    updateLastBrowseActivity(context)
+                }
+
+                Lifecycle.Event.ON_STOP -> {
+//                    super.onStop()
+                    initUIJob?.cancel()
+                    currentStartDownloadDialog?.dismiss()
+
+                    context.components.core.store.state.findTabOrCustomTabOrSelectedTab(
+                        customTabSessionId
+                    )?.let { session ->
+                        // If we didn't enter PiP, exit full screen on stop
+                        if (!session.content.pictureInPictureEnabled && fullScreenFeature.onBackPressed()) {
+                            fullScreenChanged(false, context)
+                        }
+                    }
+
+                    updateLastBrowseActivity(context)
+                    updateHistoryMetadata(context)
+                    pwaOnboardingObserver?.stop()
+                }
+
+                Lifecycle.Event.ON_PAUSE -> {
+//                    super.onPause()
+                    if (navController.currentDestination?.id != R.id.searchDialogFragment) {
+                        view?.hideKeyboard()
+                    }
+
+                    context.components.services.appLinksInterceptor.updateFragmentManger(
+                        fragmentManager = null,
+                    )
+                }
+
+                Lifecycle.Event.ON_RESUME -> {
+                    val components = context.components
+
+                    val preferredColorScheme = components.core.getPreferredColorScheme()
+                    if (components.core.engine.settings.preferredColorScheme != preferredColorScheme) {
+                        components.core.engine.settings.preferredColorScheme = preferredColorScheme
+                        components.useCases.sessionUseCases.reload()
+                    }
+                    hideToolbar(context)
+
+                    components.services.appLinksInterceptor.updateFragmentManger(
+                        fragmentManager = parentFragmentManager,
+                    )
+                    context?.settings()?.shouldOpenLinksInApp(customTabSessionId != null)
+                        ?.let { openLinksInExternalApp ->
+                            components.services.appLinksInterceptor.updateLaunchInApp {
+                                openLinksInExternalApp
+                            }
+                        }
+
+                    evaluateMessagesForMicrosurvey(components)
+
+                    context.components.core.tabCollectionStorage.register(
+                        collectionStorageObserver(context, navController, view),
+                        lifecycleOwner,
+                    )
+                }
+
+                else -> {
+
+                }
+            }
+
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
+
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState = snackbarHostState) },
         contentWindowInsets = ScaffoldDefaults.contentWindowInsets,
         content = { paddingValues ->
             MozAwesomeBar(setView = { ab -> awesomeBar = ab })
@@ -2338,7 +2405,7 @@ private fun getPromptsFeature(promptsFeature: ViewBoundFeatureWrapper<PromptFeat
 }
 
 
-private fun initializeUI(view: View, context: Context, setBrowserInitialized: (Boolean)-> Unit) {
+private fun initializeUI(view: View, context: Context, setBrowserInitialized: (Boolean) -> Unit) {
     val tab = getCurrentTab(context)
     setBrowserInitialized(
         if (tab != null) {
@@ -2364,8 +2431,30 @@ internal fun initializeUI(
 
 }
 
-private fun showUndoSnackbar(message: String, context: Context, lifecycleOwner: LifecycleOwner) {
-    // todo: snackbar
+private fun showUndoSnackbar(
+    message: String,
+    context: Context,
+    coroutineScope: CoroutineScope,
+    lifecycleOwner: LifecycleOwner,
+    snackbarHostState: AcornSnackbarHostState
+) {
+    coroutineScope.launch {
+        val result = snackbarHostState.defaultSnackbarHostState.showSnackbar(
+            message,
+            actionLabel = context.getString(R.string.snackbar_deleted_undo), //"undo",
+            duration = SnackbarDuration.Long
+        )
+        when (result) {
+            SnackbarResult.ActionPerformed -> {
+                context.components.useCases.tabsUseCases.undo.invoke()
+            }
+
+            SnackbarResult.Dismissed -> {
+                // nothing
+            }
+        }
+    }
+
 //    lifecycleOwner.lifecycleScope.allowUndo(
 //        binding.dynamicSnackbarContainer,
 //        message,
@@ -2383,27 +2472,38 @@ private fun showUndoSnackbar(message: String, context: Context, lifecycleOwner: 
  *
  * [See details](https://developer.android.com/develop/ui/views/touch-and-input/copy-paste#duplicate-notifications).
  */
-private fun showSnackbarForClipboardCopy() {
-    // todo: snackbar
-//    if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2) {
+private fun showSnackbarForClipboardCopy(context: Context, coroutineScope: CoroutineScope, snackbarHostState: AcornSnackbarHostState) {
+    if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2) {
+        coroutineScope.launch {
+            snackbarHostState.defaultSnackbarHostState.showSnackbar(
+                message = context.getString(R.string.snackbar_copy_image_to_clipboard_confirmation),
+                duration = SnackbarDuration.Long,
+            )
+        }
 //        ContextMenuSnackbarDelegate().show(
 //            snackBarParentView = binding.dynamicSnackbarContainer,
 //            text = R.string.snackbar_copy_image_to_clipboard_confirmation,
 //            duration = LENGTH_LONG,
 //        )
-//    }
+    }
 }
 
 /**
  * Show a [Snackbar] when credentials are saved or updated.
  */
-private fun showSnackbarAfterLoginChange(isUpdate: Boolean) {
+private fun showSnackbarAfterLoginChange(isUpdate: Boolean, context:Context, coroutineScope: CoroutineScope, snackbarHostState: AcornSnackbarHostState) {
     val snackbarText = if (isUpdate) {
         R.string.mozac_feature_prompt_login_snackbar_username_updated
     } else {
         R.string.mozac_feature_prompts_suggest_strong_password_saved_snackbar_title
     }
-    // todo: snackbar
+    coroutineScope.launch {
+        snackbarHostState.defaultSnackbarHostState.showSnackbar(
+            message = context.getString(snackbarText),
+            duration = SnackbarDuration.Long,
+        )
+    }
+
 //    ContextMenuSnackbarDelegate().show(
 //        snackBarParentView = binding.dynamicSnackbarContainer,
 //        text = snackbarText,
@@ -2478,7 +2578,14 @@ private fun showPinDialogWarning(
     context.settings().incrementSecureWarningCount()
 }
 
-private fun closeFindInPageBarOnNavigation(store: BrowserStore, lifecycleOwner:LifecycleOwner, context: Context, coroutineScope: CoroutineScope, findInPageIntegration: ViewBoundFeatureWrapper<com.shmibblez.inferno.components.FindInPageIntegration>,customTabSessionId: String? = null,) {
+private fun closeFindInPageBarOnNavigation(
+    store: BrowserStore,
+    lifecycleOwner: LifecycleOwner,
+    context: Context,
+    coroutineScope: CoroutineScope,
+    findInPageIntegration: ViewBoundFeatureWrapper<com.shmibblez.inferno.components.FindInPageIntegration>,
+    customTabSessionId: String? = null,
+) {
     consumeFlow(store, lifecycleOwner, context, coroutineScope) { flow ->
         flow.mapNotNull { state ->
             state.findCustomTabOrSelectedTab(customTabSessionId)
@@ -2918,7 +3025,11 @@ internal fun initializeMicrosurveyFeature(
 }
 
 @Suppress("LongMethod")
-private fun initializeMicrosurveyPrompt(context: Context, view: View, fullScreenFeature: ViewBoundFeatureWrapper<FullScreenFeature>) {
+private fun initializeMicrosurveyPrompt(
+    context: Context,
+    view: View,
+    fullScreenFeature: ViewBoundFeatureWrapper<FullScreenFeature>
+) {
 //    val context = context
 //    val view = requireView()
 
@@ -3209,7 +3320,7 @@ fun onForwardPressed(sessionFeature: ViewBoundFeatureWrapper<SessionFeature>): B
 //        promptsFeature,
 //        webAuthnFeature,
 //    ).any { it.onActivityResult(requestCode, data, resultCode) }
-     return true
+    return true
 }
 
 /**
@@ -3447,7 +3558,10 @@ private suspend fun bookmarkTapped(
             nav(
                 navController,
                 R.id.browserComponentWrapperFragment,
-                BrowserComponentWrapperFragmentDirections.actionGlobalBookmarkEditFragment(existing.guid, true),
+                BrowserComponentWrapperFragmentDirections.actionGlobalBookmarkEditFragment(
+                    existing.guid,
+                    true
+                ),
             )
         }
     } else {
@@ -3530,7 +3644,11 @@ fun onHomePressed(pipFeature: PictureInPictureFeature) = pipFeature?.onHomePress
 /**
  * Exit fullscreen mode when exiting PIP mode
  */
-private fun pipModeChanged(session: SessionState, context: Context, backPressedHandler: onBackPressedHandler) {
+private fun pipModeChanged(
+    session: SessionState,
+    context: Context,
+    backPressedHandler: onBackPressedHandler
+) {
     // todo: isAdded
     if (!session.content.pictureInPictureEnabled && session.content.fullScreen) { // && isAdded) {
         onBackPressed(backPressedHandler)
@@ -4039,7 +4157,7 @@ private fun initReviewQualityCheck(
         )!!,
         contentDescription = context.getString(R.string.review_quality_check_open_handle_content_description),
         contentDescriptionSelected = context.getString(R.string.review_quality_check_close_handle_content_description),
-        visible = {reviewQualityCheckAvailable},
+        visible = { reviewQualityCheckAvailable },
         weight = { REVIEW_QUALITY_CHECK_WEIGHT },
         listener = { _ ->
             context.components.appStore.dispatch(
