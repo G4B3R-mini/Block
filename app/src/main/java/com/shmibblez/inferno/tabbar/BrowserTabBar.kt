@@ -42,7 +42,9 @@ import mozilla.components.browser.state.selector.privateTabs
 import mozilla.components.browser.state.state.BrowserState
 import mozilla.components.browser.state.state.TabSessionState
 
-// TODO: update MiniTabViewHolder layout for individual tab layout
+// todo:
+//   - add gesture detection for switching tabs (swipe left/right to go to tab on left/right)
+//   - update MiniTabViewHolder layout for individual tab layout
 fun BrowserState.toTabList(
     tabsFilter: (TabSessionState) -> Boolean = { true },
 ): Pair<List<TabSessionState>, String?> {

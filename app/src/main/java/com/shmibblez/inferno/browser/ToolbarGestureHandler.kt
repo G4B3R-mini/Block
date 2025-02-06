@@ -137,6 +137,7 @@ class ToolbarGestureHandler(
                     ).coerceAtLeast(0f)
                 }
             }
+            else -> {}
         }
     }
 

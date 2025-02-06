@@ -46,9 +46,7 @@ import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
-import androidx.compose.material3.SnackbarVisuals
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -125,11 +123,12 @@ import com.shmibblez.inferno.components.toolbar.ui.createShareBrowserAction
 import com.shmibblez.inferno.compose.snackbar.AcornSnackbarHostState
 import com.shmibblez.inferno.compose.snackbar.Snackbar
 import com.shmibblez.inferno.compose.snackbar.SnackbarHost
-import com.shmibblez.inferno.compose.snackbar.SnackbarState
 import com.shmibblez.inferno.customtabs.ExternalAppBrowserActivity
 import com.shmibblez.inferno.downloads.DownloadService
 import com.shmibblez.inferno.downloads.dialog.DynamicDownloadDialog
+import com.shmibblez.inferno.downloads.dialog.FirstPartyDownloadDialog
 import com.shmibblez.inferno.downloads.dialog.StartDownloadDialog
+import com.shmibblez.inferno.downloads.dialog.ThirdPartyDownloadDialog
 import com.shmibblez.inferno.ext.accessibilityManager
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.consumeFlow
@@ -166,7 +165,6 @@ import com.shmibblez.inferno.theme.FirefoxTheme
 import com.shmibblez.inferno.theme.ThemeManager
 import com.shmibblez.inferno.toolbar.BrowserToolbar
 import com.shmibblez.inferno.toolbar.ToolbarBottomMenuSheet
-import com.shmibblez.inferno.utils.allowUndo
 import com.shmibblez.inferno.wifi.SitePermissionsWifiIntegration
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -271,18 +269,19 @@ import mozilla.components.browser.toolbar.BrowserToolbar as BrowserToolbarCompat
 // todo: implement layout from fragment_browser.xml
 // todo: from fragment_browser.xml, for below views first wrap views with AndroidView, then
 //  progressively implement in compose
-//   implement CrashContentView
-//   implement startDownloadDialogContaier
-//   implement dynamicSnackbarContainer
+//   implement CrashContentView (com.shmibblez.inferno/crashes/CrashContentIntegration.kt)
+//   implement startDownloadDialogContainer
 //   implement loginSelectBar
 //   implement suggestStrongPasswordBar
-//   implement AddressSelectBara
+//   implement AddressSelectBar
 //   implement CreditCardSelectBar
-//   implement TabPreview
-// TODO: start with snackbar
+// completed:
+//   - snackbars (dynamicSnackbarContainer)
+//   - TabPreview moved to toolbar (swipe to switch tabs)
 
 // todo: test
 //   - savedLoginsLauncher
+//   - snackbars
 
 // TODO:
 //  - implement composable FindInPageBar
@@ -531,7 +530,7 @@ fun BrowserComponent(
 //    val sharedViewModel: SharedViewModel by activityViewModels()
 //    val homeViewModel: HomeScreenViewModel by activityViewModels()
 
-    val currentStartDownloadDialog by remember { mutableStateOf<StartDownloadDialog?>(null) }
+    var currentStartDownloadDialog by remember { mutableStateOf<StartDownloadDialog?>(null) }
 
     var savedLoginsLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
@@ -562,7 +561,7 @@ fun BrowserComponent(
         findInPageIntegration = findInPageIntegration,
         fullScreenFeature = fullScreenFeature,
         promptsFeature = promptsFeature,
-        currentStartDownloadDialog = currentStartDownloadDialog!!,
+        currentStartDownloadDialog = currentStartDownloadDialog,
         sessionFeature = sessionFeature,
     )
 
@@ -1317,33 +1316,7 @@ fun BrowserComponent(
 //        view = view,
 //    )
 
-            // todo: snackbar
-//    snackbarBinding.set(
-//        feature = SnackbarBinding(
-//            context = context,
-//            browserStore = context.components.core.store,
-//            appStore = context.components.appStore,
-//            snackbarDelegate = FenixSnackbarDelegate(binding.dynamicSnackbarContainer),
-//            navController = navController,
-//            sendTabUseCases = SendTabUseCases(context.components.backgroundServices.accountManager),
-//            customTabSessionId = customTabSessionId,
-//        ),
-//        owner = lifecycleOwner,
-//        view = view,
-//    )
-//
-//    standardSnackbarErrorBinding.set(
-//        feature = StandardSnackbarErrorBinding(
-//            context.getActivity()!!,
-//            binding.dynamicSnackbarContainer,
-//            context.getActivity()!!.components.appStore,
-//        ),
-//        owner = viewLifecycleOwner,
-//        view = binding.root,
-//    )
-
             val allowScreenshotsInPrivateMode = context.settings().allowScreenshotsInPrivateMode
-            // todo: secure window
             secureWindowFeature.set(
                 feature = SecureWindowFeature(
                     window = context.getActivity()!!.window,
@@ -1352,7 +1325,7 @@ fun BrowserComponent(
                     isSecure = { !allowScreenshotsInPrivateMode && it.content.private },
                     clearFlagOnStop = false,
                 ),
-                owner = lifecycleOwner, // this,
+                owner = lifecycleOwner,
                 view = view,
             )
 
@@ -1362,7 +1335,7 @@ fun BrowserComponent(
                     context.components.core.store,
                     customTabSessionId,
                 ),
-                owner = lifecycleOwner, // this,
+                owner = lifecycleOwner,
                 view = view,
             )
 
@@ -1379,7 +1352,7 @@ fun BrowserComponent(
                 store = store,
                 tabId = customTabSessionId,
                 onCopyConfirmation = {
-                    showSnackbarForClipboardCopy()
+                    showSnackbarForClipboardCopy(context, coroutineScope, snackbarHostState)
                 },
             )
 
@@ -1422,7 +1395,7 @@ fun BrowserComponent(
                 customFirstPartyDownloadDialog = { filename, contentSize, positiveAction, negativeAction ->
                     run {
                         if (currentStartDownloadDialog == null) {
-                            // todo: download dialog
+                            // todo: show download dialog
 //                            FirstPartyDownloadDialog(
 //                                activity = context.getActivity()!!,
 //                                filename = filename.value,
@@ -1440,17 +1413,17 @@ fun BrowserComponent(
                 customThirdPartyDownloadDialog = { downloaderApps, onAppSelected, negativeActionCallback ->
                     run {
                         if (currentStartDownloadDialog == null) {
-                            // todo: download dialog
-//                            ThirdPartyDownloadDialog(
-//                                activity = context.getActivity()!!,
-//                                downloaderApps = downloaderApps.value,
-//                                onAppSelected = onAppSelected.value,
-//                                negativeButtonAction = negativeActionCallback.value,
-//                            ).onDismiss {
-//                                currentStartDownloadDialog = null
-//                            }.show(binding.startDownloadDialogContainer).also {
-//                                currentStartDownloadDialog = it
-//                            }
+                            // todo: show download dialog
+                            ThirdPartyDownloadDialog(
+                                activity = context.getActivity()!!,
+                                downloaderApps = downloaderApps.value,
+                                onAppSelected = onAppSelected.value,
+                                negativeButtonAction = negativeActionCallback.value,
+                            ).onDismiss {
+                                currentStartDownloadDialog = null
+                            }.show(binding.startDownloadDialogContainer).also {
+                                currentStartDownloadDialog = it
+                            }
                         }
                     }
                 },
@@ -1617,6 +1590,9 @@ fun BrowserComponent(
                     onSaveLogin = { isUpdate ->
                         showSnackbarAfterLoginChange(
                             isUpdate,
+                            context,
+                            coroutineScope,
+                            snackbarHostState,
                         )
                     },
                     passwordGeneratorColorsProvider = passwordGeneratorColorsProvider,
@@ -1877,23 +1853,6 @@ fun BrowserComponent(
 
             val components = context.components
 
-            if (!context.isTabStripEnabled() && context.settings().isSwipeToolbarToSwitchTabsEnabled) {
-                // todo: tab gestures
-//        binding.gestureLayout.addGestureListener(
-//            ToolbarGestureHandler(
-//                activity = context.getActivity()!!,
-//                contentLayout = binding.browserLayout,
-//                tabPreview = binding.tabPreview,
-//                toolbarLayout = browserToolbarView.view,
-//                store = components.core.store,
-//                selectTabUseCase = components.useCases.tabsUseCases.selectTab,
-//                onSwipeStarted = {
-//                    thumbnailsFeature.get()?.requestScreenshot()
-//                },
-//            ),
-//        )
-            }
-
             updateBrowserToolbarLeadingAndNavigationActions(
                 context = context,
                 redesignEnabled = context.settings().navigationToolbarEnabled,
@@ -2104,7 +2063,7 @@ fun BrowserComponent(
                     evaluateMessagesForMicrosurvey(components)
 
                     context.components.core.tabCollectionStorage.register(
-                        collectionStorageObserver(context, navController, view),
+                        collectionStorageObserver(context, navController, view, coroutineScope, snackbarHostState),
                         lifecycleOwner,
                     )
                 }
@@ -2261,7 +2220,7 @@ data class onBackPressedHandler(
     val findInPageIntegration: ViewBoundFeatureWrapper<com.shmibblez.inferno.components.FindInPageIntegration>,
     val fullScreenFeature: ViewBoundFeatureWrapper<FullScreenFeature>,
     val promptsFeature: ViewBoundFeatureWrapper<PromptFeature>,
-    val currentStartDownloadDialog: StartDownloadDialog,
+    val currentStartDownloadDialog: StartDownloadDialog?,
     val sessionFeature: ViewBoundFeatureWrapper<SessionFeature>,
 )
 
@@ -2454,16 +2413,6 @@ private fun showUndoSnackbar(
             }
         }
     }
-
-//    lifecycleOwner.lifecycleScope.allowUndo(
-//        binding.dynamicSnackbarContainer,
-//        message,
-//        context.getString(R.string.snackbar_deleted_undo),
-//        {
-//            context.components.useCases.tabsUseCases.undo.invoke()
-//        },
-//        operation = { },
-//    )
 }
 
 /**
@@ -2480,11 +2429,6 @@ private fun showSnackbarForClipboardCopy(context: Context, coroutineScope: Corou
                 duration = SnackbarDuration.Long,
             )
         }
-//        ContextMenuSnackbarDelegate().show(
-//            snackBarParentView = binding.dynamicSnackbarContainer,
-//            text = R.string.snackbar_copy_image_to_clipboard_confirmation,
-//            duration = LENGTH_LONG,
-//        )
     }
 }
 
@@ -2503,12 +2447,6 @@ private fun showSnackbarAfterLoginChange(isUpdate: Boolean, context:Context, cor
             duration = SnackbarDuration.Long,
         )
     }
-
-//    ContextMenuSnackbarDelegate().show(
-//        snackBarParentView = binding.dynamicSnackbarContainer,
-//        text = snackbarText,
-//        duration = LENGTH_LONG,
-//    )
 }
 
 /**
@@ -3547,7 +3485,7 @@ fun getCurrentTab(context: Context, customTabSessionId: String? = null): Session
 }
 
 private suspend fun bookmarkTapped(
-    sessionUrl: String, sessionTitle: String, context: Context, navController: NavController,
+    sessionUrl: String, sessionTitle: String, context: Context, navController: NavController, coroutineScope: CoroutineScope, snackbarHostState: AcornSnackbarHostState,
 ) = withContext(IO) {
     val bookmarksStorage = context.components.core.bookmarksStorage
     val existing =
@@ -3592,6 +3530,8 @@ private suspend fun bookmarkTapped(
                     friendlyRootTitle(context, parentNode),
                 ),
                 context = context,
+                coroutineScope = coroutineScope,
+                snackbarHostState = snackbarHostState,
                 onClick = {
 //                        MetricsUtils.recordBookmarkMetrics(
 //                            MetricsUtils.BookmarkAction.EDIT,
@@ -3609,34 +3549,31 @@ private suspend fun bookmarkTapped(
             )
         } catch (e: PlacesApiException.UrlParseFailed) {
             withContext(Main) {
-                // todo: bookmark tapped
-//                view?.let {
-//                    Snackbar.make(
-//                        snackBarParentView = binding.dynamicSnackbarContainer,
-//                        snackbarState = SnackbarState(
-//                            message = getString(R.string.bookmark_invalid_url_error),
-//                            duration = SnackbarState.Duration.Preset.Long,
-//                        ),
-//                    ).show()
-//                }
+                coroutineScope.launch {
+                    snackbarHostState.warningSnackbarHostState.showSnackbar(
+                        message = context.getString(R.string.bookmark_invalid_url_error),
+                        duration = SnackbarDuration.Long,
+                    )
+                }
             }
         }
     }
 }
 
-private fun showBookmarkSavedSnackbar(message: String, context: Context, onClick: () -> Unit) {
-    // todo: snackbar
-//    Snackbar.make(
-//        snackBarParentView = binding.dynamicSnackbarContainer,
-//        snackbarState = SnackbarState(
-//            message = message,
-//            duration = SnackbarState.Duration.Preset.Long,
-//            action = Action(
-//                label = context.getString(R.string.edit_bookmark_snackbar_action),
-//                onClick = onClick,
-//            ),
-//        ),
-//    ).show()
+private fun showBookmarkSavedSnackbar(message: String, context: Context, coroutineScope: CoroutineScope, snackbarHostState: AcornSnackbarHostState, onClick: () -> Unit) {
+    coroutineScope.launch {
+        val result = snackbarHostState.defaultSnackbarHostState.showSnackbar(
+            message = message,
+            actionLabel = context.getString(R.string.edit_bookmark_snackbar_action),
+            duration = SnackbarDuration.Long,
+        )
+        when(result) {
+            SnackbarResult.ActionPerformed -> {
+                onClick.invoke()
+            }
+            SnackbarResult.Dismissed -> {}
+        }
+    }
 }
 
 fun onHomePressed(pipFeature: PictureInPictureFeature) = pipFeature?.onHomePressed() ?: false
@@ -3838,15 +3775,17 @@ internal fun showCannotOpenFileError(
     container: ViewGroup,
     context: Context,
     downloadState: DownloadState,
+    coroutineScope: CoroutineScope,
+    snackbarHostState: AcornSnackbarHostState
 ) {
-    Snackbar.make(
-        snackBarParentView = container,
-        snackbarState = SnackbarState(
+    coroutineScope.launch {
+        snackbarHostState.warningSnackbarHostState.showSnackbar(
             message = DynamicDownloadDialog.getCannotOpenFileErrorMessage(
                 context, downloadState
             ),
-        ),
-    ).show()
+            duration = SnackbarDuration.Long
+        )
+    }
 }
 
 fun onAccessibilityStateChanged(enabled: Boolean) {
@@ -4036,6 +3975,7 @@ private fun initTranslationsAction(
 //                safeInvalidateBrowserToolbarView()
 //
 //                if (!it.isTranslateProcessing) {
+                    // todo: snackbar dismiss
 //                    context.components.appStore.dispatch(SnackbarAction.SnackbarDismissed)
 //                }
 //            },
@@ -4573,6 +4513,8 @@ private fun collectionStorageObserver(
     context: Context,
     navController: NavController,
     view: View,
+    coroutineScope: CoroutineScope,
+    snackbarHostState: AcornSnackbarHostState,
 ): TabCollectionStorage.Observer {
     return object : TabCollectionStorage.Observer {
         override fun onCollectionCreated(
@@ -4580,17 +4522,19 @@ private fun collectionStorageObserver(
             sessions: List<TabSessionState>,
             id: Long?,
         ) {
-            showTabSavedToCollectionSnackbar(sessions.size, context, navController, true)
+            showTabSavedToCollectionSnackbar(sessions.size, context, navController, coroutineScope, snackbarHostState, true)
         }
 
         override fun onTabsAdded(tabCollection: TabCollection, sessions: List<TabSessionState>) {
-            showTabSavedToCollectionSnackbar(sessions.size, context, navController)
+            showTabSavedToCollectionSnackbar(sessions.size, context, navController, coroutineScope, snackbarHostState)
         }
 
         fun showTabSavedToCollectionSnackbar(
             tabSize: Int,
             context: Context,
             navController: NavController,
+            coroutineScope: CoroutineScope,
+            snackbarHostState: AcornSnackbarHostState,
             isNewCollection: Boolean = false,
         ) {
             view?.let {
@@ -4607,7 +4551,27 @@ private fun collectionStorageObserver(
                         R.string.create_collection_tab_saved
                     }
                 }
-                // todo: snackbar
+
+                // show snackbar
+                coroutineScope.launch {
+                    val result = snackbarHostState.defaultSnackbarHostState.showSnackbar(
+                        message = context.getString(messageStringRes),
+                        duration = SnackbarDuration.Long,
+                        actionLabel = context.getString(R.string.create_collection_view),
+                    )
+                    when(result) {
+                        SnackbarResult.ActionPerformed -> {
+                            navController.navigate(
+                                    BrowserComponentWrapperFragmentDirections.actionGlobalHome(
+                                        focusOnAddressBar = false,
+                                        scrollToCollection = true,
+                                    ),
+                                )
+                        }
+                        SnackbarResult.Dismissed -> {}
+                    }
+                }
+
 //                Snackbar.make(
 //                    snackBarParentView = binding.dynamicSnackbarContainer,
 //                    snackbarState = SnackbarState(
