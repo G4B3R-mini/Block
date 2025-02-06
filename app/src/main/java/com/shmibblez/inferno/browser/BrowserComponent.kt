@@ -278,6 +278,7 @@ import mozilla.components.browser.toolbar.BrowserToolbar as BrowserToolbarCompat
 // completed:
 //   - snackbars (dynamicSnackbarContainer)
 //   - TabPreview moved to toolbar (swipe to switch tabs)
+// todo: working on download dialog
 
 // todo: test
 //   - savedLoginsLauncher
