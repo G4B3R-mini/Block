@@ -1,7 +1,6 @@
 package com.shmibblez.inferno.toolbar
 
 import android.content.Context
-import android.content.Intent
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -9,6 +8,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.aspectRatio
@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.BottomSheetDefaults
+import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.DropdownMenu
@@ -27,7 +28,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
@@ -43,12 +43,15 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.BrowserComponentMode
+import com.shmibblez.inferno.browser.FirstPartyDownloadDialogData
+import com.shmibblez.inferno.browser.ThirdPartyDownloadDialogData
 import com.shmibblez.inferno.browser.getActivity
 import com.shmibblez.inferno.compose.sessionUseCases
 import com.shmibblez.inferno.ext.components
@@ -71,6 +74,7 @@ import mozilla.components.browser.state.selector.normalTabs
 import mozilla.components.browser.state.selector.privateTabs
 import mozilla.components.browser.state.selector.selectedTab
 import mozilla.components.browser.state.state.TabSessionState
+import mozilla.components.feature.downloads.toMegabyteOrKilobyteString
 import mozilla.components.feature.tabs.TabsUseCases
 import mozilla.components.support.ktx.android.content.share
 
@@ -741,7 +745,70 @@ object ToolbarMenuItemsScopeInstance : ToolbarMenuItemsScope {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ToolbarBottomMenuSheet(
+internal fun FirstPartyDownloadBottomSheet(
+    firstPartyDownloadDialogData: FirstPartyDownloadDialogData,
+    setFirstPartyDownloadDialogData: (FirstPartyDownloadDialogData?) -> Unit
+) {
+    ModalBottomSheet(onDismissRequest = { setFirstPartyDownloadDialogData(null) },
+        containerColor = Color.Black,
+        scrimColor = Color.Black.copy(alpha = 0.1F),
+        shape = RectangleShape,
+        dragHandle = {
+            BottomSheetDefaults.DragHandle(
+                color = Color.White,
+                height = ToolbarMenuItemConstants.SHEET_HANDLE_HEIGHT,
+//            shape = RectangleShape,
+            )
+        }) {
+        Row(modifier = Modifier.fillMaxWidth().wrapContentHeight(), verticalAlignment = Alignment.CenterVertically,) {
+            Icon(
+                modifier = Modifier.width(48.dp).height(48.dp).padding(start = 16.dp, top=16.dp),
+                tint = Color.White,
+                contentDescription = "download complete icon",
+                painter = painterResource(R.drawable.mozac_feature_download_ic_download_complete)
+            )
+            Text(text = firstPartyDownloadDialogData.contentSize.toMegabyteOrKilobyteString(), color = Color.White, modifier = Modifier.weight(1F).padding(start = 4.dp, end = 4.dp))
+            Icon(
+                modifier = Modifier.width(48.dp).height(48.dp).clickable(onClick = {firstPartyDownloadDialogData.negativeButtonAction.invoke()}),
+                tint = Color.White,
+                contentDescription = "download complete icon",
+                painter = painterResource(R.drawable.mozac_ic_cross_24)
+            )
+        }
+        Button(onClick = {firstPartyDownloadDialogData.positiveButtonAction.invoke()}) {
+            Text(text = stringResource(R.string.mozac_feature_downloads_dialog_download))
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+internal fun ThirdPartyDownloadBottomSheet(
+    thirdPartyDownloadDialogData: ThirdPartyDownloadDialogData,
+    setThirdPartyDownloadDialogData: (ThirdPartyDownloadDialogData?) -> Unit
+) {
+    // TODO:
+    //   - finish first party bottom sheet, check everything ok
+    //   - implement third party bottom sheet / download dialog (lazy list for main view)
+    ModalBottomSheet(onDismissRequest = { setThirdPartyDownloadDialogData(null) },
+        containerColor = Color.Black,
+        scrimColor = Color.Black.copy(alpha = 0.1F),
+        shape = RectangleShape,
+        dragHandle = {
+            BottomSheetDefaults.DragHandle(
+                color = Color.White,
+                height = ToolbarMenuItemConstants.SHEET_HANDLE_HEIGHT,
+//            shape = RectangleShape,
+            )
+        }) {
+
+    }
+}
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ToolbarMenuBottomSheet(
     tabSessionState: TabSessionState?,
     setShowBottomMenuSheet: (Boolean) -> Unit,
     setBrowserComponentMode: (BrowserComponentMode) -> Unit

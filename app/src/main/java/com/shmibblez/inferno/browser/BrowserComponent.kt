@@ -126,9 +126,7 @@ import com.shmibblez.inferno.compose.snackbar.SnackbarHost
 import com.shmibblez.inferno.customtabs.ExternalAppBrowserActivity
 import com.shmibblez.inferno.downloads.DownloadService
 import com.shmibblez.inferno.downloads.dialog.DynamicDownloadDialog
-import com.shmibblez.inferno.downloads.dialog.FirstPartyDownloadDialog
 import com.shmibblez.inferno.downloads.dialog.StartDownloadDialog
-import com.shmibblez.inferno.downloads.dialog.ThirdPartyDownloadDialog
 import com.shmibblez.inferno.ext.accessibilityManager
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.consumeFlow
@@ -164,7 +162,9 @@ import com.shmibblez.inferno.tabstray.Page
 import com.shmibblez.inferno.theme.FirefoxTheme
 import com.shmibblez.inferno.theme.ThemeManager
 import com.shmibblez.inferno.toolbar.BrowserToolbar
-import com.shmibblez.inferno.toolbar.ToolbarBottomMenuSheet
+import com.shmibblez.inferno.toolbar.FirstPartyDownloadBottomSheet
+import com.shmibblez.inferno.toolbar.ThirdPartyDownloadBottomSheet
+import com.shmibblez.inferno.toolbar.ToolbarMenuBottomSheet
 import com.shmibblez.inferno.wifi.SitePermissionsWifiIntegration
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -214,6 +214,7 @@ import mozilla.components.feature.downloads.DownloadsFeature
 import mozilla.components.feature.downloads.manager.FetchDownloadManager
 import mozilla.components.feature.downloads.temporary.CopyDownloadFeature
 import mozilla.components.feature.downloads.temporary.ShareDownloadFeature
+import mozilla.components.feature.downloads.ui.DownloaderApp
 import mozilla.components.feature.findinpage.view.FindInPageBar
 import mozilla.components.feature.media.fullscreen.MediaSessionFullscreenFeature
 import mozilla.components.feature.privatemode.feature.SecureWindowFeature
@@ -376,6 +377,20 @@ object ComponentDimens {
     }
 }
 
+internal interface DownloadDialogData;
+
+internal data class FirstPartyDownloadDialogData(
+    val filename: String,
+    val contentSize: Long,
+    val positiveButtonAction: () -> Unit,
+    val negativeButtonAction: () -> Unit,
+) : DownloadDialogData
+
+internal data class ThirdPartyDownloadDialogData(
+    val downloaderApps: List<DownloaderApp>,
+    val onAppSelected: (DownloaderApp) -> Unit,
+    val negativeButtonAction: () -> Unit,
+) : DownloadDialogData
 
 /**
  * @param sessionId session id, from Moz BaseBrowserFragment
@@ -495,7 +510,7 @@ fun BrowserComponent(
 
 //    @VisibleForTesting
     val findInPageIntegration =
-        ViewBoundFeatureWrapper<com.shmibblez.inferno.components.FindInPageIntegration>()
+        ViewBoundFeatureWrapper<FindInPageIntegration>()
     val toolbarIntegration = ViewBoundFeatureWrapper<ToolbarIntegration>()
     val bottomToolbarContainerIntegration =
         ViewBoundFeatureWrapper<BottomToolbarContainerIntegration>()
@@ -531,7 +546,8 @@ fun BrowserComponent(
 //    val sharedViewModel: SharedViewModel by activityViewModels()
 //    val homeViewModel: HomeScreenViewModel by activityViewModels()
 
-    var currentStartDownloadDialog by remember { mutableStateOf<StartDownloadDialog?>(null) }
+//    var currentStartDownloadDialog by remember { mutableStateOf<StartDownloadDialog?>(null) }
+    var (downloadDialogData, setDownloadDialogData) = remember { mutableStateOf<DownloadDialogData?>(null) }
 
     var savedLoginsLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
@@ -556,13 +572,14 @@ fun BrowserComponent(
         { promptsFeature.get() },
     )/* BaseBrowserFragment vars */
 
-    val backHandler = onBackPressedHandler(
+    val backHandler = OnBackPressedHandler(
         context = context,
         readerViewFeature = readerViewFeature,
         findInPageIntegration = findInPageIntegration,
         fullScreenFeature = fullScreenFeature,
         promptsFeature = promptsFeature,
-        currentStartDownloadDialog = currentStartDownloadDialog,
+        downloadDialogData = downloadDialogData,
+        setDownloadDialogData = setDownloadDialogData,
         sessionFeature = sessionFeature,
     )
 
@@ -588,8 +605,23 @@ fun BrowserComponent(
 
     // bottom sheet menu setup
     val (showMenuBottomSheet, setShowMenuBottomSheet) = remember { mutableStateOf(false) }
-    if (showMenuBottomSheet) {
-        ToolbarBottomMenuSheet(
+    val (showStartDownloadBottomSheet, setShowStartDownloadBottomSheet) = remember {
+        mutableStateOf(
+            false
+        )
+    }
+
+    if (downloadDialogData != null) {
+        if (downloadDialogData is FirstPartyDownloadDialogData) {
+            // show first party download dialog
+            FirstPartyDownloadBottomSheet(downloadDialogData, setDownloadDialogData)
+        }
+        if (downloadDialogData is ThirdPartyDownloadDialogData) {
+            // show third party download dialog
+            ThirdPartyDownloadBottomSheet(downloadDialogData, setDownloadDialogData)
+        }
+    } else if (showMenuBottomSheet) {
+        ToolbarMenuBottomSheet(
             tabSessionState = tabSessionState,
             setShowBottomMenuSheet = setShowMenuBottomSheet,
             setBrowserComponentMode = setBrowserMode
@@ -1395,8 +1427,15 @@ fun BrowserComponent(
                 },
                 customFirstPartyDownloadDialog = { filename, contentSize, positiveAction, negativeAction ->
                     run {
-                        if (currentStartDownloadDialog == null) {
-                            // todo: show download dialog
+                        if (downloadDialogData == null) {
+                            downloadDialogData = FirstPartyDownloadDialogData(
+                                filename = filename.value,
+                                contentSize = contentSize.value,
+                                positiveButtonAction = positiveAction.value,
+                                negativeButtonAction = negativeAction.value,
+                            )
+                        }
+//                        if (currentStartDownloadDialog == null) {
 //                            FirstPartyDownloadDialog(
 //                                activity = context.getActivity()!!,
 //                                filename = filename.value,
@@ -1408,24 +1447,30 @@ fun BrowserComponent(
 //                            }.show(binding.startDownloadDialogContainer).also {
 //                                currentStartDownloadDialog = it
 //                            }
-                        }
+//                        }
                     }
                 },
                 customThirdPartyDownloadDialog = { downloaderApps, onAppSelected, negativeActionCallback ->
                     run {
-                        if (currentStartDownloadDialog == null) {
-                            // todo: show download dialog
-                            ThirdPartyDownloadDialog(
-                                activity = context.getActivity()!!,
+                        if (downloadDialogData == null) {
+                            downloadDialogData = ThirdPartyDownloadDialogData(
                                 downloaderApps = downloaderApps.value,
                                 onAppSelected = onAppSelected.value,
-                                negativeButtonAction = negativeActionCallback.value,
-                            ).onDismiss {
-                                currentStartDownloadDialog = null
-                            }.show(binding.startDownloadDialogContainer).also {
-                                currentStartDownloadDialog = it
-                            }
+                                negativeButtonAction = negativeActionCallback.value
+                            )
                         }
+//                        if (currentStartDownloadDialog == null) {
+//                            ThirdPartyDownloadDialog(
+//                                activity = context.getActivity()!!,
+//                                downloaderApps = downloaderApps.value,
+//                                onAppSelected = onAppSelected.value,
+//                                negativeButtonAction = negativeActionCallback.value,
+//                            ).onDismiss {
+//                                currentStartDownloadDialog = null
+//                            }.show(binding.startDownloadDialogContainer).also {
+//                                currentStartDownloadDialog = it
+//                            }
+//                        }
                     }
                 },
             )
@@ -1937,8 +1982,8 @@ fun BrowserComponent(
             context,
             lifecycleOwner,
             coroutineScope,
-            currentStartDownloadDialog,
-            browserInitialized
+            setDownloadDialogData,
+            browserInitialized,
         )
 
         if (!context.components.fenixOnboarding.userHasBeenOnboarded()) {
@@ -2014,7 +2059,8 @@ fun BrowserComponent(
                 Lifecycle.Event.ON_STOP -> {
 //                    super.onStop()
                     initUIJob?.cancel()
-                    currentStartDownloadDialog?.dismiss()
+                    setDownloadDialogData(null)
+//                    currentStartDownloadDialog?.dismiss()
 
                     context.components.core.store.state.findTabOrCustomTabOrSelectedTab(
                         customTabSessionId
@@ -2064,7 +2110,13 @@ fun BrowserComponent(
                     evaluateMessagesForMicrosurvey(components)
 
                     context.components.core.tabCollectionStorage.register(
-                        collectionStorageObserver(context, navController, view, coroutineScope, snackbarHostState),
+                        collectionStorageObserver(
+                            context,
+                            navController,
+                            view,
+                            coroutineScope,
+                            snackbarHostState
+                        ),
                         lifecycleOwner,
                     )
                 }
@@ -2215,23 +2267,24 @@ private fun showTabs(context: Context) {
     }
 }
 
-data class onBackPressedHandler(
+private data class OnBackPressedHandler(
     val context: Context,
     val readerViewFeature: ViewBoundFeatureWrapper<ReaderViewFeature>,
-    val findInPageIntegration: ViewBoundFeatureWrapper<com.shmibblez.inferno.components.FindInPageIntegration>,
+    val findInPageIntegration: ViewBoundFeatureWrapper<FindInPageIntegration>,
     val fullScreenFeature: ViewBoundFeatureWrapper<FullScreenFeature>,
     val promptsFeature: ViewBoundFeatureWrapper<PromptFeature>,
-    val currentStartDownloadDialog: StartDownloadDialog?,
+    val downloadDialogData: DownloadDialogData?,
+    val setDownloadDialogData: (DownloadDialogData?) -> Unit,
     val sessionFeature: ViewBoundFeatureWrapper<SessionFeature>,
 )
 
 // combines Moz BrowserFragment and Moz BaseBrowserFragment implementations
 private fun onBackPressed(
-    onBackPressedHandler: onBackPressedHandler
+    onBackPressedHandler: OnBackPressedHandler
 ): Boolean {
     with(onBackPressedHandler) {
-        return readerViewFeature.onBackPressed() || findInPageIntegration.onBackPressed() || fullScreenFeature.onBackPressed() || promptsFeature.onBackPressed() || currentStartDownloadDialog?.let {
-            it.dismiss()
+        return readerViewFeature.onBackPressed() || findInPageIntegration.onBackPressed() || fullScreenFeature.onBackPressed() || promptsFeature.onBackPressed() || downloadDialogData?.let {
+            setDownloadDialogData(null)
             true
         } ?: false || sessionFeature.onBackPressed() || removeSessionIfNeeded(context)
     }
@@ -2422,7 +2475,11 @@ private fun showUndoSnackbar(
  *
  * [See details](https://developer.android.com/develop/ui/views/touch-and-input/copy-paste#duplicate-notifications).
  */
-private fun showSnackbarForClipboardCopy(context: Context, coroutineScope: CoroutineScope, snackbarHostState: AcornSnackbarHostState) {
+private fun showSnackbarForClipboardCopy(
+    context: Context,
+    coroutineScope: CoroutineScope,
+    snackbarHostState: AcornSnackbarHostState
+) {
     if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2) {
         coroutineScope.launch {
             snackbarHostState.defaultSnackbarHostState.showSnackbar(
@@ -2436,7 +2493,12 @@ private fun showSnackbarForClipboardCopy(context: Context, coroutineScope: Corou
 /**
  * Show a [Snackbar] when credentials are saved or updated.
  */
-private fun showSnackbarAfterLoginChange(isUpdate: Boolean, context:Context, coroutineScope: CoroutineScope, snackbarHostState: AcornSnackbarHostState) {
+private fun showSnackbarAfterLoginChange(
+    isUpdate: Boolean,
+    context: Context,
+    coroutineScope: CoroutineScope,
+    snackbarHostState: AcornSnackbarHostState
+) {
     val snackbarText = if (isUpdate) {
         R.string.mozac_feature_prompt_login_snackbar_username_updated
     } else {
@@ -2522,7 +2584,7 @@ private fun closeFindInPageBarOnNavigation(
     lifecycleOwner: LifecycleOwner,
     context: Context,
     coroutineScope: CoroutineScope,
-    findInPageIntegration: ViewBoundFeatureWrapper<com.shmibblez.inferno.components.FindInPageIntegration>,
+    findInPageIntegration: ViewBoundFeatureWrapper<FindInPageIntegration>,
     customTabSessionId: String? = null,
 ) {
     consumeFlow(store, lifecycleOwner, context, coroutineScope) { flow ->
@@ -3186,7 +3248,7 @@ internal fun observeTabSelection(
     context: Context,
     lifecycleOwner: LifecycleOwner,
     coroutineScope: CoroutineScope,
-    currentStartDownloadDialog: StartDownloadDialog?,
+    setDownloadDialogData: (DownloadDialogData?) -> Unit,
     browserInitialized: Boolean,
 ) {
     consumeFlow(store, lifecycleOwner, context, coroutineScope) { flow ->
@@ -3195,7 +3257,8 @@ internal fun observeTabSelection(
         }.mapNotNull {
             it.selectedTab
         }.collect {
-            currentStartDownloadDialog?.dismiss()
+            setDownloadDialogData(null)
+//            currentStartDownloadDialog?.dismiss()
             handleTabSelected(it, browserInitialized)
         }
     }
@@ -3486,7 +3549,12 @@ fun getCurrentTab(context: Context, customTabSessionId: String? = null): Session
 }
 
 private suspend fun bookmarkTapped(
-    sessionUrl: String, sessionTitle: String, context: Context, navController: NavController, coroutineScope: CoroutineScope, snackbarHostState: AcornSnackbarHostState,
+    sessionUrl: String,
+    sessionTitle: String,
+    context: Context,
+    navController: NavController,
+    coroutineScope: CoroutineScope,
+    snackbarHostState: AcornSnackbarHostState,
 ) = withContext(IO) {
     val bookmarksStorage = context.components.core.bookmarksStorage
     val existing =
@@ -3561,17 +3629,24 @@ private suspend fun bookmarkTapped(
     }
 }
 
-private fun showBookmarkSavedSnackbar(message: String, context: Context, coroutineScope: CoroutineScope, snackbarHostState: AcornSnackbarHostState, onClick: () -> Unit) {
+private fun showBookmarkSavedSnackbar(
+    message: String,
+    context: Context,
+    coroutineScope: CoroutineScope,
+    snackbarHostState: AcornSnackbarHostState,
+    onClick: () -> Unit
+) {
     coroutineScope.launch {
         val result = snackbarHostState.defaultSnackbarHostState.showSnackbar(
             message = message,
             actionLabel = context.getString(R.string.edit_bookmark_snackbar_action),
             duration = SnackbarDuration.Long,
         )
-        when(result) {
+        when (result) {
             SnackbarResult.ActionPerformed -> {
                 onClick.invoke()
             }
+
             SnackbarResult.Dismissed -> {}
         }
     }
@@ -3585,7 +3660,7 @@ fun onHomePressed(pipFeature: PictureInPictureFeature) = pipFeature?.onHomePress
 private fun pipModeChanged(
     session: SessionState,
     context: Context,
-    backPressedHandler: onBackPressedHandler
+    backPressedHandler: OnBackPressedHandler
 ) {
     // todo: isAdded
     if (!session.content.pictureInPictureEnabled && session.content.fullScreen) { // && isAdded) {
@@ -3976,7 +4051,7 @@ private fun initTranslationsAction(
 //                safeInvalidateBrowserToolbarView()
 //
 //                if (!it.isTranslateProcessing) {
-                    // todo: snackbar dismiss
+    // todo: snackbar dismiss
 //                    context.components.appStore.dispatch(SnackbarAction.SnackbarDismissed)
 //                }
 //            },
@@ -4523,11 +4598,24 @@ private fun collectionStorageObserver(
             sessions: List<TabSessionState>,
             id: Long?,
         ) {
-            showTabSavedToCollectionSnackbar(sessions.size, context, navController, coroutineScope, snackbarHostState, true)
+            showTabSavedToCollectionSnackbar(
+                sessions.size,
+                context,
+                navController,
+                coroutineScope,
+                snackbarHostState,
+                true
+            )
         }
 
         override fun onTabsAdded(tabCollection: TabCollection, sessions: List<TabSessionState>) {
-            showTabSavedToCollectionSnackbar(sessions.size, context, navController, coroutineScope, snackbarHostState)
+            showTabSavedToCollectionSnackbar(
+                sessions.size,
+                context,
+                navController,
+                coroutineScope,
+                snackbarHostState
+            )
         }
 
         fun showTabSavedToCollectionSnackbar(
@@ -4560,15 +4648,16 @@ private fun collectionStorageObserver(
                         duration = SnackbarDuration.Long,
                         actionLabel = context.getString(R.string.create_collection_view),
                     )
-                    when(result) {
+                    when (result) {
                         SnackbarResult.ActionPerformed -> {
                             navController.navigate(
-                                    BrowserComponentWrapperFragmentDirections.actionGlobalHome(
-                                        focusOnAddressBar = false,
-                                        scrollToCollection = true,
-                                    ),
-                                )
+                                BrowserComponentWrapperFragmentDirections.actionGlobalHome(
+                                    focusOnAddressBar = false,
+                                    scrollToCollection = true,
+                                ),
+                            )
                         }
+
                         SnackbarResult.Dismissed -> {}
                     }
                 }
