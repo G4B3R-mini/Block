@@ -14,7 +14,7 @@ import kotlinx.coroutines.withContext
 import mozilla.components.browser.state.state.SessionState
 import mozilla.components.concept.engine.cookiehandling.CookieBannersStorage
 import mozilla.components.concept.engine.permission.SitePermissions
-import com.shmibblez.inferno.browser.BrowserFragmentDirections
+import com.shmibblez.inferno.browser.BrowserComponentWrapperFragmentDirections
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.runIfFragmentIsAttached
 import com.shmibblez.inferno.settings.quicksettings.protections.cookiebanners.getCookieBannerUIMode
@@ -63,7 +63,7 @@ class TrackingProtectionPanelInteractor(
                             val isTrackingProtectionEnabled =
                                 tab.trackingProtection.enabled && !contains
                             val directions =
-                                BrowserFragmentDirections.actionGlobalQuickSettingsSheetDialogFragment(
+                                BrowserComponentWrapperFragmentDirections.actionGlobalQuickSettingsSheetDialogFragment(
                                     sessionId = tab.id,
                                     url = tab.content.url,
                                     title = tab.content.title,

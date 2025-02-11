@@ -8,7 +8,7 @@ import mozilla.components.concept.base.crash.Breadcrumb
 import mozilla.components.concept.base.crash.CrashReporting
 import mozilla.components.feature.contextmenu.facts.ContextMenuFacts
 import mozilla.components.feature.downloads.facts.DownloadsFacts
-import mozilla.components.feature.prompts.facts.AddressAutofillDialogFacts
+import com.shmibblez.inferno.browser.prompts.AddressAutofillDialogFacts
 import mozilla.components.feature.prompts.facts.CreditCardAutofillDialogFacts
 import mozilla.components.feature.prompts.facts.PromptFacts
 import mozilla.components.feature.sitepermissions.SitePermissionsFacts

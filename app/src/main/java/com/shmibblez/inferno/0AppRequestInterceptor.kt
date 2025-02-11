@@ -33,7 +33,7 @@
 //        isSubframeRequest: Boolean,
 //    ): RequestInterceptor.InterceptionResponse? {
 //        return when (uri) {
-//            "about:privatebrowsing" -> {
+//            "inferno:privatebrowsing" -> {
 //                val page = PrivatePage.createPrivateBrowsingPage(context, uri)
 //                RequestInterceptor.InterceptionResponse.Content(page, encoding = "base64")
 //            }
@@ -43,7 +43,7 @@
 //                intent.addFlags(FLAG_ACTIVITY_NEW_TASK)
 //                context.startActivity(intent)
 //
-//                RequestInterceptor.InterceptionResponse.Url("about:blank")
+//                RequestInterceptor.InterceptionResponse.Url("inferno:home")
 //            }
 //
 //            else -> {

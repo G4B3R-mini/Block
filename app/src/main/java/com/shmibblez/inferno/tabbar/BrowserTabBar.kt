@@ -217,7 +217,7 @@ private fun MiniTab(
 
 private fun newTab(context: Context, isPrivateSession: Boolean) {
     context.components.useCases.tabsUseCases.addTab(
-        url = if (isPrivateSession) "about:privatebrowsing" else "about:blank",
+        url = if (isPrivateSession) "inferno:privatebrowsing" else "inferno:home",
         selectTab = true,
         private = isPrivateSession
     )

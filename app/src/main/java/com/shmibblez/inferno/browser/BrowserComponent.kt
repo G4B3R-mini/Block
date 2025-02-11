@@ -103,6 +103,7 @@ import com.shmibblez.inferno.IntentReceiverActivity
 import com.shmibblez.inferno.NavGraphDirections
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.browsingmode.BrowsingMode
+import com.shmibblez.inferno.browser.prompts.PromptComponent
 import com.shmibblez.inferno.browser.tabstrip.isTabStripEnabled
 import com.shmibblez.inferno.components.Components
 import com.shmibblez.inferno.components.FindInPageIntegration
@@ -126,7 +127,6 @@ import com.shmibblez.inferno.compose.snackbar.SnackbarHost
 import com.shmibblez.inferno.customtabs.ExternalAppBrowserActivity
 import com.shmibblez.inferno.downloads.DownloadService
 import com.shmibblez.inferno.downloads.dialog.DynamicDownloadDialog
-import com.shmibblez.inferno.downloads.dialog.StartDownloadDialog
 import com.shmibblez.inferno.ext.accessibilityManager
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.consumeFlow
@@ -138,6 +138,7 @@ import com.shmibblez.inferno.ext.navigateWithBreadcrumb
 import com.shmibblez.inferno.ext.secure
 import com.shmibblez.inferno.ext.settings
 import com.shmibblez.inferno.findInPageBar.BrowserFindInPageBar
+import com.shmibblez.inferno.home.CrashComponent
 import com.shmibblez.inferno.home.HomeComponent
 import com.shmibblez.inferno.home.HomeFragment
 import com.shmibblez.inferno.library.bookmarks.friendlyRootTitle
@@ -204,6 +205,7 @@ import mozilla.components.compose.cfr.CFRPopupLayout
 import mozilla.components.compose.cfr.CFRPopupProperties
 import mozilla.components.concept.engine.EngineView
 import mozilla.components.concept.engine.permission.SitePermissions
+import mozilla.components.concept.engine.prompt.PromptRequest
 import mozilla.components.concept.engine.prompt.ShareData
 import mozilla.components.concept.storage.LoginEntry
 import mozilla.components.concept.toolbar.Toolbar
@@ -270,20 +272,21 @@ import mozilla.components.browser.toolbar.BrowserToolbar as BrowserToolbarCompat
 // todo: implement layout from fragment_browser.xml
 // todo: from fragment_browser.xml, for below views first wrap views with AndroidView, then
 //  progressively implement in compose
-//   implement CrashContentView (com.shmibblez.inferno/crashes/CrashContentIntegration.kt)
-//   implement startDownloadDialogContainer
-//   implement loginSelectBar
-//   implement suggestStrongPasswordBar
-//   implement AddressSelectBar
-//   implement CreditCardSelectBar
-// completed:
-//   - snackbars (dynamicSnackbarContainer)
-//   - TabPreview moved to toolbar (swipe to switch tabs)
-// todo: working on download dialog
+//   1. implement findInPageView
+//   2. implement viewDynamicDownloadDialog
+//   3. implement readerViewControlsBar https://searchfox.org/mozilla-central/source/mobile/android/android-components/components/feature/readerview/src/main/res/layout/mozac_feature_readerview_view.xml
+//   7. implement loginSelectBar
+//   8. implement suggestStrongPasswordBar
+//   9. implement addressSelectBar AddressSelectBar
+//   10. implement creditCardSelectBar CreditCardSelectBar
+// completed, (todo: test)
+//   4. crash_reporter_view CrashContentView (com.shmibblez.inferno/crashes/CrashContentIntegration.kt)
+//   5. startDownloadDialogContainer
+//   6. dynamicSnackbarContainer
+//   11. tabPreview (TabPreview moved to toolbar (swipe to switch tabs))
 
 // todo: test
 //   - savedLoginsLauncher
-//   - snackbars
 
 // TODO:
 //  - implement composable FindInPageBar
@@ -360,7 +363,7 @@ enum class BrowserComponentMode {
 }
 
 enum class BrowserComponentPageType {
-    ENGINE, HOME, HOME_PRIVATE
+    CRASH, ENGINE, HOME, HOME_PRIVATE
 }
 
 object ComponentDimens {
@@ -391,6 +394,20 @@ internal data class ThirdPartyDownloadDialogData(
     val onAppSelected: (DownloaderApp) -> Unit,
     val negativeButtonAction: () -> Unit,
 ) : DownloadDialogData
+
+private fun resolvePageType(tabSessionState: TabSessionState?): BrowserComponentPageType {
+    val url = tabSessionState?.content?.url
+    if (tabSessionState?.engineState?.crashed == true) return BrowserComponentPageType.CRASH
+    else if (url == "inferno:home" || url == "about:blank") // TODO: create const class and set base to inferno:home
+        return BrowserComponentPageType.HOME
+    else if (url == "inferno:privatebrowsing" || url == "about:privatebrowsing") // TODO: add to const class and set base to inferno:private
+        return BrowserComponentPageType.HOME_PRIVATE
+    else {
+        return BrowserComponentPageType.ENGINE
+    }
+    // TODO: if home, show home page and load engineView in compose tree as hidden,
+    //  if page then show engineView
+}
 
 /**
  * @param sessionId session id, from Moz BaseBrowserFragment
@@ -423,21 +440,10 @@ fun BrowserComponent(
         )
     }
     var tabList by remember { mutableStateOf(store.state.toTabList().first) }
-    var tabSessionState by remember { mutableStateOf(store.state.selectedTab) }
+    var currentTab by remember { mutableStateOf(store.state.selectedTab) }
     var searchEngine by remember { mutableStateOf(store.state.search.selectedOrDefaultSearchEngine!!) }
-    val pageType by remember {
-        mutableStateOf(with(tabSessionState?.content?.url) {
-            if (this == "about:blank") // TODO: create const class and set base to inferno:home
-                BrowserComponentPageType.HOME
-            else if (this == "private page blank") // TODO: add to const class and set base to inferno:private
-                BrowserComponentPageType.HOME_PRIVATE
-            else {
-                BrowserComponentPageType.ENGINE
-            }
-            // TODO: if home, show home page and load engineView in compose tree as hidden,
-            //  if page then show engineView
-        })
-    }
+    var pageType by remember { mutableStateOf(resolvePageType(currentTab)) }
+    var promptRequests by remember {mutableStateOf<List<PromptRequest>>(emptyList())}
 
     /* BrowserFragment vars */
     val windowFeature = ViewBoundFeatureWrapper<WindowFeature>()
@@ -509,8 +515,7 @@ fun BrowserComponent(
 //    lateinit var loginBarsIntegration: LoginBarsIntegration
 
 //    @VisibleForTesting
-    val findInPageIntegration =
-        ViewBoundFeatureWrapper<FindInPageIntegration>()
+    val findInPageIntegration = ViewBoundFeatureWrapper<FindInPageIntegration>()
     val toolbarIntegration = ViewBoundFeatureWrapper<ToolbarIntegration>()
     val bottomToolbarContainerIntegration =
         ViewBoundFeatureWrapper<BottomToolbarContainerIntegration>()
@@ -547,7 +552,12 @@ fun BrowserComponent(
 //    val homeViewModel: HomeScreenViewModel by activityViewModels()
 
 //    var currentStartDownloadDialog by remember { mutableStateOf<StartDownloadDialog?>(null) }
-    var (downloadDialogData, setDownloadDialogData) = remember { mutableStateOf<DownloadDialogData?>(null) }
+    // if not null, show corresponding download dialog
+    var (downloadDialogData, setDownloadDialogData) = remember {
+        mutableStateOf<DownloadDialogData?>(
+            null
+        )
+    }
 
     var savedLoginsLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
@@ -585,10 +595,19 @@ fun BrowserComponent(
 
     // setup tab observer
     DisposableEffect(true) {
+//        store.flowScoped { flow ->
+//            flow.map { state -> state.toTabList().first }
+//                .collect {
+//                    tabList = it
+//                }
+//        }
         browserStateObserver = store.observe(localLifecycleOwner) {
             tabList = it.toTabList().first
-            tabSessionState = it.selectedTab
+            currentTab = it.selectedTab
             searchEngine = it.search.selectedOrDefaultSearchEngine!!
+            pageType = resolvePageType(currentTab)
+            promptRequests = currentTab?.content?.promptRequests ?: emptyList()
+
             Log.d("BrowserComponent", "search engine: ${searchEngine.name}")
         }
 
@@ -596,6 +615,8 @@ fun BrowserComponent(
             browserStateObserver!!.unsubscribe()
         }
     }
+
+    PromptComponent(promptRequests, currentTab)
 
 
     // browser display mode
@@ -605,11 +626,6 @@ fun BrowserComponent(
 
     // bottom sheet menu setup
     val (showMenuBottomSheet, setShowMenuBottomSheet) = remember { mutableStateOf(false) }
-    val (showStartDownloadBottomSheet, setShowStartDownloadBottomSheet) = remember {
-        mutableStateOf(
-            false
-        )
-    }
 
     if (downloadDialogData != null) {
         if (downloadDialogData is FirstPartyDownloadDialogData) {
@@ -622,37 +638,21 @@ fun BrowserComponent(
         }
     } else if (showMenuBottomSheet) {
         ToolbarMenuBottomSheet(
-            tabSessionState = tabSessionState,
+            tabSessionState = currentTab,
             setShowBottomMenuSheet = setShowMenuBottomSheet,
             setBrowserComponentMode = setBrowserMode
         )
     }
 
-    /// component features
-//    val sessionFeature = remember { ViewBoundFeatureWrapper<SessionFeature>() }
-//    val toolbarIntegration = remember { ViewBoundFeatureWrapper<ToolbarIntegration>() }
-//    val contextMenuIntegration = remember { ViewBoundFeatureWrapper<ContextMenuIntegration>() }
-//    val downloadsFeature = remember { ViewBoundFeatureWrapper<DownloadsFeature>() }
-//    val shareDownloadsFeature = remember { ViewBoundFeatureWrapper<ShareDownloadFeature>() }
+    /// old component features
 //    val appLinksFeature = remember { ViewBoundFeatureWrapper<AppLinksFeature>() }
-//    val promptsFeature = remember { ViewBoundFeatureWrapper<PromptFeature>() }
 //    val webExtensionPromptFeature =
 //        remember { ViewBoundFeatureWrapper<WebExtensionPromptFeature>() }
-//    val fullScreenFeature = remember { ViewBoundFeatureWrapper<FullScreenFeature>() }
-//    val findInPageIntegration = remember { ViewBoundFeatureWrapper<FindInPageIntegration>() }
     val sitePermissionFeature = remember { ViewBoundFeatureWrapper<SitePermissionsFeature>() }
     val pictureInPictureIntegration =
         remember { ViewBoundFeatureWrapper<PictureInPictureIntegration>() }
-//    val swipeRefreshFeature = remember { ViewBoundFeatureWrapper<SwipeRefreshFeature>() }
-//    val windowFeature = remember { ViewBoundFeatureWrapper<WindowFeature>() }
-//    val webAuthnFeature = remember { ViewBoundFeatureWrapper<WebAuthnFeature>() }
-//    val fullScreenMediaSessionFeature = remember {
-//        ViewBoundFeatureWrapper<MediaSessionFullscreenFeature>()
-//    }
+
     val lastTabFeature = remember { ViewBoundFeatureWrapper<LastTabFeature>() }
-//    val screenOrientationFeature = remember { ViewBoundFeatureWrapper<ScreenOrientationFeature>() }
-//    val thumbnailsFeature = remember { ViewBoundFeatureWrapper<BrowserThumbnails>() }
-//    val readerViewFeature = remember { ViewBoundFeatureWrapper<ReaderViewIntegration>() }
 //    val webExtToolbarFeature = remember { ViewBoundFeatureWrapper<WebExtensionToolbarFeature>() }
 
     /// views
@@ -721,7 +721,7 @@ fun BrowserComponent(
             override fun onPreScroll(
                 available: Offset, source: NestedScrollSource
             ): Offset {
-                if (tabSessionState?.content?.loading == false) {
+                if (currentTab?.content?.loading == false) {
                     val delta = available.y
                     val newOffset = (bottomBarOffsetPx.value - delta).coerceIn(
                         0F, bottomBarHeightDp.toPx().toFloat()
@@ -743,373 +743,7 @@ fun BrowserComponent(
 
     // moz components setup and shared preferences
     LaunchedEffect(engineView == null) {
-
         if (engineView == null) return@LaunchedEffect
-        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-
-        /**
-         * mozilla integrations setup
-         *//*
-        fun mozSetup(): Unit {
-            sessionFeature.set(
-                feature = SessionFeature(
-                    context.components.core.store,
-                    context.components.useCases.sessionUseCases.goBack,
-                    context.components.useCases.sessionUseCases.goForward,
-                    engineView!!,
-                    sessionId,
-                ),
-                owner = lifecycleOwner,
-                view = view,
-            )
-
-//        (toolbar!!.layoutParams as? CoordinatorLayout.LayoutParams)?.apply {
-//            behavior = EngineViewScrollingBehavior(
-//                view.context,
-//                null,
-//                ViewPosition.BOTTOM,
-//            )
-//        }
-
-            toolbarIntegration.set(
-                feature = ToolbarIntegration(
-                    context,
-                    toolbar!!,
-                    context.components.core.historyStorage,
-                    context.components.core.store,
-                    context.components.useCases.sessionUseCases,
-                    context.components.useCases.tabsUseCases,
-                    context.components.useCases.webAppUseCases,
-                    sessionId,
-                ),
-                owner = lifecycleOwner,
-                view = view,
-            )
-
-            contextMenuIntegration.set(
-                feature = ContextMenuIntegration(
-                    context,
-                    parentFragmentManager,
-                    context.components.core.store,
-                    context.components.useCases.tabsUseCases,
-                    context.components.useCases.contextMenuUseCases,
-                    engineView!!,
-                    view,
-                    sessionId,
-                ),
-                owner = lifecycleOwner,
-                view = view,
-            )
-            shareDownloadsFeature.set(
-                ShareDownloadFeature(
-                    context = context.applicationContext,
-                    httpClient = context.components.core.client,
-                    store = context.components.core.store,
-                    tabId = sessionId,
-                ),
-                owner = lifecycleOwner,
-                view = view,
-            )
-
-            downloadsFeature.set(
-                feature = DownloadsFeature(
-                    context,
-                    store = context.components.core.store,
-                    useCases = context.components.useCases.downloadUseCases,
-                    fragmentManager = context.getActivity()?.supportFragmentManager,
-                    downloadManager = FetchDownloadManager(
-                        context.applicationContext,
-                        context.components.core.store,
-                        DownloadService::class,
-                        notificationsDelegate = context.components.notificationsDelegate,
-                    ),
-                    onNeedToRequestPermissions = { permissions ->
-                        requestDownloadPermissionsLauncher.launch(permissions)
-                    },
-                ),
-                owner = lifecycleOwner,
-                view = view,
-            )
-
-            appLinksFeature.set(
-                feature = AppLinksFeature(
-                    context,
-                    store = context.components.core.store,
-                    sessionId = sessionId,
-                    fragmentManager = parentFragmentManager,
-                    launchInApp = {
-                        prefs.getBoolean(
-                            context.getPreferenceKey(R.string.pref_key_launch_external_app), false
-                        )
-                    },
-                ),
-                owner = lifecycleOwner,
-                view = view,
-            )
-
-            promptsFeature.set(
-                feature = PromptFeature(
-                    fragment = view.findFragment(),
-                    store = context.components.core.store,
-                    tabsUseCases = context.components.useCases.tabsUseCases,
-                    customTabId = sessionId,
-                    fileUploadsDirCleaner = context.components.core.fileUploadsDirCleaner,
-                    fragmentManager = parentFragmentManager,
-                    onNeedToRequestPermissions = { permissions ->
-                        requestPromptsPermissionsLauncher.launch(permissions)
-                    },
-                ),
-                owner = lifecycleOwner,
-                view = view,
-            )
-
-            webExtensionPromptFeature.set(
-                feature = WebExtensionPromptFeature(
-                    store = context.components.core.store,
-                    context = context,
-                    fragmentManager = parentFragmentManager,
-                ),
-                owner = lifecycleOwner,
-                view = view,
-            )
-
-            windowFeature.set(
-                feature = WindowFeature(
-                    context.components.core.store, context.components.useCases.tabsUseCases
-                ),
-                owner = lifecycleOwner,
-                view = view,
-            )
-
-            fullScreenFeature.set(
-                feature = FullScreenFeature(
-                    store = context.components.core.store,
-                    sessionUseCases = context.components.useCases.sessionUseCases,
-                    tabId = sessionId,
-                    viewportFitChanged = {
-                        viewportFitChanged(
-                            viewportFit = it, context
-                        )
-                    },
-                    fullScreenChanged = {
-                        fullScreenChanged(
-                            it,
-                            context,
-                            toolbar!!,
-                            engineView!!,
-                            bottomBarHeightDp.toPx() - bottomBarOffsetPx.value.toInt()
-
-                        )
-                    },
-                ),
-                owner = lifecycleOwner,
-                view = view,
-            )
-
-            findInPageIntegration.set(
-                feature = FindInPageIntegration(
-                    context.components.core.store,
-                    sessionId,
-                    findInPageBar as FindInPageView,
-                    engineView!!,
-                ),
-                owner = lifecycleOwner,
-                view = view,
-            )
-
-            sitePermissionFeature.set(
-                feature = SitePermissionsFeature(
-                    context = context,
-                    fragmentManager = parentFragmentManager,
-                    sessionId = sessionId,
-                    storage = context.components.core.geckoSitePermissionsStorage,
-                    onNeedToRequestPermissions = { permissions ->
-                        requestSitePermissionsLauncher.launch(permissions)
-                    },
-                    onShouldShowRequestPermissionRationale = {
-                        if (context.getActivity() == null) shouldShowRequestPermissionRationale(
-                            context.getActivity()!!, it
-                        )
-                        else false
-                    },
-                    store = context.components.core.store,
-                ),
-                owner = lifecycleOwner,
-                view = view,
-            )
-
-            pictureInPictureIntegration.set(
-                feature = PictureInPictureIntegration(
-                    context.components.core.store,
-                    context.getActivity()!!,
-                    sessionId,
-                ),
-                owner = lifecycleOwner,
-                view = view,
-            )
-
-            fullScreenMediaSessionFeature.set(
-                feature = MediaSessionFullscreenFeature(
-                    context.getActivity()!!,
-                    context.components.core.store,
-                    sessionId,
-                ),
-                owner = lifecycleOwner,
-                view = view,
-            )
-
-//        (swipeRefresh!!.layoutParams as? CoordinatorLayout.LayoutParams)?.apply {
-//            behavior = EngineViewClippingBehavior(
-//                context,
-//                null,
-//                swipeRefresh!!,
-//                toolbar!!.height,
-//                ToolbarPosition.BOTTOM,
-//            )
-//        }
-            swipeRefreshFeature.set(
-                feature = SwipeRefreshFeature(
-                    context.components.core.store,
-                    context.components.useCases.sessionUseCases.reload,
-                    swipeRefresh!!,
-                ),
-                owner = lifecycleOwner,
-                view = view,
-            )
-
-            lastTabFeature.set(
-                feature = LastTabFeature(
-                    context.components.core.store,
-                    sessionId,
-                    context.components.useCases.tabsUseCases.removeTab,
-                    context.getActivity()!!,
-                ),
-                owner = lifecycleOwner,
-                view = view,
-            )
-
-            screenOrientationFeature.set(
-                feature = ScreenOrientationFeature(
-                    context.components.core.engine,
-                    context.getActivity()!!,
-                ),
-                owner = lifecycleOwner,
-                view = view,
-            )
-
-//        if (BuildConfig.MOZILLA_OFFICIAL) {
-            webAuthnFeature.set(
-                feature = WebAuthnFeature(
-                    context.components.core.engine,
-                    context.getActivity()!!,
-                    context.components.useCases.sessionUseCases.exitFullscreen::invoke,
-                ) { context.components.core.store.state.selectedTabId },
-                owner = lifecycleOwner,
-                view = view,
-            )
-//        }
-
-            // from Moz BrowserFragment
-            AwesomeBarFeature(awesomeBar!!, toolbar!!, engineView).addSearchProvider(
-                context,
-                context.components.core.store,
-                context.components.useCases.searchUseCases.defaultSearch,
-                fetchClient = context.components.core.client,
-                mode = SearchSuggestionProvider.Mode.MULTIPLE_SUGGESTIONS,
-                engine = context.components.core.engine,
-                limit = 5,
-                filterExactMatch = true,
-            ).addSessionProvider(
-                context.resources,
-                context.components.core.store,
-                context.components.useCases.tabsUseCases.selectTab,
-            ).addHistoryProvider(
-                context.components.core.historyStorage,
-                context.components.useCases.sessionUseCases.loadUrl,
-            ).addClipboardProvider(
-                context, context.components.useCases.sessionUseCases.loadUrl
-            )
-
-            // from Moz BrowserHandler
-            // We cannot really add a `addSyncedTabsProvider` to `AwesomeBarFeature` coz that would create
-            // a dependency on feature-syncedtabs (which depends on Sync).
-            awesomeBar!!.addProviders(
-                SyncedTabsStorageSuggestionProvider(
-                    context.components.backgroundServices.syncedTabsStorage,
-                    context.components.useCases.tabsUseCases.addTab,
-                    context.components.core.icons,
-                ),
-            )
-
-            // from Moz BrowserHandler
-            TabsToolbarFeature(
-                toolbar = toolbar!!,
-                sessionId = sessionId,
-                store = context.components.core.store,
-                showTabs = { showTabs(context) },
-                lifecycleOwner = lifecycleOwner,
-            )
-
-            // from Moz BrowserHandler
-            thumbnailsFeature.set(
-                feature = BrowserThumbnails(
-                    context,
-                    engineView!!,
-                    context.components.core.store,
-                ),
-                owner = lifecycleOwner,
-                view = view,
-            )
-
-            // from Moz BrowserHandler
-            readerViewFeature.set(
-                feature = ReaderViewIntegration(
-                    context,
-                    context.components.core.engine,
-                    context.components.core.store,
-                    toolbar!!,
-                    readerViewBar!!,
-                    readerViewAppearanceButton!!,
-                ),
-                owner = lifecycleOwner,
-                view = view,
-            )
-
-            // from Moz BrowserHandler
-            webExtToolbarFeature.set(
-                feature = WebExtensionToolbarFeature(
-                    toolbar!!,
-                    context.components.core.store,
-                ),
-                owner = lifecycleOwner,
-                view = view,
-            )
-
-            // from Moz BrowserHandler
-            windowFeature.set(
-                feature = WindowFeature(
-                    store = context.components.core.store,
-                    tabsUseCases = context.components.useCases.tabsUseCases,
-                ),
-                owner = lifecycleOwner,
-                view = view,
-            )
-
-//            if (context.settings().showTopSitesFeature) {
-//            topSitesFeature.set(
-//                feature = TopSitesFeature(
-//                    view = DefaultTopSitesView(
-//                        appStore = context.components.appStore,
-//                        settings = context.components.settings,
-//                    ), storage = context.components.core.topSitesStorage,
-//                    config = {getTopSitesConfig(context)},
-//                ),
-//                owner = viewLifecycleOwner,
-//                view =view // binding.root,
-//            )
-//            }
-        }
-        mozSetup() */
         engineView!!.setDynamicToolbarMaxHeight(bottomBarHeightDp.toPx() - bottomBarOffsetPx.value.toInt())
     }
 
@@ -1700,7 +1334,6 @@ fun BrowserComponent(
                 view = view,
             )
 
-            // todo: crash content integration
 //            crashContentIntegration.set(
 //                feature = CrashContentIntegration(
 //                    context = context,
@@ -1824,11 +1457,7 @@ fun BrowserComponent(
             )
 
             closeFindInPageBarOnNavigation(
-                store,
-                lifecycleOwner,
-                context,
-                coroutineScope,
-                findInPageIntegration
+                store, lifecycleOwner, context, coroutineScope, findInPageIntegration
             )
 
             store.flowScoped(lifecycleOwner) { flow ->
@@ -1913,10 +1542,7 @@ fun BrowserComponent(
 
             initReaderMode(context, view)
             initTranslationsAction(
-                context,
-                view,
-                browserToolbarInteractor!!,
-                translationsAvailable.value
+                context, view, browserToolbarInteractor!!, translationsAvailable.value
             )
             initReviewQualityCheck(
                 context,
@@ -2111,11 +1737,7 @@ fun BrowserComponent(
 
                     context.components.core.tabCollectionStorage.register(
                         collectionStorageObserver(
-                            context,
-                            navController,
-                            view,
-                            coroutineScope,
-                            snackbarHostState
+                            context, navController, view, coroutineScope, snackbarHostState
                         ),
                         lifecycleOwner,
                     )
@@ -2140,47 +1762,55 @@ fun BrowserComponent(
         contentWindowInsets = ScaffoldDefaults.contentWindowInsets,
         content = { paddingValues ->
             MozAwesomeBar(setView = { ab -> awesomeBar = ab })
-            if (pageType == BrowserComponentPageType.ENGINE) {
-                MozEngineView(
-                    modifier = Modifier
-                        .padding(
-                            start = paddingValues.calculateStartPadding(LayoutDirection.Ltr),
-                            top = 0.dp,
-                            end = paddingValues.calculateEndPadding(LayoutDirection.Ltr),
-                            bottom = 0.dp
-                        )
-                        .nestedScroll(nestedScrollConnection)
-                        .motionEventSpy {
-                            if (it.action == MotionEvent.ACTION_UP || it.action == MotionEvent.ACTION_CANCEL) {
-                                // set bottom bar position
-                                coroutineScope.launch {
-                                    if (bottomBarOffsetPx.value <= (bottomBarHeightDp.toPx() / 2)) {
-                                        // if more than halfway up, go up
-                                        bottomBarOffsetPx.animateTo(0F)
-                                    } else {
-                                        // if more than halfway down, go down
-                                        bottomBarOffsetPx.animateTo(
-                                            bottomBarHeightDp
-                                                .toPx()
-                                                .toFloat()
-                                        )
+            when (pageType) {
+                BrowserComponentPageType.ENGINE -> {
+                    MozEngineView(
+                        modifier = Modifier
+                            .padding(
+                                start = paddingValues.calculateStartPadding(LayoutDirection.Ltr),
+                                top = 0.dp,
+                                end = paddingValues.calculateEndPadding(LayoutDirection.Ltr),
+                                bottom = 0.dp
+                            )
+                            .nestedScroll(nestedScrollConnection)
+                            .motionEventSpy {
+                                if (it.action == MotionEvent.ACTION_UP || it.action == MotionEvent.ACTION_CANCEL) {
+                                    // set bottom bar position
+                                    coroutineScope.launch {
+                                        if (bottomBarOffsetPx.value <= (bottomBarHeightDp.toPx() / 2)) {
+                                            // if more than halfway up, go up
+                                            bottomBarOffsetPx.animateTo(0F)
+                                        } else {
+                                            // if more than halfway down, go down
+                                            bottomBarOffsetPx.animateTo(
+                                                bottomBarHeightDp
+                                                    .toPx()
+                                                    .toFloat()
+                                            )
+                                        }
+                                        engineView!!.setDynamicToolbarMaxHeight(0)
                                     }
-                                    engineView!!.setDynamicToolbarMaxHeight(0)
                                 }
-                            }
 //                        else if (it.action == MotionEvent.ACTION_SCROLL) {
 //                            // TODO: move nested scroll connection logic here
 //                        }
-                        },
-                    setEngineView = { ev -> engineView = ev },
-                    setSwipeView = { sr -> swipeRefresh = sr },
-                )
-            }
-            if (pageType == BrowserComponentPageType.HOME_PRIVATE) {
-                HomeComponent(private = true)
-            }
-            if (pageType == BrowserComponentPageType.HOME) {
-                HomeComponent(private = false)
+                            },
+                        setEngineView = { ev -> engineView = ev },
+                        setSwipeView = { sr -> swipeRefresh = sr },
+                    )
+                }
+
+                BrowserComponentPageType.HOME_PRIVATE -> {
+                    HomeComponent(private = true)
+                }
+
+                BrowserComponentPageType.HOME -> {
+                    HomeComponent(private = false)
+                }
+
+                BrowserComponentPageType.CRASH -> {
+                    CrashComponent()
+                }
             }
         },
         floatingActionButtonPosition = FabPosition.End,
@@ -2205,7 +1835,7 @@ fun BrowserComponent(
                     if (browserMode == BrowserComponentMode.TOOLBAR) {
                         BrowserTabBar(tabList)
                         BrowserToolbar(
-                            tabSessionState = tabSessionState,
+                            tabSessionState = currentTab,
                             searchEngine = searchEngine,
                             setShowMenu = setShowMenuBottomSheet
                         )
@@ -2453,8 +2083,7 @@ private fun showUndoSnackbar(
 ) {
     coroutineScope.launch {
         val result = snackbarHostState.defaultSnackbarHostState.showSnackbar(
-            message,
-            actionLabel = context.getString(R.string.snackbar_deleted_undo), //"undo",
+            message, actionLabel = context.getString(R.string.snackbar_deleted_undo), //"undo",
             duration = SnackbarDuration.Long
         )
         when (result) {
@@ -2476,9 +2105,7 @@ private fun showUndoSnackbar(
  * [See details](https://developer.android.com/develop/ui/views/touch-and-input/copy-paste#duplicate-notifications).
  */
 private fun showSnackbarForClipboardCopy(
-    context: Context,
-    coroutineScope: CoroutineScope,
-    snackbarHostState: AcornSnackbarHostState
+    context: Context, coroutineScope: CoroutineScope, snackbarHostState: AcornSnackbarHostState
 ) {
     if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2) {
         coroutineScope.launch {
@@ -2516,7 +2143,8 @@ private fun showSnackbarAfterLoginChange(
  * Shows a biometric prompt and fallback to prompting for the password.
  */
 private fun showBiometricPrompt(
-    context: Context, biometricPromptFeature: ViewBoundFeatureWrapper<BiometricPromptFeature>,
+    context: Context,
+    biometricPromptFeature: ViewBoundFeatureWrapper<BiometricPromptFeature>,
     promptFeature: ViewBoundFeatureWrapper<PromptFeature>
 ) {
     if (BiometricPromptFeature.canUseFeature(context)) {
@@ -3027,9 +2655,7 @@ internal fun initializeMicrosurveyFeature(
 
 @Suppress("LongMethod")
 private fun initializeMicrosurveyPrompt(
-    context: Context,
-    view: View,
-    fullScreenFeature: ViewBoundFeatureWrapper<FullScreenFeature>
+    context: Context, view: View, fullScreenFeature: ViewBoundFeatureWrapper<FullScreenFeature>
 ) {
 //    val context = context
 //    val view = requireView()
@@ -3566,8 +3192,7 @@ private suspend fun bookmarkTapped(
                 navController,
                 R.id.browserComponentWrapperFragment,
                 BrowserComponentWrapperFragmentDirections.actionGlobalBookmarkEditFragment(
-                    existing.guid,
-                    true
+                    existing.guid, true
                 ),
             )
         }
@@ -3658,9 +3283,7 @@ fun onHomePressed(pipFeature: PictureInPictureFeature) = pipFeature?.onHomePress
  * Exit fullscreen mode when exiting PIP mode
  */
 private fun pipModeChanged(
-    session: SessionState,
-    context: Context,
-    backPressedHandler: OnBackPressedHandler
+    session: SessionState, context: Context, backPressedHandler: OnBackPressedHandler
 ) {
     // todo: isAdded
     if (!session.content.pictureInPictureEnabled && session.content.fullScreen) { // && isAdded) {
@@ -3858,8 +3481,7 @@ internal fun showCannotOpenFileError(
         snackbarHostState.warningSnackbarHostState.showSnackbar(
             message = DynamicDownloadDialog.getCannotOpenFileErrorMessage(
                 context, downloadState
-            ),
-            duration = SnackbarDuration.Long
+            ), duration = SnackbarDuration.Long
         )
     }
 }
@@ -4599,22 +4221,13 @@ private fun collectionStorageObserver(
             id: Long?,
         ) {
             showTabSavedToCollectionSnackbar(
-                sessions.size,
-                context,
-                navController,
-                coroutineScope,
-                snackbarHostState,
-                true
+                sessions.size, context, navController, coroutineScope, snackbarHostState, true
             )
         }
 
         override fun onTabsAdded(tabCollection: TabCollection, sessions: List<TabSessionState>) {
             showTabSavedToCollectionSnackbar(
-                sessions.size,
-                context,
-                navController,
-                coroutineScope,
-                snackbarHostState
+                sessions.size, context, navController, coroutineScope, snackbarHostState
             )
         }
 
@@ -4772,7 +4385,7 @@ fun updateLastBrowseActivity(context: Context) {
 //    var searchEngine by remember { mutableStateOf(context.components.core.store.state.search.selectedOrDefaultSearchEngine!!) }
 //    val pageType by remember {
 //        mutableStateOf(with(tabSessionState?.content?.url) {
-//            if (this == "about:blank") // TODO: create const class and set base to inferno:home
+//            if (this == "inferno:home") // TODO: create const class and set base to inferno:home
 //                BrowserComponentPageType.HOME
 //            else if (this == "private page blank") // TODO: add to const class and set base to inferno:private
 //                BrowserComponentPageType.HOME_PRIVATE

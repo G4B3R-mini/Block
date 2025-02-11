@@ -28,7 +28,7 @@ import com.shmibblez.inferno.NavGraphDirections
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.BrowserAnimator
 import com.shmibblez.inferno.browser.BrowserAnimator.Companion.getToolbarNavOptions
-import com.shmibblez.inferno.browser.BrowserFragmentDirections
+import com.shmibblez.inferno.browser.BrowserComponentWrapperFragmentDirections
 import com.shmibblez.inferno.browser.browsingmode.BrowsingMode
 import com.shmibblez.inferno.browser.readermode.ReaderModeController
 import com.shmibblez.inferno.components.AppStore
@@ -118,7 +118,7 @@ class DefaultBrowserToolbarController(
     override fun handleToolbarPaste(text: String) {
         navController.nav(
             R.id.browserComponentWrapperFragment,
-            BrowserFragmentDirections.actionGlobalSearchDialog(
+            BrowserComponentWrapperFragmentDirections.actionGlobalSearchDialog(
                 sessionId = currentSession?.id,
                 pastedText = text,
             ),
@@ -149,10 +149,10 @@ class DefaultBrowserToolbarController(
         if (currentSession?.content?.searchTerms.isNullOrBlank()) {
             browserAnimator.captureEngineViewAndDrawStatically {
                 navController.navigate(
-                    BrowserFragmentDirections.actionGlobalHome(),
+                    BrowserComponentWrapperFragmentDirections.actionGlobalHome(),
                 )
                 navController.navigate(
-                    BrowserFragmentDirections.actionGlobalSearchDialog(
+                    BrowserComponentWrapperFragmentDirections.actionGlobalSearchDialog(
                         currentSession?.id,
                     ),
                     getToolbarNavOptions(activity),
@@ -160,7 +160,7 @@ class DefaultBrowserToolbarController(
             }
         } else {
             navController.navigate(
-                BrowserFragmentDirections.actionGlobalSearchDialog(
+                BrowserComponentWrapperFragmentDirections.actionGlobalSearchDialog(
                     currentSession?.id,
                 ),
                 getToolbarNavOptions(activity),
@@ -190,7 +190,7 @@ class DefaultBrowserToolbarController(
                     if (store.state.getNormalOrPrivateTabs(it.content.private).count() == 1) {
                         homeViewModel.sessionToDelete = it.id
                         navController.navigate(
-                            BrowserFragmentDirections.actionGlobalHome(),
+                            BrowserComponentWrapperFragmentDirections.actionGlobalHome(),
                         )
                     } else {
                         onCloseTab.invoke(it)
@@ -201,13 +201,13 @@ class DefaultBrowserToolbarController(
             is TabCounterMenu.Item.NewTab -> {
                 activity.browsingModeManager.mode = BrowsingMode.Normal
                 navController.navigate(
-                    BrowserFragmentDirections.actionGlobalHome(focusOnAddressBar = true),
+                    BrowserComponentWrapperFragmentDirections.actionGlobalHome(focusOnAddressBar = true),
                 )
             }
             is TabCounterMenu.Item.NewPrivateTab -> {
                 activity.browsingModeManager.mode = BrowsingMode.Private
                 navController.navigate(
-                    BrowserFragmentDirections.actionGlobalHome(focusOnAddressBar = true),
+                    BrowserComponentWrapperFragmentDirections.actionGlobalHome(focusOnAddressBar = true),
                 )
             }
         }
@@ -223,7 +223,7 @@ class DefaultBrowserToolbarController(
 //        Events.browserToolbarHomeTapped.record(NoExtras())
         browserAnimator.captureEngineViewAndDrawStatically {
             navController.navigate(
-                BrowserFragmentDirections.actionGlobalHome(),
+                BrowserComponentWrapperFragmentDirections.actionGlobalHome(),
             )
         }
     }
@@ -231,7 +231,7 @@ class DefaultBrowserToolbarController(
     override fun handleEraseButtonClick() {
 //        Events.browserToolbarEraseTapped.record(NoExtras())
         homeViewModel.sessionToDelete = HomeFragment.ALL_PRIVATE_TABS
-        val directions = BrowserFragmentDirections.actionGlobalHome()
+        val directions = BrowserComponentWrapperFragmentDirections.actionGlobalHome()
         navController.navigate(directions)
     }
 
@@ -241,7 +241,7 @@ class DefaultBrowserToolbarController(
         appStore.dispatch(SnackbarAction.SnackbarDismissed)
 
         val directions =
-            BrowserFragmentDirections.actionBrowserFragmentToTranslationsDialogFragment()
+            BrowserComponentWrapperFragmentDirections.actionBrowserFragmentToTranslationsDialogFragment()
         navController.navigateSafe(R.id.browserComponentWrapperFragment, directions)
     }
 
@@ -275,7 +275,7 @@ class DefaultBrowserToolbarController(
 
         browserAnimator.captureEngineViewAndDrawStatically {
             navController.navigate(
-                BrowserFragmentDirections.actionGlobalHome(focusOnAddressBar = true),
+                BrowserComponentWrapperFragmentDirections.actionGlobalHome(focusOnAddressBar = true),
             )
         }
     }
@@ -290,7 +290,7 @@ class DefaultBrowserToolbarController(
         isSandboxCustomTab: Boolean,
     ) {
         navController.navigate(
-            BrowserFragmentDirections.actionGlobalMenuDialogFragment(
+            BrowserComponentWrapperFragmentDirections.actionGlobalMenuDialogFragment(
                 accesspoint = accessPoint,
                 customTabSessionId = customTabSessionId,
                 isSandboxCustomTab = isSandboxCustomTab,

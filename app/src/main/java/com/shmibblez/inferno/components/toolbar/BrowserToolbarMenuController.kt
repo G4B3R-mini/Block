@@ -40,7 +40,7 @@ import com.shmibblez.inferno.HomeActivity
 import com.shmibblez.inferno.NavGraphDirections
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.BrowserAnimator
-import com.shmibblez.inferno.browser.BrowserFragmentDirections
+import com.shmibblez.inferno.browser.BrowserComponentWrapperFragmentDirections
 import com.shmibblez.inferno.browser.readermode.ReaderModeController
 import com.shmibblez.inferno.collections.SaveCollectionStep
 import com.shmibblez.inferno.components.AppStore
@@ -110,7 +110,7 @@ class DefaultBrowserToolbarMenuController(
                             addToHomescreen()
                         } else {
                             val directions =
-                                BrowserFragmentDirections.actionBrowserFragmentToCreateShortcutFragment()
+                                BrowserComponentWrapperFragmentDirections.actionBrowserFragmentToCreateShortcutFragment()
                             navController.navigateSafe(R.id.browserComponentWrapperFragment, directions)
                         }
                     }
@@ -163,7 +163,7 @@ class DefaultBrowserToolbarMenuController(
             is ToolbarMenu.Item.Back -> {
                 if (item.viewHistory) {
                     navController.navigate(
-                        BrowserFragmentDirections.actionGlobalTabHistoryDialogFragment(
+                        BrowserComponentWrapperFragmentDirections.actionGlobalTabHistoryDialogFragment(
                             activeSessionId = customTabSessionId,
                         ),
                     )
@@ -176,7 +176,7 @@ class DefaultBrowserToolbarMenuController(
             is ToolbarMenu.Item.Forward -> {
                 if (item.viewHistory) {
                     navController.navigate(
-                        BrowserFragmentDirections.actionGlobalTabHistoryDialogFragment(
+                        BrowserComponentWrapperFragmentDirections.actionGlobalTabHistoryDialogFragment(
                             activeSessionId = customTabSessionId,
                         ),
                     )
@@ -220,19 +220,19 @@ class DefaultBrowserToolbarMenuController(
                 navController.navigate(directions)
             }
             is ToolbarMenu.Item.Settings -> browserAnimator.captureEngineViewAndDrawStatically {
-                val directions = BrowserFragmentDirections.actionBrowserFragmentToSettingsFragment()
+                val directions = BrowserComponentWrapperFragmentDirections.actionBrowserFragmentToSettingsFragment()
                 navController.nav(R.id.browserComponentWrapperFragment, directions)
             }
             is ToolbarMenu.Item.SyncAccount -> {
                 val directions = when (item.accountState) {
                     AccountState.AUTHENTICATED ->
-                        BrowserFragmentDirections.actionGlobalAccountSettingsFragment()
+                        BrowserComponentWrapperFragmentDirections.actionGlobalAccountSettingsFragment()
                     AccountState.NEEDS_REAUTHENTICATION ->
-                        BrowserFragmentDirections.actionGlobalAccountProblemFragment(
+                        BrowserComponentWrapperFragmentDirections.actionGlobalAccountProblemFragment(
                             entrypoint = FenixFxAEntryPoint.BrowserToolbar,
                         )
                     AccountState.NO_ACCOUNT ->
-                        BrowserFragmentDirections.actionGlobalTurnOnSync(entrypoint = FenixFxAEntryPoint.BrowserToolbar)
+                        BrowserComponentWrapperFragmentDirections.actionGlobalTurnOnSync(entrypoint = FenixFxAEntryPoint.BrowserToolbar)
                 }
                 browserAnimator.captureEngineViewAndDrawStatically {
                     navController.nav(
@@ -292,11 +292,11 @@ class DefaultBrowserToolbarMenuController(
                         } else {
                             if (ManufacturerCodes.isXiaomi) {
                                 val directions =
-                                    BrowserFragmentDirections.actionBrowserFragmentToCreateXiaomiShortcutFragment()
+                                    BrowserComponentWrapperFragmentDirections.actionBrowserFragmentToCreateXiaomiShortcutFragment()
                                 navController.navigateSafe(R.id.browserComponentWrapperFragment, directions)
                             } else {
                                 val directions =
-                                    BrowserFragmentDirections.actionBrowserFragmentToCreateShortcutFragment()
+                                    BrowserComponentWrapperFragmentDirections.actionBrowserFragmentToCreateShortcutFragment()
                                 navController.navigateSafe(R.id.browserComponentWrapperFragment, directions)
                             }
                         }
@@ -309,7 +309,7 @@ class DefaultBrowserToolbarMenuController(
             is ToolbarMenu.Item.AddonsManager -> browserAnimator.captureEngineViewAndDrawStatically {
                 navController.nav(
                     R.id.browserComponentWrapperFragment,
-                    BrowserFragmentDirections.actionGlobalAddonsManagementFragment(),
+                    BrowserComponentWrapperFragmentDirections.actionGlobalAddonsManagementFragment(),
                 )
             }
             is ToolbarMenu.Item.SaveToCollection -> {
@@ -321,7 +321,7 @@ class DefaultBrowserToolbarMenuController(
 
                 currentSession?.let { currentSession ->
                     val directions =
-                        BrowserFragmentDirections.actionGlobalCollectionCreationFragment(
+                        BrowserComponentWrapperFragmentDirections.actionGlobalCollectionCreationFragment(
                             tabIds = arrayOf(currentSession.id),
                             selectedTabIds = arrayOf(currentSession.id),
                             saveCollectionStep = if (tabCollectionStorage.cachedTabCollections.isEmpty()) {
@@ -346,30 +346,30 @@ class DefaultBrowserToolbarMenuController(
             is ToolbarMenu.Item.Bookmarks -> browserAnimator.captureEngineViewAndDrawStatically {
                 navController.nav(
                     R.id.browserComponentWrapperFragment,
-                    BrowserFragmentDirections.actionGlobalBookmarkFragment(BookmarkRoot.Mobile.id),
+                    BrowserComponentWrapperFragmentDirections.actionGlobalBookmarkFragment(BookmarkRoot.Mobile.id),
                 )
             }
             is ToolbarMenu.Item.History -> browserAnimator.captureEngineViewAndDrawStatically {
                 navController.nav(
                     R.id.browserComponentWrapperFragment,
-                    BrowserFragmentDirections.actionGlobalHistoryFragment(),
+                    BrowserComponentWrapperFragmentDirections.actionGlobalHistoryFragment(),
                 )
             }
             is ToolbarMenu.Item.Passwords -> {
                 navController.nav(
                     R.id.browserComponentWrapperFragment,
-                    BrowserFragmentDirections.actionLoginsListFragment(),
+                    BrowserComponentWrapperFragmentDirections.actionLoginsListFragment(),
                 )
             }
             is ToolbarMenu.Item.Downloads -> browserAnimator.captureEngineViewAndDrawStatically {
                 navController.nav(
                     R.id.browserComponentWrapperFragment,
-                    BrowserFragmentDirections.actionGlobalDownloadsFragment(),
+                    BrowserComponentWrapperFragmentDirections.actionGlobalDownloadsFragment(),
                 )
             }
             is ToolbarMenu.Item.NewTab -> {
                 navController.navigate(
-                    BrowserFragmentDirections.actionGlobalHome(focusOnAddressBar = true),
+                    BrowserComponentWrapperFragmentDirections.actionGlobalHome(focusOnAddressBar = true),
                 )
             }
             is ToolbarMenu.Item.SetDefaultBrowser -> {
@@ -398,7 +398,7 @@ class DefaultBrowserToolbarMenuController(
             ToolbarMenu.Item.Translate -> {
 //                Translations.action.record(Translations.ActionExtra("main_flow_browser"))
                 val directions =
-                    BrowserFragmentDirections.actionBrowserFragmentToTranslationsDialogFragment()
+                    BrowserComponentWrapperFragmentDirections.actionBrowserFragmentToTranslationsDialogFragment()
                 navController.navigateSafe(R.id.browserComponentWrapperFragment, directions)
             }
         }

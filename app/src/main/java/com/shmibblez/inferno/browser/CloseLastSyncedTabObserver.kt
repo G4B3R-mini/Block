@@ -26,7 +26,7 @@ class CloseLastSyncedTabObserver(
         // Observers aren't guaranteed to be called on a specific thread,
         // and `NavController` is main thread-only.
         scope.launch(Dispatchers.Main) {
-            val directions = BrowserFragmentDirections.actionGlobalHome(focusOnAddressBar = true)
+            val directions = BrowserComponentWrapperFragmentDirections.actionGlobalHome(focusOnAddressBar = true)
             navController.navigate(directions)
         }
     }

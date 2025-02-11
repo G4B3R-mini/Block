@@ -180,7 +180,7 @@ fun BrowserEditToolbar(
     fun parseInput(): TextFieldValue {
         return (tabSessionState?.content?.searchTerms?.ifEmpty { tabSessionState.content.url }
             ?: "<empty>").let {
-            (if (it != "about:blank" && it != "about:privatebrowsing") it else "").let { searchTerms ->
+            (if (it != "inferno:home" && it != "inferno:privatebrowsing") it else "").let { searchTerms ->
                 TextFieldValue(
                     text = searchTerms,
                     selection = if (searchTerms.isEmpty()) TextRange.Zero else TextRange(searchTerms.length)

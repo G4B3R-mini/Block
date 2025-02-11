@@ -11,13 +11,18 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
@@ -28,8 +33,10 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,6 +55,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.BrowserComponentMode
 import com.shmibblez.inferno.browser.FirstPartyDownloadDialogData
@@ -75,6 +83,7 @@ import mozilla.components.browser.state.selector.privateTabs
 import mozilla.components.browser.state.selector.selectedTab
 import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.feature.downloads.toMegabyteOrKilobyteString
+import mozilla.components.feature.downloads.ui.DownloaderApp
 import mozilla.components.feature.tabs.TabsUseCases
 import mozilla.components.support.ktx.android.content.share
 
@@ -652,7 +661,7 @@ object ToolbarMenuItemsScopeInstance : ToolbarMenuItemsScope {
         fun newTab(tabsUseCases: TabsUseCases, isPrivateSession: Boolean) {
             Log.d("BrowserTabBar", "newTab: isPrivateSession: $isPrivateSession")
             tabsUseCases.addTab(
-                url = if (isPrivateSession) "about:privatebrowsing" else "about:blank",
+                url = if (isPrivateSession) "inferno:privatebrowsing" else "inferno:home",
                 selectTab = true,
                 private = isPrivateSession
             )
@@ -749,33 +758,75 @@ internal fun FirstPartyDownloadBottomSheet(
     firstPartyDownloadDialogData: FirstPartyDownloadDialogData,
     setFirstPartyDownloadDialogData: (FirstPartyDownloadDialogData?) -> Unit
 ) {
-    ModalBottomSheet(onDismissRequest = { setFirstPartyDownloadDialogData(null) },
+    // don't dismiss on swipe down
+    val sheetState = rememberModalBottomSheetState(confirmValueChange = { sheetValue ->
+        sheetValue != SheetValue.Hidden
+    })
+
+    fun dismiss() {
+        setFirstPartyDownloadDialogData(null)
+    }
+    ModalBottomSheet(sheetState = sheetState,
+        onDismissRequest = { },
         containerColor = Color.Black,
         scrimColor = Color.Black.copy(alpha = 0.1F),
         shape = RectangleShape,
         dragHandle = {
-            BottomSheetDefaults.DragHandle(
-                color = Color.White,
-                height = ToolbarMenuItemConstants.SHEET_HANDLE_HEIGHT,
-//            shape = RectangleShape,
-            )
+            /* no drag handle */
+//            BottomSheetDefaults.DragHandle(
+//                color = Color.White,
+//                height = ToolbarMenuItemConstants.SHEET_HANDLE_HEIGHT,
+////            shape = RectangleShape,
+//            )
         }) {
-        Row(modifier = Modifier.fillMaxWidth().wrapContentHeight(), verticalAlignment = Alignment.CenterVertically,) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             Icon(
-                modifier = Modifier.width(48.dp).height(48.dp).padding(start = 16.dp, top=16.dp),
+                modifier = Modifier
+                    .width(48.dp)
+                    .height(48.dp)
+                    .padding(start = 16.dp, top = 16.dp),
                 tint = Color.White,
                 contentDescription = "download complete icon",
                 painter = painterResource(R.drawable.mozac_feature_download_ic_download_complete)
             )
-            Text(text = firstPartyDownloadDialogData.contentSize.toMegabyteOrKilobyteString(), color = Color.White, modifier = Modifier.weight(1F).padding(start = 4.dp, end = 4.dp))
+            Text(
+                text = firstPartyDownloadDialogData.contentSize.toMegabyteOrKilobyteString(),
+                color = Color.White,
+                textAlign = TextAlign.Start,
+                modifier = Modifier
+                    .weight(1F)
+                    .padding(start = 4.dp, end = 4.dp)
+            )
             Icon(
-                modifier = Modifier.width(48.dp).height(48.dp).clickable(onClick = {firstPartyDownloadDialogData.negativeButtonAction.invoke()}),
+                modifier = Modifier
+                    .width(48.dp)
+                    .height(48.dp)
+                    .clickable(onClick = {
+                        firstPartyDownloadDialogData.negativeButtonAction.invoke()
+                        dismiss()
+                    }),
                 tint = Color.White,
                 contentDescription = "download complete icon",
                 painter = painterResource(R.drawable.mozac_ic_cross_24)
             )
         }
-        Button(onClick = {firstPartyDownloadDialogData.positiveButtonAction.invoke()}) {
+        Text(
+            text = firstPartyDownloadDialogData.filename,
+            color = Color.White,
+            textAlign = TextAlign.Start,
+            modifier = Modifier
+                .weight(1F)
+                .padding(start = 4.dp + 48.dp, end = 16.dp)
+        )
+        Button(onClick = {
+            firstPartyDownloadDialogData.positiveButtonAction.invoke()
+            dismiss()
+        }) {
             Text(text = stringResource(R.string.mozac_feature_downloads_dialog_download))
         }
     }
@@ -787,21 +838,111 @@ internal fun ThirdPartyDownloadBottomSheet(
     thirdPartyDownloadDialogData: ThirdPartyDownloadDialogData,
     setThirdPartyDownloadDialogData: (ThirdPartyDownloadDialogData?) -> Unit
 ) {
-    // TODO:
-    //   - finish first party bottom sheet, check everything ok
-    //   - implement third party bottom sheet / download dialog (lazy list for main view)
-    ModalBottomSheet(onDismissRequest = { setThirdPartyDownloadDialogData(null) },
+    // don't dismiss on swipe down
+    val sheetState = rememberModalBottomSheetState(confirmValueChange = { sheetValue ->
+        sheetValue != SheetValue.Hidden
+    })
+
+    fun dismiss() {
+        setThirdPartyDownloadDialogData(null)
+    }
+    ModalBottomSheet(sheetState = sheetState,
+        onDismissRequest = { },
         containerColor = Color.Black,
         scrimColor = Color.Black.copy(alpha = 0.1F),
         shape = RectangleShape,
         dragHandle = {
-            BottomSheetDefaults.DragHandle(
-                color = Color.White,
-                height = ToolbarMenuItemConstants.SHEET_HANDLE_HEIGHT,
-//            shape = RectangleShape,
-            )
+            /* no drag handle */
+//            BottomSheetDefaults.DragHandle(
+//                color = Color.White,
+//                height = ToolbarMenuItemConstants.SHEET_HANDLE_HEIGHT,
+////            shape = RectangleShape,
+//            )
         }) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                modifier = Modifier
+                    .width(48.dp)
+                    .height(48.dp)
+                    .padding(start = 16.dp, top = 16.dp),
+                tint = Color.White,
+                contentDescription = "download complete icon",
+                painter = painterResource(R.drawable.mozac_feature_download_ic_download_complete)
+            )
+            Text(
+                text = stringResource(R.string.mozac_feature_downloads_third_party_app_chooser_dialog_title),
+                color = Color.White,
+                textAlign = TextAlign.Start,
+                modifier = Modifier
+                    .weight(1F)
+                    .padding(start = 4.dp, end = 4.dp),
+            )
+            Icon(
+                modifier = Modifier
+                    .width(48.dp)
+                    .height(48.dp)
+                    .clickable(onClick = {
+                        thirdPartyDownloadDialogData.negativeButtonAction.invoke()
+                        dismiss()
+                    }),
+                tint = Color.White,
+                contentDescription = "download complete icon",
+                painter = painterResource(R.drawable.mozac_ic_cross_24),
+            )
+        }
+        LazyVerticalGrid(
+            columns = GridCells.Adaptive(minSize = 76.dp),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            items(thirdPartyDownloadDialogData.downloaderApps) { downloaderApp ->
+                DownloaderAppItem(
+                    downloaderApp,
+                    thirdPartyDownloadDialogData.onAppSelected,
+                    { dismiss() },
+                )
+            }
+        }
+    }
+}
 
+@Composable
+private fun DownloaderAppItem(
+    downloaderApp: DownloaderApp, onAppClicked: (DownloaderApp) -> Unit, dismiss: () -> Unit
+) {
+    val context = LocalContext.current
+    Column(
+        modifier = Modifier
+            .width(76.dp)
+            // height + spacers/margin
+            .height(80.dp + 8.dp + 8.dp + 5.dp)
+            .clickable {
+                onAppClicked(downloaderApp)
+                dismiss()
+            },
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Spacer(modifier = Modifier.height(8.dp))
+        Icon(
+            modifier = Modifier.size(40.dp),
+            painter = rememberDrawablePainter(downloaderApp.resolver.loadIcon(context.packageManager)),
+            tint = Color.Transparent,
+            contentDescription = "app image",
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = downloaderApp.name,
+            color = Color.White,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .weight(1F)
+                .padding(start = 4.dp, end = 4.dp)
+        )
+        Spacer(modifier = Modifier.height(5.dp))
     }
 }
 

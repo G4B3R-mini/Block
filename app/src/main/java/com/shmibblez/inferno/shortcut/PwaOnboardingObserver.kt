@@ -16,7 +16,7 @@ import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.feature.pwa.WebAppUseCases
 import mozilla.components.lib.state.ext.flowScoped
 import com.shmibblez.inferno.R
-import com.shmibblez.inferno.browser.BrowserFragmentDirections
+import com.shmibblez.inferno.browser.BrowserComponentWrapperFragmentDirections
 import com.shmibblez.inferno.ext.nav
 import com.shmibblez.inferno.utils.Settings
 
@@ -62,7 +62,7 @@ class PwaOnboardingObserver(
     internal fun navigateToPwaOnboarding() {
         navController.nav(
             R.id.browserComponentWrapperFragment,
-            BrowserFragmentDirections.actionBrowserFragmentToPwaOnboardingDialogFragment(),
+            BrowserComponentWrapperFragmentDirections.actionBrowserFragmentToPwaOnboardingDialogFragment(),
         )
     }
 }

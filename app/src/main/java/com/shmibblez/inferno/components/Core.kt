@@ -51,7 +51,7 @@ import mozilla.components.feature.media.MediaSessionFeature
 import mozilla.components.feature.media.middleware.LastMediaAccessMiddleware
 import mozilla.components.feature.media.middleware.RecordingDevicesMiddleware
 import mozilla.components.feature.prompts.PromptMiddleware
-import mozilla.components.feature.prompts.file.FileUploadsDirCleaner
+import com.shmibblez.inferno.browser.prompts.FileUploadsDirCleaner
 import mozilla.components.feature.prompts.file.FileUploadsDirCleanerMiddleware
 import mozilla.components.feature.pwa.ManifestStorage
 import mozilla.components.feature.pwa.WebAppShortcutManager
@@ -59,12 +59,10 @@ import mozilla.components.feature.readerview.ReaderViewMiddleware
 import mozilla.components.feature.recentlyclosed.RecentlyClosedMiddleware
 import mozilla.components.feature.recentlyclosed.RecentlyClosedTabsStorage
 import mozilla.components.feature.search.ext.createApplicationSearchEngine
-import mozilla.components.feature.search.middleware.AdsTelemetryMiddleware
 import mozilla.components.feature.search.middleware.SearchExtraParams
 import mozilla.components.feature.search.middleware.SearchMiddleware
 import mozilla.components.feature.search.region.RegionMiddleware
 import mozilla.components.feature.search.telemetry.SerpTelemetryRepository
-import mozilla.components.feature.search.telemetry.ads.AdsTelemetry
 import mozilla.components.feature.search.telemetry.incontent.InContentTelemetry
 import mozilla.components.feature.session.HistoryDelegate
 import mozilla.components.feature.session.middleware.LastAccessMiddleware
@@ -118,7 +116,6 @@ import com.shmibblez.inferno.share.SaveToPDFMiddleware
 //import com.shmibblez.inferno.telemetry.TelemetryMiddleware
 import com.shmibblez.inferno.utils.getUndoDelay
 import org.mozilla.geckoview.GeckoRuntime
-import java.util.UUID
 import java.util.concurrent.TimeUnit
 
 /**

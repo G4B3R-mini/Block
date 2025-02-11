@@ -22,7 +22,7 @@ import mozilla.components.service.fxa.manager.AccountState.AuthenticationProblem
 import mozilla.components.service.fxa.manager.AccountState.NotAuthenticated
 import com.shmibblez.inferno.FeatureFlags
 import com.shmibblez.inferno.R
-import com.shmibblez.inferno.browser.BrowserFragmentDirections
+import com.shmibblez.inferno.browser.BrowserComponentWrapperFragmentDirections
 import com.shmibblez.inferno.browser.browsingmode.BrowsingMode
 import com.shmibblez.inferno.browser.browsingmode.BrowsingModeManager
 import com.shmibblez.inferno.collections.SaveCollectionStep
@@ -146,7 +146,7 @@ class MenuNavigationMiddleware(
                     currentState.browserMenuState?.bookmarkState?.guid?.let { guidToEdit ->
                         navController.nav(
                             R.id.menuDialogFragment,
-                            BrowserFragmentDirections.actionGlobalBookmarkEditFragment(
+                            BrowserComponentWrapperFragmentDirections.actionGlobalBookmarkEditFragment(
                                 guidToEdit = guidToEdit,
                                 requiresSnackbarPaddingForToolbar = true,
                             ),

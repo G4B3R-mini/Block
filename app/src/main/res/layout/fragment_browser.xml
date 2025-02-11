@@ -56,7 +56,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
-                android:visibility="visible" />
+                android:visibility="gone" />
 
             <mozilla.components.feature.readerview.view.ReaderViewControlsBar
                 android:id="@+id/readerViewControlsBar"
@@ -96,7 +96,7 @@
                 android:background="?attr/layer1"
                 android:elevation="@dimen/browser_fragment_above_toolbar_panels_elevation"
                 android:outlineProvider="none"
-                android:visibility="gone"
+                android:visibility="visible"
                 tools:ignore="MozMultipleConstraintLayoutsAndCustomViews" />
 
             <mozilla.components.feature.prompts.login.SuggestStrongPasswordBar

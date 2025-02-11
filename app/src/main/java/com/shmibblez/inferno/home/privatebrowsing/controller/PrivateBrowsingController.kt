@@ -8,7 +8,7 @@ import androidx.navigation.NavController
 import com.shmibblez.inferno.BrowserDirection
 import com.shmibblez.inferno.HomeActivity
 import com.shmibblez.inferno.R
-import com.shmibblez.inferno.browser.BrowserFragmentDirections
+import com.shmibblez.inferno.browser.BrowserComponentWrapperFragmentDirections
 import com.shmibblez.inferno.browser.browsingmode.BrowsingMode
 import com.shmibblez.inferno.components.AppStore
 import com.shmibblez.inferno.components.appstate.AppAction
@@ -62,7 +62,7 @@ class DefaultPrivateBrowsingController(
 
         if (navController.currentDestination?.id == R.id.searchDialogFragment) {
             navController.navigate(
-                BrowserFragmentDirections.actionGlobalSearchDialog(
+                BrowserComponentWrapperFragmentDirections.actionGlobalSearchDialog(
                     sessionId = null,
                 ),
             )

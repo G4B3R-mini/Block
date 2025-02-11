@@ -21,7 +21,7 @@ import mozilla.components.feature.accounts.push.SendTabUseCases
 import mozilla.components.lib.state.helpers.AbstractBinding
 import mozilla.components.ui.widgets.SnackbarDelegate
 import com.shmibblez.inferno.R
-import com.shmibblez.inferno.browser.BrowserFragmentDirections
+import com.shmibblez.inferno.browser.BrowserComponentWrapperFragmentDirections
 import com.shmibblez.inferno.components.AppStore
 import com.shmibblez.inferno.components.appstate.AppAction.ShareAction
 import com.shmibblez.inferno.components.appstate.AppAction.SnackbarAction
@@ -226,7 +226,7 @@ class SnackbarBinding(
                 action = context.getString(R.string.edit_bookmark_snackbar_action),
             ) { view ->
                 navController.navigateWithBreadcrumb(
-                    directions = BrowserFragmentDirections.actionGlobalBookmarkEditFragment(
+                    directions = BrowserComponentWrapperFragmentDirections.actionGlobalBookmarkEditFragment(
                         guidToEdit = guidToEdit,
                         requiresSnackbarPaddingForToolbar = true,
                     ),

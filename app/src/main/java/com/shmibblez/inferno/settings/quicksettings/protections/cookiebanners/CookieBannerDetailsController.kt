@@ -27,7 +27,7 @@ import mozilla.components.lib.publicsuffixlist.PublicSuffixList
 //import com.shmibblez.inferno.GleanMetrics.Pings
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.addons.showSnackBar
-import com.shmibblez.inferno.browser.BrowserFragmentDirections
+import com.shmibblez.inferno.browser.BrowserComponentWrapperFragmentDirections
 import com.shmibblez.inferno.compose.snackbar.toSnackbarStateDuration
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.getRootView
@@ -94,7 +94,7 @@ class DefaultCookieBannerDetailsController(
                             val isTrackingProtectionEnabled =
                                 tab.trackingProtection.enabled && !contains
                             val directions =
-                                BrowserFragmentDirections.actionGlobalQuickSettingsSheetDialogFragment(
+                                BrowserComponentWrapperFragmentDirections.actionGlobalQuickSettingsSheetDialogFragment(
                                     sessionId = tab.id,
                                     url = tab.content.url,
                                     title = tab.content.title,

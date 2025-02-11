@@ -6,12 +6,12 @@ package com.shmibblez.inferno.crashes
 
 import androidx.annotation.VisibleForTesting
 import androidx.navigation.NavController
+import com.shmibblez.inferno.browser.BrowserComponentWrapperFragmentDirections
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import com.shmibblez.inferno.browser.BrowserFragmentDirections
 import com.shmibblez.inferno.components.AppStore
 import com.shmibblez.inferno.components.Components
 import com.shmibblez.inferno.components.appstate.AppAction
@@ -55,7 +55,7 @@ class CrashReporterController(
         // When the only tab crashed and the user chose to close it we'll navigate to Home.
         if (currentNumberOfTabs == 1) {
             navController.navigate(
-                BrowserFragmentDirections.actionGlobalHome(),
+                BrowserComponentWrapperFragmentDirections.actionGlobalHome(),
             )
         }
 
