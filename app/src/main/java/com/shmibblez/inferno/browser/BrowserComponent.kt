@@ -103,7 +103,10 @@ import com.shmibblez.inferno.IntentReceiverActivity
 import com.shmibblez.inferno.NavGraphDirections
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.browsingmode.BrowsingMode
-import com.shmibblez.inferno.browser.prompts.PromptComponent
+import com.shmibblez.inferno.browser.prompts.PromptContainer
+import com.shmibblez.inferno.browser.prompts.compose.FirstPartyDownloadBottomSheet
+import com.shmibblez.inferno.browser.prompts.compose.PromptComponent
+import com.shmibblez.inferno.browser.prompts.compose.ThirdPartyDownloadBottomSheet
 import com.shmibblez.inferno.browser.tabstrip.isTabStripEnabled
 import com.shmibblez.inferno.components.Components
 import com.shmibblez.inferno.components.FindInPageIntegration
@@ -163,8 +166,6 @@ import com.shmibblez.inferno.tabstray.Page
 import com.shmibblez.inferno.theme.FirefoxTheme
 import com.shmibblez.inferno.theme.ThemeManager
 import com.shmibblez.inferno.toolbar.BrowserToolbar
-import com.shmibblez.inferno.toolbar.FirstPartyDownloadBottomSheet
-import com.shmibblez.inferno.toolbar.ThirdPartyDownloadBottomSheet
 import com.shmibblez.inferno.toolbar.ToolbarMenuBottomSheet
 import com.shmibblez.inferno.wifi.SitePermissionsWifiIntegration
 import kotlinx.coroutines.CancellationException
@@ -372,6 +373,7 @@ object ComponentDimens {
     val TAB_WIDTH = 95.dp
     val TAB_CORNER_RADIUS = 8.dp
     val FIND_IN_PAGE_BAR_HEIGHT = 50.dp
+    val PROGRESS_BAR_HEIGHT = 1.dp
     fun BOTTOM_BAR_HEIGHT(browserComponentMode: BrowserComponentMode): Dp {
         return when (browserComponentMode) {
             BrowserComponentMode.TOOLBAR -> TOOLBAR_HEIGHT + TAB_BAR_HEIGHT
@@ -443,7 +445,7 @@ fun BrowserComponent(
     var currentTab by remember { mutableStateOf(store.state.selectedTab) }
     var searchEngine by remember { mutableStateOf(store.state.search.selectedOrDefaultSearchEngine!!) }
     var pageType by remember { mutableStateOf(resolvePageType(currentTab)) }
-    var promptRequests by remember {mutableStateOf<List<PromptRequest>>(emptyList())}
+    var promptRequests by remember { mutableStateOf<List<PromptRequest>>(emptyList()) }
 
     /* BrowserFragment vars */
     val windowFeature = ViewBoundFeatureWrapper<WindowFeature>()
@@ -616,8 +618,151 @@ fun BrowserComponent(
         }
     }
 
-    PromptComponent(promptRequests, currentTab)
+    val colorsProvider = DialogColorsProvider {
+        DialogColors(
+            title = ThemeManager.resolveAttributeColor(attribute = R.attr.textPrimary),
+            description = ThemeManager.resolveAttributeColor(attribute = R.attr.textSecondary),
+        )
+    }
 
+    val passwordGeneratorColorsProvider = PasswordGeneratorDialogColorsProvider {
+        PasswordGeneratorDialogColors(
+            title = ThemeManager.resolveAttributeColor(attribute = R.attr.textPrimary),
+            description = ThemeManager.resolveAttributeColor(attribute = R.attr.textSecondary),
+            background = ThemeManager.resolveAttributeColor(attribute = R.attr.layer1),
+            cancelText = ThemeManager.resolveAttributeColor(attribute = R.attr.textAccent),
+            confirmButton = ThemeManager.resolveAttributeColor(attribute = R.attr.actionPrimary),
+            passwordBox = ThemeManager.resolveAttributeColor(attribute = R.attr.layer2),
+            boxBorder = ThemeManager.resolveAttributeColor(attribute = R.attr.textDisabled),
+        )
+    }
+
+    PromptComponent(
+        container = context.getActivity()!! as PromptContainer,
+        promptRequests = promptRequests,
+        currentTab = currentTab,
+        store = store,
+        customTabId = customTabSessionId,
+        fragmentManager = parentFragmentManager,
+        identityCredentialColorsProvider = colorsProvider,
+        tabsUseCases = context.components.useCases.tabsUseCases,
+        fileUploadsDirCleaner = context.components.core.fileUploadsDirCleaner,
+        creditCardValidationDelegate = DefaultCreditCardValidationDelegate(
+            context.components.core.lazyAutofillStorage,
+        ),
+        loginValidationDelegate = DefaultLoginValidationDelegate(
+            context.components.core.lazyPasswordsStorage,
+        ),
+        isLoginAutofillEnabled = {
+            context.settings().shouldAutofillLogins
+        },
+        isSaveLoginEnabled = {
+            context.settings().shouldPromptToSaveLogins
+        },
+        isCreditCardAutofillEnabled = {
+            context.settings().shouldAutofillCreditCardDetails
+        },
+        isAddressAutofillEnabled = {
+            context.settings().addressFeature && context.settings().shouldAutofillAddressDetails
+        },
+        loginExceptionStorage = context.components.core.loginExceptionStorage,
+        shareDelegate = object : ShareDelegate {
+            override fun showShareSheet(
+                context: Context,
+                shareData: ShareData,
+                onDismiss: () -> Unit,
+                onSuccess: () -> Unit,
+            ) {
+                val directions = NavGraphDirections.actionGlobalShareFragment(
+                    data = arrayOf(shareData),
+                    showPage = true,
+                    sessionId = getCurrentTab(context)?.id,
+                )
+                navController.navigate(directions)
+            }
+        },
+        onNeedToRequestPermissions = { permissions ->
+            // todo: permissions
+//                        requestPermissions(permissions, REQUEST_CODE_PROMPT_PERMISSIONS)
+        },
+        loginDelegate = object : LoginDelegate {
+            // todo: login delegate
+//                        override val loginPickerView
+//                            get() = binding.loginSelectBar
+//                        override val onManageLogins = {
+//                            browserAnimator.captureEngineViewAndDrawStatically {
+//                                val directions = NavGraphDirections.actionGlobalSavedLoginsAuthFragment()
+//                                navController.navigate(directions)
+//                            }
+//                        }
+        },
+        suggestStrongPasswordDelegate = object : SuggestStrongPasswordDelegate {
+            // todo: password delegate
+//                        override val strongPasswordPromptViewListenerView
+//                            get() = binding.suggestStrongPasswordBar
+        },
+        shouldAutomaticallyShowSuggestedPassword = { context.settings().isFirstTimeEngagingWithSignup },
+        onFirstTimeEngagedWithSignup = {
+            context.settings().isFirstTimeEngagingWithSignup = false
+        },
+        onSaveLoginWithStrongPassword = { url, password ->
+            handleOnSaveLoginWithGeneratedStrongPassword(
+                passwordsStorage = context.components.core.passwordsStorage,
+                url = url,
+                password = password,
+                lifecycleScope = coroutineScope,
+                setLastSavedGeneratedPassword,
+            )
+        },
+        onSaveLogin = { isUpdate ->
+            showSnackbarAfterLoginChange(
+                isUpdate,
+                context,
+                coroutineScope,
+                snackbarHostState,
+            )
+        },
+        passwordGeneratorColorsProvider = passwordGeneratorColorsProvider,
+        hideUpdateFragmentAfterSavingGeneratedPassword = { username, password ->
+            hideUpdateFragmentAfterSavingGeneratedPassword(
+                username,
+                password,
+                lastSavedGeneratedPassword,
+            )
+        },
+        removeLastSavedGeneratedPassword = {
+            removeLastSavedGeneratedPassword(
+                setLastSavedGeneratedPassword
+            )
+        },
+        creditCardDelegate = object : CreditCardDelegate {
+            // todo: credit card delegate
+//                        override val creditCardPickerView
+//                            get() = binding.creditCardSelectBar
+            override val onManageCreditCards = {
+                val directions = NavGraphDirections.actionGlobalAutofillSettingFragment()
+                navController.navigate(directions)
+            }
+            override val onSelectCreditCard = {
+                showBiometricPrompt(context, biometricPromptFeature, promptsFeature)
+            }
+        },
+        addressDelegate = object : AddressDelegate {
+            // todo: address delegate
+            override val addressPickerView
+                // todo: address select bar
+                get() = AddressSelectBar(context) // binding.addressSelectBar
+            override val onManageAddresses = {
+                val directions = NavGraphDirections.actionGlobalAutofillSettingFragment()
+                navController.navigate(directions)
+            }
+        },
+        androidPhotoPicker = com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.file.AndroidPhotoPicker(
+            context,
+            singleMediaPicker,
+            multipleMediaPicker,
+        ),
+    )
 
     // browser display mode
     val (browserMode, setBrowserMode) = remember {
@@ -1109,18 +1254,6 @@ fun BrowserComponent(
                 },
             )
 
-            val passwordGeneratorColorsProvider = PasswordGeneratorDialogColorsProvider {
-                PasswordGeneratorDialogColors(
-                    title = ThemeManager.resolveAttributeColor(attribute = R.attr.textPrimary),
-                    description = ThemeManager.resolveAttributeColor(attribute = R.attr.textSecondary),
-                    background = ThemeManager.resolveAttributeColor(attribute = R.attr.layer1),
-                    cancelText = ThemeManager.resolveAttributeColor(attribute = R.attr.textAccent),
-                    confirmButton = ThemeManager.resolveAttributeColor(attribute = R.attr.actionPrimary),
-                    passwordBox = ThemeManager.resolveAttributeColor(attribute = R.attr.layer2),
-                    boxBorder = ThemeManager.resolveAttributeColor(attribute = R.attr.textDisabled),
-                )
-            }
-
             val bottomToolbarHeight = context.settings().getBottomToolbarHeight(context)
 
             downloadFeature.onDownloadStopped = { downloadState, _, downloadJobStatus ->
@@ -1191,136 +1324,136 @@ fun BrowserComponent(
                 )
             }
 
-            promptsFeature.set(
-                feature = PromptFeature(
-                    activity = activity,
-                    store = store,
-                    customTabId = customTabSessionId,
-                    fragmentManager = parentFragmentManager,
-                    identityCredentialColorsProvider = colorsProvider,
-                    tabsUseCases = context.components.useCases.tabsUseCases,
-                    fileUploadsDirCleaner = context.components.core.fileUploadsDirCleaner,
-                    creditCardValidationDelegate = DefaultCreditCardValidationDelegate(
-                        context.components.core.lazyAutofillStorage,
-                    ),
-                    loginValidationDelegate = DefaultLoginValidationDelegate(
-                        context.components.core.lazyPasswordsStorage,
-                    ),
-                    isLoginAutofillEnabled = {
-                        context.settings().shouldAutofillLogins
-                    },
-                    isSaveLoginEnabled = {
-                        context.settings().shouldPromptToSaveLogins
-                    },
-                    isCreditCardAutofillEnabled = {
-                        context.settings().shouldAutofillCreditCardDetails
-                    },
-                    isAddressAutofillEnabled = {
-                        context.settings().addressFeature && context.settings().shouldAutofillAddressDetails
-                    },
-                    loginExceptionStorage = context.components.core.loginExceptionStorage,
-                    shareDelegate = object : ShareDelegate {
-                        override fun showShareSheet(
-                            context: Context,
-                            shareData: ShareData,
-                            onDismiss: () -> Unit,
-                            onSuccess: () -> Unit,
-                        ) {
-                            val directions = NavGraphDirections.actionGlobalShareFragment(
-                                data = arrayOf(shareData),
-                                showPage = true,
-                                sessionId = getCurrentTab(context)?.id,
-                            )
-                            navController.navigate(directions)
-                        }
-                    },
-                    onNeedToRequestPermissions = { permissions ->
-                        // todo: permissions
-//                        requestPermissions(permissions, REQUEST_CODE_PROMPT_PERMISSIONS)
-                    },
-                    loginDelegate = object : LoginDelegate {
-                        // todo: login delegate
-//                        override val loginPickerView
-//                            get() = binding.loginSelectBar
-//                        override val onManageLogins = {
-//                            browserAnimator.captureEngineViewAndDrawStatically {
-//                                val directions = NavGraphDirections.actionGlobalSavedLoginsAuthFragment()
-//                                navController.navigate(directions)
-//                            }
+//            promptsFeature.set(
+//                feature = PromptFeature(
+//                    activity = activity,
+//                    store = store,
+//                    customTabId = customTabSessionId,
+//                    fragmentManager = parentFragmentManager,
+//                    identityCredentialColorsProvider = colorsProvider,
+//                    tabsUseCases = context.components.useCases.tabsUseCases,
+//                    fileUploadsDirCleaner = context.components.core.fileUploadsDirCleaner,
+//                    creditCardValidationDelegate = DefaultCreditCardValidationDelegate(
+//                        context.components.core.lazyAutofillStorage,
+//                    ),
+//                    loginValidationDelegate = DefaultLoginValidationDelegate(
+//                        context.components.core.lazyPasswordsStorage,
+//                    ),
+//                    isLoginAutofillEnabled = {
+//                        context.settings().shouldAutofillLogins
+//                    },
+//                    isSaveLoginEnabled = {
+//                        context.settings().shouldPromptToSaveLogins
+//                    },
+//                    isCreditCardAutofillEnabled = {
+//                        context.settings().shouldAutofillCreditCardDetails
+//                    },
+//                    isAddressAutofillEnabled = {
+//                        context.settings().addressFeature && context.settings().shouldAutofillAddressDetails
+//                    },
+//                    loginExceptionStorage = context.components.core.loginExceptionStorage,
+//                    shareDelegate = object : ShareDelegate {
+//                        override fun showShareSheet(
+//                            context: Context,
+//                            shareData: ShareData,
+//                            onDismiss: () -> Unit,
+//                            onSuccess: () -> Unit,
+//                        ) {
+//                            val directions = NavGraphDirections.actionGlobalShareFragment(
+//                                data = arrayOf(shareData),
+//                                showPage = true,
+//                                sessionId = getCurrentTab(context)?.id,
+//                            )
+//                            navController.navigate(directions)
 //                        }
-                    },
-                    suggestStrongPasswordDelegate = object : SuggestStrongPasswordDelegate {
-                        // todo: password delegate
-//                        override val strongPasswordPromptViewListenerView
-//                            get() = binding.suggestStrongPasswordBar
-                    },
-                    shouldAutomaticallyShowSuggestedPassword = { context.settings().isFirstTimeEngagingWithSignup },
-                    onFirstTimeEngagedWithSignup = {
-                        context.settings().isFirstTimeEngagingWithSignup = false
-                    },
-                    onSaveLoginWithStrongPassword = { url, password ->
-                        handleOnSaveLoginWithGeneratedStrongPassword(
-                            passwordsStorage = context.components.core.passwordsStorage,
-                            url = url,
-                            password = password,
-                            lifecycleScope = coroutineScope,
-                            setLastSavedGeneratedPassword,
-                        )
-                    },
-                    onSaveLogin = { isUpdate ->
-                        showSnackbarAfterLoginChange(
-                            isUpdate,
-                            context,
-                            coroutineScope,
-                            snackbarHostState,
-                        )
-                    },
-                    passwordGeneratorColorsProvider = passwordGeneratorColorsProvider,
-                    hideUpdateFragmentAfterSavingGeneratedPassword = { username, password ->
-                        hideUpdateFragmentAfterSavingGeneratedPassword(
-                            username,
-                            password,
-                            lastSavedGeneratedPassword,
-                        )
-                    },
-                    removeLastSavedGeneratedPassword = {
-                        removeLastSavedGeneratedPassword(
-                            setLastSavedGeneratedPassword
-                        )
-                    },
-                    creditCardDelegate = object : CreditCardDelegate {
-                        // todo: credit card delegate
-//                        override val creditCardPickerView
-//                            get() = binding.creditCardSelectBar
-                        override val onManageCreditCards = {
-                            val directions =
-                                NavGraphDirections.actionGlobalAutofillSettingFragment()
-                            navController.navigate(directions)
-                        }
-                        override val onSelectCreditCard = {
-                            showBiometricPrompt(context, biometricPromptFeature, promptsFeature)
-                        }
-                    },
-                    addressDelegate = object : AddressDelegate {
-                        // todo: address delegate
-                        override val addressPickerView
-                            // todo: address select bar
-                            get() = AddressSelectBar(context) // binding.addressSelectBar
-                        override val onManageAddresses = {
-                            val directions =
-                                NavGraphDirections.actionGlobalAutofillSettingFragment()
-                            navController.navigate(directions)
-                        }
-                    },
-                    androidPhotoPicker = AndroidPhotoPicker(
-                        context,
-                        singleMediaPicker,
-                        multipleMediaPicker,
-                    ),
-                ),
-                owner = lifecycleOwner,
-                view = view,
-            )
+//                    },
+//                    onNeedToRequestPermissions = { permissions ->
+//                        // todo: permissions
+////                        requestPermissions(permissions, REQUEST_CODE_PROMPT_PERMISSIONS)
+//                    },
+//                    loginDelegate = object : LoginDelegate {
+//                        // todo: login delegate
+////                        override val loginPickerView
+////                            get() = binding.loginSelectBar
+////                        override val onManageLogins = {
+////                            browserAnimator.captureEngineViewAndDrawStatically {
+////                                val directions = NavGraphDirections.actionGlobalSavedLoginsAuthFragment()
+////                                navController.navigate(directions)
+////                            }
+////                        }
+//                    },
+//                    suggestStrongPasswordDelegate = object : SuggestStrongPasswordDelegate {
+//                        // todo: password delegate
+////                        override val strongPasswordPromptViewListenerView
+////                            get() = binding.suggestStrongPasswordBar
+//                    },
+//                    shouldAutomaticallyShowSuggestedPassword = { context.settings().isFirstTimeEngagingWithSignup },
+//                    onFirstTimeEngagedWithSignup = {
+//                        context.settings().isFirstTimeEngagingWithSignup = false
+//                    },
+//                    onSaveLoginWithStrongPassword = { url, password ->
+//                        handleOnSaveLoginWithGeneratedStrongPassword(
+//                            passwordsStorage = context.components.core.passwordsStorage,
+//                            url = url,
+//                            password = password,
+//                            lifecycleScope = coroutineScope,
+//                            setLastSavedGeneratedPassword,
+//                        )
+//                    },
+//                    onSaveLogin = { isUpdate ->
+//                        showSnackbarAfterLoginChange(
+//                            isUpdate,
+//                            context,
+//                            coroutineScope,
+//                            snackbarHostState,
+//                        )
+//                    },
+//                    passwordGeneratorColorsProvider = passwordGeneratorColorsProvider,
+//                    hideUpdateFragmentAfterSavingGeneratedPassword = { username, password ->
+//                        hideUpdateFragmentAfterSavingGeneratedPassword(
+//                            username,
+//                            password,
+//                            lastSavedGeneratedPassword,
+//                        )
+//                    },
+//                    removeLastSavedGeneratedPassword = {
+//                        removeLastSavedGeneratedPassword(
+//                            setLastSavedGeneratedPassword
+//                        )
+//                    },
+//                    creditCardDelegate = object : CreditCardDelegate {
+//                        // todo: credit card delegate
+////                        override val creditCardPickerView
+////                            get() = binding.creditCardSelectBar
+//                        override val onManageCreditCards = {
+//                            val directions =
+//                                NavGraphDirections.actionGlobalAutofillSettingFragment()
+//                            navController.navigate(directions)
+//                        }
+//                        override val onSelectCreditCard = {
+//                            showBiometricPrompt(context, biometricPromptFeature, promptsFeature)
+//                        }
+//                    },
+//                    addressDelegate = object : AddressDelegate {
+//                        // todo: address delegate
+//                        override val addressPickerView
+//                            // todo: address select bar
+//                            get() = AddressSelectBar(context) // binding.addressSelectBar
+//                        override val onManageAddresses = {
+//                            val directions =
+//                                NavGraphDirections.actionGlobalAutofillSettingFragment()
+//                            navController.navigate(directions)
+//                        }
+//                    },
+//                    androidPhotoPicker = AndroidPhotoPicker(
+//                        context,
+//                        singleMediaPicker,
+//                        multipleMediaPicker,
+//                    ),
+//                ),
+//                owner = lifecycleOwner,
+//                view = view,
+//            )
 
             sessionFeature.set(
                 feature = SessionFeature(

@@ -13,7 +13,7 @@ import androidx.annotation.VisibleForTesting
 /**
  * Wrapper to hold shared functionality between activities and fragments for [PromptFeature].
  */
-internal sealed class PromptContainer {
+sealed class PromptContainer {
 
     /**
      * Getter for [Context].

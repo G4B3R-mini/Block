@@ -52,7 +52,7 @@ internal var captureUri: Uri? = null
  * Once the request is completed, [onPermissionsResult] needs to be invoked.
  */
 internal class FilePicker(
-    private val container: com.shmibblez.inferno.browser.prompts.PromptContainer,
+    private val container: PromptContainer,
     private val store: BrowserStore,
     private var sessionId: String? = null,
     private var fileUploadsDirCleaner: FileUploadsDirCleaner,
