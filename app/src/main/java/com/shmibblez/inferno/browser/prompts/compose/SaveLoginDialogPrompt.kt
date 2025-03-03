@@ -38,6 +38,8 @@ import mozilla.components.concept.storage.LoginEntry
 
 // todo: state expanded may be necessary
 // todo: finish logic & review layout (padding & margin)
+// todo: add todo message to all prompt components that havent been tested
+//     ex: // todo: requires testing, test with dummy data prompt objects, visible only for testing
 @Composable
 fun SaveLoginDialogPrompt(
     loginData: PromptRequest.SaveLoginPrompt, sessionId: String, icon: Bitmap? = null
