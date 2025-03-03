@@ -48,6 +48,7 @@ import mozilla.components.concept.identitycredential.Account
 import mozilla.components.concept.identitycredential.Provider
 import mozilla.components.concept.storage.CreditCardEntry
 import mozilla.components.concept.storage.CreditCardValidationDelegate
+import mozilla.components.concept.storage.LoginEntry
 import mozilla.components.concept.storage.LoginValidationDelegate
 import mozilla.components.feature.prompts.address.AddressDelegate
 import mozilla.components.feature.prompts.address.DefaultAddressDelegate
@@ -560,7 +561,7 @@ fun onPositiveAction(promptRequest: PromptRequest, value: Any? = null, value2: A
         is PromptRequest.Popup -> promptRequest.onAllow.invoke()
         is PromptRequest.Repost -> promptRequest.onConfirm.invoke()
         is PromptRequest.SaveCreditCard -> promptRequest.onConfirm.invoke(value as CreditCardEntry)
-        is PromptRequest.SaveLoginPrompt -> TODO()
+        is PromptRequest.SaveLoginPrompt -> promptRequest.onConfirm.invoke(value as LoginEntry)
         is PromptRequest.SelectAddress -> TODO()
         is PromptRequest.SelectCreditCard -> TODO()
         is PromptRequest.SelectLoginPrompt -> TODO()
@@ -613,8 +614,8 @@ fun onNegativeAction(promptRequest: PromptRequest, value: Any? = null) {
         is PromptRequest.MultipleChoice -> TODO()
         is PromptRequest.Popup -> promptRequest.onDismiss.invoke()
         is PromptRequest.Repost -> promptRequest.onDismiss.invoke()
-        is PromptRequest.SaveCreditCard -> promptRequest.onDismiss()
-        is PromptRequest.SaveLoginPrompt -> TODO()
+        is PromptRequest.SaveCreditCard -> promptRequest.onDismiss.invoke()
+        is PromptRequest.SaveLoginPrompt -> promptRequest.onDismiss.invoke()
         is PromptRequest.SelectAddress -> TODO()
         is PromptRequest.SelectCreditCard -> TODO()
         is PromptRequest.SelectLoginPrompt -> TODO()
