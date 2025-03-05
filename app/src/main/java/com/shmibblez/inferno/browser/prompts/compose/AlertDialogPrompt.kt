@@ -47,9 +47,9 @@ fun AlertDialogPrompt(alertData: PromptRequest.Alert, sessionId: String) {
             text = alertData.title,
             textAlign = TextAlign.Start,
             modifier = Modifier
-                .padding(horizontal = 4.dp)
+                .padding(horizontal = 16.dp)
         )
-        Row(modifier = Modifier.padding(horizontal = 4.dp)) {
+        Row(modifier = Modifier.padding(horizontal = 16.dp)) {
             Checkbox(
                 checked = noMoreDialogs,
                 onCheckedChange = { noMoreDialogs = !noMoreDialogs },

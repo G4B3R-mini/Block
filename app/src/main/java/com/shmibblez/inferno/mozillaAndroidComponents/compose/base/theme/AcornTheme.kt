@@ -46,7 +46,7 @@ fun AcornTheme(
 }
 
 @Composable
-private fun getAcornColors() = if (isSystemInDarkTheme()) {
+fun getAcornColors() = if (isSystemInDarkTheme()) {
     darkColorPalette
 } else {
     lightColorPalette

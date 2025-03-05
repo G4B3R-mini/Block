@@ -17,6 +17,12 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.identitycredential.DialogColors
 
+// todo: abstract these as much as possible
+//  just to be prepared for changes in material api
+//  examples:
+//  - text styles set with InfernoTextType enum class
+//    - this sets text size, color, and if bold or italic
+//  - colors set directly from theme
 /**
  * convenience component, all styling is set here
  */
@@ -34,7 +40,8 @@ fun InfernoText(
     maxLines: Int = Int.MAX_VALUE,
     minLines: Int = 1,
     fontSize: TextUnit = 16.sp,
-    fontColor: Color = DialogColors.defaultProvider().provideColors().title,
+    // todo: font type
+    fontColor: Color = Color.White,
     style: TextStyle = LocalTextStyle.current.copy(
         fontSize = fontSize,
         lineHeight = lineHeight,
