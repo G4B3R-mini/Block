@@ -81,6 +81,7 @@ import androidx.core.content.ContextCompat.getColor
 import androidx.core.content.getSystemService
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.children
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.findFragment
 import androidx.lifecycle.Lifecycle
@@ -138,6 +139,7 @@ import com.shmibblez.inferno.ext.isKeyboardVisible
 import com.shmibblez.inferno.ext.isToolbarAtBottom
 import com.shmibblez.inferno.ext.nav
 import com.shmibblez.inferno.ext.navigateWithBreadcrumb
+import com.shmibblez.inferno.ext.newTab
 import com.shmibblez.inferno.ext.secure
 import com.shmibblez.inferno.ext.settings
 import com.shmibblez.inferno.findInPageBar.BrowserFindInPageBar
@@ -192,6 +194,8 @@ import mozilla.components.browser.state.selector.findCustomTabOrSelectedTab
 import mozilla.components.browser.state.selector.findTabOrCustomTab
 import mozilla.components.browser.state.selector.findTabOrCustomTabOrSelectedTab
 import mozilla.components.browser.state.selector.getNormalOrPrivateTabs
+import mozilla.components.browser.state.selector.normalTabs
+import mozilla.components.browser.state.selector.privateTabs
 import mozilla.components.browser.state.selector.selectedTab
 import mozilla.components.browser.state.state.BrowserState
 import mozilla.components.browser.state.state.CustomTabSessionState
@@ -402,16 +406,12 @@ internal data class ThirdPartyDownloadDialogData(
 private fun resolvePageType(tabSessionState: TabSessionState?): BrowserComponentPageType {
     val url = tabSessionState?.content?.url
     return if (tabSessionState?.engineState?.crashed == true) BrowserComponentPageType.CRASH
-    else if (url == "inferno:home" || url == "about:blank") {// TODO: create const class and set base to inferno:home
-        Log.d("BrowserComponent", "resolvePageType: HOME")
+    else if (url == "inferno:home" || url == "about:blank") // TODO: create const class and set base to inferno:home
         BrowserComponentPageType.HOME
-    } else if (url == "inferno:privatebrowsing" || url == "about:privatebrowsing") { // TODO: add to const class and set base to inferno:private
-        Log.d("BrowserComponent", "resolvePageType: HOME_PRIVATE")
+    else if (url == "inferno:privatebrowsing" || url == "about:privatebrowsing")  // TODO: add to const class and set base to inferno:private
         BrowserComponentPageType.HOME_PRIVATE
-    } else {
-        Log.d("BrowserComponent", "resolvePageType: ENGINE")
-        BrowserComponentPageType.ENGINE
-    }
+    else BrowserComponentPageType.ENGINE
+
     // TODO: if home, show home page and load engineView in compose tree as hidden,
     //  if page then show engineView
 }
@@ -450,6 +450,11 @@ fun BrowserComponent(
     }
     var tabList by remember { mutableStateOf(store.state.toTabList().first) }
     var currentTab by remember { mutableStateOf(store.state.selectedTab) }
+    var isPrivateSession by remember {
+        mutableStateOf(
+            store.state.selectedTab?.content?.private ?: false
+        )
+    }
     var searchEngine by remember { mutableStateOf(store.state.search.selectedOrDefaultSearchEngine!!) }
     var pageType by remember { mutableStateOf(resolvePageType(currentTab)) }
     var promptRequests by remember { mutableStateOf<List<PromptRequest>>(emptyList()) }
@@ -590,7 +595,7 @@ fun BrowserComponent(
     val lastTabFeature = remember { ViewBoundFeatureWrapper<LastTabFeature>() }
 //    val webExtToolbarFeature = remember { ViewBoundFeatureWrapper<WebExtensionToolbarFeature>() }
 
-    var filePicker by remember{ mutableStateOf<FilePicker?>(null) }
+    var filePicker by remember { mutableStateOf<FilePicker?>(null) }
 
     // permission launchers
     val requestDownloadPermissionsLauncher: ActivityResultLauncher<Array<String>> =
@@ -631,7 +636,11 @@ fun BrowserComponent(
         sessionId = customTabSessionId,
         fileUploadsDirCleaner = context.components.core.fileUploadsDirCleaner,
         androidPhotoPicker,
-        onNeedToRequestPermissions = {permissions -> requestPromptsPermissionsLauncher.launch(permissions)},
+        onNeedToRequestPermissions = { permissions ->
+            requestPromptsPermissionsLauncher.launch(
+                permissions
+            )
+        },
     )
 
     setFilePicker(filePicker!!)
@@ -657,13 +666,16 @@ fun BrowserComponent(
 //                }
 //        }
         browserStateObserver = store.observe(localLifecycleOwner) {
-            tabList = it.toTabList().first
             currentTab = it.selectedTab
+            isPrivateSession = currentTab?.content?.private ?: false
+            tabList =
+                if (isPrivateSession) it.privateTabs else it.normalTabs // it.toTabList().first
+            // if tab list empty add new tab todo: move to initial setup
+            if (tabList.isEmpty()) context.components.newTab(isPrivateSession)
             searchEngine = it.search.selectedOrDefaultSearchEngine!!
             pageType = resolvePageType(currentTab)
             promptRequests = currentTab?.content?.promptRequests ?: emptyList()
-
-            Log.d("BrowserComponent", "search engine: ${searchEngine.name}")
+            Log.d("BrowserComponent", "promptRequests refreshed, new size: ${promptRequests.size}")
         }
 
         onDispose {
@@ -801,8 +813,7 @@ fun BrowserComponent(
     }
 
     LaunchedEffect(engineView == null) {
-        if (engineView == null) return@LaunchedEffect
-        /* BaseBrowserFragment onViewCreated */
+        if (engineView == null) return@LaunchedEffect/* BaseBrowserFragment onViewCreated */
         // DO NOT ADD ANYTHING ABOVE THIS getProfilerTime CALL!
         val profilerStartTime = context.components.core.engine.profiler?.getProfilerTime()
 
@@ -1392,17 +1403,17 @@ fun BrowserComponent(
 //                    setColorSchemeResources(primaryTextColor)
 //                    setProgressBackgroundColorSchemeResource(primaryBackgroundColor)
 //                }
-                swipeRefreshFeature.set(
-                    feature = SwipeRefreshFeature(
-                        context.components.core.store,
-                        context.components.useCases.sessionUseCases.reload,
-                        swipeRefresh!!,
-                        { },
-                        customTabSessionId,
-                    ),
-                    owner = lifecycleOwner,
-                    view = view,
-                )
+            swipeRefreshFeature.set(
+                feature = SwipeRefreshFeature(
+                    context.components.core.store,
+                    context.components.useCases.sessionUseCases.reload,
+                    swipeRefresh!!,
+                    { },
+                    customTabSessionId,
+                ),
+                owner = lifecycleOwner,
+                view = view,
+            )
 //            }
 
             webchannelIntegration.set(
@@ -1803,55 +1814,61 @@ fun BrowserComponent(
         snackbarHost = { SnackbarHost(snackbarHostState = snackbarHostState) },
         contentWindowInsets = ScaffoldDefaults.contentWindowInsets,
         content = { paddingValues ->
-            MozAwesomeBar(setView = { ab -> awesomeBar = ab })
-            when (pageType) {
-                BrowserComponentPageType.ENGINE -> {
-                    MozEngineView(
-                        modifier = Modifier
-                            .padding(
-                                start = paddingValues.calculateStartPadding(LayoutDirection.Ltr),
-                                top = 0.dp,
-                                end = paddingValues.calculateEndPadding(LayoutDirection.Ltr),
-                                bottom = 0.dp
-                            )
-                            .nestedScroll(nestedScrollConnection)
-                            .motionEventSpy {
-                                if (it.action == MotionEvent.ACTION_UP || it.action == MotionEvent.ACTION_CANCEL) {
-                                    // set bottom bar position
-                                    coroutineScope.launch {
-                                        if (bottomBarOffsetPx.value <= (bottomBarHeightDp.toPx() / 2)) {
-                                            // if more than halfway up, go up
-                                            bottomBarOffsetPx.animateTo(0F)
-                                        } else {
-                                            // if more than halfway down, go down
-                                            bottomBarOffsetPx.animateTo(
-                                                bottomBarHeightDp
-                                                    .toPx()
-                                                    .toFloat()
-                                            )
-                                        }
-                                        engineView!!.setDynamicToolbarMaxHeight(0)
+            Box(
+                modifier = Modifier.fillMaxSize(),
+            ) {
+                MozAwesomeBar(setView = { ab -> awesomeBar = ab })
+                MozEngineView(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(
+                            start = paddingValues.calculateStartPadding(LayoutDirection.Ltr),
+                            top = 0.dp,
+                            end = paddingValues.calculateEndPadding(LayoutDirection.Ltr),
+                            bottom = 0.dp
+                        )
+                        .nestedScroll(nestedScrollConnection)
+                        .motionEventSpy {
+                            if (it.action == MotionEvent.ACTION_UP || it.action == MotionEvent.ACTION_CANCEL) {
+                                // set bottom bar position
+                                coroutineScope.launch {
+                                    if (bottomBarOffsetPx.value <= (bottomBarHeightDp.toPx() / 2)) {
+                                        // if more than halfway up, go up
+                                        bottomBarOffsetPx.animateTo(0F)
+                                    } else {
+                                        // if more than halfway down, go down
+                                        bottomBarOffsetPx.animateTo(
+                                            bottomBarHeightDp
+                                                .toPx()
+                                                .toFloat()
+                                        )
                                     }
+                                    engineView!!.setDynamicToolbarMaxHeight(0)
                                 }
+                            }
 //                        else if (it.action == MotionEvent.ACTION_SCROLL) {
 //                            // TODO: move nested scroll connection logic here
 //                        }
-                            },
-                        setEngineView = { ev -> engineView = ev },
-                        setSwipeView = { sr -> swipeRefresh = sr },
-                    )
-                }
+                        },
+                    setEngineView = { ev -> engineView = ev },
+                    setSwipeView = { sr -> swipeRefresh = sr },
+                )
+                when (pageType) {
+                    BrowserComponentPageType.HOME_PRIVATE -> {
+                        HomeComponent(private = true)
+                    }
 
-                BrowserComponentPageType.HOME_PRIVATE -> {
-                    HomeComponent(private = true)
-                }
+                    BrowserComponentPageType.HOME -> {
+                        HomeComponent(private = false)
+                    }
 
-                BrowserComponentPageType.HOME -> {
-                    HomeComponent(private = false)
-                }
+                    BrowserComponentPageType.CRASH -> {
+                        CrashComponent()
+                    }
 
-                BrowserComponentPageType.CRASH -> {
-                    CrashComponent()
+                    else -> {
+                        // engine view already shown, kept there so engine view doesn't reset
+                    }
                 }
             }
         },
@@ -1875,10 +1892,11 @@ fun BrowserComponent(
                         .background(Color.Black)
                 ) {
                     if (browserMode == BrowserComponentMode.TOOLBAR) {
-                        BrowserTabBar(tabList)
+                        BrowserTabBar(tabList, currentTab)
                         BrowserToolbar(
                             tabSessionState = currentTab,
                             searchEngine = searchEngine,
+                            tabCount = tabList.size,
                             setShowMenu = setShowMenuBottomSheet
                         )
                     }
@@ -1983,33 +2001,49 @@ fun MozAwesomeBar(setView: (AwesomeBarWrapper) -> Unit) {
 
 @Composable
 fun MozEngineView(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     setSwipeView: (VerticalSwipeRefreshLayout) -> Unit,
     setEngineView: (GeckoEngineView) -> Unit
 ) {
-    AndroidView(modifier = modifier.fillMaxSize(), factory = { context ->
+    AndroidView(modifier = modifier, factory = { context ->
         val vl = VerticalSwipeRefreshLayout(context)
         val gv = GeckoEngineView(context)
+        vl.layoutParams = ViewGroup.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT
+        )
+        // todo: user prefs if swipe refresh enabled or not
+        vl.visibility = View.VISIBLE
+        vl.isEnabled = true
+        vl.isActivated = true
+        vl.isVisible = true
         vl.addView(gv)
+        gv.layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT
+        gv.layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
+        gv.setBackgroundColor(android.graphics.Color.TRANSPARENT)
+        gv.visibility = View.VISIBLE
+        gv.isEnabled = true
+        gv.isActivated = true
+        gv.isVisible = true
         vl
     }, update = { sv ->
         var gv: GeckoEngineView? = null
-        // find GeckoEngineView child in scroll view
         for (v in sv.children) {
             if (v is GeckoEngineView) {
                 gv = v
                 break
             }
         }
-        // setup views
-        with(sv.layoutParams) {
-            this.width = LayoutParams.MATCH_PARENT
-            this.height = LayoutParams.MATCH_PARENT
-        }
-        with(gv!!.layoutParams) {
-            this.width = LayoutParams.MATCH_PARENT
-            this.height = LayoutParams.MATCH_PARENT
-        }
+//        // setup views
+//        with(sv.layoutParams) {
+//            this.width = LayoutParams.MATCH_PARENT
+//            this.height = LayoutParams.MATCH_PARENT
+//        }
+//        with(gv!!.layoutParams) {
+//            this.width = LayoutParams.MATCH_PARENT
+//            this.height = LayoutParams.MATCH_PARENT
+//        }
+        gv!!.isEnabled = true
+        gv.isActivated = true
         // set view references
         setSwipeView(sv)
         setEngineView(gv)

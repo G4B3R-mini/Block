@@ -70,7 +70,10 @@ import mozilla.components.support.ktx.kotlin.isUrl
 import mozilla.components.support.ktx.kotlin.toNormalizedUrl
 
 // TODO:
-//  -[ ] progress with tabSessionState.content.progress
+//  -[x] progress with tabSessionState.content.progress
+//  -[ ] when app started, new home tab added, instead go to last used tab
+//  -[ ] when last private tab closed doesn't switch to normal tabs
+//  -[ ] swipe gesture to switch tabs, left and right
 //  -[ ] implement moz AwesomeBarFeature
 //  -[ ] implement moz TabsToolbarFeature
 //  -[ ] implement moz ReaderViewIntegration
@@ -80,17 +83,18 @@ import mozilla.components.support.ktx.kotlin.toNormalizedUrl
 
 @Composable
 fun BrowserToolbar(
-    tabSessionState: TabSessionState?, searchEngine: SearchEngine, setShowMenu: (Boolean) -> Unit
+    tabSessionState: TabSessionState?,
+    searchEngine: SearchEngine,
+    tabCount: Int,
+    setShowMenu: (Boolean) -> Unit,
 ) {
     if (tabSessionState == null) {
         // don't show if null, TODO: show loading bar
         return
     }
-    val context = LocalContext.current
     val searchTerms by remember { mutableStateOf(tabSessionState.content.searchTerms) }
     val url: String? by browserStore().observeAsState { state -> state.selectedTab?.content?.url }
     val (editMode, setEditMode) = remember { mutableStateOf(false) }
-    val useCases = sessionUseCases()
     val (originBounds, setOriginBounds) = remember { mutableStateOf(OriginBounds(0.dp, 0.dp)) }
 //    val siteSecure = tabSessionState.content.securityInfo.secure
 //    val trackingProtectionEnabled = tabSessionState.trackingProtection.enabled
@@ -107,6 +111,7 @@ fun BrowserToolbar(
             url = url ?: "<empty>",
             searchTerms = searchTerms,
             setOriginBounds = setOriginBounds,
+            tabCount = tabCount,
             tabSessionState = tabSessionState,
             setEditMode = setEditMode,
             setShowMenu = setShowMenu
@@ -132,9 +137,10 @@ fun BrowserDisplayToolbar(
     url: String?,
     searchTerms: String,
     setOriginBounds: (OriginBounds) -> Unit,
+    tabCount: Int,
     tabSessionState: TabSessionState,
     setEditMode: (Boolean) -> Unit,
-    setShowMenu: (Boolean) -> Unit
+    setShowMenu: (Boolean) -> Unit,
 ) {
     var textFullSize by remember { mutableStateOf(true) }
     val loading = tabSessionState?.content?.loading ?: false
@@ -143,11 +149,11 @@ fun BrowserDisplayToolbar(
         textFullSize = false
     }
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
             .background(Color.Black)
-            .height(ComponentDimens.TOOLBAR_HEIGHT),
+            .height(ComponentDimens.TOOLBAR_HEIGHT), contentAlignment = Alignment.TopCenter
     ) {
         // loading bar
         if (loading) {
@@ -156,17 +162,21 @@ fun BrowserDisplayToolbar(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 4.dp)
-                .height(ComponentDimens.TOOLBAR_HEIGHT - if (loading) ComponentDimens.PROGRESS_BAR_HEIGHT else 0.dp)
+                .height(ComponentDimens.TOOLBAR_HEIGHT),
         ) {
             if (!textFullSize) {
                 ToolbarBack(enabled = tabSessionState.content.canGoBack)
                 ToolbarForward(enabled = tabSessionState.content.canGoForward)
             }
             ToolbarOrigin(
-                modifier = Modifier.animateContentSize() { initialValue, targetValue ->
-                    // finished callback
-                }, toolbarOriginData = ToolbarOriginData(
+                modifier = Modifier
+                    .padding(
+                        start = IconConstants.ICON_START_PADDING,
+                        end = IconConstants.ICON_END_PADDING,
+                    )
+                    .animateContentSize { initialValue, targetValue ->
+                        // finished callback
+                    }, toolbarOriginData = ToolbarOriginData(
                     url = url,
                     searchTerms = searchTerms,
                     siteSecure = detectSiteSecurity(tabSessionState),
@@ -176,7 +186,7 @@ fun BrowserDisplayToolbar(
             )
             if (!textFullSize) {
                 ToolbarReload(enabled = true)
-                ToolbarShowTabsTray()
+                ToolbarShowTabsTray(tabCount = tabCount)
                 ToolbarMenuIcon(setShowMenu = setShowMenu)
             }
         }
@@ -222,11 +232,12 @@ fun BrowserEditToolbar(
         if (tabSessionState != null) input = parseInput()
     }
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
             .background(Color.Black)
             .height(ComponentDimens.TOOLBAR_HEIGHT),
+        contentAlignment = Alignment.TopCenter,
     ) {
         // loading bar
         if (loading) {
@@ -236,7 +247,7 @@ fun BrowserEditToolbar(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(Color.Black)
-                .height(ComponentDimens.TOOLBAR_HEIGHT - if (loading) ComponentDimens.PROGRESS_BAR_HEIGHT else 0.dp)
+                .height(ComponentDimens.TOOLBAR_HEIGHT)
                 .onFocusChanged { focusState ->
                     // if focus lost, go back to editing mode
                     if (focusState.hasFocus) {

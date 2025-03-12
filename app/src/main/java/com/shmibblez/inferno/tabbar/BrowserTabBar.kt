@@ -1,6 +1,7 @@
 package com.shmibblez.inferno.tabbar
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -25,10 +27,15 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -37,8 +44,11 @@ import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.ComponentDimens
 import com.shmibblez.inferno.browser.toPx
 import com.shmibblez.inferno.ext.components
+import com.shmibblez.inferno.ext.newTab
+import mozilla.components.browser.state.ext.getUrl
 import mozilla.components.browser.state.selector.normalTabs
 import mozilla.components.browser.state.selector.privateTabs
+import mozilla.components.browser.state.selector.selectedTab
 import mozilla.components.browser.state.state.BrowserState
 import mozilla.components.browser.state.state.TabSessionState
 
@@ -47,11 +57,9 @@ import mozilla.components.browser.state.state.TabSessionState
 //   - update MiniTabViewHolder layout for individual tab layout
 fun BrowserState.toTabList(
     tabsFilter: (TabSessionState) -> Boolean = { true },
-): Pair<List<TabSessionState>, String?> {
+): Pair<List<TabSessionState>, TabSessionState?> {
     val tabStates = tabs.filter(tabsFilter)
-    val selectedTabId = tabStates.filter(tabsFilter).firstOrNull { it.id == selectedTabId }?.id
-
-    return Pair(tabStates, selectedTabId)
+    return Pair(tabStates, selectedTab)
 }
 
 inline fun <T> Iterable<T>.findIndex(predicate: (T) -> Boolean): Int? {
@@ -60,36 +68,29 @@ inline fun <T> Iterable<T>.findIndex(predicate: (T) -> Boolean): Int? {
 }
 
 @Composable
-fun BrowserTabBar(tabList: List<TabSessionState>) {
+fun BrowserTabBar(tabList: List<TabSessionState>, selectedTab: TabSessionState?) {
     val context = LocalContext.current
     val localConfig = LocalConfiguration.current
     val listState = rememberLazyListState()
-    val selectedTabId = context.components.core.store.state.toTabList().second
-//    val
+    // if no tab selected return
     val isPrivateSession: Boolean = (if (tabList.isEmpty()) {
+        Log.d("BrowserTabBar", "tab list empty")
         false
-    } else if (selectedTabId == null) {
-        newTab(context, false)
+    } else if (selectedTab == null) {
         false
-    } else tabList.find { it.id == selectedTabId }!!.content.private)
-    val displayedTabs =
-        with(context.components.core.store.state) { if (isPrivateSession) this.privateTabs else this.normalTabs }
+    } else tabList.find { it.id == selectedTab.id }!!.content.private)
+
     // scroll to active tab
-    val i = displayedTabs.findIndex { it.id == selectedTabId }
+    val i = tabList.findIndex { it.id == selectedTab?.id }
     LaunchedEffect(i) {
         val sw = localConfig.screenWidthDp.dp
         if (i != null) listState.animateScrollToItem(
-            i,
-            -(sw - ComponentDimens.TAB_WIDTH).toPx() / 2
+            i, -(sw - ComponentDimens.TAB_WIDTH).toPx() / 2
         )
     }
-    // if tab list empty add new tab
-    LaunchedEffect(displayedTabs) {
-        // TODO: replace with moz last tab callback
-        if (displayedTabs.isEmpty()) newTab(context, isPrivateSession)
-    }
 
-    if (displayedTabs.isEmpty()) return Row(
+    // if tab list empty or no tab selected return empty tab list
+    if (tabList.isEmpty() || selectedTab == null) return Row(
         Modifier
             .fillMaxWidth()
             .height(ComponentDimens.TAB_BAR_HEIGHT)
@@ -109,9 +110,14 @@ fun BrowserTabBar(tabList: List<TabSessionState>) {
                 .weight(1F),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            items(displayedTabs.size) {
+            val selectedIndex = tabList.findIndex { it.id == selectedTab.id }
+            items(tabList.size) {
                 MiniTab(
-                    context, displayedTabs[it], displayedTabs[it].id == selectedTabId
+                    context,
+                    tabList[it],
+                    tabList[it].id == selectedTab.id,
+                    it,
+                    selectedIndex!!,
                 )
             }
         }
@@ -125,7 +131,7 @@ fun BrowserTabBar(tabList: List<TabSessionState>) {
                     .fillMaxHeight()
                     .aspectRatio(2F / 3F)
                     .align(Alignment.Center)
-                    .clickable { newTab(context, isPrivateSession) },
+                    .clickable { context.components.newTab(isPrivateSession) },
                 imageVector = ImageVector.vectorResource(R.drawable.baseline_add_24),
                 contentDescription = "new tab"
             )
@@ -135,21 +141,26 @@ fun BrowserTabBar(tabList: List<TabSessionState>) {
 
 @Composable
 private fun MiniTab(
-    context: Context, tabSessionState: TabSessionState, selected: Boolean
+    context: Context,
+    tabSessionState: TabSessionState,
+    selected: Boolean,
+    index: Int,
+    selectedIndex: Int,
 ) {
     return Row(modifier = Modifier
         .fillMaxSize()
         .width(ComponentDimens.TAB_WIDTH)
         .background(if (selected) Color.Black else Color.DarkGray)
         .drawBehind {
+            // draw borders
             val w = size.width
             val h = size.height
             val cap = StrokeCap.Square
             val sw = 1.dp.toPx()
             val hsw = sw / 2
-            val color = if (selected) Color.DarkGray else Color.Gray
-            // left
-            drawLine(
+            val color = if (selected) Color.Black else Color.Gray
+            // left, only draw if first or to right of selected tab
+            if (index == 0 || index - 1 == selectedIndex) drawLine(
                 cap = cap,
                 color = color,
                 strokeWidth = sw,
@@ -158,11 +169,9 @@ private fun MiniTab(
             )
             // right
             drawLine(
-                cap = cap,
-                color = color,
-                strokeWidth = sw,
-                start = Offset(w - hsw, hsw),
-                end = Offset(w - hsw, h - hsw)
+                cap = cap, color = color,
+                // if last or to left of selected tab sw else hsw
+                strokeWidth = sw, start = Offset(w - hsw, hsw), end = Offset(w - hsw, h - hsw)
             )
             // bottom
             drawLine(
@@ -180,11 +189,32 @@ private fun MiniTab(
         }, verticalAlignment = Alignment.CenterVertically
 
     ) {
+        val url = tabSessionState.getUrl()
+        val isHomePage = url == "inferno:home" || url == "about:blank"
+        val isPrivateHomePage = url == "inferno:privatebrowsing" || url == "about:privatebrowsing"
+        val icon = tabSessionState.content.icon
+        val favicon = if (isHomePage) {
+            painterResource(R.drawable.inferno)
+        } else if (isPrivateHomePage) {
+            painterResource(R.drawable.ic_private_browsing)
+        } else {
+            if (icon != null) BitmapPainter(icon.asImageBitmap()) else painterResource(R.drawable.mozac_ic_globe_24)
+        }
+        // favicon
+        Image(
+            painter = favicon,
+            contentDescription = "icon",
+            modifier = Modifier
+                .aspectRatio(1F)
+                .padding(6.dp)
+                .padding(start = 1.dp),
+        )
+        // site name
         Text(
             text = tabSessionState.content.title.ifEmpty { tabSessionState.content.url },
             modifier = Modifier
                 .wrapContentHeight()
-                .padding(4.dp, 0.dp, 0.dp, 0.dp)
+                .padding(0.dp)
                 .weight(1F)
                 .background(
                     brush = Brush.horizontalGradient(
@@ -201,6 +231,7 @@ private fun MiniTab(
             color = Color.White,
             textAlign = TextAlign.Start
         )
+        // close
         Image(
             modifier = Modifier
                 .fillMaxHeight()
@@ -213,14 +244,6 @@ private fun MiniTab(
             contentDescription = "close tab"
         )
     }
-}
-
-private fun newTab(context: Context, isPrivateSession: Boolean) {
-    context.components.useCases.tabsUseCases.addTab(
-        url = if (isPrivateSession) "inferno:privatebrowsing" else "inferno:home",
-        selectTab = true,
-        private = isPrivateSession
-    )
 }
 
 // TODO: add listener for tab private changed, if yes then show private tabs, update here too

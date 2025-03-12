@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -43,14 +44,17 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.BrowserComponentMode
 import com.shmibblez.inferno.browser.ComponentDimens
 import com.shmibblez.inferno.browser.getActivity
+import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.compose.sessionUseCases
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.tabs.TabsTrayFragment
@@ -78,10 +82,14 @@ import mozilla.components.support.ktx.android.content.share
 
 object IconConstants {
     const val ICON_ASPECT_RATIO = 1F
-    val ICON_START_PADDING = 4.dp
-    val ICON_TOP_PADDING = 4.dp
-    val ICON_END_PADDING = 4.dp
-    val ICON_BOTTOM_PADDING = 4.dp
+    val ICON_START_PADDING = 6.dp
+    val ICON_TOP_PADDING = 10.dp
+    val ICON_END_PADDING = 6.dp
+    val ICON_BOTTOM_PADDING = 10.dp
+    val INDICATOR_ICON_START_PADDING = 4.dp
+    val INDICATOR_ICON_TOP_PADDING = 4.dp
+    val INDICATOR_ICON_END_PADDING = 4.dp
+    val INDICATOR_ICON_BOTTOM_PADDING = 4.dp
 }
 
 /**
@@ -123,7 +131,7 @@ interface ToolbarOptionsScope {
     fun ToolbarStopLoading(enabled: Boolean)
 
     @Composable
-    fun ToolbarShowTabsTray()
+    fun ToolbarShowTabsTray(tabCount: Int)
 }
 
 object ToolbarOptionsScopeInstance : ToolbarOptionsScope {
@@ -144,7 +152,6 @@ object ToolbarOptionsScopeInstance : ToolbarOptionsScope {
         Icon(
             modifier = Modifier
                 .fillMaxHeight()
-                .aspectRatio(IconConstants.ICON_ASPECT_RATIO)
                 .alpha(if (enabled) 1F else 0.5F)
                 .padding(
                     start = IconConstants.ICON_START_PADDING,
@@ -152,6 +159,7 @@ object ToolbarOptionsScopeInstance : ToolbarOptionsScope {
                     end = IconConstants.ICON_END_PADDING,
                     bottom = IconConstants.ICON_BOTTOM_PADDING
                 )
+                .aspectRatio(IconConstants.ICON_ASPECT_RATIO)
                 .clickable(enabled = enabled) { useCases.goBack.invoke() },
             painter = painterResource(id = R.drawable.baseline_chevron_left_24),
             contentDescription = "back",
@@ -165,7 +173,6 @@ object ToolbarOptionsScopeInstance : ToolbarOptionsScope {
         Icon(
             modifier = Modifier
                 .fillMaxHeight()
-                .aspectRatio(IconConstants.ICON_ASPECT_RATIO)
                 .alpha(if (enabled) 1F else 0.5F)
                 .padding(
                     start = IconConstants.ICON_START_PADDING,
@@ -173,6 +180,7 @@ object ToolbarOptionsScopeInstance : ToolbarOptionsScope {
                     end = IconConstants.ICON_END_PADDING,
                     bottom = IconConstants.ICON_BOTTOM_PADDING
                 )
+                .aspectRatio(IconConstants.ICON_ASPECT_RATIO)
                 .clickable(enabled = enabled) { useCases.goForward.invoke() },
             painter = painterResource(id = R.drawable.baseline_chevron_right_24),
             contentDescription = "forward",
@@ -186,7 +194,6 @@ object ToolbarOptionsScopeInstance : ToolbarOptionsScope {
         Icon(
             modifier = Modifier
                 .fillMaxHeight()
-                .aspectRatio(IconConstants.ICON_ASPECT_RATIO)
                 .alpha(if (enabled) 1F else 0.5F)
                 .padding(
                     start = IconConstants.ICON_START_PADDING,
@@ -194,8 +201,9 @@ object ToolbarOptionsScopeInstance : ToolbarOptionsScope {
                     end = IconConstants.ICON_END_PADDING,
                     bottom = IconConstants.ICON_BOTTOM_PADDING
                 )
+                .aspectRatio(IconConstants.ICON_ASPECT_RATIO)
                 .clickable(enabled = enabled) { useCases.reload.invoke() },
-            painter = painterResource(id = R.drawable.mozac_ic_arrow_clockwise_24),
+            painter = painterResource(id = R.drawable.ic_arrow_clockwise_24),
             contentDescription = "reload page",
             tint = Color.White
         )
@@ -207,7 +215,6 @@ object ToolbarOptionsScopeInstance : ToolbarOptionsScope {
         Icon(
             modifier = Modifier
                 .fillMaxHeight()
-                .aspectRatio(IconConstants.ICON_ASPECT_RATIO)
                 .alpha(if (enabled) 1F else 0.5F)
                 .padding(
                     start = IconConstants.ICON_START_PADDING,
@@ -215,15 +222,16 @@ object ToolbarOptionsScopeInstance : ToolbarOptionsScope {
                     end = IconConstants.ICON_END_PADDING,
                     bottom = IconConstants.ICON_BOTTOM_PADDING
                 )
+                .aspectRatio(IconConstants.ICON_ASPECT_RATIO)
                 .clickable(enabled = enabled) { useCases.stopLoading.invoke() },
-            painter = painterResource(id = R.drawable.mozac_ic_cross_24),
+            painter = painterResource(id = R.drawable.ic_cross_24),
             contentDescription = "stop loading",
             tint = Color.White
         )
     }
 
     @Composable
-    override fun ToolbarShowTabsTray() {
+    override fun ToolbarShowTabsTray(tabCount: Int) {
         fun showTabs(context: Context) {
             // For now we are performing manual fragment transactions here. Once we can use the new
             // navigation support library we may want to pass navigation graphs around.
@@ -234,10 +242,9 @@ object ToolbarOptionsScopeInstance : ToolbarOptionsScope {
         }
 
         val context = LocalContext.current
-        Icon(
+        Box(
             modifier = Modifier
                 .fillMaxHeight()
-                .aspectRatio(IconConstants.ICON_ASPECT_RATIO)
 //                .alpha(0.5F)
                 .padding(
                     start = IconConstants.ICON_START_PADDING,
@@ -245,11 +252,24 @@ object ToolbarOptionsScopeInstance : ToolbarOptionsScope {
                     end = IconConstants.ICON_END_PADDING,
                     bottom = IconConstants.ICON_BOTTOM_PADDING
                 )
+                .aspectRatio(IconConstants.ICON_ASPECT_RATIO)
                 .clickable { showTabs(context) },
-            painter = painterResource(id = R.drawable.mozac_ic_tab_tray_24),
-            contentDescription = "show tabs tray",
-            tint = Color.White
-        )
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                modifier = Modifier.fillMaxSize(),
+                painter = painterResource(id = R.drawable.ic_tabcounter_box_24),
+                contentDescription = "show tabs tray",
+                tint = Color.White,
+            )
+            InfernoText(
+                text = tabCount.toString(),
+                fontColor = Color.White,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                fontSize = 10.sp,
+            )
+        }
     }
 
     @Composable
@@ -257,15 +277,15 @@ object ToolbarOptionsScopeInstance : ToolbarOptionsScope {
         Icon(
             modifier = Modifier
                 .fillMaxHeight()
-                .aspectRatio(IconConstants.ICON_ASPECT_RATIO)
                 .padding(
                     start = IconConstants.ICON_START_PADDING,
                     top = IconConstants.ICON_TOP_PADDING,
                     end = IconConstants.ICON_END_PADDING,
                     bottom = IconConstants.ICON_BOTTOM_PADDING
                 )
+                .aspectRatio(IconConstants.ICON_ASPECT_RATIO)
                 .clickable { setShowMenu(true) },
-            painter = painterResource(id = R.drawable.mozac_ic_ellipsis_vertical_24),
+            painter = painterResource(id = R.drawable.ic_app_menu_24),
             contentDescription = "menu",
             tint = Color.White
         )
@@ -294,6 +314,7 @@ fun RowScope.ToolbarOrigin(
     Row(
         modifier = modifier
             .fillMaxHeight()
+            .padding(vertical = 4.dp)
             .weight(1F)
 //            .padding(all = 4.dp)
             .align(Alignment.CenterVertically)
@@ -320,8 +341,8 @@ fun RowScope.ToolbarOrigin(
                 color = Color.White,
                 modifier = Modifier
                     .padding(
-                        start = IconConstants.ICON_START_PADDING,
-                        end = IconConstants.ICON_END_PADDING
+                        start = IconConstants.INDICATOR_ICON_START_PADDING,
+                        end = IconConstants.INDICATOR_ICON_END_PADDING
                     )
                     .weight(1F)
                     .wrapContentHeight(Alignment.CenterVertically)
@@ -384,14 +405,14 @@ object ToolbarOriginScopeInstance : ToolbarOriginScope {
         if (enabled) Icon(
             modifier = Modifier
                 .fillMaxHeight()
-                .aspectRatio(IconConstants.ICON_ASPECT_RATIO)
                 .padding(
-                    start = IconConstants.ICON_START_PADDING,
-                    top = IconConstants.ICON_TOP_PADDING,
-                    end = IconConstants.ICON_END_PADDING,
-                    bottom = IconConstants.ICON_BOTTOM_PADDING
-                ),
-            painter = painterResource(id = R.drawable.mozac_ic_search_24),
+                    start = IconConstants.INDICATOR_ICON_START_PADDING,
+                    top = IconConstants.INDICATOR_ICON_TOP_PADDING,
+                    end = IconConstants.INDICATOR_ICON_END_PADDING,
+                    bottom = IconConstants.INDICATOR_ICON_BOTTOM_PADDING
+                )
+                .aspectRatio(IconConstants.ICON_ASPECT_RATIO),
+            painter = painterResource(id = R.drawable.mozac_ic_search_24), // todo: left off at this icon, flip aspect ratio too
             contentDescription = "empty indicator",
             tint = Color.White
         )
@@ -404,13 +425,13 @@ object ToolbarOriginScopeInstance : ToolbarOriginScope {
                 Icon(
                     modifier = Modifier
                         .fillMaxHeight()
-                        .aspectRatio(IconConstants.ICON_ASPECT_RATIO)
                         .padding(
-                            start = IconConstants.ICON_START_PADDING,
-                            top = IconConstants.ICON_TOP_PADDING,
-                            end = IconConstants.ICON_END_PADDING,
-                            bottom = IconConstants.ICON_BOTTOM_PADDING
-                        ),
+                            start = IconConstants.INDICATOR_ICON_START_PADDING,
+                            top = IconConstants.INDICATOR_ICON_TOP_PADDING,
+                            end = IconConstants.INDICATOR_ICON_END_PADDING,
+                            bottom = IconConstants.INDICATOR_ICON_BOTTOM_PADDING
+                        )
+                        .aspectRatio(IconConstants.ICON_ASPECT_RATIO),
                     painter = painterResource(id = R.drawable.mozac_ic_tracking_protection_on_trackers_blocked),
                     contentDescription = "tracking protection indicator",
                     tint = Color.White
@@ -421,13 +442,13 @@ object ToolbarOriginScopeInstance : ToolbarOriginScope {
                 Icon(
                     modifier = Modifier
                         .fillMaxHeight()
-                        .aspectRatio(IconConstants.ICON_ASPECT_RATIO)
                         .padding(
-                            start = IconConstants.ICON_START_PADDING,
-                            top = IconConstants.ICON_TOP_PADDING,
-                            end = IconConstants.ICON_END_PADDING,
-                            bottom = IconConstants.ICON_BOTTOM_PADDING
-                        ),
+                            start = IconConstants.INDICATOR_ICON_START_PADDING,
+                            top = IconConstants.INDICATOR_ICON_TOP_PADDING,
+                            end = IconConstants.INDICATOR_ICON_END_PADDING,
+                            bottom = IconConstants.INDICATOR_ICON_BOTTOM_PADDING
+                        )
+                        .aspectRatio(IconConstants.ICON_ASPECT_RATIO),
                     painter = painterResource(id = R.drawable.mozac_ic_tracking_protection_on_trackers_blocked),
                     contentDescription = "tracking protection indicator",
                     tint = Color.White
@@ -446,13 +467,13 @@ object ToolbarOriginScopeInstance : ToolbarOriginScope {
             Icon(
                 modifier = Modifier
                     .fillMaxHeight()
-                    .aspectRatio(IconConstants.ICON_ASPECT_RATIO)
                     .padding(
-                        start = IconConstants.ICON_START_PADDING,
-                        top = IconConstants.ICON_TOP_PADDING,
-                        end = IconConstants.ICON_END_PADDING,
-                        bottom = IconConstants.ICON_BOTTOM_PADDING
-                    ),
+                        start = IconConstants.INDICATOR_ICON_START_PADDING,
+                        top = IconConstants.INDICATOR_ICON_TOP_PADDING,
+                        end = IconConstants.INDICATOR_ICON_END_PADDING,
+                        bottom = IconConstants.INDICATOR_ICON_BOTTOM_PADDING
+                    )
+                    .aspectRatio(IconConstants.ICON_ASPECT_RATIO),
                 painter = painterResource(id = R.drawable.mozac_ic_lock_20),
                 contentDescription = "security indicator",
                 tint = Color.White
@@ -461,13 +482,14 @@ object ToolbarOriginScopeInstance : ToolbarOriginScope {
             Icon(
                 modifier = Modifier
                     .fillMaxHeight()
-                    .aspectRatio(IconConstants.ICON_ASPECT_RATIO)
                     .padding(
-                        start = IconConstants.ICON_START_PADDING,
-                        top = IconConstants.ICON_TOP_PADDING,
-                        end = IconConstants.ICON_END_PADDING,
-                        bottom = IconConstants.ICON_BOTTOM_PADDING
-                    ),
+                        start = IconConstants.INDICATOR_ICON_START_PADDING,
+                        top = IconConstants.INDICATOR_ICON_TOP_PADDING,
+                        end = IconConstants.INDICATOR_ICON_END_PADDING,
+                        bottom = IconConstants.INDICATOR_ICON_BOTTOM_PADDING
+                    )
+                    .aspectRatio(IconConstants.ICON_ASPECT_RATIO)
+                ,
                 painter = painterResource(id = R.drawable.mozac_ic_broken_lock),
                 contentDescription = "security indicator",
                 tint = Color.White
@@ -497,9 +519,9 @@ object ToolbarOriginScopeInstance : ToolbarOriginScope {
 //                    tint = Color.Red,
                     modifier = Modifier
                         .fillMaxHeight()
-                        .aspectRatio(1F)
                         .clip(MaterialTheme.shapes.extraSmall)
-                        .padding(start = 4.dp, top = 4.dp, bottom = 4.dp),
+                        .padding(start = 4.dp, top = 4.dp, bottom = 4.dp)
+                        .aspectRatio(1F),
                 )
                 Icon(
                     painter = painterResource(R.drawable.mozac_ic_chevron_down_24),

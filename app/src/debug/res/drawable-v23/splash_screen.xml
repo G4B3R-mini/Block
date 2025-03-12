@@ -8,8 +8,10 @@
         android:left="24dp"
         android:right="24dp"
         android:top="24dp">
-        <drawable
-            android:src="@drawable/inferno"
+        <item
+            android:width="160dp"
+            android:height="160dp"
+            android:drawable="@drawable/inferno"
             android:gravity="center" />
     </item>
 </layer-list>

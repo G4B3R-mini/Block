@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.os.StrictMode
 import android.view.View
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -20,6 +21,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
@@ -44,6 +47,7 @@ import com.shmibblez.inferno.components.TabCollectionStorage
 import com.shmibblez.inferno.components.appstate.AppAction
 import com.shmibblez.inferno.components.appstate.AppAction.MessagingAction
 import com.shmibblez.inferno.components.toolbar.navbar.shouldAddNavigationBar
+import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.consumeFrom
 import com.shmibblez.inferno.ext.containsQueryParameters
@@ -773,7 +777,7 @@ fun HomeComponent(private: Boolean) {
                     }
 
                     if (browsingModeManager.mode.isPrivate // &&
-                        // We will be showing the search dialog and don't want to show the CFR while the dialog shows
+                    // We will be showing the search dialog and don't want to show the CFR while the dialog shows
 //                     todo:   !bundleArgs.getBoolean(HomeFragment.FOCUS_ON_ADDRESS_BAR) && context.settings().shouldShowPrivateModeCfr
                     ) {
                         recommendPrivateBrowsingShortcut(
@@ -888,11 +892,19 @@ fun HomeComponent(private: Boolean) {
         }
     }
 
-    Scaffold {
-        // TODO: layout
-        it.toString()
-//        it.calculateRightPadding(LayoutDirection.Ltr)
-    }
+    Scaffold(
+        containerColor = Color.Black,
+        content = {
+            // TODO: layout
+            it.toString()
+            InfernoText(
+                text = "Home page under construction, is private page: ${if (private) "true" else "false"}",
+                modifier = Modifier
+                    .fillMaxWidth(),
+                fontColor = Color.Black,
+            )
+        }
+    )
 }
 
 

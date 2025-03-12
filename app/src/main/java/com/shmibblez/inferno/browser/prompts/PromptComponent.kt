@@ -1,5 +1,6 @@
 package com.shmibblez.inferno.browser.prompts
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -378,9 +379,6 @@ fun PromptComponent(
 ) {
     if (currentTab == null) return
     val context = LocalContext.current
-    val content = currentTab.content
-    // todo: get SessionState
-    val session = context.components.core.store.state
     val logger = remember { Logger("Prompt Component") }
 //    var promptRequest by remember { mutableStateOf<PromptRequest?>(null) }
     val sessionId = currentTab.id
@@ -390,6 +388,7 @@ fun PromptComponent(
     Box(
         modifier = Modifier.fillMaxWidth(),
     ) {
+        Log.d("PromptComponent", "prompts size: ${promptRequests.size}")
         for (prompt in promptRequests.reversed()) {
             // if cant show prompt, go to next one
             if (!canShowThisPrompt(prompt, promptAbuserDetector)) {

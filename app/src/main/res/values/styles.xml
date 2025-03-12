@@ -1,8 +1,8 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- This Source Code Form is subject to the terms of the Mozilla Public
+<?xml version="1.0" encoding="utf-8"?><!-- This Source Code Form is subject to the terms of the Mozilla Public
    - License, v. 2.0. If a copy of the MPL was not distributed with this
    - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
 <resources xmlns:tools="http://schemas.android.com/tools">
+
     <style name="AppThemeNotActionBar" parent="Theme.AppCompat.NoActionBar">
         <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
 
@@ -26,14 +26,14 @@
     </style>
 
 
-
-
-
-    <style name="SplashScreen" parent="SplashScreenThemeBase"/>
+    <style name="SplashScreen" parent="SplashScreenThemeBase" />
 
     <style name="SplashScreenThemeBase" parent="Theme.SplashScreen">
+<!--        <item name="android:windowNoTitle">true</item>-->
+<!--        <item name="android:windowFullscreen">true</item>-->
         <item name="windowSplashScreenAnimatedIcon">@drawable/splash_screen</item>
-        <item name="windowSplashScreenBackground">@color/fx_mobile_layer_color_1</item>
+<!--        <item name="windowSplashScreenBackground">@color/fx_mobile_layer_color_1</item>-->
+        <item name="windowSplashScreenBackground">@color/dark</item>
         <item name="postSplashScreenTheme">@style/NormalTheme</item>
         <!-- Temporarily opt out of edge to edge enforcement.
         To be removed in https://bugzilla.mozilla.org/show_bug.cgi?id=1916695-->
@@ -44,6 +44,8 @@
         <!-- Temporarily opt out of edge to edge enforcement.
         To be removed in https://bugzilla.mozilla.org/show_bug.cgi?id=1916695-->
         <item name="android:windowOptOutEdgeToEdgeEnforcement" tools:targetApi="35">true</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowFullscreen">true</item>
 
         <!-- Android system styling -->
         <item name="searchViewStyle">@style/SearchViewStyle</item>
@@ -67,13 +69,21 @@
         <item name="bottomSheetDialogTheme">@style/BottomSheet</item>
         <item name="android:textColorLink">@color/fx_mobile_text_color_accent</item>
 
-        <item name="mozacInputLayoutErrorTextColor"
-            tools:ignore="UnusedResources">@color/fx_mobile_text_color_critical</item>
-        <item name="mozacInputLayoutErrorIconColor"
-            tools:ignore="UnusedResources">@color/fx_mobile_text_color_critical</item>
-        <item name="mozacLoginSelectHeaderTextStyle" tools:ignore="UnusedResources">@style/SelectPromptHeaderTextStyle</item>
-        <item name="mozacSelectCreditCardHeaderTextStyle" tools:ignore="UnusedResources">@style/SelectPromptHeaderTextStyle</item>
-        <item name="mozacSelectAddressHeaderTextStyle" tools:ignore="UnusedResources">@style/SelectPromptHeaderTextStyle</item>
+        <item name="mozacInputLayoutErrorTextColor" tools:ignore="UnusedResources">
+            @color/fx_mobile_text_color_critical
+        </item>
+        <item name="mozacInputLayoutErrorIconColor" tools:ignore="UnusedResources">
+            @color/fx_mobile_text_color_critical
+        </item>
+        <item name="mozacLoginSelectHeaderTextStyle" tools:ignore="UnusedResources">
+            @style/SelectPromptHeaderTextStyle
+        </item>
+        <item name="mozacSelectCreditCardHeaderTextStyle" tools:ignore="UnusedResources">
+            @style/SelectPromptHeaderTextStyle
+        </item>
+        <item name="mozacSelectAddressHeaderTextStyle" tools:ignore="UnusedResources">
+            @style/SelectPromptHeaderTextStyle
+        </item>
 
         <!-- Design system color attributes -->
 
@@ -144,11 +154,20 @@
         <item name="toolbarEndGradient">@color/fx_mobile_layer_color_1</item>
         <item name="fillLinkFromClipboard">@color/fill_link_from_clipboard_normal_theme</item>
         <item name="syncDisconnected">@color/sync_disconnected_icon_fill_normal_theme</item>
-        <item name="syncDisconnectedBackground">@color/sync_disconnected_background_normal_theme</item>
-        <item name="addOnPrivateBrowsingExteriorCircleBackground">@color/add_on_private_browsing_exterior_circle_background_normal_theme</item>
-        <item name="mozacPromptLoginEditTextCursorColor">@color/prompt_login_edit_text_cursor_color_normal_theme</item>
-        <item name="awesomeBarIndicatorColor">@color/search_suggestion_indicator_icon_color_normal_theme</item>
-        <item name="awesomeBarIndicatorBookmarkColor">@color/search_suggestion_indicator_icon_bookmark_color_normal_theme</item>
+        <item name="syncDisconnectedBackground">@color/sync_disconnected_background_normal_theme
+        </item>
+        <item name="addOnPrivateBrowsingExteriorCircleBackground">
+            @color/add_on_private_browsing_exterior_circle_background_normal_theme
+        </item>
+        <item name="mozacPromptLoginEditTextCursorColor">
+            @color/prompt_login_edit_text_cursor_color_normal_theme
+        </item>
+        <item name="awesomeBarIndicatorColor">
+            @color/search_suggestion_indicator_icon_color_normal_theme
+        </item>
+        <item name="awesomeBarIndicatorBookmarkColor">
+            @color/search_suggestion_indicator_icon_bookmark_color_normal_theme
+        </item>
         <item name="preferenceSectionHeader">@color/fx_mobile_text_color_accent</item>
         <item name="selectPromptHeaderTextColor">@color/fx_mobile_text_color_accent</item>
         <item name="menuItemButtonTintColor">@color/fx_mobile_text_color_accent</item>
@@ -166,8 +185,11 @@
         <item name="homeBackground">@color/fx_mobile_layer_color_1</item>
         <item name="bottomBarBackground">@drawable/home_bottom_bar_background</item>
         <item name="bottomBarBackgroundTop">@drawable/home_bottom_bar_background_top</item>
-        <item name="mozac_ic_private_mode_circle_fill_background_color">@android:color/transparent</item>
-        <item name="mozac_ic_private_mode_circle_fill_icon_color">@color/fx_mobile_text_color_primary</item>
+        <item name="mozac_ic_private_mode_circle_fill_background_color">@android:color/transparent
+        </item>
+        <item name="mozac_ic_private_mode_circle_fill_icon_color">
+            @color/fx_mobile_text_color_primary
+        </item>
 
         <item name="tabCounterTintColor">?attr/textPrimary</item>
     </style>
@@ -179,7 +201,9 @@
         <item name="android:colorBackgroundCacheHint">@null</item>
         <item name="android:windowFrame">@null</item>
         <item name="android:windowTitleStyle">@style/RtlOverlay.DialogWindowTitle.AppCompat</item>
-        <item name="android:windowTitleBackgroundStyle">@style/Base.DialogWindowTitleBackground.AppCompat</item>
+        <item name="android:windowTitleBackgroundStyle">
+            @style/Base.DialogWindowTitleBackground.AppCompat
+        </item>
         <item name="android:windowIsFloating">true</item>
         <item name="android:backgroundDimEnabled">true</item>
         <item name="android:windowContentOverlay">@null</item>
@@ -238,9 +262,10 @@
         <item name="android:background">@drawable/ripple_button_dark</item>
         <item name="android:textColor">?accentUsedOnDarkBackground</item>
         <item name="android:textFontWeight" tools:ignore="NewApi">@integer/font_weight_medium</item>
-        <item name="android:fontWeight" tools:ignore="NewApi">@integer/font_weight_medium</item>    </style>
+        <item name="android:fontWeight" tools:ignore="NewApi">@integer/font_weight_medium</item>
+    </style>
 
-    <style name="DialogStyleNormal" parent="DialogStyleLight"/>
+    <style name="DialogStyleNormal" parent="DialogStyleLight" />
 
     <style name="PrivateThemeBase" parent="Theme.MaterialComponents.NoActionBar.Bridge">
         <!-- Temporarily opt out of edge to edge enforcement.
@@ -267,13 +292,21 @@
         <item name="android:splitMotionEvents">false</item>
         <item name="bottomSheetDialogTheme">@style/BottomSheetPrivate</item>
 
-        <item name="mozacInputLayoutErrorTextColor"
-            tools:ignore="UnusedResources">@color/fx_mobile_private_text_color_critical</item>
-        <item name="mozacInputLayoutErrorIconColor"
-            tools:ignore="UnusedResources">@color/fx_mobile_private_text_color_critical</item>
-        <item name="mozacLoginSelectHeaderTextStyle" tools:ignore="UnusedResources">@style/SelectPromptHeaderTextStyle</item>
-        <item name="mozacSelectCreditCardHeaderTextStyle" tools:ignore="UnusedResources">@style/SelectPromptHeaderTextStyle</item>
-        <item name="mozacSelectAddressHeaderTextStyle" tools:ignore="UnusedResources">@style/SelectPromptHeaderTextStyle</item>
+        <item name="mozacInputLayoutErrorTextColor" tools:ignore="UnusedResources">
+            @color/fx_mobile_private_text_color_critical
+        </item>
+        <item name="mozacInputLayoutErrorIconColor" tools:ignore="UnusedResources">
+            @color/fx_mobile_private_text_color_critical
+        </item>
+        <item name="mozacLoginSelectHeaderTextStyle" tools:ignore="UnusedResources">
+            @style/SelectPromptHeaderTextStyle
+        </item>
+        <item name="mozacSelectCreditCardHeaderTextStyle" tools:ignore="UnusedResources">
+            @style/SelectPromptHeaderTextStyle
+        </item>
+        <item name="mozacSelectAddressHeaderTextStyle" tools:ignore="UnusedResources">
+            @style/SelectPromptHeaderTextStyle
+        </item>
 
         <!-- Design system color attributes -->
 
@@ -322,7 +355,8 @@
         <item name="borderPrimary">@color/fx_mobile_private_border_color_primary</item>
         <item name="borderSecondary">@color/fx_mobile_private_border_color_secondary</item>
         <!-- Toolbar divider -->
-        <item name="borderToolbarDivider">@color/fx_mobile_private_border_color_toolbar_divider</item>
+        <item name="borderToolbarDivider">@color/fx_mobile_private_border_color_toolbar_divider
+        </item>
 
         <!-- Inactive thumb color -->
         <item name="colorSwitchThumbNormal">@color/toggle_off_knob_dark_theme</item>
@@ -343,9 +377,12 @@
         <item name="toolbarEndGradient">@color/fx_mobile_private_layer_color_4_end</item>
         <item name="fillLinkFromClipboard">@color/accent_high_contrast_private_theme</item>
         <item name="syncDisconnected">@color/sync_disconnected_icon_fill_private_theme</item>
-        <item name="syncDisconnectedBackground">@color/sync_disconnected_background_private_theme</item>
+        <item name="syncDisconnectedBackground">@color/sync_disconnected_background_private_theme
+        </item>
         <item name="addOnPrivateBrowsingExteriorCircleBackground">@color/accent_private_theme</item>
-        <item name="mozacPromptLoginEditTextCursorColor">@color/prompt_login_edit_text_cursor_color_private_theme</item>
+        <item name="mozacPromptLoginEditTextCursorColor">
+            @color/prompt_login_edit_text_cursor_color_private_theme
+        </item>
         <item name="awesomeBarIndicatorColor">@color/photonGreen60</item>
         <item name="awesomeBarIndicatorBookmarkColor">@color/photonBlue40</item>
         <item name="selectPromptHeaderTextColor">@color/accent_high_contrast_private_theme</item>
@@ -363,10 +400,15 @@
         <item name="fenixWordmarkText">@drawable/ic_wordmark_text_private</item>
         <item name="fenixWordmarkLogo">@drawable/ic_wordmark_logo</item>
         <item name="homeBackground">@drawable/private_home_background_gradient</item>
-        <item name="bottomBarBackground">@drawable/private_home_bottom_bar_background_gradient</item>
-        <item name="bottomBarBackgroundTop">@drawable/private_home_bottom_bar_background_gradient_top</item>
+        <item name="bottomBarBackground">@drawable/private_home_bottom_bar_background_gradient
+        </item>
+        <item name="bottomBarBackgroundTop">
+            @drawable/private_home_bottom_bar_background_gradient_top
+        </item>
         <item name="mozac_ic_private_mode_circle_fill_background_color">@color/photonWhite</item>
-        <item name="mozac_ic_private_mode_circle_fill_icon_color">@color/fx_mobile_private_layer_color_2</item>
+        <item name="mozac_ic_private_mode_circle_fill_icon_color">
+            @color/fx_mobile_private_layer_color_2
+        </item>
 
         <item name="tabCounterTintColor">?attr/textPrimary</item>
     </style>
@@ -374,11 +416,13 @@
     <style name="Mozac.Browser.Menu" parent="" tools:ignore="UnusedResources">
         <item name="cardBackgroundColor">?attr/layer2</item>
     </style>
+
     <style name="Mozac.Browser.Menu2" parent="" tools:ignore="UnusedResources">
         <item name="cardBackgroundColor">?attr/layer2</item>
     </style>
 
     <style name="PrivateTheme" parent="PrivateThemeBase" />
+
     <style name="FeltPrivateTheme" parent="PrivateThemeBase">
         <item name="homeBackground">@drawable/felt_private_home_background_gradient</item>
     </style>
@@ -577,17 +621,22 @@
         <item name="android:textColor">?fillLinkFromClipboard</item>
     </style>
 
-    <style name="CreateCollectionDialogStyle" parent="DialogStyleBase"/>
-    <style name="CreateShortcutDialogStyle" parent="DialogStyleBase"/>
-    <style name="HomeOnboardingDialogStyle" parent="DialogStyleBase"/>
+    <style name="CreateCollectionDialogStyle" parent="DialogStyleBase" />
+
+    <style name="CreateShortcutDialogStyle" parent="DialogStyleBase" />
+
+    <style name="HomeOnboardingDialogStyle" parent="DialogStyleBase" />
+
     <style name="ResearchSurfaceDialogStyle" parent="NormalThemeBase">
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowTranslucentNavigation">false</item>
     </style>
+
     <style name="WallpaperOnboardingDialogStyle" parent="DialogStyleBase">
         <item name="android:windowIsFloating">true</item>
         <item name="android:backgroundDimAmount">0.06</item>
     </style>
+
     <style name="CreateShortcutDialogButton" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
@@ -611,12 +660,13 @@
 
     <style name="StudiesItemTitleTextStyle">
         <item name="android:textSize">12sp</item>
-        <item name="android:textFontWeight" tools:ignore="NewApi">@integer/font_weight_semi_bold</item>
+        <item name="android:textFontWeight" tools:ignore="NewApi">@integer/font_weight_semi_bold
+        </item>
         <item name="android:fontWeight" tools:ignore="NewApi">@integer/font_weight_semi_bold</item>
         <item name="fontFamily">sans-serif-medium</item>
     </style>
 
-    <style name="ShareDialogStyle" parent="DialogStyleBase"/>
+    <style name="ShareDialogStyle" parent="DialogStyleBase" />
 
     <style name="AboutItemText" parent="TextAppearance.MaterialComponents.Body2">
         <item name="android:textColor">?textAccent</item>

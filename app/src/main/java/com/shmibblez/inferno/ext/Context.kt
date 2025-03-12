@@ -40,6 +40,16 @@ val Context.components: Components
     get() = application.components
 
 /**
+ * Add new tab convenience fun
+ */
+fun Components.newTab(isPrivateSession: Boolean = false) {
+    this.useCases.tabsUseCases.addTab(
+        url = if (isPrivateSession) "inferno:privatebrowsing" else "inferno:home",
+        selectTab = true,
+        private = isPrivateSession
+    )
+}
+/**
  * Helper function to get the MetricController off of context.
  */
 //val Context.metrics: MetricController
