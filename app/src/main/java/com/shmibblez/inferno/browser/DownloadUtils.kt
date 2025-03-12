@@ -19,7 +19,7 @@ internal fun handleOnDownloadFinished(
     browserToolbars: List<ScrollableToolbar>,
 ) {
     // If the download is just paused, don't show any in-app notification
-    if (shouldShowCompletedDownloadDialog(downloadState, downloadJobStatus)) {
+    if (shouldShowCompletedDownloadDialog(downloadState, downloadJobStatus, context)) {
         val safeContext = context ?: return
         val onCannotOpenFile: (DownloadState) -> Unit = {
             // todo: snackbar

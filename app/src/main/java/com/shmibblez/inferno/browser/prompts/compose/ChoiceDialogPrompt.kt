@@ -1,5 +1,6 @@
 package com.shmibblez.inferno.browser.prompts.compose
 
+import android.R
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,6 +19,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplate
+import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateAction
+import com.shmibblez.inferno.browser.prompts.onDismiss
+import com.shmibblez.inferno.browser.prompts.onPositiveAction
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.ext.components
 import mozilla.components.browser.state.action.ContentAction
@@ -60,7 +65,7 @@ fun <T> ChoiceDialogPrompt(
         SINGLE_CHOICE_DIALOG_TYPE, MENU_CHOICE_DIALOG_TYPE -> {
             // single choice dialog options, dismiss with single option
             positiveAction =
-                PromptBottomSheetTemplateAction(text = stringResource(android.R.string.ok),
+                PromptBottomSheetTemplateAction(text = stringResource(R.string.ok),
                     action = {
                         // dismiss
                         store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, menuData))
@@ -70,14 +75,14 @@ fun <T> ChoiceDialogPrompt(
         MULTIPLE_CHOICE_DIALOG_TYPE -> {
             // multiple choice dialog options
             negativeAction =
-                PromptBottomSheetTemplateAction(text = stringResource(android.R.string.ok),
+                PromptBottomSheetTemplateAction(text = stringResource(R.string.ok),
                     action = {
                         // dismiss
                         onDismiss(menuData)
                         store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, menuData))
                     })
             positiveAction =
-                PromptBottomSheetTemplateAction(text = stringResource(android.R.string.ok),
+                PromptBottomSheetTemplateAction(text = stringResource(R.string.ok),
                     action = {
                         // onConfirm
                         onPositiveAction(menuData, mapSelectChoice)

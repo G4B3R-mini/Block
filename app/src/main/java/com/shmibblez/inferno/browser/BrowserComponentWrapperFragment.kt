@@ -10,6 +10,9 @@ import android.view.accessibility.AccessibilityManager
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import com.shmibblez.inferno.R
+import com.shmibblez.inferno.browser.prompts.AndroidPhotoPicker
+import com.shmibblez.inferno.browser.prompts.FilePicker
+import com.shmibblez.inferno.ext.components
 import mozilla.components.support.base.feature.ActivityResultHandler
 import mozilla.components.support.base.feature.UserInteractionHandler
 
@@ -32,6 +35,11 @@ class BrowserComponentWrapperFragment : Fragment(), UserInteractionHandler, Acti
     private val setOnActivityResultHandler: ((OnActivityResultModel) -> Boolean) -> Unit =
         { f -> onActivityResultHandler = f }
 
+    private var filePicker: FilePicker? = null
+    private val setFilePicker: (FilePicker)-> Unit = {
+        f -> filePicker = f
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
@@ -44,10 +52,29 @@ class BrowserComponentWrapperFragment : Fragment(), UserInteractionHandler, Acti
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        // Registers a photo picker activity launcher in single-select mode.
+        val singleMediaPicker = AndroidPhotoPicker.singleMediaPicker(
+            { this },
+            { filePicker },
+        )
+
+        // Registers a photo picker activity launcher in multi-select mode.
+        val multipleMediaPicker = AndroidPhotoPicker.multipleMediaPicker(
+            { this },
+            { filePicker },
+        )
+
+        val androidPhotoPicker = AndroidPhotoPicker(
+            requireContext(),
+            singleMediaPicker,
+            multipleMediaPicker,
+        )
         baseComposeView.setContent {
             BrowserComponent(
                 sessionId = sessionId,
-                setOnActivityResultHandler = setOnActivityResultHandler
+                setOnActivityResultHandler = setOnActivityResultHandler,
+                androidPhotoPicker = androidPhotoPicker,
+                setFilePicker = setFilePicker,
             )
         }
         super.onViewCreated(view, savedInstanceState)

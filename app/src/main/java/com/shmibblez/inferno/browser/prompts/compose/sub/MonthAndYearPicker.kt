@@ -7,6 +7,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import java.util.Date
 import com.shmibblez.inferno.R
+import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.ext.year
+import java.util.Calendar
 
 @Composable
 fun rememberMonthAndYearPickerState(monthState: NumberPickerState,yearState: NumberPickerState) = remember { MonthAndYearPickerState(
@@ -30,7 +32,8 @@ fun MonthAndYearPicker(state: MonthAndYearPickerState) {
             modifier = Modifier.weight(1F),
             selected = months[0],
         )
-        val currentYear = Date().year
+//        val currentYear = Date().year
+        val currentYear = Calendar.getInstance().year
         NumberPicker(
             state = state.year,
             values = (0..(currentYear + 15)).map { it.toString() },

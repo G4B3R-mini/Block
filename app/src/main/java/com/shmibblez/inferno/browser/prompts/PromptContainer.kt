@@ -4,7 +4,6 @@
 
 package com.shmibblez.inferno.browser.prompts
 
-import mozilla.components.feature.prompts.PromptFeature
 import android.content.Context
 import android.content.Intent
 import androidx.annotation.StringRes

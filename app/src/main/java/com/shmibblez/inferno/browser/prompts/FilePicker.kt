@@ -16,10 +16,8 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia.VisualMediaType
 import androidx.annotation.VisibleForTesting
-import androidx.annotation.VisibleForTesting.Companion.PRIVATE
 import androidx.fragment.app.Fragment
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.consumePromptFrom
-import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.file.AndroidPhotoPicker
 import mozilla.components.browser.state.selector.findCustomTabOrSelectedTab
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.concept.engine.prompt.PromptRequest
@@ -51,13 +49,12 @@ internal var captureUri: Uri? = null
  * need to be requested before a prompt (e.g. a file picker) can be displayed.
  * Once the request is completed, [onPermissionsResult] needs to be invoked.
  */
-internal class FilePicker(
-    private val container: PromptContainer,
+class FilePicker(
+    private val container: Activity,
     private val store: BrowserStore,
     private var sessionId: String? = null,
     private var fileUploadsDirCleaner: FileUploadsDirCleaner,
-    @get:VisibleForTesting
-    internal var androidPhotoPicker: AndroidPhotoPicker? = null,
+    @get:VisibleForTesting internal var androidPhotoPicker: AndroidPhotoPicker? = null,
     override val onNeedToRequestPermissions: OnNeedToRequestPermissions,
 ) : PermissionsFeature {
 
@@ -81,7 +78,7 @@ internal class FilePicker(
 
         // Check if we already have all needed permissions.
         val missingPermissions = neededPermissions.filter {
-            !container.context.isPermissionGranted(it)
+            !container.isPermissionGranted(it)
         }
 
         if (missingPermissions.isEmpty()) {
@@ -98,8 +95,7 @@ internal class FilePicker(
      * @return The set of permissions needed for the prompt request.
      */
     private fun getNecessaryPermissions(promptRequest: File): Set<String> {
-        return MimeType.values()
-            .filter { it.matches(promptRequest.mimeTypes) }
+        return MimeType.values().filter { it.matches(promptRequest.mimeTypes) }
             .flatMap { mimeType ->
                 val permissions = mutableListOf<String>()
                 permissions.addAll(mimeType.filePermissions)
@@ -142,7 +138,7 @@ internal class FilePicker(
         for (type in MimeType.values()) {
             if (type.matches(promptRequest.mimeTypes)) {
                 val hasCapturePermission = type.capturePermission?.let {
-                    container.context.isPermissionGranted(
+                    container.isPermissionGranted(
                         it,
                     )
                 } ?: false
@@ -154,24 +150,24 @@ internal class FilePicker(
                         promptRequest.captureMode,
                     )
                 ) {
-                    type.buildIntent(container.context, promptRequest)?.also {
+                    type.buildIntent(container, promptRequest)?.also {
                         saveCaptureUriIfPresent(it)
                         container.startActivityForResult(it, FILE_PICKER_ACTIVITY_REQUEST_CODE)
                         return emptyList<Intent>().toMutableList()
                     }
                 }
 
-                val hasFilePermissions = container.context.isPermissionGranted(type.filePermissions)
+                val hasFilePermissions = container.isPermissionGranted(type.filePermissions)
 
                 if (hasFilePermissions) {
-                    type.buildIntent(container.context, promptRequest)?.also {
+                    type.buildIntent(container, promptRequest)?.also {
                         saveCaptureUriIfPresent(it)
                         intents.add(it)
                     }
                 }
 
                 if (hasCapturePermission) {
-                    type.buildCaptureIntent(container.context, promptRequest)?.also {
+                    type.buildCaptureIntent(container, promptRequest)?.also {
                         saveCaptureUriIfPresent(it)
                         intents.add(it)
                     }
@@ -262,9 +258,7 @@ internal class FilePicker(
 
     @VisibleForTesting
     internal fun canUseAndroidPhotoPicker(): Boolean {
-        return androidPhotoPicker != null &&
-                isPhotoOrVideoRequest(currentRequest) &&
-                androidPhotoPicker?.isPhotoPickerAvailable == true
+        return androidPhotoPicker != null && isPhotoOrVideoRequest(currentRequest) && androidPhotoPicker?.isPhotoPickerAvailable == true
     }
 
     @VisibleForTesting
@@ -318,29 +312,29 @@ internal class FilePicker(
         }
     }
 
-    @VisibleForTesting(otherwise = PRIVATE)
-    internal fun handleFilePickerIntentResult(intent: Intent?, request: File) {
+    //    @VisibleForTesting(otherwise = PRIVATE)
+    fun handleFilePickerIntentResult(intent: Intent?, request: File) {
         if (intent?.clipData != null && request.isMultipleFilesSelection) {
             intent.clipData?.run {
                 val uris = Array<Uri>(itemCount) { index -> getItemAt(index).uri }
                 // We want to verify that we are not exposing any private data
-                val sanitizedUris = uris.removeUrisUnderPrivateAppDir(container.context)
+                val sanitizedUris = uris.removeUrisUnderPrivateAppDir(container)
                 if (sanitizedUris.isEmpty()) {
                     request.onDismiss()
                 } else {
                     sanitizedUris.map {
-                        enqueueForCleanup(container.context, it)
+                        enqueueForCleanup(container, it)
                     }
-                    request.onMultipleFilesSelected(container.context, sanitizedUris)
+                    request.onMultipleFilesSelected(container, sanitizedUris)
                 }
             }
         } else {
             val uri = intent?.data ?: captureUri
             uri?.let {
                 // We want to verify that we are not exposing any private data
-                if (!it.isUnderPrivateAppDirectory(container.context)) {
-                    enqueueForCleanup(container.context, it)
-                    request.onSingleFileSelected(container.context, it)
+                if (!it.isUnderPrivateAppDirectory(container)) {
+                    enqueueForCleanup(container, it)
+                    request.onSingleFileSelected(container, it)
                 } else {
                     request.onDismiss()
                 }
@@ -367,9 +361,17 @@ internal class FilePicker(
 
     fun onAndroidPhotoPickerResult(uriList: Array<Uri>) {
         if (uriList.size == 1) {
-            (currentRequest as? File)?.onSingleFileSelected?.let { it(container.context, uriList[0]) }
+            (currentRequest as? File)?.onSingleFileSelected?.let {
+                it(
+                    container, uriList[0]
+                )
+            }
         } else {
-            (currentRequest as? File)?.onMultipleFilesSelected?.let { it(container.context, uriList) }
+            (currentRequest as? File)?.onMultipleFilesSelected?.let {
+                it(
+                    container, uriList
+                )
+            }
         }
 
         dismissRequest()

@@ -31,6 +31,12 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.findNavController
 import com.shmibblez.inferno.NavGraphDirections
 import com.shmibblez.inferno.R
+import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplate
+import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateAction
+import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateButtonPosition
+import com.shmibblez.inferno.browser.prompts.onDismiss
+import com.shmibblez.inferno.browser.prompts.onNegativeAction
+import com.shmibblez.inferno.browser.prompts.onPositiveAction
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.facts.emitAddressAutofillDismissedFact

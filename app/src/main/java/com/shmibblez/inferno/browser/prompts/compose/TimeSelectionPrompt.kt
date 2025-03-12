@@ -9,9 +9,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.shmibblez.inferno.R
+import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplate
+import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateAction
 import com.shmibblez.inferno.browser.prompts.compose.sub.MonthAndYearPicker
 import com.shmibblez.inferno.browser.prompts.compose.sub.rememberMonthAndYearPickerState
 import com.shmibblez.inferno.browser.prompts.compose.sub.rememberNumberPickerState
+import com.shmibblez.inferno.browser.prompts.onDismiss
+import com.shmibblez.inferno.browser.prompts.onNegativeAction
+import com.shmibblez.inferno.browser.prompts.onNeutralAction
+import com.shmibblez.inferno.browser.prompts.onPositiveAction
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.ext.hour
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.ext.minute

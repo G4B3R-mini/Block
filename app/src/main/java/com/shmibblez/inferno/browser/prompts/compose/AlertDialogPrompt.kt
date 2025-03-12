@@ -1,5 +1,6 @@
 package com.shmibblez.inferno.browser.prompts.compose
 
+import android.R
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Checkbox
@@ -13,13 +14,19 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplate
+import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateAction
+import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateButtonPosition
+import com.shmibblez.inferno.browser.prompts.onDismiss
+import com.shmibblez.inferno.browser.prompts.onPositiveAction
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.ext.components
 import mozilla.components.browser.state.action.ContentAction
 import mozilla.components.concept.engine.prompt.PromptRequest
+import mozilla.components.support.ktx.util.PromptAbuserDetector
 
 @Composable
-fun AlertDialogPrompt(alertData: PromptRequest.Alert, sessionId: String) {
+fun AlertDialogPrompt(alertData: PromptRequest.Alert, sessionId: String, promptAbuserDetector: PromptAbuserDetector) {
 //    promptRequest.
     val store = LocalContext.current.components.core.store
     var noMoreDialogs by remember { mutableStateOf(false) }
@@ -29,14 +36,15 @@ fun AlertDialogPrompt(alertData: PromptRequest.Alert, sessionId: String) {
             store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, alertData))
         },
         positiveAction = PromptBottomSheetTemplateAction(
-            text = stringResource(android.R.string.ok),
+            text = stringResource(R.string.ok),
             action = {
                 onPositiveAction(alertData, noMoreDialogs)
+                promptAbuserDetector.userWantsMoreDialogs(!noMoreDialogs)
                 store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, alertData))
             },
         ),
         negativeAction = PromptBottomSheetTemplateAction(
-            text = stringResource(android.R.string.cancel),
+            text = stringResource(R.string.cancel),
             action = {
                 onDismiss(alertData)
                 store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, alertData))

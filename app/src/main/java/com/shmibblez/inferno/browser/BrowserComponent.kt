@@ -1,6 +1,7 @@
 package com.shmibblez.inferno.browser
 
 import android.annotation.SuppressLint
+import android.app.Activity.RESULT_OK
 import android.app.KeyguardManager
 import android.content.Context
 import android.content.ContextWrapper
@@ -95,15 +96,16 @@ import androidx.navigation.compose.rememberNavController
 import androidx.preference.PreferenceManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.shmibblez.inferno.BuildConfig
 import com.shmibblez.inferno.HomeActivity
 import com.shmibblez.inferno.IntentReceiverActivity
 import com.shmibblez.inferno.NavGraphDirections
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.browsingmode.BrowsingMode
-import com.shmibblez.inferno.browser.prompts.PromptContainer
+import com.shmibblez.inferno.browser.prompts.AndroidPhotoPicker
+import com.shmibblez.inferno.browser.prompts.FilePicker
+import com.shmibblez.inferno.browser.prompts.FilePicker.Companion.FILE_PICKER_ACTIVITY_REQUEST_CODE
+import com.shmibblez.inferno.browser.prompts.PromptComponent
 import com.shmibblez.inferno.browser.prompts.compose.FirstPartyDownloadBottomSheet
-import com.shmibblez.inferno.browser.prompts.compose.PromptComponent
 import com.shmibblez.inferno.browser.prompts.compose.ThirdPartyDownloadBottomSheet
 import com.shmibblez.inferno.browser.tabstrip.isTabStripEnabled
 import com.shmibblez.inferno.components.Components
@@ -146,6 +148,7 @@ import com.shmibblez.inferno.library.bookmarks.friendlyRootTitle
 import com.shmibblez.inferno.messaging.FenixMessageSurfaceId
 import com.shmibblez.inferno.messaging.MessagingFeature
 import com.shmibblez.inferno.microsurvey.ui.ext.MicrosurveyUIData
+import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.consumePromptFrom
 import com.shmibblez.inferno.nimbus.FxNimbus
 import com.shmibblez.inferno.perf.MarkersFragmentLifecycleCallbacks
 import com.shmibblez.inferno.pip.PictureInPictureIntegration
@@ -205,6 +208,7 @@ import mozilla.components.compose.cfr.CFRPopupProperties
 import mozilla.components.concept.engine.EngineView
 import mozilla.components.concept.engine.permission.SitePermissions
 import mozilla.components.concept.engine.prompt.PromptRequest
+import mozilla.components.concept.engine.prompt.PromptRequest.File
 import mozilla.components.concept.engine.prompt.ShareData
 import mozilla.components.concept.storage.LoginEntry
 import mozilla.components.concept.toolbar.Toolbar
@@ -219,7 +223,6 @@ import mozilla.components.feature.downloads.ui.DownloaderApp
 import mozilla.components.feature.findinpage.view.FindInPageBar
 import mozilla.components.feature.media.fullscreen.MediaSessionFullscreenFeature
 import mozilla.components.feature.privatemode.feature.SecureWindowFeature
-import mozilla.components.feature.prompts.PromptFeature
 import mozilla.components.feature.prompts.address.AddressDelegate
 import mozilla.components.feature.prompts.address.AddressSelectBar
 import mozilla.components.feature.prompts.creditcard.CreditCardDelegate
@@ -252,6 +255,7 @@ import mozilla.components.service.sync.logins.DefaultLoginValidationDelegate
 import mozilla.components.service.sync.logins.LoginsApiException
 import mozilla.components.service.sync.logins.SyncableLoginsStorage
 import mozilla.components.support.base.feature.ActivityResultHandler
+import mozilla.components.support.base.feature.OnNeedToRequestPermissions
 import mozilla.components.support.base.feature.ViewBoundFeatureWrapper
 import mozilla.components.support.base.log.logger.Logger
 import mozilla.components.support.ktx.android.view.enterImmersiveMode
@@ -397,13 +401,16 @@ internal data class ThirdPartyDownloadDialogData(
 
 private fun resolvePageType(tabSessionState: TabSessionState?): BrowserComponentPageType {
     val url = tabSessionState?.content?.url
-    if (tabSessionState?.engineState?.crashed == true) return BrowserComponentPageType.CRASH
-    else if (url == "inferno:home" || url == "about:blank") // TODO: create const class and set base to inferno:home
-        return BrowserComponentPageType.HOME
-    else if (url == "inferno:privatebrowsing" || url == "about:privatebrowsing") // TODO: add to const class and set base to inferno:private
-        return BrowserComponentPageType.HOME_PRIVATE
-    else {
-        return BrowserComponentPageType.ENGINE
+    return if (tabSessionState?.engineState?.crashed == true) BrowserComponentPageType.CRASH
+    else if (url == "inferno:home" || url == "about:blank") {// TODO: create const class and set base to inferno:home
+        Log.d("BrowserComponent", "resolvePageType: HOME")
+        BrowserComponentPageType.HOME
+    } else if (url == "inferno:privatebrowsing" || url == "about:privatebrowsing") { // TODO: add to const class and set base to inferno:private
+        Log.d("BrowserComponent", "resolvePageType: HOME_PRIVATE")
+        BrowserComponentPageType.HOME_PRIVATE
+    } else {
+        Log.d("BrowserComponent", "resolvePageType: ENGINE")
+        BrowserComponentPageType.ENGINE
     }
     // TODO: if home, show home page and load engineView in compose tree as hidden,
     //  if page then show engineView
@@ -416,10 +423,12 @@ private fun resolvePageType(tabSessionState: TabSessionState?): BrowserComponent
     ExperimentalComposeUiApi::class, ExperimentalCoroutinesApi::class
 )
 @Composable
-@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
+@SuppressLint("UnusedMaterialScaffoldPaddingParameter", "VisibleForTests")
 fun BrowserComponent(
     sessionId: String?,
     setOnActivityResultHandler: ((OnActivityResultModel) -> Boolean) -> Unit,
+    androidPhotoPicker: AndroidPhotoPicker,
+    setFilePicker: (FilePicker) -> Unit
 //    args: HomeFragmentArgs
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -559,10 +568,10 @@ fun BrowserComponent(
         )
     }
 
-    var savedLoginsLauncher =
-        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            navigateToSavedLoginsFragment(navController)
-        } // ActivityResultLauncher<Intent>
+//    var savedLoginsLauncher =
+//        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+//            navigateToSavedLoginsFragment(navController)
+//        } // ActivityResultLauncher<Intent>
 
     val (lastSavedGeneratedPassword, setLastSavedGeneratedPassword) = remember {
         mutableStateOf<String?>(
@@ -570,20 +579,64 @@ fun BrowserComponent(
         )
     }
 
-    // todo: single media picker
-//    // Registers a photo picker activity launcher in single-select mode.
-//    val singleMediaPicker = AndroidPhotoPicker.singleMediaPicker(
-//        { getFragment(view) },
-//        { promptsFeature.get() },
-//    )
+    /// old component features
+//    val appLinksFeature = remember { ViewBoundFeatureWrapper<AppLinksFeature>() }
+//    val webExtensionPromptFeature =
+//        remember { ViewBoundFeatureWrapper<WebExtensionPromptFeature>() }
+    val sitePermissionFeature = remember { ViewBoundFeatureWrapper<SitePermissionsFeature>() }
+    val pictureInPictureIntegration =
+        remember { ViewBoundFeatureWrapper<PictureInPictureIntegration>() }
 
-    // todo: multiple media picker
-//    // Registers a photo picker activity launcher in multi-select mode.
-//    val multipleMediaPicker = AndroidPhotoPicker.multipleMediaPicker(
-//        { getFragment(view) },
-//        { promptsFeature.get() },
-//    )/* BaseBrowserFragment vars */
+    val lastTabFeature = remember { ViewBoundFeatureWrapper<LastTabFeature>() }
+//    val webExtToolbarFeature = remember { ViewBoundFeatureWrapper<WebExtensionToolbarFeature>() }
 
+    var filePicker by remember{ mutableStateOf<FilePicker?>(null) }
+
+    // permission launchers
+    val requestDownloadPermissionsLauncher: ActivityResultLauncher<Array<String>> =
+        rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { results ->
+            val permissions = results.keys.toTypedArray()
+            val grantResults = results.values.map {
+                if (it) PackageManager.PERMISSION_GRANTED else PackageManager.PERMISSION_DENIED
+            }.toIntArray()
+            downloadsFeature.withFeature {
+                it.onPermissionsResult(permissions, grantResults)
+            }
+        }
+    val requestSitePermissionsLauncher: ActivityResultLauncher<Array<String>> =
+        rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { results ->
+            val permissions = results.keys.toTypedArray()
+            val grantResults = results.values.map {
+                if (it) PackageManager.PERMISSION_GRANTED else PackageManager.PERMISSION_DENIED
+            }.toIntArray()
+            sitePermissionFeature.withFeature {
+                it.onPermissionsResult(permissions, grantResults)
+            }
+        }
+    val requestPromptsPermissionsLauncher: ActivityResultLauncher<Array<String>> =
+        rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { results ->
+            val permissions = results.keys.toTypedArray()
+            val grantResults = results.values.map {
+                if (it) PackageManager.PERMISSION_GRANTED else PackageManager.PERMISSION_DENIED
+            }.toIntArray()
+//            promptsFeature.withFeature {
+//                it.onPermissionsResult(permissions, grantResults)
+//            }
+            filePicker!!.onPermissionsResult(permissions, grantResults)
+        }
+
+    filePicker = FilePicker(
+        container = context.getActivity()!!,
+        store = store,
+        sessionId = customTabSessionId,
+        fileUploadsDirCleaner = context.components.core.fileUploadsDirCleaner,
+        androidPhotoPicker,
+        onNeedToRequestPermissions = {permissions -> requestPromptsPermissionsLauncher.launch(permissions)},
+    )
+
+    setFilePicker(filePicker!!)
+
+    /* BaseBrowserFragment vars */
     val backHandler = OnBackPressedHandler(
         context = context,
         readerViewFeature = readerViewFeature,
@@ -637,134 +690,12 @@ fun BrowserComponent(
         )
     }
 
-    PromptComponent(
-        container = context.getActivity()!! as PromptContainer,
-        promptRequests = promptRequests,
-        currentTab = currentTab,
-        store = store,
-        customTabId = customTabSessionId,
-        fragmentManager = parentFragmentManager,
-        identityCredentialColorsProvider = colorsProvider,
-        tabsUseCases = context.components.useCases.tabsUseCases,
-        fileUploadsDirCleaner = context.components.core.fileUploadsDirCleaner,
-        creditCardValidationDelegate = DefaultCreditCardValidationDelegate(
-            context.components.core.lazyAutofillStorage,
-        ),
-        loginValidationDelegate = DefaultLoginValidationDelegate(
-            context.components.core.lazyPasswordsStorage,
-        ),
-        isLoginAutofillEnabled = {
-            context.settings().shouldAutofillLogins
-        },
-        isSaveLoginEnabled = {
-            context.settings().shouldPromptToSaveLogins
-        },
-        isCreditCardAutofillEnabled = {
-            context.settings().shouldAutofillCreditCardDetails
-        },
-        isAddressAutofillEnabled = {
-            context.settings().addressFeature && context.settings().shouldAutofillAddressDetails
-        },
-        loginExceptionStorage = context.components.core.loginExceptionStorage,
-        shareDelegate = object : ShareDelegate {
-            override fun showShareSheet(
-                context: Context,
-                shareData: ShareData,
-                onDismiss: () -> Unit,
-                onSuccess: () -> Unit,
-            ) {
-                val directions = NavGraphDirections.actionGlobalShareFragment(
-                    data = arrayOf(shareData),
-                    showPage = true,
-                    sessionId = getCurrentTab(context)?.id,
-                )
-                navController.navigate(directions)
-            }
-        },
-        onNeedToRequestPermissions = { permissions ->
+    val onNeedToRequestPermissions: OnNeedToRequestPermissions = remember {
+        { permissions ->
             // todo: permissions
 //                        requestPermissions(permissions, REQUEST_CODE_PROMPT_PERMISSIONS)
-        },
-        loginDelegate = object : LoginDelegate {
-            // todo: login delegate
-//                        override val loginPickerView
-//                            get() = binding.loginSelectBar
-//                        override val onManageLogins = {
-//                            browserAnimator.captureEngineViewAndDrawStatically {
-//                                val directions = NavGraphDirections.actionGlobalSavedLoginsAuthFragment()
-//                                navController.navigate(directions)
-//                            }
-//                        }
-        },
-        suggestStrongPasswordDelegate = object : SuggestStrongPasswordDelegate {
-            // todo: password delegate
-//                        override val strongPasswordPromptViewListenerView
-//                            get() = binding.suggestStrongPasswordBar
-        },
-        shouldAutomaticallyShowSuggestedPassword = { context.settings().isFirstTimeEngagingWithSignup },
-        onFirstTimeEngagedWithSignup = {
-            context.settings().isFirstTimeEngagingWithSignup = false
-        },
-        onSaveLoginWithStrongPassword = { url, password ->
-            handleOnSaveLoginWithGeneratedStrongPassword(
-                passwordsStorage = context.components.core.passwordsStorage,
-                url = url,
-                password = password,
-                lifecycleScope = coroutineScope,
-                setLastSavedGeneratedPassword,
-            )
-        },
-        onSaveLogin = { isUpdate ->
-            showSnackbarAfterLoginChange(
-                isUpdate,
-                context,
-                coroutineScope,
-                snackbarHostState,
-            )
-        },
-        passwordGeneratorColorsProvider = passwordGeneratorColorsProvider,
-        hideUpdateFragmentAfterSavingGeneratedPassword = { username, password ->
-            hideUpdateFragmentAfterSavingGeneratedPassword(
-                username,
-                password,
-                lastSavedGeneratedPassword,
-            )
-        },
-        removeLastSavedGeneratedPassword = {
-            removeLastSavedGeneratedPassword(
-                setLastSavedGeneratedPassword
-            )
-        },
-        creditCardDelegate = object : CreditCardDelegate {
-            // todo: credit card delegate
-//                        override val creditCardPickerView
-//                            get() = binding.creditCardSelectBar
-            override val onManageCreditCards = {
-                val directions = NavGraphDirections.actionGlobalAutofillSettingFragment()
-                navController.navigate(directions)
-            }
-            override val onSelectCreditCard = {
-                // todo: biometrics
-//                showBiometricPrompt(context, biometricPromptFeature, promptsFeature)
-            }
-        },
-        addressDelegate = object : AddressDelegate {
-            // todo: address delegate
-            override val addressPickerView
-                // todo: address select bar
-                get() = AddressSelectBar(context) // binding.addressSelectBar
-            override val onManageAddresses = {
-                val directions = NavGraphDirections.actionGlobalAutofillSettingFragment()
-                navController.navigate(directions)
-            }
-        },
-        androidPhotoPicker = com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.file.AndroidPhotoPicker(
-            context,
-            // todo: single and multiple media pickers
-            singleMediaPicker,
-            multipleMediaPicker,
-        ),
-    )
+        }
+    }
 
     // browser display mode
     val (browserMode, setBrowserMode) = remember {
@@ -791,17 +722,6 @@ fun BrowserComponent(
         )
     }
 
-    /// old component features
-//    val appLinksFeature = remember { ViewBoundFeatureWrapper<AppLinksFeature>() }
-//    val webExtensionPromptFeature =
-//        remember { ViewBoundFeatureWrapper<WebExtensionPromptFeature>() }
-    val sitePermissionFeature = remember { ViewBoundFeatureWrapper<SitePermissionsFeature>() }
-    val pictureInPictureIntegration =
-        remember { ViewBoundFeatureWrapper<PictureInPictureIntegration>() }
-
-    val lastTabFeature = remember { ViewBoundFeatureWrapper<LastTabFeature>() }
-//    val webExtToolbarFeature = remember { ViewBoundFeatureWrapper<WebExtensionToolbarFeature>() }
-
     /// views
     var engineView: EngineView? by remember { mutableStateOf(null) }
     var toolbar: BrowserToolbarCompat? by remember { mutableStateOf(null) }
@@ -814,6 +734,7 @@ fun BrowserComponent(
     /// event handlers
     val activityResultHandler: List<ViewBoundFeatureWrapper<*>> = listOf(
         webAuthnFeature,
+
 //        promptsFeature,
     )
     // sets parent fragment handler for onActivityResult
@@ -821,45 +742,29 @@ fun BrowserComponent(
         Logger.info(
             "Fragment onActivityResult received with " + "requestCode: ${result.requestCode}, resultCode: ${result.resultCode}, data: ${result.data}",
         )
+
+        // filePicker results
+        with(result) {
+            for (promptRequest in promptRequests) {
+                if (requestCode == FILE_PICKER_ACTIVITY_REQUEST_CODE && promptRequest is File) {
+                    store.consumePromptFrom(sessionId, promptRequest.uid) {
+                        if (resultCode == RESULT_OK) {
+                            filePicker!!.handleFilePickerIntentResult(data, promptRequest)
+                        } else {
+                            promptRequest.onDismiss()
+                        }
+                    }
+                }
+            }
+        }
+        // feature activity result handler
         activityResultHandler.any {
             it.onActivityResult(
                 result.requestCode, result.data, result.resultCode
             )
         }
-    }
 
-    // permission launchers
-    val requestDownloadPermissionsLauncher: ActivityResultLauncher<Array<String>> =
-        rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestMultiplePermissions()) { results ->
-            val permissions = results.keys.toTypedArray()
-            val grantResults = results.values.map {
-                if (it) PackageManager.PERMISSION_GRANTED else PackageManager.PERMISSION_DENIED
-            }.toIntArray()
-            downloadsFeature.withFeature {
-                it.onPermissionsResult(permissions, grantResults)
-            }
-        }
-    val requestSitePermissionsLauncher: ActivityResultLauncher<Array<String>> =
-        rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { results ->
-            val permissions = results.keys.toTypedArray()
-            val grantResults = results.values.map {
-                if (it) PackageManager.PERMISSION_GRANTED else PackageManager.PERMISSION_DENIED
-            }.toIntArray()
-            sitePermissionFeature.withFeature {
-                it.onPermissionsResult(permissions, grantResults)
-            }
-        }
-    val requestPromptsPermissionsLauncher: ActivityResultLauncher<Array<String>> =
-        rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { results ->
-            val permissions = results.keys.toTypedArray()
-            val grantResults = results.values.map {
-                if (it) PackageManager.PERMISSION_GRANTED else PackageManager.PERMISSION_DENIED
-            }.toIntArray()
-            // todo: permimssion launcher
-//            promptsFeature.withFeature {
-//                it.onPermissionsResult(permissions, grantResults)
-//            }
-        }
+    }
 
     // connection to the nested scroll system and listen to the scroll
     val bottomBarHeightDp = ComponentDimens.BOTTOM_BAR_HEIGHT(browserMode)
@@ -895,7 +800,8 @@ fun BrowserComponent(
         engineView!!.setDynamicToolbarMaxHeight(bottomBarHeightDp.toPx() - bottomBarOffsetPx.value.toInt())
     }
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(engineView == null) {
+        if (engineView == null) return@LaunchedEffect
         /* BaseBrowserFragment onViewCreated */
         // DO NOT ADD ANYTHING ABOVE THIS getProfilerTime CALL!
         val profilerStartTime = context.components.core.engine.profiler?.getProfilerTime()
@@ -1204,7 +1110,8 @@ fun BrowserComponent(
                     positiveButtonRadius = ComponentDimens.TAB_CORNER_RADIUS.value,
                 ),
                 onNeedToRequestPermissions = { permissions ->
-                    // todo: request permissions
+                    // todo: test
+                    requestDownloadPermissionsLauncher.launch(permissions)
 //            requestPermissions(permissions, REQUEST_CODE_DOWNLOAD_PERMISSIONS)
                 },
                 customFirstPartyDownloadDialog = { filename, contentSize, positiveAction, negativeAction ->
@@ -1393,7 +1300,8 @@ fun BrowserComponent(
                     ),
                     sessionId = customTabSessionId,
                     onNeedToRequestPermissions = { permissions ->
-                        // todo: request permissions
+                        // todo: test
+                        requestSitePermissionsLauncher.launch(permissions)
 //                        requestPermissions(permissions, REQUEST_CODE_APP_PERMISSIONS)
                     },
                     onShouldShowRequestPermissionRationale = {
@@ -1419,18 +1327,19 @@ fun BrowserComponent(
             )
 
             // This component feature only works on Fenix when built on Mozilla infrastructure.
-            if (BuildConfig.MOZILLA_OFFICIAL) {
-                webAuthnFeature.set(
-                    feature = WebAuthnFeature(
-                        engine = context.components.core.engine,
-                        activity = context.getActivity()!!,
-                        exitFullScreen = context.components.useCases.sessionUseCases.exitFullscreen::invoke,
-                        currentTab = { store.state.selectedTabId },
-                    ),
-                    owner = lifecycleOwner,
-                    view = view,
-                )
-            }
+            // sike
+//            if (BuildConfig.MOZILLA_OFFICIAL) {
+            webAuthnFeature.set(
+                feature = WebAuthnFeature(
+                    engine = context.components.core.engine,
+                    activity = context.getActivity()!!,
+                    exitFullScreen = context.components.useCases.sessionUseCases.exitFullscreen::invoke,
+                    currentTab = { store.state.selectedTabId },
+                ),
+                owner = lifecycleOwner,
+                view = view,
+            )
+//            }
 
             screenOrientationFeature.set(
                 feature = ScreenOrientationFeature(
@@ -1483,17 +1392,17 @@ fun BrowserComponent(
 //                    setColorSchemeResources(primaryTextColor)
 //                    setProgressBackgroundColorSchemeResource(primaryBackgroundColor)
 //                }
-//                swipeRefreshFeature.set(
-//                    feature = SwipeRefreshFeature(
-//                        context.components.core.store,
-//                        context.components.useCases.sessionUseCases.reload,
-//                        binding.swipeRefresh,
-//                        { },
-//                        customTabSessionId,
-//                    ),
-//                    owner = lifecycleOwner,
-//                    view = view,
-//                )
+                swipeRefreshFeature.set(
+                    feature = SwipeRefreshFeature(
+                        context.components.core.store,
+                        context.components.useCases.sessionUseCases.reload,
+                        swipeRefresh!!,
+                        { },
+                        customTabSessionId,
+                    ),
+                    owner = lifecycleOwner,
+                    view = view,
+                )
 //            }
 
             webchannelIntegration.set(
@@ -1548,9 +1457,10 @@ fun BrowserComponent(
             updateBrowserToolbarMenuVisibility()
 
             initReaderMode(context, view)
-            initTranslationsAction(
-                context, view, browserToolbarInteractor!!, translationsAvailable.value
-            )
+            // todo: translation, browser toolbar interactor
+//            initTranslationsAction(
+//                context, view, browserToolbarInteractor!!, translationsAvailable.value
+//            )
             initReviewQualityCheck(
                 context,
                 lifecycleOwner,
@@ -1560,7 +1470,8 @@ fun BrowserComponent(
                 reviewQualityCheckAvailable,
                 reviewQualityCheckFeature
             )
-            initSharePageAction(context, browserToolbarInteractor)
+            // todo: init share page action, browser toolbar interactor
+//            initSharePageAction(context, browserToolbarInteractor)
             initReloadAction(context)
 
             thumbnailsFeature.set(
@@ -1763,6 +1674,130 @@ fun BrowserComponent(
         }
     }
 
+    PromptComponent(
+//        container = context.getActivity()!! as PromptContainer,
+        promptRequests = promptRequests,
+        currentTab = currentTab,
+        store = store,
+        customTabId = customTabSessionId,
+        fragmentManager = parentFragmentManager,
+        filePicker = filePicker!!,
+        identityCredentialColorsProvider = colorsProvider,
+        tabsUseCases = context.components.useCases.tabsUseCases,
+        fileUploadsDirCleaner = context.components.core.fileUploadsDirCleaner,
+        creditCardValidationDelegate = DefaultCreditCardValidationDelegate(
+            context.components.core.lazyAutofillStorage,
+        ),
+        loginValidationDelegate = DefaultLoginValidationDelegate(
+            context.components.core.lazyPasswordsStorage,
+        ),
+        isLoginAutofillEnabled = {
+            context.settings().shouldAutofillLogins
+        },
+        isSaveLoginEnabled = {
+            context.settings().shouldPromptToSaveLogins
+        },
+        isCreditCardAutofillEnabled = {
+            context.settings().shouldAutofillCreditCardDetails
+        },
+        isAddressAutofillEnabled = {
+            context.settings().addressFeature && context.settings().shouldAutofillAddressDetails
+        },
+        loginExceptionStorage = context.components.core.loginExceptionStorage,
+        shareDelegate = object : ShareDelegate {
+            override fun showShareSheet(
+                context: Context,
+                shareData: ShareData,
+                onDismiss: () -> Unit,
+                onSuccess: () -> Unit,
+            ) {
+                val directions = NavGraphDirections.actionGlobalShareFragment(
+                    data = arrayOf(shareData),
+                    showPage = true,
+                    sessionId = getCurrentTab(context)?.id,
+                )
+                navController.navigate(directions)
+            }
+        },
+        onNeedToRequestPermissions = { permissions ->
+            // todo: test
+            requestPromptsPermissionsLauncher.launch(permissions)
+        },
+        loginDelegate = object : LoginDelegate {
+            // todo: login delegate
+//                        override val loginPickerView
+//                            get() = binding.loginSelectBar
+//                        override val onManageLogins = {
+//                            browserAnimator.captureEngineViewAndDrawStatically {
+//                                val directions = NavGraphDirections.actionGlobalSavedLoginsAuthFragment()
+//                                navController.navigate(directions)
+//                            }
+//                        }
+        },
+        suggestStrongPasswordDelegate = object : SuggestStrongPasswordDelegate {
+            // todo: password delegate
+//                        override val strongPasswordPromptViewListenerView
+//                            get() = binding.suggestStrongPasswordBar
+        },
+        shouldAutomaticallyShowSuggestedPassword = { context.settings().isFirstTimeEngagingWithSignup },
+        onFirstTimeEngagedWithSignup = {
+            context.settings().isFirstTimeEngagingWithSignup = false
+        },
+        onSaveLoginWithStrongPassword = { url, password ->
+            handleOnSaveLoginWithGeneratedStrongPassword(
+                passwordsStorage = context.components.core.passwordsStorage,
+                url = url,
+                password = password,
+                lifecycleScope = coroutineScope,
+                setLastSavedGeneratedPassword,
+            )
+        },
+        onSaveLogin = { isUpdate ->
+            showSnackbarAfterLoginChange(
+                isUpdate,
+                context,
+                coroutineScope,
+                snackbarHostState,
+            )
+        },
+        passwordGeneratorColorsProvider = passwordGeneratorColorsProvider,
+        hideUpdateFragmentAfterSavingGeneratedPassword = { username, password ->
+            hideUpdateFragmentAfterSavingGeneratedPassword(
+                username,
+                password,
+                lastSavedGeneratedPassword,
+            )
+        },
+        removeLastSavedGeneratedPassword = {
+            removeLastSavedGeneratedPassword(
+                setLastSavedGeneratedPassword
+            )
+        },
+        creditCardDelegate = object : CreditCardDelegate {
+            // todo: credit card delegate
+//                        override val creditCardPickerView
+//                            get() = binding.creditCardSelectBar
+            override val onManageCreditCards = {
+                val directions = NavGraphDirections.actionGlobalAutofillSettingFragment()
+                navController.navigate(directions)
+            }
+            override val onSelectCreditCard = {
+                // todo: biometrics
+//                showBiometricPrompt(context, biometricPromptFeature, promptsFeature)
+            }
+        },
+        addressDelegate = object : AddressDelegate {
+            // todo: address delegate
+            override val addressPickerView
+                // todo: address select bar
+                get() = AddressSelectBar(context) // binding.addressSelectBar
+            override val onManageAddresses = {
+                val directions = NavGraphDirections.actionGlobalAutofillSettingFragment()
+                navController.navigate(directions)
+            }
+        },
+        androidPhotoPicker = androidPhotoPicker,
+    )
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState = snackbarHostState) },
@@ -2152,7 +2187,7 @@ private fun showSnackbarAfterLoginChange(
 private fun showBiometricPrompt(
     context: Context,
     biometricPromptFeature: ViewBoundFeatureWrapper<BiometricPromptFeature>,
-    promptFeature: ViewBoundFeatureWrapper<PromptFeature>
+//    promptFeature: ViewBoundFeatureWrapper<PromptFeature>
 ) {
     if (BiometricPromptFeature.canUseFeature(context)) {
         biometricPromptFeature.get()
@@ -2170,7 +2205,7 @@ private fun showBiometricPrompt(
             // todo: biometrics
 //            showPinDialogWarning(context, promptFeature)
         } else {
-            promptFeature.get()?.onBiometricResult(isAuthenticated = true)
+//            promptFeature.get()?.onBiometricResult(isAuthenticated = true)
         }
     }
 }

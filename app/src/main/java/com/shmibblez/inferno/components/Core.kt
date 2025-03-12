@@ -52,7 +52,6 @@ import mozilla.components.feature.media.middleware.LastMediaAccessMiddleware
 import mozilla.components.feature.media.middleware.RecordingDevicesMiddleware
 import mozilla.components.feature.prompts.PromptMiddleware
 import com.shmibblez.inferno.browser.prompts.FileUploadsDirCleaner
-import mozilla.components.feature.prompts.file.FileUploadsDirCleanerMiddleware
 import mozilla.components.feature.pwa.ManifestStorage
 import mozilla.components.feature.pwa.WebAppShortcutManager
 import mozilla.components.feature.readerview.ReaderViewMiddleware
@@ -98,6 +97,7 @@ import com.shmibblez.inferno.IntentReceiverActivity
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.desktopmode.DefaultDesktopModeRepository
 import com.shmibblez.inferno.browser.desktopmode.DesktopModeMiddleware
+import com.shmibblez.inferno.browser.prompts.FileUploadsDirCleanerMiddleware
 import com.shmibblez.inferno.components.search.SearchMigration
 import com.shmibblez.inferno.downloads.DownloadService
 import com.shmibblez.inferno.ext.components
@@ -331,7 +331,9 @@ class Core(
             SessionPrioritizationMiddleware(),
             SaveToPDFMiddleware(context),
             FxSuggestFactsMiddleware(),
-            FileUploadsDirCleanerMiddleware(fileUploadsDirCleaner),
+            FileUploadsDirCleanerMiddleware(
+                fileUploadsDirCleaner
+            ),
             DesktopModeMiddleware(
                 repository = DefaultDesktopModeRepository(
                     context = context,

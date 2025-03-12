@@ -26,10 +26,16 @@ import com.shmibblez.inferno.ext.components
 import mozilla.components.browser.state.action.ContentAction
 import mozilla.components.concept.engine.prompt.PromptRequest
 import com.shmibblez.inferno.R
+import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplate
+import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateAction
+import com.shmibblez.inferno.browser.prompts.onDismiss
+import com.shmibblez.inferno.browser.prompts.onNegativeAction
+import com.shmibblez.inferno.browser.prompts.onPositiveAction
+import mozilla.components.support.ktx.util.PromptAbuserDetector
 
 @Composable
 fun TextPromptDialogPrompt(
-    textData: PromptRequest.TextPrompt, sessionId: String, hasShownManyDialogs: Boolean
+    textData: PromptRequest.TextPrompt, sessionId: String, hasShownManyDialogs: Boolean, promptAbuserDetector: PromptAbuserDetector
 ) {
     val store = LocalContext.current.components.core.store
     var noMoreDialogs by remember { mutableStateOf(false) }
@@ -44,6 +50,7 @@ fun TextPromptDialogPrompt(
             text = stringResource(android.R.string.cancel),
             action = {
                 onPositiveAction(textData, noMoreDialogs, text)
+                promptAbuserDetector.userWantsMoreDialogs(!noMoreDialogs)
                 store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, textData))
             },
         ),

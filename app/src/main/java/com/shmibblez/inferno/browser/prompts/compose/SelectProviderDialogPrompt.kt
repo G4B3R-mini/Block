@@ -24,6 +24,9 @@ import mozilla.components.concept.identitycredential.Provider
 import mozilla.components.feature.prompts.identitycredential.DialogColors
 import mozilla.components.support.ktx.kotlin.base64ToBitmap
 import com.shmibblez.inferno.R
+import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplate
+import com.shmibblez.inferno.browser.prompts.onDismiss
+import com.shmibblez.inferno.browser.prompts.onPositiveAction
 import com.shmibblez.inferno.ext.components
 
 @Composable

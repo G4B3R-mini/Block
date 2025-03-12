@@ -1,5 +1,6 @@
 package com.shmibblez.inferno.browser.prompts.compose
 
+import android.R
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -7,10 +8,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplate
+import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateAction
+import com.shmibblez.inferno.browser.prompts.onDismiss
+import com.shmibblez.inferno.browser.prompts.onNegativeAction
 import com.shmibblez.inferno.ext.components
 import mozilla.components.browser.state.action.ContentAction
 import mozilla.components.concept.engine.prompt.PromptRequest
 import mozilla.components.feature.prompts.concept.PasswordPromptView
+import mozilla.components.feature.prompts.login.PasswordGeneratorPrompt
 import mozilla.components.feature.prompts.login.PasswordGeneratorPromptColors
 
 // todo: not tested
@@ -32,14 +38,14 @@ fun GeneratePasswordPrompt(
             store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, loginData))
         },
         negativeAction = PromptBottomSheetTemplateAction(
-            text = stringResource(android.R.string.cancel),
+            text = stringResource(R.string.cancel),
             action = {
                 onNegativeAction(loginData)
             }
         )
     ) {
         if (showPasswordGenerator) {
-            mozilla.components.feature.prompts.login.PasswordGeneratorPrompt(
+            PasswordGeneratorPrompt(
                 onGeneratedPasswordPromptClick = {
                     listener?.onGeneratedPasswordPromptClick()
                     showPasswordGenerator = true

@@ -23,6 +23,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.core.content.ContextCompat.getColor
 import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.Lifecycle
@@ -149,7 +150,7 @@ fun HomeComponent(private: Boolean) {
 
     @androidx.annotation.VisibleForTesting
     // TODO: bundleArgs
-    lateinit var bundleArgs: Bundle
+//    lateinit var bundleArgs: Bundle
 
 //    @androidx.annotation.VisibleForTesting
 //    @Suppress("VariableNaming")
@@ -664,8 +665,8 @@ fun HomeComponent(private: Boolean) {
         // TODO: toolbar
 //        toolbarView?.updateTabCounter(context.components.core.store.state)
 
-        val focusOnAddressBar =
-            bundleArgs.getBoolean(FOCUS_ON_ADDRESS_BAR) || FxNimbus.features.oneClickSearch.value().enabled
+        val focusOnAddressBar = FxNimbus.features.oneClickSearch.value().enabled
+//          todo:  bundleArgs.getBoolean(FOCUS_ON_ADDRESS_BAR) || FxNimbus.features.oneClickSearch.value().enabled
 
         if (focusOnAddressBar) {
             // If the fragment gets recreated by the activity, the search fragment might get recreated as well. Changing
@@ -676,28 +677,30 @@ fun HomeComponent(private: Boolean) {
             if (!searchFragmentAlreadyAdded) {
                 sessionControlInteractor!!.onNavigateSearch()
             }
-        } else if (bundleArgs.getBoolean(SCROLL_TO_COLLECTION)) {
-            // todo: sessionControlView
-//            MainScope().launch {
-//                delay(ANIM_SCROLL_DELAY)
-//                val smoothScroller: SmoothScroller =
-//                    object : LinearSmoothScroller(sessionControlView!!.view.context) {
-//                        override fun getVerticalSnapPreference(): Int {
-//                            return SNAP_TO_START
-//                        }
-//                    }
-//                val recyclerView = sessionControlView!!.view
-//                val adapter = recyclerView.adapter!!
-//                val collectionPosition = IntRange(0, adapter.itemCount - 1).firstOrNull {
-//                    adapter.getItemViewType(it) == CollectionHeaderViewHolder.LAYOUT_ID
-//                }
-//                collectionPosition?.run {
-//                    val linearLayoutManager = recyclerView.layoutManager as LinearLayoutManager
-//                    smoothScroller.targetPosition = this
-//                    linearLayoutManager.startSmoothScroll(smoothScroller)
-//                }
-//            }
         }
+        // todo:
+//        else if (bundleArgs.getBoolean(SCROLL_TO_COLLECTION)) {
+//            // todo: sessionControlView
+////            MainScope().launch {
+////                delay(ANIM_SCROLL_DELAY)
+////                val smoothScroller: SmoothScroller =
+////                    object : LinearSmoothScroller(sessionControlView!!.view.context) {
+////                        override fun getVerticalSnapPreference(): Int {
+////                            return SNAP_TO_START
+////                        }
+////                    }
+////                val recyclerView = sessionControlView!!.view
+////                val adapter = recyclerView.adapter!!
+////                val collectionPosition = IntRange(0, adapter.itemCount - 1).firstOrNull {
+////                    adapter.getItemViewType(it) == CollectionHeaderViewHolder.LAYOUT_ID
+////                }
+////                collectionPosition?.run {
+////                    val linearLayoutManager = recyclerView.layoutManager as LinearLayoutManager
+////                    smoothScroller.targetPosition = this
+////                    linearLayoutManager.startSmoothScroll(smoothScroller)
+////                }
+////            }
+//        }
 
         // todo: searchSelector
 //        searchSelectorBinding.set(
@@ -741,11 +744,11 @@ fun HomeComponent(private: Boolean) {
 //                    val context = context
 
                     context.components.backgroundServices.accountManagerAvailableQueue.runIfReadyOrQueue {
-                        // By the time this code runs, we may not be attached to a context or have a view lifecycle owner.
-//                        if ((this@HomeFragment).view?.context == null) {
-                        if (view == null) {
-                            return@runIfReadyOrQueue
-                        }
+//                        // By the time this code runs, we may not be attached to a context or have a view lifecycle owner.
+////                        if ((this@HomeFragment).view?.context == null) {
+//                        if (view == null) {
+//                            return@runIfReadyOrQueue
+//                        }
 
                         context.components.backgroundServices.accountManager.register(
                             object : AccountObserver {
@@ -769,9 +772,9 @@ fun HomeComponent(private: Boolean) {
                         )
                     }
 
-                    if (browsingModeManager.mode.isPrivate &&
+                    if (browsingModeManager.mode.isPrivate // &&
                         // We will be showing the search dialog and don't want to show the CFR while the dialog shows
-                        !bundleArgs.getBoolean(HomeFragment.FOCUS_ON_ADDRESS_BAR) && context.settings().shouldShowPrivateModeCfr
+//                     todo:   !bundleArgs.getBoolean(HomeFragment.FOCUS_ON_ADDRESS_BAR) && context.settings().shouldShowPrivateModeCfr
                     ) {
                         recommendPrivateBrowsingShortcut(
                             context, recommendPrivateBrowsingCFR, setRecommendPrivateBrowsingCFR
@@ -868,7 +871,7 @@ fun HomeComponent(private: Boolean) {
 //                    _bottomToolbarContainerView = null
 //                    _binding = null
 
-                    bundleArgs.clear()
+//                 todo:   bundleArgs.clear()
                     setLastAppliedWallpaperName(Wallpaper.defaultName)
                 }
 
@@ -887,6 +890,8 @@ fun HomeComponent(private: Boolean) {
 
     Scaffold {
         // TODO: layout
+        it.toString()
+//        it.calculateRightPadding(LayoutDirection.Ltr)
     }
 }
 

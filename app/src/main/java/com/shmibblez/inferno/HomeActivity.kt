@@ -298,8 +298,7 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
 //        )
 
         SplashScreenManager(
-            splashScreenOperation =
-            if (FxNimbus.features.splashScreen.value().offTrainOnboarding) {
+            splashScreenOperation = if (FxNimbus.features.splashScreen.value().offTrainOnboarding) {
                 ApplyExperimentsOperation(
                     storage = DefaultExperimentsOperationStorage(components.settings),
                     nimbus = components.nimbus.sdk,
@@ -334,9 +333,7 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
                 writeScope = this,
             )
 
-            debugSettingsRepository.debugDrawerEnabled
-                .distinctUntilChanged()
-                .collect { enabled ->
+            debugSettingsRepository.debugDrawerEnabled.distinctUntilChanged().collect { enabled ->
                     with(binding.debugOverlay) {
                         if (enabled) {
                             visibility = View.VISIBLE
@@ -362,8 +359,9 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
 
         // Must be after we set the content view
         if (isVisuallyComplete) {
-            components.performance.visualCompletenessQueue
-                .attachViewToRunVisualCompletenessQueueLater(WeakReference(binding.rootContainer))
+            components.performance.visualCompletenessQueue.attachViewToRunVisualCompletenessQueueLater(
+                    WeakReference(binding.rootContainer)
+                )
         }
 
         privateNotificationObserver = PrivateNotificationFeature(
@@ -375,19 +373,20 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
         }
 
 //        if (!shouldShowOnboarding) {
-            lifecycleScope.launch(IO) {
-                showFullscreenMessageIfNeeded(applicationContext)
-            }
+        lifecycleScope.launch(IO) {
+            showFullscreenMessageIfNeeded(applicationContext)
+        }
 //
 //            // Unless the activity is recreated, navigate to home first (without rendering it)
 //            // to add it to the back stack.
-            if (savedInstanceState == null) {
-                navigateToHome(navHost.navController)
-            }
-//
-            if (!shouldStartOnHome() && shouldNavigateToBrowserOnColdStart(savedInstanceState)) {
-                navigateToBrowserOnColdStart()
-            }
+        if (savedInstanceState == null) {
+            navigateToHome(navHost.navController)
+        }
+
+        // always start on browser
+//            if (!shouldStartOnHome() && shouldNavigateToBrowserOnColdStart(savedInstanceState)) {
+        navigateToBrowserOnColdStart()
+//            }
 //            else {
 //                StartOnHome.enterHomeScreen.record(NoExtras())
 //            }
@@ -707,22 +706,16 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
             components.useCases.sessionUseCases.exitFullscreen(tab.id)
         }
 
-        val intentProcessors =
-            listOf(
-                CrashReporterIntentProcessor(components.appStore),
-            ) + externalSourceIntentProcessors
+        val intentProcessors = listOf(
+            CrashReporterIntentProcessor(components.appStore),
+        ) + externalSourceIntentProcessors
         val intentHandled =
             intentProcessors.any { it.process(intent, navHost.navController, this.intent) }
         browsingModeManager.mode = getModeFromIntentOrLastKnown(intent)
 
         if (intentHandled) {
-            supportFragmentManager
-                .primaryNavigationFragment
-                ?.childFragmentManager
-                ?.fragments
-                ?.lastOrNull()
-                ?.let { it as? TabsTrayFragment }
-                ?.also { it.dismissAllowingStateLoss() }
+            supportFragmentManager.primaryNavigationFragment?.childFragmentManager?.fragments?.lastOrNull()
+                ?.let { it as? TabsTrayFragment }?.also { it.dismissAllowingStateLoss() }
         }
     }
 
@@ -861,8 +854,9 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
 
             // check if the key has been pressed for longer than the time needed for a press to turn into a long press
             // and if tab history is already visible we do not want to dismiss it.
-            if (event.eventTime - event.downTime >= ViewConfiguration.getLongPressTimeout() &&
-                navHost.navController.hasTopDestination(TabHistoryDialogFragment.NAME)
+            if (event.eventTime - event.downTime >= ViewConfiguration.getLongPressTimeout() && navHost.navController.hasTopDestination(
+                    TabHistoryDialogFragment.NAME
+                )
             ) {
                 // returning true avoids further processing of the KeyUp event and avoids dismissing tab history.
                 return true
@@ -1268,8 +1262,7 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
     internal fun getSettings(): Settings = settings()
 
     private fun shouldNavigateToBrowserOnColdStart(savedInstanceState: Bundle?): Boolean {
-        return isActivityColdStarted(intent, savedInstanceState) &&
-                !processIntent(intent)
+        return isActivityColdStarted(intent, savedInstanceState) && !processIntent(intent)
     }
 
     private suspend fun showFullscreenMessageIfNeeded(context: Context) {

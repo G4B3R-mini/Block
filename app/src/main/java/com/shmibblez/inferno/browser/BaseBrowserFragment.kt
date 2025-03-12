@@ -96,13 +96,13 @@ import mozilla.components.feature.downloads.temporary.ShareDownloadFeature
 import mozilla.components.feature.intent.ext.EXTRA_SESSION_ID
 import mozilla.components.feature.media.fullscreen.MediaSessionFullscreenFeature
 import mozilla.components.feature.privatemode.feature.SecureWindowFeature
-import mozilla.components.feature.prompts.PromptFeature
-import mozilla.components.feature.prompts.PromptFeature.Companion.PIN_REQUEST
+import com.shmibblez.inferno.browser.prompts.PromptFeature
+import com.shmibblez.inferno.browser.prompts.PromptFeature.Companion.PIN_REQUEST
 import mozilla.components.feature.prompts.address.AddressDelegate
 import mozilla.components.feature.prompts.creditcard.CreditCardDelegate
 import mozilla.components.feature.prompts.dialog.FullScreenNotificationToast
 import mozilla.components.feature.prompts.dialog.GestureNavUtils
-import mozilla.components.feature.prompts.file.AndroidPhotoPicker
+import com.shmibblez.inferno.browser.prompts.AndroidPhotoPicker
 import mozilla.components.feature.prompts.identitycredential.DialogColors
 import mozilla.components.feature.prompts.identitycredential.DialogColorsProvider
 import mozilla.components.feature.prompts.login.LoginDelegate
@@ -243,6 +243,8 @@ private const val NAVIGATION_CFR_VERTICAL_OFFSET = 10
 private const val NAVIGATION_CFR_ARROW_OFFSET = 24
 private const val NAVIGATION_CFR_MAX_MS_BETWEEN_CLICKS = 5000
 
+// todo: onBiometricResult (search in this file to see where necessary)
+
 /**
  * Base fragment extended by [BrowserFragment].
  * This class only contains shared code focused on the main browsing content.
@@ -351,14 +353,14 @@ abstract class BaseBrowserFragment :
     private val singleMediaPicker =
         AndroidPhotoPicker.singleMediaPicker(
             { getFragment() },
-            { getPromptsFeature() },
+            { null }, //getPromptsFeature() },
         )
 
     // Registers a photo picker activity launcher in multi-select mode.
     private val multipleMediaPicker =
         AndroidPhotoPicker.multipleMediaPicker(
             { getFragment() },
-            { getPromptsFeature() },
+            { null }, // getPromptsFeature() },
         )
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -885,10 +887,10 @@ abstract class BaseBrowserFragment :
                 context = context,
                 fragment = this,
                 onAuthFailure = {
-                    promptsFeature.get()?.onBiometricResult(isAuthenticated = false)
+//                    promptsFeature.get()?.onBiometricResult(isAuthenticated = false)
                 },
                 onAuthSuccess = {
-                    promptsFeature.get()?.onBiometricResult(isAuthenticated = true)
+//                    promptsFeature.get()?.onBiometricResult(isAuthenticated = true)
                 },
             ),
             owner = this,
@@ -1263,7 +1265,7 @@ abstract class BaseBrowserFragment :
             if (context.settings().shouldShowSecurityPinWarning) {
                 showPinDialogWarning(context)
             } else {
-                promptsFeature.get()?.onBiometricResult(isAuthenticated = true)
+//                promptsFeature.get()?.onBiometricResult(isAuthenticated = true)
             }
         }
     }
@@ -1290,12 +1292,12 @@ abstract class BaseBrowserFragment :
             setMessage(getString(R.string.credit_cards_warning_dialog_message_3))
 
             setNegativeButton(getString(R.string.credit_cards_warning_dialog_later)) { _: DialogInterface, _ ->
-                promptsFeature.get()?.onBiometricResult(isAuthenticated = false)
+//                promptsFeature.get()?.onBiometricResult(isAuthenticated = false)
             }
 
             setPositiveButton(getString(R.string.credit_cards_warning_dialog_set_up_now)) { it: DialogInterface, _ ->
                 it.dismiss()
-                promptsFeature.get()?.onBiometricResult(isAuthenticated = false)
+//                promptsFeature.get()?.onBiometricResult(isAuthenticated = false)
                 startActivity(Intent(Settings.ACTION_SECURITY_SETTINGS))
             }
 

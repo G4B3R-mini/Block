@@ -38,7 +38,7 @@
 //import mozilla.components.feature.findinpage.view.FindInPageBar
 //import mozilla.components.feature.findinpage.view.FindInPageView
 //import mozilla.components.feature.media.fullscreen.MediaSessionFullscreenFeature
-//import mozilla.components.feature.prompts.PromptFeature
+//import com.shmibblez.inferno.browser.prompts.PromptFeature
 //import mozilla.components.feature.session.FullScreenFeature
 //import mozilla.components.feature.session.ScreenOrientationFeature
 //import mozilla.components.feature.session.SessionFeature
