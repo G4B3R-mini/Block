@@ -412,7 +412,7 @@ object ToolbarOriginScopeInstance : ToolbarOriginScope {
                     bottom = IconConstants.INDICATOR_ICON_BOTTOM_PADDING
                 )
                 .aspectRatio(IconConstants.ICON_ASPECT_RATIO),
-            painter = painterResource(id = R.drawable.mozac_ic_search_24), // todo: left off at this icon, flip aspect ratio too
+            painter = painterResource(id = R.drawable.ic_search_24),
             contentDescription = "empty indicator",
             tint = Color.White
         )
@@ -432,7 +432,7 @@ object ToolbarOriginScopeInstance : ToolbarOriginScope {
                             bottom = IconConstants.INDICATOR_ICON_BOTTOM_PADDING
                         )
                         .aspectRatio(IconConstants.ICON_ASPECT_RATIO),
-                    painter = painterResource(id = R.drawable.mozac_ic_tracking_protection_on_trackers_blocked),
+                    painter = painterResource(id = R.drawable.ic_tracking_protection_on_trackers_blocked),
                     contentDescription = "tracking protection indicator",
                     tint = Color.White
                 )
@@ -449,7 +449,7 @@ object ToolbarOriginScopeInstance : ToolbarOriginScope {
                             bottom = IconConstants.INDICATOR_ICON_BOTTOM_PADDING
                         )
                         .aspectRatio(IconConstants.ICON_ASPECT_RATIO),
-                    painter = painterResource(id = R.drawable.mozac_ic_tracking_protection_on_trackers_blocked),
+                    painter = painterResource(id = R.drawable.ic_tracking_protection_on_trackers_blocked),
                     contentDescription = "tracking protection indicator",
                     tint = Color.White
                 )
@@ -474,7 +474,7 @@ object ToolbarOriginScopeInstance : ToolbarOriginScope {
                         bottom = IconConstants.INDICATOR_ICON_BOTTOM_PADDING
                     )
                     .aspectRatio(IconConstants.ICON_ASPECT_RATIO),
-                painter = painterResource(id = R.drawable.mozac_ic_lock_20),
+                painter = painterResource(id = R.drawable.ic_lock_20),
                 contentDescription = "security indicator",
                 tint = Color.White
             )
@@ -490,7 +490,7 @@ object ToolbarOriginScopeInstance : ToolbarOriginScope {
                     )
                     .aspectRatio(IconConstants.ICON_ASPECT_RATIO)
                 ,
-                painter = painterResource(id = R.drawable.mozac_ic_broken_lock),
+                painter = painterResource(id = R.drawable.ic_broken_lock),
                 contentDescription = "security indicator",
                 tint = Color.White
             )
@@ -524,7 +524,7 @@ object ToolbarOriginScopeInstance : ToolbarOriginScope {
                         .aspectRatio(1F),
                 )
                 Icon(
-                    painter = painterResource(R.drawable.mozac_ic_chevron_down_24),
+                    painter = painterResource(id = R.drawable.ic_chevron_down_24),
                     contentDescription = "open menu", modifier = Modifier.aspectRatio(0.5F),
                     tint = Color.White,
                 )

@@ -713,7 +713,6 @@ class PromptFeature private constructor(
                     promptAbuserDetector.userWantsMoreDialogs(!shouldNotShowMoreDialogs)
                     it.onConfirm(!shouldNotShowMoreDialogs)
                 }
-
                 is SingleChoice -> it.onConfirm(value as Choice)
                 is MenuChoice -> it.onConfirm(value as Choice)
                 is BeforeUnload -> it.onLeave()
