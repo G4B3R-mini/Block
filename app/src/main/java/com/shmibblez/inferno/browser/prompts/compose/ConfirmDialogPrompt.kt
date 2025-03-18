@@ -9,6 +9,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplate
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateAction
+import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateButtonPosition
 import com.shmibblez.inferno.browser.prompts.onDismiss
 import com.shmibblez.inferno.browser.prompts.onNegativeAction
 import com.shmibblez.inferno.browser.prompts.onPositiveAction
@@ -23,7 +24,7 @@ fun ConfirmDialogPrompt(
     confirmData: PromptRequest,
     sessionId: String,
     title: String,
-    body: String,
+    body: String?,
     negativeLabel: String,
     positiveLabel: String,
     promptAbuserDetector: PromptAbuserDetector
@@ -32,28 +33,38 @@ fun ConfirmDialogPrompt(
         throw IllegalArgumentException("unrecognized prompt type")
     }
     val store = LocalContext.current.components.core.store
-    PromptBottomSheetTemplate(onDismissRequest = {
-        onDismiss(confirmData)
-        store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, confirmData))
-    }, negativeAction = PromptBottomSheetTemplateAction(text = negativeLabel, action = {
-        onNegativeAction(confirmData) // onLeave
-        promptAbuserDetector.userWantsMoreDialogs(!promptAbuserDetector.areDialogsBeingAbused())
-        store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, confirmData))
-    }), positiveAction = PromptBottomSheetTemplateAction(text = positiveLabel, action = {
-        onPositiveAction(confirmData)
-        promptAbuserDetector.userWantsMoreDialogs(!promptAbuserDetector.areDialogsBeingAbused())
-        store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, confirmData))
-    })) {
+    PromptBottomSheetTemplate(
+        onDismissRequest = {
+            onDismiss(confirmData)
+            store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, confirmData))
+        },
+        negativeAction = PromptBottomSheetTemplateAction(text = negativeLabel, action = {
+            onNegativeAction(confirmData) // onLeave
+            promptAbuserDetector.userWantsMoreDialogs(!promptAbuserDetector.areDialogsBeingAbused())
+            store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, confirmData))
+        }),
+        positiveAction = PromptBottomSheetTemplateAction(text = positiveLabel, action = {
+            onPositiveAction(confirmData)
+            promptAbuserDetector.userWantsMoreDialogs(!promptAbuserDetector.areDialogsBeingAbused())
+            store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, confirmData))
+        }),
+        buttonPosition = PromptBottomSheetTemplateButtonPosition.BOTTOM,
+    ) {
         // title
         InfernoText(
             text = title,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Start,
-            modifier = Modifier.padding(horizontal = 4.dp)
+            modifier = Modifier.padding(horizontal = 16.dp),
         )
         // message
+        if (body != null)
         InfernoText(
-            text = body, textAlign = TextAlign.Start, modifier = Modifier.padding(horizontal = 4.dp)
+            text = body,
+            textAlign = TextAlign.Start,
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .padding(top = 8.dp),
         )
     }
 }

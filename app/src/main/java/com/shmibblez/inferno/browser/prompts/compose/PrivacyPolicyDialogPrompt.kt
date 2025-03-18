@@ -1,6 +1,8 @@
 package com.shmibblez.inferno.browser.prompts.compose
 
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -13,9 +15,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withLink
+import androidx.compose.ui.unit.dp
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplate
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateAction
+import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateButtonPosition
 import com.shmibblez.inferno.browser.prompts.onDismiss
 import com.shmibblez.inferno.browser.prompts.onPositiveAction
 import com.shmibblez.inferno.compose.base.InfernoText
@@ -33,32 +37,54 @@ fun PrivacyPolicyDialog(
     val store = LocalContext.current.components.core.store
     PromptBottomSheetTemplate(
         onDismissRequest = {
-            onDismiss(privacyPolicyData, )
+            onDismiss(privacyPolicyData)
             store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, privacyPolicyData))
         },
-        negativeAction = PromptBottomSheetTemplateAction(text = stringResource(R.string.mozac_feature_prompts_identity_credentials_cancel),
+        negativeAction = PromptBottomSheetTemplateAction(
+            text = stringResource(R.string.mozac_feature_prompts_identity_credentials_cancel),
             action = {
                 onPositiveAction(privacyPolicyData, false)
-                store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, privacyPolicyData))
-            }),
-        positiveAction = PromptBottomSheetTemplateAction(text = stringResource(R.string.mozac_feature_prompts_identity_credentials_continue),
+                store.dispatch(
+                    ContentAction.ConsumePromptRequestAction(
+                        sessionId,
+                        privacyPolicyData
+                    )
+                )
+            },
+        ),
+        positiveAction = PromptBottomSheetTemplateAction(
+            text = stringResource(R.string.mozac_feature_prompts_identity_credentials_continue),
             action = {
                 onPositiveAction(privacyPolicyData, true)
-                store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, privacyPolicyData))
-            }),
+                store.dispatch(
+                    ContentAction.ConsumePromptRequestAction(
+                        sessionId,
+                        privacyPolicyData
+                    )
+                )
+            },
+        ),
+        buttonPosition = PromptBottomSheetTemplateButtonPosition.BOTTOM,
     ) {
         InfernoText(
             text = title,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Start,
+            modifier = Modifier.padding(horizontal = 16.dp),
         )
         InfernoText(
             text = message,
             textAlign = TextAlign.Start,
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .padding(top = 8.dp),
         )
         InfernoText(
             text = linkifiedText(message),
             textAlign = TextAlign.Start,
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .padding(top = 8.dp),
         )
     }
 }

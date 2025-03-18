@@ -1,19 +1,19 @@
 package com.shmibblez.inferno.browser.prompts.compose
 
-import android.R
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -21,8 +21,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplate
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateAction
+import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateButtonPosition
 import com.shmibblez.inferno.browser.prompts.onDismiss
 import com.shmibblez.inferno.browser.prompts.onPositiveAction
+import com.shmibblez.inferno.compose.base.InfernoCheckbox
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.ext.components
 import mozilla.components.browser.state.action.ContentAction
@@ -46,7 +48,9 @@ fun choices(menuData: PromptRequest): Array<Choice> {
         is PromptRequest.MultipleChoice -> menuData.choices
         is PromptRequest.MenuChoice -> menuData.choices
 
-        else -> {throw IllegalArgumentException("unknown class received")}
+        else -> {
+            throw IllegalArgumentException("unknown class received")
+        }
     }
 }
 
@@ -64,48 +68,74 @@ fun <T> ChoiceDialogPrompt(
     when (dialogType) {
         SINGLE_CHOICE_DIALOG_TYPE, MENU_CHOICE_DIALOG_TYPE -> {
             // single choice dialog options, dismiss with single option
-            positiveAction =
-                PromptBottomSheetTemplateAction(text = stringResource(R.string.ok),
-                    action = {
-                        // dismiss
-                        store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, menuData))
-                    })
+            positiveAction = PromptBottomSheetTemplateAction(
+                text = stringResource(android.R.string.ok),
+                action = {
+                    // dismiss
+                    store.dispatch(
+                        ContentAction.ConsumePromptRequestAction(
+                            sessionId, menuData
+                        )
+                    )
+                })
         }
 
         MULTIPLE_CHOICE_DIALOG_TYPE -> {
             // multiple choice dialog options
-            negativeAction =
-                PromptBottomSheetTemplateAction(text = stringResource(R.string.ok),
-                    action = {
-                        // dismiss
-                        onDismiss(menuData)
-                        store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, menuData))
-                    })
-            positiveAction =
-                PromptBottomSheetTemplateAction(text = stringResource(R.string.ok),
-                    action = {
-                        // onConfirm
-                        onPositiveAction(menuData, mapSelectChoice)
-                        store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, menuData))
-                    })
+            negativeAction = PromptBottomSheetTemplateAction(
+                text = stringResource(android.R.string.cancel),
+                action = {
+                    // dismiss
+                    onDismiss(menuData)
+                    store.dispatch(
+                        ContentAction.ConsumePromptRequestAction(
+                            sessionId, menuData
+                        )
+                    )
+                })
+            positiveAction = PromptBottomSheetTemplateAction(
+                text = stringResource(android.R.string.ok),
+                action = {
+                    // onConfirm
+                    onPositiveAction(menuData, mapSelectChoice)
+                    store.dispatch(
+                        ContentAction.ConsumePromptRequestAction(
+                            sessionId, menuData
+                        )
+                    )
+                })
         }
     }
     PromptBottomSheetTemplate(
         onDismissRequest = {
             onDismiss(menuData)
             store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, menuData))
-        }, negativeAction = negativeAction, positiveAction = positiveAction
+        },
+        negativeAction = negativeAction, positiveAction = positiveAction,
+        buttonPosition = PromptBottomSheetTemplateButtonPosition.TOP,
     ) {
-        LazyColumn {
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically)
+        ) {
             items(choices(menuData)) {
                 val type = deduceItemType(it, dialogType)
                 when (type) {
                     TYPE_MULTIPLE -> {
-                        MultipleItem(choice = it, menuData as PromptRequest.MultipleChoice, sessionId, mapSelectChoice)
+                        MultipleItem(
+                            choice = it,
+                            menuData as PromptRequest.MultipleChoice,
+                            sessionId,
+                            mapSelectChoice
+                        )
                     }
 
                     TYPE_SINGLE -> {
-                        SingleItem(choice = it, menuData as PromptRequest.SingleChoice, sessionId, mapSelectChoice)
+                        SingleItem(
+                            choice = it,
+                            menuData as PromptRequest.SingleChoice,
+                            sessionId,
+                            mapSelectChoice
+                        )
                     }
 
                     TYPE_GROUP -> {
@@ -130,9 +160,9 @@ private fun deduceItemType(choice: Choice, dialogType: Int): Int {
     val isMenuChoice = { dialogType == MENU_CHOICE_DIALOG_TYPE }
 
     return when {
+        isMenuChoice() -> if (choice.isASeparator) TYPE_MENU_SEPARATOR else TYPE_MENU
         isSingleChoice() and choice.isGroupType -> TYPE_GROUP
         isSingleChoice() -> TYPE_SINGLE
-        isMenuChoice() -> if (choice.isASeparator) TYPE_MENU_SEPARATOR else TYPE_MENU
         choice.isGroupType -> TYPE_GROUP
         else -> TYPE_MULTIPLE
     }
@@ -148,10 +178,10 @@ fun MultipleItem(
     val store = LocalContext.current.components.core.store
     var checked by remember { mutableStateOf(choice.selected) }
     Row(modifier = Modifier
-        .padding(horizontal = 4.dp)
+        .padding(horizontal = 16.dp)
         .fillMaxWidth()
         .clickable(enabled = choice.enable) {
-            var isChecked = false
+            var isChecked: Boolean
             with(mapSelectChoice) {
                 if (choice in this) {
                     this -= choice
@@ -172,9 +202,9 @@ fun MultipleItem(
             text = choice.label,
             modifier = Modifier.weight(1F),
         )
-        Checkbox(
+        InfernoCheckbox(
             checked = checked,
-            enabled = false,
+            enabled = choice.enable,
             onCheckedChange = {},
         )
     }
@@ -185,12 +215,13 @@ fun SingleItem(
     choice: Choice,
     menuData: PromptRequest.SingleChoice,
     sessionId: String,
-    mapSelectChoice: HashMap<Choice, Choice>
+    // todo: why this not used
+    mapSelectChoice: HashMap<Choice, Choice>,
 ) {
     val store = LocalContext.current.components.core.store
     var checked by remember { mutableStateOf(choice.selected) }
     Row(modifier = Modifier
-        .padding(horizontal = 4.dp)
+        .padding(horizontal = 16.dp)
         .fillMaxWidth()
         .clickable(enabled = choice.enable) {
             // toggle
@@ -204,7 +235,7 @@ fun SingleItem(
             text = choice.label,
             modifier = Modifier.weight(1F),
         )
-        Checkbox(
+        InfernoCheckbox(
             checked = checked,
             enabled = false,
             onCheckedChange = {},
@@ -217,7 +248,7 @@ fun GroupItem(choice: Choice) {
     InfernoText(
         text = choice.label,
         modifier = Modifier
-            .padding(horizontal = 4.dp)
+            .padding(horizontal = 16.dp)
             .fillMaxWidth(),
     )
 }
@@ -228,7 +259,7 @@ fun MenuItem(choice: Choice, menuData: PromptRequest.MenuChoice, sessionId: Stri
     InfernoText(
         text = choice.label,
         modifier = Modifier
-            .padding(horizontal = 4.dp)
+            .padding(horizontal = 16.dp)
             .fillMaxWidth()
             .clickable(enabled = choice.enable) {
                 // on select
@@ -241,5 +272,9 @@ fun MenuItem(choice: Choice, menuData: PromptRequest.MenuChoice, sessionId: Stri
 
 @Composable
 fun MenuSeparatorItem() {
-    HorizontalDivider(thickness = 2.dp, color = Color.White)
+    HorizontalDivider(
+        thickness = 1.dp,
+        color = Color.White,
+        modifier = Modifier.padding(horizontal = 16.dp),
+    )
 }

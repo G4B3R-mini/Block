@@ -893,7 +893,7 @@ fun HomeComponent(private: Boolean) {
     }
 
     Scaffold(
-        containerColor = Color.Black,
+        containerColor = Color.White,
         content = {
             // TODO: layout
             it.toString()

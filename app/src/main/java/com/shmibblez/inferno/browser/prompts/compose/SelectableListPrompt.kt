@@ -1,6 +1,7 @@
 package com.shmibblez.inferno.browser.prompts.compose
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -28,6 +29,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import com.shmibblez.inferno.NavGraphDirections
 import com.shmibblez.inferno.R
@@ -48,8 +50,11 @@ import mozilla.components.concept.storage.CreditCardEntry
 import mozilla.components.support.utils.creditCardIssuerNetwork
 
 @Composable
-fun <T : PromptRequest> SelectableListPrompt(
-    data: T, sessionId: String, header: String, manageText: String
+fun SelectableListPrompt(
+    data: PromptRequest,
+    sessionId: String,
+    header: String,
+    manageText: String,
 ) {
     if (data !is PromptRequest.SelectAddress && data !is PromptRequest.SelectCreditCard) {
         throw IllegalArgumentException("unsupported prompt type, supported above")
@@ -64,8 +69,13 @@ fun <T : PromptRequest> SelectableListPrompt(
                 is PromptRequest.SelectAddress -> {
                     emitAddressAutofillDismissedFact()
                 }
+
                 is PromptRequest.SelectCreditCard -> {
                     emitCreditCardAutofillDismissedFact()
+                }
+
+                else -> {
+                    throw IllegalArgumentException("unsupported prompt type, supported above")
                 }
             }
             onDismiss(data)
@@ -84,16 +94,16 @@ fun <T : PromptRequest> SelectableListPrompt(
     ) {
         Row(
             modifier = Modifier
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.Top,
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             // header
             InfernoText(
                 text = header,
                 fontSize = 16.sp,
                 modifier = Modifier
-                    .weight(1F)
-                    .padding(horizontal = 16.dp),
+                    .weight(1F),
             )
             // expand addresses
             Icon(
@@ -103,9 +113,7 @@ fun <T : PromptRequest> SelectableListPrompt(
                 tint = Color.White,
                 contentDescription = "",
                 modifier = Modifier
-                    .padding(16.dp)
-                    .size(48.dp)
-                    .padding(start = 8.dp, end = 8.dp)
+                    .size(36.dp)
                     .clickable {
                         expanded = !expanded
                     },
@@ -114,7 +122,10 @@ fun <T : PromptRequest> SelectableListPrompt(
         if (expanded) {
             // address list
             LazyColumn(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
             ) {
                 when (data) {
                     is PromptRequest.SelectAddress -> {
@@ -150,57 +161,68 @@ fun <T : PromptRequest> SelectableListPrompt(
                     }
 
                     else -> {
-                        IllegalArgumentException("unsupported prompt type")
+                        throw IllegalArgumentException("unsupported prompt type")
                     }
                 }
+                item { ManageOptions(data, navController, manageText) }
             }
+
         }
         // todo: tint text color primary
         // manage addresses / credit cards
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(48.dp)
-                .padding(start = 24.dp)
-                .clickable {
-                    when (data) {
-                        is PromptRequest.SelectAddress -> {
-                            // go to manage directions page
-                            val directions =
-                                NavGraphDirections.actionGlobalAutofillSettingFragment()
-                            navController.navigate(directions)
-                        }
-
-                        is PromptRequest.SelectCreditCard -> {
-                            // go to manage credit cards page
-                            val directions =
-                                NavGraphDirections.actionGlobalAutofillSettingFragment()
-                            navController.navigate(directions)
-                        }
-                    }
-                },
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.mozac_ic_settings_24),
-                tint = Color.White,
-                contentDescription = "",
-                modifier = Modifier
-                    .aspectRatio(1F)
-                    .fillMaxHeight()
-                    .padding(12.dp)
-            )
-            // todo: text color primary
-            InfernoText(
-                text = manageText,
-                modifier = Modifier
-                    .weight(1F)
-                    .padding(end = 16.dp),
-                textAlign = TextAlign.Start,
-                fontSize = 16.sp,
-            )
+        if (!expanded) {
+            ManageOptions(data, navController, manageText)
         }
+    }
+}
 
+@Composable
+fun ManageOptions(data: PromptRequest, navController: NavController, manageText: String, modifier: Modifier = Modifier,) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(36.dp)
+            .padding(start = 24.dp)
+            .clickable {
+                when (data) {
+                    is PromptRequest.SelectAddress -> {
+                        // go to manage directions page
+                        val directions =
+                            NavGraphDirections.actionGlobalAutofillSettingFragment()
+                        navController.navigate(directions)
+                    }
+
+                    is PromptRequest.SelectCreditCard -> {
+                        // go to manage credit cards page
+                        val directions =
+                            NavGraphDirections.actionGlobalAutofillSettingFragment()
+                        navController.navigate(directions)
+                    }
+
+                    else -> {
+                        throw IllegalArgumentException("unsupported prompt type")
+                    }
+                }
+            },
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.mozac_ic_settings_24),
+            tint = Color.White,
+            contentDescription = "",
+            modifier = Modifier
+                .aspectRatio(1F)
+                .fillMaxHeight(),
+        )
+        // todo: text color primary
+        InfernoText(
+            text = manageText,
+            modifier = Modifier
+                .weight(1F)
+                .padding(end = 16.dp),
+            textAlign = TextAlign.Start,
+            fontSize = 16.sp,
+        )
     }
 }
 
@@ -211,9 +233,7 @@ private fun ColumnScope.AddressItem(address: Address, onClick: () -> Unit) {
         modifier = Modifier
             .padding(horizontal = 16.dp)
             .fillMaxWidth()
-            .clickable {
-                onClick.invoke()
-            },
+            .clickable(onClick = onClick),
         textAlign = TextAlign.Start,
         fontSize = 16.sp,
     )

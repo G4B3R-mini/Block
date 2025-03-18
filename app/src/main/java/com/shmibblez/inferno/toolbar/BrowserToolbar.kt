@@ -9,9 +9,7 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -51,13 +49,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.shmibblez.inferno.browser.ComponentDimens
 import com.shmibblez.inferno.compose.browserStore
-import com.shmibblez.inferno.compose.sessionUseCases
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.state.observeAsState
 import com.shmibblez.inferno.toolbar.ToolbarOptionsScopeInstance.ToolbarBack
+import com.shmibblez.inferno.toolbar.ToolbarOptionsScopeInstance.ToolbarForward
 import com.shmibblez.inferno.toolbar.ToolbarOptionsScopeInstance.ToolbarMenuIcon
 import com.shmibblez.inferno.toolbar.ToolbarOptionsScopeInstance.ToolbarReload
-import com.shmibblez.inferno.toolbar.ToolbarOptionsScopeInstance.ToolbarForward
 import com.shmibblez.inferno.toolbar.ToolbarOptionsScopeInstance.ToolbarShowTabsTray
 import com.shmibblez.inferno.toolbar.ToolbarOriginScopeInstance.ToolbarSearchEngineSelector
 import mozilla.components.browser.state.search.SearchEngine

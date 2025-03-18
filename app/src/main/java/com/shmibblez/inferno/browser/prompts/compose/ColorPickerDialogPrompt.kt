@@ -1,13 +1,22 @@
 package com.shmibblez.inferno.browser.prompts.compose
 
 import android.content.Context
-import androidx.compose.foundation.lazy.items
 import android.graphics.Color
+import android.graphics.ColorSpace
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -18,10 +27,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toColorInt
-import mozilla.components.browser.state.action.ContentAction
-import mozilla.components.concept.engine.prompt.PromptRequest
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplate
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateAction
@@ -33,6 +41,9 @@ import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.dialog.ColorItem
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.dialog.toColorItem
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.dialog.toHexColor
+import com.shmibblez.inferno.theme.FirefoxTheme
+import mozilla.components.browser.state.action.ContentAction
+import mozilla.components.concept.engine.prompt.PromptRequest
 
 
 @Composable
@@ -54,49 +65,53 @@ fun ColorPickerDialogPrompt(colorData: PromptRequest.Color, sessionId: String) {
     }
     PromptBottomSheetTemplate(
         onDismissRequest = {
-           onDismiss(colorData)
+            onDismiss(colorData)
             store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, colorData))
         },
-        negativeAction = PromptBottomSheetTemplateAction(
-            text = stringResource(R.string.mozac_feature_prompts_cancel),
+        negativeAction = PromptBottomSheetTemplateAction(text = stringResource(R.string.mozac_feature_prompts_cancel),
             action = {
                 onDismiss(colorData)
                 store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, colorData))
             }),
-        positiveAction = PromptBottomSheetTemplateAction(
-            text = stringResource(R.string.mozac_feature_prompts_set_date),
+        positiveAction = PromptBottomSheetTemplateAction(text = stringResource(R.string.mozac_feature_prompts_set_date),
             action = {
                 onPositiveAction(colorData, selectedColor.toHexColor())
                 store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, colorData))
             })
     ) {
-        // title
-        InfernoText(
-            text = stringResource(R.string.mozac_feature_prompts_choose_a_color) + ":",
-            textAlign = TextAlign.Start,
-            modifier = Modifier.padding(horizontal = 4.dp)
-        )
-        // color list
-        LazyColumn {
-            items(colorList) {
-                val newColor = it
-                ColorListItem(newColor, newColor.color == selectedColor) {
-                    // set selected
-                    selectedColor = newColor.color
-                    // if not in list add
-                    val colorItems = colorList.toMutableList()
-                    val index = colorItems.indexOfFirst { color -> color.color == newColor.color }
-                    val lastColor = if (index > -1) {
-                        colorItems[index] = colorItems[index].copy(selected = true)
-                        initiallySelectedCustomColor
-                    } else {
-                        newColor.color
+        FirefoxTheme {
+            // title
+            InfernoText(
+                text = stringResource(R.string.mozac_feature_prompts_choose_a_color) + ":",
+                textAlign = TextAlign.Start,
+                modifier = Modifier.padding(horizontal = 16.dp),
+            )
+            // color list
+            LazyColumn(
+                modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                items(colorList) {
+                    val newColor = it
+                    ColorListItem(newColor, newColor.color == selectedColor) {
+                        // set selected
+                        selectedColor = newColor.color
+                        // if not in list add
+                        val colorItems = colorList.toMutableList()
+                        val index =
+                            colorItems.indexOfFirst { color -> color.color == newColor.color }
+                        val lastColor = if (index > -1) {
+                            colorItems[index] = colorItems[index].copy(selected = true)
+                            initiallySelectedCustomColor
+                        } else {
+                            newColor.color
+                        }
+                        if (lastColor != null) {
+                            colorItems.add(lastColor.toColorItem(selected = lastColor == newColor.color))
+                        }
+                        // update list
+                        colorList = colorItems
                     }
-                    if (lastColor != null) {
-                        colorItems.add(lastColor.toColorItem(selected = lastColor == newColor.color))
-                    }
-                    // update list
-                    colorList = colorItems
                 }
             }
         }
@@ -105,18 +120,29 @@ fun ColorPickerDialogPrompt(colorData: PromptRequest.Color, sessionId: String) {
 
 @Composable
 private fun ColorListItem(colorItem: ColorItem, selected: Boolean, onColorChange: () -> Unit) {
+    val color = androidx.compose.ui.graphics.Color(colorItem.color)
     Row(
         modifier = Modifier
-            .padding(4.dp)
             .clickable {
                 onColorChange.invoke()
-            }, verticalAlignment = Alignment.CenterVertically
+            },
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        RadioButton(selected = selected) { }
+        CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides Dp.Unspecified) {
+            RadioButton(selected = selected) { }
+        }
         InfernoText(
             text = colorItem.color.toHexColor(),
             modifier = Modifier.weight(1F),
-            textAlign = TextAlign.Left
+            textAlign = TextAlign.Left,
+        )
+        Box(modifier = Modifier.weight(1F))
+        Box(
+            modifier = Modifier
+                .size(32.dp)
+                .background(color)
+                .border(1.dp, androidx.compose.ui.graphics.Color.White)
         )
     }
 }

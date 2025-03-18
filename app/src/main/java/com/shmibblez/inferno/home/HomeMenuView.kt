@@ -22,6 +22,7 @@ import com.shmibblez.inferno.BrowserDirection
 //import com.shmibblez.inferno.GleanMetrics.HomeScreen
 import com.shmibblez.inferno.HomeActivity
 import com.shmibblez.inferno.R
+import com.shmibblez.inferno.browser.BrowserComponentWrapperFragmentDirections
 import com.shmibblez.inferno.components.accounts.AccountState
 import com.shmibblez.inferno.components.accounts.FenixFxAEntryPoint
 import com.shmibblez.inferno.components.menu.MenuAccessPoint
@@ -180,7 +181,7 @@ class HomeMenuView(
             HomeMenu.Item.Passwords -> {
                 navController.nav(
                     R.id.homeFragment,
-                    HomeFragmentDirections.actionHomeFragmentToLoginsListFragment(),
+                    BrowserComponentWrapperFragmentDirections.actionBrowserFragmentToLoginsListFragment(),
                 )
             }
             HomeMenu.Item.Help -> {

@@ -38,6 +38,7 @@ import mozilla.components.browser.state.action.ContentAction
 import mozilla.components.concept.engine.prompt.PromptRequest
 import mozilla.components.concept.storage.CreditCardValidationDelegate.Result
 import mozilla.components.service.sync.autofill.DefaultCreditCardValidationDelegate
+import mozilla.components.support.ktx.android.content.appName
 import mozilla.components.support.utils.creditCardIssuerNetwork
 
 @Composable
@@ -115,7 +116,7 @@ fun CreditCardSaveDialogPrompt(saveData: PromptRequest.SaveCreditCard, sessionId
                 // save credit card message
                 InfernoText(
                     text = when (confirmResult) {
-                        is Result.CanBeCreated -> stringResource(R.string.mozac_feature_prompts_save_credit_card_prompt_body_2)
+                        is Result.CanBeCreated -> stringResource(R.string.mozac_feature_prompts_save_credit_card_prompt_body_2, context.appName)
                         is Result.CanBeUpdated -> ""
                         else -> ""
                     },

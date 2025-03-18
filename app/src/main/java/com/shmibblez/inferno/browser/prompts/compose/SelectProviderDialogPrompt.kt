@@ -1,12 +1,16 @@
 package com.shmibblez.inferno.browser.prompts.compose
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
@@ -25,6 +29,8 @@ import mozilla.components.feature.prompts.identitycredential.DialogColors
 import mozilla.components.support.ktx.kotlin.base64ToBitmap
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplate
+import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateAction
+import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateButtonPosition
 import com.shmibblez.inferno.browser.prompts.onDismiss
 import com.shmibblez.inferno.browser.prompts.onPositiveAction
 import com.shmibblez.inferno.ext.components
@@ -41,6 +47,14 @@ fun SelectProviderDialogPrompt(
             onDismiss(selectData)
             store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, selectData))
         },
+        negativeAction = PromptBottomSheetTemplateAction(
+            text = stringResource(android.R.string.cancel),
+            action = {
+                onDismiss(selectData)
+                store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, selectData))
+            }
+        ),
+        buttonPosition = PromptBottomSheetTemplateButtonPosition.TOP
     ) {
         InfernoText(
             text = stringResource(id = R.string.mozac_feature_prompts_identity_credentials_choose_provider),
@@ -51,17 +65,19 @@ fun SelectProviderDialogPrompt(
                 letterSpacing = 0.15.sp,
                 fontWeight = FontWeight.Bold,
             ),
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(horizontal = 16.dp),
         )
-
-        selectData.providers.forEach { provider ->
-            ProviderItem(provider = provider, onClick = {
-                onPositiveAction(selectData, provider)
-                store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, selectData))
-            }, colors = colors)
+        LazyColumn(
+            modifier = Modifier.padding(top = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
+        ) {
+            items(selectData.providers) { provider ->
+                ProviderItem(provider = provider, onClick = {
+                    onPositiveAction(selectData, it)
+                    store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, selectData))
+                }, colors = colors)
+            }
         }
-
-        Spacer(modifier = Modifier.height(16.dp))
     }
 }
 
@@ -89,8 +105,8 @@ private fun ProviderItem(
                     .size(24.dp),
             )
         } ?: Spacer(
-            Modifier
-                .padding(horizontal = 16.dp)
+            modifier = Modifier
+                .padding(horizontal = 16.dp, vertical = 24.dp)
                 .width(24.dp),
         )
     }

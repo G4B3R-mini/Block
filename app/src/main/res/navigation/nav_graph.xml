@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- This Source Code Form is subject to the terms of the Mozilla Public
+<?xml version="1.0" encoding="utf-8"?><!-- This Source Code Form is subject to the terms of the Mozilla Public
    - License, v. 2.0. If a copy of the MPL was not distributed with this
    - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
 
@@ -11,42 +10,44 @@
 
     <action
         android:id="@+id/action_startup_home"
-        app:destination="@id/homeFragment"
+        app:destination="@id/browserComponentWrapperFragment"
         app:popUpTo="@id/startupFragment"
         app:popUpToInclusive="true" />
 
     <action
         android:id="@+id/action_global_home"
-        app:destination="@id/homeFragment"
-        app:popUpTo="@id/homeFragment"
+        app:destination="@id/browserComponentWrapperFragment"
+        app:popUpTo="@id/browserComponentWrapperFragment"
         app:popUpToInclusive="true" />
 
     <action
         android:id="@+id/action_global_browser"
         app:destination="@id/browserComponentWrapperFragment"
-        app:popUpTo="@id/homeFragment"
+        app:popUpTo="@id/browserComponentWrapperFragment"
         app:popUpToInclusive="false" />
 
+    <!--  todo: go to browser component wrapper fragment, implement special functionality (no tabs, top bar, etc)  -->
     <action
         android:id="@+id/action_global_external_app_browser"
         app:destination="@id/externalAppBrowserFragment"
-        app:popUpTo="@id/homeFragment"
+        app:popUpTo="@id/browserComponentWrapperFragment"
         app:popUpToInclusive="false" />
 
-<!--    <action-->
-<!--        android:id="@+id/action_global_onboarding"-->
-<!--        app:destination="@id/onboardingFragment"-->
-<!--        app:popUpTo="@id/startupFragment"-->
-<!--        app:popUpToInclusive="true" />-->
+    <!--    <action-->
+    <!--        android:id="@+id/action_global_onboarding"-->
+    <!--        app:destination="@id/onboardingFragment"-->
+    <!--        app:popUpTo="@id/startupFragment"-->
+    <!--        app:popUpToInclusive="true" />-->
 
     <action
         android:id="@+id/action_global_home_onboarding_dialog"
         app:destination="@id/homeOnboardingDialogFragment" />
 
+    <!--  todo: add onboarding implementation to home component wrapper fragment  -->
     <action
         android:id="@+id/action_global_wallpaper_onboarding_dialog"
         app:destination="@id/wallpaperOnboardingDialogFragment"
-        app:popUpTo="@id/homeFragment" />
+        app:popUpTo="@id/browserComponentWrapperFragment" />
 
     <action
         android:id="@+id/action_global_microsurvey_dialog"
@@ -198,18 +199,17 @@
 
     <fragment
         android:id="@+id/startupFragment"
-        android:name="com.shmibblez.inferno.StartupFragment">
-    </fragment>
+        android:name="com.shmibblez.inferno.browser.BrowserComponentWrapperFragment"></fragment>
 
-<!--    <fragment-->
-<!--        android:id="@+id/onboardingFragment"-->
-<!--        android:name="com.shmibblez.inferno.onboarding.OnboardingFragment">-->
-<!--        <action-->
-<!--            android:id="@+id/action_home"-->
-<!--            app:destination="@id/homeFragment"-->
-<!--            app:popUpTo="@id/onboardingFragment"-->
-<!--            app:popUpToInclusive="true" />-->
-<!--    </fragment>-->
+    <!--    <fragment-->
+    <!--        android:id="@+id/onboardingFragment"-->
+    <!--        android:name="com.shmibblez.inferno.onboarding.OnboardingFragment">-->
+    <!--        <action-->
+    <!--            android:id="@+id/action_home"-->
+    <!--            app:destination="@id/homeFragment"-->
+    <!--            app:popUpTo="@id/onboardingFragment"-->
+    <!--            app:popUpToInclusive="true" />-->
+    <!--    </fragment>-->
 
     <fragment
         android:id="@+id/homeFragment"
@@ -223,13 +223,13 @@
             android:name="scrollToCollection"
             android:defaultValue="false"
             app:argType="boolean" />
-        <action
-            android:id="@+id/action_homeFragment_to_loginsListFragment"
-            app:destination="@id/savedLogins"
-            app:enterAnim="@anim/slide_in_right"
-            app:exitAnim="@anim/slide_out_left"
-            app:popEnterAnim="@anim/slide_in_left"
-            app:popExitAnim="@anim/slide_out_right" />
+        <!--        <action-->
+        <!--            android:id="@+id/action_homeFragment_to_loginsListFragment"-->
+        <!--            app:destination="@id/savedLogins"-->
+        <!--            app:enterAnim="@anim/slide_in_right"-->
+        <!--            app:exitAnim="@anim/slide_out_left"-->
+        <!--            app:popEnterAnim="@anim/slide_in_left"-->
+        <!--            app:popExitAnim="@anim/slide_out_right" />-->
     </fragment>
 
     <dialog
@@ -238,19 +238,19 @@
 
     <dialog
         android:id="@+id/researchSurfaceDialogFragment"
-        android:name="com.shmibblez.inferno.experiments.ResearchSurfaceDialogFragment" >
+        android:name="com.shmibblez.inferno.experiments.ResearchSurfaceDialogFragment">
         <argument
             android:name="KEY_MESSAGE_TEXT"
-            app:nullable="true"
-            app:argType="string" />
+            app:argType="string"
+            app:nullable="true" />
         <argument
             android:name="KEY_ACCEPT_BUTTON_TEXT"
-            app:nullable="true"
-            app:argType="string" />
+            app:argType="string"
+            app:nullable="true" />
         <argument
             android:name="KEY_DISMISS_BUTTON_TEXT"
-            app:nullable="true"
-            app:argType="string" />
+            app:argType="string"
+            app:nullable="true" />
     </dialog>
 
     <dialog
@@ -279,10 +279,10 @@
             android:defaultValue="@null"
             app:argType="string"
             app:nullable="true" />
-<!--        <argument-->
-<!--            android:name="search_access_point"-->
-<!--            android:defaultValue="NONE"-->
-<!--            app:argType="com.shmibblez.inferno.components.metrics.MetricsUtils$Source" />-->
+        <!--        <argument-->
+        <!--            android:name="search_access_point"-->
+        <!--            android:defaultValue="NONE"-->
+        <!--            app:argType="com.shmibblez.inferno.components.metrics.MetricsUtils$Source" />-->
         <argument
             android:name="search_engine"
             android:defaultValue="@null"
@@ -309,11 +309,31 @@
         android:name="com.shmibblez.inferno.browser.BrowserComponentWrapperFragment"
         app:exitAnim="@anim/fade_out"
         tools:layout="@layout/fragment_browser_component_wrapper">
+        <!--        <argument-->
+        <!--            android:name="activeSessionId"-->
+        <!--            android:defaultValue=""-->
+        <!--            app:argType="string" />-->
+        <!--    bugged, no nullable only default args: https://www.reddit.com/r/androiddev/comments/b0kgmt/safeargs_gotcha_when_using_nullable_args/    -->
         <argument
             android:name="activeSessionId"
             android:defaultValue="@null"
             app:argType="string"
             app:nullable="true" />
+        <argument
+            android:name="focusOnAddressBar"
+            android:defaultValue="false"
+            app:argType="boolean" />
+        <argument
+            android:name="scrollToCollection"
+            android:defaultValue="false"
+            app:argType="boolean" />
+        <action
+            android:id="@+id/action_browserFragment_to_loginsListFragment"
+            app:destination="@id/savedLogins"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
         <action
             android:id="@+id/action_browserFragment_to_settingsFragment"
             app:destination="@id/settingsFragment" />
@@ -368,8 +388,7 @@
         android:id="@+id/historyFragment"
         android:name="com.shmibblez.inferno.library.history.HistoryFragment"
         android:label="@string/library_history"
-        tools:layout="@layout/fragment_history">
-    </fragment>
+        tools:layout="@layout/fragment_history"></fragment>
 
     <fragment
         android:id="@+id/historyMetadataGroupFragment"
@@ -450,8 +469,8 @@
         <argument
             android:name="hideFolderGuid"
             android:defaultValue="@null"
-            app:nullable="true"
-            app:argType="string" />
+            app:argType="string"
+            app:nullable="true" />
     </fragment>
 
     <fragment
@@ -466,7 +485,7 @@
 
     <dialog
         android:id="@+id/reviewQualityCheckFragment"
-        android:name="com.shmibblez.inferno.shopping.ReviewQualityCheckFragment"/>
+        android:name="com.shmibblez.inferno.shopping.ReviewQualityCheckFragment" />
 
     <fragment
         android:id="@+id/savedLoginsAuthFragment"
@@ -509,10 +528,10 @@
         tools:layout="@layout/fragment_exceptions" />
 
     <action
-            android:id="@+id/action_loginDetailFragment_to_savedLogins"
-            app:destination="@id/savedLogins"
-            app:popUpTo="@id/savedLoginsFragment"
-            app:popUpToInclusive="true"/>
+        android:id="@+id/action_loginDetailFragment_to_savedLogins"
+        app:destination="@id/savedLogins"
+        app:popUpTo="@id/savedLoginsFragment"
+        app:popUpToInclusive="true" />
 
     <fragment
         android:id="@+id/settingsFragment"
@@ -523,14 +542,14 @@
             android:defaultValue="@null"
             app:argType="string"
             app:nullable="true" />
-<!--        <action-->
-<!--            android:id="@+id/action_settingsFragment_to_dataChoicesFragment"-->
-<!--            app:destination="@id/dataChoicesFragment"-->
-<!--            app:enterAnim="@anim/slide_in_right"-->
-<!--            app:exitAnim="@anim/slide_out_left"-->
-<!--            app:popEnterAnim="@anim/slide_in_left"-->
-<!--            app:popExitAnim="@anim/slide_out_right"-->
-<!--            app:popUpTo="@id/settingsFragment" />-->
+        <!--        <action-->
+        <!--            android:id="@+id/action_settingsFragment_to_dataChoicesFragment"-->
+        <!--            app:destination="@id/dataChoicesFragment"-->
+        <!--            app:enterAnim="@anim/slide_in_right"-->
+        <!--            app:exitAnim="@anim/slide_out_left"-->
+        <!--            app:popEnterAnim="@anim/slide_in_left"-->
+        <!--            app:popExitAnim="@anim/slide_out_right"-->
+        <!--            app:popUpTo="@id/settingsFragment" />-->
         <action
             android:id="@+id/action_settingsFragment_to_sitePermissionsFragment"
             app:destination="@id/sitePermissionsFragment"
@@ -601,13 +620,13 @@
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
             app:popExitAnim="@anim/slide_out_right" />
-<!--        <action-->
-<!--            android:id="@+id/action_settingsFragment_to_nimbusExperimentsFragment"-->
-<!--            app:destination="@id/nimbus_experiment_graph"-->
-<!--            app:enterAnim="@anim/slide_in_right"-->
-<!--            app:exitAnim="@anim/slide_out_left"-->
-<!--            app:popEnterAnim="@anim/slide_in_left"-->
-<!--            app:popExitAnim="@anim/slide_out_right" />-->
+        <!--        <action-->
+        <!--            android:id="@+id/action_settingsFragment_to_nimbusExperimentsFragment"-->
+        <!--            app:destination="@id/nimbus_experiment_graph"-->
+        <!--            app:enterAnim="@anim/slide_in_right"-->
+        <!--            app:exitAnim="@anim/slide_out_left"-->
+        <!--            app:popEnterAnim="@anim/slide_in_left"-->
+        <!--            app:popExitAnim="@anim/slide_out_right" />-->
         <action
             android:id="@+id/action_settingsFragment_to_customizationFragment"
             app:destination="@id/customizationFragment"
@@ -723,12 +742,10 @@
     </fragment>
     <dialog
         android:id="@+id/profilerStartDialogFragment"
-        android:name="com.shmibblez.inferno.perf.ProfilerStartDialogFragment">
-    </dialog>
+        android:name="com.shmibblez.inferno.perf.ProfilerStartDialogFragment"></dialog>
     <dialog
         android:id="@+id/profilerStopDialogFragment"
-        android:name="com.shmibblez.inferno.perf.ProfilerStopDialogFragment">
-    </dialog>
+        android:name="com.shmibblez.inferno.perf.ProfilerStopDialogFragment"></dialog>
     <fragment
         android:id="@+id/tabsSettingsFragment"
         android:name="com.shmibblez.inferno.settings.TabsSettingsFragment"
@@ -748,20 +765,20 @@
     <fragment
         android:id="@+id/wallpaperSettingsFragment"
         android:name="com.shmibblez.inferno.settings.wallpaper.WallpaperSettingsFragment"
-        android:label="@string/customize_wallpapers"/>
-<!--    <fragment-->
-<!--        android:id="@+id/dataChoicesFragment"-->
-<!--        android:name="com.shmibblez.inferno.settings.DataChoicesFragment"-->
-<!--        android:label="@string/preferences_data_choices">-->
-<!--        <action-->
-<!--            android:id="@+id/action_dataChoicesFragment_to_studiesFragment"-->
-<!--            app:destination="@id/studiesFragment"-->
-<!--            app:enterAnim="@anim/slide_in_right"-->
-<!--            app:exitAnim="@anim/slide_out_left"-->
-<!--            app:popEnterAnim="@anim/slide_in_left"-->
-<!--            app:popExitAnim="@anim/slide_out_right"-->
-<!--            app:popUpTo="@id/dataChoicesFragment" />-->
-<!--    </fragment>-->
+        android:label="@string/customize_wallpapers" />
+    <!--    <fragment-->
+    <!--        android:id="@+id/dataChoicesFragment"-->
+    <!--        android:name="com.shmibblez.inferno.settings.DataChoicesFragment"-->
+    <!--        android:label="@string/preferences_data_choices">-->
+    <!--        <action-->
+    <!--            android:id="@+id/action_dataChoicesFragment_to_studiesFragment"-->
+    <!--            app:destination="@id/studiesFragment"-->
+    <!--            app:enterAnim="@anim/slide_in_right"-->
+    <!--            app:exitAnim="@anim/slide_out_left"-->
+    <!--            app:popEnterAnim="@anim/slide_in_left"-->
+    <!--            app:popExitAnim="@anim/slide_out_right"-->
+    <!--            app:popUpTo="@id/dataChoicesFragment" />-->
+    <!--    </fragment>-->
     <fragment
         android:id="@+id/studiesFragment"
         android:name="com.shmibblez.inferno.settings.studies.StudiesFragment"
@@ -818,7 +835,7 @@
         android:id="@+id/pairFragment"
         android:name="com.shmibblez.inferno.settings.PairFragment"
         android:label="@string/preferences_sync_2"
-        tools:layout="@layout/fragment_pair" >
+        tools:layout="@layout/fragment_pair">
         <argument
             android:name="entrypoint"
             app:argType="com.shmibblez.inferno.components.accounts.FenixFxAEntryPoint" />
@@ -1297,42 +1314,42 @@
             <argument
                 android:name="searchEngineIdentifier"
                 app:argType="string"
-                app:nullable="true"/>
+                app:nullable="true" />
         </fragment>
     </navigation>
 
-<!--    <navigation-->
-<!--        android:id="@+id/nimbus_experiment_graph"-->
-<!--        app:startDestination="@id/nimbusExperimentsFragment">-->
-<!--        <fragment-->
-<!--            android:id="@+id/nimbusExperimentsFragment"-->
-<!--            android:name="com.shmibblez.inferno.nimbus.NimbusExperimentsFragment"-->
-<!--            android:label="@string/preferences_nimbus_experiments"-->
-<!--            tools:layout="@layout/mozac_service_nimbus_experiments">-->
-<!--            <action-->
-<!--                android:id="@+id/action_nimbusExperimentsFragment_to_nimbusBranchesFragment"-->
-<!--                app:destination="@+id/nimbusBranchesFragment" />-->
-<!--        </fragment>-->
-<!--        <fragment-->
-<!--            android:id="@+id/nimbusBranchesFragment"-->
-<!--            android:name="com.shmibblez.inferno.nimbus.NimbusBranchesFragment"-->
-<!--            tools:layout="@layout/mozac_service_nimbus_experiment_details">-->
-<!--            <argument-->
-<!--                android:name="experimentId"-->
-<!--                app:argType="string" />-->
-<!--            <argument-->
-<!--                android:name="experimentName"-->
-<!--                app:argType="string" />-->
-<!--            <action-->
-<!--                android:id="@+id/action_nimbusBranchesFragment_to_dataChoicesFragment"-->
-<!--                app:destination="@id/dataChoicesFragment"-->
-<!--                app:enterAnim="@anim/slide_in_right"-->
-<!--                app:exitAnim="@anim/slide_out_left"-->
-<!--                app:popEnterAnim="@anim/slide_in_left"-->
-<!--                app:popExitAnim="@anim/slide_out_right"-->
-<!--                app:popUpTo="@id/settingsFragment" />-->
-<!--        </fragment>-->
-<!--    </navigation>-->
+    <!--    <navigation-->
+    <!--        android:id="@+id/nimbus_experiment_graph"-->
+    <!--        app:startDestination="@id/nimbusExperimentsFragment">-->
+    <!--        <fragment-->
+    <!--            android:id="@+id/nimbusExperimentsFragment"-->
+    <!--            android:name="com.shmibblez.inferno.nimbus.NimbusExperimentsFragment"-->
+    <!--            android:label="@string/preferences_nimbus_experiments"-->
+    <!--            tools:layout="@layout/mozac_service_nimbus_experiments">-->
+    <!--            <action-->
+    <!--                android:id="@+id/action_nimbusExperimentsFragment_to_nimbusBranchesFragment"-->
+    <!--                app:destination="@+id/nimbusBranchesFragment" />-->
+    <!--        </fragment>-->
+    <!--        <fragment-->
+    <!--            android:id="@+id/nimbusBranchesFragment"-->
+    <!--            android:name="com.shmibblez.inferno.nimbus.NimbusBranchesFragment"-->
+    <!--            tools:layout="@layout/mozac_service_nimbus_experiment_details">-->
+    <!--            <argument-->
+    <!--                android:name="experimentId"-->
+    <!--                app:argType="string" />-->
+    <!--            <argument-->
+    <!--                android:name="experimentName"-->
+    <!--                app:argType="string" />-->
+    <!--            <action-->
+    <!--                android:id="@+id/action_nimbusBranchesFragment_to_dataChoicesFragment"-->
+    <!--                app:destination="@id/dataChoicesFragment"-->
+    <!--                app:enterAnim="@anim/slide_in_right"-->
+    <!--                app:exitAnim="@anim/slide_out_left"-->
+    <!--                app:popEnterAnim="@anim/slide_in_left"-->
+    <!--                app:popExitAnim="@anim/slide_out_right"-->
+    <!--                app:popUpTo="@id/settingsFragment" />-->
+    <!--        </fragment>-->
+    <!--    </navigation>-->
 
     <navigation
         android:id="@+id/autofill_graph"
@@ -1527,7 +1544,7 @@
             <argument
                 android:name="selectedLanguageDisplayName"
                 app:argType="string"
-                app:nullable="true"/>
+                app:nullable="true" />
         </fragment>
         <fragment
             android:id="@+id/neverTranslateSitePreferenceFragment"
@@ -1561,12 +1578,12 @@
                 app:argType="com.shmibblez.inferno.translations.preferences.downloadlanguages.DownloadLanguageItemTypePreference" />
             <argument
                 android:name="languageCode"
-                app:nullable="true"
-                app:argType="string" />
+                app:argType="string"
+                app:nullable="true" />
             <argument
                 android:name="languageDisplayName"
-                app:nullable="true"
-                app:argType="string" />
+                app:argType="string"
+                app:nullable="true" />
             <argument
                 android:name="modelSize"
                 app:argType="long" />
@@ -1582,8 +1599,8 @@
         <argument
             android:name="customTabSessionId"
             android:defaultValue="@null"
-            app:nullable="true"
-            app:argType="string" />
+            app:argType="string"
+            app:nullable="true" />
         <argument
             android:name="isSandboxCustomTab"
             android:defaultValue="false"
@@ -1597,8 +1614,8 @@
             <argument
                 android:name="customTabSessionId"
                 android:defaultValue="@null"
-                app:nullable="true"
-                app:argType="string" />
+                app:argType="string"
+                app:nullable="true" />
             <argument
                 android:name="isSandboxCustomTab"
                 android:defaultValue="false"

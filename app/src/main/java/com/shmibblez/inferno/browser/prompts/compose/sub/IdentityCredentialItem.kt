@@ -38,7 +38,7 @@ internal fun IdentityCredentialItem(
         modifier = modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 6.dp),
+            .padding(horizontal = 16.dp), // vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         beforeItemContent?.invoke()

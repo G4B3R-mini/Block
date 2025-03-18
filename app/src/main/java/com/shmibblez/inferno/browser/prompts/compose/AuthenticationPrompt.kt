@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -40,8 +41,7 @@ fun AuthenticationPrompt(authData: PromptRequest.Authentication, sessionId: Stri
                 store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, authData))
             },
         ),
-        positiveAction = PromptBottomSheetTemplateAction(
-            text = stringResource(android.R.string.ok),
+        positiveAction = PromptBottomSheetTemplateAction(text = stringResource(android.R.string.ok),
             action = {
                 onPositiveAction(authData, username, password)
                 store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, authData))
@@ -52,31 +52,40 @@ fun AuthenticationPrompt(authData: PromptRequest.Authentication, sessionId: Stri
         InfernoText(
             text = authData.title,
             textAlign = TextAlign.Start,
-            modifier = Modifier
-                .padding(horizontal = 4.dp)
+            modifier = Modifier.padding(horizontal = 16.dp)
         )
         // message
         InfernoText(
             text = authData.message,
             textAlign = TextAlign.Start,
             modifier = Modifier
-                .padding(horizontal = 4.dp)
+                .padding(horizontal = 16.dp)
+                .padding(top = 8.dp)
         )
-        InfernoOutlinedTextField(
-            value = username,
-            onValueChange = {
-                username = it
-            },
-            modifier = Modifier.padding(horizontal = 4.dp),
-            label = { InfernoText(stringResource(R.string.mozac_feature_prompt_username_hint)) },
-        )
+        if (!authData.onlyShowPassword)
+            InfernoOutlinedTextField(
+                value = username,
+                onValueChange = {
+                    username = it
+                },
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .padding(top = 8.dp),
+                label = {
+                    InfernoText(stringResource(R.string.mozac_feature_prompt_username_hint))
+                },
+            )
         InfernoOutlinedTextField(
             value = password,
             onValueChange = {
                 password = it
             },
-            modifier = Modifier.padding(horizontal = 4.dp),
-            label = { InfernoText(stringResource(R.string.mozac_feature_prompt_password_hint)) },
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .padding(top = 8.dp),
+            label = {
+                InfernoText(stringResource(R.string.mozac_feature_prompt_password_hint))
+            },
         )
     }
 }

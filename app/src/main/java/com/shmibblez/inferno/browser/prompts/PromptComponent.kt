@@ -2,13 +2,20 @@ package com.shmibblez.inferno.browser.prompts
 
 import android.util.Log
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -26,6 +33,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentManager
@@ -93,6 +101,7 @@ import mozilla.components.concept.storage.Login
 import mozilla.components.concept.storage.LoginEntry
 import mozilla.components.concept.storage.LoginValidationDelegate
 import mozilla.components.feature.prompts.address.AddressDelegate
+import mozilla.components.feature.prompts.address.AddressPicker
 import mozilla.components.feature.prompts.address.DefaultAddressDelegate
 import mozilla.components.feature.prompts.creditcard.CreditCardDelegate
 import mozilla.components.feature.prompts.identitycredential.DialogColors
@@ -173,7 +182,7 @@ fun PromptBottomSheetTemplate(
         onDismissRequest = onDismissRequest,
         // todo: use acorn colors
         containerColor = Color.Black,
-        scrimColor = Color.Black.copy(alpha = 0.1F),
+        scrimColor = Color.Black.copy(alpha = 0.5F),
         shape = RectangleShape,
         dragHandle = {
             /* no drag handle */
@@ -186,7 +195,14 @@ fun PromptBottomSheetTemplate(
         content = {
             // content actions (cancel or confirm)
             // content below
-            if (buttonPosition == PromptBottomSheetTemplateButtonPosition.TOP && (positiveAction != null || negativeAction != null)) {
+            if (buttonPosition == PromptBottomSheetTemplateButtonPosition.BOTTOM && (positiveAction != null || negativeAction != null)) {
+                Spacer(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp),
+                )
+            }
+            if (buttonPosition == PromptBottomSheetTemplateButtonPosition.TOP && (positiveAction != null || neutralAction != null || negativeAction != null)) {
                 Column {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -194,62 +210,94 @@ fun PromptBottomSheetTemplate(
                     ) {
                         // todo: button text color and colors if not enabled
                         if (negativeAction != null) {
-                            TextButton(
-                                onClick = negativeAction.action,
-                                enabled = negativeAction.enabled,
-                            ) {
-                                InfernoText(
-                                    text = negativeAction.text,
-                                    textAlign = TextAlign.Center,
-                                    modifier = Modifier.padding(all = 4.dp)
-                                )
-                            }
+//                            TextButton(
+//                                onClick = negativeAction.action,
+//                                enabled = negativeAction.enabled,
+//                            ) {
+                            InfernoText(
+                                text = negativeAction.text,
+                                textAlign = TextAlign.Start,
+                                modifier = Modifier
+                                    .padding(all = 8.dp)
+                                    .weight(1F)
+                                    .clickable(
+                                        onClick = negativeAction.action,
+                                        enabled = negativeAction.enabled,
+                                    ),
+                                fontWeight = FontWeight.Bold,
+                                fontColor = Color(143, 0, 255),
+                            )
+//                            }
                         }
                         if (neutralAction != null) {
-                            TextButton(
-                                onClick = neutralAction.action,
-                                enabled = neutralAction.enabled,
-                            ) {
-                                InfernoText(
-                                    text = neutralAction.text,
-                                    textAlign = TextAlign.Center,
-                                    modifier = Modifier.padding(all = 4.dp)
-                                )
-                            }
+//                            TextButton(
+//                                onClick = neutralAction.action,
+//                                enabled = neutralAction.enabled,
+//                            ) {
+                            InfernoText(
+                                text = neutralAction.text,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .padding(all = 8.dp)
+                                    .weight(1F)
+                                    .clickable(
+                                        onClick = neutralAction.action,
+                                        enabled = neutralAction.enabled,
+                                    ),
+                                fontWeight = FontWeight.Bold,
+                                fontColor = Color(143, 0, 255),
+                            )
+//                            }
                         }
                         if (positiveAction != null) {
-                            TextButton(
-                                onClick = positiveAction.action,
-                                enabled = positiveAction.enabled,
-                            ) {
-                                InfernoText(
-                                    text = positiveAction.text,
-                                    textAlign = TextAlign.Center,
-                                    modifier = Modifier.padding(all = 4.dp)
-                                )
-                            }
+//                            TextButton(
+//                                onClick = positiveAction.action,
+//                                enabled = positiveAction.enabled,
+//                            ) {
+                            InfernoText(
+                                text = positiveAction.text,
+                                textAlign = TextAlign.End,
+                                modifier = Modifier
+                                    .padding(all = 8.dp)
+                                    .weight(1F)
+                                    .clickable(
+                                        onClick = positiveAction.action,
+                                        enabled = positiveAction.enabled,
+                                    ),
+                                fontWeight = FontWeight.Bold,
+                                fontColor = Color(143, 0, 255),
+                            )
+//                            }
                         }
                     }
                     HorizontalDivider(
-                        color = Color.LightGray, modifier = Modifier.padding(horizontal = 4.dp)
+                        color = Color.LightGray, modifier = Modifier.padding(horizontal = 8.dp)
+                    )
+                    Spacer(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 16.dp),
                     )
                 }
             }
             // content
             content.invoke(this)
             // bottom buttons
-            if (buttonPosition == PromptBottomSheetTemplateButtonPosition.BOTTOM && (positiveAction != null || negativeAction != null)) {
+            if (buttonPosition == PromptBottomSheetTemplateButtonPosition.BOTTOM && (positiveAction != null || neutralAction != null || negativeAction != null)) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(all = 4.dp),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        .padding(16.dp)
+                        .height(IntrinsicSize.Max),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     // todo: button text color and colors if not enabled
                     if (negativeAction != null) {
                         OutlinedButton(
                             onClick = negativeAction.action,
-                            modifier = Modifier.weight(1F),
+                            modifier = Modifier
+                                .weight(1F)
+                                .fillMaxHeight(),
                             enabled = negativeAction.enabled,
                             shape = MaterialTheme.shapes.small,
                             border = BorderStroke(width = 1.dp, color = Color.White),
@@ -267,7 +315,9 @@ fun PromptBottomSheetTemplate(
                     if (neutralAction != null) {
                         OutlinedButton(
                             onClick = neutralAction.action,
-                            modifier = Modifier.weight(1F),
+                            modifier = Modifier
+                                .weight(1F)
+                                .fillMaxHeight(),
                             enabled = neutralAction.enabled,
                             shape = MaterialTheme.shapes.small,
                             border = BorderStroke(width = 1.dp, color = Color.White),
@@ -285,7 +335,9 @@ fun PromptBottomSheetTemplate(
                     if (positiveAction != null) {
                         Button(
                             onClick = positiveAction.action,
-                            modifier = Modifier.weight(1F),
+                            modifier = Modifier
+                                .weight(1F)
+                                .fillMaxHeight(),
                             enabled = positiveAction.enabled,
                             shape = MaterialTheme.shapes.small,
                             colors = ButtonDefaults.buttonColors(
@@ -324,7 +376,7 @@ fun PromptComponent(
     customTabId: String?,
     /* private val */
     fragmentManager: FragmentManager,
-    filePicker: FilePicker,
+    filePicker: FilePicker?,
     /* private val */
     identityCredentialColorsProvider: DialogColorsProvider = DialogColorsProvider {
         DialogColors.default()
@@ -388,7 +440,6 @@ fun PromptComponent(
     Box(
         modifier = Modifier.fillMaxWidth(),
     ) {
-        Log.d("PromptComponent", "prompts size: ${promptRequests.size}")
         for (prompt in promptRequests.reversed()) {
             // if cant show prompt, go to next one
             if (!canShowThisPrompt(prompt, promptAbuserDetector)) {
@@ -434,9 +485,9 @@ fun PromptComponent(
                     )
                 }
 
-                is PromptRequest.File -> {
-                    emitPromptDisplayedFact(promptName = "FilePrompt")
-                    filePicker.handleFileRequest(prompt)
+                is File -> {
+//                    emitPromptDisplayedFact(promptName = "FilePrompt")
+                    filePicker?.handleFileRequest(prompt)
                 }
 
                 is PromptRequest.IdentityCredential.PrivacyPolicy -> {
@@ -479,7 +530,7 @@ fun PromptComponent(
                         prompt,
                         sessionId,
                         title,
-                        "",
+                        null,
                         negativeLabel,
                         positiveLabel,
                         promptAbuserDetector
@@ -554,7 +605,7 @@ fun PromptComponent(
                     )
                 }
 
-                is PromptRequest.SelectAddress -> {
+                is SelectAddress -> {
 //                var addressPicker =
 //                    with(addressDelegate) {
 //                        addressPickerView?.let {
@@ -566,8 +617,12 @@ fun PromptComponent(
 //                            )
 //                        }
 //                    }
-                    emitSuccessfulAddressAutofillFormDetectedFact()
-                    if (isAddressAutofillEnabled() && prompt.addresses.isNotEmpty()) {
+//                    emitSuccessfulAddressAutofillFormDetectedFact()
+                    Log.d(
+                        "PromptComponent",
+                        "isAddressAutofillEnabled: ${isAddressAutofillEnabled()}, addresses size: ${prompt.addresses.size}"
+                    )
+                    if (prompt.addresses.isNotEmpty()) {
 //                    addressPicker?.handleSelectAddressRequest(prompt)
                         SelectableListPrompt(
                             prompt,
@@ -578,8 +633,8 @@ fun PromptComponent(
                     }
                 }
 
-                is PromptRequest.SelectCreditCard -> {
-                    emitSuccessfulCreditCardAutofillFormDetectedFact()
+                is SelectCreditCard -> {
+//                    emitSuccessfulCreditCardAutofillFormDetectedFact()
                     if (isCreditCardAutofillEnabled() && prompt.creditCards.isNotEmpty()) {
 //                    creditCardPicker?.handleSelectCreditCardRequest(prompt)
                         SelectableListPrompt(
@@ -592,7 +647,7 @@ fun PromptComponent(
                     }
                 }
 
-                is PromptRequest.SelectLoginPrompt -> {
+                is SelectLoginPrompt -> {
                     if (!isLoginAutofillEnabled()) {
                         return
                     }
@@ -614,7 +669,7 @@ fun PromptComponent(
                                 dismissDialogRequest(prompt, sessionId, store)
                                 return
                             }
-                            emitGeneratedPasswordShownFact()
+//                            emitGeneratedPasswordShownFact()
                             // todo: password generator dialog
                             PasswordGeneratorDialogPrompt(
                                 prompt,
@@ -643,7 +698,7 @@ fun PromptComponent(
                                 dismissDialogRequest(prompt, sessionId, store)
                                 return
                             }
-                            emitGeneratedPasswordShownFact()
+//                            emitGeneratedPasswordShownFact()
                             GeneratePasswordPrompt(prompt, sessionId, onGeneratePassword = {
                                 PasswordGeneratorDialogPrompt(
                                     prompt,
@@ -654,20 +709,20 @@ fun PromptComponent(
                             })
                         }
                     } else {
-                        emitLoginAutofillShownFact()
+//                        emitLoginAutofillShownFact()
                         LoginPickerPrompt(prompt, sessionId)
 //                    loginPicker?.handleSelectLoginRequest(promptRequest)
                     }
-                    emitPromptDisplayedFact(promptName = "SelectLoginPrompt")
+//                    emitPromptDisplayedFact(promptName = "SelectLoginPrompt")
                 }
 
-                is PromptRequest.Share -> {
-                    emitPromptDisplayedFact(promptName = "ShareSheet")
+                is Share -> {
+//                    emitPromptDisplayedFact(promptName = "ShareSheet")
                     shareDelegate.showShareSheet(
                         context = context,
                         shareData = prompt.data,
                         onDismiss = {
-                            emitPromptDismissedFact(promptName = "ShareSheet")
+//                            emitPromptDismissedFact(promptName = "ShareSheet")
                             onDismiss(prompt)
                             onNegativeAction(prompt)
                             store.dispatch(
@@ -687,11 +742,11 @@ fun PromptComponent(
                     )
                 }
 
-                is PromptRequest.SingleChoice -> {
+                is SingleChoice -> {
                     ChoiceDialogPrompt(prompt, sessionId, SINGLE_CHOICE_DIALOG_TYPE)
                 }
 
-                is PromptRequest.TextPrompt -> {
+                is TextPrompt -> {
                     TextPromptDialogPrompt(
                         prompt,
                         sessionId,
@@ -717,7 +772,6 @@ fun PromptComponent(
             }
         }
     }
-
 }
 
 fun onDismiss(promptRequest: PromptRequest) {
@@ -727,7 +781,7 @@ fun onDismiss(promptRequest: PromptRequest) {
         is PromptRequest.BeforeUnload -> promptRequest.onDismiss.invoke()
         is PromptRequest.Color -> promptRequest.onDismiss.invoke()
         is PromptRequest.Confirm -> promptRequest.onDismiss.invoke()
-        is PromptRequest.File -> promptRequest.onDismiss.invoke()
+        is File -> promptRequest.onDismiss.invoke()
         is PromptRequest.IdentityCredential.PrivacyPolicy -> promptRequest.onDismiss.invoke()
         is PromptRequest.IdentityCredential.SelectAccount -> promptRequest.onDismiss.invoke()
         is PromptRequest.IdentityCredential.SelectProvider -> promptRequest.onDismiss.invoke()
@@ -737,12 +791,12 @@ fun onDismiss(promptRequest: PromptRequest) {
         is PromptRequest.Repost -> promptRequest.onDismiss.invoke()
         is PromptRequest.SaveCreditCard -> promptRequest.onDismiss.invoke()
         is PromptRequest.SaveLoginPrompt -> promptRequest.onDismiss.invoke()
-        is PromptRequest.SelectAddress -> promptRequest.onDismiss.invoke()
-        is PromptRequest.SelectCreditCard -> promptRequest.onDismiss.invoke()
-        is PromptRequest.SelectLoginPrompt -> promptRequest.onDismiss.invoke()
-        is PromptRequest.Share -> promptRequest.onDismiss.invoke()
-        is PromptRequest.SingleChoice -> promptRequest.onDismiss.invoke()
-        is PromptRequest.TextPrompt -> promptRequest.onDismiss.invoke()
+        is SelectAddress -> promptRequest.onDismiss.invoke()
+        is SelectCreditCard -> promptRequest.onDismiss.invoke()
+        is SelectLoginPrompt -> promptRequest.onDismiss.invoke()
+        is Share -> promptRequest.onDismiss.invoke()
+        is SingleChoice -> promptRequest.onDismiss.invoke()
+        is TextPrompt -> promptRequest.onDismiss.invoke()
         is TimeSelection -> promptRequest.onDismiss.invoke()
     }
 }
@@ -759,7 +813,7 @@ fun onPositiveAction(promptRequest: PromptRequest, value: Any? = null, value2: A
 
         is PromptRequest.Color -> promptRequest.onConfirm.invoke(value as String)
         is PromptRequest.Confirm -> promptRequest.onConfirmPositiveButton.invoke(value as Boolean)
-        is PromptRequest.File -> {}
+        is File -> {}
         is PromptRequest.IdentityCredential.PrivacyPolicy -> promptRequest.onConfirm.invoke(value as Boolean)
         is PromptRequest.IdentityCredential.SelectAccount -> promptRequest.onConfirm.invoke(value as Account)
         is PromptRequest.IdentityCredential.SelectProvider -> promptRequest.onConfirm.invoke(value as Provider)
@@ -767,12 +821,12 @@ fun onPositiveAction(promptRequest: PromptRequest, value: Any? = null, value2: A
         is PromptRequest.Repost -> promptRequest.onConfirm.invoke()
         is PromptRequest.SaveCreditCard -> promptRequest.onConfirm.invoke(value as CreditCardEntry)
         is PromptRequest.SaveLoginPrompt -> promptRequest.onConfirm.invoke(value as LoginEntry)
-        is PromptRequest.SelectAddress -> promptRequest.onConfirm.invoke(value as Address)
-        is PromptRequest.SelectCreditCard -> promptRequest.onConfirm.invoke(value as CreditCardEntry)
-        is PromptRequest.SelectLoginPrompt -> promptRequest.onConfirm.invoke(value as Login)
-        is PromptRequest.Share -> promptRequest.onSuccess.invoke()
-        is PromptRequest.SingleChoice -> promptRequest.onConfirm.invoke(value as Choice)
-        is PromptRequest.TextPrompt -> promptRequest.onConfirm.invoke(
+        is SelectAddress -> promptRequest.onConfirm.invoke(value as Address)
+        is SelectCreditCard -> promptRequest.onConfirm.invoke(value as CreditCardEntry)
+        is SelectLoginPrompt -> promptRequest.onConfirm.invoke(value as Login)
+        is Share -> promptRequest.onSuccess.invoke()
+        is SingleChoice -> promptRequest.onConfirm.invoke(value as Choice)
+        is TextPrompt -> promptRequest.onConfirm.invoke(
             value as Boolean, value2 as String
         )
 
@@ -787,7 +841,7 @@ fun onNeutralAction(promptRequest: PromptRequest, value: Any? = null) {
         is PromptRequest.BeforeUnload -> promptRequest.onDismiss.invoke()
         is PromptRequest.Color -> TODO()
         is PromptRequest.Confirm -> promptRequest.onConfirmNeutralButton.invoke(value as Boolean)
-        is PromptRequest.File -> TODO()
+        is File -> TODO()
         is PromptRequest.IdentityCredential.PrivacyPolicy -> TODO()
         is PromptRequest.IdentityCredential.SelectAccount -> TODO()
         is PromptRequest.IdentityCredential.SelectProvider -> TODO()
@@ -797,12 +851,12 @@ fun onNeutralAction(promptRequest: PromptRequest, value: Any? = null) {
         is PromptRequest.Repost -> promptRequest.onDismiss.invoke()
         is PromptRequest.SaveCreditCard -> TODO()
         is PromptRequest.SaveLoginPrompt -> TODO()
-        is PromptRequest.SelectAddress -> TODO()
-        is PromptRequest.SelectCreditCard -> TODO()
-        is PromptRequest.SelectLoginPrompt -> TODO()
-        is PromptRequest.Share -> TODO()
-        is PromptRequest.SingleChoice -> TODO()
-        is PromptRequest.TextPrompt -> TODO()
+        is SelectAddress -> TODO()
+        is SelectCreditCard -> TODO()
+        is SelectLoginPrompt -> TODO()
+        is Share -> TODO()
+        is SingleChoice -> TODO()
+        is TextPrompt -> TODO()
         is TimeSelection -> promptRequest.onClear.invoke()
     }
 }
@@ -814,7 +868,7 @@ fun onNegativeAction(promptRequest: PromptRequest, value: Any? = null) {
         is PromptRequest.BeforeUnload -> promptRequest.onStay.invoke()
         is PromptRequest.Color -> promptRequest.onDismiss.invoke()
         is PromptRequest.Confirm -> promptRequest.onConfirmNegativeButton.invoke(value as Boolean)
-        is PromptRequest.File -> TODO()
+        is File -> TODO()
         is PromptRequest.IdentityCredential.PrivacyPolicy -> promptRequest.onDismiss.invoke()
         is PromptRequest.IdentityCredential.SelectAccount -> promptRequest.onDismiss.invoke()
         is PromptRequest.IdentityCredential.SelectProvider -> promptRequest.onDismiss.invoke()
@@ -824,12 +878,12 @@ fun onNegativeAction(promptRequest: PromptRequest, value: Any? = null) {
         is PromptRequest.Repost -> promptRequest.onDismiss.invoke()
         is PromptRequest.SaveCreditCard -> promptRequest.onDismiss.invoke()
         is PromptRequest.SaveLoginPrompt -> promptRequest.onDismiss.invoke()
-        is PromptRequest.SelectAddress -> promptRequest.onDismiss.invoke()
-        is PromptRequest.SelectCreditCard -> promptRequest.onDismiss.invoke()
-        is PromptRequest.SelectLoginPrompt -> promptRequest.onDismiss.invoke()
-        is PromptRequest.Share -> promptRequest.onFailure.invoke()
-        is PromptRequest.SingleChoice -> promptRequest.onDismiss.invoke()
-        is PromptRequest.TextPrompt -> promptRequest.onDismiss.invoke()
+        is SelectAddress -> promptRequest.onDismiss.invoke()
+        is SelectCreditCard -> promptRequest.onDismiss.invoke()
+        is SelectLoginPrompt -> promptRequest.onDismiss.invoke()
+        is Share -> promptRequest.onFailure.invoke()
+        is SingleChoice -> promptRequest.onDismiss.invoke()
+        is TextPrompt -> promptRequest.onDismiss.invoke()
         is TimeSelection -> promptRequest.onDismiss.invoke()
     }
 }

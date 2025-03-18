@@ -166,6 +166,7 @@ import com.shmibblez.inferno.tabbar.toTabList
 import com.shmibblez.inferno.tabs.LastTabFeature
 import com.shmibblez.inferno.tabs.TabsTrayFragment
 import com.shmibblez.inferno.tabstray.Page
+import com.shmibblez.inferno.test.PromptComponentTestObjs
 import com.shmibblez.inferno.theme.FirefoxTheme
 import com.shmibblez.inferno.theme.ThemeManager
 import com.shmibblez.inferno.toolbar.BrowserToolbar
@@ -274,7 +275,7 @@ import java.lang.ref.WeakReference
 import kotlin.math.roundToInt
 import mozilla.components.browser.toolbar.BrowserToolbar as BrowserToolbarCompat
 
-// todo: implement [BrowserFragment], [BaseBrowserFragment]
+// todo: nav host should be base composable, BrowserComponent in this case since it is now base home screen
 // todo: implement layout from fragment_browser.xml
 // todo: from fragment_browser.xml, for below views first wrap views with AndroidView, then
 //  progressively implement in compose
@@ -295,6 +296,7 @@ import mozilla.components.browser.toolbar.BrowserToolbar as BrowserToolbarCompat
 //   - savedLoginsLauncher
 
 // TODO:
+//  - if not scrollable make bottom bar offset swipe up or down with scroll received
 //  - implement biometric authentication in SelectableListPrompt for credit cards (urgent)
 //  - implement composable FindInPageBar
 //  - home page
@@ -425,15 +427,16 @@ private fun resolvePageType(tabSessionState: TabSessionState?): BrowserComponent
 @Composable
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter", "VisibleForTests")
 fun BrowserComponent(
+    navController: NavController,
     sessionId: String?,
     setOnActivityResultHandler: ((OnActivityResultModel) -> Boolean) -> Unit,
     androidPhotoPicker: AndroidPhotoPicker,
     setFilePicker: (FilePicker) -> Unit
 //    args: HomeFragmentArgs
 ) {
+    Log.d("BrowserComponent", "rebuilt")
     val coroutineScope = rememberCoroutineScope()
     val lifecycleOwner = LocalLifecycleOwner.current
-    val navController = rememberNavController()
     val context = LocalContext.current
     val store = context.components.core.store
     val view = LocalView.current
@@ -443,10 +446,8 @@ fun BrowserComponent(
 
     // browser state observer setup
     val localLifecycleOwner = LocalLifecycleOwner.current
-    var browserStateObserver: Store.Subscription<BrowserState, BrowserAction>? by remember {
-        mutableStateOf(
-            null
-        )
+    var browserStateObserver by remember {
+        mutableStateOf<Store.Subscription<BrowserState, BrowserAction>?>(null)
     }
     var tabList by remember { mutableStateOf(store.state.toTabList().first) }
     var currentTab by remember { mutableStateOf(store.state.selectedTab) }
@@ -479,12 +480,11 @@ fun BrowserComponent(
 //    var forwardAction: BrowserToolbar.TwoStateButton? = null
 //    var backAction: BrowserToolbar.TwoStateButton? = null
 //    var refreshAction: BrowserToolbar.TwoStateButton? = null
-    var isTablet: Boolean = false/* BrowserFragment  vars */
+    var isTablet: Boolean = false
+
+    /* BrowserFragment  vars */
 
     /* BaseBrowserFragment vars */
-//    var _binding: FragmentBrowserBinding? = null
-//    val binding get() = _binding!!
-
     lateinit var browserFragmentStore: BrowserFragmentStore
     lateinit var browserAnimator: BrowserAnimator
     lateinit var startForResult: ActivityResultLauncher<Intent>
@@ -627,23 +627,10 @@ fun BrowserComponent(
 //            promptsFeature.withFeature {
 //                it.onPermissionsResult(permissions, grantResults)
 //            }
-            filePicker!!.onPermissionsResult(permissions, grantResults)
+            filePicker?.onPermissionsResult(permissions, grantResults)
         }
 
-    filePicker = FilePicker(
-        container = context.getActivity()!!,
-        store = store,
-        sessionId = customTabSessionId,
-        fileUploadsDirCleaner = context.components.core.fileUploadsDirCleaner,
-        androidPhotoPicker,
-        onNeedToRequestPermissions = { permissions ->
-            requestPromptsPermissionsLauncher.launch(
-                permissions
-            )
-        },
-    )
 
-    setFilePicker(filePicker!!)
 
     /* BaseBrowserFragment vars */
     val backHandler = OnBackPressedHandler(
@@ -675,7 +662,12 @@ fun BrowserComponent(
             searchEngine = it.search.selectedOrDefaultSearchEngine!!
             pageType = resolvePageType(currentTab)
             promptRequests = currentTab?.content?.promptRequests ?: emptyList()
-            Log.d("BrowserComponent", "promptRequests refreshed, new size: ${promptRequests.size}")
+            // currentTab?.content?.promptRequests ?: emptyList()
+            // todo: listOf(PromptComponentTestObjs.selectAddress)
+            Log.d(
+                "BrowserComponent",
+                "browser state changed, promptRequests size: ${promptRequests.size}"
+            )
         }
 
         onDispose {
@@ -700,13 +692,6 @@ fun BrowserComponent(
             passwordBox = ThemeManager.resolveAttributeColor(attribute = R.attr.layer2),
             boxBorder = ThemeManager.resolveAttributeColor(attribute = R.attr.textDisabled),
         )
-    }
-
-    val onNeedToRequestPermissions: OnNeedToRequestPermissions = remember {
-        { permissions ->
-            // todo: permissions
-//                        requestPermissions(permissions, REQUEST_CODE_PROMPT_PERMISSIONS)
-        }
     }
 
     // browser display mode
@@ -735,13 +720,13 @@ fun BrowserComponent(
     }
 
     /// views
-    var engineView: EngineView? by remember { mutableStateOf(null) }
-    var toolbar: BrowserToolbarCompat? by remember { mutableStateOf(null) }
-    var findInPageBar: FindInPageBar? by remember { mutableStateOf(null) }
-    var swipeRefresh: SwipeRefreshLayout? by remember { mutableStateOf(null) }
-    var awesomeBar: AwesomeBarWrapper? by remember { mutableStateOf(null) }
-    var readerViewBar: ReaderViewControlsBar? by remember { mutableStateOf(null) }
-    var readerViewAppearanceButton: FloatingActionButton? by remember { mutableStateOf(null) }
+    var engineView by remember { mutableStateOf<EngineView?>(null) }
+    var toolbar by remember { mutableStateOf<BrowserToolbarCompat?>(null) }
+    var findInPageBar by remember { mutableStateOf<FindInPageBar?>(null) }
+    var swipeRefresh by remember { mutableStateOf<SwipeRefreshLayout?>(null) }
+    var awesomeBar by remember { mutableStateOf<AwesomeBarWrapper?>(null) }
+    var readerViewBar by remember { mutableStateOf<ReaderViewControlsBar?>(null) }
+    var readerViewAppearanceButton by remember { mutableStateOf<FloatingActionButton?>(null) }
 
     /// event handlers
     val activityResultHandler: List<ViewBoundFeatureWrapper<*>> = listOf(
@@ -810,10 +795,8 @@ fun BrowserComponent(
     LaunchedEffect(engineView == null) {
         if (engineView == null) return@LaunchedEffect
         engineView!!.setDynamicToolbarMaxHeight(bottomBarHeightDp.toPx() - bottomBarOffsetPx.value.toInt())
-    }
 
-    LaunchedEffect(engineView == null) {
-        if (engineView == null) return@LaunchedEffect/* BaseBrowserFragment onViewCreated */
+        /* BaseBrowserFragment onViewCreated */
         // DO NOT ADD ANYTHING ABOVE THIS getProfilerTime CALL!
         val profilerStartTime = context.components.core.engine.profiler?.getProfilerTime()
 
@@ -1564,6 +1547,24 @@ fun BrowserComponent(
         )/* BaseBrowserFragment onViewCreated */
     }
 
+    // run only once
+    LaunchedEffect(null) {
+        filePicker = FilePicker(
+            container = context.getActivity()!!,
+            store = store,
+            sessionId = customTabSessionId,
+            fileUploadsDirCleaner = context.components.core.fileUploadsDirCleaner,
+            androidPhotoPicker,
+            onNeedToRequestPermissions = { permissions ->
+                requestPromptsPermissionsLauncher.launch(
+                    permissions
+                )
+            },
+        )
+
+        setFilePicker(filePicker!!)
+    }
+
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
@@ -1686,13 +1687,12 @@ fun BrowserComponent(
     }
 
     PromptComponent(
-//        container = context.getActivity()!! as PromptContainer,
         promptRequests = promptRequests,
         currentTab = currentTab,
         store = store,
         customTabId = customTabSessionId,
         fragmentManager = parentFragmentManager,
-        filePicker = filePicker!!,
+        filePicker = filePicker,
         identityCredentialColorsProvider = colorsProvider,
         tabsUseCases = context.components.useCases.tabsUseCases,
         fileUploadsDirCleaner = context.components.core.fileUploadsDirCleaner,
@@ -1989,13 +1989,16 @@ fun MozAwesomeBar(setView: (AwesomeBarWrapper) -> Unit) {
     AndroidView(modifier = Modifier
         .height(0.dp)
         .width(0.dp),
-        factory = { context -> AwesomeBarWrapper(context) },
+        factory = { context ->
+            val v = AwesomeBarWrapper(context)
+            setView(v)
+            v
+        },
         update = {
             it.visibility = View.GONE
             it.layoutParams.width = LayoutParams.MATCH_PARENT
             it.layoutParams.height = LayoutParams.MATCH_PARENT
             it.setPadding(4.dp.toPx(), 4.dp.toPx(), 4.dp.toPx(), 4.dp.toPx())
-            setView(it)
         })
 }
 
@@ -2008,6 +2011,8 @@ fun MozEngineView(
     AndroidView(modifier = modifier, factory = { context ->
         val vl = VerticalSwipeRefreshLayout(context)
         val gv = GeckoEngineView(context)
+        setSwipeView(vl)
+        setEngineView(gv)
         vl.layoutParams = ViewGroup.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT
         )
@@ -2044,9 +2049,6 @@ fun MozEngineView(
 //        }
         gv!!.isEnabled = true
         gv.isActivated = true
-        // set view references
-        setSwipeView(sv)
-        setEngineView(gv)
     })
 }
 
@@ -2057,14 +2059,17 @@ fun MozBrowserToolbar(setView: (BrowserToolbarCompat) -> Unit) {
         .height(dimensionResource(id = R.dimen.browser_toolbar_height))
         .background(Color.Black)
         .padding(horizontal = 8.dp, vertical = 0.dp),
-        factory = { context -> BrowserToolbarCompat(context) },
+        factory = { context ->
+            val v = BrowserToolbarCompat(context)
+            setView(v)
+            v
+        },
         update = { bt ->
             bt.layoutParams.height = R.dimen.browser_toolbar_height
             bt.layoutParams.width = LayoutParams.MATCH_PARENT
             bt.visibility = View.VISIBLE
             bt.setBackgroundColor(0xFF0000)
             bt.displayMode()
-            setView(bt)
         })
 }
 
@@ -2077,9 +2082,12 @@ fun MozFindInPageBar(setView: (FindInPageBar) -> Unit) {
         .fillMaxSize()
         .height(0.dp)
         .width(0.dp),
-        factory = { context -> FindInPageBar(context) },
+        factory = { context ->
+            val v = FindInPageBar(context)
+            setView(v)
+            v
+        },
         update = {
-            setView(it)
             it.visibility = View.GONE
         })
 }
@@ -2093,11 +2101,12 @@ fun MozReaderViewControlsBar(
         .background(colorResource(id = R.color.toolbarBackgroundColor))
         .height(0.dp)
         .width(0.dp),
-        factory = { context -> ReaderViewControlsBar(context) },
-        update = {
-            setView(it)
-            it.visibility = View.GONE
-        })
+        factory = { context ->
+            val v = ReaderViewControlsBar(context)
+            setView(v)
+            v
+        },
+        update = { it.visibility = View.GONE })
 }
 
 // reader view button, what this for?
@@ -2106,11 +2115,12 @@ fun MozFloatingActionButton(
     setView: (FloatingActionButton) -> Unit
 ) {
     AndroidView(modifier = Modifier.fillMaxSize(),
-        factory = { context -> FloatingActionButton(context) },
-        update = {
-            setView(it)
-            it.visibility = View.GONE
-        })
+        factory = { context ->
+            val v = FloatingActionButton(context)
+            setView(v)
+            v
+        },
+        update = { it.visibility = View.GONE })
 }
 
 /* new functions *//* BaseBrowserFragment funs */
@@ -3880,9 +3890,10 @@ private fun initReviewQualityCheck(
             context.components.appStore.dispatch(
                 ShoppingAction.ShoppingSheetStateUpdated(expanded = true),
             )
-            navController.navigate(
-                BrowserComponentWrapperFragmentDirections.actionBrowserFragmentToReviewQualityCheckDialogFragment(),
-            )
+            // todo: nonexistent
+//            navController.navigate(
+//                BrowserComponentWrapperFragmentDirections.actionBrowserFragmentToReviewQualityCheckDialogFragment(),
+//            )
         },
     )
 

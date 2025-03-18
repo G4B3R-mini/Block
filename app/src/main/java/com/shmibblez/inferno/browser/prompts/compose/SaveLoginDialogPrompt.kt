@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -38,10 +37,12 @@ import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateButtonPosi
 import com.shmibblez.inferno.browser.prompts.onDismiss
 import com.shmibblez.inferno.browser.prompts.onNegativeAction
 import com.shmibblez.inferno.browser.prompts.onPositiveAction
+import com.shmibblez.inferno.compose.base.InfernoOutlinedTextField
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.dialog.emitCancelFact
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.dialog.emitSaveFact
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
@@ -71,20 +72,25 @@ fun SaveLoginDialogPrompt(
 ) {
     val context = LocalContext.current
     val store = context.components.core.store
-
-    /*
+    var shouldRender by remember { mutableStateOf(false) }/*
      * If an implementation of [LoginExceptions] is hooked up to [PromptFeature], we will not
      * show this save login dialog for any origin saved as an exception.
      */
     val coroutineScope = rememberCoroutineScope()
-    if (context.components.core.loginExceptionStorage.isLoginExceptionByOrigin(
-            loginData.logins[0].origin
-        )
-    ) {
-        onNegativeAction(loginData)
-        store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, loginData))
-        return
+    LaunchedEffect(loginData) {
+        CoroutineScope(IO).launch {
+            if (context.components.core.loginExceptionStorage.isLoginExceptionByOrigin(
+                    loginData.logins[0].origin
+                )
+            ) {
+                onNegativeAction(loginData)
+                store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, loginData))
+            } else {
+                shouldRender = true
+            }
+        }
     }
+    if (!shouldRender) return
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     val loginValid by remember { mutableStateOf(password.isEmpty()) }
@@ -192,9 +198,7 @@ fun SaveLoginDialogPrompt(
         }),
     ) {
         Row(
-            modifier = Modifier
-                .padding(horizontal = 16.dp)
-                .padding(top = 16.dp),
+            modifier = Modifier.padding(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.Start),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -221,8 +225,10 @@ fun SaveLoginDialogPrompt(
         }
         // save message
         Row(
-            modifier = Modifier.padding(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.Start),
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .padding(top = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.Start),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             // globe icon
@@ -245,11 +251,10 @@ fun SaveLoginDialogPrompt(
         }
         // username
         // todo: text color primary
-        OutlinedTextField(
+        InfernoOutlinedTextField(
             modifier = Modifier
-                .weight(1F)
                 .padding(horizontal = 16.dp)
-                .padding(top = 16.dp),
+                .padding(top = 8.dp),
             value = username,
             onValueChange = {
                 username = it
@@ -265,6 +270,11 @@ fun SaveLoginDialogPrompt(
             ),
             colors = TextFieldDefaults.colors(
                 focusedTextColor = Color.White,
+                unfocusedTextColor = Color.LightGray,
+                focusedContainerColor = Color.Black,
+                errorContainerColor = Color.Black,
+                disabledContainerColor = Color.Black,
+                unfocusedContainerColor = Color.Black,
             ),
             singleLine = true,
         )
@@ -273,11 +283,10 @@ fun SaveLoginDialogPrompt(
         // todo: error font color
         // todo: error outline & container color
         // todo: toggle password visibility
-        OutlinedTextField(
+        InfernoOutlinedTextField(
             modifier = Modifier
-                .weight(1F)
                 .padding(horizontal = 16.dp)
-                .padding(top = 12.dp, bottom = 12.dp),
+                .padding(top = 8.dp),
             value = password,
             onValueChange = { password = it },
             label = { InfernoText(stringResource(R.string.mozac_feature_prompt_password_hint)) },
@@ -298,10 +307,15 @@ fun SaveLoginDialogPrompt(
             ),
             colors = TextFieldDefaults.colors(
                 focusedTextColor = Color.White,
+                unfocusedTextColor = Color.LightGray,
                 errorTextColor = Color.Red,
+                focusedContainerColor = Color.Black,
+                errorContainerColor = Color.Black,
+                disabledContainerColor = Color.Black,
+                unfocusedContainerColor = Color.Black,
             ),
             singleLine = true,
-            isError = !loginValid
+            isError = !loginValid,
         )
     }
 }
