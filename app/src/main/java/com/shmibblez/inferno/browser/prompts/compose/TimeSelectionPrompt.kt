@@ -1,13 +1,26 @@
 package com.shmibblez.inferno.browser.prompts.compose
 
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.scrollable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TimeInput
+import androidx.compose.material3.TimePickerDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplate
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateAction
@@ -35,6 +48,10 @@ const val SELECTION_TYPE_DATE_AND_TIME = 2
 const val SELECTION_TYPE_TIME = 3
 const val SELECTION_TYPE_MONTH = 4
 
+// todo:
+//   - date picker not scrolling up when horizontal
+//   - modal sheet expanded when keyboard pops up
+//   - error when press ok and nothing selected
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TimeSelectionPrompt(timeData: PromptRequest.TimeSelection, sessionId: String, type: Int) {
@@ -133,22 +150,160 @@ fun TimeSelectionPrompt(timeData: PromptRequest.TimeSelection, sessionId: String
             },
         ),
     ) {
-        when (type) {
-            SELECTION_TYPE_TIME -> {
-                TimeInput(timeState)
-            }
+        Column(
+            modifier = Modifier
+                .scrollable(rememberScrollState(0), orientation = Orientation.Vertical),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            when (type) {
+                SELECTION_TYPE_TIME -> {
+                    TimeInput(
+                        timeState,
+                        colors = TimePickerDefaults.colors(
+                            clockDialColor = Color.White,
+                            clockDialSelectedContentColor = Color.White,
+                            clockDialUnselectedContentColor = Color.LightGray,
+                            selectorColor = Color.White,
+                            containerColor = Color.Black,
+                            periodSelectorBorderColor = Color.White,
+                            periodSelectorSelectedContainerColor = Color.Red,
+                            periodSelectorUnselectedContainerColor = Color.Black,
+                            periodSelectorSelectedContentColor = Color.White,
+                            periodSelectorUnselectedContentColor = Color.LightGray,
+                            timeSelectorSelectedContainerColor = Color.Black,
+                            timeSelectorUnselectedContainerColor = Color.Black,
+                            timeSelectorSelectedContentColor = Color.White,
+                            timeSelectorUnselectedContentColor = Color.LightGray,
+                        ),
+                    )
+                }
 
-            SELECTION_TYPE_DATE -> {
-                DatePicker(datePickerState)
-            }
+                SELECTION_TYPE_DATE -> {
+                    DatePicker(
+                        datePickerState,
+                        modifier = Modifier.padding(bottom = 16.dp),
+                        colors = DatePickerDefaults.colors(
+                            containerColor = Color.Black,
+                            titleContentColor = Color.White,
+                            headlineContentColor = Color.White,
+                            weekdayContentColor = Color.White,
+                            subheadContentColor = Color.White,
+                            navigationContentColor = Color.White,
+                            yearContentColor = Color.White,
+                            disabledYearContentColor = Color.LightGray,
+                            currentYearContentColor = Color.White,
+                            selectedYearContentColor = Color.White,
+                            disabledSelectedYearContentColor = Color.LightGray,
+                            selectedYearContainerColor = Color.Black,
+                            disabledSelectedYearContainerColor = Color.Black,
+                            dayContentColor = Color.White,
+                            disabledDayContentColor = Color.LightGray,
+                            selectedDayContentColor = Color.White,
+                            disabledSelectedDayContentColor = Color.LightGray,
+                            selectedDayContainerColor = Color.Black,
+                            disabledSelectedDayContainerColor = Color.LightGray,
+                            todayContentColor = Color.White,
+                            todayDateBorderColor = Color.White,
+                            dayInSelectionRangeContentColor = Color.White,
+                            dayInSelectionRangeContainerColor = Color.White,
+                            dividerColor = Color.White,
+                            dateTextFieldColors = TextFieldDefaults.colors(
+                                focusedTextColor = Color.White,
+                                unfocusedTextColor = Color.LightGray,
+                                focusedLabelColor = Color.White,
+                                unfocusedLabelColor = Color.LightGray,
+                                disabledLabelColor = Color.LightGray,
+                                errorLabelColor = Color.Red,
+                                focusedPlaceholderColor = Color.LightGray,
+                                unfocusedPlaceholderColor = Color.LightGray,
+                                disabledPlaceholderColor = Color.Gray,
+                                errorPlaceholderColor = Color.LightGray,
+                                focusedContainerColor = Color.Black,
+                                unfocusedContainerColor = Color.Black,
+                                errorContainerColor = Color.Black,
+                                disabledContainerColor = Color.Black,
+                                errorTextColor = Color.Red,
+                                errorCursorColor = Color.Red,
+                                errorIndicatorColor = Color.Red,
+                            ),
+                        ),
+                    )
+                }
 
-            SELECTION_TYPE_DATE_AND_TIME -> {
-                DatePicker(datePickerState)
-                TimeInput(timeState)
-            }
+                SELECTION_TYPE_DATE_AND_TIME -> {
+                    TimeInput(
+                        timeState,
+                        colors = TimePickerDefaults.colors(
+                            clockDialColor = Color.White,
+                            clockDialSelectedContentColor = Color.White,
+                            clockDialUnselectedContentColor = Color.LightGray,
+                            selectorColor = Color.White,
+                            containerColor = Color.Black,
+                            periodSelectorBorderColor = Color.White,
+                            periodSelectorSelectedContainerColor = Color.Red,
+                            periodSelectorUnselectedContainerColor = Color.Black,
+                            periodSelectorSelectedContentColor = Color.White,
+                            periodSelectorUnselectedContentColor = Color.LightGray,
+                            timeSelectorSelectedContainerColor = Color.Black,
+                            timeSelectorUnselectedContainerColor = Color.Black,
+                            timeSelectorSelectedContentColor = Color.White,
+                            timeSelectorUnselectedContentColor = Color.LightGray,
+                        ),
+                    )
+                    DatePicker(
+                        datePickerState,
+                        modifier = Modifier.padding(bottom = 16.dp),
+                        colors = DatePickerDefaults.colors(
+                            containerColor = Color.Black,
+                            titleContentColor = Color.White,
+                            headlineContentColor = Color.White,
+                            weekdayContentColor = Color.White,
+                            subheadContentColor = Color.White,
+                            navigationContentColor = Color.White,
+                            yearContentColor = Color.White,
+                            disabledYearContentColor = Color.LightGray,
+                            currentYearContentColor = Color.White,
+                            selectedYearContentColor = Color.White,
+                            disabledSelectedYearContentColor = Color.LightGray,
+                            selectedYearContainerColor = Color.Black,
+                            disabledSelectedYearContainerColor = Color.Black,
+                            dayContentColor = Color.White,
+                            disabledDayContentColor = Color.LightGray,
+                            selectedDayContentColor = Color.White,
+                            disabledSelectedDayContentColor = Color.LightGray,
+                            selectedDayContainerColor = Color.Black,
+                            disabledSelectedDayContainerColor = Color.LightGray,
+                            todayContentColor = Color.White,
+                            todayDateBorderColor = Color.White,
+                            dayInSelectionRangeContentColor = Color.White,
+                            dayInSelectionRangeContainerColor = Color.White,
+                            dividerColor = Color.White,
+                            dateTextFieldColors = TextFieldDefaults.colors(
+                                focusedTextColor = Color.White,
+                                unfocusedTextColor = Color.LightGray,
+                                focusedLabelColor = Color.White,
+                                unfocusedLabelColor = Color.LightGray,
+                                disabledLabelColor = Color.LightGray,
+                                errorLabelColor = Color.Red,
+                                focusedPlaceholderColor = Color.LightGray,
+                                unfocusedPlaceholderColor = Color.LightGray,
+                                disabledPlaceholderColor = Color.Gray,
+                                errorPlaceholderColor = Color.LightGray,
+                                focusedContainerColor = Color.Black,
+                                unfocusedContainerColor = Color.Black,
+                                errorContainerColor = Color.Black,
+                                disabledContainerColor = Color.Black,
+                                errorTextColor = Color.Red,
+                                errorCursorColor = Color.Red,
+                                errorIndicatorColor = Color.Red,
+                            ),
+                        ),
+                    )
+                }
 
-            SELECTION_TYPE_MONTH -> {
-                MonthAndYearPicker(monthAndYearPickerState)
+                SELECTION_TYPE_MONTH -> {
+                    MonthAndYearPicker(monthAndYearPickerState)
+                }
             }
         }
     }

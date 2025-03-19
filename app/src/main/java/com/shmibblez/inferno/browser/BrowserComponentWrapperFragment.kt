@@ -84,7 +84,6 @@ class BrowserComponentWrapperFragment : Fragment(), UserInteractionHandler, Acti
         val scrollToCollection = arguments?.getBoolean(SCROLL_TO_COLLECTION) ?: false
 
         baseComposeView.setContent {
-            Log.d("BrowserComponentWrapper", "setting content for base compose view")
             BrowserComponent(
                 navController = this.findNavController(),
                 sessionId = sessionId,

@@ -23,6 +23,7 @@ import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplate
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateAction
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateButtonPosition
 import com.shmibblez.inferno.browser.prompts.onDismiss
+import com.shmibblez.inferno.browser.prompts.onNegativeAction
 import com.shmibblez.inferno.browser.prompts.onPositiveAction
 import com.shmibblez.inferno.compose.base.InfernoCheckbox
 import com.shmibblez.inferno.compose.base.InfernoText
@@ -67,43 +68,57 @@ fun <T> ChoiceDialogPrompt(
     var mapSelectChoice = remember { HashMap<Choice, Choice>() }
     when (dialogType) {
         SINGLE_CHOICE_DIALOG_TYPE, MENU_CHOICE_DIALOG_TYPE -> {
+            negativeAction = PromptBottomSheetTemplateAction(
+                text = stringResource(android.R.string.cancel),
+                action = {
+                    // dismiss
+                    onNegativeAction(menuData)
+                    store.dispatch(
+                        ContentAction.ConsumePromptRequestAction(
+                            sessionId, menuData
+                        )
+                    )
+                },
+            )
             // single choice dialog options, dismiss with single option
             positiveAction = PromptBottomSheetTemplateAction(
                 text = stringResource(android.R.string.ok),
                 action = {
                     // dismiss
+                    onNegativeAction(menuData)
                     store.dispatch(
                         ContentAction.ConsumePromptRequestAction(
                             sessionId, menuData
                         )
                     )
-                })
+                },
+            )
         }
 
         MULTIPLE_CHOICE_DIALOG_TYPE -> {
             // multiple choice dialog options
-            negativeAction = PromptBottomSheetTemplateAction(
-                text = stringResource(android.R.string.cancel),
-                action = {
-                    // dismiss
-                    onDismiss(menuData)
-                    store.dispatch(
-                        ContentAction.ConsumePromptRequestAction(
-                            sessionId, menuData
+            negativeAction =
+                PromptBottomSheetTemplateAction(text = stringResource(android.R.string.cancel),
+                    action = {
+                        // dismiss
+                        onDismiss(menuData)
+                        store.dispatch(
+                            ContentAction.ConsumePromptRequestAction(
+                                sessionId, menuData
+                            )
                         )
-                    )
-                })
-            positiveAction = PromptBottomSheetTemplateAction(
-                text = stringResource(android.R.string.ok),
-                action = {
-                    // onConfirm
-                    onPositiveAction(menuData, mapSelectChoice)
-                    store.dispatch(
-                        ContentAction.ConsumePromptRequestAction(
-                            sessionId, menuData
+                    })
+            positiveAction =
+                PromptBottomSheetTemplateAction(text = stringResource(android.R.string.ok),
+                    action = {
+                        // onConfirm
+                        onPositiveAction(menuData, mapSelectChoice)
+                        store.dispatch(
+                            ContentAction.ConsumePromptRequestAction(
+                                sessionId, menuData
+                            )
                         )
-                    )
-                })
+                    })
         }
     }
     PromptBottomSheetTemplate(
@@ -220,24 +235,28 @@ fun SingleItem(
 ) {
     val store = LocalContext.current.components.core.store
     var checked by remember { mutableStateOf(choice.selected) }
-    Row(modifier = Modifier
-        .padding(horizontal = 16.dp)
-        .fillMaxWidth()
-        .clickable(enabled = choice.enable) {
-            // toggle
-            checked = !checked
-            // on select
-            onPositiveAction(menuData, choice)
-            // dismiss
-            store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, menuData))
-        }) {
+    Row(
+        modifier = Modifier
+            .padding(horizontal = 16.dp)
+            .padding(bottom = 16.dp)
+            .fillMaxWidth()
+            .clickable(enabled = choice.enable) {
+                // toggle
+                checked = !checked
+                // on select
+                onPositiveAction(menuData, choice)
+                // dismiss
+                store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, menuData))
+            },
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
         InfernoText(
             text = choice.label,
             modifier = Modifier.weight(1F),
         )
         InfernoCheckbox(
             checked = checked,
-            enabled = false,
+            enabled = choice.enable,
             onCheckedChange = {},
         )
     }

@@ -1,6 +1,7 @@
 package com.shmibblez.inferno.test
 
 import android.util.Log
+import androidx.core.util.toRange
 import mozilla.components.concept.engine.prompt.Choice
 import mozilla.components.concept.engine.prompt.PromptRequest
 import mozilla.components.concept.engine.prompt.PromptRequest.Alert
@@ -18,22 +19,6 @@ import kotlin.random.Random
 
 class PromptComponentTestObjs {
     companion object {
-        private val _logins = List(20) {
-            Login(
-                guid = "$it",
-                username = "username$it",
-                password = "password$it",
-                origin = "www.google.com",
-                formActionOrigin = null,
-                httpRealm = "http realm",
-                usernameField = "htmlUsernameField",
-                passwordField = "htmlPasswordField",
-                timesUsed = 0,
-                timeCreated = Date().time,
-                timeLastUsed = Date().time,
-                timePasswordChanged = Date().time,
-            )
-        }
         val alert = Alert(
             title = "title",
             message = "message",
@@ -200,7 +185,11 @@ class PromptComponentTestObjs {
         val saveCreditCard = PromptRequest.SaveCreditCard(
             creditCard = CreditCardEntry(guid = "99",
                 name = "creditCardEntry99",
-                number = List(16) { Random.nextInt(0, 10) }.joinToString { n -> "$n" },
+                number = List(16) {
+                    Random.nextInt(
+                        0, 10
+                    )
+                }.joinToString(separator = "") { n -> "$n" },
                 expiryMonth = "10",
                 expiryYear = "2024",
                 cardType = listOf(
@@ -276,7 +265,11 @@ class PromptComponentTestObjs {
             creditCards = List(20) {
                 CreditCardEntry(guid = "$it",
                     name = "creditCardEntry$it",
-                    number = List(16) { Random.nextInt(0, 10) }.joinToString { n -> "$n" },
+                    number = List(16) {
+                        Random.nextInt(
+                            0, 10
+                        )
+                    }.joinToString(separator = "") { n -> "$n" },
                     expiryMonth = "10",
                     expiryYear = "2024",
                     cardType = listOf(
@@ -316,8 +309,71 @@ class PromptComponentTestObjs {
                     timePasswordChanged = Date().time,
                 )
             },
-            generatedPassword = listOf("a", "b", "c").asSequence().shuffled().take(10)
-                .joinToString { it },
+            generatedPassword = listOf(
+                "a",
+                "b",
+                "c",
+                "d",
+                "e",
+                "f",
+                "g",
+                "h",
+                "i",
+                "j",
+                "k",
+                "l",
+                "m",
+                "n",
+                "o",
+                "p",
+                "q",
+                "r",
+                "s",
+                "t",
+                "u",
+                "v",
+                "w",
+                "x",
+                "y",
+                "z",
+                "A",
+                "B",
+                "C",
+                "D",
+                "E",
+                "F",
+                "G",
+                "H",
+                "I",
+                "J",
+                "K",
+                "L",
+                "M",
+                "N",
+                "O",
+                "P",
+                "Q",
+                "R",
+                "S",
+                "T",
+                "U",
+                "V",
+                "W",
+                "X",
+                "Y",
+                "Z",
+                "0",
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+                "8",
+                "9",
+            ).asSequence()
+                .shuffled().take(10).joinToString(separator = "") { it },
             onConfirm = {},
             onDismiss = {},
         )

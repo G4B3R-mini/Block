@@ -75,6 +75,7 @@ internal fun NormalTabsPage(
     onTabDragStart: () -> Unit,
 ) {
     if (normalTabs.isNotEmpty() || inactiveTabs.isNotEmpty()) {
+
         val showInactiveTabsAutoCloseDialog by remember(inactiveTabs) {
             derivedStateOf {
                 shouldShowInactiveTabsAutoCloseDialog(inactiveTabs.size)

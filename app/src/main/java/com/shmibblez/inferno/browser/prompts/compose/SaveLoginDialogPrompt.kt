@@ -178,7 +178,7 @@ fun SaveLoginDialogPrompt(
         },
         negativeAction = PromptBottomSheetTemplateAction(text = negativeText, action = {
             onNegativeAction(loginData)
-            emitCancelFact()
+//            emitCancelFact()
             store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, loginData))
         }),
         positiveAction = PromptBottomSheetTemplateAction(text = confirmText, action = {

@@ -4,6 +4,7 @@
 
 package com.shmibblez.inferno.compose.tabstray
 
+import android.util.Log
 import androidx.compose.animation.core.DecayAnimationSpec
 import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -33,6 +34,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.colorResource
@@ -91,6 +93,7 @@ fun TabListItem(
     onClick: (tab: TabSessionState) -> Unit,
     onLongClick: ((tab: TabSessionState) -> Unit)? = null,
 ) {
+    Log.d("TabListItem", "made it to TabListItem")
     val contentBackgroundColor = if (isSelected) {
         FirefoxTheme.colors.layerAccentNonOpaque
     } else {
@@ -147,8 +150,9 @@ fun TabListItem(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(FirefoxTheme.colors.layer3)
-                .background(contentBackgroundColor)
+                .background(Color.Red)
+//                .background(FirefoxTheme.colors.layer3)
+//                .background(contentBackgroundColor)
                 .then(clickableModifier)
                 .padding(start = 16.dp, top = 8.dp, bottom = 8.dp)
                 .testTag(TabsTrayTestTag.tabItemRoot)

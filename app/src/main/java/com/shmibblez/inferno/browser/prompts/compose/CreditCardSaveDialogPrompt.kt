@@ -1,6 +1,7 @@
 package com.shmibblez.inferno.browser.prompts.compose
 
 import androidx.annotation.VisibleForTesting
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -128,9 +129,8 @@ fun CreditCardSaveDialogPrompt(saveData: PromptRequest.SaveCreditCard, sessionId
                     modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp),
                 ) {
                     // card type
-                    Icon(
+                    Image(
                         painter = painterResource(saveData.creditCard.cardType.creditCardIssuerNetwork().icon),
-                        tint = Color.White,
                         contentDescription = "card type",
                         modifier = Modifier.size(40.dp),
                     )

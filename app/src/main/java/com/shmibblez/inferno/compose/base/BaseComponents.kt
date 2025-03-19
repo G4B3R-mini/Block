@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxColors
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.OutlinedTextField
@@ -146,7 +148,7 @@ fun InfernoOutlinedTextField(
     isError: Boolean = false,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
-    singleLine:Boolean = false,
+    singleLine: Boolean = false,
     colors: TextFieldColors = OutlinedTextFieldDefaults.colors(
         focusedTextColor = Color.White,
         unfocusedTextColor = Color.LightGray,
@@ -158,19 +160,19 @@ fun InfernoOutlinedTextField(
     ) // OutlinedTextFieldDefaults. colors()
 ) {
 //    CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides Dp.Unspecified) {
-        OutlinedTextField(
-            value = value,
-            onValueChange = onValueChange,
-            modifier = modifier,
-            textStyle = textStyle,
-            label = label,
-            placeholder = placeholder,
-            isError = isError,
-            keyboardOptions = keyboardOptions,
-            keyboardActions = keyboardActions,
-            singleLine = singleLine,
-            colors = colors,
-        )
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        modifier = modifier,
+        textStyle = textStyle,
+        label = label,
+        placeholder = placeholder,
+        isError = isError,
+        keyboardOptions = keyboardOptions,
+        keyboardActions = keyboardActions,
+        singleLine = singleLine,
+        colors = colors,
+    )
 //    }
 }
 
@@ -180,13 +182,19 @@ fun InfernoCheckbox(
     onCheckedChange: ((Boolean) -> Unit)?,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    colors: CheckboxColors = CheckboxDefaults.colors(
+        checkedColor = Color(143, 0, 255),
+        checkmarkColor = Color.White,
+        uncheckedColor = Color.White,
+    )
 ) {
     CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides Dp.Unspecified) {
         Checkbox(
             checked = checked,
             onCheckedChange = onCheckedChange,
             modifier = modifier,
-            enabled = enabled
+            enabled = enabled,
+            colors = colors,
         )
     }
 }

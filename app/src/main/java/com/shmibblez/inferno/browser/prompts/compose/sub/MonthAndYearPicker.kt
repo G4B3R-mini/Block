@@ -30,13 +30,13 @@ fun MonthAndYearPicker(state: MonthAndYearPickerState) {
             state = state.month,
             values =  months,
             modifier = Modifier.weight(1F),
-            selected = months[0],
+            selected = months[1],
         )
 //        val currentYear = Date().year
         val currentYear = Calendar.getInstance().year
         NumberPicker(
             state = state.year,
-            values = (0..(currentYear + 15)).map { it.toString() },
+            values = (0..(currentYear + 50)).map { it.toString() },
             modifier = Modifier.weight(1F),
             selected = currentYear.toString(),
         )

@@ -1,5 +1,6 @@
 package com.shmibblez.inferno.browser.prompts.compose
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -171,7 +172,7 @@ fun SelectableListPrompt(
         // todo: tint text color primary
         // manage addresses / credit cards
         if (!expanded) {
-            ManageOptions(data, navController, manageText)
+            ManageOptions(data, navController, manageText, modifier = Modifier.padding(top = 8.dp))
         }
     }
 }
@@ -181,8 +182,7 @@ fun ManageOptions(data: PromptRequest, navController: NavController, manageText:
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .height(36.dp)
-            .padding(start = 24.dp)
+            .padding(start = 32.dp)
             .clickable {
                 when (data) {
                     is PromptRequest.SelectAddress -> {
@@ -211,15 +211,14 @@ fun ManageOptions(data: PromptRequest, navController: NavController, manageText:
             tint = Color.White,
             contentDescription = "",
             modifier = Modifier
-                .aspectRatio(1F)
-                .fillMaxHeight(),
+                .size(20.dp),
         )
         // todo: text color primary
         InfernoText(
             text = manageText,
             modifier = Modifier
                 .weight(1F)
-                .padding(end = 16.dp),
+                .padding(start = 8.dp, end = 16.dp),
             textAlign = TextAlign.Start,
             fontSize = 16.sp,
         )
@@ -252,9 +251,8 @@ private fun ColumnScope.CreditCardItem(creditCard: CreditCardEntry, onClick: () 
             },
     ) {
         // card network icon
-        Icon(
+        Image(
             painter = painterResource(creditCard.cardType.creditCardIssuerNetwork().icon),
-            tint = Color.White,
             contentDescription = "card issuer image",
             modifier = Modifier
                 .size(40.dp)

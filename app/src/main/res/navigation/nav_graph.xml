@@ -199,7 +199,7 @@
 
     <fragment
         android:id="@+id/startupFragment"
-        android:name="com.shmibblez.inferno.browser.BrowserComponentWrapperFragment"></fragment>
+        android:name="com.shmibblez.inferno.browser.BrowserComponentWrapperFragment"/>
 
     <!--    <fragment-->
     <!--        android:id="@+id/onboardingFragment"-->

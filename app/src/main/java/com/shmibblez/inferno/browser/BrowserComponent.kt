@@ -32,8 +32,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.calculateEndPadding
-import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -73,7 +71,6 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -93,7 +90,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavDirections
 import androidx.navigation.NavOptions
-import androidx.navigation.compose.rememberNavController
 import androidx.preference.PreferenceManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -137,6 +133,7 @@ import com.shmibblez.inferno.ext.consumeFlow
 import com.shmibblez.inferno.ext.getPreferenceKey
 import com.shmibblez.inferno.ext.isKeyboardVisible
 import com.shmibblez.inferno.ext.isToolbarAtBottom
+import com.shmibblez.inferno.ext.lastOpenedNormalTab
 import com.shmibblez.inferno.ext.nav
 import com.shmibblez.inferno.ext.navigateWithBreadcrumb
 import com.shmibblez.inferno.ext.newTab
@@ -164,9 +161,7 @@ import com.shmibblez.inferno.shortcut.PwaOnboardingObserver
 import com.shmibblez.inferno.tabbar.BrowserTabBar
 import com.shmibblez.inferno.tabbar.toTabList
 import com.shmibblez.inferno.tabs.LastTabFeature
-import com.shmibblez.inferno.tabs.TabsTrayFragment
 import com.shmibblez.inferno.tabstray.Page
-import com.shmibblez.inferno.test.PromptComponentTestObjs
 import com.shmibblez.inferno.theme.FirefoxTheme
 import com.shmibblez.inferno.theme.ThemeManager
 import com.shmibblez.inferno.toolbar.BrowserToolbar
@@ -180,9 +175,7 @@ import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.distinctUntilChangedBy
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -194,7 +187,6 @@ import mozilla.components.browser.state.action.ContentAction
 import mozilla.components.browser.state.selector.findCustomTabOrSelectedTab
 import mozilla.components.browser.state.selector.findTabOrCustomTab
 import mozilla.components.browser.state.selector.findTabOrCustomTabOrSelectedTab
-import mozilla.components.browser.state.selector.getNormalOrPrivateTabs
 import mozilla.components.browser.state.selector.normalTabs
 import mozilla.components.browser.state.selector.privateTabs
 import mozilla.components.browser.state.selector.selectedTab
@@ -228,17 +220,12 @@ import mozilla.components.feature.downloads.ui.DownloaderApp
 import mozilla.components.feature.findinpage.view.FindInPageBar
 import mozilla.components.feature.media.fullscreen.MediaSessionFullscreenFeature
 import mozilla.components.feature.privatemode.feature.SecureWindowFeature
-import mozilla.components.feature.prompts.address.AddressDelegate
-import mozilla.components.feature.prompts.address.AddressSelectBar
-import mozilla.components.feature.prompts.creditcard.CreditCardDelegate
 import mozilla.components.feature.prompts.dialog.FullScreenNotificationToast
 import mozilla.components.feature.prompts.dialog.GestureNavUtils
 import mozilla.components.feature.prompts.identitycredential.DialogColors
 import mozilla.components.feature.prompts.identitycredential.DialogColorsProvider
-import mozilla.components.feature.prompts.login.LoginDelegate
 import mozilla.components.feature.prompts.login.PasswordGeneratorDialogColors
 import mozilla.components.feature.prompts.login.PasswordGeneratorDialogColorsProvider
-import mozilla.components.feature.prompts.login.SuggestStrongPasswordDelegate
 import mozilla.components.feature.prompts.share.ShareDelegate
 import mozilla.components.feature.readerview.ReaderViewFeature
 import mozilla.components.feature.readerview.view.ReaderViewControlsBar
@@ -260,7 +247,6 @@ import mozilla.components.service.sync.logins.DefaultLoginValidationDelegate
 import mozilla.components.service.sync.logins.LoginsApiException
 import mozilla.components.service.sync.logins.SyncableLoginsStorage
 import mozilla.components.support.base.feature.ActivityResultHandler
-import mozilla.components.support.base.feature.OnNeedToRequestPermissions
 import mozilla.components.support.base.feature.ViewBoundFeatureWrapper
 import mozilla.components.support.base.log.logger.Logger
 import mozilla.components.support.ktx.android.view.enterImmersiveMode
@@ -275,6 +261,9 @@ import java.lang.ref.WeakReference
 import kotlin.math.roundToInt
 import mozilla.components.browser.toolbar.BrowserToolbar as BrowserToolbarCompat
 
+// fixme, bugs:
+//   - when opening a new page from a link in a tab, 2 tabs appear, very buggy
+// todo: huge drawable with diagonal red and black
 // todo: nav host should be base composable, BrowserComponent in this case since it is now base home screen
 // todo: implement layout from fragment_browser.xml
 // todo: from fragment_browser.xml, for below views first wrap views with AndroidView, then
@@ -425,7 +414,10 @@ private fun resolvePageType(tabSessionState: TabSessionState?): BrowserComponent
     ExperimentalComposeUiApi::class, ExperimentalCoroutinesApi::class
 )
 @Composable
-@SuppressLint("UnusedMaterialScaffoldPaddingParameter", "VisibleForTests")
+@SuppressLint(
+    "UnusedMaterialScaffoldPaddingParameter", "VisibleForTests",
+    "UnusedMaterial3ScaffoldPaddingParameter"
+)
 fun BrowserComponent(
     navController: NavController,
     sessionId: String?,
@@ -449,8 +441,10 @@ fun BrowserComponent(
     var browserStateObserver by remember {
         mutableStateOf<Store.Subscription<BrowserState, BrowserAction>?>(null)
     }
+    var initialized by remember { mutableStateOf(false) }
     var tabList by remember { mutableStateOf(store.state.toTabList().first) }
     var currentTab by remember { mutableStateOf(store.state.selectedTab) }
+    var pendingTabUpdate by remember { mutableStateOf(false) }
     var isPrivateSession by remember {
         mutableStateOf(
             store.state.selectedTab?.content?.private ?: false
@@ -631,7 +625,6 @@ fun BrowserComponent(
         }
 
 
-
     /* BaseBrowserFragment vars */
     val backHandler = OnBackPressedHandler(
         context = context,
@@ -645,7 +638,7 @@ fun BrowserComponent(
     )
 
     // setup tab observer
-    DisposableEffect(true) {
+    DisposableEffect(null) {
 //        store.flowScoped { flow ->
 //            flow.map { state -> state.toTabList().first }
 //                .collect {
@@ -654,20 +647,38 @@ fun BrowserComponent(
 //        }
         browserStateObserver = store.observe(localLifecycleOwner) {
             currentTab = it.selectedTab
-            isPrivateSession = currentTab?.content?.private ?: false
-            tabList =
-                if (isPrivateSession) it.privateTabs else it.normalTabs // it.toTabList().first
-            // if tab list empty add new tab todo: move to initial setup
-            if (tabList.isEmpty()) context.components.newTab(isPrivateSession)
-            searchEngine = it.search.selectedOrDefaultSearchEngine!!
-            pageType = resolvePageType(currentTab)
-            promptRequests = currentTab?.content?.promptRequests ?: emptyList()
-            // currentTab?.content?.promptRequests ?: emptyList()
-            // todo: listOf(PromptComponentTestObjs.selectAddress)
-            Log.d(
-                "BrowserComponent",
-                "browser state changed, promptRequests size: ${promptRequests.size}"
-            )
+
+            Log.d("BrowserComponent", "change in browser state")
+            if (!initialized) {
+                initialized = true
+                return@observe
+            }
+            if (initialized) {
+                // if no tab selected, false
+                isPrivateSession = currentTab?.content?.private ?: false
+                tabList =
+                    if (isPrivateSession) it.privateTabs else it.normalTabs // it.toTabList().first
+                // if no tab selected, select one
+                if (currentTab == null && !pendingTabUpdate) {
+                    if (tabList.isNotEmpty()) {
+                        val lastNormalTabId =
+                            context.components.core.store.state.lastOpenedNormalTab?.id
+                        if (tabList.any { tab -> tab.id == lastNormalTabId }) {
+                            context.components.useCases.tabsUseCases.selectTab(lastNormalTabId!!)
+                        } else {
+                            context.components.useCases.tabsUseCases.selectTab(tabList.last().id)
+                        }
+                    } else {
+                        // if tab list empty add new tab
+                        context.components.newTab(false)
+                    }
+                    pendingTabUpdate = true
+                } else {
+                    pendingTabUpdate = false
+                }
+                searchEngine = it.search.selectedOrDefaultSearchEngine!!
+                pageType = resolvePageType(currentTab)
+            }
         }
 
         onDispose {
@@ -715,7 +726,8 @@ fun BrowserComponent(
         ToolbarMenuBottomSheet(
             tabSessionState = currentTab,
             setShowBottomMenuSheet = setShowMenuBottomSheet,
-            setBrowserComponentMode = setBrowserMode
+            setBrowserComponentMode = setBrowserMode,
+            onNavToSettings = { navToSettings(navController) }
         )
     }
 
@@ -1502,19 +1514,6 @@ fun BrowserComponent(
         }
         initializeUI()
 
-        if (customTabSessionId == null) {
-            // We currently only need this observer to navigate to home
-            // in case all tabs have been removed on startup. No need to
-            // this if we have a known session to display.
-            observeRestoreComplete(
-                context.components.core.store,
-                context,
-                lifecycleOwner,
-                coroutineScope,
-                navController
-            )
-        }
-
         observeTabSelection(
             context.components.core.store,
             context,
@@ -1687,15 +1686,15 @@ fun BrowserComponent(
     }
 
     PromptComponent(
-        promptRequests = promptRequests,
+        setPromptRequests = { pr -> promptRequests = pr },
         currentTab = currentTab,
-        store = store,
+//        store = store,
         customTabId = customTabSessionId,
-        fragmentManager = parentFragmentManager,
+//        fragmentManager = parentFragmentManager,
         filePicker = filePicker,
-        identityCredentialColorsProvider = colorsProvider,
-        tabsUseCases = context.components.useCases.tabsUseCases,
-        fileUploadsDirCleaner = context.components.core.fileUploadsDirCleaner,
+//        identityCredentialColorsProvider = colorsProvider,
+//        tabsUseCases = context.components.useCases.tabsUseCases,
+//        fileUploadsDirCleaner = context.components.core.fileUploadsDirCleaner,
         creditCardValidationDelegate = DefaultCreditCardValidationDelegate(
             context.components.core.lazyAutofillStorage,
         ),
@@ -1714,7 +1713,7 @@ fun BrowserComponent(
         isAddressAutofillEnabled = {
             context.settings().addressFeature && context.settings().shouldAutofillAddressDetails
         },
-        loginExceptionStorage = context.components.core.loginExceptionStorage,
+//        loginExceptionStorage = context.components.core.loginExceptionStorage,
         shareDelegate = object : ShareDelegate {
             override fun showShareSheet(
                 context: Context,
@@ -1730,39 +1729,39 @@ fun BrowserComponent(
                 navController.navigate(directions)
             }
         },
-        onNeedToRequestPermissions = { permissions ->
-            // todo: test
-            requestPromptsPermissionsLauncher.launch(permissions)
-        },
-        loginDelegate = object : LoginDelegate {
-            // todo: login delegate
-//                        override val loginPickerView
-//                            get() = binding.loginSelectBar
-//                        override val onManageLogins = {
-//                            browserAnimator.captureEngineViewAndDrawStatically {
-//                                val directions = NavGraphDirections.actionGlobalSavedLoginsAuthFragment()
-//                                navController.navigate(directions)
-//                            }
-//                        }
-        },
-        suggestStrongPasswordDelegate = object : SuggestStrongPasswordDelegate {
-            // todo: password delegate
-//                        override val strongPasswordPromptViewListenerView
-//                            get() = binding.suggestStrongPasswordBar
-        },
+//        onNeedToRequestPermissions = { permissions ->
+//            // todo: test
+//            requestPromptsPermissionsLauncher.launch(permissions)
+//        },
+//        loginDelegate = object : LoginDelegate {
+//            // todo: login delegate
+////                        override val loginPickerView
+////                            get() = binding.loginSelectBar
+////                        override val onManageLogins = {
+////                            browserAnimator.captureEngineViewAndDrawStatically {
+////                                val directions = NavGraphDirections.actionGlobalSavedLoginsAuthFragment()
+////                                navController.navigate(directions)
+////                            }
+////                        }
+//        },
+//        suggestStrongPasswordDelegate = object : SuggestStrongPasswordDelegate {
+//            // todo: password delegate
+////                        override val strongPasswordPromptViewListenerView
+////                            get() = binding.suggestStrongPasswordBar
+//        },
         shouldAutomaticallyShowSuggestedPassword = { context.settings().isFirstTimeEngagingWithSignup },
-        onFirstTimeEngagedWithSignup = {
-            context.settings().isFirstTimeEngagingWithSignup = false
-        },
-        onSaveLoginWithStrongPassword = { url, password ->
-            handleOnSaveLoginWithGeneratedStrongPassword(
-                passwordsStorage = context.components.core.passwordsStorage,
-                url = url,
-                password = password,
-                lifecycleScope = coroutineScope,
-                setLastSavedGeneratedPassword,
-            )
-        },
+//        onFirstTimeEngagedWithSignup = {
+//            context.settings().isFirstTimeEngagingWithSignup = false
+//        },
+//        onSaveLoginWithStrongPassword = { url, password ->
+//            handleOnSaveLoginWithGeneratedStrongPassword(
+//                passwordsStorage = context.components.core.passwordsStorage,
+//                url = url,
+//                password = password,
+//                lifecycleScope = coroutineScope,
+//                setLastSavedGeneratedPassword,
+//            )
+//        },
         onSaveLogin = { isUpdate ->
             showSnackbarAfterLoginChange(
                 isUpdate,
@@ -1771,7 +1770,7 @@ fun BrowserComponent(
                 snackbarHostState,
             )
         },
-        passwordGeneratorColorsProvider = passwordGeneratorColorsProvider,
+//        passwordGeneratorColorsProvider = passwordGeneratorColorsProvider,
         hideUpdateFragmentAfterSavingGeneratedPassword = { username, password ->
             hideUpdateFragmentAfterSavingGeneratedPassword(
                 username,
@@ -1784,36 +1783,37 @@ fun BrowserComponent(
                 setLastSavedGeneratedPassword
             )
         },
-        creditCardDelegate = object : CreditCardDelegate {
-            // todo: credit card delegate
-//                        override val creditCardPickerView
-//                            get() = binding.creditCardSelectBar
-            override val onManageCreditCards = {
-                val directions = NavGraphDirections.actionGlobalAutofillSettingFragment()
-                navController.navigate(directions)
-            }
-            override val onSelectCreditCard = {
-                // todo: biometrics
-//                showBiometricPrompt(context, biometricPromptFeature, promptsFeature)
-            }
-        },
-        addressDelegate = object : AddressDelegate {
-            // todo: address delegate
-            override val addressPickerView
-                // todo: address select bar
-                get() = AddressSelectBar(context) // binding.addressSelectBar
-            override val onManageAddresses = {
-                val directions = NavGraphDirections.actionGlobalAutofillSettingFragment()
-                navController.navigate(directions)
-            }
-        },
-        androidPhotoPicker = androidPhotoPicker,
+//        creditCardDelegate = object : CreditCardDelegate {
+//            // todo: credit card delegate
+////                        override val creditCardPickerView
+////                            get() = binding.creditCardSelectBar
+//            override val onManageCreditCards = {
+//                val directions = NavGraphDirections.actionGlobalAutofillSettingFragment()
+//                navController.navigate(directions)
+//            }
+//            override val onSelectCreditCard = {
+//                // todo: biometrics
+////                showBiometricPrompt(context, biometricPromptFeature, promptsFeature)
+//            }
+//        },
+//        addressDelegate = object : AddressDelegate {
+//            // todo: address delegate
+//            override val addressPickerView
+//                // todo: address select bar
+//                get() = AddressSelectBar(context) // binding.addressSelectBar
+//            override val onManageAddresses = {
+//                val directions = NavGraphDirections.actionGlobalAutofillSettingFragment()
+//                navController.navigate(directions)
+//            }
+//        },
+//        androidPhotoPicker = androidPhotoPicker,
     )
 
     Scaffold(
+        modifier = Modifier.fillMaxSize(),
         snackbarHost = { SnackbarHost(snackbarHostState = snackbarHostState) },
         contentWindowInsets = ScaffoldDefaults.contentWindowInsets,
-        content = { paddingValues ->
+        content = {
             Box(
                 modifier = Modifier.fillMaxSize(),
             ) {
@@ -1822,9 +1822,9 @@ fun BrowserComponent(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(
-                            start = paddingValues.calculateStartPadding(LayoutDirection.Ltr),
+                            start = 0.dp,
                             top = 0.dp,
-                            end = paddingValues.calculateEndPadding(LayoutDirection.Ltr),
+                            end = 0.dp,
                             bottom = 0.dp
                         )
                         .nestedScroll(nestedScrollConnection)
@@ -1897,7 +1897,8 @@ fun BrowserComponent(
                             tabSessionState = currentTab,
                             searchEngine = searchEngine,
                             tabCount = tabList.size,
-                            setShowMenu = setShowMenuBottomSheet
+                            setShowMenu = setShowMenuBottomSheet,
+                            onNavToTabsTray = { navToTabsTray(navController) }
                         )
                     }
                     if (browserMode == BrowserComponentMode.FIND_IN_PAGE) {
@@ -1946,15 +1947,25 @@ private fun fullScreenChanged(
     }
 }
 
-// from Moz BrowserHandler
-private fun showTabs(context: Context) {
-    // For now we are performing manual fragment transactions here. Once we can use the new
-    // navigation support library we may want to pass navigation graphs around.
-    // TODO: use navigation instead of fragment transactions
-    context.getActivity()?.supportFragmentManager?.beginTransaction()?.apply {
-        replace(R.id.container, TabsTrayFragment())
-        commit()
-    }
+/*** navigation ***/
+/**
+ * navigate to tabs tray fragment
+ */
+private fun navToTabsTray(nav: NavController) {
+    nav.nav(
+        R.id.browserComponentWrapperFragment,
+        BrowserComponentWrapperFragmentDirections.actionGlobalTabsTrayFragment()
+    )
+}
+
+/**
+ * navigate to settings fragment
+ */
+private fun navToSettings(nav: NavController) {
+    nav.nav(
+        R.id.browserComponentWrapperFragment,
+        BrowserComponentWrapperFragmentDirections.actionGlobalSettingsFragment(),
+    )
 }
 
 private data class OnBackPressedHandler(
@@ -2246,7 +2257,7 @@ private fun showBiometricPrompt(
     } else {
         // Warn that the device has not been secured
         if (context.settings().shouldShowSecurityPinWarning) {
-            // todo: biometrics
+            // todo: biometrics, integrate with prompt component for credit card select
 //            showPinDialogWarning(context, promptFeature)
         } else {
 //            promptFeature.get()?.onBiometricResult(isAuthenticated = true)
@@ -2933,29 +2944,6 @@ private fun isToolbarDynamic(context: Context) =
 //    view: View,
 //): List<ContextMenuCandidate>
 
-@VisibleForTesting
-internal fun observeRestoreComplete(
-    store: BrowserStore,
-    context: Context,
-    lifecycleOwner: LifecycleOwner,
-    coroutineScope: CoroutineScope,
-    navController: NavController,
-) {
-    val activity = context.getActivity()!! as HomeActivity
-    consumeFlow(store, lifecycleOwner, context, coroutineScope) { flow ->
-        flow.map { state -> state.restoreComplete }.distinctUntilChanged().collect { restored ->
-            if (restored) {
-                // Once tab restoration is complete, if there are no tabs to show in the browser, go home
-                val tabs = store.state.getNormalOrPrivateTabs(
-                    activity.browsingModeManager.mode.isPrivate,
-                )
-                if (tabs.isEmpty() || store.state.selectedTabId == null) {
-                    navController.popBackStack(R.id.homeFragment, false)
-                }
-            }
-        }
-    }
-}
 
 @VisibleForTesting
 internal fun observeTabSelection(

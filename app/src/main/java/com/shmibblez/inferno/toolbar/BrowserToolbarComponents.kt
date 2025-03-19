@@ -9,6 +9,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.aspectRatio
@@ -17,11 +18,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.material3.BottomSheetDefaults
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -41,7 +38,6 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -53,11 +49,10 @@ import androidx.compose.ui.unit.sp
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.BrowserComponentMode
 import com.shmibblez.inferno.browser.ComponentDimens
-import com.shmibblez.inferno.browser.getActivity
+import com.shmibblez.inferno.compose.base.InfernoCheckbox
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.compose.sessionUseCases
 import com.shmibblez.inferno.ext.components
-import com.shmibblez.inferno.tabs.TabsTrayFragment
 import com.shmibblez.inferno.toolbar.ToolbarMenuItemsScopeInstance.DividerToolbarMenuItem
 import com.shmibblez.inferno.toolbar.ToolbarMenuItemsScopeInstance.FindInPageToolbarMenuItem
 import com.shmibblez.inferno.toolbar.ToolbarMenuItemsScopeInstance.NavOptionsToolbarMenuItem
@@ -79,6 +74,10 @@ import mozilla.components.feature.tabs.TabsUseCases
 import mozilla.components.support.ktx.android.content.share
 
 // TODO: test implementations
+// todo:
+//   - add double up and down chevron icon for options tray
+//     - options tray is a sheet that pops up or down and shows all options available as icons
+//   - make options in menu a grid
 
 object IconConstants {
     const val ICON_ASPECT_RATIO = 1F
@@ -86,10 +85,10 @@ object IconConstants {
     val ICON_TOP_PADDING = 10.dp
     val ICON_END_PADDING = 6.dp
     val ICON_BOTTOM_PADDING = 10.dp
-    val INDICATOR_ICON_START_PADDING = 4.dp
-    val INDICATOR_ICON_TOP_PADDING = 4.dp
-    val INDICATOR_ICON_END_PADDING = 4.dp
-    val INDICATOR_ICON_BOTTOM_PADDING = 4.dp
+    val INDICATOR_ICON_START_PADDING = 8.dp
+    val INDICATOR_ICON_TOP_PADDING = 8.dp
+    val INDICATOR_ICON_END_PADDING = 8.dp
+    val INDICATOR_ICON_BOTTOM_PADDING = 8.dp
 }
 
 /**
@@ -131,7 +130,7 @@ interface ToolbarOptionsScope {
     fun ToolbarStopLoading(enabled: Boolean)
 
     @Composable
-    fun ToolbarShowTabsTray(tabCount: Int)
+    fun ToolbarShowTabsTray(tabCount: Int, onNavToTabsTray: () -> Unit)
 }
 
 object ToolbarOptionsScopeInstance : ToolbarOptionsScope {
@@ -231,16 +230,7 @@ object ToolbarOptionsScopeInstance : ToolbarOptionsScope {
     }
 
     @Composable
-    override fun ToolbarShowTabsTray(tabCount: Int) {
-        fun showTabs(context: Context) {
-            // For now we are performing manual fragment transactions here. Once we can use the new
-            // navigation support library we may want to pass navigation graphs around.
-            context.getActivity()?.supportFragmentManager?.beginTransaction()?.apply {
-                replace(R.id.container, TabsTrayFragment())
-                commit()
-            }
-        }
-
+    override fun ToolbarShowTabsTray(tabCount: Int, onNavToTabsTray: () -> Unit) {
         val context = LocalContext.current
         Box(
             modifier = Modifier
@@ -253,7 +243,8 @@ object ToolbarOptionsScopeInstance : ToolbarOptionsScope {
                     bottom = IconConstants.ICON_BOTTOM_PADDING
                 )
                 .aspectRatio(IconConstants.ICON_ASPECT_RATIO)
-                .clickable { showTabs(context) },
+                .clickable { onNavToTabsTray.invoke() }
+                .wrapContentHeight(unbounded = true),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
@@ -267,7 +258,7 @@ object ToolbarOptionsScopeInstance : ToolbarOptionsScope {
                 fontColor = Color.White,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
-                fontSize = 10.sp,
+                fontSize = 10.sp
             )
         }
     }
@@ -341,7 +332,6 @@ fun RowScope.ToolbarOrigin(
                 color = Color.White,
                 modifier = Modifier
                     .padding(
-                        start = IconConstants.INDICATOR_ICON_START_PADDING,
                         end = IconConstants.INDICATOR_ICON_END_PADDING
                     )
                     .weight(1F)
@@ -488,8 +478,7 @@ object ToolbarOriginScopeInstance : ToolbarOriginScope {
                         end = IconConstants.INDICATOR_ICON_END_PADDING,
                         bottom = IconConstants.INDICATOR_ICON_BOTTOM_PADDING
                     )
-                    .aspectRatio(IconConstants.ICON_ASPECT_RATIO)
-                ,
+                    .aspectRatio(IconConstants.ICON_ASPECT_RATIO),
                 painter = painterResource(id = R.drawable.ic_broken_lock),
                 contentDescription = "security indicator",
                 tint = Color.White
@@ -536,7 +525,7 @@ object ToolbarOriginScopeInstance : ToolbarOriginScope {
 interface ToolbarMenuItemsScope {
     // TODO: add add to home screen, add-ons, synced tabs, and report issue
     @Composable
-    fun DividerToolbarMenuItem()
+    fun DividerToolbarMenuItem(modifier: Modifier = Modifier)
 
     @Composable
     fun ShareToolbarMenuItem()
@@ -550,7 +539,7 @@ interface ToolbarMenuItemsScope {
     )
 
     @Composable
-    fun SettingsToolbarMenuItem()
+    fun SettingsToolbarMenuItem(onNavToSettings: () -> Unit)
 
     @Composable
     fun PrivateModeToolbarMenuItem(isPrivateMode: Boolean, dismissMenuSheet: () -> Unit)
@@ -571,8 +560,8 @@ object ToolbarMenuItemConstants {
 
 object ToolbarMenuItemsScopeInstance : ToolbarMenuItemsScope {
     @Composable
-    override fun DividerToolbarMenuItem() {
-        HorizontalDivider(thickness = 0.25F.dp, color = Color.White)
+    override fun DividerToolbarMenuItem(modifier: Modifier) {
+        HorizontalDivider(modifier = modifier, thickness = 0.25F.dp, color = Color.White)
     }
 
     @Composable
@@ -619,12 +608,10 @@ object ToolbarMenuItemsScopeInstance : ToolbarMenuItemsScope {
                 color = Color.White,
                 modifier = Modifier.wrapContentHeight(),
             )
-            Checkbox(
-                checked = desktopMode, colors = CheckboxDefaults.colors(
-                    checkedColor = Color.White,
-                    checkmarkColor = Color.DarkGray,
-                    uncheckedColor = Color.White,
-                ), onCheckedChange = {}, modifier = Modifier.padding(all = 0.dp)
+            InfernoCheckbox(
+                checked = desktopMode,
+                onCheckedChange = {},
+                modifier = Modifier.padding(all = 0.dp),
             )
         }
     }
@@ -653,13 +640,8 @@ object ToolbarMenuItemsScopeInstance : ToolbarMenuItemsScope {
     }
 
     @Composable
-    override fun SettingsToolbarMenuItem() {
-        fun showSettings(context: Context) {
-            // FIXME: TODO: see if settings page is fragment or activity
-//            val intent = Intent(context, SettingsActivity::class.java)
-//            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-//            context.startActivity(intent)
-        }
+    override fun SettingsToolbarMenuItem(onNavToSettings: () -> Unit) {
+
 
         val context = LocalContext.current
         Box(contentAlignment = Alignment.CenterStart,
@@ -671,9 +653,9 @@ object ToolbarMenuItemsScopeInstance : ToolbarMenuItemsScope {
                     end = ToolbarMenuItemConstants.OPTION_PADDING_END,
                     bottom = ToolbarMenuItemConstants.OPTION_PADDING_BOTTOM,
                 )
-                .clickable {
-                    showSettings(context)
-                }) {
+                .fillMaxWidth()
+                .clickable { onNavToSettings.invoke() },
+            ) {
             Text(
                 text = "Settings", color = Color.White, modifier = Modifier.wrapContentHeight()
             )
@@ -742,12 +724,10 @@ object ToolbarMenuItemsScopeInstance : ToolbarMenuItemsScope {
                 color = Color.White,
                 modifier = Modifier.wrapContentHeight(),
             )
-            Checkbox(
-                checked = isPrivateMode, colors = CheckboxDefaults.colors(
-                    checkedColor = Color.White,
-                    checkmarkColor = Color.DarkGray,
-                    uncheckedColor = Color.White,
-                ), onCheckedChange = {}, modifier = Modifier.padding(all = 0.dp)
+            InfernoCheckbox(
+                checked = isPrivateMode,
+                onCheckedChange = {},
+                modifier = Modifier.padding(all = 0.dp),
             )
         }
     }
@@ -755,14 +735,12 @@ object ToolbarMenuItemsScopeInstance : ToolbarMenuItemsScope {
     @Composable
     override fun NavOptionsToolbarMenuItem() {
         val tabSessionState = LocalContext.current.components.core.store.state.selectedTab
-        val spacerWidth = (LocalConfiguration.current.screenWidthDp / 8).dp
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
             modifier = Modifier
                 .height(ToolbarMenuItemConstants.OPTION_HEIGHT)
                 .fillMaxWidth()
         ) {
-            Box(Modifier.width(spacerWidth))
             ToolbarOptionsScopeInstance.ToolbarBack(
                 enabled = tabSessionState?.content?.canGoBack ?: false
             )
@@ -771,7 +749,6 @@ object ToolbarMenuItemsScopeInstance : ToolbarMenuItemsScope {
             )
             ToolbarOptionsScopeInstance.ToolbarReload(enabled = tabSessionState != null)
             ToolbarOptionsScopeInstance.ToolbarStopLoading(enabled = tabSessionState != null)
-            Box(Modifier.width(spacerWidth))
         }
     }
 }
@@ -781,41 +758,48 @@ object ToolbarMenuItemsScopeInstance : ToolbarMenuItemsScope {
 fun ToolbarMenuBottomSheet(
     tabSessionState: TabSessionState?,
     setShowBottomMenuSheet: (Boolean) -> Unit,
-    setBrowserComponentMode: (BrowserComponentMode) -> Unit
+    setBrowserComponentMode: (BrowserComponentMode) -> Unit,
+    onNavToSettings: () -> Unit,
 ) {
     if (tabSessionState == null) return
-    ModalBottomSheet(onDismissRequest = { setShowBottomMenuSheet(false) },
+    ModalBottomSheet(
+        onDismissRequest = { setShowBottomMenuSheet(false) },
+        modifier = Modifier.fillMaxWidth(),
         containerColor = Color.Black,
         scrimColor = Color.Black.copy(alpha = 0.1F),
         shape = RectangleShape,
-        dragHandle = {
-            BottomSheetDefaults.DragHandle(
-                color = Color.White,
-                height = ToolbarMenuItemConstants.SHEET_HANDLE_HEIGHT,
-//            shape = RectangleShape,
-            )
-        }) {
-        DividerToolbarMenuItem()
+        dragHandle = { /* no drag handle */
+            // in case want to add one, make custom component centered in middle
+//            BottomSheetDefaults.DragHandle(
+//                color = Color.White,
+//                height = ToolbarMenuItemConstants.SHEET_HANDLE_HEIGHT,
+////            shape = RectangleShape,
+//            )
+        },
+    ) {
+        Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+            // todo: move to bottom when switch to grid view
+            // stop, refresh, forward, back
+            NavOptionsToolbarMenuItem()
 
-        ShareToolbarMenuItem()
-        DividerToolbarMenuItem()
+            DividerToolbarMenuItem()
 
-        PrivateModeToolbarMenuItem(isPrivateMode = tabSessionState.content.private,
-            dismissMenuSheet = { setShowBottomMenuSheet(false) })
-        DividerToolbarMenuItem()
+            ShareToolbarMenuItem()
+            DividerToolbarMenuItem()
 
-        RequestDesktopSiteToolbarMenuItem(desktopMode = tabSessionState.content.desktopMode)
-        DividerToolbarMenuItem()
+            PrivateModeToolbarMenuItem(isPrivateMode = tabSessionState.content.private,
+                dismissMenuSheet = { setShowBottomMenuSheet(false) })
+            DividerToolbarMenuItem()
 
-        FindInPageToolbarMenuItem(setBrowserComponentMode = setBrowserComponentMode,
-            dismissMenuSheet = { setShowBottomMenuSheet(false) })
-        DividerToolbarMenuItem()
+            RequestDesktopSiteToolbarMenuItem(desktopMode = tabSessionState.content.desktopMode)
+            DividerToolbarMenuItem()
 
-        SettingsToolbarMenuItem()
-        DividerToolbarMenuItem()
+            FindInPageToolbarMenuItem(setBrowserComponentMode = setBrowserComponentMode,
+                dismissMenuSheet = { setShowBottomMenuSheet(false) })
+            DividerToolbarMenuItem()
 
-        // stop, refresh, forward, back
-        NavOptionsToolbarMenuItem()
+            SettingsToolbarMenuItem(onNavToSettings = onNavToSettings)
+        }
     }
 }
 

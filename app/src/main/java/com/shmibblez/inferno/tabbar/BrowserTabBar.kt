@@ -126,13 +126,14 @@ fun BrowserTabBar(tabList: List<TabSessionState>, selectedTab: TabSessionState?)
                 .fillMaxHeight()
                 .aspectRatio(1F)
         ) {
-            Image(
+            Icon(
                 modifier = Modifier
                     .fillMaxHeight()
                     .aspectRatio(2F / 3F)
                     .align(Alignment.Center)
                     .clickable { context.components.newTab(isPrivateSession) },
-                imageVector = ImageVector.vectorResource(R.drawable.baseline_add_24),
+                painter = painterResource(R.drawable.baseline_add_24),
+                tint = Color.White,
                 contentDescription = "new tab"
             )
         }

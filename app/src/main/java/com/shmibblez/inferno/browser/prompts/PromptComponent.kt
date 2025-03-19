@@ -14,8 +14,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -24,10 +22,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SheetValue
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
@@ -36,7 +37,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.fragment.app.FragmentManager
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.prompts.compose.AlertDialogPrompt
 import com.shmibblez.inferno.browser.prompts.compose.AuthenticationPrompt
@@ -64,10 +64,9 @@ import com.shmibblez.inferno.browser.prompts.compose.TextPromptDialogPrompt
 import com.shmibblez.inferno.browser.prompts.compose.TimeSelectionPrompt
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.ext.components
-import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.dialog.emitGeneratedPasswordShownFact
-import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.facts.emitLoginAutofillShownFact
-import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.facts.emitSuccessfulAddressAutofillFormDetectedFact
-import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.facts.emitSuccessfulCreditCardAutofillFormDetectedFact
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.map
 import mozilla.components.browser.state.action.ContentAction
 import mozilla.components.browser.state.selector.findTabOrCustomTabOrSelectedTab
 import mozilla.components.browser.state.state.TabSessionState
@@ -100,50 +99,21 @@ import mozilla.components.concept.storage.CreditCardValidationDelegate
 import mozilla.components.concept.storage.Login
 import mozilla.components.concept.storage.LoginEntry
 import mozilla.components.concept.storage.LoginValidationDelegate
-import mozilla.components.feature.prompts.address.AddressDelegate
-import mozilla.components.feature.prompts.address.AddressPicker
-import mozilla.components.feature.prompts.address.DefaultAddressDelegate
-import mozilla.components.feature.prompts.creditcard.CreditCardDelegate
-import mozilla.components.feature.prompts.identitycredential.DialogColors
-import mozilla.components.feature.prompts.identitycredential.DialogColorsProvider
-import mozilla.components.feature.prompts.login.LoginDelegate
-import mozilla.components.feature.prompts.login.LoginExceptions
-import mozilla.components.feature.prompts.login.PasswordGeneratorDialogColors
-import mozilla.components.feature.prompts.login.PasswordGeneratorDialogColorsProvider
-import mozilla.components.feature.prompts.login.SuggestStrongPasswordDelegate
 import mozilla.components.feature.prompts.share.ShareDelegate
-import mozilla.components.feature.session.SessionUseCases
-import mozilla.components.feature.session.SessionUseCases.ExitFullScreenUseCase
-import mozilla.components.feature.tabs.TabsUseCases
-import mozilla.components.support.base.feature.OnNeedToRequestPermissions
+import mozilla.components.lib.state.ext.flowScoped
 import mozilla.components.support.base.log.logger.Logger
 import mozilla.components.support.ktx.kotlin.ifNullOrEmpty
+import mozilla.components.support.ktx.kotlinx.coroutines.flow.ifAnyChanged
 import mozilla.components.support.ktx.util.PromptAbuserDetector
 import java.util.Date
 
 // todo:
-//   - prompt requests pop up on bottom of screen, show active ones (could be multiple)
-//     on the bottom stacked, first one on bottom and last on top
-//   - depending on the type, show different prompt, for each lifecycle is the following:
-//     1. active
-//     2. pending dismissal,
-//     3. process and dismiss (cancel) or just dismiss,
-//        for process look at fun processPromptRequest() in [PromptFeature]
-//     4. confirm check out onConfirm() in [PromptFeature]
-//        if can be confirmed check moz prompt onConfirm() fun
-//   - to consume prompt in browser store, check BrowserStore.consumePromptFrom() in [PromptFeature]
-//     (there are multiple functions, also BrowserStore.consumeAllSessionPrompts)
-//  - for specific prompts, things to keep in mind:
-//    - if cannot be shown (permissions, settings, etc), then dismiss
-//    - TimeSelection prompt: can be cleared
-//    - select prompts with listeners:
-//      - LoginPicker prompt
-//      - SuggestStrongPassword prompt
-//      - CreditCardPicker prompt
-//      - AddressPicker prompt
-//    - AndroidPhotoPicker result needs to be transferred over to filePicker:
-//      filePicker.onAndroidPhotoPickerResult(uriList)
-//
+//   - colors
+//   - some prompts not working nicely
+//   - move file picker implementation here, make clean with callbacks and such
+//   - implement share dialog in compose
+//   - some minor problems in some components, go to ones with todos in their files
+//   - check usage of parameters that are not in use for [PromptComponent] (commented out)
 //
 
 enum class PromptBottomSheetTemplateButtonPosition {
@@ -178,20 +148,14 @@ fun PromptBottomSheetTemplate(
         sheetValue != SheetValue.Hidden || dismissOnSwipeDown
     })
     ModalBottomSheet(
+        modifier = Modifier.fillMaxWidth(),
         sheetState = sheetState,
         onDismissRequest = onDismissRequest,
         // todo: use acorn colors
         containerColor = Color.Black,
         scrimColor = Color.Black.copy(alpha = 0.5F),
         shape = RectangleShape,
-        dragHandle = {
-            /* no drag handle */
-//            BottomSheetDefaults.DragHandle(
-//                color = Color.White,
-//                height = ToolbarMenuItemConstants.SHEET_HANDLE_HEIGHT,
-////            shape = RectangleShape,
-//            )
-        },
+        dragHandle = { /* no drag handle */ },
         content = {
             // content actions (cancel or confirm)
             // content below
@@ -355,6 +319,11 @@ fun PromptBottomSheetTemplate(
                     }
                 }
             }
+            Spacer(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(16.dp),
+            )
         },
     )
 }
@@ -365,28 +334,28 @@ fun PromptBottomSheetTemplate(
  */
 @Composable
 fun PromptComponent(
-    promptRequests: List<PromptRequest>,
+    setPromptRequests: (List<PromptRequest>)->Unit,
     currentTab: TabSessionState?,
 
-    /* private val */
+//    /* private val */
 //    container: PromptContainer,
-    /* private val */
-    store: BrowserStore,
+//    /* private val */
+//    store: BrowserStore,
     /* private var */
     customTabId: String?,
-    /* private val */
-    fragmentManager: FragmentManager,
+//    /* private val */
+//    fragmentManager: FragmentManager,
     filePicker: FilePicker?,
-    /* private val */
-    identityCredentialColorsProvider: DialogColorsProvider = DialogColorsProvider {
-        DialogColors.default()
-    },
-    /* private val */
-    tabsUseCases: TabsUseCases,
+//    /* private val */
+//    identityCredentialColorsProvider: DialogColorsProvider = DialogColorsProvider {
+//        DialogColors.default()
+//    },
+//    /* private val */
+//    tabsUseCases: TabsUseCases,
     /* private val */
     shareDelegate: ShareDelegate,
-    /* private val */
-    exitFullscreenUsecase: ExitFullScreenUseCase = SessionUseCases(store).exitFullscreen,
+//    /* private val */
+//    exitFullscreenUsecase: ExitFullScreenUseCase = SessionUseCases(store).exitFullscreen,
     /* override val */
     creditCardValidationDelegate: CreditCardValidationDelegate? = null,
     /* override val */
@@ -399,35 +368,35 @@ fun PromptComponent(
     isCreditCardAutofillEnabled: () -> Boolean = { false },
     /* private val */
     isAddressAutofillEnabled: () -> Boolean = { false },
-    /* override val */
-    loginExceptionStorage: LoginExceptions? = null,
-    /* private val */
-    loginDelegate: LoginDelegate = object : LoginDelegate {},
-    /* private val */
-    suggestStrongPasswordDelegate: SuggestStrongPasswordDelegate = object :
-        SuggestStrongPasswordDelegate {},
+//    /* override val */
+//    loginExceptionStorage: LoginExceptions? = null,
+//    /* private val */
+//    loginDelegate: LoginDelegate = object : LoginDelegate {},
+//    /* private val */
+//    suggestStrongPasswordDelegate: SuggestStrongPasswordDelegate = object :
+//        SuggestStrongPasswordDelegate {},
     /* private var */
     shouldAutomaticallyShowSuggestedPassword: () -> Boolean = { false },
-    /* private val */
-    onFirstTimeEngagedWithSignup: () -> Unit = {},
-    /* private val */
-    onSaveLoginWithStrongPassword: (String, String) -> Unit = { _, _ -> },
+//    /* private val */
+//    onFirstTimeEngagedWithSignup: () -> Unit = {},
+//    /* private val */
+//    onSaveLoginWithStrongPassword: (String, String) -> Unit = { _, _ -> },
     /* private val */
     onSaveLogin: (Boolean) -> Unit = { _ -> },
-    /* private val */
-    passwordGeneratorColorsProvider: PasswordGeneratorDialogColorsProvider = PasswordGeneratorDialogColorsProvider { PasswordGeneratorDialogColors.default() },
+//    /* private val */
+//    passwordGeneratorColorsProvider: PasswordGeneratorDialogColorsProvider = PasswordGeneratorDialogColorsProvider { PasswordGeneratorDialogColors.default() },
     /* private val */
     hideUpdateFragmentAfterSavingGeneratedPassword: (String, String) -> Boolean = { _, _ -> true },
     /* private val */
     removeLastSavedGeneratedPassword: () -> Unit = {},
-    /* private val */
-    creditCardDelegate: CreditCardDelegate = object : CreditCardDelegate {},
-    /* private val */
-    addressDelegate: AddressDelegate = DefaultAddressDelegate(),
-    /* private val */
-    fileUploadsDirCleaner: FileUploadsDirCleaner,
-    onNeedToRequestPermissions: OnNeedToRequestPermissions,
-    androidPhotoPicker: AndroidPhotoPicker?,
+//    /* private val */
+//    creditCardDelegate: CreditCardDelegate = object : CreditCardDelegate {},
+//    /* private val */
+//    addressDelegate: AddressDelegate = DefaultAddressDelegate(),
+//    /* private val */
+//    fileUploadsDirCleaner: FileUploadsDirCleaner,
+//    onNeedToRequestPermissions: OnNeedToRequestPermissions,
+//    androidPhotoPicker: AndroidPhotoPicker?,
 ) {
     if (currentTab == null) return
     val context = LocalContext.current
@@ -435,6 +404,29 @@ fun PromptComponent(
 //    var promptRequest by remember { mutableStateOf<PromptRequest?>(null) }
     val sessionId = currentTab.id
     val promptAbuserDetector = remember { PromptAbuserDetector() }
+
+    val store = LocalContext.current.components.core.store
+    var listener by remember { mutableStateOf<CoroutineScope?>(null) }
+    var promptRequests by remember { mutableStateOf<List<PromptRequest>>(emptyList()) }
+
+    DisposableEffect(null) {
+        listener = store.flowScoped { flow ->
+            flow.map { state -> state.findTabOrCustomTabOrSelectedTab(customTabId) }.ifAnyChanged {
+                    arrayOf(it?.content?.promptRequests, it?.content?.loading)
+                }.collect { state ->
+                    state?.content?.let { content ->
+                        // for testing:
+                        // listOf(PromptComponentTestObjs.file, PromptComponentTestObjs.share, PromptComponentTestObjs.selectLoginPrompt)
+                        promptRequests = content.promptRequests
+                        setPromptRequests(promptRequests)
+                    }
+
+                }
+        }
+        onDispose {
+            listener?.cancel()
+        }
+    }
 
     // show prompts one above the other, first one on top
     Box(
@@ -592,7 +584,6 @@ fun PromptComponent(
                     ) {
                         removeLastSavedGeneratedPassword()
                         dismissDialogRequest(prompt, sessionId, store)
-
                         return
                     }
 
@@ -686,7 +677,6 @@ fun PromptComponent(
 //                            )
 //                        }
 //                        strongPasswordPromptViewListener?.handleSuggestStrongPasswordRequest()
-                            // todo: suggest strong password bar
                             val currentUrl =
                                 store.state.findTabOrCustomTabOrSelectedTab(customTabId)?.content?.url
                             val generatedPassword = prompt.generatedPassword
@@ -718,6 +708,7 @@ fun PromptComponent(
 
                 is Share -> {
 //                    emitPromptDisplayedFact(promptName = "ShareSheet")
+                    // todo: customize this and make bottom prompt sheet
                     shareDelegate.showShareSheet(
                         context = context,
                         shareData = prompt.data,
@@ -836,39 +827,12 @@ fun onPositiveAction(promptRequest: PromptRequest, value: Any? = null, value2: A
 
 fun onNeutralAction(promptRequest: PromptRequest, value: Any? = null) {
     when (promptRequest) {
-        is Alert -> TODO()
-        is PromptRequest.Authentication -> TODO()
-        is PromptRequest.BeforeUnload -> promptRequest.onDismiss.invoke()
-        is PromptRequest.Color -> TODO()
-        is PromptRequest.Confirm -> promptRequest.onConfirmNeutralButton.invoke(value as Boolean)
-        is File -> TODO()
-        is PromptRequest.IdentityCredential.PrivacyPolicy -> TODO()
-        is PromptRequest.IdentityCredential.SelectAccount -> TODO()
-        is PromptRequest.IdentityCredential.SelectProvider -> TODO()
-        is PromptRequest.MenuChoice -> TODO()
-        is PromptRequest.MultipleChoice -> TODO()
-        is PromptRequest.Popup -> promptRequest.onDismiss.invoke()
-        is PromptRequest.Repost -> promptRequest.onDismiss.invoke()
-        is PromptRequest.SaveCreditCard -> TODO()
-        is PromptRequest.SaveLoginPrompt -> TODO()
-        is SelectAddress -> TODO()
-        is SelectCreditCard -> TODO()
-        is SelectLoginPrompt -> TODO()
-        is Share -> TODO()
-        is SingleChoice -> TODO()
-        is TextPrompt -> TODO()
-        is TimeSelection -> promptRequest.onClear.invoke()
-    }
-}
-
-fun onNegativeAction(promptRequest: PromptRequest, value: Any? = null) {
-    when (promptRequest) {
         is Alert -> promptRequest.onDismiss.invoke()
         is PromptRequest.Authentication -> promptRequest.onDismiss.invoke()
-        is PromptRequest.BeforeUnload -> promptRequest.onStay.invoke()
+        is PromptRequest.BeforeUnload -> promptRequest.onDismiss.invoke()
         is PromptRequest.Color -> promptRequest.onDismiss.invoke()
-        is PromptRequest.Confirm -> promptRequest.onConfirmNegativeButton.invoke(value as Boolean)
-        is File -> TODO()
+        is PromptRequest.Confirm -> promptRequest.onConfirmNeutralButton.invoke(value as Boolean)
+        is File -> promptRequest.onDismiss.invoke()
         is PromptRequest.IdentityCredential.PrivacyPolicy -> promptRequest.onDismiss.invoke()
         is PromptRequest.IdentityCredential.SelectAccount -> promptRequest.onDismiss.invoke()
         is PromptRequest.IdentityCredential.SelectProvider -> promptRequest.onDismiss.invoke()
@@ -878,6 +842,35 @@ fun onNegativeAction(promptRequest: PromptRequest, value: Any? = null) {
         is PromptRequest.Repost -> promptRequest.onDismiss.invoke()
         is PromptRequest.SaveCreditCard -> promptRequest.onDismiss.invoke()
         is PromptRequest.SaveLoginPrompt -> promptRequest.onDismiss.invoke()
+        is SelectAddress -> promptRequest.onDismiss.invoke()
+        is SelectCreditCard -> promptRequest.onDismiss.invoke()
+        is SelectLoginPrompt -> promptRequest.onDismiss.invoke()
+        is Share -> promptRequest.onDismiss.invoke()
+        is SingleChoice -> promptRequest.onDismiss.invoke()
+        is TextPrompt -> promptRequest.onDismiss.invoke()
+        is TimeSelection -> promptRequest.onClear.invoke()
+    }
+}
+
+fun onNegativeAction(promptRequest: PromptRequest, value: Any? = null) {
+    when (promptRequest) {
+        is Alert -> promptRequest.onDismiss.invoke()
+        is Authentication -> promptRequest.onDismiss.invoke()
+        is BeforeUnload -> promptRequest.onStay.invoke()
+        is PromptRequest.Color -> promptRequest.onDismiss.invoke()
+        is Confirm -> promptRequest.onConfirmNegativeButton.invoke(value as Boolean)
+        is File -> { /* not necessary */
+        }
+
+        is PromptRequest.IdentityCredential.PrivacyPolicy -> promptRequest.onDismiss.invoke()
+        is PromptRequest.IdentityCredential.SelectAccount -> promptRequest.onDismiss.invoke()
+        is PromptRequest.IdentityCredential.SelectProvider -> promptRequest.onDismiss.invoke()
+        is MenuChoice -> promptRequest.onDismiss.invoke()
+        is MultipleChoice -> promptRequest.onDismiss.invoke()
+        is Popup -> promptRequest.onDismiss.invoke()
+        is Repost -> promptRequest.onDismiss.invoke()
+        is SaveCreditCard -> promptRequest.onDismiss.invoke()
+        is SaveLoginPrompt -> promptRequest.onDismiss.invoke()
         is SelectAddress -> promptRequest.onDismiss.invoke()
         is SelectCreditCard -> promptRequest.onDismiss.invoke()
         is SelectLoginPrompt -> promptRequest.onDismiss.invoke()

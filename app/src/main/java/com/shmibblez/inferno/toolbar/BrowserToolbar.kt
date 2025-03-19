@@ -84,6 +84,7 @@ fun BrowserToolbar(
     searchEngine: SearchEngine,
     tabCount: Int,
     setShowMenu: (Boolean) -> Unit,
+    onNavToTabsTray: ()->Unit,
 ) {
     if (tabSessionState == null) {
         // don't show if null, TODO: show loading bar
@@ -111,7 +112,8 @@ fun BrowserToolbar(
             tabCount = tabCount,
             tabSessionState = tabSessionState,
             setEditMode = setEditMode,
-            setShowMenu = setShowMenu
+            setShowMenu = setShowMenu,
+            onNavToTabsTray = onNavToTabsTray,
         )
     }
 }
@@ -138,6 +140,7 @@ fun BrowserDisplayToolbar(
     tabSessionState: TabSessionState,
     setEditMode: (Boolean) -> Unit,
     setShowMenu: (Boolean) -> Unit,
+    onNavToTabsTray: ()->Unit,
 ) {
     var textFullSize by remember { mutableStateOf(true) }
     val loading = tabSessionState?.content?.loading ?: false
@@ -183,7 +186,7 @@ fun BrowserDisplayToolbar(
             )
             if (!textFullSize) {
                 ToolbarReload(enabled = true)
-                ToolbarShowTabsTray(tabCount = tabCount)
+                ToolbarShowTabsTray(tabCount = tabCount, onNavToTabsTray = onNavToTabsTray)
                 ToolbarMenuIcon(setShowMenu = setShowMenu)
             }
         }

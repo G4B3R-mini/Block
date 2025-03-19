@@ -42,6 +42,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.shmibblez.inferno.compose.base.InfernoText
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
@@ -101,10 +102,12 @@ private fun Picker(
                 .fadingEdge(fadingEdgeGradient)
         ) {
             items(listScrollCount) { index ->
-                Text(text = getItem(index),
+                InfernoText(text = getItem(index),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     style = textStyle,
+                    fontColor = Color.White,
+                    fontSize = 32.sp,
                     modifier = Modifier
                         .onSizeChanged { size ->
                             itemHeightPixels.intValue = size.height
@@ -153,23 +156,21 @@ fun NumberPicker(
             state = state,
             items = values,
             startIndex = selectedIndex,
-            visibleItemsCount = 5,
+            visibleItemsCount = 3,
             modifier = Modifier.fillMaxWidth(0.5f),
             textModifier = Modifier.padding(8.dp),
-            textStyle = TextStyle(fontSize = 32.sp),
             dividerColor = Color(0xFFE8E8E8)
         )
-
-        Text(
-            text = "Result: ${state.selectedItem}",
+        InfernoText(
+            text = state.selectedItem,
             textAlign = TextAlign.Center,
             fontWeight = FontWeight(500),
             fontSize = 20.sp,
+            fontColor = Color.White,
             modifier = Modifier
-                .padding(vertical = 16.dp)
+                .padding(bottom = 16.dp)
                 .fillMaxWidth(0.5f)
-                .background(color = Color(0xFFF5F5F5), shape = RoundedCornerShape(size = 8.dp))
-                .padding(vertical = 10.dp, horizontal = 16.dp)
+                .padding(vertical = 10.dp, horizontal = 16.dp),
         )
     }
 }

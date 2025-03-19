@@ -4,6 +4,7 @@
 
 package com.shmibblez.inferno.tabstray
 
+import android.util.Log
 import androidx.compose.animation.core.DecayAnimationSpec
 import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -102,6 +103,7 @@ fun TabLayout(
     }
 
     if (displayTabsInGrid) {
+        Log.d("TabLayout" , "showing tabs in grid")
         TabGrid(
             tabs = tabs,
             selectedTabId = selectedTabId,
@@ -117,6 +119,7 @@ fun TabLayout(
             header = header,
         )
     } else {
+        Log.d("TabLayout" , "showing tabs in list")
         TabList(
             tabs = tabs,
             selectedTabId = selectedTabId,
@@ -294,6 +297,7 @@ private fun TabList(
         }
     }
 
+    Log.d("TabList", "gonna show tabs any moment")
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
@@ -314,6 +318,7 @@ private fun TabList(
             items = tabs,
             key = { _, tab -> tab.id },
         ) { index, tab ->
+            Log.d("TabList","rendering tab, index: $index")
             DragItemContainer(
                 state = reorderState,
                 position = index + if (header != null) 1 else 0,
