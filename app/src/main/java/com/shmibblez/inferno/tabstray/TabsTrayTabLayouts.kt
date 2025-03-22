@@ -297,7 +297,6 @@ private fun TabList(
         }
     }
 
-    Log.d("TabList", "gonna show tabs any moment")
     LazyColumn(
         modifier = modifier
             .fillMaxSize()

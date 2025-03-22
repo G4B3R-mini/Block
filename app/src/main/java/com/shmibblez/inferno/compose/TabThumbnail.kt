@@ -5,6 +5,7 @@
 package com.shmibblez.inferno.compose
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -44,14 +45,15 @@ fun TabThumbnail(
     tab: TabSessionState,
     size: Int,
     modifier: Modifier = Modifier,
-    backgroundColor: Color = FirefoxTheme.colors.layer2,
+    backgroundColor: Color = Color.Black, // FirefoxTheme.colors.layer2,
     contentDescription: String? = null,
     contentScale: ContentScale = ContentScale.FillWidth,
-    alignment: Alignment = Alignment.TopCenter,
+    alignment: Alignment = Alignment.Center,
 ) {
-    Card(
-        colors = CardDefaults.cardColors(containerColor = backgroundColor),
-        modifier = modifier,
+    Box(
+//        colors = CardDefaults.cardColors(containerColor = backgroundColor),
+        modifier = modifier.background(Color.Black),
+        contentAlignment = Alignment.Center,
     ) {
         ThumbnailImage(
             request = ImageLoadRequest(
@@ -59,7 +61,7 @@ fun TabThumbnail(
                 size = size,
                 isPrivate = tab.content.private,
             ),
-            contentScale = contentScale,
+            contentScale = ContentScale.FillWidth,
             alignment = alignment,
         ) {
             Box(
@@ -75,7 +77,7 @@ fun TabThumbnail(
                         modifier = Modifier
                             .size(FALLBACK_ICON_SIZE.dp)
                             .clip(RoundedCornerShape(8.dp)),
-                        contentScale = contentScale,
+                        contentScale = ContentScale.FillWidth,
                     )
                 } else {
                     Favicon(

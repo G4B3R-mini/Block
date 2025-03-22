@@ -93,7 +93,6 @@ fun TabListItem(
     onClick: (tab: TabSessionState) -> Unit,
     onLongClick: ((tab: TabSessionState) -> Unit)? = null,
 ) {
-    Log.d("TabListItem", "made it to TabListItem")
     val contentBackgroundColor = if (isSelected) {
         FirefoxTheme.colors.layerAccentNonOpaque
     } else {

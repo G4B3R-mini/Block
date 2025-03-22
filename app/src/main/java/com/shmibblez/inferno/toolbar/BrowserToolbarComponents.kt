@@ -231,7 +231,6 @@ object ToolbarOptionsScopeInstance : ToolbarOptionsScope {
 
     @Composable
     override fun ToolbarShowTabsTray(tabCount: Int, onNavToTabsTray: () -> Unit) {
-        val context = LocalContext.current
         Box(
             modifier = Modifier
                 .fillMaxHeight()

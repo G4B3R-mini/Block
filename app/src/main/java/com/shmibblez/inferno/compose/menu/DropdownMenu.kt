@@ -74,18 +74,20 @@ fun DropdownMenu(
     scrollState: ScrollState = rememberScrollState(),
     onDismissRequest: () -> Unit,
 ) {
-    MaterialTheme(shapes = MaterialTheme.shapes.copy(medium = defaultMenuShape)) {
-        MaterialDropdownMenu(
-            expanded = expanded,
-            onDismissRequest = onDismissRequest,
-            offset = offset,
-            scrollState = scrollState,
-            modifier = modifier.background(FirefoxTheme.colors.layer2),
-        ) {
-            DropdownMenuContent(
-                menuItems = menuItems,
+    FirefoxTheme {
+        MaterialTheme(shapes = MaterialTheme.shapes.copy(medium = defaultMenuShape)) {
+            MaterialDropdownMenu(
+                expanded = expanded,
                 onDismissRequest = onDismissRequest,
-            )
+                offset = offset,
+                scrollState = scrollState,
+                modifier = modifier.background(FirefoxTheme.colors.layer2),
+            ) {
+                DropdownMenuContent(
+                    menuItems = menuItems,
+                    onDismissRequest = onDismissRequest,
+                )
+            }
         }
     }
 }

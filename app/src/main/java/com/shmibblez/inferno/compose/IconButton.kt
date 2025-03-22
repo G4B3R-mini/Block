@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.shmibblez.inferno.theme.FirefoxTheme
@@ -31,26 +32,28 @@ fun IconButton(
     interactionSource: MutableInteractionSource? = null,
     content: @Composable () -> Unit,
 ) {
-    Box(
-        modifier = modifier
-            .minimumInteractiveComponentSize()
-            .clickable(
-                onClick = onClick,
-                enabled = enabled,
-                role = Role.Button,
-                interactionSource = interactionSource,
-                indication = ripple(
-                    bounded = false, radius = RippleRadius, color = FirefoxTheme.colors.ripple
+    FirefoxTheme {
+        Box(
+            modifier = modifier
+                .minimumInteractiveComponentSize()
+                .clickable(
+                    onClick = onClick,
+                    enabled = enabled,
+                    role = Role.Button,
+                    interactionSource = interactionSource,
+                    indication = ripple(
+                        bounded = false, radius = RippleRadius, color = FirefoxTheme.colors.ripple
+                    ),
                 ),
-            ),
-        contentAlignment = Alignment.Center,
-    ) {
-        val contentAlpha = if (enabled) LocalContentColor.current.alpha else 0.38f
-        CompositionLocalProvider(
-            LocalContentColor provides MaterialTheme.colorScheme.onSurface.copy(
-                alpha = contentAlpha
-            ), content = content
-        )//LocalContentAlpha provides contentAlpha, content = content)
+            contentAlignment = Alignment.Center,
+        ) {
+            val contentAlpha = if (enabled) LocalContentColor.current.alpha else 0.38f
+            CompositionLocalProvider(
+                LocalContentColor provides MaterialTheme.colorScheme.onSurface.copy(
+                    alpha = contentAlpha
+                ), content = content
+            )//LocalContentAlpha provides contentAlpha, content = content)
+        }
     }
 }
 

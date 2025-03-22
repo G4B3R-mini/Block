@@ -63,7 +63,6 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.motionEventSpy
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.colorResource
@@ -108,7 +107,9 @@ import com.shmibblez.inferno.browser.tabstrip.isTabStripEnabled
 import com.shmibblez.inferno.components.Components
 import com.shmibblez.inferno.components.FindInPageIntegration
 import com.shmibblez.inferno.components.TabCollectionStorage
+import com.shmibblez.inferno.components.accounts.FenixFxAEntryPoint
 import com.shmibblez.inferno.components.accounts.FxaWebChannelIntegration
+import com.shmibblez.inferno.components.appstate.AppAction
 import com.shmibblez.inferno.components.appstate.AppAction.MessagingAction
 import com.shmibblez.inferno.components.appstate.AppAction.ShoppingAction
 import com.shmibblez.inferno.components.toolbar.BottomToolbarContainerIntegration
@@ -127,11 +128,13 @@ import com.shmibblez.inferno.compose.snackbar.SnackbarHost
 import com.shmibblez.inferno.customtabs.ExternalAppBrowserActivity
 import com.shmibblez.inferno.downloads.DownloadService
 import com.shmibblez.inferno.downloads.dialog.DynamicDownloadDialog
+import com.shmibblez.inferno.ext.DEFAULT_ACTIVE_DAYS
 import com.shmibblez.inferno.ext.accessibilityManager
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.consumeFlow
 import com.shmibblez.inferno.ext.getPreferenceKey
 import com.shmibblez.inferno.ext.isKeyboardVisible
+import com.shmibblez.inferno.ext.isLargeWindow
 import com.shmibblez.inferno.ext.isToolbarAtBottom
 import com.shmibblez.inferno.ext.lastOpenedNormalTab
 import com.shmibblez.inferno.ext.nav
@@ -161,7 +164,14 @@ import com.shmibblez.inferno.shortcut.PwaOnboardingObserver
 import com.shmibblez.inferno.tabbar.BrowserTabBar
 import com.shmibblez.inferno.tabbar.toTabList
 import com.shmibblez.inferno.tabs.LastTabFeature
+import com.shmibblez.inferno.tabs.tabstray.InfernoTabsTray
+import com.shmibblez.inferno.tabs.tabstray.InfernoTabsTrayDisplayType
+import com.shmibblez.inferno.tabs.tabstray.InfernoTabsTrayMode
+import com.shmibblez.inferno.tabs.tabstray.InfernoTabsTraySelectedTab
 import com.shmibblez.inferno.tabstray.Page
+import com.shmibblez.inferno.tabstray.TabsTrayFragmentDirections
+import com.shmibblez.inferno.tabstray.ext.isActiveDownload
+import com.shmibblez.inferno.tabstray.ext.isNormalTab
 import com.shmibblez.inferno.theme.FirefoxTheme
 import com.shmibblez.inferno.theme.ThemeManager
 import com.shmibblez.inferno.toolbar.BrowserToolbar
@@ -170,6 +180,7 @@ import com.shmibblez.inferno.wifi.SitePermissionsWifiIntegration
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -184,9 +195,13 @@ import mozilla.appservices.places.uniffi.PlacesApiException
 import mozilla.components.browser.engine.gecko.GeckoEngineView
 import mozilla.components.browser.state.action.BrowserAction
 import mozilla.components.browser.state.action.ContentAction
+import mozilla.components.browser.state.action.DebugAction
+import mozilla.components.browser.state.action.LastAccessAction
 import mozilla.components.browser.state.selector.findCustomTabOrSelectedTab
+import mozilla.components.browser.state.selector.findTab
 import mozilla.components.browser.state.selector.findTabOrCustomTab
 import mozilla.components.browser.state.selector.findTabOrCustomTabOrSelectedTab
+import mozilla.components.browser.state.selector.getNormalOrPrivateTabs
 import mozilla.components.browser.state.selector.normalTabs
 import mozilla.components.browser.state.selector.privateTabs
 import mozilla.components.browser.state.selector.selectedTab
@@ -203,6 +218,7 @@ import mozilla.components.compose.cfr.CFRPopup
 import mozilla.components.compose.cfr.CFRPopupLayout
 import mozilla.components.compose.cfr.CFRPopupProperties
 import mozilla.components.concept.engine.EngineView
+import mozilla.components.concept.engine.mediasession.MediaSession
 import mozilla.components.concept.engine.permission.SitePermissions
 import mozilla.components.concept.engine.prompt.PromptRequest
 import mozilla.components.concept.engine.prompt.PromptRequest.File
@@ -239,6 +255,7 @@ import mozilla.components.feature.sitepermissions.SitePermissionsFeature
 import mozilla.components.feature.tab.collections.TabCollection
 import mozilla.components.feature.tabs.WindowFeature
 import mozilla.components.feature.webauthn.WebAuthnFeature
+import mozilla.components.lib.state.DelicateAction
 import mozilla.components.lib.state.Store
 import mozilla.components.lib.state.ext.flowScoped
 import mozilla.components.lib.state.ext.observe
@@ -258,6 +275,8 @@ import mozilla.components.support.utils.ext.isLandscape
 import mozilla.components.ui.widgets.VerticalSwipeRefreshLayout
 import mozilla.components.ui.widgets.withCenterAlignedButtons
 import java.lang.ref.WeakReference
+import java.util.concurrent.TimeUnit
+import kotlin.math.abs
 import kotlin.math.roundToInt
 import mozilla.components.browser.toolbar.BrowserToolbar as BrowserToolbarCompat
 
@@ -411,7 +430,7 @@ private fun resolvePageType(tabSessionState: TabSessionState?): BrowserComponent
  * @param sessionId session id, from Moz BaseBrowserFragment
  */
 @OptIn(
-    ExperimentalComposeUiApi::class, ExperimentalCoroutinesApi::class
+    ExperimentalComposeUiApi::class, ExperimentalCoroutinesApi::class, DelicateAction::class
 )
 @Composable
 @SuppressLint(
@@ -432,7 +451,7 @@ fun BrowserComponent(
     val context = LocalContext.current
     val store = context.components.core.store
     val view = LocalView.current
-    val localConfiguration = LocalConfiguration.current
+//    val localConfiguration = LocalConfiguration.current
     val parentFragmentManager = context.getActivity()!!.supportFragmentManager
     val snackbarHostState = remember { AcornSnackbarHostState() }
 
@@ -453,6 +472,8 @@ fun BrowserComponent(
     var searchEngine by remember { mutableStateOf(store.state.search.selectedOrDefaultSearchEngine!!) }
     var pageType by remember { mutableStateOf(resolvePageType(currentTab)) }
     var promptRequests by remember { mutableStateOf<List<PromptRequest>>(emptyList()) }
+    var showTabsTray by remember { mutableStateOf(false) }
+    var tabsTrayMode by remember { mutableStateOf<InfernoTabsTrayMode>(InfernoTabsTrayMode.Normal) }
 
     /* BrowserFragment vars */
     val windowFeature = ViewBoundFeatureWrapper<WindowFeature>()
@@ -728,6 +749,255 @@ fun BrowserComponent(
             setShowBottomMenuSheet = setShowMenuBottomSheet,
             setBrowserComponentMode = setBrowserMode,
             onNavToSettings = { navToSettings(navController) }
+        )
+    }
+
+
+
+    if (showTabsTray) {
+        // todo: missing functionality from [TabsTrayFragment], [DefaultTabsTrayInteractor], and [DefaultTabsTrayController]
+        InfernoTabsTray(
+            dismiss = { showTabsTray = false },
+            mode = tabsTrayMode,
+            setMode = { mode -> tabsTrayMode = mode },
+            activeTabId = currentTab?.id,
+            normalTabs = context.components.core.store.state.normalTabs,
+            privateTabs = context.components.core.store.state.privateTabs,
+            syncedTabs = context.components.core.store.state.normalTabs, // todo: synced tabs implementation
+            recentlyClosedTabs = context.components.core.store.state.closedTabs,
+            tabDisplayType = InfernoTabsTrayDisplayType.List,
+            initiallySelectedTab = InfernoTabsTraySelectedTab.NormalTabs,
+            onBookmarkSelectedTabsClick = {
+                CoroutineScope(IO).launch {
+                    Result.runCatching {
+                        val bookmarksStorage = context.components.core.bookmarksStorage
+                        val parentGuid = bookmarksStorage
+                            .getRecentBookmarks(1)
+                            .firstOrNull()
+                            ?.parentGuid
+                            ?: BookmarkRoot.Mobile.id
+
+                        val parentNode = bookmarksStorage.getBookmark(parentGuid)
+
+                        tabsTrayMode.selectedTabs.forEach { tab ->
+                            bookmarksStorage.addItem(
+                                parentGuid = parentNode!!.guid,
+                                url = tab.content.url,
+                                title = tab.content.title,
+                                position = null,
+                            )
+                        }
+                        withContext(Dispatchers.Main) {
+                            // todo: showBookmarkSnackbar(mode.selectedTabs.size, parentNode?.title)
+                        }
+                    }.getOrElse {
+                        // silently fail
+                    }
+                }
+                tabsTrayMode = InfernoTabsTrayMode.Normal
+            },
+            onDeleteSelectedTabsClick = {
+                /**
+                 * Helper function to delete multiple tabs and offer an undo option.
+                 */
+                fun deleteMultipleTabs(tabs: Collection<TabSessionState>) {
+                    val isPrivate = tabs.any { it.content.private }
+
+                    // If user closes all the tabs from selected tabs page dismiss tray and navigate home.
+                    if (tabs.size == context.components.core.store.state.getNormalOrPrivateTabs(
+                            isPrivate
+                        ).size
+                    ) {
+                        showTabsTray = false
+//                        dismissTabsTrayAndNavigateHome(
+//                            if (isPrivate) HomeFragment.ALL_PRIVATE_TABS else HomeFragment.ALL_NORMAL_TABS,
+//                        )
+                    } else {
+                        tabs.map { it.id }.let {
+                            context.components.useCases.tabsUseCases.removeTabs(it)
+                        }
+                    }
+//                    todo: snackbar -> showUndoSnackbarForTab(isPrivate)
+                }
+
+                val tabs = tabsTrayMode.selectedTabs
+
+//        TabsTray.closeSelectedTabs.record(TabsTray.CloseSelectedTabsExtra(tabCount = tabs.size))
+
+                deleteMultipleTabs(tabs)
+
+                tabsTrayMode = InfernoTabsTrayMode.Normal
+            },
+            onForceSelectedTabsAsInactiveClick = {
+                val numDays: Long = DEFAULT_ACTIVE_DAYS + 1
+                val tabs = tabsTrayMode.selectedTabs
+                val currentTabId = context.components.core.store.state.selectedTabId
+                tabs
+                    .filterNot { it.id == currentTabId }
+                    .forEach { tab ->
+                        val daysSince = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(numDays)
+                        context.components.core.store.apply {
+                            dispatch(LastAccessAction.UpdateLastAccessAction(tab.id, daysSince))
+                            dispatch(DebugAction.UpdateCreatedAtAction(tab.id, daysSince))
+                        }
+                    }
+
+                tabsTrayMode = InfernoTabsTrayMode.Normal
+            },
+            onTabSettingsClick = {
+                navController.navigate(
+                    TabsTrayFragmentDirections.actionGlobalTabSettingsFragment(),
+                )
+            },
+            onShareAllTabsClick = {
+                // todo:
+//                if (tabsTrayStore.state.selectedPage == Page.NormalTabs) {
+//                    tabsTrayStore.dispatch(TabsTrayAction.ShareAllNormalTabs)
+//                } else if (tabsTrayStore.state.selectedPage == Page.PrivateTabs) {
+//                    tabsTrayStore.dispatch(TabsTrayAction.ShareAllPrivateTabs)
+//                }
+//
+//                navigationInteractor.onShareTabsOfTypeClicked(
+//                    private = tabsTrayStore.state.selectedPage == Page.PrivateTabs,
+//                )
+            },
+            onDeleteAllTabsClick = {
+//          // todo:
+//                if (tabsTrayStore.state.selectedPage == Page.NormalTabs) {
+//                    tabsTrayStore.dispatch(TabsTrayAction.CloseAllNormalTabs)
+//                } else if (tabsTrayStore.state.selectedPage == Page.PrivateTabs) {
+//                    tabsTrayStore.dispatch(TabsTrayAction.CloseAllPrivateTabs)
+//                }
+//
+//                navigationInteractor.onCloseAllTabsClicked(
+//                    private = tabsTrayStore.state.selectedPage == Page.PrivateTabs,
+//                )
+            },
+            onAccountSettingsClick = {
+                val isSignedIn =
+                    context.components.backgroundServices.accountManager.authenticatedAccount() != null
+
+                val direction = if (isSignedIn) {
+                    TabsTrayFragmentDirections.actionGlobalAccountSettingsFragment()
+                } else {
+                    TabsTrayFragmentDirections.actionGlobalTurnOnSync(entrypoint = FenixFxAEntryPoint.NavigationInteraction)
+                }
+                navController.navigate(direction)
+            },
+            onTabClick = { tab ->
+                fun getTabPositionFromId(tabsList: List<TabSessionState>, tabId: String): Int {
+                    tabsList.forEachIndexed { index, tab -> if (tab.id == tabId) return index }
+                    return -1
+                }
+                run outer@{
+                    if (!context.settings().hasShownTabSwipeCFR &&
+                        !context.isTabStripEnabled() &&
+                        context.settings().isSwipeToolbarToSwitchTabsEnabled
+                    ) {
+                        val normalTabs = context.components.core.store.state.normalTabs
+                        val currentTabId = currentTab?.id
+
+                        if (normalTabs.size >= 2) {
+                            val currentTabPosition = currentTabId
+                                ?.let { getTabPositionFromId(normalTabs, it) }
+                                ?: return@outer
+                            val newTabPosition =
+                                getTabPositionFromId(normalTabs, tab.id)
+
+                            if (abs(currentTabPosition - newTabPosition) == 1) {
+                                context.settings().shouldShowTabSwipeCFR = true
+                            }
+                        }
+                    }
+                }
+
+                val selected = tabsTrayMode.selectedTabs
+                when {
+                    selected.isEmpty() && tabsTrayMode.isSelect().not() -> {
+//                TabsTray.openedExistingTab.record(TabsTray.OpenedExistingTabExtra(source ?: "unknown"))
+                        context.components.useCases.tabsUseCases.selectTab(tab.id)
+                        val mode = BrowsingMode.fromBoolean(tab.content.private)
+                        (context.getActivity()!! as HomeActivity).browsingModeManager.mode = mode
+                        context.components.appStore.dispatch(AppAction.ModeChange(mode))
+//                        handleNavigateToBrowser()
+                        showTabsTray = false
+                    }
+
+                    tab.id in selected.map { it.id } -> {
+                    // todo:
+//                        handleTabUnselected(tab)
+                    // aka:
+                        // tabsTrayStore.dispatch(TabsTrayAction.RemoveSelectTab(tab))
+                    }
+                    // todo:
+//                    source != TrayPagerAdapter.INACTIVE_TABS_FEATURE_NAME -> {
+//                        tabsTrayStore.dispatch(TabsTrayAction.AddSelectTab(tab))
+//                    }
+                }
+
+//                tabsTrayInteractor.onTabSelected(tab, TABS_TRAY_FEATURE_NAME)
+            },
+            onTabClose = { tab->
+                fun deleteTab(tabId: String, source: String?, isConfirmed: Boolean) {
+                    val browserStore = context.components.core.store
+                    val tab = browserStore.state.findTab(tabId)
+                    tab?.let {
+                        val isLastTab = browserStore.state.getNormalOrPrivateTabs(it.content.private).size == 1
+                        val isCurrentTab = browserStore.state.selectedTabId.equals(tabId)
+                        if (!isLastTab || !isCurrentTab) {
+                            context.components.useCases.tabsUseCases.removeTab(tabId)
+//                            todo: snackbar showUndoSnackbarForTab(it.content.private)
+                        } else {
+                            val privateDownloads = browserStore.state.downloads.filter { map ->
+                                map.value.private && map.value.isActiveDownload()
+                            }
+                            if (!isConfirmed && privateDownloads.isNotEmpty()) {
+//                                todo: dialog showCancelledDownloadWarning(privateDownloads.size, tabId, source)
+                                return
+                            } else {
+//                                dismissTabsTrayAndNavigateHome(tabId)
+                                showTabsTray = false // todo: close tab
+                                context.components.useCases.tabsUseCases.removeTab(tabId)
+                            }
+                        }
+//            TabsTray.closedExistingTab.record(TabsTray.ClosedExistingTabExtra(source ?: "unknown"))
+                    }
+
+                    showTabsTray = false
+                }
+
+                deleteTab(tab.id, null, isConfirmed = false)
+            },
+            onTabMediaClick = {tab ->
+                when (tab.mediaSessionState?.playbackState) {
+                    MediaSession.PlaybackState.PLAYING -> {
+//                GleanTab.mediaPause.record(NoExtras())
+                        tab.mediaSessionState?.controller?.pause()
+                    }
+
+                    MediaSession.PlaybackState.PAUSED -> {
+//                GleanTab.mediaPlay.record(NoExtras())
+                        tab.mediaSessionState?.controller?.play()
+                    }
+                    else -> throw AssertionError(
+                        "Play/Pause button clicked without play/pause state.",
+                    )
+                }
+            },
+            onTabMove = { tabId, targetId, placeAfter ->
+                if (targetId != null && tabId != targetId) {
+                    context.components.useCases.tabsUseCases.moveTabs(listOf(tabId), targetId, placeAfter)
+                }
+            },
+            onTabLongClick = { tab ->
+                if (tab.isNormalTab() && tabsTrayMode.selectedTabs.isEmpty()) {
+//            Collections.longPress.record(NoExtras())
+//                    todo: wtf to do here lol tabsTrayStore.dispatch(TabsTrayAction.AddSelectTab(tab))
+//                    true
+                } else {
+//                    false
+                }
+            }
         )
     }
 
@@ -1383,7 +1653,11 @@ fun BrowserComponent(
             )
 
             store.flowScoped(lifecycleOwner) { flow ->
-                flow.mapNotNull { state -> state.findTabOrCustomTabOrSelectedTab(customTabSessionId) }
+                flow.mapNotNull { state ->
+                    state.findTabOrCustomTabOrSelectedTab(
+                        customTabSessionId
+                    )
+                }
                     .distinctUntilChangedBy { tab -> tab.content.pictureInPictureEnabled }
                     .collect { tab -> pipModeChanged(tab, context, backHandler) }
             }
@@ -1454,7 +1728,7 @@ fun BrowserComponent(
                 context = context,
                 redesignEnabled = context.settings().navigationToolbarEnabled,
                 isLandscape = context.isLandscape(),
-                isTablet = com.shmibblez.inferno.ext.isLargeWindow(context),
+                isTablet = isLargeWindow(context),
                 isPrivate = (context.getActivity()!! as HomeActivity).browsingModeManager.mode.isPrivate,
                 feltPrivateBrowsingEnabled = context.settings().feltPrivateBrowsingEnabled,
                 isWindowSizeSmall = true, // AcornWindowSize.getWindowSize(context) == AcornWindowSize.Small,
@@ -1524,7 +1798,12 @@ fun BrowserComponent(
         )
 
         if (!context.components.fenixOnboarding.userHasBeenOnboarded()) {
-            observeTabSource(context.components.core.store, context, lifecycleOwner, coroutineScope)
+            observeTabSource(
+                context.components.core.store,
+                context,
+                lifecycleOwner,
+                coroutineScope
+            )
         }
 
         // todo: accessibility
@@ -1647,7 +1926,8 @@ fun BrowserComponent(
 
                     val preferredColorScheme = components.core.getPreferredColorScheme()
                     if (components.core.engine.settings.preferredColorScheme != preferredColorScheme) {
-                        components.core.engine.settings.preferredColorScheme = preferredColorScheme
+                        components.core.engine.settings.preferredColorScheme =
+                            preferredColorScheme
                         components.useCases.sessionUseCases.reload()
                     }
                     hideToolbar(context)
@@ -1898,7 +2178,7 @@ fun BrowserComponent(
                             searchEngine = searchEngine,
                             tabCount = tabList.size,
                             setShowMenu = setShowMenuBottomSheet,
-                            onNavToTabsTray = { navToTabsTray(navController) }
+                            onNavToTabsTray = { showTabsTray({ showTabsTray = true }) }
                         )
                     }
                     if (browserMode == BrowserComponentMode.FIND_IN_PAGE) {
@@ -1951,11 +2231,8 @@ private fun fullScreenChanged(
 /**
  * navigate to tabs tray fragment
  */
-private fun navToTabsTray(nav: NavController) {
-    nav.nav(
-        R.id.browserComponentWrapperFragment,
-        BrowserComponentWrapperFragmentDirections.actionGlobalTabsTrayFragment()
-    )
+private fun showTabsTray(showTabsTray: () -> Unit) {
+    showTabsTray.invoke()
 }
 
 /**
@@ -2024,8 +2301,8 @@ fun MozEngineView(
         val gv = GeckoEngineView(context)
         setSwipeView(vl)
         setEngineView(gv)
-        vl.layoutParams = ViewGroup.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT
+        vl.layoutParams = LayoutParams(
+            LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT
         )
         // todo: user prefs if swipe refresh enabled or not
         vl.visibility = View.VISIBLE
@@ -2033,8 +2310,8 @@ fun MozEngineView(
         vl.isActivated = true
         vl.isVisible = true
         vl.addView(gv)
-        gv.layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT
-        gv.layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
+        gv.layoutParams.width = LayoutParams.MATCH_PARENT
+        gv.layoutParams.height = LayoutParams.MATCH_PARENT
         gv.setBackgroundColor(android.graphics.Color.TRANSPARENT)
         gv.visibility = View.VISIBLE
         gv.isEnabled = true
@@ -2145,7 +2422,11 @@ private fun getFragment(view: View): Fragment {
 //}
 
 
-private fun initializeUI(view: View, context: Context, setBrowserInitialized: (Boolean) -> Unit) {
+private fun initializeUI(
+    view: View,
+    context: Context,
+    setBrowserInitialized: (Boolean) -> Unit
+) {
     val tab = getCurrentTab(context)
     setBrowserInitialized(
         if (tab != null) {
@@ -3019,7 +3300,11 @@ fun onForwardPressed(sessionFeature: ViewBoundFeatureWrapper<SessionFeature>): B
 
 /**
  * Forwards activity results to the [ActivityResultHandler] features.
- *//* override */ fun onActivityResult(requestCode: Int, data: Intent?, resultCode: Int): Boolean {
+ *//* override */ fun onActivityResult(
+    requestCode: Int,
+    data: Intent?,
+    resultCode: Int
+): Boolean {
     // todo: onActivityResult
 //    return listOf(
 //        promptsFeature,
@@ -3277,8 +3562,9 @@ private suspend fun bookmarkTapped(
         // Save bookmark, then go to edit fragment
         try {
             val parentNode = Result.runCatching {
-                val parentGuid = bookmarksStorage.getRecentBookmarks(1).firstOrNull()?.parentGuid
-                    ?: BookmarkRoot.Mobile.id
+                val parentGuid =
+                    bookmarksStorage.getRecentBookmarks(1).firstOrNull()?.parentGuid
+                        ?: BookmarkRoot.Mobile.id
 
                 bookmarksStorage.getBookmark(parentGuid)!!
             }.getOrElse {
@@ -4049,7 +4335,7 @@ fun onUpdateToolbarForConfigurationChange(toolbar: BrowserToolbarView, context: 
         context = context,
         redesignEnabled = context.settings().navigationToolbarEnabled,
         isLandscape = context.isLandscape(),
-        isTablet = com.shmibblez.inferno.ext.isLargeWindow(context),
+        isTablet = isLargeWindow(context),
         isPrivate = (context.getActivity()!! as HomeActivity).browsingModeManager.mode.isPrivate,
         feltPrivateBrowsingEnabled = context.settings().feltPrivateBrowsingEnabled,
         isWindowSizeSmall = false, // AcornWindowSize.getWindowSize(context) == AcornWindowSize.Small,
@@ -4303,7 +4589,10 @@ private fun collectionStorageObserver(
             )
         }
 
-        override fun onTabsAdded(tabCollection: TabCollection, sessions: List<TabSessionState>) {
+        override fun onTabsAdded(
+            tabCollection: TabCollection,
+            sessions: List<TabSessionState>
+        ) {
             showTabSavedToCollectionSnackbar(
                 sessions.size, context, navController, coroutineScope, snackbarHostState
             )

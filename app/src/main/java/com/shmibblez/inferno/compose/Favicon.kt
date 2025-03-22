@@ -49,37 +49,37 @@ fun Favicon(
 //            modifier = modifier,
 //        )
 //    } else {
-        val iconResource = imageUrl?.let {
-            IconRequest.Resource(
-                url = imageUrl,
-                type = IconRequest.Resource.Type.FAVICON,
+    val iconResource = imageUrl?.let {
+        IconRequest.Resource(
+            url = imageUrl,
+            type = IconRequest.Resource.Type.FAVICON,
+        )
+    }
+
+    components.core.icons.LoadableImage(
+        url = url,
+        iconResource = iconResource,
+        isPrivate = isPrivate,
+        iconSize = size.toIconRequestSize(),
+    ) {
+        Placeholder {
+            FaviconPlaceholder(
+                size = size,
+                modifier = modifier,
             )
         }
 
-        components.core.icons.LoadableImage(
-            url = url,
-            iconResource = iconResource,
-            isPrivate = isPrivate,
-            iconSize = size.toIconRequestSize(),
-        ) {
-            Placeholder {
-                FaviconPlaceholder(
-                    size = size,
-                    modifier = modifier,
-                )
-            }
-
-            WithIcon { icon ->
-                Image(
-                    painter = icon.painter,
-                    contentDescription = null,
-                    modifier = modifier
-                        .size(size)
-                        .clip(RoundedCornerShape(2.dp)),
-                    contentScale = ContentScale.Crop,
-                )
-            }
+        WithIcon { icon ->
+            Image(
+                painter = icon.painter,
+                contentDescription = null,
+                modifier = modifier
+                    .size(size)
+                    .clip(RoundedCornerShape(2.dp)),
+                contentScale = ContentScale.Crop,
+            )
         }
+    }
 //    }
 }
 
@@ -94,14 +94,16 @@ private fun FaviconPlaceholder(
     size: Dp,
     modifier: Modifier = Modifier,
 ) {
-    Box(
-        modifier = modifier
-            .size(size)
-            .clip(RoundedCornerShape(2.dp))
-            .background(
-                color = FirefoxTheme.colors.layer2,
-            ),
-    )
+    FirefoxTheme {
+        Box(
+            modifier = modifier
+                .size(size)
+                .clip(RoundedCornerShape(2.dp))
+                .background(
+                    color = FirefoxTheme.colors.layer2,
+                ),
+        )
+    }
 }
 
 @Composable

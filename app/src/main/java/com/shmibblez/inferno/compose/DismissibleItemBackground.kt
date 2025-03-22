@@ -41,27 +41,29 @@ fun DismissibleItemBackground(
     shape: Shape = RoundedCornerShape(0.dp),
 ) {
     if (isSwipeActive) {
-        Card(
-            modifier = modifier.fillMaxSize(),
-            colors = CardDefaults.cardColors(containerColor = FirefoxTheme.colors.layer3),
-            shape = shape,
-            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-        ) {
-            Box(modifier = Modifier.fillMaxSize()) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_delete),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .padding(horizontal = 32.dp)
-                        .align(
-                            if (isSwipingToStart) {
-                                Alignment.CenterEnd
-                            } else {
-                                Alignment.CenterStart
-                            },
-                        ),
-                    tint = FirefoxTheme.colors.iconCritical,
-                )
+        FirefoxTheme {
+            Card(
+                modifier = modifier.fillMaxSize(),
+                colors = CardDefaults.cardColors(containerColor = FirefoxTheme.colors.layer3),
+                shape = shape,
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+            ) {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_delete),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .padding(horizontal = 32.dp)
+                            .align(
+                                if (isSwipingToStart) {
+                                    Alignment.CenterEnd
+                                } else {
+                                    Alignment.CenterStart
+                                },
+                            ),
+                        tint = FirefoxTheme.colors.iconCritical,
+                    )
+                }
             }
         }
     }
