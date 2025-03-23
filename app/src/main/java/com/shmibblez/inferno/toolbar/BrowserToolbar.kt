@@ -27,6 +27,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -94,6 +95,7 @@ fun BrowserToolbar(
     val url: String? by browserStore().observeAsState { state -> state.selectedTab?.content?.url }
     val (editMode, setEditMode) = remember { mutableStateOf(false) }
     val (originBounds, setOriginBounds) = remember { mutableStateOf(OriginBounds(0.dp, 0.dp)) }
+    val loading by remember { derivedStateOf { tabSessionState.content.loading } }
 //    val siteSecure = tabSessionState.content.securityInfo.secure
 //    val trackingProtectionEnabled = tabSessionState.trackingProtection.enabled
 
@@ -107,6 +109,7 @@ fun BrowserToolbar(
     } else {
         BrowserDisplayToolbar(
             url = url ?: "<empty>",
+            loading = loading,
             searchTerms = searchTerms,
             setOriginBounds = setOriginBounds,
             tabCount = tabCount,
@@ -134,6 +137,7 @@ fun detectSiteSecurity(tabSessionState: TabSessionState): SiteSecurity {
 @Composable
 fun BrowserDisplayToolbar(
     url: String?,
+    loading: Boolean,
     searchTerms: String,
     setOriginBounds: (OriginBounds) -> Unit,
     tabCount: Int,
@@ -185,7 +189,7 @@ fun BrowserDisplayToolbar(
                 ), setOriginBounds = setOriginBounds
             )
             if (!textFullSize) {
-                ToolbarReload(enabled = true)
+                ToolbarReload(enabled = true, loading = loading)
                 ToolbarShowTabsTray(tabCount = tabCount, onNavToTabsTray = onNavToTabsTray)
                 ToolbarMenuIcon(setShowMenu = setShowMenu)
             }

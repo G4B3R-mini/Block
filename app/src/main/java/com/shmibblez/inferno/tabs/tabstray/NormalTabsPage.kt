@@ -45,7 +45,19 @@ internal fun NormalTabsPage(
         }
 
         InfernoTabsTrayDisplayType.Grid -> {
-            TabGrid(normalTabs)
+            TabGrid(
+                activeTabId = activeTabId,
+                activeTabIndex = activeTabIndex,
+                tabs = normalTabs,
+                mode = mode,
+                header = header,
+                onTabClick = onTabClick,
+                onTabClose = onTabClose,
+                onTabMediaClick = onTabMediaClick,
+                onTabMove = onTabMove,
+                onTabDragStart = onTabDragStart,
+                onTabLongClick = onTabLongClick,
+            )
         }
     }
 }

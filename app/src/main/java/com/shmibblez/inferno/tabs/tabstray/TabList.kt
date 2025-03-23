@@ -181,14 +181,6 @@ fun TabList(
                 )
             }
         }
-
-        item {
-            Spacer(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(72.dp),
-            )
-        }
     }
 }
 

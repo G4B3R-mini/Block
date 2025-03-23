@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -29,6 +30,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -75,6 +77,10 @@ import mozilla.components.support.ktx.android.content.share
 
 // TODO: test implementations
 // todo:
+//   - icons left to add (add settings screen for ones shown on tab, max 5):
+//     - settings icon
+//     - private mode toggle
+//     - view desktop site toggle
 //   - add double up and down chevron icon for options tray
 //     - options tray is a sheet that pops up or down and shows all options available as icons
 //   - make options in menu a grid
@@ -124,7 +130,7 @@ interface ToolbarOptionsScope {
     fun ToolbarForward(enabled: Boolean)
 
     @Composable
-    fun ToolbarReload(enabled: Boolean)
+    fun ToolbarReload(enabled: Boolean, loading: Boolean)
 
     @Composable
     fun ToolbarStopLoading(enabled: Boolean)
@@ -188,7 +194,7 @@ object ToolbarOptionsScopeInstance : ToolbarOptionsScope {
     }
 
     @Composable
-    override fun ToolbarReload(enabled: Boolean) {
+    override fun ToolbarReload(enabled: Boolean, loading: Boolean) {
         val useCases = sessionUseCases()
         Icon(
             modifier = Modifier
@@ -201,8 +207,12 @@ object ToolbarOptionsScopeInstance : ToolbarOptionsScope {
                     bottom = IconConstants.ICON_BOTTOM_PADDING
                 )
                 .aspectRatio(IconConstants.ICON_ASPECT_RATIO)
-                .clickable(enabled = enabled) { useCases.reload.invoke() },
-            painter = painterResource(id = R.drawable.ic_arrow_clockwise_24),
+                .clickable(enabled = enabled) {
+                    if (loading) useCases.stopLoading.invoke() else useCases.reload.invoke()
+                },
+            painter = if (loading) painterResource(id = R.drawable.ic_cross_24) else painterResource(
+                id = R.drawable.ic_arrow_clockwise_24
+            ),
             contentDescription = "reload page",
             tint = Color.White
         )
@@ -513,7 +523,7 @@ object ToolbarOriginScopeInstance : ToolbarOriginScope {
                 )
                 Icon(
                     painter = painterResource(id = R.drawable.ic_chevron_down_24),
-                    contentDescription = "open menu", modifier = Modifier.aspectRatio(0.5F),
+                    contentDescription = "open menu", modifier = Modifier.padding(horizontal = 4.dp).size(4.dp),
                     tint = Color.White,
                 )
             }
@@ -545,7 +555,7 @@ interface ToolbarMenuItemsScope {
 
     // stop, refresh, forward, back
     @Composable
-    fun NavOptionsToolbarMenuItem()
+    fun NavOptionsToolbarMenuItem(loading: Boolean)
 }
 
 object ToolbarMenuItemConstants {
@@ -643,7 +653,8 @@ object ToolbarMenuItemsScopeInstance : ToolbarMenuItemsScope {
 
 
         val context = LocalContext.current
-        Box(contentAlignment = Alignment.CenterStart,
+        Box(
+            contentAlignment = Alignment.CenterStart,
             modifier = Modifier
                 .height(ToolbarMenuItemConstants.OPTION_HEIGHT)
                 .padding(
@@ -654,7 +665,7 @@ object ToolbarMenuItemsScopeInstance : ToolbarMenuItemsScope {
                 )
                 .fillMaxWidth()
                 .clickable { onNavToSettings.invoke() },
-            ) {
+        ) {
             Text(
                 text = "Settings", color = Color.White, modifier = Modifier.wrapContentHeight()
             )
@@ -732,7 +743,7 @@ object ToolbarMenuItemsScopeInstance : ToolbarMenuItemsScope {
     }
 
     @Composable
-    override fun NavOptionsToolbarMenuItem() {
+    override fun NavOptionsToolbarMenuItem(loading: Boolean) {
         val tabSessionState = LocalContext.current.components.core.store.state.selectedTab
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -746,7 +757,7 @@ object ToolbarMenuItemsScopeInstance : ToolbarMenuItemsScope {
             ToolbarOptionsScopeInstance.ToolbarForward(
                 enabled = tabSessionState?.content?.canGoForward ?: false
             )
-            ToolbarOptionsScopeInstance.ToolbarReload(enabled = tabSessionState != null)
+            ToolbarOptionsScopeInstance.ToolbarReload(enabled = tabSessionState != null, loading = loading)
             ToolbarOptionsScopeInstance.ToolbarStopLoading(enabled = tabSessionState != null)
         }
     }
@@ -756,6 +767,7 @@ object ToolbarMenuItemsScopeInstance : ToolbarMenuItemsScope {
 @Composable
 fun ToolbarMenuBottomSheet(
     tabSessionState: TabSessionState?,
+    loading: Boolean,
     setShowBottomMenuSheet: (Boolean) -> Unit,
     setBrowserComponentMode: (BrowserComponentMode) -> Unit,
     onNavToSettings: () -> Unit,
@@ -779,7 +791,7 @@ fun ToolbarMenuBottomSheet(
         Column(modifier = Modifier.padding(horizontal = 16.dp)) {
             // todo: move to bottom when switch to grid view
             // stop, refresh, forward, back
-            NavOptionsToolbarMenuItem()
+            NavOptionsToolbarMenuItem(loading)
 
             DividerToolbarMenuItem()
 

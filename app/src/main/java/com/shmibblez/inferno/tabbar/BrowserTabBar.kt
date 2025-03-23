@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyRow
@@ -27,15 +28,14 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -46,8 +46,6 @@ import com.shmibblez.inferno.browser.toPx
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.newTab
 import mozilla.components.browser.state.ext.getUrl
-import mozilla.components.browser.state.selector.normalTabs
-import mozilla.components.browser.state.selector.privateTabs
 import mozilla.components.browser.state.selector.selectedTab
 import mozilla.components.browser.state.state.BrowserState
 import mozilla.components.browser.state.state.TabSessionState
@@ -124,15 +122,20 @@ fun BrowserTabBar(tabList: List<TabSessionState>, selectedTab: TabSessionState?)
         Box(
             modifier = Modifier
                 .fillMaxHeight()
-                .aspectRatio(1F)
+                .aspectRatio(1F),
+            contentAlignment = Alignment.Center,
         ) {
+            // add tab
             Icon(
                 modifier = Modifier
-                    .fillMaxHeight()
-                    .aspectRatio(2F / 3F)
-                    .align(Alignment.Center)
-                    .clickable { context.components.newTab(isPrivateSession) },
-                painter = painterResource(R.drawable.baseline_add_24),
+                    .size(12.dp)
+                    .clickable {
+                        context.components.newTab(
+                            isPrivateSession = isPrivateSession,
+                            nextTo = selectedTab.id, // todo: next to current based on config, default is true
+                        )
+                    },
+                painter = painterResource(R.drawable.ic_new),
                 tint = Color.White,
                 contentDescription = "new tab"
             )
@@ -204,7 +207,7 @@ private fun MiniTab(
         // favicon
         Image(
             painter = favicon,
-            contentDescription = "icon",
+            contentDescription = "favicon",
             modifier = Modifier
                 .aspectRatio(1F)
                 .padding(6.dp)
@@ -233,16 +236,16 @@ private fun MiniTab(
             textAlign = TextAlign.Start
         )
         // close
-        Image(
+        Icon(
             modifier = Modifier
-                .fillMaxHeight()
-                .padding(0.dp, 0.dp, 4.dp, 0.dp)
-                .aspectRatio(0.5F)
+                .padding(8.dp, 0.dp, 8.dp, 0.dp)
+                .size(10.dp)
                 .clickable {
                     context.components.useCases.tabsUseCases.removeTab(tabSessionState.id)
                 },
-            imageVector = ImageVector.vectorResource(R.drawable.close),
-            contentDescription = "close tab"
+            painter = painterResource(R.drawable.ic_close),
+            tint = Color.White,
+            contentDescription = stringResource(R.string.close_tab),
         )
     }
 }

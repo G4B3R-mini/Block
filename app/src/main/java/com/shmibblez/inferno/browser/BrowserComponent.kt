@@ -280,8 +280,13 @@ import kotlin.math.abs
 import kotlin.math.roundToInt
 import mozilla.components.browser.toolbar.BrowserToolbar as BrowserToolbarCompat
 
+// todo:
+//   - make new tab next to current based on config, default is true
+//     - so far called from [BrowserTabBar] and from [TabTrayComponent]
+
 // fixme, bugs:
 //   - when opening a new page from a link in a tab, 2 tabs appear, very buggy
+
 // todo: huge drawable with diagonal red and black
 // todo: nav host should be base composable, BrowserComponent in this case since it is now base home screen
 // todo: implement layout from fragment_browser.xml
@@ -746,6 +751,7 @@ fun BrowserComponent(
     } else if (showMenuBottomSheet) {
         ToolbarMenuBottomSheet(
             tabSessionState = currentTab,
+            loading = currentTab?.content?.loading ?: false,
             setShowBottomMenuSheet = setShowMenuBottomSheet,
             setBrowserComponentMode = setBrowserMode,
             onNavToSettings = { navToSettings(navController) }
@@ -963,7 +969,7 @@ fun BrowserComponent(
 //            TabsTray.closedExistingTab.record(TabsTray.ClosedExistingTabExtra(source ?: "unknown"))
                     }
 
-                    showTabsTray = false
+//                    showTabsTray = false
                 }
 
                 deleteTab(tab.id, null, isConfirmed = false)
