@@ -4,6 +4,7 @@
 
 package com.shmibblez.inferno.compose
 
+import android.graphics.BitmapFactory
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -16,14 +17,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.shmibblez.inferno.settings.SupportUtils
 import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.browser.state.state.createTab
 import mozilla.components.concept.base.images.ImageLoadRequest
 import com.shmibblez.inferno.theme.FirefoxTheme
+import com.shmibblez.inferno.R
 
 private const val FALLBACK_ICON_SIZE = 36
 
@@ -52,7 +57,7 @@ fun TabThumbnail(
 ) {
     Box(
 //        colors = CardDefaults.cardColors(containerColor = backgroundColor),
-        modifier = modifier.background(Color.Black),
+        modifier = modifier.background(backgroundColor),
         contentAlignment = Alignment.Center,
     ) {
         ThumbnailImage(
@@ -69,6 +74,7 @@ fun TabThumbnail(
                 contentAlignment = Alignment.Center,
             ) {
                 val icon = tab.content.icon
+
                 if (icon != null) {
                     icon.prepareToDraw()
                     Image(

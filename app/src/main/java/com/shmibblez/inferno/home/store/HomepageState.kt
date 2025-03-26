@@ -96,7 +96,7 @@ internal sealed class HomepageState {
         @Composable
         internal fun build(
             appState: AppState,
-            browsingModeManager: BrowsingModeManager,
+            isPrivate: Boolean,
             settings: Settings,
         ): HomepageState {
             return with(appState) {
@@ -120,7 +120,7 @@ internal sealed class HomepageState {
                         collectionsState = CollectionsState.build(
                             appState = appState,
                             browserState = components.core.store.state,
-                            browsingModeManager = browsingModeManager,
+                            isPrivate = isPrivate,
                         ),
 //                        pocketState = PocketState.build(appState, settings),
                         showTopSites = settings.showTopSitesFeature && topSites.isNotEmpty(),
@@ -131,7 +131,7 @@ internal sealed class HomepageState {
 //                        showPocketStories = settings.showPocketRecommendationsFeature &&
 //                            recommendationState.pocketStories.isNotEmpty(),
                         topSiteColors = TopSiteColors.colors(wallpaperState = wallpaperState),
-                        cardBackgroundColor = wallpaperState.cardBackgroundColor,
+                        cardBackgroundColor = Color.Black, // wallpaperState.cardBackgroundColor,
                         buttonBackgroundColor = wallpaperState.buttonBackgroundColor,
                         buttonTextColor = wallpaperState.buttonTextColor,
                     )

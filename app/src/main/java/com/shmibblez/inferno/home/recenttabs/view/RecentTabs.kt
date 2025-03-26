@@ -7,6 +7,10 @@
 package com.shmibblez.inferno.home.recenttabs.view
 
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Paint.Align
+import android.util.Log
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -26,7 +30,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CardElevation
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -41,21 +45,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import mozilla.components.browser.icons.compose.Loader
-import mozilla.components.browser.icons.compose.Placeholder
-import mozilla.components.browser.icons.compose.WithIcon
-//import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.annotation.LightDarkPreview
-//import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.utils.inComposePreview
-import mozilla.components.support.ktx.kotlin.trimmed
-import mozilla.components.ui.colors.PhotonColors
-import com.shmibblez.inferno.components.components
+import androidx.core.content.res.ResourcesCompat
+import androidx.core.graphics.drawable.toBitmap
 import com.shmibblez.inferno.compose.Image
 import com.shmibblez.inferno.compose.TabThumbnail
 import com.shmibblez.inferno.compose.menu.DropdownMenu
@@ -63,10 +63,11 @@ import com.shmibblez.inferno.compose.menu.MenuItem
 import com.shmibblez.inferno.compose.text.Text
 import com.shmibblez.inferno.home.fake.FakeHomepagePreview
 import com.shmibblez.inferno.home.recenttabs.RecentTab
+import com.shmibblez.inferno.settings.SupportUtils
 import com.shmibblez.inferno.theme.FirefoxTheme
-//import com.shmibblez.inferno.theme.layer2
-//import com.shmibblez.inferno.theme.textPrimary
-//import com.shmibblez.inferno.theme.textSecondary
+import mozilla.components.support.ktx.kotlin.trimmed
+import mozilla.components.ui.colors.PhotonColors
+import com.shmibblez.inferno.R
 
 private const val THUMBNAIL_SIZE = 108
 
@@ -92,7 +93,8 @@ fun RecentTabs(
             .semantics {
                 testTagsAsResourceId = true
                 testTag = "recent.tabs"
-            },
+            }
+            .background(Color.Black),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         recentTabs.forEach { tab ->
@@ -132,7 +134,7 @@ private fun RecentTabItem(
 ) {
     var isMenuExpanded by remember { mutableStateOf(false) }
 
-    Card(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(112.dp)
@@ -140,12 +142,14 @@ private fun RecentTabItem(
                 enabled = true,
                 onClick = { onRecentTabClick(tab.state.id) },
                 onLongClick = { isMenuExpanded = true },
-            ),
-        shape = RoundedCornerShape(8.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+            )
+            .background(Color.DarkGray)
+            .clip(RoundedCornerShape(8.dp)),
+//        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             RecentTabImage(
                 tab = tab,
@@ -173,7 +177,7 @@ private fun RecentTabItem(
                     overflow = TextOverflow.Ellipsis,
                 )
 
-                Row {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     RecentTabIcon(
                         url = tab.state.content.url,
                         modifier = Modifier
@@ -229,7 +233,32 @@ fun RecentTabImage(
 ) {
     val previewImageUrl = tab.state.content.previewImageUrl
 
+    val context = LocalContext.current
+    val isHomePage =
+        previewImageUrl == SupportUtils.INFERNO_HOME_URL || previewImageUrl == SupportUtils.INFERNO_HOME_URL_2
+    val isPrivateHomePage =
+        previewImageUrl == SupportUtils.INFERNO_PRIVATE_HOME_URL || previewImageUrl == SupportUtils.INFERNO_PRIVATE_HOME_URL_2
+    val icon = when {
+        previewImageUrl == null -> AppCompatResources.getDrawable(context, R.drawable.inferno)
+            ?.toBitmap()?.asImageBitmap()
+
+        isHomePage -> AppCompatResources.getDrawable(context, R.drawable.inferno)?.toBitmap()
+            ?.asImageBitmap()
+
+        isPrivateHomePage -> AppCompatResources.getDrawable(
+            context, R.drawable.ic_private_browsing
+        )?.toBitmap()?.asImageBitmap()
+
+        else -> null
+    }
+
     when {
+        icon != null -> {
+            Image(
+                bitmap = icon, contentDescription = "", modifier = Modifier.size(THUMBNAIL_SIZE.dp)
+            )
+        }
+
         !previewImageUrl.isNullOrEmpty() -> {
             Image(
                 url = previewImageUrl,
@@ -246,6 +275,7 @@ fun RecentTabImage(
                 },
             )
         }
+
         else -> TabThumbnail(
             tab = tab.state,
             size = LocalDensity.current.run { THUMBNAIL_SIZE.dp.toPx().toInt() },
@@ -273,7 +303,26 @@ private fun RecentTabIcon(
     alignment: Alignment = Alignment.Center,
     icon: Bitmap? = null,
 ) {
+    val context = LocalContext.current
+    val isHomePage = url == SupportUtils.INFERNO_HOME_URL || url == SupportUtils.INFERNO_HOME_URL_2
+    val isPrivateHomePage =
+        url == SupportUtils.INFERNO_PRIVATE_HOME_URL || url == SupportUtils.INFERNO_PRIVATE_HOME_URL_2
+    val homeIcon = when {
+        isHomePage -> AppCompatResources.getDrawable(context, R.drawable.inferno)?.toBitmap()
+            ?.asImageBitmap()
+
+        isPrivateHomePage -> AppCompatResources.getDrawable(
+            context, R.drawable.ic_private_browsing
+        )?.toBitmap()?.asImageBitmap()
+
+        else -> null
+    }
+
     when {
+        homeIcon != null -> Image(
+            bitmap = homeIcon!!, contentDescription = "", modifier = modifier,
+        )
+
         icon != null -> {
             Image(
                 painter = BitmapPainter(icon.asImageBitmap()),
@@ -299,9 +348,9 @@ private fun RecentTabIcon(
 //                }
 //            }
 //        }
-//        else -> {
-//            PlaceHolderTabIcon(modifier)
-//        }
+        else -> {
+            PlaceHolderTabIcon(modifier)
+        }
     }
 }
 

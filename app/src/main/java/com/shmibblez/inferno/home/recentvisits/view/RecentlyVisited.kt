@@ -29,6 +29,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -87,16 +88,19 @@ fun RecentlyVisited(
                 modifier = Modifier.horizontalScroll(state = rememberScrollState()),
                 predicate = { !isSingleColumn },
             )
+            .background(Color.DarkGray)
             .padding(
-                horizontal = contentPadding,
+//                horizontal = contentPadding,
                 vertical = 8.dp,
             ),
     ) {
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(8.dp),
-            colors = CardDefaults.cardColors(containerColor = backgroundColor),
-            elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(8.dp))
+                .background(Color.DarkGray),
+//            colors = CardDefaults.cardColors(containerColor = backgroundColor),
+//            elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
         ) {
             FlowColumn(
                 modifier = Modifier.fillMaxWidth(),
@@ -107,7 +111,7 @@ fun RecentlyVisited(
                     // Don't display the divider when its the last item in a column or the last item
                     // in the table.
                     val showDivider = (index + 1) % VISITS_PER_COLUMN != 0 &&
-                        index != recentVisits.lastIndex
+                            index != recentVisits.lastIndex
                     val pageIndex = index / VISITS_PER_COLUMN
                     val pageNumber = pageIndex + 1
 

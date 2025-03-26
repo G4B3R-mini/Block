@@ -9,8 +9,10 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -23,6 +25,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -40,6 +43,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
@@ -57,7 +61,9 @@ import com.shmibblez.inferno.toolbar.ToolbarOptionsScopeInstance.ToolbarForward
 import com.shmibblez.inferno.toolbar.ToolbarOptionsScopeInstance.ToolbarMenuIcon
 import com.shmibblez.inferno.toolbar.ToolbarOptionsScopeInstance.ToolbarReload
 import com.shmibblez.inferno.toolbar.ToolbarOptionsScopeInstance.ToolbarShowTabsTray
+import com.shmibblez.inferno.toolbar.ToolbarOriginScopeInstance.ToolbarClearText
 import com.shmibblez.inferno.toolbar.ToolbarOriginScopeInstance.ToolbarSearchEngineSelector
+import com.shmibblez.inferno.toolbar.ToolbarOriginScopeInstance.ToolbarUndoClearText
 import mozilla.components.browser.state.search.SearchEngine
 import mozilla.components.browser.state.selector.selectedTab
 import mozilla.components.browser.state.state.TabSessionState
@@ -84,8 +90,8 @@ fun BrowserToolbar(
     tabSessionState: TabSessionState?,
     searchEngine: SearchEngine,
     tabCount: Int,
-    setShowMenu: (Boolean) -> Unit,
-    onNavToTabsTray: ()->Unit,
+    onShowMenuBottomSheet: () -> Unit,
+    onNavToTabsTray: () -> Unit,
 ) {
     if (tabSessionState == null) {
         // don't show if null, TODO: show loading bar
@@ -93,7 +99,7 @@ fun BrowserToolbar(
     }
     val searchTerms by remember { mutableStateOf(tabSessionState.content.searchTerms) }
     val url: String? by browserStore().observeAsState { state -> state.selectedTab?.content?.url }
-    val (editMode, setEditMode) = remember { mutableStateOf(false) }
+    var editMode by remember { mutableStateOf(false) }
     val (originBounds, setOriginBounds) = remember { mutableStateOf(OriginBounds(0.dp, 0.dp)) }
     val loading by remember { derivedStateOf { tabSessionState.content.loading } }
 //    val siteSecure = tabSessionState.content.securityInfo.secure
@@ -102,7 +108,7 @@ fun BrowserToolbar(
     if (editMode) {
         BrowserEditToolbar(
             tabSessionState = tabSessionState,
-            setEditMode = setEditMode,
+            onDisableEditMode = { editMode = false },
             originBounds = originBounds,
             searchEngine = searchEngine,
         )
@@ -114,8 +120,8 @@ fun BrowserToolbar(
             setOriginBounds = setOriginBounds,
             tabCount = tabCount,
             tabSessionState = tabSessionState,
-            setEditMode = setEditMode,
-            setShowMenu = setShowMenu,
+            onEnableEditMode = { editMode = true },
+            onShowMenuBottomSheet = onShowMenuBottomSheet,
             onNavToTabsTray = onNavToTabsTray,
         )
     }
@@ -142,12 +148,11 @@ fun BrowserDisplayToolbar(
     setOriginBounds: (OriginBounds) -> Unit,
     tabCount: Int,
     tabSessionState: TabSessionState,
-    setEditMode: (Boolean) -> Unit,
-    setShowMenu: (Boolean) -> Unit,
-    onNavToTabsTray: ()->Unit,
+    onEnableEditMode: () -> Unit,
+    onShowMenuBottomSheet: () -> Unit,
+    onNavToTabsTray: () -> Unit,
 ) {
     var textFullSize by remember { mutableStateOf(true) }
-    val loading = tabSessionState?.content?.loading ?: false
 
     LaunchedEffect(true) {
         textFullSize = false
@@ -161,37 +166,37 @@ fun BrowserDisplayToolbar(
     ) {
         // loading bar
         if (loading) {
-            ProgressBar(progress = (tabSessionState?.content?.progress?.toFloat() ?: 0F) / 100F)
+            ProgressBar(progress = (tabSessionState.content.progress.toFloat() ?: 0F) / 100F)
         }
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(ComponentDimens.TOOLBAR_HEIGHT),
+                .height(ComponentDimens.TOOLBAR_HEIGHT)
+                .padding(horizontal = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(
+                ICON_PADDING, Alignment.CenterHorizontally
+            ),
         ) {
             if (!textFullSize) {
                 ToolbarBack(enabled = tabSessionState.content.canGoBack)
                 ToolbarForward(enabled = tabSessionState.content.canGoForward)
             }
             ToolbarOrigin(
-                modifier = Modifier
-                    .padding(
-                        start = IconConstants.ICON_START_PADDING,
-                        end = IconConstants.ICON_END_PADDING,
-                    )
-                    .animateContentSize { initialValue, targetValue ->
-                        // finished callback
-                    }, toolbarOriginData = ToolbarOriginData(
+                modifier = Modifier.animateContentSize { initialValue, targetValue ->
+                    // finished callback
+                }, toolbarOriginData = ToolbarOriginData(
                     url = url,
                     searchTerms = searchTerms,
                     siteSecure = detectSiteSecurity(tabSessionState),
                     siteTrackingProtection = detectSiteTrackingProtection(tabSessionState),
-                    setEditMode = setEditMode,
+                    onEnableEditMode = onEnableEditMode,
                 ), setOriginBounds = setOriginBounds
             )
             if (!textFullSize) {
                 ToolbarReload(enabled = true, loading = loading)
                 ToolbarShowTabsTray(tabCount = tabCount, onNavToTabsTray = onNavToTabsTray)
-                ToolbarMenuIcon(setShowMenu = setShowMenu)
+                ToolbarMenuIcon(onShowMenuBottomSheet = onShowMenuBottomSheet)
             }
         }
     }
@@ -201,7 +206,7 @@ fun BrowserDisplayToolbar(
 @Composable
 fun BrowserEditToolbar(
     tabSessionState: TabSessionState?,
-    setEditMode: (Boolean) -> Unit,
+    onDisableEditMode: () -> Unit,
     originBounds: OriginBounds,
     searchEngine: SearchEngine,
 ) {
@@ -219,6 +224,7 @@ fun BrowserEditToolbar(
 
     val context = LocalContext.current
     var input by remember { mutableStateOf(parseInput()) }
+    var undoClearText by remember { mutableStateOf<TextFieldValue?>(null) }
     var textFullSize by remember { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
     var alreadyFocused by remember { mutableStateOf(false) }
@@ -257,7 +263,7 @@ fun BrowserEditToolbar(
                     if (focusState.hasFocus) {
                         alreadyFocused = true
                     }
-                    if (alreadyFocused && !focusState.hasFocus) setEditMode(false)
+                    if (alreadyFocused && !focusState.hasFocus) onDisableEditMode.invoke()
                     Log.d(
                         "BrowserEditToolbar",
                         "alreadyFocused: $alreadyFocused, focusState: $focusState"
@@ -265,9 +271,10 @@ fun BrowserEditToolbar(
                 }
                 .focusable(true)
                 .focusRequester(focusRequester),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             if (!textFullSize) {
-                Box(
+                Spacer(
                     modifier = Modifier
                         .width(originBounds.left)
                         .fillMaxHeight()
@@ -300,6 +307,7 @@ fun BrowserEditToolbar(
                         onValueChange = { v ->
                             // move cursor to end
                             input = v
+                            undoClearText = null
                         },
                         enabled = true,
                         singleLine = true,
@@ -329,7 +337,7 @@ fun BrowserEditToolbar(
                                         )
                                     }
                                 }
-                                setEditMode(false)
+                                onDisableEditMode.invoke()
                             },
                         ),
                         keyboardOptions = KeyboardOptions(
@@ -338,12 +346,28 @@ fun BrowserEditToolbar(
                         modifier = Modifier
                             .wrapContentHeight(align = Alignment.CenterVertically)
                             .weight(1F)
-                            .padding(all = 4.dp),
+                            .padding(horizontal = 8.dp),
+                    )
+                }
+                if (undoClearText != null) {
+                    ToolbarUndoClearText(
+                        onClick = {
+                            input = undoClearText!!
+                            undoClearText = null
+                        },
+                    )
+                } else if (input.text.isNotEmpty()) {
+                    ToolbarClearText(
+                        onClick = {
+                            undoClearText = input
+                            input = TextFieldValue("")
+                        },
                     )
                 }
             }
+
             if (!textFullSize) {
-                Box(
+                Spacer(
                     modifier = Modifier
                         .width(originBounds.right)
                         .fillMaxHeight()

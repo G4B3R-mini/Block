@@ -1211,8 +1211,9 @@ class HomeFragment : Fragment() {
                         state = HomepageState.build(
                             appState = appState,
                             settings = settings,
-                            browsingModeManager = browsingModeManager,
+                            isPrivate = browsingModeManager.mode.isPrivate,
                         ),
+                        isPrivate = browsingModeManager.mode.isPrivate,
                         interactor = sessionControlInteractor,
                         onTopSitesItemBound = {
                             StartupTimeline.onTopSitesItemBound(activity = (requireActivity() as HomeActivity))

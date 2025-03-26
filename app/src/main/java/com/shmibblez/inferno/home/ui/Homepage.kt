@@ -16,6 +16,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -24,8 +25,13 @@ import androidx.compose.ui.unit.dp
 //import com.shmibblez.inferno.GleanMetrics.History
 //import com.shmibblez.inferno.GleanMetrics.RecentlyVisitedHomepage
 import com.shmibblez.inferno.R
+import com.shmibblez.inferno.components.components
 import com.shmibblez.inferno.compose.button.TertiaryButton
 import com.shmibblez.inferno.compose.home.HomeSectionHeader
+import com.shmibblez.inferno.ext.components
+import com.shmibblez.inferno.ext.settings
+import com.shmibblez.inferno.ext.shouldShowRecentSyncedTabs
+import com.shmibblez.inferno.ext.shouldShowRecentTabs
 import com.shmibblez.inferno.home.bookmarks.Bookmark
 import com.shmibblez.inferno.home.bookmarks.interactor.BookmarksInteractor
 import com.shmibblez.inferno.home.bookmarks.view.Bookmarks
@@ -34,6 +40,7 @@ import com.shmibblez.inferno.home.collections.Collections
 import com.shmibblez.inferno.home.collections.CollectionsState
 import com.shmibblez.inferno.home.fake.FakeHomepagePreview
 import com.shmibblez.inferno.home.interactor.HomepageInteractor
+import com.shmibblez.inferno.home.recentsyncedtabs.RecentSyncedTabState
 //import com.shmibblez.inferno.home.pocket.ui.PocketSection
 import com.shmibblez.inferno.home.recentsyncedtabs.view.RecentSyncedTab
 import com.shmibblez.inferno.home.recenttabs.RecentTab
@@ -57,6 +64,9 @@ import com.shmibblez.inferno.theme.FirefoxTheme
 import com.shmibblez.inferno.theme.Theme
 import com.shmibblez.inferno.wallpapers.WallpaperState
 
+private val ITEM_PADDING = 24.dp
+private val HEADER_BOTTOM_PADDING = 16.dp
+
 /**
  * Top level composable for the homepage.
  *
@@ -70,15 +80,21 @@ internal fun Homepage(
     state: HomepageState,
     interactor: HomepageInteractor,
     onTopSitesItemBound: () -> Unit,
+    isPrivate: Boolean,
 ) {
     Column(
         modifier = Modifier
+            .background(Color.Black)
             .padding(horizontal = 16.dp)
+            .fillMaxSize()
             .verticalScroll(rememberScrollState()),
     ) {
+        Spacer(modifier = Modifier.height(16.dp))
         with(state) {
-            when (this) {
-                is HomepageState.Private -> {
+            when (isPrivate) {
+                true -> {
+                    val feltPrivateBrowsingEnabled =
+                        if (state is HomepageState.Private) state.feltPrivateBrowsingEnabled else false
                     if (feltPrivateBrowsingEnabled) {
                         FeltPrivacyModeInfoCard(
                             onLearnMoreClick = interactor::onLearnMoreClicked,
@@ -90,11 +106,43 @@ internal fun Homepage(
                     }
                 }
 
-                is HomepageState.Normal -> {
+                false -> {
+                    val appState = LocalContext.current.components.appStore.state
+                    val settings = LocalContext.current.settings()
+                    val topSites = appState.topSites
+                    val showTopSites = settings.showTopSitesFeature && topSites.isNotEmpty()
+                    if (state is HomepageState.Normal) state.showRecentTabs else false
+                    val recentTabs = appState.recentTabs
+                    val showRecentTabs = appState.shouldShowRecentTabs(settings)
+                    val cardBackgroundColor = Color.Black // wallpaperState.cardBackgroundColor,
+                    val syncedTab = when (appState.recentSyncedTabState) {
+                        RecentSyncedTabState.None,
+                        RecentSyncedTabState.Loading,
+                            -> null
+
+                        is RecentSyncedTabState.Success -> appState.recentSyncedTabState.tabs.firstOrNull()
+                    }
+                    val showRecentSyncedTab = appState.shouldShowRecentSyncedTabs()
+
+                    val buttonBackgroundColor = appState.wallpaperState.buttonBackgroundColor
+                    val buttonTextColor = appState.wallpaperState.buttonTextColor
+                    val bookmarks = appState.bookmarks
+                    val showBookmarks = settings.showBookmarksHomeFeature && bookmarks.isNotEmpty()
+                    val recentlyVisited = appState.recentHistory
+                    val showRecentlyVisited =
+                        settings.historyMetadataUIFeature && recentlyVisited.isNotEmpty()
+                    val collectionsState = CollectionsState.build(
+                        appState = appState,
+                        browserState = components.core.store.state,
+                        isPrivate = false,
+                    )
+                    val showCustomizeHome =
+                        showTopSites || showRecentTabs || showBookmarks || showRecentlyVisited // || showPocketStories
+
                     if (showTopSites) {
                         TopSites(
                             topSites = topSites,
-                            topSiteColors = topSiteColors,
+                            topSiteColors = TopSiteColors.colors(),
                             interactor = interactor,
                             onTopSitesItemBound = onTopSitesItemBound,
                         )
@@ -138,7 +186,9 @@ internal fun Homepage(
                         )
                     }
 
-                    CollectionsSection(collectionsState = collectionsState, interactor = interactor)
+                    CollectionsSection(
+                        collectionsState = collectionsState, interactor = interactor
+                    )
 
 //                    if (showPocketStories) {
 //                        PocketSection(
@@ -156,7 +206,7 @@ internal fun Homepage(
                     }
 
                     // This is a temporary value until I can fix layout issues
-                    Spacer(Modifier.height(288.dp))
+                    Spacer(Modifier.height(100.dp))
                 }
             }
         }
@@ -169,7 +219,7 @@ private fun RecentTabsSection(
     cardBackgroundColor: Color,
     recentTabs: List<RecentTab>,
 ) {
-    Spacer(modifier = Modifier.height(40.dp))
+//    Spacer(modifier = Modifier.height(ITEM_PADDING))
 
     HomeSectionHeader(
         headerText = stringResource(R.string.recent_tabs_header),
@@ -177,11 +227,11 @@ private fun RecentTabsSection(
         onShowAllClick = interactor::onRecentTabShowAllClicked,
     )
 
-    Spacer(Modifier.height(16.dp))
+    Spacer(Modifier.height(HEADER_BOTTOM_PADDING))
 
     RecentTabs(
         recentTabs = recentTabs,
-        backgroundColor = cardBackgroundColor,
+        backgroundColor = Color.Black, // cardBackgroundColor,
         onRecentTabClick = { interactor.onRecentTabClicked(it) },
         menuItems = listOf(
             RecentTabMenuItem(
@@ -198,7 +248,7 @@ private fun BookmarksSection(
     cardBackgroundColor: Color,
     interactor: BookmarksInteractor,
 ) {
-    Spacer(modifier = Modifier.height(40.dp))
+    Spacer(modifier = Modifier.height(ITEM_PADDING))
 
     HomeSectionHeader(
         headerText = stringResource(R.string.home_bookmarks_title),
@@ -206,7 +256,7 @@ private fun BookmarksSection(
         onShowAllClick = interactor::onShowAllBookmarksClicked,
     )
 
-    Spacer(Modifier.height(16.dp))
+    Spacer(Modifier.height(HEADER_BOTTOM_PADDING))
 
     Bookmarks(
         bookmarks = bookmarks,
@@ -227,7 +277,7 @@ private fun RecentlyVisitedSection(
     cardBackgroundColor: Color,
     interactor: RecentVisitsInteractor,
 ) {
-    Spacer(modifier = Modifier.height(40.dp))
+    Spacer(modifier = Modifier.height(ITEM_PADDING))
 
     HomeSectionHeader(
         headerText = stringResource(R.string.history_metadata_header_2),
@@ -235,7 +285,7 @@ private fun RecentlyVisitedSection(
         onShowAllClick = interactor::onHistoryShowAllClicked,
     )
 
-    Spacer(Modifier.height(16.dp))
+    Spacer(Modifier.height(HEADER_BOTTOM_PADDING))
 
     RecentlyVisited(
         recentVisits = recentVisits,
@@ -283,11 +333,11 @@ private fun CollectionsSection(
     when (collectionsState) {
         is CollectionsState.Content -> {
             Column {
-                Spacer(Modifier.height(56.dp))
+                Spacer(Modifier.height(ITEM_PADDING))
 
                 HomeSectionHeader(headerText = stringResource(R.string.collections_header))
 
-                Spacer(Modifier.height(10.dp))
+                Spacer(Modifier.height(HEADER_BOTTOM_PADDING))
 
                 with(collectionsState) {
                     Collections(
@@ -309,7 +359,7 @@ private fun CollectionsSection(
 
 @Composable
 private fun CustomizeHomeButton(buttonBackgroundColor: Color, interactor: CustomizeHomeIteractor) {
-    Spacer(modifier = Modifier.height(68.dp))
+    Spacer(modifier = Modifier.height(ITEM_PADDING))
 
     TertiaryButton(
         text = stringResource(R.string.browser_menu_customize_home_1),
@@ -338,10 +388,11 @@ private fun HomepagePreview() {
                 showRecentlyVisited = true,
 //                showPocketStories = true,
                 topSiteColors = TopSiteColors.colors(),
-                cardBackgroundColor = WallpaperState.default.cardBackgroundColor,
+                cardBackgroundColor = Color.Black, // WallpaperState.default.cardBackgroundColor,
                 buttonTextColor = WallpaperState.default.buttonTextColor,
                 buttonBackgroundColor = WallpaperState.default.buttonBackgroundColor,
             ),
+            isPrivate = false,
             interactor = FakeHomepagePreview.homepageInteractor,
             onTopSitesItemBound = {},
         )
@@ -361,6 +412,7 @@ private fun PrivateHomepagePreview() {
                 HomepageState.Private(
                     feltPrivateBrowsingEnabled = false,
                 ),
+                isPrivate = true,
                 interactor = FakeHomepagePreview.homepageInteractor,
                 onTopSitesItemBound = {},
             )

@@ -6,6 +6,8 @@ import androidx.annotation.MainThread
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Dp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -24,6 +26,12 @@ import mozilla.components.lib.state.ext.channel
 import mozilla.components.lib.state.ext.consumeFlow
 import mozilla.components.lib.state.ext.flow
 import mozilla.components.support.ktx.android.view.toScope
+
+@Composable
+fun Dp.dpToPx() = with(LocalDensity.current) { this@dpToPx.toPx() }
+
+@Composable
+fun Int.pxToDp() = with(LocalDensity.current) { this@pxToDp.toDp() }
 
 @SuppressLint("ComposableNaming")
 @OptIn(ExperimentalCoroutinesApi::class)

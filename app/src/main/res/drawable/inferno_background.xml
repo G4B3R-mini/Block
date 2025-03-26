@@ -1,0 +1,27 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:width="960dp"
+    android:height="960dp"
+    android:viewportWidth="2048"
+    android:viewportHeight="2048"
+    tools:ignore="VectorRaster">
+    <path
+        android:fillColor="#ff0000"
+        android:fillType="evenOdd"
+        android:pathData="m2121.3,2121l-2121.3,2121.3 -2121.3,-2121.3 2121.3,-2121.3z"
+        android:strokeWidth="5"
+        android:strokeColor="#ff0000"
+        android:strokeLineJoin="round" />
+    <group
+        android:rotation="180"
+        android:translateX="2048"
+        android:translateY="2048">
+        <path
+            android:fillColor="#000000"
+            android:fillType="evenOdd"
+            android:pathData="m2121.3,2121l-2121.3,2121.3 -2121.3,-2121.3 2121.3,-2121.3z"
+            android:strokeWidth="5"
+            android:strokeColor="#000000"
+            android:strokeLineJoin="round" />
+    </group>
+</vector>

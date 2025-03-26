@@ -51,7 +51,7 @@ sealed class CollectionsState {
         internal fun build(
             appState: AppState,
             browserState: BrowserState,
-            browsingModeManager: BrowsingModeManager,
+            isPrivate: Boolean,
         ): CollectionsState =
             with(appState) {
                 when {
@@ -62,7 +62,7 @@ sealed class CollectionsState {
                     )
 
                     showCollectionPlaceholder -> {
-                        val tabCount = if (browsingModeManager.mode.isPrivate) {
+                        val tabCount = if (isPrivate) {
                             browserState.privateTabs.size
                         } else {
                             browserState.normalTabs.size

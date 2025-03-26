@@ -38,6 +38,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
@@ -64,6 +65,7 @@ import com.shmibblez.inferno.settings.SupportUtils
 import com.shmibblez.inferno.theme.FirefoxTheme
 import com.shmibblez.inferno.wallpapers.WallpaperState
 import kotlin.math.ceil
+
 //import com.shmibblez.inferno.GleanMetrics.TopSites as TopSitesMetrics
 
 private const val TOP_SITES_PER_PAGE = 8
@@ -192,7 +194,7 @@ fun TopSites(
                             }
                         }
 
-                        Spacer(modifier = Modifier.height(12.dp))
+//                        Spacer(modifier = Modifier.height(12.dp))
                     }
                 }
             }
@@ -296,6 +298,7 @@ private fun TopSiteItem(
                 testTagsAsResourceId = true
             }
             .testTag(TopSitesTestTag.topSiteItemRoot),
+        contentAlignment = Alignment.Center,
     ) {
         Column(
             modifier = Modifier
@@ -362,18 +365,17 @@ private fun TopSiteItem(
         }
 
         ContextualMenu(
-            modifier = Modifier
-                .testTag(TopSitesTestTag.topSiteContextualMenu),
+            modifier = Modifier.testTag(TopSitesTestTag.topSiteContextualMenu),
             menuItems = menuItems,
             showMenu = menuExpanded,
             onDismissRequest = { menuExpanded = false },
         )
 
-        if (topSite is TopSite.Provided) {
-            LaunchedEffect(topSite) {
-                submitTopSitesImpressionPing(topSite = topSite, position = position)
-            }
-        }
+//        if (topSite is TopSite.Provided) {
+//            LaunchedEffect(topSite) {
+//                submitTopSitesImpressionPing(topSite = topSite, position = position)
+//            }
+//        }
     }
 
     LaunchedEffect(Unit) {
@@ -392,25 +394,27 @@ private fun TopSiteFaviconCard(
     topSite: TopSite,
     backgroundColor: Color,
 ) {
-    Card(
-        modifier = Modifier.size(TOP_SITES_FAVICON_CARD_SIZE.dp),
-        shape = RoundedCornerShape(8.dp),
-        colors = CardDefaults.cardColors(containerColor = backgroundColor),
-        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+    Box(
+        modifier = Modifier
+            .size(TOP_SITES_FAVICON_CARD_SIZE.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .background(Color.DarkGray),
+        contentAlignment = Alignment.Center,
+//        colors = CardDefaults.cardColors(containerColor = backgroundColor),
+//        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
     ) {
-        Box(contentAlignment = Alignment.Center) {
-            Surface(
-                modifier = Modifier.size(TOP_SITES_FAVICON_SIZE.dp),
-                color = backgroundColor,
-                shape = RoundedCornerShape(4.dp),
-            ) {
-                if (topSite is TopSite.Provided) {
-                    TopSiteFavicon(topSite.url, topSite.imageUrl)
-                } else {
-                    TopSiteFavicon(topSite.url)
-                }
+        Surface(
+            modifier = Modifier.size(TOP_SITES_FAVICON_SIZE.dp),
+            color = Color.Transparent, // backgroundColor,
+            shape = RoundedCornerShape(4.dp),
+        ) {
+            if (topSite is TopSite.Provided) {
+                TopSiteFavicon(topSite.url, topSite.imageUrl)
+            } else {
+                TopSiteFavicon(topSite.url)
             }
         }
+
     }
 }
 
@@ -427,6 +431,14 @@ private fun FaviconImage(painter: Painter) {
 @Composable
 private fun TopSiteFavicon(url: String, imageUrl: String? = null) {
     when (url) {
+        SupportUtils.INFERNO_HOME_URL, SupportUtils.INFERNO_HOME_URL_2 -> FaviconImage(
+            painterResource(R.drawable.inferno)
+        )
+
+        SupportUtils.INFERNO_PRIVATE_HOME_URL, SupportUtils.INFERNO_PRIVATE_HOME_URL_2 -> FaviconImage(
+            painterResource(R.drawable.ic_private_browsing)
+        )
+
         SupportUtils.POCKET_TRENDING_URL -> FaviconImage(painterResource(R.drawable.ic_pocket))
         SupportUtils.BAIDU_URL -> FaviconImage(painterResource(R.drawable.ic_baidu))
         SupportUtils.JD_URL -> FaviconImage(painterResource(R.drawable.ic_jd))

@@ -105,7 +105,6 @@ import com.shmibblez.inferno.browser.prompts.compose.FirstPartyDownloadBottomShe
 import com.shmibblez.inferno.browser.prompts.compose.ThirdPartyDownloadBottomSheet
 import com.shmibblez.inferno.browser.tabstrip.isTabStripEnabled
 import com.shmibblez.inferno.components.Components
-import com.shmibblez.inferno.components.FindInPageIntegration
 import com.shmibblez.inferno.components.TabCollectionStorage
 import com.shmibblez.inferno.components.accounts.FenixFxAEntryPoint
 import com.shmibblez.inferno.components.accounts.FxaWebChannelIntegration
@@ -233,7 +232,6 @@ import mozilla.components.feature.downloads.manager.FetchDownloadManager
 import mozilla.components.feature.downloads.temporary.CopyDownloadFeature
 import mozilla.components.feature.downloads.temporary.ShareDownloadFeature
 import mozilla.components.feature.downloads.ui.DownloaderApp
-import mozilla.components.feature.findinpage.view.FindInPageBar
 import mozilla.components.feature.media.fullscreen.MediaSessionFullscreenFeature
 import mozilla.components.feature.privatemode.feature.SecureWindowFeature
 import mozilla.components.feature.prompts.dialog.FullScreenNotificationToast
@@ -311,7 +309,6 @@ import mozilla.components.browser.toolbar.BrowserToolbar as BrowserToolbarCompat
 // TODO:
 //  - if not scrollable make bottom bar offset swipe up or down with scroll received
 //  - implement biometric authentication in SelectableListPrompt for credit cards (urgent)
-//  - implement composable FindInPageBar
 //  - home page
 //  - move to selected tab on start
 //  - use nicer icons for toolbar options
@@ -548,8 +545,6 @@ fun BrowserComponent(
 //    val promptsFeature = remember { ViewBoundFeatureWrapper<PromptFeature>() }
 //    lateinit var loginBarsIntegration: LoginBarsIntegration
 
-//    @VisibleForTesting
-    val findInPageIntegration = ViewBoundFeatureWrapper<FindInPageIntegration>()
     val toolbarIntegration = ViewBoundFeatureWrapper<ToolbarIntegration>()
     val bottomToolbarContainerIntegration =
         ViewBoundFeatureWrapper<BottomToolbarContainerIntegration>()
@@ -655,7 +650,6 @@ fun BrowserComponent(
     val backHandler = OnBackPressedHandler(
         context = context,
         readerViewFeature = readerViewFeature,
-        findInPageIntegration = findInPageIntegration,
         fullScreenFeature = fullScreenFeature,
 //        promptsFeature = promptsFeature,
         downloadDialogData = downloadDialogData,
@@ -732,12 +726,12 @@ fun BrowserComponent(
     }
 
     // browser display mode
-    val (browserMode, setBrowserMode) = remember {
+    var browserMode by remember {
         mutableStateOf(BrowserComponentMode.TOOLBAR)
     }
 
     // bottom sheet menu setup
-    val (showMenuBottomSheet, setShowMenuBottomSheet) = remember { mutableStateOf(false) }
+    var showMenuBottomSheet by remember { mutableStateOf(false) }
 
     if (downloadDialogData != null) {
         if (downloadDialogData is FirstPartyDownloadDialogData) {
@@ -752,8 +746,8 @@ fun BrowserComponent(
         ToolbarMenuBottomSheet(
             tabSessionState = currentTab,
             loading = currentTab?.content?.loading ?: false,
-            setShowBottomMenuSheet = setShowMenuBottomSheet,
-            setBrowserComponentMode = setBrowserMode,
+            onDismissMenuBottomSheet = { showMenuBottomSheet = false },
+            onActivateFindInPage = { browserMode = BrowserComponentMode.FIND_IN_PAGE },
             onNavToSettings = { navToSettings(navController) }
         )
     }
@@ -930,9 +924,9 @@ fun BrowserComponent(
                     }
 
                     tab.id in selected.map { it.id } -> {
-                    // todo:
+                        // todo:
 //                        handleTabUnselected(tab)
-                    // aka:
+                        // aka:
                         // tabsTrayStore.dispatch(TabsTrayAction.RemoveSelectTab(tab))
                     }
                     // todo:
@@ -943,12 +937,13 @@ fun BrowserComponent(
 
 //                tabsTrayInteractor.onTabSelected(tab, TABS_TRAY_FEATURE_NAME)
             },
-            onTabClose = { tab->
+            onTabClose = { tab ->
                 fun deleteTab(tabId: String, source: String?, isConfirmed: Boolean) {
                     val browserStore = context.components.core.store
                     val tab = browserStore.state.findTab(tabId)
                     tab?.let {
-                        val isLastTab = browserStore.state.getNormalOrPrivateTabs(it.content.private).size == 1
+                        val isLastTab =
+                            browserStore.state.getNormalOrPrivateTabs(it.content.private).size == 1
                         val isCurrentTab = browserStore.state.selectedTabId.equals(tabId)
                         if (!isLastTab || !isCurrentTab) {
                             context.components.useCases.tabsUseCases.removeTab(tabId)
@@ -969,12 +964,12 @@ fun BrowserComponent(
 //            TabsTray.closedExistingTab.record(TabsTray.ClosedExistingTabExtra(source ?: "unknown"))
                     }
 
-//                    showTabsTray = false
+                    showTabsTray = false
                 }
 
                 deleteTab(tab.id, null, isConfirmed = false)
             },
-            onTabMediaClick = {tab ->
+            onTabMediaClick = { tab ->
                 when (tab.mediaSessionState?.playbackState) {
                     MediaSession.PlaybackState.PLAYING -> {
 //                GleanTab.mediaPause.record(NoExtras())
@@ -985,6 +980,7 @@ fun BrowserComponent(
 //                GleanTab.mediaPlay.record(NoExtras())
                         tab.mediaSessionState?.controller?.play()
                     }
+
                     else -> throw AssertionError(
                         "Play/Pause button clicked without play/pause state.",
                     )
@@ -992,7 +988,11 @@ fun BrowserComponent(
             },
             onTabMove = { tabId, targetId, placeAfter ->
                 if (targetId != null && tabId != targetId) {
-                    context.components.useCases.tabsUseCases.moveTabs(listOf(tabId), targetId, placeAfter)
+                    context.components.useCases.tabsUseCases.moveTabs(
+                        listOf(tabId),
+                        targetId,
+                        placeAfter
+                    )
                 }
             },
             onTabLongClick = { tab ->
@@ -1010,7 +1010,6 @@ fun BrowserComponent(
     /// views
     var engineView by remember { mutableStateOf<EngineView?>(null) }
     var toolbar by remember { mutableStateOf<BrowserToolbarCompat?>(null) }
-    var findInPageBar by remember { mutableStateOf<FindInPageBar?>(null) }
     var swipeRefresh by remember { mutableStateOf<SwipeRefreshLayout?>(null) }
     var awesomeBar by remember { mutableStateOf<AwesomeBarWrapper?>(null) }
     var readerViewBar by remember { mutableStateOf<ReaderViewControlsBar?>(null) }
@@ -1145,7 +1144,7 @@ fun BrowserComponent(
 //                settings = context.settings(),
 //                readerModeController = readerMenuController,
 //                sessionFeature = sessionFeature,
-//                findInPageLauncher = { findInPageIntegration.withFeature { it.launch() } },
+//                findInPageLauncher = {},
 //                browserAnimator = browserAnimator,
 //                customTabSessionId = customTabSessionId,
 //                openInFenixIntent = openInFenixIntent,
@@ -1244,34 +1243,6 @@ fun BrowserComponent(
             // todo: toolbar
 //    toolbarIntegration.set(
 //        feature = browserToolbarView.toolbarIntegration,
-//        owner = lifecycleOwner,
-//        view = view,
-//    )
-            // todo: findInPage
-//    findInPageIntegration.set(
-//        feature = com.shmibblez.inferno.components.FindInPageIntegration(
-//            store = store,
-//            appStore = context.components.appStore,
-//            sessionId = customTabSessionId,
-//            view = binding.findInPageView,
-//            engineView = binding.engineView,
-//            toolbarsHideCallback = {
-//                expandBrowserView()
-//            },
-//            toolbarsResetCallback = {
-//                onUpdateToolbarForConfigurationChange(browserToolbarView)
-//                collapseBrowserView()
-//            },
-//        ),
-//        owner = lifecycleOwner,
-//        view = view,
-//    )
-//
-//    findInPageBinding.set(
-//        feature = FindInPageBinding(
-//            appStore = context.components.appStore,
-//            onFindInPageLaunch = { findInPageIntegration.withFeature { it.launch() } },
-//        ),
 //        owner = lifecycleOwner,
 //        view = view,
 //    )
@@ -1652,10 +1623,6 @@ fun BrowserComponent(
                 ),
                 owner = lifecycleOwner,
                 view = view,
-            )
-
-            closeFindInPageBarOnNavigation(
-                store, lifecycleOwner, context, coroutineScope, findInPageIntegration
             )
 
             store.flowScoped(lifecycleOwner) { flow ->
@@ -2141,11 +2108,11 @@ fun BrowserComponent(
                 )
                 when (pageType) {
                     BrowserComponentPageType.HOME_PRIVATE -> {
-                        HomeComponent(private = true)
+                        HomeComponent(isPrivate = true, navController)
                     }
 
                     BrowserComponentPageType.HOME -> {
-                        HomeComponent(private = false)
+                        HomeComponent(isPrivate = false, navController)
                     }
 
                     BrowserComponentPageType.CRASH -> {
@@ -2183,14 +2150,20 @@ fun BrowserComponent(
                             tabSessionState = currentTab,
                             searchEngine = searchEngine,
                             tabCount = tabList.size,
-                            setShowMenu = setShowMenuBottomSheet,
+                            onShowMenuBottomSheet = {showMenuBottomSheet = true},
                             onNavToTabsTray = { showTabsTray({ showTabsTray = true }) }
                         )
                     }
                     if (browserMode == BrowserComponentMode.FIND_IN_PAGE) {
-                        BrowserFindInPageBar()
+                        BrowserFindInPageBar(
+                            onDismiss = {
+                                browserMode = BrowserComponentMode.TOOLBAR
+                            },
+                            engineSession = currentTab?.engineState?.engineSession,
+                            engineView = engineView,
+                            session = currentTab,
+                        )
                     }
-                    MozFindInPageBar { fip -> findInPageBar = fip }
                     MozBrowserToolbar { bt -> toolbar = bt }
                     MozReaderViewControlsBar { cb -> readerViewBar = cb }
                     Box(
@@ -2254,7 +2227,6 @@ private fun navToSettings(nav: NavController) {
 private data class OnBackPressedHandler(
     val context: Context,
     val readerViewFeature: ViewBoundFeatureWrapper<ReaderViewFeature>,
-    val findInPageIntegration: ViewBoundFeatureWrapper<FindInPageIntegration>,
     val fullScreenFeature: ViewBoundFeatureWrapper<FullScreenFeature>,
 //    val promptsFeature: ViewBoundFeatureWrapper<PromptFeature>,
     val downloadDialogData: DownloadDialogData?,
@@ -2267,7 +2239,8 @@ private fun onBackPressed(
     onBackPressedHandler: OnBackPressedHandler
 ): Boolean {
     with(onBackPressedHandler) {
-        return readerViewFeature.onBackPressed() || findInPageIntegration.onBackPressed() || fullScreenFeature.onBackPressed() || /* promptsFeature.onBackPressed()  || */ downloadDialogData?.let {
+        // todo: findInPageIntegration.onBackPressed() ||
+        return readerViewFeature.onBackPressed() || fullScreenFeature.onBackPressed() || /* promptsFeature.onBackPressed()  || */ downloadDialogData?.let {
             setDownloadDialogData(null)
             true
         } ?: false || sessionFeature.onBackPressed() || removeSessionIfNeeded(context)
@@ -2364,25 +2337,6 @@ fun MozBrowserToolbar(setView: (BrowserToolbarCompat) -> Unit) {
             bt.visibility = View.VISIBLE
             bt.setBackgroundColor(0xFF0000)
             bt.displayMode()
-        })
-}
-
-/**
- * @param setView function to set view variable in parent
- */
-@Composable
-fun MozFindInPageBar(setView: (FindInPageBar) -> Unit) {
-    AndroidView(modifier = Modifier
-        .fillMaxSize()
-        .height(0.dp)
-        .width(0.dp),
-        factory = { context ->
-            val v = FindInPageBar(context)
-            setView(v)
-            v
-        },
-        update = {
-            it.visibility = View.GONE
         })
 }
 
@@ -2592,25 +2546,6 @@ private fun showPinDialogWarning(
     }.show().withCenterAlignedButtons().secure(context.getActivity())
 
     context.settings().incrementSecureWarningCount()
-}
-
-private fun closeFindInPageBarOnNavigation(
-    store: BrowserStore,
-    lifecycleOwner: LifecycleOwner,
-    context: Context,
-    coroutineScope: CoroutineScope,
-    findInPageIntegration: ViewBoundFeatureWrapper<FindInPageIntegration>,
-    customTabSessionId: String? = null,
-) {
-    consumeFlow(store, lifecycleOwner, context, coroutineScope) { flow ->
-        flow.mapNotNull { state ->
-            state.findCustomTabOrSelectedTab(customTabSessionId)
-        }.ifAnyChanged { tab ->
-            arrayOf(tab.content.url, tab.content.loadRequest)
-        }.collect {
-            findInPageIntegration.onBackPressed()
-        }
-    }
 }
 
 /**
@@ -3423,15 +3358,14 @@ fun getAppropriateLayoutGravity(context: Context): Int =
 internal fun configureEngineViewWithDynamicToolbarsMaxHeight(
     context: Context,
     customTabSessionId: String?,
-    findInPageIntegration: ViewBoundFeatureWrapper<FindInPageIntegration>
 ) {
     val currentTab =
         context.components.core.store.state.findCustomTabOrSelectedTab(customTabSessionId)
     if (currentTab?.content?.isPdf == true) return
-    if (findInPageIntegration.get()?.isFeatureActive == true) return
+//    if (findInPageIntegration.get()?.isFeatureActive == true) return
 //    val toolbarHeights = view?.let { probeToolbarHeights(it) } ?: return
 
-    context?.also {
+    context.also {
         if (isToolbarDynamic(it)) {
             // todo: toolbar
 //            if (!context.components.core.geckoRuntime.isInteractiveWidgetDefaultResizesVisual) {

@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -88,6 +87,7 @@ fun RecentSyncedTab(
 
     Card(
         modifier = Modifier
+            .background(Color.Black)
             .fillMaxWidth()
             .combinedClickable(
                 onClick = { tab?.let { onRecentSyncedTabClick(tab) } },
@@ -97,7 +97,7 @@ fun RecentSyncedTab(
         colors = CardDefaults.cardColors(containerColor = backgroundColor),
         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column {
             Row(modifier = Modifier.height(IntrinsicSize.Min)) {
                 if (tab == null) {
                     RecentTabImagePlaceholder()
@@ -117,7 +117,9 @@ fun RecentSyncedTab(
                             url = tab.url,
                             request = ImageLoadRequest(
                                 id = tab.url.hashCode().toString(),
-                                size = LocalDensity.current.run { THUMBNAIL_SIZE.dp.toPx().toInt() },
+                                size = LocalDensity.current.run {
+                                    THUMBNAIL_SIZE.dp.toPx().toInt()
+                                },
                                 isPrivate = false,
                             ),
                             modifier = imageModifier,
@@ -177,18 +179,15 @@ fun RecentSyncedTab(
                 }
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
+//            Spacer(modifier = Modifier.height(32.dp))
 
-            SecondaryButton(
-                text = if (tab != null) {
-                    stringResource(R.string.recent_tabs_see_all_synced_tabs_button_text)
-                } else {
-                    ""
-                },
-                textColor = buttonTextColor,
-                backgroundColor = buttonBackgroundColor,
-                onClick = onSeeAllSyncedTabsButtonClick,
-            )
+            if (tab != null)
+                SecondaryButton(
+                    text = stringResource(R.string.recent_tabs_see_all_synced_tabs_button_text),
+                    textColor = buttonTextColor,
+                    backgroundColor = buttonBackgroundColor,
+                    onClick = onSeeAllSyncedTabsButtonClick,
+                )
         }
     }
 

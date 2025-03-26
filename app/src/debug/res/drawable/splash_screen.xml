@@ -9,7 +9,7 @@
         android:right="24dp"
         android:top="24dp">
         <drawable
-            android:src="@drawable/inferno"
+            android:src="@drawable/inferno_animated"
             android:gravity="center" />
     </item>
 </layer-list>

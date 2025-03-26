@@ -5,6 +5,8 @@
 package com.shmibblez.inferno.compose
 
 import android.content.res.Configuration
+import android.graphics.BitmapFactory
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -13,16 +15,21 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.drawable.toBitmap
+import com.shmibblez.inferno.R
 import mozilla.components.browser.icons.IconRequest
 import mozilla.components.browser.icons.compose.Placeholder
 import mozilla.components.browser.icons.compose.WithIcon
 //import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.utils.inComposePreview
 import com.shmibblez.inferno.components.components
+import com.shmibblez.inferno.settings.SupportUtils
 import com.shmibblez.inferno.theme.FirefoxTheme
 
 /**
@@ -43,44 +50,58 @@ fun Favicon(
     isPrivate: Boolean = false,
     imageUrl: String? = null,
 ) {
-//    if (inComposePreview) {
-//        FaviconPlaceholder(
-//            size = size,
-//            modifier = modifier,
-//        )
-//    } else {
+
     val iconResource = imageUrl?.let {
         IconRequest.Resource(
             url = imageUrl,
             type = IconRequest.Resource.Type.FAVICON,
         )
     }
+    val context = LocalContext.current
+    val isHomepage = url == SupportUtils.INFERNO_HOME_URL || url == SupportUtils.INFERNO_HOME_URL_2
+    val isPrivateHomepage =
+        url == SupportUtils.INFERNO_PRIVATE_HOME_URL || url == SupportUtils.INFERNO_PRIVATE_HOME_URL_2
+    val icon = when {
+        isHomepage -> AppCompatResources.getDrawable(context, R.drawable.inferno)?.toBitmap()
+            ?.asImageBitmap()
 
-    components.core.icons.LoadableImage(
-        url = url,
-        iconResource = iconResource,
-        isPrivate = isPrivate,
-        iconSize = size.toIconRequestSize(),
-    ) {
-        Placeholder {
-            FaviconPlaceholder(
-                size = size,
-                modifier = modifier,
-            )
-        }
+        isPrivateHomepage -> AppCompatResources.getDrawable(context, R.drawable.ic_private_browsing)
+            ?.toBitmap()?.asImageBitmap()
 
-        WithIcon { icon ->
-            Image(
-                painter = icon.painter,
-                contentDescription = null,
-                modifier = modifier
-                    .size(size)
-                    .clip(RoundedCornerShape(2.dp)),
-                contentScale = ContentScale.Crop,
-            )
+        else -> null
+    }
+    if (icon != null) {
+        Image(
+            bitmap = icon,
+            contentDescription = "",
+            modifier = Modifier.size(size),
+        )
+    } else {
+        components.core.icons.LoadableImage(
+            url = url,
+            iconResource = iconResource,
+            isPrivate = isPrivate,
+            iconSize = size.toIconRequestSize(),
+        ) {
+            Placeholder {
+                FaviconPlaceholder(
+                    size = size,
+                    modifier = modifier,
+                )
+            }
+
+            WithIcon { icon ->
+                Image(
+                    painter = icon.painter,
+                    contentDescription = null,
+                    modifier = modifier
+                        .size(size)
+                        .clip(RoundedCornerShape(2.dp)),
+                    contentScale = ContentScale.Crop,
+                )
+            }
         }
     }
-//    }
 }
 
 /**
