@@ -7,6 +7,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -84,7 +85,7 @@ internal const val TOAST_ELEVATION = 80f
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 @Composable
-fun HomeComponent(isPrivate: Boolean, navController: NavController) {
+fun HomeComponent(isPrivate: Boolean, navController: NavController, modifier: Modifier = Modifier) {
     val settings = LocalContext.current.settings()
     val context = LocalContext.current
     val components = context.components
@@ -339,6 +340,7 @@ fun HomeComponent(isPrivate: Boolean, navController: NavController) {
         // todo: copy homepage and customize
         // todo: remove / fix home page state component (some stuff may have broken since change)
         Homepage(
+            modifier = modifier,
             state = HomepageState.build(
                 appState = appState,
                 settings = settings,

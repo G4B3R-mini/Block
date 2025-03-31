@@ -281,8 +281,7 @@ fun RowScope.ToolbarOrigin(
             },
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(
-            INDICATOR_ICON_PADDING,
-            Alignment.CenterHorizontally
+            INDICATOR_ICON_PADDING, Alignment.CenterHorizontally
         )
     ) {
         // toolbar indicators
@@ -367,8 +366,7 @@ object ToolbarOriginScopeInstance : ToolbarOriginScope {
     @Composable
     override fun ToolbarEmptyIndicator(enabled: Boolean) {
         if (enabled) Icon(
-            modifier = Modifier
-                .size(INDICATOR_ICON_SIZE),
+            modifier = Modifier.size(INDICATOR_ICON_SIZE),
             painter = painterResource(id = R.drawable.ic_search_24),
             contentDescription = "empty indicator",
             tint = Color.White
@@ -380,8 +378,7 @@ object ToolbarOriginScopeInstance : ToolbarOriginScope {
         when (trackingProtection) {
             SiteTrackingProtection.ON_TRACKERS_BLOCKED, SiteTrackingProtection.ON_NO_TRACKERS_BLOCKED -> {
                 Icon(
-                    modifier = Modifier
-                        .size(INDICATOR_ICON_SIZE),
+                    modifier = Modifier.size(INDICATOR_ICON_SIZE),
                     painter = painterResource(id = R.drawable.ic_tracking_protection_on_trackers_blocked),
                     contentDescription = "tracking protection indicator",
                     tint = Color.White
@@ -390,8 +387,7 @@ object ToolbarOriginScopeInstance : ToolbarOriginScope {
 
             SiteTrackingProtection.OFF_FOR_A_SITE -> {
                 Icon(
-                    modifier = Modifier
-                        .size(INDICATOR_ICON_SIZE),
+                    modifier = Modifier.size(INDICATOR_ICON_SIZE),
                     painter = painterResource(id = R.drawable.ic_tracking_protection_on_trackers_blocked),
                     contentDescription = "tracking protection indicator",
                     tint = Color.White
@@ -408,16 +404,14 @@ object ToolbarOriginScopeInstance : ToolbarOriginScope {
     override fun ToolbarSecurityIndicator(siteSecurity: SiteSecurity) {
         if (siteSecurity == SiteSecurity.SECURE) {
             Icon(
-                modifier = Modifier
-                    .size(INDICATOR_ICON_SIZE),
+                modifier = Modifier.size(INDICATOR_ICON_SIZE),
                 painter = painterResource(id = R.drawable.ic_lock_20),
                 contentDescription = "security indicator",
                 tint = Color.White
             )
         } else if (siteSecurity == SiteSecurity.INSECURE) {
             Icon(
-                modifier = Modifier
-                    .size(INDICATOR_ICON_SIZE),
+                modifier = Modifier.size(INDICATOR_ICON_SIZE),
                 painter = painterResource(id = R.drawable.ic_broken_lock),
                 contentDescription = "security indicator",
                 tint = Color.White
@@ -656,8 +650,7 @@ object ToolbarMenuItemsScopeInstance : ToolbarMenuItemsScope {
             Text(
                 text = "Private Browsing Activated",
                 color = Color.White,
-                modifier = Modifier
-                    .wrapContentHeight(),
+                modifier = Modifier.wrapContentHeight(),
             )
             InfernoCheckbox(
                 checked = isPrivateMode,
@@ -680,8 +673,7 @@ object ToolbarMenuItemsScopeInstance : ToolbarMenuItemsScope {
                 enabled = tabSessionState?.content?.canGoBack ?: false
             )
             ToolbarOptionsScopeInstance.ToolbarReload(
-                enabled = tabSessionState != null,
-                loading = loading
+                enabled = tabSessionState != null, loading = loading
             )
             ToolbarOptionsScopeInstance.ToolbarForward(
                 enabled = tabSessionState?.content?.canGoForward ?: false
@@ -703,8 +695,8 @@ fun ToolbarMenuBottomSheet(
     ModalBottomSheet(
         onDismissRequest = onDismissMenuBottomSheet,
         modifier = Modifier.fillMaxWidth(),
-        containerColor = Color.Black,
-        scrimColor = Color.Black.copy(alpha = 0.1F),
+        containerColor = Color.Black.copy(alpha = 0.75F),
+        scrimColor = Color.Black.copy(alpha = 0.5F),
         shape = RectangleShape,
         dragHandle = { /* no drag handle */
             // in case want to add one, make custom component centered in middle
@@ -716,8 +708,7 @@ fun ToolbarMenuBottomSheet(
         },
     ) {
         Column(
-            modifier = Modifier
-                .padding(horizontal = 16.dp),
+            modifier = Modifier.padding(horizontal = 16.dp),
         ) {
             // todo: move to bottom when switch to grid view
             // stop, refresh, forward, back

@@ -49,6 +49,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -56,13 +57,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
-import androidx.compose.ui.input.nestedscroll.NestedScrollSource
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.motionEventSpy
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.colorResource
@@ -268,13 +266,13 @@ import mozilla.components.support.ktx.android.view.enterImmersiveMode
 import mozilla.components.support.ktx.android.view.exitImmersiveMode
 import mozilla.components.support.ktx.android.view.hideKeyboard
 import mozilla.components.support.ktx.kotlin.getOrigin
-import mozilla.components.support.ktx.kotlinx.coroutines.flow.ifAnyChanged
 import mozilla.components.support.utils.ext.isLandscape
 import mozilla.components.ui.widgets.VerticalSwipeRefreshLayout
 import mozilla.components.ui.widgets.withCenterAlignedButtons
 import java.lang.ref.WeakReference
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
+import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
 import mozilla.components.browser.toolbar.BrowserToolbar as BrowserToolbarCompat
 
@@ -436,7 +434,8 @@ private fun resolvePageType(tabSessionState: TabSessionState?): BrowserComponent
 )
 @Composable
 @SuppressLint(
-    "UnusedMaterialScaffoldPaddingParameter", "VisibleForTests",
+    "UnusedMaterialScaffoldPaddingParameter",
+    "VisibleForTests",
     "UnusedMaterial3ScaffoldPaddingParameter"
 )
 fun BrowserComponent(
@@ -743,21 +742,18 @@ fun BrowserComponent(
             ThirdPartyDownloadBottomSheet(downloadDialogData, setDownloadDialogData)
         }
     } else if (showMenuBottomSheet) {
-        ToolbarMenuBottomSheet(
-            tabSessionState = currentTab,
+        ToolbarMenuBottomSheet(tabSessionState = currentTab,
             loading = currentTab?.content?.loading ?: false,
             onDismissMenuBottomSheet = { showMenuBottomSheet = false },
             onActivateFindInPage = { browserMode = BrowserComponentMode.FIND_IN_PAGE },
-            onNavToSettings = { navToSettings(navController) }
-        )
+            onNavToSettings = { navToSettings(navController) })
     }
 
 
 
     if (showTabsTray) {
         // todo: missing functionality from [TabsTrayFragment], [DefaultTabsTrayInteractor], and [DefaultTabsTrayController]
-        InfernoTabsTray(
-            dismiss = { showTabsTray = false },
+        InfernoTabsTray(dismiss = { showTabsTray = false },
             mode = tabsTrayMode,
             setMode = { mode -> tabsTrayMode = mode },
             activeTabId = currentTab?.id,
@@ -771,11 +767,9 @@ fun BrowserComponent(
                 CoroutineScope(IO).launch {
                     Result.runCatching {
                         val bookmarksStorage = context.components.core.bookmarksStorage
-                        val parentGuid = bookmarksStorage
-                            .getRecentBookmarks(1)
-                            .firstOrNull()
-                            ?.parentGuid
-                            ?: BookmarkRoot.Mobile.id
+                        val parentGuid =
+                            bookmarksStorage.getRecentBookmarks(1).firstOrNull()?.parentGuid
+                                ?: BookmarkRoot.Mobile.id
 
                         val parentNode = bookmarksStorage.getBookmark(parentGuid)
 
@@ -832,15 +826,13 @@ fun BrowserComponent(
                 val numDays: Long = DEFAULT_ACTIVE_DAYS + 1
                 val tabs = tabsTrayMode.selectedTabs
                 val currentTabId = context.components.core.store.state.selectedTabId
-                tabs
-                    .filterNot { it.id == currentTabId }
-                    .forEach { tab ->
-                        val daysSince = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(numDays)
-                        context.components.core.store.apply {
-                            dispatch(LastAccessAction.UpdateLastAccessAction(tab.id, daysSince))
-                            dispatch(DebugAction.UpdateCreatedAtAction(tab.id, daysSince))
-                        }
+                tabs.filterNot { it.id == currentTabId }.forEach { tab ->
+                    val daysSince = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(numDays)
+                    context.components.core.store.apply {
+                        dispatch(LastAccessAction.UpdateLastAccessAction(tab.id, daysSince))
+                        dispatch(DebugAction.UpdateCreatedAtAction(tab.id, daysSince))
                     }
+                }
 
                 tabsTrayMode = InfernoTabsTrayMode.Normal
             },
@@ -890,19 +882,15 @@ fun BrowserComponent(
                     return -1
                 }
                 run outer@{
-                    if (!context.settings().hasShownTabSwipeCFR &&
-                        !context.isTabStripEnabled() &&
-                        context.settings().isSwipeToolbarToSwitchTabsEnabled
-                    ) {
+                    if (!context.settings().hasShownTabSwipeCFR && !context.isTabStripEnabled() && context.settings().isSwipeToolbarToSwitchTabsEnabled) {
                         val normalTabs = context.components.core.store.state.normalTabs
                         val currentTabId = currentTab?.id
 
                         if (normalTabs.size >= 2) {
-                            val currentTabPosition = currentTabId
-                                ?.let { getTabPositionFromId(normalTabs, it) }
-                                ?: return@outer
-                            val newTabPosition =
-                                getTabPositionFromId(normalTabs, tab.id)
+                            val currentTabPosition =
+                                currentTabId?.let { getTabPositionFromId(normalTabs, it) }
+                                    ?: return@outer
+                            val newTabPosition = getTabPositionFromId(normalTabs, tab.id)
 
                             if (abs(currentTabPosition - newTabPosition) == 1) {
                                 context.settings().shouldShowTabSwipeCFR = true
@@ -989,9 +977,7 @@ fun BrowserComponent(
             onTabMove = { tabId, targetId, placeAfter ->
                 if (targetId != null && tabId != targetId) {
                     context.components.useCases.tabsUseCases.moveTabs(
-                        listOf(tabId),
-                        targetId,
-                        placeAfter
+                        listOf(tabId), targetId, placeAfter
                     )
                 }
             },
@@ -1003,8 +989,7 @@ fun BrowserComponent(
                 } else {
 //                    false
                 }
-            }
-        )
+            })
     }
 
     /// views
@@ -1053,25 +1038,7 @@ fun BrowserComponent(
     // connection to the nested scroll system and listen to the scroll
     val bottomBarHeightDp = ComponentDimens.BOTTOM_BAR_HEIGHT(browserMode)
     val bottomBarOffsetPx = remember { Animatable(0F) }
-    val nestedScrollConnection = remember {
-        object : NestedScrollConnection {
-            override fun onPreScroll(
-                available: Offset, source: NestedScrollSource
-            ): Offset {
-                if (currentTab?.content?.loading == false) {
-                    val delta = available.y
-                    val newOffset = (bottomBarOffsetPx.value - delta).coerceIn(
-                        0F, bottomBarHeightDp.toPx().toFloat()
-                    )
-                    coroutineScope.launch {
-                        bottomBarOffsetPx.snapTo(newOffset)
-                        engineView!!.setDynamicToolbarMaxHeight(bottomBarHeightDp.toPx() - newOffset.toInt())
-                    }
-                }
-                return Offset.Zero
-            }
-        }
-    }
+
 
     // on back pressed handlers
     BackHandler {
@@ -1630,8 +1597,7 @@ fun BrowserComponent(
                     state.findTabOrCustomTabOrSelectedTab(
                         customTabSessionId
                     )
-                }
-                    .distinctUntilChangedBy { tab -> tab.content.pictureInPictureEnabled }
+                }.distinctUntilChangedBy { tab -> tab.content.pictureInPictureEnabled }
                     .collect { tab -> pipModeChanged(tab, context, backHandler) }
             }
 
@@ -1772,10 +1738,7 @@ fun BrowserComponent(
 
         if (!context.components.fenixOnboarding.userHasBeenOnboarded()) {
             observeTabSource(
-                context.components.core.store,
-                context,
-                lifecycleOwner,
-                coroutineScope
+                context.components.core.store, context, lifecycleOwner, coroutineScope
             )
         }
 
@@ -1899,8 +1862,7 @@ fun BrowserComponent(
 
                     val preferredColorScheme = components.core.getPreferredColorScheme()
                     if (components.core.engine.settings.preferredColorScheme != preferredColorScheme) {
-                        components.core.engine.settings.preferredColorScheme =
-                            preferredColorScheme
+                        components.core.engine.settings.preferredColorScheme = preferredColorScheme
                         components.useCases.sessionUseCases.reload()
                     }
                     hideToolbar(context)
@@ -2062,6 +2024,7 @@ fun BrowserComponent(
 //        androidPhotoPicker = androidPhotoPicker,
     )
 
+    var scrollYStart by remember { mutableFloatStateOf(0F) }
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         snackbarHost = { SnackbarHost(snackbarHostState = snackbarHostState) },
@@ -2070,18 +2033,75 @@ fun BrowserComponent(
             Box(
                 modifier = Modifier.fillMaxSize(),
             ) {
-                MozAwesomeBar(setView = { ab -> awesomeBar = ab })
-                MozEngineView(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(
-                            start = 0.dp,
-                            top = 0.dp,
-                            end = 0.dp,
-                            bottom = 0.dp
-                        )
-                        .nestedScroll(nestedScrollConnection)
+                // modifier for scroll
+                val modifier = remember {
+                    Modifier
+                        // todo: use pointerInput without consuming events
+//                        .pointerInput(null) {
+//                            fun onEnd() {
+//                                coroutineScope.launch {
+//                                    if (bottomBarOffsetPx.value <= (bottomBarHeightDp.toPx() / 2)) {
+//                                        // if more than halfway up, go up
+//                                        bottomBarOffsetPx.animateTo(0F)
+//                                    } else {
+//                                        // if more than halfway down, go down
+//                                        bottomBarOffsetPx.animateTo(
+//                                            bottomBarHeightDp
+//                                                .toPx()
+//                                                .toFloat()
+//                                        )
+//                                    }
+//                                    engineView!!.setDynamicToolbarMaxHeight(
+//                                        bottomBarHeightDp
+//                                            .toPx()
+//                                            .roundToInt() - bottomBarOffsetPx.value.roundToInt()
+//                                    )
+//                                }
+//                            }
+//                            detectVerticalDragGestures(onDragEnd = ::onEnd,
+//                                onDragCancel = ::onEnd,
+//                                onVerticalDrag = { change, dy ->
+//                                    change.consu
+////                                change.positionChangeIgnoreConsumed()
+//                                    // if not loading scroll
+////                                if (currentTab?.content?.loading == false) {
+//                                    val newOffset = (bottomBarOffsetPx.value - dy).coerceIn(
+//                                        0F,
+//                                        bottomBarHeightDp
+//                                            .toPx()
+//                                            .toFloat()
+//                                    )
+//                                    coroutineScope.launch {
+//                                        bottomBarOffsetPx.snapTo(newOffset)
+//                                        engineView!!.setDynamicToolbarMaxHeight(
+//                                            bottomBarHeightDp
+//                                                .toPx()
+//                                                .roundToInt() - newOffset.roundToInt()
+//                                        )
+//                                    }
+//                                })
+//                        }
                         .motionEventSpy {
+                            if (it.action == MotionEvent.ACTION_DOWN) {
+                                scrollYStart = it.y
+                            }
+                            if (it.action == MotionEvent.ACTION_MOVE) {
+                                val dy = it.y - scrollYStart
+                                scrollYStart = it.y
+                                // if not loading scroll
+//                                if (currentTab?.content?.loading == false) {
+                                val newOffset = (bottomBarOffsetPx.value - dy).coerceIn(
+                                    0F,
+                                    bottomBarHeightDp
+                                        .toPx()
+                                        .toFloat()
+                                )
+                                coroutineScope.launch {
+                                    bottomBarOffsetPx.snapTo(newOffset)
+                                    engineView!!.setDynamicToolbarMaxHeight(bottomBarHeightDp.toPx() - newOffset.toInt())
+                                }
+//                                }
+                            }
                             if (it.action == MotionEvent.ACTION_UP || it.action == MotionEvent.ACTION_CANCEL) {
                                 // set bottom bar position
                                 coroutineScope.launch {
@@ -2096,27 +2116,35 @@ fun BrowserComponent(
                                                 .toFloat()
                                         )
                                     }
-                                    engineView!!.setDynamicToolbarMaxHeight(0)
+                                    engineView!!.setDynamicToolbarMaxHeight(bottomBarHeightDp.toPx() - bottomBarOffsetPx.value.toInt())
                                 }
                             }
 //                        else if (it.action == MotionEvent.ACTION_SCROLL) {
 //                            // TODO: move nested scroll connection logic here
 //                        }
-                        },
+                        }
+                }
+                MozAwesomeBar(setView = { ab -> awesomeBar = ab })
+                MozEngineView(
+                    modifier = modifier
+                        .fillMaxSize()
+                        .padding(
+                            start = 0.dp, top = 0.dp, end = 0.dp, bottom = 0.dp
+                        ),
                     setEngineView = { ev -> engineView = ev },
                     setSwipeView = { sr -> swipeRefresh = sr },
                 )
                 when (pageType) {
                     BrowserComponentPageType.HOME_PRIVATE -> {
-                        HomeComponent(isPrivate = true, navController)
+                        HomeComponent(isPrivate = true, navController, modifier = modifier)
                     }
 
                     BrowserComponentPageType.HOME -> {
-                        HomeComponent(isPrivate = false, navController)
+                        HomeComponent(isPrivate = false, navController, modifier = modifier)
                     }
 
                     BrowserComponentPageType.CRASH -> {
-                        CrashComponent()
+                        CrashComponent(modifier)
                     }
 
                     else -> {
@@ -2146,13 +2174,11 @@ fun BrowserComponent(
                 ) {
                     if (browserMode == BrowserComponentMode.TOOLBAR) {
                         BrowserTabBar(tabList, currentTab)
-                        BrowserToolbar(
-                            tabSessionState = currentTab,
+                        BrowserToolbar(tabSessionState = currentTab,
                             searchEngine = searchEngine,
                             tabCount = tabList.size,
-                            onShowMenuBottomSheet = {showMenuBottomSheet = true},
-                            onNavToTabsTray = { showTabsTray({ showTabsTray = true }) }
-                        )
+                            onShowMenuBottomSheet = { showMenuBottomSheet = true },
+                            onNavToTabsTray = { showTabsTray({ showTabsTray = true }) })
                     }
                     if (browserMode == BrowserComponentMode.FIND_IN_PAGE) {
                         BrowserFindInPageBar(
@@ -2255,18 +2281,16 @@ fun Dp.toPx(): Int {
 fun MozAwesomeBar(setView: (AwesomeBarWrapper) -> Unit) {
     AndroidView(modifier = Modifier
         .height(0.dp)
-        .width(0.dp),
-        factory = { context ->
-            val v = AwesomeBarWrapper(context)
-            setView(v)
-            v
-        },
-        update = {
-            it.visibility = View.GONE
-            it.layoutParams.width = LayoutParams.MATCH_PARENT
-            it.layoutParams.height = LayoutParams.MATCH_PARENT
-            it.setPadding(4.dp.toPx(), 4.dp.toPx(), 4.dp.toPx(), 4.dp.toPx())
-        })
+        .width(0.dp), factory = { context ->
+        val v = AwesomeBarWrapper(context)
+        setView(v)
+        v
+    }, update = {
+        it.visibility = View.GONE
+        it.layoutParams.width = LayoutParams.MATCH_PARENT
+        it.layoutParams.height = LayoutParams.MATCH_PARENT
+        it.setPadding(4.dp.toPx(), 4.dp.toPx(), 4.dp.toPx(), 4.dp.toPx())
+    })
 }
 
 @Composable
@@ -2325,19 +2349,17 @@ fun MozBrowserToolbar(setView: (BrowserToolbarCompat) -> Unit) {
         .fillMaxWidth()
         .height(dimensionResource(id = R.dimen.browser_toolbar_height))
         .background(Color.Black)
-        .padding(horizontal = 8.dp, vertical = 0.dp),
-        factory = { context ->
-            val v = BrowserToolbarCompat(context)
-            setView(v)
-            v
-        },
-        update = { bt ->
-            bt.layoutParams.height = R.dimen.browser_toolbar_height
-            bt.layoutParams.width = LayoutParams.MATCH_PARENT
-            bt.visibility = View.VISIBLE
-            bt.setBackgroundColor(0xFF0000)
-            bt.displayMode()
-        })
+        .padding(horizontal = 8.dp, vertical = 0.dp), factory = { context ->
+        val v = BrowserToolbarCompat(context)
+        setView(v)
+        v
+    }, update = { bt ->
+        bt.layoutParams.height = R.dimen.browser_toolbar_height
+        bt.layoutParams.width = LayoutParams.MATCH_PARENT
+        bt.visibility = View.VISIBLE
+        bt.setBackgroundColor(0xFF0000)
+        bt.displayMode()
+    })
 }
 
 @Composable
@@ -2362,13 +2384,11 @@ fun MozReaderViewControlsBar(
 fun MozFloatingActionButton(
     setView: (FloatingActionButton) -> Unit
 ) {
-    AndroidView(modifier = Modifier.fillMaxSize(),
-        factory = { context ->
-            val v = FloatingActionButton(context)
-            setView(v)
-            v
-        },
-        update = { it.visibility = View.GONE })
+    AndroidView(modifier = Modifier.fillMaxSize(), factory = { context ->
+        val v = FloatingActionButton(context)
+        setView(v)
+        v
+    }, update = { it.visibility = View.GONE })
 }
 
 /* new functions *//* BaseBrowserFragment funs */
@@ -2383,9 +2403,7 @@ private fun getFragment(view: View): Fragment {
 
 
 private fun initializeUI(
-    view: View,
-    context: Context,
-    setBrowserInitialized: (Boolean) -> Unit
+    view: View, context: Context, setBrowserInitialized: (Boolean) -> Unit
 ) {
     val tab = getCurrentTab(context)
     setBrowserInitialized(
@@ -3242,9 +3260,7 @@ fun onForwardPressed(sessionFeature: ViewBoundFeatureWrapper<SessionFeature>): B
 /**
  * Forwards activity results to the [ActivityResultHandler] features.
  *//* override */ fun onActivityResult(
-    requestCode: Int,
-    data: Intent?,
-    resultCode: Int
+    requestCode: Int, data: Intent?, resultCode: Int
 ): Boolean {
     // todo: onActivityResult
 //    return listOf(
@@ -3502,9 +3518,8 @@ private suspend fun bookmarkTapped(
         // Save bookmark, then go to edit fragment
         try {
             val parentNode = Result.runCatching {
-                val parentGuid =
-                    bookmarksStorage.getRecentBookmarks(1).firstOrNull()?.parentGuid
-                        ?: BookmarkRoot.Mobile.id
+                val parentGuid = bookmarksStorage.getRecentBookmarks(1).firstOrNull()?.parentGuid
+                    ?: BookmarkRoot.Mobile.id
 
                 bookmarksStorage.getBookmark(parentGuid)!!
             }.getOrElse {
@@ -4530,8 +4545,7 @@ private fun collectionStorageObserver(
         }
 
         override fun onTabsAdded(
-            tabCollection: TabCollection,
-            sessions: List<TabSessionState>
+            tabCollection: TabCollection, sessions: List<TabSessionState>
         ) {
             showTabSavedToCollectionSnackbar(
                 sessions.size, context, navController, coroutineScope, snackbarHostState

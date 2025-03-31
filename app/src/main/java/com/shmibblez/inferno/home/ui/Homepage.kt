@@ -81,9 +81,10 @@ internal fun Homepage(
     interactor: HomepageInteractor,
     onTopSitesItemBound: () -> Unit,
     isPrivate: Boolean,
+    modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .background(Color.Black)
             .padding(horizontal = 16.dp)
             .fillMaxSize()
