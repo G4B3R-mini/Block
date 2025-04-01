@@ -15,21 +15,18 @@ import android.view.ViewGroup
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.view.Window
 import android.view.accessibility.AccessibilityEvent
-import android.view.accessibility.AccessibilityNodeInfo
 import androidx.annotation.VisibleForTesting
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.children
 import androidx.viewbinding.ViewBinding
-import mozilla.components.concept.base.crash.Breadcrumb
+import com.shmibblez.inferno.R
+import com.shmibblez.inferno.databinding.DialogScrimBinding
+import com.shmibblez.inferno.databinding.StartDownloadDialogLayoutBinding
+import com.shmibblez.inferno.ext.settings
 import mozilla.components.feature.downloads.databinding.MozacDownloaderChooserPromptBinding
 import mozilla.components.feature.downloads.toMegabyteOrKilobyteString
 import mozilla.components.feature.downloads.ui.DownloaderApp
 import mozilla.components.feature.downloads.ui.DownloaderAppAdapter
-import com.shmibblez.inferno.R
-import com.shmibblez.inferno.databinding.DialogScrimBinding
-import com.shmibblez.inferno.databinding.StartDownloadDialogLayoutBinding
-import com.shmibblez.inferno.ext.components
-import com.shmibblez.inferno.ext.settings
 
 /**
  * Parent of all download views that can mimic a modal [Dialog].

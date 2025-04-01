@@ -11,8 +11,8 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.shmibblez.inferno.R
-import com.shmibblez.inferno.browser.prompts.AndroidPhotoPicker
-import com.shmibblez.inferno.browser.prompts.FilePicker
+import com.shmibblez.inferno.browser.prompts.webPrompts.AndroidPhotoPicker
+import com.shmibblez.inferno.browser.prompts.webPrompts.FilePicker
 import com.shmibblez.inferno.nimbus.FxNimbus
 import mozilla.components.support.base.feature.ActivityResultHandler
 import mozilla.components.support.base.feature.UserInteractionHandler

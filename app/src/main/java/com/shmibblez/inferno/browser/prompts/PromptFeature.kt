@@ -11,6 +11,9 @@ import androidx.annotation.VisibleForTesting
 import androidx.annotation.VisibleForTesting.Companion.PRIVATE
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
+import com.shmibblez.inferno.browser.prompts.webPrompts.AndroidPhotoPicker
+import com.shmibblez.inferno.browser.prompts.webPrompts.FilePicker
+import com.shmibblez.inferno.browser.prompts.webPrompts.FileUploadsDirCleaner
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.concept.engine.prompt.PromptRequest
 import mozilla.components.concept.storage.CreditCardValidationDelegate
@@ -179,7 +182,7 @@ class PromptFeature private constructor(
         addressDelegate: AddressDelegate = DefaultAddressDelegate(),
         fileUploadsDirCleaner: FileUploadsDirCleaner,
         onNeedToRequestPermissions: OnNeedToRequestPermissions,
-        androidPhotoPicker: com.shmibblez.inferno.browser.prompts.AndroidPhotoPicker? = null,
+        androidPhotoPicker: AndroidPhotoPicker? = null,
     ) : this(
         container = activity,
         store = store,

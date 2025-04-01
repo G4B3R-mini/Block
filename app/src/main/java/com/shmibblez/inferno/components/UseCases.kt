@@ -32,7 +32,6 @@ import com.shmibblez.inferno.components.bookmarks.BookmarksUseCase
 import com.shmibblez.inferno.perf.StrictModeManager
 import com.shmibblez.inferno.perf.lazyMonitored
 import com.shmibblez.inferno.wallpapers.WallpapersUseCases
-import mozilla.components.feature.downloads.manager.DownloadManager
 
 /**
  * Component group for all use cases. Use cases are provided by feature

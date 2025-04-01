@@ -60,7 +60,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.motionEventSpy
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.colorResource
@@ -95,12 +94,13 @@ import com.shmibblez.inferno.IntentReceiverActivity
 import com.shmibblez.inferno.NavGraphDirections
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.browsingmode.BrowsingMode
-import com.shmibblez.inferno.browser.prompts.AndroidPhotoPicker
-import com.shmibblez.inferno.browser.prompts.FilePicker
-import com.shmibblez.inferno.browser.prompts.FilePicker.Companion.FILE_PICKER_ACTIVITY_REQUEST_CODE
+import com.shmibblez.inferno.browser.prompts.DownloadComponent
+import com.shmibblez.inferno.browser.prompts.webPrompts.AndroidPhotoPicker
+import com.shmibblez.inferno.browser.prompts.webPrompts.FilePicker
+import com.shmibblez.inferno.browser.prompts.webPrompts.FilePicker.Companion.FILE_PICKER_ACTIVITY_REQUEST_CODE
 import com.shmibblez.inferno.browser.prompts.PromptComponent
-import com.shmibblez.inferno.browser.prompts.compose.FirstPartyDownloadBottomSheet
-import com.shmibblez.inferno.browser.prompts.compose.ThirdPartyDownloadBottomSheet
+import com.shmibblez.inferno.browser.prompts.download.compose.FirstPartyDownloadPrompt
+import com.shmibblez.inferno.browser.prompts.download.compose.ThirdPartyDownloadPrompt
 import com.shmibblez.inferno.browser.tabstrip.isTabStripEnabled
 import com.shmibblez.inferno.components.Components
 import com.shmibblez.inferno.components.TabCollectionStorage
@@ -272,7 +272,6 @@ import mozilla.components.ui.widgets.withCenterAlignedButtons
 import java.lang.ref.WeakReference
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
-import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
 import mozilla.components.browser.toolbar.BrowserToolbar as BrowserToolbarCompat
 
@@ -328,13 +327,13 @@ import mozilla.components.browser.toolbar.BrowserToolbar as BrowserToolbarCompat
 //  - color scheme, search for FirefoxTheme usages
 
 //companion object {
-private const val KEY_CUSTOM_TAB_SESSION_ID = "custom_tab_session_id"
+//private const val KEY_CUSTOM_TAB_SESSION_ID = "custom_tab_session_id"
 private const val REQUEST_CODE_DOWNLOAD_PERMISSIONS = 1
 private const val REQUEST_CODE_PROMPT_PERMISSIONS = 2
 private const val REQUEST_CODE_APP_PERMISSIONS = 3
 private const val METRIC_SOURCE = "page_action_menu"
 private const val TOAST_METRIC_SOURCE = "add_bookmark_toast"
-private const val LAST_SAVED_GENERATED_PASSWORD = "last_saved_generated_password"
+//private const val LAST_SAVED_GENERATED_PASSWORD = "last_saved_generated_password"
 
 val onboardingLinksList: List<String> = listOf(
     SupportUtils.getMozillaPageUrl(SupportUtils.MozillaPage.PRIVATE_NOTICE),
@@ -397,21 +396,6 @@ object ComponentDimens {
         }
     }
 }
-
-internal interface DownloadDialogData;
-
-internal data class FirstPartyDownloadDialogData(
-    val filename: String,
-    val contentSize: Long,
-    val positiveButtonAction: () -> Unit,
-    val negativeButtonAction: () -> Unit,
-) : DownloadDialogData
-
-internal data class ThirdPartyDownloadDialogData(
-    val downloaderApps: List<DownloaderApp>,
-    val onAppSelected: (DownloaderApp) -> Unit,
-    val negativeButtonAction: () -> Unit,
-) : DownloadDialogData
 
 private fun resolvePageType(tabSessionState: TabSessionState?): BrowserComponentPageType {
     val url = tabSessionState?.content?.url
@@ -538,7 +522,7 @@ fun BrowserComponent(
 
     val sessionFeature = remember { ViewBoundFeatureWrapper<SessionFeature>() }
     val contextMenuFeature = remember { ViewBoundFeatureWrapper<ContextMenuFeature>() }
-    val downloadsFeature = remember { ViewBoundFeatureWrapper<DownloadsFeature>() }
+//    val downloadsFeature = remember { ViewBoundFeatureWrapper<DownloadsFeature>() }
     val shareDownloadsFeature = remember { ViewBoundFeatureWrapper<ShareDownloadFeature>() }
     val copyDownloadsFeature = remember { ViewBoundFeatureWrapper<CopyDownloadFeature>() }
 //    val promptsFeature = remember { ViewBoundFeatureWrapper<PromptFeature>() }
@@ -576,22 +560,6 @@ fun BrowserComponent(
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED) var webAppToolbarShouldBeVisible =
         true
 
-//    val sharedViewModel: SharedViewModel by activityViewModels()
-//    val homeViewModel: HomeScreenViewModel by activityViewModels()
-
-//    var currentStartDownloadDialog by remember { mutableStateOf<StartDownloadDialog?>(null) }
-    // if not null, show corresponding download dialog
-    var (downloadDialogData, setDownloadDialogData) = remember {
-        mutableStateOf<DownloadDialogData?>(
-            null
-        )
-    }
-
-//    var savedLoginsLauncher =
-//        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-//            navigateToSavedLoginsFragment(navController)
-//        } // ActivityResultLauncher<Intent>
-
     val (lastSavedGeneratedPassword, setLastSavedGeneratedPassword) = remember {
         mutableStateOf<String?>(
             null
@@ -618,9 +586,10 @@ fun BrowserComponent(
             val grantResults = results.values.map {
                 if (it) PackageManager.PERMISSION_GRANTED else PackageManager.PERMISSION_DENIED
             }.toIntArray()
-            downloadsFeature.withFeature {
-                it.onPermissionsResult(permissions, grantResults)
-            }
+            // todo: call downloads feature callback here, set in DownloadsComponent callback
+//            downloadsFeature.withFeature {
+//                it.onPermissionsResult(permissions, grantResults)
+//            }
         }
     val requestSitePermissionsLauncher: ActivityResultLauncher<Array<String>> =
         rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { results ->
@@ -651,8 +620,6 @@ fun BrowserComponent(
         readerViewFeature = readerViewFeature,
         fullScreenFeature = fullScreenFeature,
 //        promptsFeature = promptsFeature,
-        downloadDialogData = downloadDialogData,
-        setDownloadDialogData = setDownloadDialogData,
         sessionFeature = sessionFeature,
     )
 
@@ -667,7 +634,6 @@ fun BrowserComponent(
         browserStateObserver = store.observe(localLifecycleOwner) {
             currentTab = it.selectedTab
 
-            Log.d("BrowserComponent", "change in browser state")
             if (!initialized) {
                 initialized = true
                 return@observe
@@ -731,17 +697,7 @@ fun BrowserComponent(
 
     // bottom sheet menu setup
     var showMenuBottomSheet by remember { mutableStateOf(false) }
-
-    if (downloadDialogData != null) {
-        if (downloadDialogData is FirstPartyDownloadDialogData) {
-            // show first party download dialog
-            FirstPartyDownloadBottomSheet(downloadDialogData, setDownloadDialogData)
-        }
-        if (downloadDialogData is ThirdPartyDownloadDialogData) {
-            // show third party download dialog
-            ThirdPartyDownloadBottomSheet(downloadDialogData, setDownloadDialogData)
-        }
-    } else if (showMenuBottomSheet) {
+    if (showMenuBottomSheet) {
         ToolbarMenuBottomSheet(tabSessionState = currentTab,
             loading = currentTab?.content?.loading ?: false,
             onDismissMenuBottomSheet = { showMenuBottomSheet = false },
@@ -991,6 +947,63 @@ fun BrowserComponent(
                 }
             })
     }
+
+    DownloadComponent(
+        applicationContext = context.applicationContext,
+        store = store,
+        useCases = context.components.useCases.downloadUseCases,
+        tabId = customTabSessionId,
+        downloadManager = FetchDownloadManager(
+            context.applicationContext,
+            store,
+            DownloadService::class,
+            notificationsDelegate = context.components.notificationsDelegate,
+        ),
+        shouldForwardToThirdParties = {
+            PreferenceManager.getDefaultSharedPreferences(context).getBoolean(
+                context.getPreferenceKey(R.string.pref_key_external_download_manager),
+                false, // todo: test if true
+            )
+        },
+        // todo: download prompt styling
+//        promptsStyling = DownloadsFeature.PromptsStyling(
+//            gravity = Gravity.BOTTOM,
+//            shouldWidthMatchParent = true,
+//            positiveButtonBackgroundColor = ThemeManager.resolveAttribute(
+//                R.attr.accent,
+//                context,
+//            ),
+//            positiveButtonTextColor = ThemeManager.resolveAttribute(
+//                R.attr.textOnColorPrimary,
+//                context,
+//            ),
+//            positiveButtonRadius = ComponentDimens.TAB_CORNER_RADIUS.value,
+//        ),
+        onNeedToRequestPermissions = { permissions ->
+            // todo: test
+            requestDownloadPermissionsLauncher.launch(permissions)
+//            requestPermissions(permissions, REQUEST_CODE_DOWNLOAD_PERMISSIONS)
+        },
+        customThirdPartyDownloadDialog = { downloaderApps, onAppSelected, negativeActionCallback ->
+            run {
+//                        if (currentStartDownloadDialog == null) {
+//                            ThirdPartyDownloadDialog(
+//                                activity = context.getActivity()!!,
+//                                downloaderApps = downloaderApps.value,
+//                                onAppSelected = onAppSelected.value,
+//                                negativeButtonAction = negativeActionCallback.value,
+//                            ).onDismiss {
+//                                currentStartDownloadDialog = null
+//                            }.show(binding.startDownloadDialogContainer).also {
+//                                currentStartDownloadDialog = it
+//                            }
+//                        }
+            }
+        },
+        setOnPermissionsResultCallback = {
+            // todo: important
+        },
+    )
 
     /// views
     var engineView by remember { mutableStateOf<EngineView?>(null) }
@@ -1297,109 +1310,110 @@ fun BrowserComponent(
                 },
             )
 
-            val downloadFeature = DownloadsFeature(
-                context.applicationContext,
-                store = store,
-                useCases = context.components.useCases.downloadUseCases,
-                // todo: test since using parent frag manager
-                fragmentManager = parentFragmentManager, // childFragmentManager,
-                tabId = customTabSessionId,
-                downloadManager = FetchDownloadManager(
-                    context.applicationContext,
-                    store,
-                    DownloadService::class,
-                    notificationsDelegate = context.components.notificationsDelegate,
-                ),
-                shouldForwardToThirdParties = {
-                    PreferenceManager.getDefaultSharedPreferences(context).getBoolean(
-                        context.getPreferenceKey(R.string.pref_key_external_download_manager),
-                        false,
-                    )
-                },
-                promptsStyling = DownloadsFeature.PromptsStyling(
-                    gravity = Gravity.BOTTOM,
-                    shouldWidthMatchParent = true,
-                    positiveButtonBackgroundColor = ThemeManager.resolveAttribute(
-                        R.attr.accent,
-                        context,
-                    ),
-                    positiveButtonTextColor = ThemeManager.resolveAttribute(
-                        R.attr.textOnColorPrimary,
-                        context,
-                    ),
-                    positiveButtonRadius = ComponentDimens.TAB_CORNER_RADIUS.value,
-                ),
-                onNeedToRequestPermissions = { permissions ->
-                    // todo: test
-                    requestDownloadPermissionsLauncher.launch(permissions)
-//            requestPermissions(permissions, REQUEST_CODE_DOWNLOAD_PERMISSIONS)
-                },
-                customFirstPartyDownloadDialog = { filename, contentSize, positiveAction, negativeAction ->
-                    run {
-                        if (downloadDialogData == null) {
-                            downloadDialogData = FirstPartyDownloadDialogData(
-                                filename = filename.value,
-                                contentSize = contentSize.value,
-                                positiveButtonAction = positiveAction.value,
-                                negativeButtonAction = negativeAction.value,
-                            )
-                        }
-//                        if (currentStartDownloadDialog == null) {
-//                            FirstPartyDownloadDialog(
-//                                activity = context.getActivity()!!,
+//            val downloadFeature = DownloadsFeature(
+//                context.applicationContext,
+//                store = store,
+//                useCases = context.components.useCases.downloadUseCases,
+//                // todo: test since using parent frag manager
+//                fragmentManager = parentFragmentManager, // childFragmentManager,
+//                tabId = customTabSessionId,
+//                downloadManager = FetchDownloadManager(
+//                    context.applicationContext,
+//                    store,
+//                    DownloadService::class,
+//                    notificationsDelegate = context.components.notificationsDelegate,
+//                ),
+//                shouldForwardToThirdParties = {
+//                    PreferenceManager.getDefaultSharedPreferences(context).getBoolean(
+//                        context.getPreferenceKey(R.string.pref_key_external_download_manager),
+//                        false,
+//                    )
+//                },
+//                promptsStyling = DownloadsFeature.PromptsStyling(
+//                    gravity = Gravity.BOTTOM,
+//                    shouldWidthMatchParent = true,
+//                    positiveButtonBackgroundColor = ThemeManager.resolveAttribute(
+//                        R.attr.accent,
+//                        context,
+//                    ),
+//                    positiveButtonTextColor = ThemeManager.resolveAttribute(
+//                        R.attr.textOnColorPrimary,
+//                        context,
+//                    ),
+//                    positiveButtonRadius = ComponentDimens.TAB_CORNER_RADIUS.value,
+//                ),
+//                onNeedToRequestPermissions = { permissions ->
+//                    // todo: test
+//                    requestDownloadPermissionsLauncher.launch(permissions)
+////            requestPermissions(permissions, REQUEST_CODE_DOWNLOAD_PERMISSIONS)
+//                },
+//                customFirstPartyDownloadDialog = { filename, contentSize, positiveAction, negativeAction ->
+//                    run {
+//                        if (downloadDialogData == null) {
+//                            downloadDialogData = FirstPartyDownloadDialogData(
 //                                filename = filename.value,
 //                                contentSize = contentSize.value,
 //                                positiveButtonAction = positiveAction.value,
 //                                negativeButtonAction = negativeAction.value,
-//                            ).onDismiss {
-//                                currentStartDownloadDialog = null
-//                            }.show(binding.startDownloadDialogContainer).also {
-//                                currentStartDownloadDialog = it
-//                            }
+//                            )
 //                        }
-                    }
-                },
-                customThirdPartyDownloadDialog = { downloaderApps, onAppSelected, negativeActionCallback ->
-                    run {
-                        if (downloadDialogData == null) {
-                            downloadDialogData = ThirdPartyDownloadDialogData(
-                                downloaderApps = downloaderApps.value,
-                                onAppSelected = onAppSelected.value,
-                                negativeButtonAction = negativeActionCallback.value
-                            )
-                        }
-//                        if (currentStartDownloadDialog == null) {
-//                            ThirdPartyDownloadDialog(
-//                                activity = context.getActivity()!!,
+////                        if (currentStartDownloadDialog == null) {
+////                            FirstPartyDownloadDialog(
+////                                activity = context.getActivity()!!,
+////                                filename = filename.value,
+////                                contentSize = contentSize.value,
+////                                positiveButtonAction = positiveAction.value,
+////                                negativeButtonAction = negativeAction.value,
+////                            ).onDismiss {
+////                                currentStartDownloadDialog = null
+////                            }.show(binding.startDownloadDialogContainer).also {
+////                                currentStartDownloadDialog = it
+////                            }
+////                        }
+//                    }
+//                },
+//                customThirdPartyDownloadDialog = { downloaderApps, onAppSelected, negativeActionCallback ->
+//                    run {
+//                        if (downloadDialogData == null) {
+//                            downloadDialogData = ThirdPartyDownloadDialogData(
 //                                downloaderApps = downloaderApps.value,
 //                                onAppSelected = onAppSelected.value,
-//                                negativeButtonAction = negativeActionCallback.value,
-//                            ).onDismiss {
-//                                currentStartDownloadDialog = null
-//                            }.show(binding.startDownloadDialogContainer).also {
-//                                currentStartDownloadDialog = it
-//                            }
+//                                negativeButtonAction = negativeActionCallback.value
+//                            )
 //                        }
-                    }
-                },
-            )
+////                        if (currentStartDownloadDialog == null) {
+////                            ThirdPartyDownloadDialog(
+////                                activity = context.getActivity()!!,
+////                                downloaderApps = downloaderApps.value,
+////                                onAppSelected = onAppSelected.value,
+////                                negativeButtonAction = negativeActionCallback.value,
+////                            ).onDismiss {
+////                                currentStartDownloadDialog = null
+////                            }.show(binding.startDownloadDialogContainer).also {
+////                                currentStartDownloadDialog = it
+////                            }
+////                        }
+//                    }
+//                },
+//            )
 
             val bottomToolbarHeight = context.settings().getBottomToolbarHeight(context)
 
-            downloadFeature.onDownloadStopped = { downloadState, _, downloadJobStatus ->
-                // todo: dialogs (in below function)
-                // todo: toolbar
-//                handleOnDownloadFinished(
-//                    context = context,
-//                    downloadState = downloadState,
-//                    downloadJobStatus = downloadJobStatus,
-//                    tryAgain = downloadFeature::tryAgain,
-//                    browserToolbars = listOfNotNull(
-//                        browserToolbarView,
-//                        _bottomToolbarContainerView?.toolbarContainerView,
-//                    ),
-//                )
-            }
+            // fixme: downloadFeature.onDownloadStopped not implemented
+//            downloadFeature.onDownloadStopped = { downloadState, _, downloadJobStatus ->
+//                // todo: dialogs (in below function)
+//                // todo: toolbar
+////                handleOnDownloadFinished(
+////                    context = context,
+////                    downloadState = downloadState,
+////                    downloadJobStatus = downloadJobStatus,
+////                    tryAgain = downloadFeature::tryAgain,
+////                    browserToolbars = listOfNotNull(
+////                        browserToolbarView,
+////                        _bottomToolbarContainerView?.toolbarContainerView,
+////                    ),
+////                )
+//            }
 
             resumeDownloadDialogState(
                 getCurrentTab(context)?.id,
@@ -1419,11 +1433,11 @@ fun BrowserComponent(
                 view = view,
             )
 
-            downloadsFeature.set(
-                downloadFeature,
-                owner = lifecycleOwner,
-                view = view,
-            )
+//            downloadsFeature.set(
+//                downloadFeature,
+//                owner = lifecycleOwner,
+//                view = view,
+//            )
 
             pipFeature = PictureInPictureFeature(
                 store = store,
@@ -1732,7 +1746,6 @@ fun BrowserComponent(
             context,
             lifecycleOwner,
             coroutineScope,
-            setDownloadDialogData,
             browserInitialized,
         )
 
@@ -1829,7 +1842,6 @@ fun BrowserComponent(
                 Lifecycle.Event.ON_STOP -> {
 //                    super.onStop()
                     initUIJob?.cancel()
-                    setDownloadDialogData(null)
 //                    currentStartDownloadDialog?.dismiss()
 
                     context.components.core.store.state.findTabOrCustomTabOrSelectedTab(
@@ -2024,109 +2036,163 @@ fun BrowserComponent(
 //        androidPhotoPicker = androidPhotoPicker,
     )
 
-    var scrollYStart by remember { mutableFloatStateOf(0F) }
+//    var startX by remember {mutableFloatStateOf(0F)}
+    var startY by remember {mutableFloatStateOf(0F)}
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         snackbarHost = { SnackbarHost(snackbarHostState = snackbarHostState) },
         contentWindowInsets = ScaffoldDefaults.contentWindowInsets,
         content = {
             Box(
-                modifier = Modifier.fillMaxSize(),
-            ) {
-                // modifier for scroll
-                val modifier = remember {
-                    Modifier
-                        // todo: use pointerInput without consuming events
-//                        .pointerInput(null) {
-//                            fun onEnd() {
-//                                coroutineScope.launch {
-//                                    if (bottomBarOffsetPx.value <= (bottomBarHeightDp.toPx() / 2)) {
-//                                        // if more than halfway up, go up
-//                                        bottomBarOffsetPx.animateTo(0F)
-//                                    } else {
-//                                        // if more than halfway down, go down
-//                                        bottomBarOffsetPx.animateTo(
-//                                            bottomBarHeightDp
-//                                                .toPx()
-//                                                .toFloat()
+                modifier = Modifier
+                    .fillMaxSize()
+//                    .pointerInput(pageType) {
+//                        awaitEachGesture {
+//                            Log.d("BrowserComponent", "new gesture: ${this.currentEvent}")
+//                            val down = awaitFirstDown()
+//                            Log.d("BrowserComponent", "before touch slop, startX: $startX, startY: $startY")
+//                            var change =
+//                                awaitTouchSlopOrCancellation(down.id) { change, over ->
+//                                    Log.d("BrowserComponent", "touch slop surpassed")
+//                                    val original = Offset(startX, startY)
+//                                    val summed = original + over
+//                                    val newValue =
+//                                        Offset(
+//                                            x = summed.x.coerceIn(
+//                                                0f,
+//                                                size.width - 50.dp.toPx()
+//                                            ),
+//                                            y = summed.y.coerceIn(
+//                                                0f,
+//                                                size.height - 50.dp.toPx()
+//                                            )
 //                                        )
-//                                    }
+//                                        change.consume()
+//                                    startX = newValue.x
+//                                    startY = newValue.y
+//                                }
+//                            Log.d("BrowserComponent", "after touch slop, will now begin scrolling")
+//
+//                            // while scrolling
+//                            while (change != null && change.pressed) {
+//                                change = awaitVerticalDragOrCancellation(change.id)
+//                                Log.d("BrowserComponent", "drag or cancellation change: $change")
+//                                // if not scrolling or null then exit
+//                                if (change == null || !change.pressed) break
+//
+//                                // get scroll offset
+//                                val original = Offset(startX, startY)
+//                                val summed =
+//                                    original + change.positionChangeIgnoreConsumed()
+//                                val newValue =
+//                                    Offset(
+//                                        x = summed.x.coerceIn(
+//                                            0f,
+//                                            size.width - 50.dp.toPx()
+//                                        ),
+//                                        y = summed.y.coerceIn(
+//                                            0f,
+//                                            size.height - 50.dp.toPx()
+//                                        )
+//                                    )
+//                                        change.consume()
+//
+//                                // apply scroll to bottom bar
+//                                val dy = newValue.y - startY
+//                                Log.d("BrowserComponent", "Scroll dy: $dy")
+//                                // if not loading scroll
+////                                if (currentTab?.content?.loading == false) {
+//                                val newOffset = (bottomBarOffsetPx.value - dy).coerceIn(
+//                                    0F,
+//                                    bottomBarHeightDp
+//                                        .toPx()
+//                                )
+//                                coroutineScope.launch {
+//                                    bottomBarOffsetPx.snapTo(newOffset)
 //                                    engineView!!.setDynamicToolbarMaxHeight(
 //                                        bottomBarHeightDp
 //                                            .toPx()
-//                                            .roundToInt() - bottomBarOffsetPx.value.roundToInt()
+//                                            .roundToInt() - newOffset.roundToInt()
 //                                    )
 //                                }
+//                                // update start positions
+//                                startX = newValue.x
+//                                startY = newValue.y
+////                                    }
 //                            }
-//                            detectVerticalDragGestures(onDragEnd = ::onEnd,
-//                                onDragCancel = ::onEnd,
-//                                onVerticalDrag = { change, dy ->
-//                                    change.consu
-////                                change.positionChangeIgnoreConsumed()
-//                                    // if not loading scroll
-////                                if (currentTab?.content?.loading == false) {
-//                                    val newOffset = (bottomBarOffsetPx.value - dy).coerceIn(
-//                                        0F,
+//
+//                            // after scrolling done snap bottom bar
+//                            coroutineScope.launch {
+//                                if (bottomBarOffsetPx.value <= (bottomBarHeightDp.toPx() / 2)) {
+//                                    // if more than halfway up, go up
+//                                    bottomBarOffsetPx.animateTo(0F)
+//                                } else {
+//                                    // if more than halfway down, go down
+//                                    bottomBarOffsetPx.animateTo(
 //                                        bottomBarHeightDp
 //                                            .toPx()
 //                                            .toFloat()
 //                                    )
-//                                    coroutineScope.launch {
-//                                        bottomBarOffsetPx.snapTo(newOffset)
-//                                        engineView!!.setDynamicToolbarMaxHeight(
-//                                            bottomBarHeightDp
-//                                                .toPx()
-//                                                .roundToInt() - newOffset.roundToInt()
-//                                        )
-//                                    }
-//                                })
-//                        }
-                        .motionEventSpy {
-                            if (it.action == MotionEvent.ACTION_DOWN) {
-                                scrollYStart = it.y
-                            }
-                            if (it.action == MotionEvent.ACTION_MOVE) {
-                                val dy = it.y - scrollYStart
-                                scrollYStart = it.y
-                                // if not loading scroll
-//                                if (currentTab?.content?.loading == false) {
-                                val newOffset = (bottomBarOffsetPx.value - dy).coerceIn(
-                                    0F,
-                                    bottomBarHeightDp
-                                        .toPx()
-                                        .toFloat()
-                                )
-                                coroutineScope.launch {
-                                    bottomBarOffsetPx.snapTo(newOffset)
-                                    engineView!!.setDynamicToolbarMaxHeight(bottomBarHeightDp.toPx() - newOffset.toInt())
-                                }
 //                                }
+//                                engineView!!.setDynamicToolbarMaxHeight(
+//                                    bottomBarHeightDp
+//                                        .toPx()
+//                                        .roundToInt() - bottomBarOffsetPx.value.roundToInt()
+//                                )
+//                            }
+//                        }
+//                    }
+                    .motionEventSpy {
+                        if (it.action == MotionEvent.ACTION_DOWN) {
+                            startY = it.y
+                        }
+                        if (it.action == MotionEvent.ACTION_MOVE) {
+                            val dy = it.y - startY
+                            startY = it.y
+                            // if not loading scroll
+//                                if (currentTab?.content?.loading == false) {
+                            val newOffset = (bottomBarOffsetPx.value - dy).coerceIn(
+                                0F,
+                                bottomBarHeightDp
+                                    .toPx()
+                                    .toFloat()
+                            )
+                            coroutineScope.launch {
+                                bottomBarOffsetPx.snapTo(newOffset)
+                                engineView!!.setDynamicToolbarMaxHeight(
+                                    bottomBarHeightDp.toPx() - newOffset.toInt()
+                                )
                             }
-                            if (it.action == MotionEvent.ACTION_UP || it.action == MotionEvent.ACTION_CANCEL) {
-                                // set bottom bar position
-                                coroutineScope.launch {
-                                    if (bottomBarOffsetPx.value <= (bottomBarHeightDp.toPx() / 2)) {
-                                        // if more than halfway up, go up
-                                        bottomBarOffsetPx.animateTo(0F)
-                                    } else {
-                                        // if more than halfway down, go down
-                                        bottomBarOffsetPx.animateTo(
-                                            bottomBarHeightDp
-                                                .toPx()
-                                                .toFloat()
-                                        )
-                                    }
-                                    engineView!!.setDynamicToolbarMaxHeight(bottomBarHeightDp.toPx() - bottomBarOffsetPx.value.toInt())
+//                                }
+                        }
+                        if (it.action == MotionEvent.ACTION_UP || it.action == MotionEvent.ACTION_CANCEL) {
+                            // set bottom bar position
+                            coroutineScope.launch {
+                                if (bottomBarOffsetPx.value <= (bottomBarHeightDp.toPx() / 2)) {
+                                    // if more than halfway up, go up
+                                    bottomBarOffsetPx.animateTo(0F)
+                                } else {
+                                    // if more than halfway down, go down
+                                    bottomBarOffsetPx.animateTo(
+                                        bottomBarHeightDp
+                                            .toPx()
+                                            .toFloat()
+                                    )
                                 }
+                                engineView!!.setDynamicToolbarMaxHeight(
+                                    bottomBarHeightDp.toPx() - bottomBarOffsetPx.value.toInt()
+                                )
                             }
+                        }
 //                        else if (it.action == MotionEvent.ACTION_SCROLL) {
 //                            // TODO: move nested scroll connection logic here
 //                        }
-                        }
-                }
+                    },
+            ) {
                 MozAwesomeBar(setView = { ab -> awesomeBar = ab })
                 MozEngineView(
-                    modifier = modifier
+                    modifier = Modifier
                         .fillMaxSize()
                         .padding(
                             start = 0.dp, top = 0.dp, end = 0.dp, bottom = 0.dp
@@ -2136,15 +2202,15 @@ fun BrowserComponent(
                 )
                 when (pageType) {
                     BrowserComponentPageType.HOME_PRIVATE -> {
-                        HomeComponent(isPrivate = true, navController, modifier = modifier)
+                        HomeComponent(isPrivate = true, navController)
                     }
 
                     BrowserComponentPageType.HOME -> {
-                        HomeComponent(isPrivate = false, navController, modifier = modifier)
+                        HomeComponent(isPrivate = false, navController)
                     }
 
                     BrowserComponentPageType.CRASH -> {
-                        CrashComponent(modifier)
+                        CrashComponent()
                     }
 
                     else -> {
@@ -2255,8 +2321,6 @@ private data class OnBackPressedHandler(
     val readerViewFeature: ViewBoundFeatureWrapper<ReaderViewFeature>,
     val fullScreenFeature: ViewBoundFeatureWrapper<FullScreenFeature>,
 //    val promptsFeature: ViewBoundFeatureWrapper<PromptFeature>,
-    val downloadDialogData: DownloadDialogData?,
-    val setDownloadDialogData: (DownloadDialogData?) -> Unit,
     val sessionFeature: ViewBoundFeatureWrapper<SessionFeature>,
 )
 
@@ -2266,10 +2330,7 @@ private fun onBackPressed(
 ): Boolean {
     with(onBackPressedHandler) {
         // todo: findInPageIntegration.onBackPressed() ||
-        return readerViewFeature.onBackPressed() || fullScreenFeature.onBackPressed() || /* promptsFeature.onBackPressed()  || */ downloadDialogData?.let {
-            setDownloadDialogData(null)
-            true
-        } ?: false || sessionFeature.onBackPressed() || removeSessionIfNeeded(context)
+        return readerViewFeature.onBackPressed() || fullScreenFeature.onBackPressed() || /* promptsFeature.onBackPressed()  || */ sessionFeature.onBackPressed() || removeSessionIfNeeded(context)
     }
 }
 
@@ -3191,7 +3252,6 @@ internal fun observeTabSelection(
     context: Context,
     lifecycleOwner: LifecycleOwner,
     coroutineScope: CoroutineScope,
-    setDownloadDialogData: (DownloadDialogData?) -> Unit,
     browserInitialized: Boolean,
 ) {
     consumeFlow(store, lifecycleOwner, context, coroutineScope) { flow ->
@@ -3200,7 +3260,6 @@ internal fun observeTabSelection(
         }.mapNotNull {
             it.selectedTab
         }.collect {
-            setDownloadDialogData(null)
 //            currentStartDownloadDialog?.dismiss()
             handleTabSelected(it, browserInitialized)
         }
@@ -3518,8 +3577,9 @@ private suspend fun bookmarkTapped(
         // Save bookmark, then go to edit fragment
         try {
             val parentNode = Result.runCatching {
-                val parentGuid = bookmarksStorage.getRecentBookmarks(1).firstOrNull()?.parentGuid
-                    ?: BookmarkRoot.Mobile.id
+                val parentGuid =
+                    bookmarksStorage.getRecentBookmarks(1).firstOrNull()?.parentGuid
+                        ?: BookmarkRoot.Mobile.id
 
                 bookmarksStorage.getBookmark(parentGuid)!!
             }.getOrElse {

@@ -12,10 +12,6 @@ import androidx.appcompat.content.res.AppCompatResources.getDrawable
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.datastore.preferences.preferencesDataStore
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import mozilla.components.browser.domains.autocomplete.BaseDomainAutocompleteProvider
 import mozilla.components.browser.domains.autocomplete.ShippedDomainsProvider
 import mozilla.components.browser.engine.gecko.GeckoEngine
@@ -51,7 +47,7 @@ import mozilla.components.feature.media.MediaSessionFeature
 import mozilla.components.feature.media.middleware.LastMediaAccessMiddleware
 import mozilla.components.feature.media.middleware.RecordingDevicesMiddleware
 import mozilla.components.feature.prompts.PromptMiddleware
-import com.shmibblez.inferno.browser.prompts.FileUploadsDirCleaner
+import com.shmibblez.inferno.browser.prompts.webPrompts.FileUploadsDirCleaner
 import mozilla.components.feature.pwa.ManifestStorage
 import mozilla.components.feature.pwa.WebAppShortcutManager
 import mozilla.components.feature.readerview.ReaderViewMiddleware
@@ -61,7 +57,6 @@ import mozilla.components.feature.search.ext.createApplicationSearchEngine
 import mozilla.components.feature.search.middleware.SearchExtraParams
 import mozilla.components.feature.search.middleware.SearchMiddleware
 import mozilla.components.feature.search.region.RegionMiddleware
-import mozilla.components.feature.search.telemetry.SerpTelemetryRepository
 import mozilla.components.feature.search.telemetry.incontent.InContentTelemetry
 import mozilla.components.feature.session.HistoryDelegate
 import mozilla.components.feature.session.middleware.LastAccessMiddleware
@@ -88,7 +83,6 @@ import mozilla.components.service.location.MozillaLocationService
 import mozilla.components.service.sync.autofill.AutofillCreditCardsAddressesStorage
 import mozilla.components.service.sync.logins.SyncableLoginsStorage
 import mozilla.components.support.base.worker.Frequency
-import mozilla.components.support.ktx.android.content.res.readJSONObject
 import mozilla.components.support.locale.LocaleManager
 import com.shmibblez.inferno.AppRequestInterceptor
 import com.shmibblez.inferno.BuildConfig
@@ -97,7 +91,7 @@ import com.shmibblez.inferno.IntentReceiverActivity
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.desktopmode.DefaultDesktopModeRepository
 import com.shmibblez.inferno.browser.desktopmode.DesktopModeMiddleware
-import com.shmibblez.inferno.browser.prompts.FileUploadsDirCleanerMiddleware
+import com.shmibblez.inferno.browser.prompts.webPrompts.FileUploadsDirCleanerMiddleware
 import com.shmibblez.inferno.components.search.SearchMigration
 import com.shmibblez.inferno.downloads.DownloadService
 import com.shmibblez.inferno.ext.components

@@ -38,30 +38,31 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.shmibblez.inferno.R
-import com.shmibblez.inferno.browser.prompts.compose.AlertDialogPrompt
-import com.shmibblez.inferno.browser.prompts.compose.AuthenticationPrompt
-import com.shmibblez.inferno.browser.prompts.compose.ChoiceDialogPrompt
-import com.shmibblez.inferno.browser.prompts.compose.ColorPickerDialogPrompt
-import com.shmibblez.inferno.browser.prompts.compose.ConfirmDialogPrompt
-import com.shmibblez.inferno.browser.prompts.compose.CreditCardSaveDialogPrompt
-import com.shmibblez.inferno.browser.prompts.compose.GeneratePasswordPrompt
-import com.shmibblez.inferno.browser.prompts.compose.LoginPickerPrompt
-import com.shmibblez.inferno.browser.prompts.compose.MENU_CHOICE_DIALOG_TYPE
-import com.shmibblez.inferno.browser.prompts.compose.MULTIPLE_CHOICE_DIALOG_TYPE
-import com.shmibblez.inferno.browser.prompts.compose.MultiButtonDialogPrompt
-import com.shmibblez.inferno.browser.prompts.compose.PasswordGeneratorDialogPrompt
-import com.shmibblez.inferno.browser.prompts.compose.PrivacyPolicyDialog
-import com.shmibblez.inferno.browser.prompts.compose.SELECTION_TYPE_DATE
-import com.shmibblez.inferno.browser.prompts.compose.SELECTION_TYPE_DATE_AND_TIME
-import com.shmibblez.inferno.browser.prompts.compose.SELECTION_TYPE_MONTH
-import com.shmibblez.inferno.browser.prompts.compose.SELECTION_TYPE_TIME
-import com.shmibblez.inferno.browser.prompts.compose.SINGLE_CHOICE_DIALOG_TYPE
-import com.shmibblez.inferno.browser.prompts.compose.SaveLoginDialogPrompt
-import com.shmibblez.inferno.browser.prompts.compose.SelectAccountDialogPrompt
-import com.shmibblez.inferno.browser.prompts.compose.SelectProviderDialogPrompt
-import com.shmibblez.inferno.browser.prompts.compose.SelectableListPrompt
-import com.shmibblez.inferno.browser.prompts.compose.TextPromptDialogPrompt
-import com.shmibblez.inferno.browser.prompts.compose.TimeSelectionPrompt
+import com.shmibblez.inferno.browser.prompts.webPrompts.compose.AlertDialogPrompt
+import com.shmibblez.inferno.browser.prompts.webPrompts.compose.AuthenticationPrompt
+import com.shmibblez.inferno.browser.prompts.webPrompts.compose.ChoiceDialogPrompt
+import com.shmibblez.inferno.browser.prompts.webPrompts.compose.ColorPickerDialogPrompt
+import com.shmibblez.inferno.browser.prompts.webPrompts.compose.ConfirmDialogPrompt
+import com.shmibblez.inferno.browser.prompts.webPrompts.compose.CreditCardSaveDialogPrompt
+import com.shmibblez.inferno.browser.prompts.webPrompts.compose.GeneratePasswordPrompt
+import com.shmibblez.inferno.browser.prompts.webPrompts.compose.LoginPickerPrompt
+import com.shmibblez.inferno.browser.prompts.webPrompts.compose.MENU_CHOICE_DIALOG_TYPE
+import com.shmibblez.inferno.browser.prompts.webPrompts.compose.MULTIPLE_CHOICE_DIALOG_TYPE
+import com.shmibblez.inferno.browser.prompts.webPrompts.compose.MultiButtonDialogPrompt
+import com.shmibblez.inferno.browser.prompts.webPrompts.compose.PasswordGeneratorDialogPrompt
+import com.shmibblez.inferno.browser.prompts.webPrompts.compose.PrivacyPolicyDialog
+import com.shmibblez.inferno.browser.prompts.webPrompts.compose.SELECTION_TYPE_DATE
+import com.shmibblez.inferno.browser.prompts.webPrompts.compose.SELECTION_TYPE_DATE_AND_TIME
+import com.shmibblez.inferno.browser.prompts.webPrompts.compose.SELECTION_TYPE_MONTH
+import com.shmibblez.inferno.browser.prompts.webPrompts.compose.SELECTION_TYPE_TIME
+import com.shmibblez.inferno.browser.prompts.webPrompts.compose.SINGLE_CHOICE_DIALOG_TYPE
+import com.shmibblez.inferno.browser.prompts.webPrompts.compose.SaveLoginDialogPrompt
+import com.shmibblez.inferno.browser.prompts.webPrompts.compose.SelectAccountDialogPrompt
+import com.shmibblez.inferno.browser.prompts.webPrompts.compose.SelectProviderDialogPrompt
+import com.shmibblez.inferno.browser.prompts.webPrompts.compose.SelectableListPrompt
+import com.shmibblez.inferno.browser.prompts.webPrompts.compose.TextPromptDialogPrompt
+import com.shmibblez.inferno.browser.prompts.webPrompts.compose.TimeSelectionPrompt
+import com.shmibblez.inferno.browser.prompts.webPrompts.FilePicker
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.ext.components
 import kotlinx.coroutines.CoroutineScope
@@ -115,218 +116,6 @@ import java.util.Date
 //   - some minor problems in some components, go to ones with todos in their files
 //   - check usage of parameters that are not in use for [PromptComponent] (commented out)
 //
-
-enum class PromptBottomSheetTemplateButtonPosition {
-    BOTTOM, TOP
-}
-
-data class PromptBottomSheetTemplateAction(
-    val text: String, val action: () -> Unit, val enabled: Boolean = true,
-)
-
-
-/**
- * @param onDismissRequest what to do when dialog dismissed
- * @param dismissOnSwipeDown whether should dismiss on swipe down
- * @param negativeAction negative action text and function
- * @param positiveAction positive action text and function
- * @param content dialog content
- */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun PromptBottomSheetTemplate(
-    onDismissRequest: () -> Unit,
-    dismissOnSwipeDown: Boolean = false,
-    negativeAction: PromptBottomSheetTemplateAction? = null,
-    neutralAction: PromptBottomSheetTemplateAction? = null,
-    positiveAction: PromptBottomSheetTemplateAction? = null,
-    buttonPosition: PromptBottomSheetTemplateButtonPosition = PromptBottomSheetTemplateButtonPosition.TOP,
-    content: @Composable (ColumnScope.() -> Unit),
-) {
-    // don't dismiss on swipe down
-    val sheetState = rememberModalBottomSheetState(confirmValueChange = { sheetValue ->
-        sheetValue != SheetValue.Hidden || dismissOnSwipeDown
-    })
-    ModalBottomSheet(
-        modifier = Modifier.fillMaxWidth(),
-        sheetState = sheetState,
-        onDismissRequest = onDismissRequest,
-        // todo: use acorn colors
-        containerColor = Color.Black,
-        scrimColor = Color.Black.copy(alpha = 0.5F),
-        shape = RectangleShape,
-        dragHandle = { /* no drag handle */ },
-        content = {
-            // content actions (cancel or confirm)
-            // content below
-            if (buttonPosition == PromptBottomSheetTemplateButtonPosition.BOTTOM && (positiveAction != null || negativeAction != null)) {
-                Spacer(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 16.dp),
-                )
-            }
-            if (buttonPosition == PromptBottomSheetTemplateButtonPosition.TOP && (positiveAction != null || neutralAction != null || negativeAction != null)) {
-                Column {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        // todo: button text color and colors if not enabled
-                        if (negativeAction != null) {
-//                            TextButton(
-//                                onClick = negativeAction.action,
-//                                enabled = negativeAction.enabled,
-//                            ) {
-                            InfernoText(
-                                text = negativeAction.text,
-                                textAlign = TextAlign.Start,
-                                modifier = Modifier
-                                    .padding(all = 8.dp)
-                                    .weight(1F)
-                                    .clickable(
-                                        onClick = negativeAction.action,
-                                        enabled = negativeAction.enabled,
-                                    ),
-                                fontWeight = FontWeight.Bold,
-                                fontColor = Color(143, 0, 255),
-                            )
-//                            }
-                        }
-                        if (neutralAction != null) {
-//                            TextButton(
-//                                onClick = neutralAction.action,
-//                                enabled = neutralAction.enabled,
-//                            ) {
-                            InfernoText(
-                                text = neutralAction.text,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier
-                                    .padding(all = 8.dp)
-                                    .weight(1F)
-                                    .clickable(
-                                        onClick = neutralAction.action,
-                                        enabled = neutralAction.enabled,
-                                    ),
-                                fontWeight = FontWeight.Bold,
-                                fontColor = Color(143, 0, 255),
-                            )
-//                            }
-                        }
-                        if (positiveAction != null) {
-//                            TextButton(
-//                                onClick = positiveAction.action,
-//                                enabled = positiveAction.enabled,
-//                            ) {
-                            InfernoText(
-                                text = positiveAction.text,
-                                textAlign = TextAlign.End,
-                                modifier = Modifier
-                                    .padding(all = 8.dp)
-                                    .weight(1F)
-                                    .clickable(
-                                        onClick = positiveAction.action,
-                                        enabled = positiveAction.enabled,
-                                    ),
-                                fontWeight = FontWeight.Bold,
-                                fontColor = Color(143, 0, 255),
-                            )
-//                            }
-                        }
-                    }
-                    HorizontalDivider(
-                        color = Color.LightGray, modifier = Modifier.padding(horizontal = 8.dp)
-                    )
-                    Spacer(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 16.dp),
-                    )
-                }
-            }
-            // content
-            content.invoke(this)
-            // bottom buttons
-            if (buttonPosition == PromptBottomSheetTemplateButtonPosition.BOTTOM && (positiveAction != null || neutralAction != null || negativeAction != null)) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                        .height(IntrinsicSize.Max),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                ) {
-                    // todo: button text color and colors if not enabled
-                    if (negativeAction != null) {
-                        OutlinedButton(
-                            onClick = negativeAction.action,
-                            modifier = Modifier
-                                .weight(1F)
-                                .fillMaxHeight(),
-                            enabled = negativeAction.enabled,
-                            shape = MaterialTheme.shapes.small,
-                            border = BorderStroke(width = 1.dp, color = Color.White),
-                        ) {
-                            InfernoText(
-                                text = negativeAction.text,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier
-                                    .weight(1F)
-                                    .padding(all = 4.dp)
-                            )
-                        }
-                    }
-
-                    if (neutralAction != null) {
-                        OutlinedButton(
-                            onClick = neutralAction.action,
-                            modifier = Modifier
-                                .weight(1F)
-                                .fillMaxHeight(),
-                            enabled = neutralAction.enabled,
-                            shape = MaterialTheme.shapes.small,
-                            border = BorderStroke(width = 1.dp, color = Color.White),
-                        ) {
-                            InfernoText(
-                                text = neutralAction.text,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier
-                                    .weight(1F)
-                                    .padding(all = 4.dp)
-                            )
-                        }
-                    }
-
-                    if (positiveAction != null) {
-                        Button(
-                            onClick = positiveAction.action,
-                            modifier = Modifier
-                                .weight(1F)
-                                .fillMaxHeight(),
-                            enabled = positiveAction.enabled,
-                            shape = MaterialTheme.shapes.small,
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(143, 0, 255)
-                            ),
-                        ) {
-                            InfernoText(
-                                text = positiveAction.text,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier
-                                    .weight(1F)
-                                    .padding(all = 4.dp)
-                            )
-                        }
-                    }
-                }
-            }
-            Spacer(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(16.dp),
-            )
-        },
-    )
-}
 
 /**
  * replaces prompt integration
