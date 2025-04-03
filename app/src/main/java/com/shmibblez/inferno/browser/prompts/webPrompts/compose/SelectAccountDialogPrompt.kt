@@ -20,8 +20,8 @@ import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplate
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateAction
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateButtonPosition
-import com.shmibblez.inferno.browser.prompts.dialogs.webPrompts.sub.IdentityCredentialItem
 import com.shmibblez.inferno.browser.prompts.onPositiveAction
+import com.shmibblez.inferno.browser.prompts.webPrompts.compose.sub.IdentityCredentialItem
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.ext.components
 import mozilla.components.browser.state.action.ContentAction

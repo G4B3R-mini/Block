@@ -20,12 +20,13 @@ import androidx.compose.ui.unit.dp
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplate
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateAction
+import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateButtonPosition
 import com.shmibblez.inferno.browser.prompts.download.compose.sub.AppsGrid
 import com.shmibblez.inferno.compose.base.InfernoText
 import mozilla.components.feature.downloads.ui.DownloaderApp
 
+private val ICON_SIZE = 24.dp
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun ThirdPartyDownloadPrompt(
     downloaderApps: List<DownloaderApp>,
@@ -34,10 +35,12 @@ internal fun ThirdPartyDownloadPrompt(
 ) {
     PromptBottomSheetTemplate(
         onDismissRequest = onDismiss,
+        dismissOnSwipeDown = false,
         positiveAction = PromptBottomSheetTemplateAction(
             text = stringResource(android.R.string.cancel),
             action = onDismiss,
         ),
+        buttonPosition = PromptBottomSheetTemplateButtonPosition.TOP,
     ) {
         Row(
             modifier = Modifier
@@ -47,9 +50,9 @@ internal fun ThirdPartyDownloadPrompt(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
-                painter = painterResource(R.drawable.mozac_feature_download_ic_download_complete),
+                painter = painterResource(R.drawable.ic_download_24),
                 contentDescription = "",
-                modifier = Modifier.size(32.dp),
+                modifier = Modifier.size(ICON_SIZE),
                 tint = Color.White,
             )
             InfernoText(

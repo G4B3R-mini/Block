@@ -23,6 +23,8 @@ import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateButtonPosi
 import com.shmibblez.inferno.compose.base.InfernoText
 import mozilla.components.browser.state.state.content.DownloadState
 
+private val ICON_SIZE = 24.dp
+
 @Composable
 fun DownloadPrompt(
     download: DownloadState,
@@ -31,17 +33,14 @@ fun DownloadPrompt(
 ) {
     PromptBottomSheetTemplate(
         onDismissRequest = onCancelDownload,
+        dismissOnSwipeDown = false,
         negativeAction = PromptBottomSheetTemplateAction(
             text = stringResource(android.R.string.cancel),
-            action = {
-                onCancelDownload.invoke()
-            },
+            action = onCancelDownload,
         ),
         positiveAction = PromptBottomSheetTemplateAction(
             text = stringResource(R.string.mozac_feature_downloads_dialog_download),
-            action = {
-                onStartDownload.invoke()
-            },
+            action = onStartDownload,
         ),
         buttonPosition = PromptBottomSheetTemplateButtonPosition.BOTTOM,
     ) {
@@ -49,13 +48,13 @@ fun DownloadPrompt(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.Start),
+            horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.Start),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
-                painter = painterResource(R.drawable.mozac_feature_download_ic_download_complete),
+                painter = painterResource(R.drawable.ic_download_24),
                 contentDescription = "download complete icon",
-                modifier = Modifier.size(32.dp),
+                modifier = Modifier.size(ICON_SIZE),
                 tint = Color.White,
             )
             InfernoText(
@@ -72,10 +71,11 @@ fun DownloadPrompt(
             color = Color.White,
             textAlign = TextAlign.Start,
             modifier = Modifier
-                .weight(1F)
                 .padding(horizontal = 16.dp)
                 // padding is icon + row item spacing
-                .padding(start = 32.dp + 8.dp)
+                .padding(start = ICON_SIZE + 16.dp),
+            overflow = TextOverflow.Ellipsis,
+            maxLines = 1,
         )
     }
 

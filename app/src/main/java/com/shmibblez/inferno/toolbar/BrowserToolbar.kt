@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -42,6 +43,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextRange
@@ -51,8 +53,12 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import com.shmibblez.inferno.browser.BrowserComponentMode
 import com.shmibblez.inferno.browser.ComponentDimens
+import com.shmibblez.inferno.browser.InfernoAwesomeBar
+import com.shmibblez.inferno.browser.toPx
 import com.shmibblez.inferno.compose.browserStore
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.state.observeAsState
@@ -69,6 +75,10 @@ import mozilla.components.browser.state.selector.selectedTab
 import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.browser.state.state.searchEngines
 import mozilla.components.browser.state.state.selectedOrDefaultSearchEngine
+import mozilla.components.compose.browser.awesomebar.AwesomeBar
+import mozilla.components.compose.browser.awesomebar.AwesomeBarColors
+import mozilla.components.compose.browser.awesomebar.AwesomeBarDefaults
+import mozilla.components.compose.browser.awesomebar.AwesomeBarOrientation
 import mozilla.components.concept.engine.EngineSession
 import mozilla.components.support.ktx.kotlin.isUrl
 import mozilla.components.support.ktx.kotlin.toNormalizedUrl
@@ -92,6 +102,10 @@ fun BrowserToolbar(
     tabCount: Int,
     onShowMenuBottomSheet: () -> Unit,
     onNavToTabsTray: () -> Unit,
+    onStartSearch: () -> Unit,
+    onStopSearch: () -> Unit,
+    searchText: TextFieldValue,
+    omSearchTextChanged: (TextFieldValue) -> Unit,
 ) {
     if (tabSessionState == null) {
         // don't show if null, TODO: show loading bar
@@ -108,9 +122,15 @@ fun BrowserToolbar(
     if (editMode) {
         BrowserEditToolbar(
             tabSessionState = tabSessionState,
-            onDisableEditMode = { editMode = false },
+            onDisableEditMode = {
+                editMode = false
+                onStopSearch.invoke()
+                omSearchTextChanged.invoke(TextFieldValue(""))
+            },
             originBounds = originBounds,
             searchEngine = searchEngine,
+            searchText = searchText,
+            omSearchTextChanged = omSearchTextChanged,
         )
     } else {
         BrowserDisplayToolbar(
@@ -120,7 +140,10 @@ fun BrowserToolbar(
             setOriginBounds = setOriginBounds,
             tabCount = tabCount,
             tabSessionState = tabSessionState,
-            onEnableEditMode = { editMode = true },
+            onEnableEditMode = {
+                editMode = true
+                onStartSearch.invoke()
+            },
             onShowMenuBottomSheet = onShowMenuBottomSheet,
             onNavToTabsTray = onNavToTabsTray,
         )
@@ -209,7 +232,9 @@ fun BrowserEditToolbar(
     onDisableEditMode: () -> Unit,
     originBounds: OriginBounds,
     searchEngine: SearchEngine,
-) {
+    searchText: TextFieldValue,
+    omSearchTextChanged: (TextFieldValue) -> Unit,
+    ) {
     fun parseInput(): TextFieldValue {
         return (tabSessionState?.content?.searchTerms?.ifEmpty { tabSessionState.content.url }
             ?: "<empty>").let {
@@ -223,7 +248,7 @@ fun BrowserEditToolbar(
     }
 
     val context = LocalContext.current
-    var input by remember { mutableStateOf(parseInput()) }
+//    var input by remember { mutableStateOf(parseInput()) }
     var undoClearText by remember { mutableStateOf<TextFieldValue?>(null) }
     var textFullSize by remember { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
@@ -239,7 +264,7 @@ fun BrowserEditToolbar(
     }
 
     LaunchedEffect(tabSessionState?.id) {
-        if (tabSessionState != null) input = parseInput()
+        if (tabSessionState != null) omSearchTextChanged.invoke(parseInput())
     }
 
     Box(
@@ -247,12 +272,29 @@ fun BrowserEditToolbar(
             .fillMaxWidth()
             .background(Color.Black)
             .height(ComponentDimens.TOOLBAR_HEIGHT),
+//            .wrapContentHeight(
+//                unbounded = true,
+//                align = Alignment.Top,
+//            ),
         contentAlignment = Alignment.TopCenter,
     ) {
-        // loading bar
-        if (loading) {
-            ProgressBar((tabSessionState?.content?.progress?.toFloat() ?: 0F) / 100F)
-        }
+//        InfernoAwesomeBar(
+//            text = input.text,
+//            colors = AwesomeBarDefaults.colors(),
+////            providers = emptyList(),
+//            orientation = AwesomeBarOrientation.BOTTOM,
+//            onSuggestionClicked = { providerGroup, suggestion -> TODO() },
+//            onAutoComplete = { providerGroup, suggestion -> TODO() },
+//            modifier = Modifier
+//                .onGloballyPositioned {
+//                    val y = -it.size.height
+//                    Log.d("InfernoAwesomeBar", "y offset: $y")
+//                    IntOffset(x = 0, y = y)
+//                }
+//                .fillMaxWidth()
+//                .height(200.dp)
+//                .background(Color.Green),
+//        )
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -303,10 +345,10 @@ fun BrowserEditToolbar(
                 )
                 CompositionLocalProvider(LocalTextSelectionColors provides customTextSelectionColors) {
                     BasicTextField(
-                        value = input,
+                        value = searchText,
                         onValueChange = { v ->
                             // move cursor to end
-                            input = v
+                            omSearchTextChanged.invoke(v)
                             undoClearText = null
                         },
                         enabled = true,
@@ -323,7 +365,7 @@ fun BrowserEditToolbar(
                         cursorBrush = SolidColor(Color.White),
                         keyboardActions = KeyboardActions(
                             onGo = {
-                                with(input.text) {
+                                with(searchText.text) {
                                     if (this.isUrl()) {
                                         context.components.useCases.sessionUseCases.loadUrl(
                                             url = this.toNormalizedUrl(),
@@ -352,15 +394,15 @@ fun BrowserEditToolbar(
                 if (undoClearText != null) {
                     ToolbarUndoClearText(
                         onClick = {
-                            input = undoClearText!!
+                            omSearchTextChanged.invoke(undoClearText!!)
                             undoClearText = null
                         },
                     )
-                } else if (input.text.isNotEmpty()) {
+                } else if (searchText.text.isNotEmpty()) {
                     ToolbarClearText(
                         onClick = {
-                            undoClearText = input
-                            input = TextFieldValue("")
+                            undoClearText = searchText
+                            omSearchTextChanged.invoke(TextFieldValue(""))
                         },
                     )
                 }
@@ -373,6 +415,20 @@ fun BrowserEditToolbar(
                         .fillMaxHeight()
                 )
             }
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp)
+                .background(Color.Green)
+                .offset(x = 0.dp, y = -(100.dp)),
+//            .onGloballyPositioned {
+//                IntOffset(x = 0, y = -100.dp.toPx())
+//            },
+        )
+        // loading bar
+        if (loading) {
+            ProgressBar((tabSessionState?.content?.progress?.toFloat() ?: 0F) / 100F)
         }
     }
 }

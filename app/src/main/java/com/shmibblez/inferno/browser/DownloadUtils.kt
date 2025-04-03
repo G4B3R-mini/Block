@@ -16,7 +16,7 @@ internal fun handleOnDownloadFinished(
     downloadState: DownloadState,
     downloadJobStatus: Status,
     tryAgain: (String) -> Unit,
-    browserToolbars: List<ScrollableToolbar>,
+//    browserToolbars: List<ScrollableToolbar>,
 ) {
     // If the download is just paused, don't show any in-app notification
     if (shouldShowCompletedDownloadDialog(downloadState, downloadJobStatus, context)) {
@@ -51,7 +51,8 @@ internal fun handleOnDownloadFinished(
 //            ) { sharedViewModel.downloadDialogState.remove(downloadState.sessionId) }
 //
 //            dynamicDownloadDialog.show()
-            browserToolbars.forEach { it.expand() }
+            // todo: expand toolbars
+//            browserToolbars.forEach { it.expand() }
         }
     }
 }

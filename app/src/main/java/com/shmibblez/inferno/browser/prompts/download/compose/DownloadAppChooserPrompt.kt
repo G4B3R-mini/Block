@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplate
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateAction
@@ -21,6 +22,8 @@ import com.shmibblez.inferno.browser.prompts.download.compose.sub.AppsGrid
 import com.shmibblez.inferno.compose.base.InfernoText
 import mozilla.components.feature.downloads.ui.DownloaderApp
 
+private val ICON_SIZE = 24.dp
+
 @Composable
 fun DownloadAppChooserPrompt(
     downloaderApps: List<DownloaderApp>,
@@ -29,6 +32,7 @@ fun DownloadAppChooserPrompt(
 ) {
     PromptBottomSheetTemplate(
         onDismissRequest = onDismiss,
+        dismissOnSwipeDown = false,
         positiveAction = PromptBottomSheetTemplateAction(
             text = stringResource(android.R.string.cancel),
             action = onDismiss,
@@ -39,17 +43,20 @@ fun DownloadAppChooserPrompt(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.Start),
+            horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.Start),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
-                painter = painterResource(R.drawable.mozac_feature_download_ic_download),
+                painter = painterResource(R.drawable.ic_download_24),
                 contentDescription = "",
-                modifier = Modifier.size(32.dp),
+                modifier = Modifier.size(ICON_SIZE),
                 tint = Color.White,
             )
             InfernoText(
                 text = stringResource(R.string.mozac_feature_downloads_third_party_app_chooser_dialog_title),
+                fontColor = Color.White,
+                textAlign = TextAlign.Start,
+                modifier = Modifier.weight(1F),
             )
         }
         AppsGrid(

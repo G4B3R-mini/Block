@@ -23,9 +23,9 @@ import androidx.compose.ui.unit.dp
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplate
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateAction
-import com.shmibblez.inferno.browser.prompts.dialogs.webPrompts.sub.MonthAndYearPicker
-import com.shmibblez.inferno.browser.prompts.dialogs.webPrompts.sub.rememberMonthAndYearPickerState
-import com.shmibblez.inferno.browser.prompts.dialogs.webPrompts.sub.rememberNumberPickerState
+import com.shmibblez.inferno.browser.prompts.webPrompts.compose.sub.MonthAndYearPicker
+import com.shmibblez.inferno.browser.prompts.webPrompts.compose.sub.rememberMonthAndYearPickerState
+import com.shmibblez.inferno.browser.prompts.webPrompts.compose.sub.rememberNumberPickerState
 import com.shmibblez.inferno.browser.prompts.onDismiss
 import com.shmibblez.inferno.browser.prompts.onNegativeAction
 import com.shmibblez.inferno.browser.prompts.onNeutralAction

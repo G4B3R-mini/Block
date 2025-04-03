@@ -76,13 +76,19 @@ import mozilla.components.feature.tabs.TabsUseCases
 import mozilla.components.support.ktx.android.content.share
 
 // TODO: test implementations
+// todo: add options icons for
+//  - settings (settings icon)
+//  - find in page (search icon)
+//  - view desktop site toggle (desktop icon)
+//  - share (share icon)
+//  - private mode toggle (incog symbol) (incog with browser icon bottom right, reversed for switch back)
+//  - print page
+//  - scrolling screenshot
 // todo:
-//   - icons left to add (add settings screen for ones shown on tab, max 5):
-//     - settings icon
-//     - private mode toggle
-//     - view desktop site toggle
+//   - add settings screen for options shown on toolbar, max 7, rearrangeable and selectable from list
 //   - add double up and down chevron icon for options tray
-//     - options tray is a sheet that pops up or down and shows all options available as icons
+//     - options tray is a sheet that pops up or down and shows all options available as icons,
+//     scrollable horizontal
 //   - make options in menu a grid
 
 
@@ -115,6 +121,8 @@ interface ToolbarOptionsScope {
     //  - share (share icon)
     //  - settings (settings icon)
     //  - private mode (incog symbol)
+    //  - print page
+    //  - scrolling screenshot
 
     @Composable
     fun ToolbarSeparator()

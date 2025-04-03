@@ -50,8 +50,8 @@ data class PromptBottomSheetTemplateAction(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PromptBottomSheetTemplate(
-    onDismissRequest: () -> Unit,
-    dismissOnSwipeDown: Boolean = false,
+    onDismissRequest: (() -> Unit)?,
+    dismissOnSwipeDown: Boolean = onDismissRequest != null,
     negativeAction: PromptBottomSheetTemplateAction? = null,
     neutralAction: PromptBottomSheetTemplateAction? = null,
     positiveAction: PromptBottomSheetTemplateAction? = null,
@@ -65,7 +65,7 @@ fun PromptBottomSheetTemplate(
     ModalBottomSheet(
         modifier = Modifier.fillMaxWidth(),
         sheetState = sheetState,
-        onDismissRequest = onDismissRequest,
+        onDismissRequest = onDismissRequest ?: {},
         // todo: use acorn colors
         containerColor = Color.Black,
         scrimColor = Color.Black.copy(alpha = 0.5F),

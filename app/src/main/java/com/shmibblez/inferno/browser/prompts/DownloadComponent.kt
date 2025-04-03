@@ -11,22 +11,18 @@ import androidx.annotation.VisibleForTesting
 import androidx.annotation.VisibleForTesting.Companion.PRIVATE
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.core.net.toUri
-import androidx.fragment.app.FragmentManager
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.prompts.download.compose.DownloadAppChooserPrompt
 import com.shmibblez.inferno.browser.prompts.download.compose.DownloadPrompt
 import com.shmibblez.inferno.browser.prompts.download.compose.FirstPartyDownloadPrompt
 import com.shmibblez.inferno.browser.prompts.download.compose.ThirdPartyDownloadPrompt
 import com.shmibblez.inferno.ext.realFilenameOrGuessed
-import com.shmibblez.inferno.feature.downloads.Filename
-import com.shmibblez.inferno.feature.downloads.NegativeActionCallback
-import com.shmibblez.inferno.feature.downloads.ThirdPartyDownloaderAppChosenCallback
-import com.shmibblez.inferno.feature.downloads.ThirdPartyDownloaderApps
 import com.shmibblez.inferno.feature.downloads.noop
 import com.shmibblez.inferno.feature.downloads.onDownloadStopped
 import kotlinx.coroutines.CoroutineScope
@@ -37,8 +33,8 @@ import mozilla.components.browser.state.selector.findTabOrCustomTabOrSelectedTab
 import mozilla.components.browser.state.state.SessionState
 import mozilla.components.browser.state.state.content.DownloadState
 import mozilla.components.browser.state.store.BrowserStore
-import mozilla.components.feature.downloads.DownloadDialogFragment
 import mozilla.components.feature.downloads.DownloadsUseCases
+import mozilla.components.feature.downloads.Filename
 import mozilla.components.feature.downloads.manager.AndroidDownloadManager
 import mozilla.components.feature.downloads.manager.DownloadManager
 import mozilla.components.feature.downloads.ui.DownloaderApp
@@ -62,7 +58,6 @@ fun DownloadComponent(
     store: BrowserStore,
     useCases: DownloadsUseCases,
     onNeedToRequestPermissions: OnNeedToRequestPermissions = { },
-    // todo: what to do in case stopped
     onDownloadStopped: onDownloadStopped = noop,
     downloadManager: DownloadManager = AndroidDownloadManager(
         applicationContext, store
@@ -70,7 +65,8 @@ fun DownloadComponent(
     tabId: String? = null,
 //    promptsStyling: PromptsStyling? = null,
     shouldForwardToThirdParties: () -> Boolean = { false },
-    customThirdPartyDownloadDialog: ((ThirdPartyDownloaderApps, ThirdPartyDownloaderAppChosenCallback, NegativeActionCallback) -> Unit)? = null,
+    useCustomFirstPartyDownloadPrompt: Boolean = true,
+    useCustomThirdPartyDownloadDialog: Boolean = true, // ((List<DownloaderApp>, (DownloaderApp) -> Unit, () -> Unit) -> Unit)? = null,
     setOnPermissionsResultCallback: ((permissions: Array<String>, grantResults: IntArray) -> Unit) -> Unit,
 ) {
     // listeners
@@ -205,7 +201,7 @@ fun DownloadComponent(
                 } else {
                     previousTab = tab
                     downloadState = download
-                    // processDownload(tab, download) equivalent, state rebuild with new values
+                    // processDownload(tab, download) equivalent, state rebuilt with new values
                 }
             } else {
                 useCases.cancelDownloadRequest.invoke(tab.id, download.id)
@@ -213,32 +209,44 @@ fun DownloadComponent(
             }
         }
     }
-    // sets callback in parent so can be invoked
-    setOnPermissionsResultCallback.invoke { permissions, grantResults ->
-        onPermissionsResult(
-            permissions, grantResults
-        )
-    }
-
-    @VisibleForTesting
-    fun dismissAllDownloadDialogs() {
-        // todo: necessary? since only keep latest download request, don't need to dismiss
-        // todo: dismiss all download dialogs
-    }
 
     /**
-     * Styling for the download dialog prompt
+     * dismisses current download dialog
      */
-    data class PromptsStyling(
-        val gravity: Int,
-        val shouldWidthMatchParent: Boolean = false,
-        @ColorRes val positiveButtonBackgroundColor: Int? = null,
-        @ColorRes val positiveButtonTextColor: Int? = null,
-        val positiveButtonRadius: Float? = null,
-        val fileNameEndMargin: Int? = null,
-    )
+    fun dismissDialog() {
+        previousTab = null
+        downloadState = null
+    }
 
+    // todo: prompt style based on app colors
+//    /**
+//     * Styling for the download dialog prompt
+//     */
+//    data class PromptsStyling(
+//        val gravity: Int,
+//        val shouldWidthMatchParent: Boolean = false,
+//        @ColorRes val positiveButtonBackgroundColor: Int? = null,
+//        @ColorRes val positiveButtonTextColor: Int? = null,
+//        val positiveButtonRadius: Float? = null,
+//        val fileNameEndMargin: Int? = null,
+//    )
 
+    // set setOnPermissionsResultCallback callback
+    LaunchedEffect(setOnPermissionsResultCallback) {
+        // sets callback in parent so can be invoked
+        setOnPermissionsResultCallback.invoke { permissions, grantResults ->
+            onPermissionsResult(
+                permissions, grantResults
+            )
+        }
+    }
+    // set OnDownloadStopped callback
+    LaunchedEffect(onDownloadStopped) {
+        // todo: set callback that shows prompt when download completed
+        //  to inform user, show option to close prompt or open downloaded file,
+        //  in body show file name and content size, title is, open downloaded file?
+        downloadManager.onDownloadStopped = onDownloadStopped
+    }
 
     DisposableEffect(null) {
         // Dismiss the previous prompts when the user navigates to another site.
@@ -255,7 +263,7 @@ fun DownloadComponent(
                             // We have an old download request.
                             tab.content.download?.let { download ->
                                 useCases.cancelDownloadRequest.invoke(tab.id, download.id)
-                                dismissAllDownloadDialogs()
+                                // dismissed when previousTab set to null, replaces dismissAllDownloadDialogs()
                                 previousTab = null
                             }
                         }
@@ -286,29 +294,32 @@ fun DownloadComponent(
     }
 
     if (shouldShowAppDownloaderDialog && previousTab != null && downloadState != null) {
-        when (customThirdPartyDownloadDialog) {
-            null -> {
+        when (useCustomThirdPartyDownloadDialog) {
+            false -> {
                 DownloadAppChooserPrompt(
                     downloaderApps = apps,
                     onAppSelected = { app ->
                         onDownloaderAppSelected(app, previousTab!!, downloadState!!)
+                        dismissDialog()
                     },
                     onDismiss = {
 //                            emitPromptDismissedFact()
                         useCases.cancelDownloadRequest.invoke(previousTab!!.id, downloadState!!.id)
+                        dismissDialog()
                     },
                 )
             } // replaces showAppDownloaderDialog(previousTab, download, apps)
 
-            // todo: call dialog directly here
-            else -> {
+            true -> {
                 ThirdPartyDownloadPrompt(
                     downloaderApps = apps,
                     onAppSelected = {
                         onDownloaderAppSelected(it, previousTab!!, downloadState!!)
+                        dismissDialog()
                     },
-                    onDismiss =  {
+                    onDismiss = {
                         useCases.cancelDownloadRequest.invoke(previousTab!!.id, downloadState!!.id)
+                        dismissDialog()
                     },
                 )
             } // replaces customThirdPartyDownloadDialog.invoke(...)
@@ -316,18 +327,22 @@ fun DownloadComponent(
     } else {
         if (applicationContext.isPermissionGranted(downloadManager.permissions.asIterable()) && downloadState != null && previousTab != null) {
             when {
-                !downloadState!!.skipConfirmation -> {
+                useCustomFirstPartyDownloadPrompt && !downloadState!!.skipConfirmation -> {
                     FirstPartyDownloadPrompt(
                         filename = Filename(downloadState!!.realFilenameOrGuessed),
-                        contentSize = mozilla.components.feature.downloads.ContentSize(downloadState!!.contentLength ?: 0),
+                        contentSize = mozilla.components.feature.downloads.ContentSize(
+                            downloadState!!.contentLength ?: 0
+                        ),
                         onPositiveAction = {
                             startDownload(downloadState!!)
                             useCases.consumeDownload.invoke(previousTab!!.id, downloadState!!.id)
+                            dismissDialog()
                         },
                         onNegativeAction = {
                             useCases.cancelDownloadRequest.invoke(
                                 previousTab!!.id, downloadState!!.id
                             )
+                            dismissDialog()
                         },
                     ) // replaces customFirstPartyDownloadDialog.invoke(...)
                 }
@@ -338,11 +353,13 @@ fun DownloadComponent(
                         onStartDownload = {
                             startDownload(downloadState!!)
                             useCases.consumeDownload.invoke(previousTab!!.id, downloadState!!.id)
+                            dismissDialog()
                         },
                         onCancelDownload = {
                             useCases.cancelDownloadRequest.invoke(
                                 previousTab!!.id, downloadState!!.id
                             )
+                            dismissDialog()
                         },
                     ) // replaces showDownloadDialog(previousTab, download)
                 }
@@ -350,8 +367,11 @@ fun DownloadComponent(
                 else -> {
                     useCases.consumeDownload(previousTab!!.id, downloadState!!.id)
                     startDownload(downloadState!!)
+                    dismissDialog()
                 }
             }
+        } else if (downloadState == null || previousTab == null) {
+            // do nothing
         } else {
             onNeedToRequestPermissions(downloadManager.permissions)
         }

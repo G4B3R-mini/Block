@@ -12,7 +12,6 @@ import android.content.res.Resources
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
@@ -38,6 +37,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Scaffold
@@ -65,6 +65,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -95,12 +96,10 @@ import com.shmibblez.inferno.NavGraphDirections
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.browsingmode.BrowsingMode
 import com.shmibblez.inferno.browser.prompts.DownloadComponent
+import com.shmibblez.inferno.browser.prompts.PromptComponent
 import com.shmibblez.inferno.browser.prompts.webPrompts.AndroidPhotoPicker
 import com.shmibblez.inferno.browser.prompts.webPrompts.FilePicker
 import com.shmibblez.inferno.browser.prompts.webPrompts.FilePicker.Companion.FILE_PICKER_ACTIVITY_REQUEST_CODE
-import com.shmibblez.inferno.browser.prompts.PromptComponent
-import com.shmibblez.inferno.browser.prompts.download.compose.FirstPartyDownloadPrompt
-import com.shmibblez.inferno.browser.prompts.download.compose.ThirdPartyDownloadPrompt
 import com.shmibblez.inferno.browser.tabstrip.isTabStripEnabled
 import com.shmibblez.inferno.components.Components
 import com.shmibblez.inferno.components.TabCollectionStorage
@@ -211,6 +210,8 @@ import mozilla.components.browser.state.state.selectedOrDefaultSearchEngine
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.browser.thumbnails.BrowserThumbnails
 import mozilla.components.browser.toolbar.BrowserToolbar
+import mozilla.components.compose.browser.awesomebar.AwesomeBarDefaults
+import mozilla.components.compose.browser.awesomebar.AwesomeBarOrientation
 import mozilla.components.compose.cfr.CFRPopup
 import mozilla.components.compose.cfr.CFRPopupLayout
 import mozilla.components.compose.cfr.CFRPopupProperties
@@ -229,7 +230,6 @@ import mozilla.components.feature.downloads.DownloadsFeature
 import mozilla.components.feature.downloads.manager.FetchDownloadManager
 import mozilla.components.feature.downloads.temporary.CopyDownloadFeature
 import mozilla.components.feature.downloads.temporary.ShareDownloadFeature
-import mozilla.components.feature.downloads.ui.DownloaderApp
 import mozilla.components.feature.media.fullscreen.MediaSessionFullscreenFeature
 import mozilla.components.feature.privatemode.feature.SecureWindowFeature
 import mozilla.components.feature.prompts.dialog.FullScreenNotificationToast
@@ -375,7 +375,7 @@ fun nav(
 }
 
 enum class BrowserComponentMode {
-    TOOLBAR, FIND_IN_PAGE,
+    TOOLBAR, TOOLBAR_SEARCH, FIND_IN_PAGE,
 }
 
 enum class BrowserComponentPageType {
@@ -385,6 +385,7 @@ enum class BrowserComponentPageType {
 object ComponentDimens {
     val TOOLBAR_HEIGHT = 40.dp
     val TAB_BAR_HEIGHT = 30.dp
+    val AWESOME_BAR_HEIGHT = 100.dp
     val TAB_WIDTH = 95.dp
     val TAB_CORNER_RADIUS = 8.dp
     val FIND_IN_PAGE_BAR_HEIGHT = 50.dp
@@ -392,6 +393,7 @@ object ComponentDimens {
     fun BOTTOM_BAR_HEIGHT(browserComponentMode: BrowserComponentMode): Dp {
         return when (browserComponentMode) {
             BrowserComponentMode.TOOLBAR -> TOOLBAR_HEIGHT + TAB_BAR_HEIGHT
+            BrowserComponentMode.TOOLBAR_SEARCH -> TOOLBAR_HEIGHT + AWESOME_BAR_HEIGHT
             BrowserComponentMode.FIND_IN_PAGE -> FIND_IN_PAGE_BAR_HEIGHT
         }
     }
@@ -522,7 +524,6 @@ fun BrowserComponent(
 
     val sessionFeature = remember { ViewBoundFeatureWrapper<SessionFeature>() }
     val contextMenuFeature = remember { ViewBoundFeatureWrapper<ContextMenuFeature>() }
-//    val downloadsFeature = remember { ViewBoundFeatureWrapper<DownloadsFeature>() }
     val shareDownloadsFeature = remember { ViewBoundFeatureWrapper<ShareDownloadFeature>() }
     val copyDownloadsFeature = remember { ViewBoundFeatureWrapper<CopyDownloadFeature>() }
 //    val promptsFeature = remember { ViewBoundFeatureWrapper<PromptFeature>() }
@@ -579,6 +580,11 @@ fun BrowserComponent(
 
     var filePicker by remember { mutableStateOf<FilePicker?>(null) }
 
+    var requestDownloadPermissionsCallback by remember {
+        mutableStateOf<((permissions: Array<String>, grantResults: IntArray) -> Unit)?>(
+            null
+        )
+    }
     // permission launchers
     val requestDownloadPermissionsLauncher: ActivityResultLauncher<Array<String>> =
         rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { results ->
@@ -587,9 +593,7 @@ fun BrowserComponent(
                 if (it) PackageManager.PERMISSION_GRANTED else PackageManager.PERMISSION_DENIED
             }.toIntArray()
             // todo: call downloads feature callback here, set in DownloadsComponent callback
-//            downloadsFeature.withFeature {
-//                it.onPermissionsResult(permissions, grantResults)
-//            }
+            requestDownloadPermissionsCallback?.invoke(permissions, grantResults)
         }
     val requestSitePermissionsLauncher: ActivityResultLauncher<Array<String>> =
         rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { results ->
@@ -948,17 +952,21 @@ fun BrowserComponent(
             })
     }
 
+    val downloadManager = remember {
+        FetchDownloadManager(
+            context.applicationContext,
+            store,
+            DownloadService::class,
+            notificationsDelegate = context.components.notificationsDelegate,
+        )
+    }
+
     DownloadComponent(
         applicationContext = context.applicationContext,
         store = store,
         useCases = context.components.useCases.downloadUseCases,
         tabId = customTabSessionId,
-        downloadManager = FetchDownloadManager(
-            context.applicationContext,
-            store,
-            DownloadService::class,
-            notificationsDelegate = context.components.notificationsDelegate,
-        ),
+        downloadManager = downloadManager,
         shouldForwardToThirdParties = {
             PreferenceManager.getDefaultSharedPreferences(context).getBoolean(
                 context.getPreferenceKey(R.string.pref_key_external_download_manager),
@@ -984,24 +992,24 @@ fun BrowserComponent(
             requestDownloadPermissionsLauncher.launch(permissions)
 //            requestPermissions(permissions, REQUEST_CODE_DOWNLOAD_PERMISSIONS)
         },
-        customThirdPartyDownloadDialog = { downloaderApps, onAppSelected, negativeActionCallback ->
-            run {
-//                        if (currentStartDownloadDialog == null) {
-//                            ThirdPartyDownloadDialog(
-//                                activity = context.getActivity()!!,
-//                                downloaderApps = downloaderApps.value,
-//                                onAppSelected = onAppSelected.value,
-//                                negativeButtonAction = negativeActionCallback.value,
-//                            ).onDismiss {
-//                                currentStartDownloadDialog = null
-//                            }.show(binding.startDownloadDialogContainer).also {
-//                                currentStartDownloadDialog = it
-//                            }
-//                        }
-            }
+        onDownloadStopped = { downloadState, _, downloadJobStatus ->
+            // todo: if download finished show
+            handleOnDownloadFinished(
+                context = context,
+                downloadState = downloadState,
+                downloadJobStatus = downloadJobStatus,
+                tryAgain = downloadManager::tryAgain, // downloadFeature::tryAgain,
+                // todo: toolbars
+//                browserToolbars = listOfNotNull(
+//                    browserToolbarView,
+//                    _bottomToolbarContainerView?.toolbarContainerView,
+//                ),
+            )
         },
+        useCustomFirstPartyDownloadPrompt = true,
+        useCustomThirdPartyDownloadDialog = true,
         setOnPermissionsResultCallback = {
-            // todo: important
+            requestDownloadPermissionsCallback = it
         },
     )
 
@@ -1009,7 +1017,7 @@ fun BrowserComponent(
     var engineView by remember { mutableStateOf<EngineView?>(null) }
     var toolbar by remember { mutableStateOf<BrowserToolbarCompat?>(null) }
     var swipeRefresh by remember { mutableStateOf<SwipeRefreshLayout?>(null) }
-    var awesomeBar by remember { mutableStateOf<AwesomeBarWrapper?>(null) }
+//    var awesomeBar by remember { mutableStateOf<AwesomeBarWrapper?>(null) }
     var readerViewBar by remember { mutableStateOf<ReaderViewControlsBar?>(null) }
     var readerViewAppearanceButton by remember { mutableStateOf<FloatingActionButton?>(null) }
 
@@ -1310,110 +1318,7 @@ fun BrowserComponent(
                 },
             )
 
-//            val downloadFeature = DownloadsFeature(
-//                context.applicationContext,
-//                store = store,
-//                useCases = context.components.useCases.downloadUseCases,
-//                // todo: test since using parent frag manager
-//                fragmentManager = parentFragmentManager, // childFragmentManager,
-//                tabId = customTabSessionId,
-//                downloadManager = FetchDownloadManager(
-//                    context.applicationContext,
-//                    store,
-//                    DownloadService::class,
-//                    notificationsDelegate = context.components.notificationsDelegate,
-//                ),
-//                shouldForwardToThirdParties = {
-//                    PreferenceManager.getDefaultSharedPreferences(context).getBoolean(
-//                        context.getPreferenceKey(R.string.pref_key_external_download_manager),
-//                        false,
-//                    )
-//                },
-//                promptsStyling = DownloadsFeature.PromptsStyling(
-//                    gravity = Gravity.BOTTOM,
-//                    shouldWidthMatchParent = true,
-//                    positiveButtonBackgroundColor = ThemeManager.resolveAttribute(
-//                        R.attr.accent,
-//                        context,
-//                    ),
-//                    positiveButtonTextColor = ThemeManager.resolveAttribute(
-//                        R.attr.textOnColorPrimary,
-//                        context,
-//                    ),
-//                    positiveButtonRadius = ComponentDimens.TAB_CORNER_RADIUS.value,
-//                ),
-//                onNeedToRequestPermissions = { permissions ->
-//                    // todo: test
-//                    requestDownloadPermissionsLauncher.launch(permissions)
-////            requestPermissions(permissions, REQUEST_CODE_DOWNLOAD_PERMISSIONS)
-//                },
-//                customFirstPartyDownloadDialog = { filename, contentSize, positiveAction, negativeAction ->
-//                    run {
-//                        if (downloadDialogData == null) {
-//                            downloadDialogData = FirstPartyDownloadDialogData(
-//                                filename = filename.value,
-//                                contentSize = contentSize.value,
-//                                positiveButtonAction = positiveAction.value,
-//                                negativeButtonAction = negativeAction.value,
-//                            )
-//                        }
-////                        if (currentStartDownloadDialog == null) {
-////                            FirstPartyDownloadDialog(
-////                                activity = context.getActivity()!!,
-////                                filename = filename.value,
-////                                contentSize = contentSize.value,
-////                                positiveButtonAction = positiveAction.value,
-////                                negativeButtonAction = negativeAction.value,
-////                            ).onDismiss {
-////                                currentStartDownloadDialog = null
-////                            }.show(binding.startDownloadDialogContainer).also {
-////                                currentStartDownloadDialog = it
-////                            }
-////                        }
-//                    }
-//                },
-//                customThirdPartyDownloadDialog = { downloaderApps, onAppSelected, negativeActionCallback ->
-//                    run {
-//                        if (downloadDialogData == null) {
-//                            downloadDialogData = ThirdPartyDownloadDialogData(
-//                                downloaderApps = downloaderApps.value,
-//                                onAppSelected = onAppSelected.value,
-//                                negativeButtonAction = negativeActionCallback.value
-//                            )
-//                        }
-////                        if (currentStartDownloadDialog == null) {
-////                            ThirdPartyDownloadDialog(
-////                                activity = context.getActivity()!!,
-////                                downloaderApps = downloaderApps.value,
-////                                onAppSelected = onAppSelected.value,
-////                                negativeButtonAction = negativeActionCallback.value,
-////                            ).onDismiss {
-////                                currentStartDownloadDialog = null
-////                            }.show(binding.startDownloadDialogContainer).also {
-////                                currentStartDownloadDialog = it
-////                            }
-////                        }
-//                    }
-//                },
-//            )
-
             val bottomToolbarHeight = context.settings().getBottomToolbarHeight(context)
-
-            // fixme: downloadFeature.onDownloadStopped not implemented
-//            downloadFeature.onDownloadStopped = { downloadState, _, downloadJobStatus ->
-//                // todo: dialogs (in below function)
-//                // todo: toolbar
-////                handleOnDownloadFinished(
-////                    context = context,
-////                    downloadState = downloadState,
-////                    downloadJobStatus = downloadJobStatus,
-////                    tryAgain = downloadFeature::tryAgain,
-////                    browserToolbars = listOfNotNull(
-////                        browserToolbarView,
-////                        _bottomToolbarContainerView?.toolbarContainerView,
-////                    ),
-////                )
-//            }
 
             resumeDownloadDialogState(
                 getCurrentTab(context)?.id,
@@ -1432,12 +1337,6 @@ fun BrowserComponent(
                 owner = lifecycleOwner,
                 view = view,
             )
-
-//            downloadsFeature.set(
-//                downloadFeature,
-//                owner = lifecycleOwner,
-//                view = view,
-//            )
 
             pipFeature = PictureInPictureFeature(
                 store = store,
@@ -2037,7 +1936,7 @@ fun BrowserComponent(
     )
 
 //    var startX by remember {mutableFloatStateOf(0F)}
-    var startY by remember {mutableFloatStateOf(0F)}
+    var startY by remember { mutableFloatStateOf(0F) }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -2190,7 +2089,7 @@ fun BrowserComponent(
 //                        }
                     },
             ) {
-                MozAwesomeBar(setView = { ab -> awesomeBar = ab })
+//                MozAwesomeBar(setView = { ab -> awesomeBar = ab })
                 MozEngineView(
                     modifier = Modifier
                         .fillMaxSize()
@@ -2225,26 +2124,78 @@ fun BrowserComponent(
         },
         bottomBar = {
             // hide and show when scrolling
-            BottomAppBar(contentPadding = PaddingValues(0.dp),
+            BottomAppBar(
+                contentPadding = PaddingValues(0.dp),
                 modifier = Modifier
                     .height(bottomBarHeightDp)
                     .offset {
                         IntOffset(
                             x = 0, y = bottomBarOffsetPx.value.roundToInt()
                         )
-                    }) {
+                    }
+                    .wrapContentHeight(unbounded = true),
+            ) {
                 Column(
                     Modifier
                         .fillMaxSize()
                         .background(Color.Black)
                 ) {
+                    var searchText by remember { mutableStateOf(TextFieldValue("")) }
                     if (browserMode == BrowserComponentMode.TOOLBAR) {
                         BrowserTabBar(tabList, currentTab)
-                        BrowserToolbar(tabSessionState = currentTab,
+                        BrowserToolbar(
+                            tabSessionState = currentTab,
                             searchEngine = searchEngine,
                             tabCount = tabList.size,
                             onShowMenuBottomSheet = { showMenuBottomSheet = true },
-                            onNavToTabsTray = { showTabsTray({ showTabsTray = true }) })
+                            onNavToTabsTray = { showTabsTray({ showTabsTray = true }) },
+                            onStartSearch = { browserMode = BrowserComponentMode.TOOLBAR_SEARCH },
+                            onStopSearch = {
+                                browserMode = BrowserComponentMode.TOOLBAR
+                            },
+                            searchText = searchText,
+                            omSearchTextChanged = { text -> searchText = text },
+                        )
+                    }
+                    if (browserMode == BrowserComponentMode.TOOLBAR_SEARCH) {
+//                        BrowserTabBar(tabList, currentTab)
+                        InfernoAwesomeBar(
+                            text = searchText.text,
+                            colors = AwesomeBarDefaults.colors(),
+//                    providers = emptyList(),
+                            orientation = AwesomeBarOrientation.BOTTOM,
+                            onSuggestionClicked = { providerGroup, suggestion ->
+                                val t = suggestion.title
+                                if (t != null) {
+                                    searchText = TextFieldValue(t)
+                                }
+                            },
+                            onAutoComplete = { providerGroup, suggestion ->
+                                val t = suggestion.title
+                                if (t != null) {
+                                    searchText = TextFieldValue(t)
+                                }
+                            },
+//                            modifier = Modifier
+//                                .onGloballyPositioned {
+//                                    val y = -it.size.height
+//                                    Log.d("InfernoAwesomeBar", "y offset: $y")
+//                                    IntOffset(x = 0, y = 0)
+//                                }
+                        )
+                        BrowserToolbar(
+                            tabSessionState = currentTab,
+                            searchEngine = searchEngine,
+                            tabCount = tabList.size,
+                            onShowMenuBottomSheet = { showMenuBottomSheet = true },
+                            onNavToTabsTray = { showTabsTray({ showTabsTray = true }) },
+                            onStartSearch = { browserMode = BrowserComponentMode.TOOLBAR_SEARCH },
+                            onStopSearch = {
+                                browserMode = BrowserComponentMode.TOOLBAR
+                            },
+                            searchText = searchText,
+                            omSearchTextChanged = { text -> searchText = text },
+                        )
                     }
                     if (browserMode == BrowserComponentMode.FIND_IN_PAGE) {
                         BrowserFindInPageBar(
@@ -2330,7 +2281,9 @@ private fun onBackPressed(
 ): Boolean {
     with(onBackPressedHandler) {
         // todo: findInPageIntegration.onBackPressed() ||
-        return readerViewFeature.onBackPressed() || fullScreenFeature.onBackPressed() || /* promptsFeature.onBackPressed()  || */ sessionFeature.onBackPressed() || removeSessionIfNeeded(context)
+        return readerViewFeature.onBackPressed() || fullScreenFeature.onBackPressed() || /* promptsFeature.onBackPressed()  || */ sessionFeature.onBackPressed() || removeSessionIfNeeded(
+            context
+        )
     }
 }
 
@@ -3577,9 +3530,8 @@ private suspend fun bookmarkTapped(
         // Save bookmark, then go to edit fragment
         try {
             val parentNode = Result.runCatching {
-                val parentGuid =
-                    bookmarksStorage.getRecentBookmarks(1).firstOrNull()?.parentGuid
-                        ?: BookmarkRoot.Mobile.id
+                val parentGuid = bookmarksStorage.getRecentBookmarks(1).firstOrNull()?.parentGuid
+                    ?: BookmarkRoot.Mobile.id
 
                 bookmarksStorage.getBookmark(parentGuid)!!
             }.getOrElse {
