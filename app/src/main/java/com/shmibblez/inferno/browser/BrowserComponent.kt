@@ -385,7 +385,7 @@ enum class BrowserComponentPageType {
 object ComponentDimens {
     val TOOLBAR_HEIGHT = 40.dp
     val TAB_BAR_HEIGHT = 30.dp
-    val AWESOME_BAR_HEIGHT = 100.dp
+    val AWESOME_BAR_HEIGHT = 150.dp
     val TAB_WIDTH = 95.dp
     val TAB_CORNER_RADIUS = 8.dp
     val FIND_IN_PAGE_BAR_HEIGHT = 50.dp
@@ -2133,7 +2133,7 @@ fun BrowserComponent(
                             x = 0, y = bottomBarOffsetPx.value.roundToInt()
                         )
                     }
-                    .wrapContentHeight(unbounded = true),
+                    .background(Color.Green),
             ) {
                 Column(
                     Modifier
@@ -2209,12 +2209,12 @@ fun BrowserComponent(
                     }
                     MozBrowserToolbar { bt -> toolbar = bt }
                     MozReaderViewControlsBar { cb -> readerViewBar = cb }
-                    Box(
-                        Modifier
-                            .fillMaxWidth()
-                            .height(10.dp)
-                            .background(Color.Magenta)
-                    )
+//                    Box(
+//                        Modifier
+//                            .fillMaxWidth()
+//                            .height(10.dp)
+//                            .background(Color.Magenta)
+//                    )
                 }
             }
         },

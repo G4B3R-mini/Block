@@ -13,6 +13,7 @@ import androidx.navigation.fragment.findNavController
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.prompts.webPrompts.AndroidPhotoPicker
 import com.shmibblez.inferno.browser.prompts.webPrompts.FilePicker
+import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.nimbus.FxNimbus
 import mozilla.components.support.base.feature.ActivityResultHandler
 import mozilla.components.support.base.feature.UserInteractionHandler
@@ -83,6 +84,7 @@ class BrowserComponentWrapperFragment : Fragment(), UserInteractionHandler, Acti
             arguments?.getBoolean(FOCUS_ON_ADDRESS_BAR) ?: false || FxNimbus.features.oneClickSearch.value().enabled
         val scrollToCollection = arguments?.getBoolean(SCROLL_TO_COLLECTION) ?: false
 
+        requireContext().components.crashReporter.install(requireContext())
         baseComposeView.setContent {
             BrowserComponent(
                 navController = this.findNavController(),

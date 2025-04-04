@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -26,7 +25,6 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -43,9 +41,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
@@ -53,12 +49,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import com.shmibblez.inferno.browser.BrowserComponentMode
 import com.shmibblez.inferno.browser.ComponentDimens
-import com.shmibblez.inferno.browser.InfernoAwesomeBar
-import com.shmibblez.inferno.browser.toPx
 import com.shmibblez.inferno.compose.browserStore
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.state.observeAsState
@@ -75,10 +67,6 @@ import mozilla.components.browser.state.selector.selectedTab
 import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.browser.state.state.searchEngines
 import mozilla.components.browser.state.state.selectedOrDefaultSearchEngine
-import mozilla.components.compose.browser.awesomebar.AwesomeBar
-import mozilla.components.compose.browser.awesomebar.AwesomeBarColors
-import mozilla.components.compose.browser.awesomebar.AwesomeBarDefaults
-import mozilla.components.compose.browser.awesomebar.AwesomeBarOrientation
 import mozilla.components.concept.engine.EngineSession
 import mozilla.components.support.ktx.kotlin.isUrl
 import mozilla.components.support.ktx.kotlin.toNormalizedUrl
@@ -416,16 +404,6 @@ fun BrowserEditToolbar(
                 )
             }
         }
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp)
-                .background(Color.Green)
-                .offset(x = 0.dp, y = -(100.dp)),
-//            .onGloballyPositioned {
-//                IntOffset(x = 0, y = -100.dp.toPx())
-//            },
-        )
         // loading bar
         if (loading) {
             ProgressBar((tabSessionState?.content?.progress?.toFloat() ?: 0F) / 100F)
