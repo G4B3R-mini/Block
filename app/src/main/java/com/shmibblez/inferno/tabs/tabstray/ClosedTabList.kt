@@ -1,10 +1,8 @@
 package com.shmibblez.inferno.tabs.tabstray
 
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.animation.core.DecayAnimationSpec
 import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -51,12 +49,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.DismissibleItemBackground
 import com.shmibblez.inferno.compose.SwipeToDismissBox
 import com.shmibblez.inferno.compose.SwipeToDismissState
-import com.shmibblez.inferno.compose.TabThumbnail
+import com.shmibblez.inferno.compose.base.InfernoCheckbox
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.ext.toShortUrl
 import com.shmibblez.inferno.tabstray.HEADER_ITEM_KEY
@@ -65,10 +62,10 @@ import com.shmibblez.inferno.tabstray.TabsTrayTestTag
 import com.shmibblez.inferno.tabstray.browser.compose.DragItemContainer
 import com.shmibblez.inferno.tabstray.browser.compose.createListReorderState
 import com.shmibblez.inferno.tabstray.browser.compose.detectListPressAndDrag
-import com.shmibblez.inferno.tabstray.ext.toDisplayTitle
 import mozilla.components.browser.state.state.TabSessionState
-import mozilla.components.concept.engine.mediasession.MediaSession.PlaybackState
+import mozilla.components.browser.state.state.recover.TabState
 import mozilla.components.support.ktx.kotlin.MAX_URI_LENGTH
+import mozilla.components.support.ktx.kotlin.trimmed
 import mozilla.components.ui.colors.PhotonColors
 import kotlin.math.max
 
@@ -84,59 +81,26 @@ import kotlin.math.max
 // todo: bugs
 //   - hold to move tab not moving properly
 
+/**
+ * Returns a [String] for displaying a [TabSessionState]'s title or its url when a title is not available.
+ */
+fun TabState.toDisplayTitle(): String = title.ifEmpty { url.trimmed() }
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun TabList(
-    activeTabId: String?,
-    activeTabIndex: Int,
-    tabs: List<TabSessionState>,
+fun ClosedTabList(
+    tabs: List<TabState>,
     mode: InfernoTabsTrayMode,
     header: (@Composable () -> Unit)? = null,
-    onTabClick: (tab: TabSessionState) -> Unit,
-    onTabClose: (tab: TabSessionState) -> Unit,
-    onTabMediaClick: (tab: TabSessionState) -> Unit,
-    onTabMove: (String, String?, Boolean) -> Unit,
-    onTabDragStart: () -> Unit,
-    onTabLongClick: (TabSessionState) -> Unit,
+    onTabClick: (tab: TabState) -> Unit,
+    onTabClose: (tab: TabState) -> Unit,
+    onTabLongClick: (TabState) -> Unit,
 ) {
-    val state = rememberLazyListState(initialFirstVisibleItemIndex = activeTabIndex)
-    val tabThumbnailSize = max(
-        LocalContext.current.resources.getDimensionPixelSize(R.dimen.tab_tray_list_item_thumbnail_height),
-        LocalContext.current.resources.getDimensionPixelSize(R.dimen.tab_tray_list_item_thumbnail_width),
-    )
+    val state = rememberLazyListState()
     val isInMultiSelectMode = mode.isSelect()
-    val reorderState = createListReorderState(
-        listState = state,
-        onMove = { initialTab, newTab ->
-            onTabMove(
-                (initialTab.key as String),
-                (newTab.key as String),
-                initialTab.index < newTab.index,
-            )
-        },
-        onLongPress = {
-            tabs.firstOrNull { tab -> tab.id == it.key }?.let { tab ->
-                onTabLongClick(tab)
-            }
-        },
-        onExitLongPress = onTabDragStart,
-        ignoredItems = listOf(HEADER_ITEM_KEY, SPAN_ITEM_KEY),
-    )
-    var shouldLongPress by remember { mutableStateOf(!isInMultiSelectMode) }
-    LaunchedEffect(mode, reorderState.draggingItemKey) {
-        if (reorderState.draggingItemKey == null) {
-            shouldLongPress = mode.isNormal()
-        }
-    }
 
     LazyColumn(
-        modifier = Modifier
-            .fillMaxWidth()
-            .detectListPressAndDrag(
-                listState = state,
-                reorderState = reorderState,
-                shouldLongPressToDrag = shouldLongPress,
-            ),
+        modifier = Modifier.fillMaxWidth(),
         state = state,
     ) {
         header?.let {
@@ -148,11 +112,6 @@ fun TabList(
             items = tabs,
             key = { _, tab -> tab.id },
         ) { index, tab ->
-            DragItemContainer(
-                state = reorderState,
-                position = index + if (header != null) 1 else 0,
-                key = tab.id,
-            ) {
 //                TabListItem(
 //                    tab = tab,
 //                    thumbnailSize = tabThumbnailSize,
@@ -165,44 +124,37 @@ fun TabList(
 //                    onMediaClick = onTabMediaClick,
 //                    onClick = onTabClick,
 //                )
-                ListTab(
-                    tab = tab,
-                    thumbnailSize = tabThumbnailSize,
-                    isSelected = tab.id == activeTabId,
-                    multiSelectionEnabled = isInMultiSelectMode,
-                    multiSelectionSelected = mode.selectedTabs.contains(tab),
-                    shouldClickListen = reorderState.draggingItemKey != tab.id,
-                    swipingEnabled = !state.isScrollInProgress,
-                    onCloseClick = onTabClose,
-                    onMediaClick = onTabMediaClick,
-                    onClick = onTabClick,
-                )
-            }
+            ClosedListTab(
+                tab = tab,
+                mode = mode,
+                multiSelectionEnabled = isInMultiSelectMode,
+                multiSelectionSelected = mode.selectedClosedTabs.contains(tab),
+                swipingEnabled = !state.isScrollInProgress,
+                onCloseClick = onTabClose,
+                onClick = onTabClick,
+            )
+
         }
     }
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun ListTab(
-    tab: TabSessionState,
-    thumbnailSize: Int,
-    isSelected: Boolean = false,
+private fun ClosedListTab(
+    tab: TabState,
+    mode: InfernoTabsTrayMode,
     multiSelectionEnabled: Boolean = false,
     multiSelectionSelected: Boolean = false,
-    shouldClickListen: Boolean = true,
     swipingEnabled: Boolean = true,
-    onCloseClick: (tab: TabSessionState) -> Unit,
-    onMediaClick: (tab: TabSessionState) -> Unit,
-    onClick: (tab: TabSessionState) -> Unit,
-    onLongClick: ((tab: TabSessionState) -> Unit)? = null,
+    onCloseClick: (tab: TabState) -> Unit,
+    onClick: (tab: TabState) -> Unit,
+    onLongClick: ((tab: TabState) -> Unit)? = null,
 ) {
     // Used to propagate the ripple effect to the whole tab
     val interactionSource = remember { MutableInteractionSource() }
 
     val clickableModifier = if (onLongClick == null) {
         Modifier.clickable(
-            enabled = shouldClickListen,
             interactionSource = interactionSource,
             indication = ripple(
                 color = clickableColor(),
@@ -211,7 +163,6 @@ private fun ListTab(
         )
     } else {
         Modifier.combinedClickable(
-            enabled = shouldClickListen,
             interactionSource = interactionSource,
             indication = ripple(
                 color = clickableColor(),
@@ -249,24 +200,12 @@ private fun ListTab(
                 .fillMaxWidth()
 //                .background(FirefoxTheme.colors.layer3)
 //                .background(contentBackgroundColor)
-                .background(if (isSelected) Color.DarkGray else Color.Black)
+                .background(if (multiSelectionSelected) Color.DarkGray else Color.Black)
                 .then(clickableModifier)
                 .padding(start = 16.dp, top = 8.dp, bottom = 8.dp)
-                .testTag(TabsTrayTestTag.tabItemRoot)
-                .semantics {
-                    selected = isSelected
-                },
+                .testTag(TabsTrayTestTag.tabItemRoot),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Thumbnail(
-                tab = tab,
-                size = thumbnailSize,
-                multiSelectionEnabled = multiSelectionEnabled,
-                isSelected = multiSelectionSelected,
-                onMediaIconClicked = { onMediaClick(it) },
-                interactionSource = interactionSource,
-            )
-
             Column(
                 modifier = Modifier
                     .padding(start = 12.dp)
@@ -286,7 +225,7 @@ private fun ListTab(
                 )
 
                 InfernoText(
-                    text = tab.content.url.toShortUrl(),
+                    text = tab.url.toShortUrl(),
                     fontColor = Color.White, // FirefoxTheme.colors.textSecondary,
                     style = TextStyle(
                         fontSize = 14.sp,
@@ -316,7 +255,16 @@ private fun ListTab(
                     )
                 }
             } else {
-                Spacer(modifier = Modifier.size(48.dp))
+                InfernoCheckbox(
+                    checked = multiSelectionSelected,
+                    onCheckedChange = { checked ->
+                        // todo: make based on state, need to use callbacks so parent
+                        //  changes own state directly
+                        if (checked) mode.selectedClosedTabs.plus(tab)
+                        else mode.selectedClosedTabs.minus(tab)
+                    },
+                    modifier = Modifier.size(48.dp),
+                )
             }
         }
     }
@@ -327,106 +275,4 @@ private fun clickableColor() = when (isSystemInDarkTheme()) {
 //    true -> PhotonColors.White
 //    false -> PhotonColors.Black
     else -> PhotonColors.White // todo: update with colors / theme update
-}
-
-
-@Composable
-private fun Thumbnail(
-    tab: TabSessionState,
-    size: Int,
-    multiSelectionEnabled: Boolean,
-    isSelected: Boolean,
-    onMediaIconClicked: ((TabSessionState) -> Unit),
-    interactionSource: MutableInteractionSource,
-) {
-    Box(
-        contentAlignment = Alignment.Center,
-    ) {
-        TabThumbnail(
-            tab = tab,
-            size = size,
-            modifier = Modifier
-                .size(width = 92.dp, height = 72.dp)
-                .testTag(TabsTrayTestTag.tabItemThumbnail),
-            contentDescription = stringResource(id = R.string.mozac_browser_tabstray_open_tab),
-        )
-
-        if (isSelected) {
-            Box(
-                modifier = Modifier
-                    .size(width = 92.dp, height = 72.dp)
-                    .clip(RoundedCornerShape(4.dp))
-                    .background(Color(143, 0, 255)), // FirefoxTheme.colors.layerAccentNonOpaque),
-//                contentAlignment = Alignment.Center,
-            )
-
-            Card(
-                modifier = Modifier
-                    .size(size = 40.dp)
-                    .align(alignment = Alignment.Center),
-                shape = CircleShape,
-                colors = CardDefaults.cardColors(
-                    containerColor = Color(
-                        143, 0, 255
-                    )
-                ), // FirefoxTheme.colors.layerAccent ),
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.mozac_ic_checkmark_24),
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(all = 8.dp),
-                    contentDescription = null,
-                    tint = colorResource(id = R.color.mozac_ui_icons_fill),
-                )
-            }
-        }
-
-        if (!multiSelectionEnabled) {
-            MediaImage(
-                tab = tab,
-                onMediaIconClicked = onMediaIconClicked,
-                modifier = Modifier.align(Alignment.TopEnd),
-                interactionSource = interactionSource,
-            )
-        }
-    }
-}
-
-/**
- * Controller buttons for the media (play/pause) state for the given [tab].
- *
- * @param tab [TabSessionState] which the image should be shown.
- * @param onMediaIconClicked handles the click event when tab has media session like play/pause.
- * @param modifier [Modifier] to be applied to the layout.
- * @param interactionSource [MutableInteractionSource] used to propagate the ripple effect on click.
- */
-@Composable
-fun MediaImage(
-    tab: TabSessionState,
-    onMediaIconClicked: ((TabSessionState) -> Unit),
-    modifier: Modifier,
-    interactionSource: MutableInteractionSource = MutableInteractionSource(),
-) {
-    val (icon, contentDescription) = when (tab.mediaSessionState?.playbackState) {
-        PlaybackState.PAUSED -> {
-            R.drawable.media_state_play to R.string.mozac_feature_media_notification_action_play
-        }
-
-        PlaybackState.PLAYING -> {
-            R.drawable.media_state_pause to R.string.mozac_feature_media_notification_action_pause
-        }
-
-        else -> return
-    }
-    val drawable = AppCompatResources.getDrawable(LocalContext.current, icon)
-    // Follow up ticket https://github.com/mozilla-mobile/fenix/issues/25774
-    Image(
-        painter = rememberDrawablePainter(drawable = drawable),
-        contentDescription = stringResource(contentDescription),
-        modifier = modifier.clickable(
-            interactionSource = interactionSource,
-            indication = null,
-        ) { onMediaIconClicked(tab) },
-    )
 }

@@ -72,6 +72,8 @@ enum class InfernoTabsTrayDisplayType {
 open class InfernoTabsTrayMode {
     open val selectedTabs = emptySet<TabSessionState>()
 
+    open val selectedClosedTabs = emptySet<TabState>()
+
     data object Normal : InfernoTabsTrayMode()
 
     data class Select(override val selectedTabs: Set<TabSessionState>) : InfernoTabsTrayMode()
@@ -270,7 +272,6 @@ fun InfernoTabsTray(
     activeTabId: String?,
     normalTabs: List<TabSessionState>,
     privateTabs: List<TabSessionState>,
-    syncedTabs: List<SyncedTabsListItem>,
     recentlyClosedTabs: List<TabState>,
     tabDisplayType: InfernoTabsTrayDisplayType = InfernoTabsTrayDisplayType.List,
     initiallySelectedTab: InfernoTabsTraySelectedTab = InfernoTabsTraySelectedTab.NormalTabs,
@@ -291,6 +292,10 @@ fun InfernoTabsTray(
 
     onSyncedTabClick: (tab: Tab) -> Unit,
     onSyncedTabClose: (deviceId: String, tab: Tab) -> Unit,
+
+    onClosedTabClick: (TabState) -> Unit,
+    onClosedTabClose: (TabState) -> Unit,
+    onClosedTabLongClick: (TabState) -> Unit,
 
     ) {
     val context = LocalContext.current
@@ -459,8 +464,11 @@ fun InfernoTabsTray(
                     InfernoTabsTraySelectedTab.RecentlyClosedTabs -> RecentlyClosedTabsPage(
 //            activeTabId = activeTabId,
                         recentlyClosedTabs = recentlyClosedTabs,
-                        tabDisplayType = tabDisplayType,
                         mode = mode,
+                        header = null, // todo
+                        onTabClick = onClosedTabClick,
+                        onTabClose = onClosedTabClose,
+                        onTabLongClick = onClosedTabLongClick,
                     )
                 }
                 // extra item for button

@@ -6,20 +6,18 @@ import mozilla.components.browser.state.state.recover.TabState
 @Composable
 internal fun RecentlyClosedTabsPage(
     recentlyClosedTabs: List<TabState>,
-    tabDisplayType: InfernoTabsTrayDisplayType,
     mode: InfernoTabsTrayMode,
+    header: (@Composable () -> Unit)? = null,
+    onTabClick: (tab: TabState) -> Unit,
+    onTabClose: (tab: TabState) -> Unit,
+    onTabLongClick: (TabState) -> Unit,
 ) {
-    TabList(
-        activeTabId = TODO(),
-        activeTabIndex = TODO(),
+    ClosedTabList(
         tabs = recentlyClosedTabs,
         mode = mode,
-        header = null,
-        onTabClick = TODO("revive tab"),
-        onTabClose = TODO(),
-        onTabMediaClick = TODO(),
-        onTabMove = TODO(),
-        onTabDragStart = TODO(),
-        onTabLongClick = TODO()
+        header = header,
+        onTabClick = onTabClick,
+        onTabClose =onTabClose ,
+        onTabLongClick =onTabLongClick,
     )
 }

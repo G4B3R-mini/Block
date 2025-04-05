@@ -103,6 +103,7 @@ fun ContextMenuComponent(
     var state by remember { mutableStateOf<SessionState?>(null) }
 
     fun dismissDialog() {
+        if (state != null) useCases.consumeHitResult(state!!.id)
         state = null
         hitResult = null
     }
@@ -212,8 +213,7 @@ fun ContextMenuComponent(
 private fun ContextMenuTitle(title: String) {
     InfernoText(
         text = title,
-        modifier = Modifier
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
         fontWeight = FontWeight.Bold,
         maxLines = 2,
         fontColor = Color.White,

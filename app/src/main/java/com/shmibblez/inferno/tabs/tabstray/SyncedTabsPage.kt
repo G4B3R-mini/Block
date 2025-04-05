@@ -251,7 +251,7 @@ internal fun SyncedTabsPage(
     // layout content
     if (errorType != null) {
         SyncedTabsError(errorType!!)
-    } else {
+    } else if (allSyncedTabs != null) {
         // if no errors show synced tabs
         // todo: swipe refresh
         SyncedTabsList(

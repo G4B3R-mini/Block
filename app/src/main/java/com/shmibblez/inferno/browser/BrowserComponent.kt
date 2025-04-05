@@ -428,11 +428,10 @@ fun BrowserComponent(
     var browserStateObserver by remember {
         mutableStateOf<Store.Subscription<BrowserState, BrowserAction>?>(null)
     }
-    var initialized by remember { mutableStateOf(false) }
+    var initialized = remember { false }
     var tabList by remember { mutableStateOf(store.state.toTabList().first) }
     var normalTabs by remember { mutableStateOf(store.state.normalTabs) }
     var privateTabs by remember { mutableStateOf(store.state.privateTabs) }
-    var syncedTabs by remember { mutableStateOf(context.components.backgroundServices.syncedTabsStorage) }
     var closedTabs by remember { mutableStateOf(store.state.closedTabs) }
     var currentTab by remember { mutableStateOf(store.state.selectedTab) }
     var pendingTabUpdate by remember { mutableStateOf(false) }
@@ -446,6 +445,7 @@ fun BrowserComponent(
     var promptRequests by remember { mutableStateOf<List<PromptRequest>>(emptyList()) }
     var showTabsTray by remember { mutableStateOf(false) }
     var tabsTrayMode by remember { mutableStateOf<InfernoTabsTrayMode>(InfernoTabsTrayMode.Normal) }
+    var initiallySelectedTabsTrayTab by remember {mutableStateOf(InfernoTabsTraySelectedTab.NormalTabs)}
 
     /* BrowserFragment vars */
     val windowFeature = ViewBoundFeatureWrapper<WindowFeature>()
@@ -619,11 +619,11 @@ fun BrowserComponent(
             if (initialized) {
                 // if no tab selected, false
                 isPrivateSession = currentTab?.content?.private ?: false
+                initiallySelectedTabsTrayTab = if(isPrivateSession) InfernoTabsTraySelectedTab.PrivateTabs else InfernoTabsTraySelectedTab.NormalTabs
                 tabList =
                     if (isPrivateSession) it.privateTabs else it.normalTabs // it.toTabList().first
                 normalTabs = it.normalTabs
                 privateTabs = it.privateTabs
-                syncedTabs = context.components.backgroundServices.syncedTabsStorage
                 closedTabs = it.closedTabs
                 // if no tab selected, select one
                 if (currentTab == null && !pendingTabUpdate) {
@@ -712,10 +712,9 @@ fun BrowserComponent(
             activeTabId = currentTab?.id,
             normalTabs = normalTabs, // todo: rebuild on change, make part of state, add vars
             privateTabs = privateTabs,
-            syncedTabs = syncedTabs, // todo: synced tabs, where to get from?
             recentlyClosedTabs = context.components.core.store.state.closedTabs,
             tabDisplayType = InfernoTabsTrayDisplayType.List,
-            initiallySelectedTab = InfernoTabsTraySelectedTab.NormalTabs,
+            initiallySelectedTab = initiallySelectedTabsTrayTab,
             onBookmarkSelectedTabsClick = {
                 CoroutineScope(IO).launch {
                     Result.runCatching {
@@ -953,14 +952,17 @@ fun BrowserComponent(
             },
             onSyncedTabClose = { deviceId, tab ->
                 val closeSyncedTabsUseCases = context.components.useCases.closeSyncedTabsUseCases
-                CoroutineScope(Dispatchers.IO).launch {
+                CoroutineScope(IO).launch {
                     val operation = closeSyncedTabsUseCases.close(deviceId, tab.active().url)
-                    withContext(Dispatchers.Main) {
+                    withContext(Main) {
                         // todo: show undo snackbar for synced tab
 //                        showUndoSnackbarForSyncedTab(operation)
                     }
                 }
             },
+            onClosedTabClick = { /* todo: implement */ },
+            onClosedTabClose = { /* todo: implement */ },
+            onClosedTabLongClick = { /* todo: implement */ },
         )
     }
 
