@@ -7,6 +7,7 @@ package com.shmibblez.inferno.browser.awesomebar
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,9 +38,10 @@ import androidx.core.graphics.drawable.toBitmap
 import com.shmibblez.inferno.compose.base.InfernoText
 import mozilla.components.compose.browser.awesomebar.AwesomeBarColors
 import mozilla.components.compose.browser.awesomebar.AwesomeBarOrientation
-import mozilla.components.compose.browser.awesomebar.R
+//import mozilla.components.compose.browser.awesomebar.R
 import mozilla.components.concept.awesomebar.AwesomeBar
-import mozilla.components.ui.icons.R as iconsR
+//import mozilla.components.ui.icons.R as iconsR
+import com.shmibblez.inferno.R
 
 // We only show one row of text, covering at max screen width.
 // Limit bigger texts that could cause slowdowns or even crashes.
@@ -55,10 +57,11 @@ internal fun Suggestion(
 ) {
     Row(
         modifier = Modifier
-            .clickable { onSuggestionClicked() }
-            .defaultMinSize(minHeight = 56.dp)
-            .testTag("mozac.awesomebar.suggestion")
-            .padding(start = 16.dp, top = 8.dp, bottom = 8.dp, end = 8.dp),
+//            .defaultMinSize(minHeight = 56.dp)
+            .background(Color.Black)
+//            .testTag("mozac.awesomebar.suggestion")
+            .padding(start = 16.dp, top = 4.dp, bottom = 4.dp, end = 8.dp)
+            .clickable { onSuggestionClicked() },
     ) {
         val icon = suggestion.icon
         if (icon != null) {
@@ -167,7 +170,7 @@ private fun AutocompleteButton(
     modifier: Modifier,
 ) {
     Image(
-        painterResource(iconsR.drawable.mozac_ic_append_up_left_24),
+        painterResource(R.drawable.mozac_ic_append_up_left_24),
         colorFilter = ColorFilter.tint(colors.autocompleteIcon),
         contentDescription = stringResource(R.string.mozac_browser_awesomebar_edit_suggestion),
         modifier = modifier

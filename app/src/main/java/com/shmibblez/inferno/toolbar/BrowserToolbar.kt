@@ -4,13 +4,12 @@
 
 package com.shmibblez.inferno.toolbar
 
-import android.util.Log
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -39,8 +38,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
@@ -51,6 +52,7 @@ import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.shmibblez.inferno.browser.ComponentDimens
+import com.shmibblez.inferno.browser.InfernoAwesomeBar
 import com.shmibblez.inferno.compose.browserStore
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.state.observeAsState
@@ -62,11 +64,14 @@ import com.shmibblez.inferno.toolbar.ToolbarOptionsScopeInstance.ToolbarShowTabs
 import com.shmibblez.inferno.toolbar.ToolbarOriginScopeInstance.ToolbarClearText
 import com.shmibblez.inferno.toolbar.ToolbarOriginScopeInstance.ToolbarSearchEngineSelector
 import com.shmibblez.inferno.toolbar.ToolbarOriginScopeInstance.ToolbarUndoClearText
+import kotlinx.coroutines.delay
 import mozilla.components.browser.state.search.SearchEngine
 import mozilla.components.browser.state.selector.selectedTab
 import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.browser.state.state.searchEngines
 import mozilla.components.browser.state.state.selectedOrDefaultSearchEngine
+import mozilla.components.compose.browser.awesomebar.AwesomeBarDefaults
+import mozilla.components.compose.browser.awesomebar.AwesomeBarOrientation
 import mozilla.components.concept.engine.EngineSession
 import mozilla.components.support.ktx.kotlin.isUrl
 import mozilla.components.support.ktx.kotlin.toNormalizedUrl
@@ -90,10 +95,9 @@ fun BrowserToolbar(
     tabCount: Int,
     onShowMenuBottomSheet: () -> Unit,
     onNavToTabsTray: () -> Unit,
+    editMode: Boolean,
     onStartSearch: () -> Unit,
     onStopSearch: () -> Unit,
-    searchText: TextFieldValue,
-    omSearchTextChanged: (TextFieldValue) -> Unit,
 ) {
     if (tabSessionState == null) {
         // don't show if null, TODO: show loading bar
@@ -101,7 +105,7 @@ fun BrowserToolbar(
     }
     val searchTerms by remember { mutableStateOf(tabSessionState.content.searchTerms) }
     val url: String? by browserStore().observeAsState { state -> state.selectedTab?.content?.url }
-    var editMode by remember { mutableStateOf(false) }
+//    var editMode by remember { mutableStateOf(false) }
     val (originBounds, setOriginBounds) = remember { mutableStateOf(OriginBounds(0.dp, 0.dp)) }
     val loading by remember { derivedStateOf { tabSessionState.content.loading } }
 //    val siteSecure = tabSessionState.content.securityInfo.secure
@@ -110,15 +114,9 @@ fun BrowserToolbar(
     if (editMode) {
         BrowserEditToolbar(
             tabSessionState = tabSessionState,
-            onDisableEditMode = {
-                editMode = false
-                onStopSearch.invoke()
-                omSearchTextChanged.invoke(TextFieldValue(""))
-            },
+            onDisableEditMode = onStopSearch,
             originBounds = originBounds,
             searchEngine = searchEngine,
-            searchText = searchText,
-            omSearchTextChanged = omSearchTextChanged,
         )
     } else {
         BrowserDisplayToolbar(
@@ -128,10 +126,7 @@ fun BrowserToolbar(
             setOriginBounds = setOriginBounds,
             tabCount = tabCount,
             tabSessionState = tabSessionState,
-            onEnableEditMode = {
-                editMode = true
-                onStartSearch.invoke()
-            },
+            onEnableEditMode = onStartSearch,
             onShowMenuBottomSheet = onShowMenuBottomSheet,
             onNavToTabsTray = onNavToTabsTray,
         )
@@ -220,9 +215,7 @@ fun BrowserEditToolbar(
     onDisableEditMode: () -> Unit,
     originBounds: OriginBounds,
     searchEngine: SearchEngine,
-    searchText: TextFieldValue,
-    omSearchTextChanged: (TextFieldValue) -> Unit,
-    ) {
+) {
     fun parseInput(): TextFieldValue {
         return (tabSessionState?.content?.searchTerms?.ifEmpty { tabSessionState.content.url }
             ?: "<empty>").let {
@@ -236,71 +229,74 @@ fun BrowserEditToolbar(
     }
 
     val context = LocalContext.current
-//    var input by remember { mutableStateOf(parseInput()) }
+    var searchText by remember { mutableStateOf(parseInput()) }
     var undoClearText by remember { mutableStateOf<TextFieldValue?>(null) }
     var textFullSize by remember { mutableStateOf(false) }
+    // focus requester makes sure toolbar is set to display mode when focus lost
     val focusRequester = remember { FocusRequester() }
-    var alreadyFocused by remember { mutableStateOf(false) }
-    val interactionSource = remember { MutableInteractionSource() }
+    var focusReady = remember { false }
+    // origin focus requester makes sure toolbar edittext is focused when start
+    val originFocusRequester = remember { FocusRequester() }
     val (showPopupMenu, setShowPopupMenu) = remember { mutableStateOf(false) }
     val loading = tabSessionState?.content?.loading ?: false
 
     LaunchedEffect(true) {
         // animate to fill width after first compose
         focusRequester.requestFocus()
+        originFocusRequester.requestFocus()
         textFullSize = true
     }
 
     LaunchedEffect(tabSessionState?.id) {
-        if (tabSessionState != null) omSearchTextChanged.invoke(parseInput())
+        if (tabSessionState != null) searchText = parseInput()
     }
 
-    Box(
+    Column(
         modifier = Modifier
+            .onFocusChanged { focusState ->
+                if (focusState.hasFocus) {
+                    focusReady = true
+                } else if (focusReady && !focusState.hasFocus) {
+                    onDisableEditMode.invoke()
+                }
+            }
+            .focusRequester(focusRequester)
+            .focusable(true)
             .fillMaxWidth()
-            .background(Color.Black)
-            .height(ComponentDimens.TOOLBAR_HEIGHT),
-//            .wrapContentHeight(
-//                unbounded = true,
-//                align = Alignment.Top,
-//            ),
-        contentAlignment = Alignment.TopCenter,
+            .background(Color.Transparent)
+            .height(ComponentDimens.TOOLBAR_HEIGHT + ComponentDimens.AWESOME_BAR_HEIGHT),
     ) {
-//        InfernoAwesomeBar(
-//            text = input.text,
-//            colors = AwesomeBarDefaults.colors(),
-////            providers = emptyList(),
-//            orientation = AwesomeBarOrientation.BOTTOM,
-//            onSuggestionClicked = { providerGroup, suggestion -> TODO() },
-//            onAutoComplete = { providerGroup, suggestion -> TODO() },
-//            modifier = Modifier
-//                .onGloballyPositioned {
-//                    val y = -it.size.height
-//                    Log.d("InfernoAwesomeBar", "y offset: $y")
-//                    IntOffset(x = 0, y = y)
-//                }
-//                .fillMaxWidth()
-//                .height(200.dp)
-//                .background(Color.Green),
-//        )
+        InfernoAwesomeBar(
+            text = searchText.text,
+            modifier = Modifier.focusable(false),
+            colors = AwesomeBarDefaults.colors(),
+//                    providers = emptyList(),
+            orientation = AwesomeBarOrientation.BOTTOM,
+            // todo: move cursor to end on suggestion set
+            onSuggestionClicked = { providerGroup, suggestion ->
+                val t = suggestion.title
+                if (t != null) {
+                    searchText = TextFieldValue(t, TextRange(t.length))
+                }
+            },
+            onAutoComplete = { providerGroup, suggestion ->
+                val t = suggestion.title
+                if (t != null) {
+                    searchText = TextFieldValue(t, TextRange(t.length))
+                }
+            },
+//                            modifier = Modifier
+//                                .onGloballyPositioned {
+//                                    val y = -it.size.height
+//                                    Log.d("InfernoAwesomeBar", "y offset: $y")
+//                                    IntOffset(x = 0, y = 0)
+//                                }
+        )
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(Color.Black)
-                .height(ComponentDimens.TOOLBAR_HEIGHT)
-                .onFocusChanged { focusState ->
-                    // if focus lost, go back to editing mode
-                    if (focusState.hasFocus) {
-                        alreadyFocused = true
-                    }
-                    if (alreadyFocused && !focusState.hasFocus) onDisableEditMode.invoke()
-                    Log.d(
-                        "BrowserEditToolbar",
-                        "alreadyFocused: $alreadyFocused, focusState: $focusState"
-                    )
-                }
-                .focusable(true)
-                .focusRequester(focusRequester),
+                .height(ComponentDimens.TOOLBAR_HEIGHT),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             if (!textFullSize) {
@@ -336,12 +332,11 @@ fun BrowserEditToolbar(
                         value = searchText,
                         onValueChange = { v ->
                             // move cursor to end
-                            omSearchTextChanged.invoke(v)
+                            searchText = v
                             undoClearText = null
                         },
                         enabled = true,
                         singleLine = true,
-                        interactionSource = interactionSource,
                         textStyle = TextStyle(
                             color = Color.White,
                             textAlign = TextAlign.Start,
@@ -374,6 +369,8 @@ fun BrowserEditToolbar(
                             keyboardType = KeyboardType.Uri, imeAction = ImeAction.Go
                         ),
                         modifier = Modifier
+                            .focusRequester(originFocusRequester)
+                            .focusable(true)
                             .wrapContentHeight(align = Alignment.CenterVertically)
                             .weight(1F)
                             .padding(horizontal = 8.dp),
@@ -382,7 +379,7 @@ fun BrowserEditToolbar(
                 if (undoClearText != null) {
                     ToolbarUndoClearText(
                         onClick = {
-                            omSearchTextChanged.invoke(undoClearText!!)
+                            searchText = undoClearText!!
                             undoClearText = null
                         },
                     )
@@ -390,7 +387,7 @@ fun BrowserEditToolbar(
                     ToolbarClearText(
                         onClick = {
                             undoClearText = searchText
-                            omSearchTextChanged.invoke(TextFieldValue(""))
+                            searchText = TextFieldValue("")
                         },
                     )
                 }

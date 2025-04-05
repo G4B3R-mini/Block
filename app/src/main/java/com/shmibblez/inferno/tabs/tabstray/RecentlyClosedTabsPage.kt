@@ -9,5 +9,17 @@ internal fun RecentlyClosedTabsPage(
     tabDisplayType: InfernoTabsTrayDisplayType,
     mode: InfernoTabsTrayMode,
 ) {
-
+    TabList(
+        activeTabId = TODO(),
+        activeTabIndex = TODO(),
+        tabs = recentlyClosedTabs,
+        mode = mode,
+        header = null,
+        onTabClick = TODO("revive tab"),
+        onTabClose = TODO(),
+        onTabMediaClick = TODO(),
+        onTabMove = TODO(),
+        onTabDragStart = TODO(),
+        onTabLongClick = TODO()
+    )
 }

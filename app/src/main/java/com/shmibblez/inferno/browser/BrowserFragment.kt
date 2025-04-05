@@ -344,9 +344,10 @@ class BrowserFragment : BaseBrowserFragment(), UserInteractionHandler {
                     requireComponents.appStore.dispatch(
                         ShoppingAction.ShoppingSheetStateUpdated(expanded = true),
                     )
-                    findNavController().navigate(
-                        BrowserComponentWrapperFragmentDirections.actionBrowserFragmentToReviewQualityCheckDialogFragment(),
-                    )
+                    // todo
+//                    findNavController().navigate(
+//                        BrowserComponentWrapperFragmentDirections.actionBrowserFragmentToReviewQualityCheckDialogFragment(),
+//                    )
                 },
             )
 
@@ -743,32 +744,35 @@ class BrowserFragment : BaseBrowserFragment(), UserInteractionHandler {
                         val isTrackingProtectionEnabled =
                             tab.trackingProtection.enabled && !hasTrackingProtectionException
                         val directions = if (requireContext().settings().enableUnifiedTrustPanel) {
-                            BrowserComponentWrapperFragmentDirections.actionBrowserFragmentToTrustPanelFragment(
-                                sessionId = tab.id,
-                                url = tab.content.url,
-                                title = tab.content.title,
-                                isSecured = tab.content.securityInfo.secure,
-                                sitePermissions = sitePermissions,
-                                certificateName = tab.content.securityInfo.issuer,
-                                permissionHighlights = tab.content.permissionHighlights,
-                                isTrackingProtectionEnabled = isTrackingProtectionEnabled,
-                                cookieBannerUIMode = cookieBannerUIMode,
-                            )
+                            // todo
+//                            BrowserComponentWrapperFragmentDirections.actionBrowserFragmentToTrustPanelFragment(
+//                                sessionId = tab.id,
+//                                url = tab.content.url,
+//                                title = tab.content.title,
+//                                isSecured = tab.content.securityInfo.secure,
+//                                sitePermissions = sitePermissions,
+//                                certificateName = tab.content.securityInfo.issuer,
+//                                permissionHighlights = tab.content.permissionHighlights,
+//                                isTrackingProtectionEnabled = isTrackingProtectionEnabled,
+//                                cookieBannerUIMode = cookieBannerUIMode,
+//                            )
                         } else {
-                            BrowserComponentWrapperFragmentDirections.actionBrowserFragmentToQuickSettingsSheetDialogFragment(
-                                sessionId = tab.id,
-                                url = tab.content.url,
-                                title = tab.content.title,
-                                isSecured = tab.content.securityInfo.secure,
-                                sitePermissions = sitePermissions,
-                                gravity = getAppropriateLayoutGravity(),
-                                certificateName = tab.content.securityInfo.issuer,
-                                permissionHighlights = tab.content.permissionHighlights,
-                                isTrackingProtectionEnabled = isTrackingProtectionEnabled,
-                                cookieBannerUIMode = cookieBannerUIMode,
-                            )
+                            // todo
+//                            BrowserComponentWrapperFragmentDirections.actionBrowserFragmentToQuickSettingsSheetDialogFragment(
+//                                sessionId = tab.id,
+//                                url = tab.content.url,
+//                                title = tab.content.title,
+//                                isSecured = tab.content.securityInfo.secure,
+//                                sitePermissions = sitePermissions,
+//                                gravity = getAppropriateLayoutGravity(),
+//                                certificateName = tab.content.securityInfo.issuer,
+//                                permissionHighlights = tab.content.permissionHighlights,
+//                                isTrackingProtectionEnabled = isTrackingProtectionEnabled,
+//                                cookieBannerUIMode = cookieBannerUIMode,
+//                            )
                         }
-                        nav(R.id.browserComponentWrapperFragment, directions)
+                        // todo
+//                        nav(R.id.browserComponentWrapperFragment, directions)
                     }
                 }
             }

@@ -56,8 +56,10 @@ import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.newTab
 import com.shmibblez.inferno.tabstray.TabsTrayState.Mode
 import com.shmibblez.inferno.tabstray.TabsTrayTestTag
+import com.shmibblez.inferno.tabstray.syncedtabs.SyncedTabsListItem
 import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.browser.state.state.recover.TabState
+import mozilla.components.browser.storage.sync.Tab
 
 enum class InfernoTabsTraySelectedTab {
     NormalTabs, PrivateTabs, SyncedTabs, RecentlyClosedTabs,
@@ -268,7 +270,7 @@ fun InfernoTabsTray(
     activeTabId: String?,
     normalTabs: List<TabSessionState>,
     privateTabs: List<TabSessionState>,
-    syncedTabs: List<TabSessionState>,
+    syncedTabs: List<SyncedTabsListItem>,
     recentlyClosedTabs: List<TabState>,
     tabDisplayType: InfernoTabsTrayDisplayType = InfernoTabsTrayDisplayType.List,
     initiallySelectedTab: InfernoTabsTraySelectedTab = InfernoTabsTraySelectedTab.NormalTabs,
@@ -287,7 +289,11 @@ fun InfernoTabsTray(
     onTabMove: (String, String?, Boolean) -> Unit,
     onTabLongClick: (TabSessionState) -> Unit,
 
+    onSyncedTabClick: (tab: Tab) -> Unit,
+    onSyncedTabClose: (deviceId: String, tab: Tab) -> Unit,
+
     ) {
+    val context = LocalContext.current
     var showMenu by remember { mutableStateOf(false) }
     var selectedTab by remember { mutableStateOf(initiallySelectedTab) }
     val normalTabCount by remember { derivedStateOf { privateTabs.size } }
@@ -441,7 +447,11 @@ fun InfernoTabsTray(
 
                     InfernoTabsTraySelectedTab.SyncedTabs -> SyncedTabsPage(
                         activeTabId = activeTabId,
-                        syncedTabs = syncedTabs,
+                        syncedTabsStorage = context.components.backgroundServices.syncedTabsStorage,
+                        accountManager = context.components.backgroundServices.accountManager,
+                        commands = context.components.backgroundServices.syncedTabsCommands,
+                        onTabClick = onSyncedTabClick,
+                        onTabClose = onSyncedTabClose,
                         tabDisplayType = tabDisplayType,
                         mode = mode,
                     )

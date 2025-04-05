@@ -99,6 +99,7 @@ fun BrowserTabBar(tabList: List<TabSessionState>, selectedTab: TabSessionState?)
         Modifier
             .fillMaxWidth()
             .height(ComponentDimens.TAB_BAR_HEIGHT)
+            .background(Color.Black),
     ) {
         LazyRow(
             state = listState,
@@ -122,7 +123,8 @@ fun BrowserTabBar(tabList: List<TabSessionState>, selectedTab: TabSessionState?)
         Box(
             modifier = Modifier
                 .fillMaxHeight()
-                .aspectRatio(1F),
+                .aspectRatio(1F)
+                .background(Color.Black),
             contentAlignment = Alignment.Center,
         ) {
             // add tab

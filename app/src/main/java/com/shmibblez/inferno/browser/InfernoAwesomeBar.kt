@@ -3,6 +3,7 @@ package com.shmibblez.inferno.browser
 import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -106,6 +107,7 @@ fun InfernoAwesomeBar(
 //            .testTag("inferno.awesomebar")
 //            .background(colors.background)
             .background(Color.Transparent),
+        verticalArrangement = Arrangement.Bottom,
     ) {
         val fetcher = remember(groups) { SuggestionFetcher(groups, profiler) }
 
