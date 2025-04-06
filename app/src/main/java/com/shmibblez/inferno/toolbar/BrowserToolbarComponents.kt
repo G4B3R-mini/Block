@@ -340,7 +340,7 @@ fun ToolbarOrigin(
                 .background(Color.DarkGray)
                 .fillMaxSize()
                 .padding(4.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(0.dp)
         ) {
             val customTextSelectionColors = TextSelectionColors(
                 handleColor = Color.White, backgroundColor = Color.White.copy(alpha = 0.4F)
