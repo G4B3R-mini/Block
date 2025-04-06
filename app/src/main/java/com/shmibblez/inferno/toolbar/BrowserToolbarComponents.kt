@@ -305,7 +305,7 @@ fun ToolbarOrigin(
     animationValue: Float,
 ) {
     fun parseInput(): TextFieldValue {
-        return (searchTerms.ifEmpty { url?: "" }).let {
+        return (searchTerms.ifEmpty { url ?: "" }).let {
             TextFieldValue(
                 text = (if (it != "inferno:home" && it != "inferno:privatebrowsing") it else ""),
                 selection = if (searchTerms.isEmpty()) TextRange.Zero else TextRange(searchTerms.length)
@@ -346,14 +346,9 @@ fun ToolbarOrigin(
                 handleColor = Color.White, backgroundColor = Color.White.copy(alpha = 0.4F)
             )
             if (editMode) {
-                ToolbarSearchEngineSelectorPopupMenu(
-                    searchEngines = context.components.core.store.state.search.searchEngines,
-                    showPopupMenu = showPopupMenu,
-                    setShowPopupMenu = setShowPopupMenu,
-                )
                 ToolbarSearchEngineSelector(
                     currentSearchEngine = searchEngine,
-                    showPopupMenu = setShowPopupMenu,
+                    modifier = Modifier.alpha(1F - animationValue),
                 )
             }
             CompositionLocalProvider(LocalTextSelectionColors provides customTextSelectionColors) {
@@ -467,12 +462,13 @@ fun ToolbarOrigin(
         // undo / clear buttons
         Box(
             modifier = Modifier
+                .alpha(1F - animationValue)
                 .onSizeChanged {
                     actionWidth = it.width
                 }
                 .align(Alignment.CenterEnd)
                 .padding(
-                    end = 8.dp
+                    end = 4.dp
                 )
                 .size(INDICATOR_ICON_SIZE)
                 .offset {
@@ -510,7 +506,8 @@ interface ToolbarOriginScope {
 
     @Composable
     fun ToolbarSearchEngineSelector(
-        currentSearchEngine: SearchEngine, showPopupMenu: (Boolean) -> Unit
+        currentSearchEngine: SearchEngine,
+        modifier: Modifier = Modifier,
     )
 
     @Composable
@@ -608,14 +605,22 @@ object ToolbarOriginScopeInstance : ToolbarOriginScope {
 
     @Composable
     override fun ToolbarSearchEngineSelector(
-        currentSearchEngine: SearchEngine, showPopupMenu: (Boolean) -> Unit
+        currentSearchEngine: SearchEngine,
+        modifier: Modifier,
     ) {
+        val context = LocalContext.current
+        var showPopupMenu by remember { mutableStateOf(false) }
         Box(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxHeight()
                 .focusable(false)
-                .clickable { showPopupMenu(true) },
+                .clickable { showPopupMenu = true },
         ) {
+            ToolbarSearchEngineSelectorPopupMenu(
+                searchEngines = context.components.core.store.state.search.searchEngines,
+                showPopupMenu = showPopupMenu,
+                setShowPopupMenu = { showPopupMenu = it },
+            )
             Row(
                 modifier = Modifier
                     .background(
