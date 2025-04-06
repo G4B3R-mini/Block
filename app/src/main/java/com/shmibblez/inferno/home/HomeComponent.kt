@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
 import androidx.annotation.VisibleForTesting
+import androidx.compose.foundation.focusable
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -340,7 +341,7 @@ fun HomeComponent(isPrivate: Boolean, navController: NavController, modifier: Mo
         // todo: copy homepage and customize
         // todo: remove / fix home page state component (some stuff may have broken since change)
         Homepage(
-            modifier = modifier,
+            modifier = modifier.focusable(),
             state = HomepageState.build(
                 appState = appState,
                 settings = settings,

@@ -2184,30 +2184,17 @@ fun BrowserComponent(
                         .fillMaxSize()
                         .background(Color.Transparent)
                 ) {
-                    if (browserMode == BrowserComponentMode.TOOLBAR) {
-                        BrowserTabBar(tabList, currentTab)
+                    if (browserMode == BrowserComponentMode.TOOLBAR || browserMode == BrowserComponentMode.TOOLBAR_SEARCH) {
+                        if (browserMode == BrowserComponentMode.TOOLBAR) {
+                            BrowserTabBar(tabList, currentTab)
+                        }
                         BrowserToolbar(
                             tabSessionState = currentTab,
                             searchEngine = searchEngine,
                             tabCount = tabList.size,
                             onShowMenuBottomSheet = { showMenuBottomSheet = true },
                             onNavToTabsTray = { showTabsTray({ showTabsTray = true }) },
-                            editMode = false,
-                            onStartSearch = { browserMode = BrowserComponentMode.TOOLBAR_SEARCH },
-                            onStopSearch = { browserMode = BrowserComponentMode.TOOLBAR },
-                        )
-                    }
-                    if (browserMode == BrowserComponentMode.TOOLBAR_SEARCH) {
-//                        BrowserTabBar(tabList, currentTab)
-                        // todo: when selected textfield not focusing correctly, maybe try after
-                        //  animation complete
-                        BrowserToolbar(
-                            tabSessionState = currentTab,
-                            searchEngine = searchEngine,
-                            tabCount = tabList.size,
-                            onShowMenuBottomSheet = { showMenuBottomSheet = true },
-                            onNavToTabsTray = { showTabsTray({ showTabsTray = true }) },
-                            editMode = true,
+                            editMode = browserMode == BrowserComponentMode.TOOLBAR_SEARCH,
                             onStartSearch = { browserMode = BrowserComponentMode.TOOLBAR_SEARCH },
                             onStopSearch = { browserMode = BrowserComponentMode.TOOLBAR },
                         )
