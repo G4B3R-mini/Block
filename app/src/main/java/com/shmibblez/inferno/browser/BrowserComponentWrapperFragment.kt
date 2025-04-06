@@ -9,18 +9,105 @@ import android.view.ViewGroup
 import android.view.accessibility.AccessibilityManager
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.prompts.webPrompts.AndroidPhotoPicker
 import com.shmibblez.inferno.browser.prompts.webPrompts.FilePicker
 import com.shmibblez.inferno.ext.components
+import com.shmibblez.inferno.ext.lastOpenedNormalTab
+import com.shmibblez.inferno.ext.newTab
+import com.shmibblez.inferno.ext.requireComponents
 import com.shmibblez.inferno.nimbus.FxNimbus
+import com.shmibblez.inferno.tabbar.toTabList
+import com.shmibblez.inferno.tabs.tabstray.InfernoTabsTraySelectedTab
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import mozilla.components.browser.state.search.SearchEngine
+import mozilla.components.browser.state.selector.normalTabs
+import mozilla.components.browser.state.selector.privateTabs
+import mozilla.components.browser.state.selector.selectedTab
+import mozilla.components.browser.state.state.TabSessionState
+import mozilla.components.browser.state.state.recover.TabState
+import mozilla.components.browser.state.state.selectedOrDefaultSearchEngine
+import mozilla.components.concept.engine.prompt.PromptRequest
+import mozilla.components.lib.state.ext.flowScoped
 import mozilla.components.support.base.feature.ActivityResultHandler
 import mozilla.components.support.base.feature.UserInteractionHandler
 
 class OnActivityResultModel(
     val requestCode: Int, val data: Intent?, val resultCode: Int
 )
+
+data class BrowserUiState(
+    var tabList: List<TabSessionState> = emptyList(),
+    var normalTabs: List<TabSessionState> = emptyList(),
+    var privateTabs: List<TabSessionState> = emptyList(),
+    var closedTabs: List<TabState> = emptyList(),
+    var currentTab: TabSessionState? = null,
+    var isPrivateSession: Boolean = false,
+    var searchEngine: SearchEngine? = null,
+    var promptRequests: List<PromptRequest> = emptyList(),
+    var pageType: BrowserComponentPageType = BrowserComponentPageType.ENGINE,
+    var selectedTabsTrayTab: InfernoTabsTraySelectedTab = InfernoTabsTraySelectedTab.NormalTabs,
+)
+
+class BrowserViewModel : ViewModel() {
+    private val _uiState = MutableStateFlow(BrowserUiState())
+    val uiState: StateFlow<BrowserUiState> = _uiState.asStateFlow()
+
+    fun update(
+        tabList: List<TabSessionState>,
+        normalTabs: List<TabSessionState>,
+        privateTabs: List<TabSessionState>,
+        closedTabs: List<TabState>,
+        currentTab: TabSessionState?,
+        isPrivateSession: Boolean,
+        searchEngine: SearchEngine?,
+        pageType: BrowserComponentPageType,
+        selectedTabsTrayTab: InfernoTabsTraySelectedTab,
+    ) {
+        _uiState.update {
+            it.copy(
+                tabList = tabList,
+                normalTabs = normalTabs,
+                privateTabs = privateTabs,
+                closedTabs = closedTabs,
+                currentTab = currentTab,
+                isPrivateSession = isPrivateSession,
+                searchEngine = searchEngine,
+                pageType = pageType,
+                selectedTabsTrayTab = selectedTabsTrayTab,
+            )
+        }
+    }
+
+    fun setPromptRequests(promptRequests: List<PromptRequest>) {
+        _uiState.update {
+            it.copy(
+                promptRequests = promptRequests,
+            )
+        }
+    }
+
+    fun setSelectedTabsTrayTab(selectedTabsTrayTab: InfernoTabsTraySelectedTab) {
+        _uiState.update {
+            it.copy(
+                selectedTabsTrayTab = selectedTabsTrayTab,
+            )
+        }
+    }
+}
 
 class BrowserComponentWrapperFragment : Fragment(), UserInteractionHandler, ActivityResultHandler,
     AccessibilityManager.AccessibilityStateChangeListener {
@@ -30,8 +117,13 @@ class BrowserComponentWrapperFragment : Fragment(), UserInteractionHandler, Acti
 //    @VisibleForTesting
 //    internal lateinit var bundleArgs: Bundle
 
+    private var browserStateObserver: CoroutineScope? = null
+
+    private var initialized = false
+
     private val baseComposeView: ComposeView
         get() = requireView().findViewById(R.id.baseComposeView)
+
 
     private val sessionId: String?
         get() = arguments?.getString(SESSION_ID)
@@ -84,17 +176,107 @@ class BrowserComponentWrapperFragment : Fragment(), UserInteractionHandler, Acti
             arguments?.getBoolean(FOCUS_ON_ADDRESS_BAR) ?: false || FxNimbus.features.oneClickSearch.value().enabled
         val scrollToCollection = arguments?.getBoolean(SCROLL_TO_COLLECTION) ?: false
 
-        requireContext().components.crashReporter.install(requireContext())
-        baseComposeView.setContent {
-            BrowserComponent(
-                navController = this.findNavController(),
-                sessionId = sessionId,
-                setOnActivityResultHandler = setOnActivityResultHandler,
-                androidPhotoPicker = androidPhotoPicker,
-                setFilePicker = setFilePicker,
-            )
+        val browserViewModel: BrowserViewModel by viewModels()
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                browserViewModel.uiState.collect {
+                    baseComposeView.setContent {
+                        BrowserComponent(
+                            navController = findNavController(),
+                            sessionId = sessionId,
+                            setOnActivityResultHandler = setOnActivityResultHandler,
+                            androidPhotoPicker = androidPhotoPicker,
+                            setFilePicker = setFilePicker,
+                            setPromptRequests = { browserViewModel.setPromptRequests(it) },
+                            setSelectedTabsTrayTab = { browserViewModel.setSelectedTabsTrayTab(it) },
+                            tabList = it.tabList,
+                            normalTabs = it.normalTabs,
+                            privateTabs = it.privateTabs,
+                            closedTabs = it.closedTabs,
+                            currentTab = it.currentTab,
+                            searchEngine = it.searchEngine,
+                            promptRequests = it.promptRequests,
+                            pageType = it.pageType,
+                            selectedTabsTrayTab = it.selectedTabsTrayTab,
+                        )
+                    }
+                }
+            }
         }
+
+        val store = requireComponents.core.store
+
+        browserStateObserver = store.flowScoped(viewLifecycleOwner) { flow ->
+            flow.map { it }.collect {
+                    var currentTab = it.selectedTab
+
+                    var tabList: List<TabSessionState> = emptyList()
+                    var normalTabs: List<TabSessionState> = emptyList()
+                    var privateTabs: List<TabSessionState> = emptyList()
+                    var closedTabs: List<TabState> = emptyList()
+                    var isPrivateSession = false
+                    var searchEngine: SearchEngine? = null
+                    var pageType = BrowserComponentPageType.ENGINE
+                    var selectedTabsTrayTab = InfernoTabsTraySelectedTab.NormalTabs
+
+                    if (!initialized) {
+                        initialized = true
+                        return@collect
+                    }
+
+                    Log.d("WrapperFrag", "content update")
+                    // if no tab selected, false
+                    isPrivateSession = currentTab?.content?.private ?: false
+//                val mode = BrowsingMode.fromBoolean(isPrivateSession)
+//                (context.getActivity()!! as HomeActivity).browsingModeManager.mode = mode
+//                context.components.appStore.dispatch(AppAction.ModeChange(mode))
+                    selectedTabsTrayTab =
+                        if (isPrivateSession) InfernoTabsTraySelectedTab.PrivateTabs else InfernoTabsTraySelectedTab.NormalTabs
+                    tabList =
+                        if (isPrivateSession) it.privateTabs else it.normalTabs // it.toTabList().first
+                    normalTabs = it.normalTabs
+                    privateTabs = it.privateTabs
+                    closedTabs = it.closedTabs
+                    // if no tab selected, select one
+                    if (currentTab == null) {
+                        if (tabList.isNotEmpty()) {
+                            val lastNormalTabId = store.state.lastOpenedNormalTab?.id
+                            if (tabList.any { tab -> tab.id == lastNormalTabId }) {
+                                requireComponents.useCases.tabsUseCases.selectTab(
+                                    lastNormalTabId!!
+                                )
+                            } else {
+                                requireComponents.useCases.tabsUseCases.selectTab(tabList.last().id)
+                            }
+                        } else {
+                            // if tab list empty add new tab
+                            requireComponents.newTab(false)
+                        }
+                    }
+                    searchEngine = it.search.selectedOrDefaultSearchEngine!!
+                    pageType = resolvePageType(currentTab)
+
+                    browserViewModel.update(
+                        tabList = tabList,
+                        normalTabs = normalTabs,
+                        privateTabs = privateTabs,
+                        closedTabs = closedTabs,
+                        currentTab = currentTab,
+                        isPrivateSession = isPrivateSession,
+                        searchEngine = searchEngine,
+                        pageType = pageType,
+                        selectedTabsTrayTab = selectedTabsTrayTab,
+                    )
+                }
+        }
+
+        requireContext().components.crashReporter.install(requireContext())
         super.onViewCreated(view, savedInstanceState)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        browserStateObserver?.cancel()
     }
 
 
@@ -163,5 +345,17 @@ class BrowserComponentWrapperFragment : Fragment(), UserInteractionHandler, Acti
     override fun onAccessibilityStateChanged(enabled: Boolean) {
         // todo: make toolbar unscrollable if true
     }
+}
 
+private fun resolvePageType(tabSessionState: TabSessionState?): BrowserComponentPageType {
+    val url = tabSessionState?.content?.url
+    return if (tabSessionState?.engineState?.crashed == true) BrowserComponentPageType.CRASH
+    else if (url == "inferno:home" || url == "about:blank") // TODO: create const class and set base to inferno:home
+        BrowserComponentPageType.HOME
+    else if (url == "inferno:privatebrowsing" || url == "about:privatebrowsing")  // TODO: add to const class and set base to inferno:private
+        BrowserComponentPageType.HOME_PRIVATE
+    else BrowserComponentPageType.ENGINE
+
+    // TODO: if home, show home page and load engineView in compose tree as hidden,
+    //  if page then show engineView
 }

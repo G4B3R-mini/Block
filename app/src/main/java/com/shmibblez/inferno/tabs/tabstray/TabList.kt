@@ -249,7 +249,12 @@ private fun ListTab(
                 .fillMaxWidth()
 //                .background(FirefoxTheme.colors.layer3)
 //                .background(contentBackgroundColor)
-                .background(if (isSelected) Color.DarkGray else Color.Black)
+                .background(
+                    when (multiSelectionEnabled) {
+                        true -> if (multiSelectionSelected) Color.Red else Color.Black
+                        false -> if (isSelected) Color.DarkGray else Color.Black
+                    }
+                )
                 .then(clickableModifier)
                 .padding(start = 16.dp, top = 8.dp, bottom = 8.dp)
                 .testTag(TabsTrayTestTag.tabItemRoot)

@@ -7,6 +7,8 @@ package com.shmibblez.inferno.toolbar
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,7 +30,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,10 +39,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.focus.onFocusEvent
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
@@ -91,7 +91,7 @@ import mozilla.components.support.ktx.kotlin.toNormalizedUrl
 @Composable
 fun BrowserToolbar(
     tabSessionState: TabSessionState?,
-    searchEngine: SearchEngine,
+    searchEngine: SearchEngine?,
     tabCount: Int,
     onShowMenuBottomSheet: () -> Unit,
     onNavToTabsTray: () -> Unit,
@@ -99,15 +99,15 @@ fun BrowserToolbar(
     onStartSearch: () -> Unit,
     onStopSearch: () -> Unit,
 ) {
-    if (tabSessionState == null) {
-        // don't show if null, TODO: show loading bar
+    if (tabSessionState == null || searchEngine == null) {
+        // don't show if null, TODO: show loading bar layout
         return
     }
     val searchTerms by remember { mutableStateOf(tabSessionState.content.searchTerms) }
     val url: String? by browserStore().observeAsState { state -> state.selectedTab?.content?.url }
 //    var editMode by remember { mutableStateOf(false) }
     val (originBounds, setOriginBounds) = remember { mutableStateOf(OriginBounds(0.dp, 0.dp)) }
-    val loading by remember { derivedStateOf { tabSessionState.content.loading } }
+    val loading = tabSessionState.content.loading
 //    val siteSecure = tabSessionState.content.securityInfo.secure
 //    val trackingProtectionEnabled = tabSessionState.trackingProtection.enabled
 
@@ -168,12 +168,9 @@ fun BrowserDisplayToolbar(
         modifier = Modifier
             .fillMaxWidth()
             .background(Color.Black)
-            .height(ComponentDimens.TOOLBAR_HEIGHT), contentAlignment = Alignment.TopCenter
+            .height(ComponentDimens.TOOLBAR_HEIGHT),
+        contentAlignment = Alignment.TopCenter,
     ) {
-        // loading bar
-        if (loading) {
-            ProgressBar(progress = (tabSessionState.content.progress.toFloat() ?: 0F) / 100F)
-        }
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -205,6 +202,10 @@ fun BrowserDisplayToolbar(
                 ToolbarMenuIcon(onShowMenuBottomSheet = onShowMenuBottomSheet)
             }
         }
+        // loading bar
+        if (loading) {
+            ProgressBar(progress = (tabSessionState.content.progress.toFloat() ?: 0F) / 100F)
+        }
     }
 }
 
@@ -233,18 +234,26 @@ fun BrowserEditToolbar(
     var undoClearText by remember { mutableStateOf<TextFieldValue?>(null) }
     var textFullSize by remember { mutableStateOf(false) }
     // focus requester makes sure toolbar is set to display mode when focus lost
-    val focusRequester = remember { FocusRequester() }
     var focusReady = remember { false }
     // origin focus requester makes sure toolbar edittext is focused when start
     val originFocusRequester = remember { FocusRequester() }
+    var alreadyFocused = remember { false }
+    val originInteractionSource = remember { MutableInteractionSource() }
     val (showPopupMenu, setShowPopupMenu) = remember { mutableStateOf(false) }
     val loading = tabSessionState?.content?.loading ?: false
 
-    LaunchedEffect(true) {
+    LaunchedEffect(textFullSize) {
         // animate to fill width after first compose
-        focusRequester.requestFocus()
+        if (!textFullSize) {
+            textFullSize = true
+            return@LaunchedEffect
+        }
+//        val press = PressInteraction.Press(Offset(5F,5F))
+//        originInteractionSource.emit(press)
+//        delay(100)
+//        originInteractionSource.emit(PressInteraction.Release(press))
+        delay(1000)
         originFocusRequester.requestFocus()
-        textFullSize = true
     }
 
     LaunchedEffect(tabSessionState?.id) {
@@ -253,22 +262,12 @@ fun BrowserEditToolbar(
 
     Column(
         modifier = Modifier
-            .onFocusChanged { focusState ->
-                if (focusState.hasFocus) {
-                    focusReady = true
-                } else if (focusReady && !focusState.hasFocus) {
-                    onDisableEditMode.invoke()
-                }
-            }
-            .focusRequester(focusRequester)
-            .focusable(true)
             .fillMaxWidth()
             .background(Color.Transparent)
             .height(ComponentDimens.TOOLBAR_HEIGHT + ComponentDimens.AWESOME_BAR_HEIGHT),
     ) {
         InfernoAwesomeBar(
             text = searchText.text,
-            modifier = Modifier.focusable(false),
             colors = AwesomeBarDefaults.colors(),
 //                    providers = emptyList(),
             orientation = AwesomeBarOrientation.BOTTOM,
@@ -288,122 +287,134 @@ fun BrowserEditToolbar(
 //                            modifier = Modifier
 //                                .onGloballyPositioned {
 //                                    val y = -it.size.height
-//                                    Log.d("InfernoAwesomeBar", "y offset: $y")
 //                                    IntOffset(x = 0, y = 0)
 //                                }
         )
-        Row(
+        Box(
             modifier = Modifier
+                .onFocusChanged {
+                    if (it.hasFocus) {
+                        alreadyFocused = true
+                    } else if (alreadyFocused) {
+                        onDisableEditMode.invoke()
+                    }
+                }
                 .fillMaxWidth()
-                .background(Color.Black)
                 .height(ComponentDimens.TOOLBAR_HEIGHT),
-            verticalAlignment = Alignment.CenterVertically,
         ) {
-            if (!textFullSize) {
-                Spacer(
-                    modifier = Modifier
-                        .width(originBounds.left)
-                        .fillMaxHeight()
-                )
-            }
             Row(
-                verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(all = 4.dp)
-                    .weight(1F)
-                    .background(Color.DarkGray, shape = MaterialTheme.shapes.small)
-                    .animateContentSize()
+                    .background(Color.Black),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                val customTextSelectionColors = TextSelectionColors(
-                    handleColor = Color.White, backgroundColor = Color.White.copy(alpha = 0.4F)
-                )
-                ToolbarSearchEngineSelectorPopupMenu(
-                    searchEngines = context.components.core.store.state.search.searchEngines,
-                    showPopupMenu = showPopupMenu,
-                    setShowPopupMenu = setShowPopupMenu,
-                )
-                ToolbarSearchEngineSelector(
-                    currentSearchEngine = searchEngine,
-                    showPopupMenu = setShowPopupMenu,
-                )
-                CompositionLocalProvider(LocalTextSelectionColors provides customTextSelectionColors) {
-                    BasicTextField(
-                        value = searchText,
-                        onValueChange = { v ->
-                            // move cursor to end
-                            searchText = v
-                            undoClearText = null
-                        },
-                        enabled = true,
-                        singleLine = true,
-                        textStyle = TextStyle(
-                            color = Color.White,
-                            textAlign = TextAlign.Start,
-                            lineHeightStyle = LineHeightStyle(
-                                alignment = LineHeightStyle.Alignment.Center,
-                                trim = LineHeightStyle.Trim.None,
-                            )
-                        ),
-                        cursorBrush = SolidColor(Color.White),
-                        keyboardActions = KeyboardActions(
-                            onGo = {
-                                with(searchText.text) {
-                                    if (this.isUrl()) {
-                                        context.components.useCases.sessionUseCases.loadUrl(
-                                            url = this.toNormalizedUrl(),
-                                            flags = EngineSession.LoadUrlFlags.none()
-                                        )
-                                    } else {
-                                        context.components.useCases.searchUseCases.defaultSearch.invoke(
-                                            searchTerms = this,
-                                            searchEngine = context.components.core.store.state.search.selectedOrDefaultSearchEngine!!,
-                                            parentSessionId = null,
-                                        )
-                                    }
-                                }
-                                onDisableEditMode.invoke()
-                            },
-                        ),
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Uri, imeAction = ImeAction.Go
-                        ),
+                if (!textFullSize) {
+                    Spacer(
                         modifier = Modifier
-                            .focusRequester(originFocusRequester)
-                            .focusable(true)
-                            .wrapContentHeight(align = Alignment.CenterVertically)
-                            .weight(1F)
-                            .padding(horizontal = 8.dp),
+                            .width(originBounds.left)
+                            .fillMaxHeight()
                     )
                 }
-                if (undoClearText != null) {
-                    ToolbarUndoClearText(
-                        onClick = {
-                            searchText = undoClearText!!
-                            undoClearText = null
-                        },
-                    )
-                } else if (searchText.text.isNotEmpty()) {
-                    ToolbarClearText(
-                        onClick = {
-                            undoClearText = searchText
-                            searchText = TextFieldValue("")
-                        },
-                    )
-                }
-            }
-
-            if (!textFullSize) {
-                Spacer(
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
-                        .width(originBounds.right)
-                        .fillMaxHeight()
-                )
+                        .fillMaxSize()
+                        .padding(all = 4.dp)
+                        .weight(1F)
+                        .background(Color.DarkGray, shape = MaterialTheme.shapes.small)
+                        .animateContentSize()
+                ) {
+                    val customTextSelectionColors = TextSelectionColors(
+                        handleColor = Color.White, backgroundColor = Color.White.copy(alpha = 0.4F)
+                    )
+                    ToolbarSearchEngineSelectorPopupMenu(
+                        searchEngines = context.components.core.store.state.search.searchEngines,
+                        showPopupMenu = showPopupMenu,
+                        setShowPopupMenu = setShowPopupMenu,
+                    )
+                    ToolbarSearchEngineSelector(
+                        currentSearchEngine = searchEngine,
+                        showPopupMenu = setShowPopupMenu,
+                    )
+                    CompositionLocalProvider(LocalTextSelectionColors provides customTextSelectionColors) {
+                        BasicTextField(
+                            value = searchText,
+                            onValueChange = { v ->
+                                // move cursor to end
+                                searchText = v
+                                undoClearText = null
+                            },
+                            enabled = true,
+                            singleLine = true,
+                            textStyle = TextStyle(
+                                color = Color.White,
+                                textAlign = TextAlign.Start,
+                                lineHeightStyle = LineHeightStyle(
+                                    alignment = LineHeightStyle.Alignment.Center,
+                                    trim = LineHeightStyle.Trim.None,
+                                )
+                            ),
+                            cursorBrush = SolidColor(Color.White),
+                            keyboardActions = KeyboardActions(
+                                onGo = {
+                                    with(searchText.text) {
+                                        if (this.isUrl()) {
+                                            context.components.useCases.sessionUseCases.loadUrl(
+                                                url = this.toNormalizedUrl(),
+                                                flags = EngineSession.LoadUrlFlags.none()
+                                            )
+                                        } else {
+                                            context.components.useCases.searchUseCases.defaultSearch.invoke(
+                                                searchTerms = this,
+                                                searchEngine = context.components.core.store.state.search.selectedOrDefaultSearchEngine!!,
+                                                parentSessionId = null,
+                                            )
+                                        }
+                                    }
+                                    onDisableEditMode.invoke()
+                                },
+                            ),
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Uri, imeAction = ImeAction.Go
+                            ),
+                            modifier = Modifier
+                                .focusRequester(originFocusRequester)
+                                .focusable(interactionSource = originInteractionSource)
+                                .wrapContentHeight(align = Alignment.CenterVertically)
+                                .weight(1F)
+                                .padding(horizontal = 8.dp),
+                            interactionSource = originInteractionSource,
+                        )
+                    }
+                    if (undoClearText != null) {
+                        ToolbarUndoClearText(
+                            onClick = {
+                                searchText = undoClearText!!
+                                undoClearText = null
+                            },
+                        )
+                    } else if (searchText.text.isNotEmpty()) {
+                        ToolbarClearText(
+                            onClick = {
+                                undoClearText = searchText
+                                searchText = TextFieldValue("")
+                            },
+                        )
+                    }
+                }
+
+                if (!textFullSize) {
+                    Spacer(
+                        modifier = Modifier
+                            .width(originBounds.right)
+                            .fillMaxHeight()
+                    )
+                }
             }
-        }
-        // loading bar
-        if (loading) {
-            ProgressBar((tabSessionState?.content?.progress?.toFloat() ?: 0F) / 100F)
+            // loading bar
+            if (loading) {
+                ProgressBar((tabSessionState?.content?.progress?.toFloat() ?: 0F) / 100F)
+            }
         }
     }
 }

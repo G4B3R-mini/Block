@@ -2,6 +2,9 @@ package com.shmibblez.inferno.tabs.tabstray
 
 import android.annotation.SuppressLint
 import android.util.Log
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
@@ -56,7 +59,6 @@ import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.newTab
 import com.shmibblez.inferno.tabstray.TabsTrayState.Mode
 import com.shmibblez.inferno.tabstray.TabsTrayTestTag
-import com.shmibblez.inferno.tabstray.syncedtabs.SyncedTabsListItem
 import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.browser.state.state.recover.TabState
 import mozilla.components.browser.storage.sync.Tab
@@ -78,10 +80,12 @@ open class InfernoTabsTrayMode {
 
     data class Select(override val selectedTabs: Set<TabSessionState>) : InfernoTabsTrayMode()
 
+    data class SelectClosed(override val selectedClosedTabs: Set<TabState>) : InfernoTabsTrayMode()
+
     /**
      * A helper to check if we're in [Mode.Select] mode.
      */
-    fun isSelect() = this is Select
+    fun isSelect() = this is Select || this is SelectClosed
 
     /**
      * A helper to check if we're in [Mode.Normal] mode.
@@ -114,18 +118,21 @@ open class InfernoTabsTrayMode {
         onCloseSelectedTabsClick: () -> Unit,
         onMakeSelectedTabsInactive: () -> Unit,
         onTabSettingsClick: () -> Unit,
-//        onRecentlyClosedClick: () -> Unit,
+        onHistoryClick: () -> Unit,
         onEnterMultiselectModeClick: () -> Unit,
         onShareAllTabsClick: () -> Unit,
         onDeleteAllTabsClick: () -> Unit,
         onAccountSettingsClick: () -> Unit,
+        onDeleteSelectedCloseTabsClick: () -> Unit,
     ): List<MenuItem> {
         return if (this.isSelect()) {
             generateMultiSelectBannerMenuItems(
+                selectedPage = selectedPage,
 //                shouldShowInactiveButton = shouldShowInactiveButton,
                 onBookmarkSelectedTabsClick = onBookmarkSelectedTabsClick,
                 onCloseSelectedTabsClick = onCloseSelectedTabsClick,
                 onMakeSelectedTabsInactive = onMakeSelectedTabsInactive,
+                onDeleteSelectedCloseTabsClick = onDeleteSelectedCloseTabsClick
             )
         } else {
             generateTabPageBannerMenuItems(
@@ -133,7 +140,7 @@ open class InfernoTabsTrayMode {
                 normalTabCount = normalTabCount,
                 privateTabCount = privateTabCount,
                 onTabSettingsClick = onTabSettingsClick,
-//                onRecentlyClosedClick = onRecentlyClosedClick,
+                onHistoryClick = onHistoryClick,
                 onEnterMultiselectModeClick = onEnterMultiselectModeClick,
                 onShareAllTabsClick = onShareAllTabsClick,
                 onDeleteAllTabsClick = onDeleteAllTabsClick,
@@ -146,30 +153,51 @@ open class InfernoTabsTrayMode {
      *  Builds the menu items list when in multiselect mode
      */
     private fun generateMultiSelectBannerMenuItems(
+        selectedPage: InfernoTabsTraySelectedTab,
 //        shouldShowInactiveButton: Boolean,
         onBookmarkSelectedTabsClick: () -> Unit,
         onCloseSelectedTabsClick: () -> Unit,
         onMakeSelectedTabsInactive: () -> Unit,
+        onDeleteSelectedCloseTabsClick: () -> Unit,
     ): List<MenuItem> {
-        val menuItems = mutableListOf(
-            MenuItem.TextItem(
-                text = Text.Resource(R.string.tab_tray_multiselect_menu_item_bookmark),
-                onClick = onBookmarkSelectedTabsClick,
-            ),
-            MenuItem.TextItem(
-                text = Text.Resource(R.string.tab_tray_multiselect_menu_item_close),
-                onClick = onCloseSelectedTabsClick,
-            ),
+        val bookmarkAllItem = MenuItem.TextItem(
+            text = Text.Resource(R.string.tab_tray_multiselect_menu_item_bookmark),
+            onClick = onBookmarkSelectedTabsClick,
         )
-//        if (shouldShowInactiveButton) {
-        menuItems.add(
-            MenuItem.TextItem(
-                text = Text.Resource(R.string.inactive_tabs_menu_item),
-                onClick = onMakeSelectedTabsInactive,
-            ),
+        val closeAllTabSessionStateItem = MenuItem.TextItem(
+            text = Text.Resource(R.string.tab_tray_multiselect_menu_item_close),
+            onClick = onCloseSelectedTabsClick,
         )
-//        }
-        return menuItems
+        val deleteAllClosedTabsItem = MenuItem.TextItem(
+            text = Text.Resource(R.string.tab_tray_multiselect_menu_item_close),
+            onClick = onDeleteSelectedCloseTabsClick,
+        )
+        val makeAllInactiveItem = MenuItem.TextItem(
+            text = Text.Resource(R.string.inactive_tabs_menu_item),
+            onClick = onMakeSelectedTabsInactive,
+        )
+
+        return when (selectedPage) {
+            InfernoTabsTraySelectedTab.NormalTabs -> listOf(
+                bookmarkAllItem,
+                closeAllTabSessionStateItem,
+                makeAllInactiveItem,
+            )
+
+            InfernoTabsTraySelectedTab.PrivateTabs -> listOf(
+                bookmarkAllItem,
+                closeAllTabSessionStateItem,
+                //                makeAllInactiveItem,
+            )
+
+            InfernoTabsTraySelectedTab.SyncedTabs -> listOf(
+                // todo
+            )
+
+            InfernoTabsTraySelectedTab.RecentlyClosedTabs -> listOf(
+                deleteAllClosedTabsItem,
+            )
+        }
     }
 
     /**
@@ -181,7 +209,7 @@ open class InfernoTabsTrayMode {
         normalTabCount: Int,
         privateTabCount: Int,
         onTabSettingsClick: () -> Unit,
-//        onRecentlyClosedClick: () -> Unit,
+        onHistoryClick: () -> Unit,
         onEnterMultiselectModeClick: () -> Unit,
         onShareAllTabsClick: () -> Unit,
         onDeleteAllTabsClick: () -> Unit,
@@ -197,6 +225,11 @@ open class InfernoTabsTrayMode {
 //            testTag = TabsTrayTestTag.recentlyClosedTabs,
 //            onClick = onRecentlyClosedClick,
 //        )
+        val historyItem = MenuItem.TextItem(
+            text = Text.Resource(R.string.recently_closed_show_full_history),
+            testTag = "history item",
+            onClick = onHistoryClick,
+        )
         val enterSelectModeItem = MenuItem.TextItem(
             text = Text.Resource(R.string.tabs_tray_select_tabs),
             testTag = TabsTrayTestTag.selectTabs,
@@ -218,7 +251,7 @@ open class InfernoTabsTrayMode {
             onClick = onAccountSettingsClick,
         )
         return when {
-            selectedPage == InfernoTabsTraySelectedTab.NormalTabs && (normalTabCount == 0 || privateTabCount == 0) -> listOf(
+            selectedPage == InfernoTabsTraySelectedTab.NormalTabs && normalTabCount == 0 -> listOf(
                 tabSettingsItem,
 //                recentlyClosedTabsItem,
             )
@@ -227,19 +260,24 @@ open class InfernoTabsTrayMode {
                 enterSelectModeItem,
                 shareAllTabsItem,
                 tabSettingsItem,
-//                recentlyClosedTabsItem,
                 deleteAllTabsItem,
+            )
+
+            selectedPage == InfernoTabsTraySelectedTab.PrivateTabs && privateTabCount == 0 -> listOf(
+                tabSettingsItem,
             )
 
             selectedPage == InfernoTabsTraySelectedTab.PrivateTabs -> listOf(
                 tabSettingsItem,
-//                recentlyClosedTabsItem,
                 deleteAllTabsItem,
             )
 
             selectedPage == InfernoTabsTraySelectedTab.SyncedTabs -> listOf(
                 accountSettingsItem,
-//                recentlyClosedTabsItem,
+            )
+
+            selectedPage == InfernoTabsTraySelectedTab.RecentlyClosedTabs -> listOf(
+                historyItem,
             )
 
             else -> emptyList()
@@ -274,12 +312,13 @@ fun InfernoTabsTray(
     privateTabs: List<TabSessionState>,
     recentlyClosedTabs: List<TabState>,
     tabDisplayType: InfernoTabsTrayDisplayType = InfernoTabsTrayDisplayType.List,
-    initiallySelectedTab: InfernoTabsTraySelectedTab = InfernoTabsTraySelectedTab.NormalTabs,
+    selectedTabsTrayTab: InfernoTabsTraySelectedTab = InfernoTabsTraySelectedTab.NormalTabs,
 
     onBookmarkSelectedTabsClick: () -> Unit,
     onDeleteSelectedTabsClick: () -> Unit,
     onForceSelectedTabsAsInactiveClick: () -> Unit,
     onTabSettingsClick: () -> Unit,
+    onHistoryClick: () -> Unit,
     onShareAllTabsClick: () -> Unit,
     onDeleteAllTabsClick: () -> Unit,
     onAccountSettingsClick: () -> Unit,
@@ -296,13 +335,13 @@ fun InfernoTabsTray(
     onClosedTabClick: (TabState) -> Unit,
     onClosedTabClose: (TabState) -> Unit,
     onClosedTabLongClick: (TabState) -> Unit,
+    onDeleteSelectedCloseTabsClick: () -> Unit,
 
     ) {
     val context = LocalContext.current
-    var showMenu by remember { mutableStateOf(false) }
-    var selectedTab by remember { mutableStateOf(initiallySelectedTab) }
-    val normalTabCount by remember { derivedStateOf { privateTabs.size } }
-    val privateTabCount by remember { derivedStateOf { privateTabs.size } }
+    var selectedTab by remember { mutableStateOf(selectedTabsTrayTab) }
+    val normalTabCount = privateTabs.size
+    val privateTabCount = privateTabs.size
     val sheetState = rememberModalBottomSheetState()
     var initialized by remember { mutableStateOf(false) }
 
@@ -327,93 +366,42 @@ fun InfernoTabsTray(
             modifier = Modifier.fillMaxSize()
         ) {
             Column {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    PrimaryTabRow(
-                        selectedTabIndex = selectedTab.ordinal,
-                        modifier = Modifier
-                            .weight(1F)
-                            .wrapContentHeight(),
-                        divider = {},
-                        containerColor = Color.Black,
-                        contentColor = Color(
-                            143, 0, 255
-                        ), // todo: purple color, add to FirefoxTheme as iconActive
-                        tabs = {
-                            NormalTabsIcon(
-                                selected = selectedTab == InfernoTabsTraySelectedTab.NormalTabs,
-                                onSelected = {
-                                    selectedTab = InfernoTabsTraySelectedTab.NormalTabs
-                                },
-                                count = normalTabs.size,
-                            )
-                            PrivateTabsIcon(
-                                selected = selectedTab == InfernoTabsTraySelectedTab.PrivateTabs,
-                                onSelected = {
-                                    selectedTab = InfernoTabsTraySelectedTab.PrivateTabs
-                                },
-                            )
-                            SyncedTabsIcon(
-                                selected = selectedTab == InfernoTabsTraySelectedTab.SyncedTabs,
-                                onSelected = {
-                                    selectedTab = InfernoTabsTraySelectedTab.SyncedTabs
-                                },
-                            )
-                            RecentlyClosedTabsIcon(
-                                selected = selectedTab == InfernoTabsTraySelectedTab.RecentlyClosedTabs,
-                                onSelected = {
-                                    selectedTab = InfernoTabsTraySelectedTab.RecentlyClosedTabs
-                                },
-                            )
-                        },
-                    )
-                    VerticalDivider(
-                        thickness = 1.dp,
-                        color = Color.White,
-                        modifier = Modifier.height(24.dp),
-                    )
-                    IconButton(
-                        onClick = { showMenu = true },
-                        modifier = Modifier
-                            .padding(ICON_PADDING)
-                            .size(MENU_ICON_SIZE),
-                    ) {
-                        DropdownMenu(
-                            menuItems = mode.generateMenuItems(
-//                    shouldShowInactiveButton = isInDebugMode,
-                                onBookmarkSelectedTabsClick = onBookmarkSelectedTabsClick,
-                                onCloseSelectedTabsClick = onDeleteSelectedTabsClick,
-                                onMakeSelectedTabsInactive = onForceSelectedTabsAsInactiveClick,
 
-                                selectedPage = selectedTab,
-                                normalTabCount = normalTabCount,
-                                privateTabCount = privateTabCount,
-                                onTabSettingsClick = onTabSettingsClick,
-//                    onRecentlyClosedClick = onRecentlyClosedClick,
-                                onEnterMultiselectModeClick = {
-                                    setMode(InfernoTabsTrayMode.Select(emptySet()))
-                                },
-                                onShareAllTabsClick = onShareAllTabsClick,
-                                onDeleteAllTabsClick = onDeleteAllTabsClick,
-                                onAccountSettingsClick = onAccountSettingsClick,
-                            ),
-                            expanded = showMenu,
-                            offset = DpOffset(x = 0.dp, y = -ICON_SIZE),
-                            onDismissRequest = {
-                                showMenu = false
-                            },
-                        )
-                        Icon(
-                            painter = painterResource(R.drawable.ic_menu),
-                            contentDescription = stringResource(id = R.string.open_tabs_menu),
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .align(Alignment.CenterVertically),
-                            tint = Color.White,
-                        )
-                    }
+                if (mode == InfernoTabsTrayMode.Normal) {
+                    NormalBanner(
+                        mode = mode,
+                        setMode = setMode,
+                        setSelectedTab = { selectedTab = it },
+                        selectedTab = selectedTab,
+                        normalTabCount = normalTabCount,
+                        privateTabCount = privateTabCount,
+                        onBookmarkSelectedTabsClick = onBookmarkSelectedTabsClick,
+                        onDeleteSelectedTabsClick = onDeleteSelectedTabsClick,
+                        onForceSelectedTabsAsInactiveClick = onForceSelectedTabsAsInactiveClick,
+                        onTabSettingsClick = onTabSettingsClick,
+                        onHistoryClick = onHistoryClick,
+                        onShareAllTabsClick = onShareAllTabsClick,
+                        onDeleteAllTabsClick = onDeleteAllTabsClick,
+                        onAccountSettingsClick = onAccountSettingsClick,
+                        onDeleteSelectedCloseTabsClick = onDeleteSelectedCloseTabsClick,
+                    )
+                } else {
+                    SelectBanner(
+                        mode = mode,
+                        setMode = setMode,
+                        selectedTab = selectedTab,
+                        normalTabCount = normalTabCount,
+                        privateTabCount = privateTabCount,
+                        onBookmarkSelectedTabsClick = onBookmarkSelectedTabsClick,
+                        onDeleteSelectedTabsClick = onDeleteSelectedTabsClick,
+                        onForceSelectedTabsAsInactiveClick = onForceSelectedTabsAsInactiveClick,
+                        onTabSettingsClick = onTabSettingsClick,
+                        onHistoryClick = onHistoryClick,
+                        onShareAllTabsClick = onShareAllTabsClick,
+                        onDeleteAllTabsClick = onDeleteAllTabsClick,
+                        onAccountSettingsClick = onAccountSettingsClick,
+                        onDeleteSelectedCloseTabsClick = onDeleteSelectedCloseTabsClick,
+                    )
                 }
 
                 // corresponding tab page
@@ -466,6 +454,7 @@ fun InfernoTabsTray(
                         recentlyClosedTabs = recentlyClosedTabs,
                         mode = mode,
                         header = null, // todo
+                        onHistoryClick = onHistoryClick,
                         onTabClick = onClosedTabClick,
                         onTabClose = onClosedTabClose,
                         onTabLongClick = onClosedTabLongClick,
@@ -487,6 +476,228 @@ fun InfernoTabsTray(
     }
 }
 
+private val BANNER_HEIGHT = 56.dp
+
+@Composable
+private fun SelectBanner(
+    mode: InfernoTabsTrayMode,
+    setMode: (InfernoTabsTrayMode) -> Unit,
+    selectedTab: InfernoTabsTraySelectedTab,
+    normalTabCount: Int,
+    privateTabCount: Int,
+
+    onBookmarkSelectedTabsClick: () -> Unit,
+    onDeleteSelectedTabsClick: () -> Unit,
+    onForceSelectedTabsAsInactiveClick: () -> Unit,
+    onTabSettingsClick: () -> Unit,
+    onHistoryClick: () -> Unit,
+    onShareAllTabsClick: () -> Unit,
+    onDeleteAllTabsClick: () -> Unit,
+    onAccountSettingsClick: () -> Unit,
+    onDeleteSelectedCloseTabsClick: () -> Unit,
+) {
+    var showMenu by remember { mutableStateOf(false) }
+    val selectedTabCount = when (mode) {
+        is InfernoTabsTrayMode.Select -> {
+            mode.selectedTabs.size
+        }
+
+        is InfernoTabsTrayMode.SelectClosed -> {
+            mode.selectedClosedTabs.size
+        }
+
+        else -> {
+            0
+        }
+    }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color.Red)
+            .height(BANNER_HEIGHT),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.ic_close),
+            contentDescription = stringResource(android.R.string.cancel),
+            modifier = Modifier
+                .clickable { setMode.invoke(InfernoTabsTrayMode.Normal) }
+                .padding(ICON_PADDING)
+                .size(MENU_ICON_SIZE),
+            tint = Color.White,
+        )
+
+        InfernoText(
+            text = when (selectedTabCount > 0) {
+                true -> "$selectedTabCount " + stringResource(R.string.tab_tray_multiselect_selected_content_description)
+                false -> stringResource(R.string.tabs_tray_select_tabs)
+            },
+            modifier = Modifier.weight(1F),
+        )
+
+        IconButton(
+            onClick = { showMenu = true },
+            modifier = Modifier
+                .padding(ICON_PADDING)
+                .size(MENU_ICON_SIZE),
+        ) {
+            DropdownMenu(
+                menuItems = mode.generateMenuItems(
+//                    shouldShowInactiveButton = isInDebugMode,
+                    onBookmarkSelectedTabsClick = onBookmarkSelectedTabsClick,
+                    onCloseSelectedTabsClick = onDeleteSelectedTabsClick,
+                    onMakeSelectedTabsInactive = onForceSelectedTabsAsInactiveClick,
+
+                    selectedPage = selectedTab,
+                    normalTabCount = normalTabCount,
+                    privateTabCount = privateTabCount,
+                    onTabSettingsClick = onTabSettingsClick,
+                    onHistoryClick = onHistoryClick,
+//                    onRecentlyClosedClick = onRecentlyClosedClick,
+                    onEnterMultiselectModeClick = {
+                        setMode(InfernoTabsTrayMode.Select(emptySet()))
+                    },
+                    onShareAllTabsClick = onShareAllTabsClick,
+                    onDeleteAllTabsClick = onDeleteAllTabsClick,
+                    onAccountSettingsClick = onAccountSettingsClick,
+                    onDeleteSelectedCloseTabsClick = onDeleteSelectedCloseTabsClick,
+                ),
+                expanded = showMenu,
+                offset = DpOffset(x = 0.dp, y = -ICON_SIZE),
+                onDismissRequest = {
+                    showMenu = false
+                },
+            )
+            Icon(
+                painter = painterResource(R.drawable.ic_menu),
+                contentDescription = stringResource(id = R.string.open_tabs_menu),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .align(Alignment.CenterVertically),
+                tint = Color.White,
+            )
+        }
+    }
+}
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun NormalBanner(
+    mode: InfernoTabsTrayMode,
+    setMode: (InfernoTabsTrayMode) -> Unit,
+    setSelectedTab: (InfernoTabsTraySelectedTab) -> Unit,
+    selectedTab: InfernoTabsTraySelectedTab,
+    normalTabCount: Int,
+    privateTabCount: Int,
+
+    onBookmarkSelectedTabsClick: () -> Unit,
+    onDeleteSelectedTabsClick: () -> Unit,
+    onForceSelectedTabsAsInactiveClick: () -> Unit,
+    onTabSettingsClick: () -> Unit,
+    onHistoryClick: () -> Unit,
+    onShareAllTabsClick: () -> Unit,
+    onDeleteAllTabsClick: () -> Unit,
+    onAccountSettingsClick: () -> Unit,
+    onDeleteSelectedCloseTabsClick: () -> Unit,
+) {
+    var showMenu by remember { mutableStateOf(false) }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(BANNER_HEIGHT),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        PrimaryTabRow(
+            selectedTabIndex = selectedTab.ordinal,
+            modifier = Modifier
+                .weight(1F)
+                .wrapContentHeight(),
+            divider = {},
+            containerColor = Color.Black,
+            contentColor = Color(
+                143, 0, 255
+            ), // todo: purple color, add to FirefoxTheme as iconActive
+            tabs = {
+                NormalTabsIcon(
+                    selected = selectedTab == InfernoTabsTraySelectedTab.NormalTabs,
+                    onSelected = {
+                        setSelectedTab.invoke(InfernoTabsTraySelectedTab.NormalTabs)
+                    },
+                    count = normalTabCount,
+                )
+                PrivateTabsIcon(
+                    selected = selectedTab == InfernoTabsTraySelectedTab.PrivateTabs,
+                    onSelected = {
+                        setSelectedTab.invoke(InfernoTabsTraySelectedTab.PrivateTabs)
+                    },
+                )
+                SyncedTabsIcon(
+                    selected = selectedTab == InfernoTabsTraySelectedTab.SyncedTabs,
+                    onSelected = {
+                        setSelectedTab.invoke(InfernoTabsTraySelectedTab.SyncedTabs)
+                    },
+                )
+                RecentlyClosedTabsIcon(
+                    selected = selectedTab == InfernoTabsTraySelectedTab.RecentlyClosedTabs,
+                    onSelected = {
+                        setSelectedTab.invoke(InfernoTabsTraySelectedTab.RecentlyClosedTabs)
+                    },
+                )
+            },
+        )
+        VerticalDivider(
+            thickness = 1.dp,
+            color = Color.White,
+            modifier = Modifier.height(24.dp),
+        )
+        IconButton(
+            onClick = { showMenu = true },
+            modifier = Modifier
+                .padding(ICON_PADDING)
+                .size(MENU_ICON_SIZE),
+        ) {
+            DropdownMenu(
+                menuItems = mode.generateMenuItems(
+//                    shouldShowInactiveButton = isInDebugMode,
+                    onBookmarkSelectedTabsClick = onBookmarkSelectedTabsClick,
+                    onCloseSelectedTabsClick = onDeleteSelectedTabsClick,
+                    onMakeSelectedTabsInactive = onForceSelectedTabsAsInactiveClick,
+
+                    selectedPage = selectedTab,
+                    normalTabCount = normalTabCount,
+                    privateTabCount = privateTabCount,
+                    onTabSettingsClick = onTabSettingsClick,
+                    onHistoryClick = onHistoryClick,
+//                    onRecentlyClosedClick = onRecentlyClosedClick,
+                    onEnterMultiselectModeClick = {
+                        setMode(InfernoTabsTrayMode.Select(emptySet()))
+                    },
+                    onShareAllTabsClick = onShareAllTabsClick,
+                    onDeleteAllTabsClick = onDeleteAllTabsClick,
+                    onAccountSettingsClick = onAccountSettingsClick,
+                    onDeleteSelectedCloseTabsClick = onDeleteSelectedCloseTabsClick
+                ),
+                expanded = showMenu,
+                offset = DpOffset(x = 0.dp, y = -ICON_SIZE),
+                onDismissRequest = {
+                    showMenu = false
+                },
+            )
+            Icon(
+                painter = painterResource(R.drawable.ic_menu),
+                contentDescription = stringResource(id = R.string.open_tabs_menu),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .align(Alignment.CenterVertically),
+                tint = Color.White,
+            )
+        }
+    }
+}
 
 @Composable
 private fun BoxScope.NewTabButton(

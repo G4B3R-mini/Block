@@ -8,42 +8,28 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.selected
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -57,17 +43,12 @@ import com.shmibblez.inferno.compose.base.InfernoCheckbox
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.ext.toShortUrl
 import com.shmibblez.inferno.tabstray.HEADER_ITEM_KEY
-import com.shmibblez.inferno.tabstray.SPAN_ITEM_KEY
 import com.shmibblez.inferno.tabstray.TabsTrayTestTag
-import com.shmibblez.inferno.tabstray.browser.compose.DragItemContainer
-import com.shmibblez.inferno.tabstray.browser.compose.createListReorderState
-import com.shmibblez.inferno.tabstray.browser.compose.detectListPressAndDrag
 import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.browser.state.state.recover.TabState
 import mozilla.components.support.ktx.kotlin.MAX_URI_LENGTH
 import mozilla.components.support.ktx.kotlin.trimmed
 import mozilla.components.ui.colors.PhotonColors
-import kotlin.math.max
 
 // todo: everything with FirefoxTheme commented out was fixed by shameless haccs
 //   - tab thumbnails
@@ -86,12 +67,12 @@ import kotlin.math.max
  */
 fun TabState.toDisplayTitle(): String = title.ifEmpty { url.trimmed() }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ClosedTabList(
     tabs: List<TabState>,
     mode: InfernoTabsTrayMode,
     header: (@Composable () -> Unit)? = null,
+    onHistoryClick: () -> Unit,
     onTabClick: (tab: TabState) -> Unit,
     onTabClose: (tab: TabState) -> Unit,
     onTabLongClick: (TabState) -> Unit,
@@ -108,41 +89,53 @@ fun ClosedTabList(
                 header()
             }
         }
-        itemsIndexed(
+        items(
             items = tabs,
-            key = { _, tab -> tab.id },
-        ) { index, tab ->
-//                TabListItem(
-//                    tab = tab,
-//                    thumbnailSize = tabThumbnailSize,
-//                    isSelected = tab.id == activeTabId,
-//                    multiSelectionEnabled = isInMultiSelectMode,
-//                    multiSelectionSelected = mode.selectedTabs.contains(tab),
-//                    shouldClickListen = reorderState.draggingItemKey != tab.id,
-//                    swipingEnabled = !state.isScrollInProgress,
-//                    onCloseClick = onTabClose,
-//                    onMediaClick = onTabMediaClick,
-//                    onClick = onTabClick,
-//                )
-            ClosedListTab(
+            key = { tab -> tab.id },
+        ) { tab ->
+            ClosedTabListItem(
                 tab = tab,
-                mode = mode,
                 multiSelectionEnabled = isInMultiSelectMode,
                 multiSelectionSelected = mode.selectedClosedTabs.contains(tab),
                 swipingEnabled = !state.isScrollInProgress,
                 onCloseClick = onTabClose,
                 onClick = onTabClick,
+                onLongClick = onTabLongClick,
             )
 
         }
+
+        item {
+            ViewFullHistoryItem(onHistoryClick)
+        }
+    }
+}
+
+@Composable
+private fun ViewFullHistoryItem(
+    onHistoryClick: () -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .padding(16.dp)
+            .clickable(onClick = onHistoryClick),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.Start),
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.ic_history),
+            contentDescription = stringResource(R.string.recently_closed_show_full_history),
+            modifier = Modifier.size(24.dp),
+            tint = Color.White,
+        )
+        InfernoText(text = stringResource(R.string.recently_closed_show_full_history))
     }
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun ClosedListTab(
+private fun ClosedTabListItem(
     tab: TabState,
-    mode: InfernoTabsTrayMode,
     multiSelectionEnabled: Boolean = false,
     multiSelectionSelected: Boolean = false,
     swipingEnabled: Boolean = true,
@@ -200,16 +193,14 @@ private fun ClosedListTab(
                 .fillMaxWidth()
 //                .background(FirefoxTheme.colors.layer3)
 //                .background(contentBackgroundColor)
-                .background(if (multiSelectionSelected) Color.DarkGray else Color.Black)
+                .background(if (multiSelectionSelected) Color.Red else Color.Black)
                 .then(clickableModifier)
                 .padding(start = 16.dp, top = 8.dp, bottom = 8.dp)
                 .testTag(TabsTrayTestTag.tabItemRoot),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(
-                modifier = Modifier
-                    .padding(start = 12.dp)
-                    .weight(weight = 1f),
+                modifier = Modifier.weight(weight = 1f),
             ) {
                 InfernoText(
                     text = tab.toDisplayTitle().take(MAX_URI_LENGTH),
@@ -257,12 +248,7 @@ private fun ClosedListTab(
             } else {
                 InfernoCheckbox(
                     checked = multiSelectionSelected,
-                    onCheckedChange = { checked ->
-                        // todo: make based on state, need to use callbacks so parent
-                        //  changes own state directly
-                        if (checked) mode.selectedClosedTabs.plus(tab)
-                        else mode.selectedClosedTabs.minus(tab)
-                    },
+                    onCheckedChange = null,
                     modifier = Modifier.size(48.dp),
                 )
             }
