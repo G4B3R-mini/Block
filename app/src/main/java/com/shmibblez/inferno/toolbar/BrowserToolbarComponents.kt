@@ -1,7 +1,9 @@
 package com.shmibblez.inferno.toolbar
 
 //import com.shmibblez.inferno.ext.share
+import android.content.ActivityNotFoundException
 import android.content.Context
+import android.content.Intent
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -73,6 +75,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.ComponentDimens
+import com.shmibblez.inferno.browser.getLink
 import com.shmibblez.inferno.compose.base.InfernoCheckbox
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.compose.sessionUseCases
@@ -102,6 +105,7 @@ import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.browser.state.state.searchEngines
 import mozilla.components.browser.state.state.selectedOrDefaultSearchEngine
 import mozilla.components.feature.tabs.TabsUseCases
+import mozilla.components.support.ktx.android.content.createChooserExcludingCurrentApp
 import mozilla.components.support.ktx.android.content.share
 import mozilla.components.support.ktx.kotlin.isUrl
 import mozilla.components.support.ktx.kotlin.toNormalizedUrl
@@ -172,16 +176,20 @@ interface ToolbarOptionsScope {
     fun ToolbarStopLoading(enabled: Boolean)
 
     @Composable
+    fun ToolbarShare(url: String?)
+
+    @Composable
     fun ToolbarShowTabsTray(tabCount: Int, onNavToTabsTray: () -> Unit)
 }
 
 object ToolbarOptionsScopeInstance : ToolbarOptionsScope {
+    private val disabledAlpha = 0.5F
+
     @Composable
     override fun ToolbarSeparator() {
         VerticalDivider(
             modifier = Modifier
-                .fillMaxHeight()
-                .padding(vertical = 6.dp),
+                .height(ICON_SIZE),
             color = Color.White,
             thickness = 1.dp,
         )
@@ -193,7 +201,7 @@ object ToolbarOptionsScopeInstance : ToolbarOptionsScope {
         Icon(
             modifier = Modifier
                 .size(ICON_SIZE)
-                .alpha(if (enabled) 1F else 0.5F)
+                .alpha(if (enabled) 1F else disabledAlpha)
                 .clickable(enabled = enabled) { useCases.goBack.invoke() },
             painter = painterResource(id = R.drawable.baseline_chevron_left_24),
             contentDescription = "back",
@@ -207,7 +215,7 @@ object ToolbarOptionsScopeInstance : ToolbarOptionsScope {
         Icon(
             modifier = Modifier
                 .size(ICON_SIZE)
-                .alpha(if (enabled) 1F else 0.5F)
+                .alpha(if (enabled) 1F else disabledAlpha)
                 .clickable(enabled = enabled) { useCases.goForward.invoke() },
             painter = painterResource(id = R.drawable.baseline_chevron_right_24),
             contentDescription = "forward",
@@ -221,7 +229,7 @@ object ToolbarOptionsScopeInstance : ToolbarOptionsScope {
         Icon(
             modifier = Modifier
                 .size(ICON_SIZE)
-                .alpha(if (enabled) 1F else 0.5F)
+                .alpha(if (enabled) 1F else disabledAlpha)
                 .clickable(enabled = enabled) {
                     if (loading) useCases.stopLoading.invoke() else useCases.reload.invoke()
                 },
@@ -239,10 +247,48 @@ object ToolbarOptionsScopeInstance : ToolbarOptionsScope {
         Icon(
             modifier = Modifier
                 .size(ICON_SIZE)
-                .alpha(if (enabled) 1F else 0.5F)
+                .alpha(if (enabled) 1F else disabledAlpha)
                 .clickable(enabled = enabled) { useCases.stopLoading.invoke() },
             painter = painterResource(id = R.drawable.ic_cross_24),
             contentDescription = "stop loading",
+            tint = Color.White
+        )
+    }
+
+    @Composable
+    override fun ToolbarShare(url: String?) {
+        val context = LocalContext.current
+        fun share() {
+            val intent = Intent(Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                putExtra(Intent.EXTRA_TEXT, url)
+            }
+
+            try {
+                context.startActivity(
+                    intent.createChooserExcludingCurrentApp(
+                        context,
+                        context.getString(R.string.mozac_feature_contextmenu_share_link),
+                    ),
+                )
+            } catch (e: ActivityNotFoundException) {
+                mozilla.components.support.base.log.Log.log(
+                    mozilla.components.support.base.log.Log.Priority.WARN,
+                    message = "No activity to share to found",
+                    throwable = e,
+                    tag = "createShareLinkCandidate",
+                )
+            }
+        }
+        val enabled = url!= null
+        Icon(
+            modifier = Modifier
+                .size(ICON_SIZE)
+                .alpha(if (enabled) 1F else disabledAlpha)
+                .clickable(enabled = enabled, onClick = ::share),
+            painter = painterResource(id = R.drawable.ic_share),
+            contentDescription = "share",
             tint = Color.White
         )
     }
@@ -293,8 +339,6 @@ fun ToolbarOrigin(
     searchEngine: SearchEngine,
     siteSecure: SiteSecurity,
     siteTrackingProtection: SiteTrackingProtection,
-    url: String?,
-    searchTerms: String,
     searchText: TextFieldValue,
     setSearchText: (TextFieldValue) -> Unit,
     originModifier: Modifier = Modifier,
@@ -305,21 +349,26 @@ fun ToolbarOrigin(
     animationValue: Float,
 ) {
     fun parseInput(): TextFieldValue {
-        return (searchTerms.ifEmpty { url ?: "" }).let {
+        return (tabSessionState.content.searchTerms.ifEmpty { tabSessionState.content.url }).let {
             TextFieldValue(
                 text = (if (it != "inferno:home" && it != "inferno:privatebrowsing") it else ""),
-                selection = if (searchTerms.isEmpty()) TextRange.Zero else TextRange(searchTerms.length)
+                selection = if (tabSessionState.content.searchTerms.isEmpty()) TextRange.Zero else TextRange(
+                    tabSessionState.content.searchTerms.length
+                )
             )
         }
     }
 
     val context = LocalContext.current
     var undoClearText by remember { mutableStateOf<TextFieldValue?>(null) }
-    val (showPopupMenu, setShowPopupMenu) = remember { mutableStateOf(false) }
     var indicatorWidth by remember { mutableIntStateOf(0) }
     var actionWidth by remember { mutableIntStateOf(0) }
     val originFocusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
+
+    LaunchedEffect(tabSessionState.id) {
+        setSearchText(TextFieldValue(tabSessionState.content.url))
+    }
 
     LaunchedEffect(editMode) {
         if (editMode) {
@@ -335,12 +384,12 @@ fun ToolbarOrigin(
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
-                .padding(vertical = 4.dp)
+                .padding(vertical = 6.dp)
                 .clip(MaterialTheme.shapes.small)
                 .background(Color.DarkGray)
                 .fillMaxSize()
                 .padding(4.dp),
-            horizontalArrangement = Arrangement.spacedBy(0.dp)
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             val customTextSelectionColors = TextSelectionColors(
                 handleColor = Color.White, backgroundColor = Color.White.copy(alpha = 0.4F)
@@ -362,30 +411,33 @@ fun ToolbarOrigin(
                     enabled = true,
                     singleLine = true,
                     textStyle = TextStyle(
-                        color = when (animationValue < 0.5) {
-                            true -> {
-                                Color.White.copy(
-                                    alpha = 255F - animationValue.toRange(
-                                        from = Pair(
-                                            0F, 0.5F
-                                        ), to = Pair(0F, 255F)
-                                    )
-                                )
-                            }
-
-                            false -> {
-                                Color.White.copy(
-                                    alpha = animationValue.toRange(
-                                        from = Pair(
-                                            0.5F, 1F
-                                        ), to = Pair(0F, 255F)
-                                    )
-                                )
-                            }
-                        }, textAlign = TextAlign.Start, lineHeightStyle = LineHeightStyle(
+                        color = Color.White,
+//                        when (animationValue < 0.5) {
+//                            true -> {
+//                                Color.White.copy(
+//                                    alpha = 255F - animationValue.toRange(
+//                                        from = Pair(
+//                                            0F, 0.5F
+//                                        ), to = Pair(0F, 255F)
+//                                    )
+//                                )
+//                            }
+//
+//                            false -> {
+//                                Color.White.copy(
+//                                    alpha = animationValue.toRange(
+//                                        from = Pair(
+//                                            0.5F, 1F
+//                                        ), to = Pair(0F, 255F)
+//                                    )
+//                                )
+//                            }
+//                        }
+                        textAlign = TextAlign.Start, lineHeightStyle = LineHeightStyle(
                             alignment = LineHeightStyle.Alignment.Center,
                             trim = LineHeightStyle.Trim.None,
-                        )
+                        ),
+                        fontSize = 16.sp
                     ),
                     cursorBrush = SolidColor(Color.White),
                     keyboardActions = KeyboardActions(
@@ -455,8 +507,8 @@ fun ToolbarOrigin(
             ToolbarTrackingProtectionIndicator(trackingProtection = siteTrackingProtection)
             if (siteTrackingProtection != SiteTrackingProtection.OFF_GLOBALLY) ToolbarSeparator()
             ToolbarSecurityIndicator(siteSecure)
-            if (url == null) ToolbarSeparator()
-            ToolbarEmptyIndicator(enabled = url == null)
+//            if (tabSessionState.content.url == null) ToolbarSeparator()
+//            ToolbarEmptyIndicator(enabled = tabSessionState.content.url == null)
         }
 
         // undo / clear buttons
@@ -859,13 +911,16 @@ object ToolbarMenuItemsScopeInstance : ToolbarMenuItemsScope {
             verticalAlignment = Alignment.CenterVertically,
         ) {
             ToolbarOptionsScopeInstance.ToolbarBack(
-                enabled = tabSessionState?.content?.canGoBack ?: false
+                enabled = tabSessionState?.content?.canGoBack ?: false,
             )
             ToolbarOptionsScopeInstance.ToolbarReload(
-                enabled = tabSessionState != null, loading = loading
+                enabled = tabSessionState != null, loading = loading,
+            )
+            ToolbarOptionsScopeInstance.ToolbarShare(
+                url = tabSessionState?.content?.url,
             )
             ToolbarOptionsScopeInstance.ToolbarForward(
-                enabled = tabSessionState?.content?.canGoForward ?: false
+                enabled = tabSessionState?.content?.canGoForward ?: false,
             )
         }
     }

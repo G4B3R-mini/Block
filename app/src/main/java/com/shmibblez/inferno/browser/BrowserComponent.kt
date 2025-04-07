@@ -358,10 +358,10 @@ enum class BrowserComponentPageType {
 }
 
 object ComponentDimens {
-    val TOOLBAR_HEIGHT = 40.dp
-    val TAB_BAR_HEIGHT = 30.dp
+    val TOOLBAR_HEIGHT = 44.dp
+    val TAB_BAR_HEIGHT = 32.dp
     val AWESOME_BAR_HEIGHT = 200.dp
-    val TAB_WIDTH = 95.dp
+    val TAB_WIDTH = 112.dp
     val TAB_CORNER_RADIUS = 8.dp
     val FIND_IN_PAGE_BAR_HEIGHT = 50.dp
     val PROGRESS_BAR_HEIGHT = 1.dp

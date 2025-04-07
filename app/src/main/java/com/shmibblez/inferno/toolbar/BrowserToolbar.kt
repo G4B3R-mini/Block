@@ -86,6 +86,9 @@ fun BrowserToolbar(
     var leftWidth by remember { mutableIntStateOf(0) }
     var rightWidth by remember { mutableIntStateOf(0) }
 
+    var searchText by remember { mutableStateOf(TextFieldValue(tabSessionState.content.url)) }
+    val loading = tabSessionState.content.loading
+
     LaunchedEffect(editMode) {
         if (editMode) {
             animationValue.animateTo(EDIT_VALUE)
@@ -93,25 +96,6 @@ fun BrowserToolbar(
             animationValue.animateTo(DISPLAY_VALUE)
         }
     }
-
-    fun parseInput(): TextFieldValue {
-        return (tabSessionState?.content?.searchTerms?.ifEmpty { tabSessionState.content.url }
-            ?: "<empty>").let {
-            (if (it != "inferno:home" && it != "inferno:privatebrowsing") it else "").let { searchTerms ->
-                TextFieldValue(
-                    text = searchTerms,
-                    selection = if (searchTerms.isEmpty()) TextRange.Zero else TextRange(searchTerms.length)
-                )
-            }
-        }
-    }
-
-    val searchTerms by remember { mutableStateOf(tabSessionState.content.searchTerms) }
-    val url by browserStore().observeAsState { state ->
-        state.selectedTab?.content?.url
-    }
-    val loading = tabSessionState.content.loading
-    var searchText by remember { mutableStateOf(parseInput()) }
 
     Column(
         modifier = Modifier
@@ -171,8 +155,6 @@ fun BrowserToolbar(
                 indicatorModifier = Modifier,
                 tabSessionState = tabSessionState,
                 searchEngine = searchEngine,
-                url = url,
-                searchTerms = searchTerms,
                 searchText = searchText,
                 setSearchText = { searchText = it },
                 siteSecure = detectSiteSecurity(tabSessionState),
