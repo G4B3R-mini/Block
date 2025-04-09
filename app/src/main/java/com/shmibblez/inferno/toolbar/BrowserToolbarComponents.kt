@@ -1,6 +1,5 @@
 package com.shmibblez.inferno.toolbar
 
-//import com.shmibblez.inferno.ext.share
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
@@ -50,15 +49,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
@@ -70,18 +68,17 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.ComponentDimens
-import com.shmibblez.inferno.browser.getLink
+import com.shmibblez.inferno.browser.toPx
 import com.shmibblez.inferno.compose.base.InfernoCheckbox
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.compose.sessionUseCases
 import com.shmibblez.inferno.ext.components
-import com.shmibblez.inferno.ext.pxToDp
-import com.shmibblez.inferno.ext.toRange
 import com.shmibblez.inferno.toolbar.ToolbarMenuItemsScopeInstance.DividerToolbarMenuItem
 import com.shmibblez.inferno.toolbar.ToolbarMenuItemsScopeInstance.FindInPageToolbarMenuItem
 import com.shmibblez.inferno.toolbar.ToolbarMenuItemsScopeInstance.NavOptionsToolbarMenuItem
@@ -91,7 +88,6 @@ import com.shmibblez.inferno.toolbar.ToolbarMenuItemsScopeInstance.SettingsToolb
 import com.shmibblez.inferno.toolbar.ToolbarMenuItemsScopeInstance.ShareToolbarMenuItem
 import com.shmibblez.inferno.toolbar.ToolbarOptionsScopeInstance.ToolbarSeparator
 import com.shmibblez.inferno.toolbar.ToolbarOriginScopeInstance.ToolbarClearText
-import com.shmibblez.inferno.toolbar.ToolbarOriginScopeInstance.ToolbarEmptyIndicator
 import com.shmibblez.inferno.toolbar.ToolbarOriginScopeInstance.ToolbarSearchEngineSelector
 import com.shmibblez.inferno.toolbar.ToolbarOriginScopeInstance.ToolbarSecurityIndicator
 import com.shmibblez.inferno.toolbar.ToolbarOriginScopeInstance.ToolbarTrackingProtectionIndicator
@@ -120,6 +116,8 @@ import kotlin.math.roundToInt
 //  - private mode toggle (incog symbol) (incog with browser icon bottom right, reversed for switch back)
 //  - print page
 //  - scrolling screenshot
+//  - extensions (go to extensions page, installed)
+//  - reader view (if enabled for page)
 // todo:
 //   - add settings screen for options shown on toolbar, max 7, rearrangeable and selectable from list
 //   - add double up and down chevron icon for options tray
@@ -183,13 +181,12 @@ interface ToolbarOptionsScope {
 }
 
 object ToolbarOptionsScopeInstance : ToolbarOptionsScope {
-    private val disabledAlpha = 0.5F
+    private const val disabledAlpha = 0.5F
 
     @Composable
     override fun ToolbarSeparator() {
         VerticalDivider(
-            modifier = Modifier
-                .height(ICON_SIZE),
+            modifier = Modifier.height(ICON_SIZE),
             color = Color.White,
             thickness = 1.dp,
         )
@@ -281,7 +278,8 @@ object ToolbarOptionsScopeInstance : ToolbarOptionsScope {
                 )
             }
         }
-        val enabled = url!= null
+
+        val enabled = url != null
         Icon(
             modifier = Modifier
                 .size(ICON_SIZE)
@@ -333,6 +331,25 @@ object ToolbarOptionsScopeInstance : ToolbarOptionsScope {
     }
 }
 
+// start padding + (width - vertical padding since 1:1 aspect ratio) + expand icon start padding + expand icon size + expand icon end padding
+private val TOOLBAR_SEARCH_ENGINE_SELECTOR_WIDTH =
+    4.dp + (ComponentDimens.TOOLBAR_HEIGHT - 16.dp - 8.dp - 4.dp) + (4.dp + 6.dp + 4.dp)
+private val TOOLBAR_SEARCH_ENGINE_SELECTOR_WIDTH_PX = TOOLBAR_SEARCH_ENGINE_SELECTOR_WIDTH.toPx()
+
+// start padding + indicator icon size + end padding
+private val TOOLBAR_ACTION_WIDTH = 4.dp + INDICATOR_ICON_SIZE + 8.dp
+private val TOOLBAR_ACTION_WIDTH_PX = TOOLBAR_ACTION_WIDTH.toPx()
+
+//
+private fun toolbarIndicatorWidth(siteTrackingProtection: SiteTrackingProtection): Dp {
+    return 8.dp + INDICATOR_ICON_SIZE + INDICATOR_ICON_PADDING + (if (siteTrackingProtection != SiteTrackingProtection.OFF_GLOBALLY) INDICATOR_ICON_SIZE + INDICATOR_ICON_PADDING + 1.dp + INDICATOR_ICON_PADDING else 0.dp) + 4.dp
+}
+
+private fun toolbarIndicatorWidthPx(siteTrackingProtection: SiteTrackingProtection): Int {
+    return toolbarIndicatorWidth(siteTrackingProtection).toPx()
+}
+
+
 @Composable
 fun ToolbarOrigin(
     tabSessionState: TabSessionState,
@@ -361,10 +378,21 @@ fun ToolbarOrigin(
 
     val context = LocalContext.current
     var undoClearText by remember { mutableStateOf<TextFieldValue?>(null) }
-    var indicatorWidth by remember { mutableIntStateOf(0) }
-    var actionWidth by remember { mutableIntStateOf(0) }
+    var indicatorWidth by remember { mutableStateOf(toolbarIndicatorWidth(siteTrackingProtection)) }
+    var indicatorWidthPx by remember {
+        mutableIntStateOf(
+            toolbarIndicatorWidthPx(
+                siteTrackingProtection
+            )
+        )
+    }
     val originFocusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
+
+    LaunchedEffect(siteTrackingProtection) {
+        indicatorWidth = toolbarIndicatorWidth(siteTrackingProtection)
+        indicatorWidthPx = toolbarIndicatorWidthPx(siteTrackingProtection)
+    }
 
     LaunchedEffect(tabSessionState.id) {
         setSearchText(TextFieldValue(tabSessionState.content.url))
@@ -379,27 +407,27 @@ fun ToolbarOrigin(
         }
     }
 
-    Box(modifier = originModifier) {
+    Box(
+        modifier = originModifier
+            .fillMaxSize()
+            .padding(vertical = 8.dp)
+            .clip(MaterialTheme.shapes.small)
+            .background(Color.DarkGray),
+    ) {
         // origin editor
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .padding(vertical = 6.dp)
-                .clip(MaterialTheme.shapes.small)
-                .background(Color.DarkGray)
-                .fillMaxSize()
-                .padding(4.dp),
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            val customTextSelectionColors = TextSelectionColors(
-                handleColor = Color.White, backgroundColor = Color.White.copy(alpha = 0.4F)
+        val customTextSelectionColors = TextSelectionColors(
+            handleColor = Color.White, backgroundColor = Color.White.copy(alpha = 0.4F)
+        )
+        // url editor
+        Box(modifier = Modifier
+            .fillMaxSize()
+            .padding(
+                start = indicatorWidth * (animationValue) + TOOLBAR_SEARCH_ENGINE_SELECTOR_WIDTH * (1F - animationValue),
             )
-            if (editMode) {
-                ToolbarSearchEngineSelector(
-                    currentSearchEngine = searchEngine,
-                    modifier = Modifier.alpha(1F - animationValue),
-                )
-            }
+            .padding(
+                end = (TOOLBAR_ACTION_WIDTH * (1F - animationValue)) + 4.dp,
+            ),
+            ) {
             CompositionLocalProvider(LocalTextSelectionColors provides customTextSelectionColors) {
                 BasicTextField(
                     value = searchText,
@@ -408,6 +436,20 @@ fun ToolbarOrigin(
                         setSearchText(v)
                         undoClearText = null
                     },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.CenterStart)
+                        .focusRequester(originFocusRequester)
+                        .focusable()
+                        .onFocusChanged {
+                            if (it.isFocused) {
+                                onStartSearch.invoke()
+                            } else if (it.hasFocus) {
+                                onStartSearch.invoke()
+                            } else {
+                                onStopSearch.invoke()
+                            }
+                        },
                     enabled = true,
                     singleLine = true,
                     textStyle = TextStyle(
@@ -436,8 +478,7 @@ fun ToolbarOrigin(
                         textAlign = TextAlign.Start, lineHeightStyle = LineHeightStyle(
                             alignment = LineHeightStyle.Alignment.Center,
                             trim = LineHeightStyle.Trim.None,
-                        ),
-                        fontSize = 16.sp
+                        ), fontSize = 16.sp
                     ),
                     cursorBrush = SolidColor(Color.White),
                     keyboardActions = KeyboardActions(
@@ -462,42 +503,48 @@ fun ToolbarOrigin(
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Uri, imeAction = ImeAction.Go
                     ),
-                    modifier = Modifier
-                        .padding(
-                            start = (indicatorWidth * (animationValue))
-                                .roundToInt()
-                                .pxToDp(),
-                        )
-                        .padding(
-                            end = (actionWidth * (1F - animationValue))
-                                .roundToInt()
-                                .pxToDp()
-                        )
-                        .focusRequester(originFocusRequester)
-                        .focusable()
-                        .onFocusChanged {
-                            if (it.isFocused) {
-                                onStartSearch.invoke()
-                            } else if (it.hasFocus) {
-                                onStartSearch.invoke()
-                            } else {
-                                onStopSearch.invoke()
-                            }
-                        }
-                        .weight(1F),
                 )
             }
+            // end gradient
+            Box(
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .aspectRatio(1F)
+                    .background(
+                        brush = Brush.horizontalGradient(
+                            colors = listOf(
+                                Color.Transparent,
+                                Color.DarkGray
+                            )
+                        )
+                    )
+            )
         }
 
+        // search engine selector
+        ToolbarSearchEngineSelector(
+            currentSearchEngine = searchEngine,
+            modifier = Modifier
+                .padding(start = 4.dp)
+                .height(ComponentDimens.TOOLBAR_HEIGHT - 16.dp - 8.dp)
+                .align(Alignment.CenterStart)
+                .offset {
+                    IntOffset(
+                        x = (-TOOLBAR_SEARCH_ENGINE_SELECTOR_WIDTH_PX * animationValue).roundToInt(),
+                        y = 0,
+                    )
+                },
+        )
+
         // indicators
-        Row(modifier = indicatorModifier
-            .onSizeChanged { indicatorWidth = it.width }
-            .padding(start = 4.dp, top = 4.dp, bottom = 4.dp)
-            .background(Color.Transparent)
-            .align(Alignment.CenterStart)
-            .offset {
-                IntOffset(x = (-indicatorWidth * (1F - animationValue)).roundToInt(), y = 0)
-            },
+        Row(
+            modifier = indicatorModifier
+                .padding(start = 8.dp, top = 4.dp, bottom = 4.dp)
+                .background(Color.Transparent)
+                .align(Alignment.CenterStart)
+                .offset {
+                    IntOffset(x = (-indicatorWidthPx * (1F - animationValue)).roundToInt(), y = 0)
+                },
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(
                 INDICATOR_ICON_PADDING, Alignment.CenterHorizontally
@@ -514,17 +561,13 @@ fun ToolbarOrigin(
         // undo / clear buttons
         Box(
             modifier = Modifier
-                .alpha(1F - animationValue)
-                .onSizeChanged {
-                    actionWidth = it.width
-                }
                 .align(Alignment.CenterEnd)
                 .padding(
-                    end = 4.dp
+                    start = 4.dp, end = 8.dp
                 )
                 .size(INDICATOR_ICON_SIZE)
                 .offset {
-                    IntOffset(x = (actionWidth * (animationValue)).roundToInt(), y = 0)
+                    IntOffset(x = (TOOLBAR_ACTION_WIDTH_PX * animationValue).roundToInt(), y = 0)
                 },
         ) {
             if (editMode && undoClearText != null) {
@@ -685,7 +728,6 @@ object ToolbarOriginScopeInstance : ToolbarOriginScope {
                 Image(
                     bitmap = currentSearchEngine.icon.asImageBitmap(),
                     contentDescription = "search engine icon",
-//                    tint = Color.Red,
                     modifier = Modifier
                         .fillMaxHeight()
                         .clip(MaterialTheme.shapes.extraSmall)

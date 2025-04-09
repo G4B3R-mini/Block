@@ -24,12 +24,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
@@ -40,9 +44,11 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.ComponentDimens
 import com.shmibblez.inferno.browser.toPx
+import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.newTab
 import mozilla.components.browser.state.ext.getUrl
@@ -154,9 +160,10 @@ private fun MiniTab(
     selectedIndex: Int,
 ) {
     return Row(modifier = Modifier
+        .alpha(if (selected) 1F else 0.33F)
         .fillMaxSize()
         .width(ComponentDimens.TAB_WIDTH)
-        .background(if (selected) Color.Black else Color.DarkGray)
+        .background(Color.Black)
         .drawBehind {
             // draw borders
             val w = size.width
@@ -179,14 +186,14 @@ private fun MiniTab(
                 // if last or to left of selected tab sw else hsw
                 strokeWidth = sw, start = Offset(w - hsw, hsw), end = Offset(w - hsw, h - hsw)
             )
-            // bottom
-            drawLine(
-                cap = cap,
-                color = color,
-                strokeWidth = sw,
-                start = Offset(hsw, hsw),
-                end = Offset(w - hsw, hsw)
-            )
+//            // bottom
+//            drawLine(
+//                cap = cap,
+//                color = color,
+//                strokeWidth = sw,
+//                start = Offset(hsw, hsw),
+//                end = Offset(w - hsw, hsw)
+//            )
         }
         .clickable(enabled = !selected) {
             context.components.useCases.tabsUseCases.selectTab(
@@ -215,28 +222,40 @@ private fun MiniTab(
                 .padding(6.dp)
                 .padding(start = 1.dp),
         )
-        // site name
-        Text(
-            text = tabSessionState.content.title.ifEmpty { tabSessionState.content.url },
+        // site name with gradient
+        Box(
             modifier = Modifier
+                .weight(1F)
                 .wrapContentHeight()
                 .padding(0.dp)
-                .weight(1F)
-                .background(
-                    brush = Brush.horizontalGradient(
-                        colors = listOf(
-                            Color.Transparent, if (selected) Color.Black else Color.DarkGray
-                        ),
-                        startX = (90.dp - 10.dp)
-                            .toPx()
-                            .toFloat()
+                .weight(1F),
+        ) {
+            InfernoText(
+                text = tabSessionState.content.title.ifEmpty { tabSessionState.content.url },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.CenterStart),
+                textAlign = TextAlign.Start,
+                maxLines = 1,
+                overflow = TextOverflow.Clip,
+                fontSize = 14.sp,
+                fontColor = Color.White,
+            )
+            // gradient
+            Box(
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .aspectRatio(0.5F)
+                    .background(
+                        brush = Brush.horizontalGradient(
+                            colors = listOf(
+                                Color.Transparent,
+                                Color.Black
+                            )
+                        )
                     )
-                ),
-            maxLines = 1,
-            overflow = TextOverflow.Clip,
-            color = Color.White,
-            textAlign = TextAlign.Start
-        )
+            )
+        }
         // close
         Icon(
             modifier = Modifier

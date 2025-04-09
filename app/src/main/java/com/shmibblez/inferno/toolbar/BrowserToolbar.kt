@@ -4,48 +4,39 @@
 
 package com.shmibblez.inferno.toolbar
 
-import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.shmibblez.inferno.browser.ComponentDimens
 import com.shmibblez.inferno.browser.InfernoAwesomeBar
 import com.shmibblez.inferno.browser.toPx
-import com.shmibblez.inferno.compose.browserStore
-import com.shmibblez.inferno.ext.pxToDp
-import com.shmibblez.inferno.state.observeAsState
 import com.shmibblez.inferno.toolbar.ToolbarOptionsScopeInstance.ToolbarBack
 import com.shmibblez.inferno.toolbar.ToolbarOptionsScopeInstance.ToolbarForward
 import com.shmibblez.inferno.toolbar.ToolbarOptionsScopeInstance.ToolbarMenuIcon
 import com.shmibblez.inferno.toolbar.ToolbarOptionsScopeInstance.ToolbarReload
 import com.shmibblez.inferno.toolbar.ToolbarOptionsScopeInstance.ToolbarShowTabsTray
 import mozilla.components.browser.state.search.SearchEngine
-import mozilla.components.browser.state.selector.selectedTab
 import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.compose.browser.awesomebar.AwesomeBarDefaults
 import mozilla.components.compose.browser.awesomebar.AwesomeBarOrientation
@@ -66,6 +57,14 @@ import kotlin.math.roundToInt
 const val DISPLAY_VALUE = 1F
 const val EDIT_VALUE = 0F
 
+private fun iconsWidth(nOptions: Int):Dp {
+    return ICON_PADDING + (ICON_SIZE + ICON_PADDING) * nOptions
+}
+
+private fun iconsWidthPx(nOptions: Int):Int {
+    return iconsWidth(nOptions).toPx()
+}
+
 @Composable
 fun BrowserToolbar(
     tabSessionState: TabSessionState?,
@@ -83,8 +82,10 @@ fun BrowserToolbar(
     }
 
     val animationValue = remember { Animatable(if (editMode) EDIT_VALUE else DISPLAY_VALUE) }
-    var leftWidth by remember { mutableIntStateOf(0) }
-    var rightWidth by remember { mutableIntStateOf(0) }
+    val leftWidth = remember { iconsWidth(2) }
+    val leftWidthPx = remember { iconsWidthPx(2) }
+    val rightWidth = remember { iconsWidth(3) }
+    val rightWidthPx = remember { iconsWidthPx(3) }
 
     var searchText by remember { mutableStateOf(TextFieldValue(tabSessionState.content.url)) }
     val loading = tabSessionState.content.loading
@@ -141,17 +142,10 @@ fun BrowserToolbar(
             // origin
             ToolbarOrigin(
                 originModifier = Modifier
-                    .padding(horizontal = 4.dp)
-                    .fillMaxSize()
                     .padding(
-                        start = ((leftWidth - (if (leftWidth > 0) 4.dp.toPx() else 0)) * animationValue.value)
-                            .roundToInt()
-                            .pxToDp(),
-                        end = ((rightWidth - (if (leftWidth > 0) 4.dp.toPx() else 0)) * animationValue.value)
-                            .roundToInt()
-                            .pxToDp(),
-                    )
-                    .clip(MaterialTheme.shapes.small),
+                        start = (leftWidth * animationValue.value),
+                        end = (rightWidth * animationValue.value),
+                    ),
                 indicatorModifier = Modifier,
                 tabSessionState = tabSessionState,
                 searchEngine = searchEngine,
@@ -168,12 +162,11 @@ fun BrowserToolbar(
             // icons on left
             Row(
                 modifier = Modifier
-                    .onSizeChanged { leftWidth = it.width }
                     .padding(start = ICON_PADDING, end = 4.dp)
                     .align(Alignment.CenterStart)
                     .offset {
                         IntOffset(
-                            x = (-leftWidth * (1F - animationValue.value)).roundToInt(), y = 0
+                            x = (-leftWidthPx * (1F - animationValue.value)).roundToInt(), y = 0
                         )
                     },
                 verticalAlignment = Alignment.CenterVertically,
@@ -188,12 +181,11 @@ fun BrowserToolbar(
             // icons on right
             Row(
                 modifier = Modifier
-                    .onSizeChanged { rightWidth = it.width }
                     .padding(horizontal = ICON_PADDING)
                     .align(Alignment.CenterEnd)
                     .offset {
                         IntOffset(
-                            x = (rightWidth * (1F - animationValue.value)).roundToInt(), y = 0
+                            x = (rightWidthPx * (1F - animationValue.value)).roundToInt(), y = 0
                         )
                     },
                 verticalAlignment = Alignment.CenterVertically,

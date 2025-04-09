@@ -98,6 +98,7 @@ import com.shmibblez.inferno.browser.prompts.PromptComponent
 import com.shmibblez.inferno.browser.prompts.webPrompts.AndroidPhotoPicker
 import com.shmibblez.inferno.browser.prompts.webPrompts.FilePicker
 import com.shmibblez.inferno.browser.prompts.webPrompts.FilePicker.Companion.FILE_PICKER_ACTIVITY_REQUEST_CODE
+import com.shmibblez.inferno.browser.readermode.DefaultReaderModeController
 import com.shmibblez.inferno.browser.tabstrip.isTabStripEnabled
 import com.shmibblez.inferno.components.Components
 import com.shmibblez.inferno.components.TabCollectionStorage
@@ -358,7 +359,7 @@ enum class BrowserComponentPageType {
 }
 
 object ComponentDimens {
-    val TOOLBAR_HEIGHT = 44.dp
+    val TOOLBAR_HEIGHT = 48.dp
     val TAB_BAR_HEIGHT = 32.dp
     val AWESOME_BAR_HEIGHT = 200.dp
     val TAB_WIDTH = 112.dp
@@ -452,8 +453,6 @@ fun BrowserComponent(
     lateinit var browserFragmentStore: BrowserFragmentStore
     lateinit var browserAnimator: BrowserAnimator
     lateinit var startForResult: ActivityResultLauncher<Intent>
-
-//    var _browserToolbarInteractor: BrowserToolbarInteractor? = null
 
     var (browserToolbarInteractor, setBrowserToolbarInteractor) = remember {
         mutableStateOf<BrowserToolbarInteractor?>(
@@ -1132,12 +1131,12 @@ fun BrowserComponent(
             }
 
             // todo: readerView
-//            val readerMenuController = DefaultReaderModeController(
-//                readerViewFeature,
-//                binding.readerViewControlsBar,
-//                isPrivate = activity.browsingModeManager.mode.isPrivate,
-//                onReaderModeChanged = { activity.finishActionMode() },
-//            )
+            val readerMenuController = DefaultReaderModeController(
+                readerViewFeature,
+                binding.readerViewControlsBar,
+                isPrivate = activity.browsingModeManager.mode.isPrivate,
+                onReaderModeChanged = { activity.finishActionMode() },
+            )
             // todo: toolbar
 //    val browserToolbarController = DefaultBrowserToolbarController(
 //        store = store,
@@ -2820,108 +2819,108 @@ internal fun initializeEngineView(
     }
 }
 
-@Suppress("LongMethod")
-private fun initializeNavBar(
-    browserToolbar: BrowserToolbar,
-    view: View,
-    context: Context,
-    activity: HomeActivity,
-) {
-//        NavigationBar.browserInitializeTimespan.start()
-
-    val isToolbarAtBottom = context.isToolbarAtBottom()
-
-    // The toolbar view has already been added directly to the container.
-    // We should remove it and add the view to the navigation bar container.
-    // Should refactor this so there is no added view to remove to begin with:
-    // https://bugzilla.mozilla.org/show_bug.cgi?id=1870976
-    // todo: toolbar
-//    if (isToolbarAtBottom) {
-//        binding.browserLayout.removeView(browserToolbar)
-//    }
-
-    // todo: toolbar
-//    _bottomToolbarContainerView = BottomToolbarContainerView(
-//        context = context,
-//        parent = binding.browserLayout,
-//        hideOnScroll = isToolbarDynamic(context),
-//        content = {
-//            val areLoginBarsShown by remember { mutableStateOf(loginBarsIntegration.isVisible) }
+//@Suppress("LongMethod")
+//private fun initializeNavBar(
+//    browserToolbar: BrowserToolbar,
+//    view: View,
+//    context: Context,
+//    activity: HomeActivity,
+//) {
+////        NavigationBar.browserInitializeTimespan.start()
 //
-//            FirefoxTheme {
-//                Column(
-//                    modifier = Modifier.background(FirefoxTheme.colors.layer1),
-//                ) {
-//                    if (!activity.isMicrosurveyPromptDismissed.value) {
-//                        currentMicrosurvey?.let {
-//                            if (isToolbarAtBottom) {
-//                                removeBottomToolbarDivider(browserToolbar)
-//                            }
+//    val isToolbarAtBottom = context.isToolbarAtBottom()
 //
-//                            HorizontalDivider()
+//    // The toolbar view has already been added directly to the container.
+//    // We should remove it and add the view to the navigation bar container.
+//    // Should refactor this so there is no added view to remove to begin with:
+//    // https://bugzilla.mozilla.org/show_bug.cgi?id=1870976
+//    // todo: toolbar
+////    if (isToolbarAtBottom) {
+////        binding.browserLayout.removeView(browserToolbar)
+////    }
 //
-//                            MicrosurveyRequestPrompt(
-//                                microsurvey = it,
-//                                activity = activity,
-//                                onStartSurveyClicked = {
-//                                    context.components.appStore.dispatch(
-//                                        MicrosurveyAction.Started(
-//                                            it.id
-//                                        )
-//                                    )
-//                                    navController.nav(
-//                                        R.id.browserFragment,
-//                                        BrowserComponentWrapperFragmentDirections.actionGlobalMicrosurveyDialog(
-//                                            it.id
-//                                        ),
-//                                    )
-//                                },
-//                                onCloseButtonClicked = {
-//                                    context.components.appStore.dispatch(
-//                                        MicrosurveyAction.Dismissed(it.id),
-//                                    )
+//    // todo: toolbar
+////    _bottomToolbarContainerView = BottomToolbarContainerView(
+////        context = context,
+////        parent = binding.browserLayout,
+////        hideOnScroll = isToolbarDynamic(context),
+////        content = {
+////            val areLoginBarsShown by remember { mutableStateOf(loginBarsIntegration.isVisible) }
+////
+////            FirefoxTheme {
+////                Column(
+////                    modifier = Modifier.background(FirefoxTheme.colors.layer1),
+////                ) {
+////                    if (!activity.isMicrosurveyPromptDismissed.value) {
+////                        currentMicrosurvey?.let {
+////                            if (isToolbarAtBottom) {
+////                                removeBottomToolbarDivider(browserToolbar)
+////                            }
+////
+////                            HorizontalDivider()
+////
+////                            MicrosurveyRequestPrompt(
+////                                microsurvey = it,
+////                                activity = activity,
+////                                onStartSurveyClicked = {
+////                                    context.components.appStore.dispatch(
+////                                        MicrosurveyAction.Started(
+////                                            it.id
+////                                        )
+////                                    )
+////                                    navController.nav(
+////                                        R.id.browserFragment,
+////                                        BrowserComponentWrapperFragmentDirections.actionGlobalMicrosurveyDialog(
+////                                            it.id
+////                                        ),
+////                                    )
+////                                },
+////                                onCloseButtonClicked = {
+////                                    context.components.appStore.dispatch(
+////                                        MicrosurveyAction.Dismissed(it.id),
+////                                    )
+////
+////                                    context.settings().shouldShowMicrosurveyPrompt = false
+////                                    activity.isMicrosurveyPromptDismissed.value = true
+////
+////                                    resumeDownloadDialogState(
+////                                        getCurrentTab()?.id,
+////                                        context.components.core.store,
+////                                        context,
+////                                    )
+////                                },
+////                            )
+////                        }
+////                    } else {
+////                        restoreBottomToolbarDivider(browserToolbar)
+////                    }
+////
+////                    if (isToolbarAtBottom) {
+////                        AndroidView(factory = { _ -> browserToolbar })
+////                    }
+////
+////                    NavigationButtonsCFR(
+////                        context = context,
+////                        activity = activity,
+////                        showDivider = !isToolbarAtBottom && !areLoginBarsShown && (currentMicrosurvey == null || activity.isMicrosurveyPromptDismissed.value),
+////                    )
+////                }
+////            }
+////        },
+////    )
+////
+////    bottomToolbarContainerIntegration.set(
+////        feature = BottomToolbarContainerIntegration(
+////            toolbar = bottomToolbarContainerView.toolbarContainerView,
+////            store = context.components.core.store,
+////            sessionId = customTabSessionId,
+////        ),
+////        owner = lifecycleOwner,
+////        view = view,
+////    )
 //
-//                                    context.settings().shouldShowMicrosurveyPrompt = false
-//                                    activity.isMicrosurveyPromptDismissed.value = true
-//
-//                                    resumeDownloadDialogState(
-//                                        getCurrentTab()?.id,
-//                                        context.components.core.store,
-//                                        context,
-//                                    )
-//                                },
-//                            )
-//                        }
-//                    } else {
-//                        restoreBottomToolbarDivider(browserToolbar)
-//                    }
-//
-//                    if (isToolbarAtBottom) {
-//                        AndroidView(factory = { _ -> browserToolbar })
-//                    }
-//
-//                    NavigationButtonsCFR(
-//                        context = context,
-//                        activity = activity,
-//                        showDivider = !isToolbarAtBottom && !areLoginBarsShown && (currentMicrosurvey == null || activity.isMicrosurveyPromptDismissed.value),
-//                    )
-//                }
-//            }
-//        },
-//    )
-//
-//    bottomToolbarContainerIntegration.set(
-//        feature = BottomToolbarContainerIntegration(
-//            toolbar = bottomToolbarContainerView.toolbarContainerView,
-//            store = context.components.core.store,
-//            sessionId = customTabSessionId,
-//        ),
-//        owner = lifecycleOwner,
-//        view = view,
-//    )
-
-//        NavigationBar.browserInitializeTimespan.stop()
-}
+////        NavigationBar.browserInitializeTimespan.stop()
+//}
 
 @Suppress("LongMethod")
 @Composable
@@ -4191,22 +4190,22 @@ private fun initReaderMode(context: Context, view: View) {
     // todo: toolbar
 //    browserToolbarView.view.addPageAction(readerModeAction)
 //
-//    readerViewFeature.set(
-//        feature = context.components.strictMode.resetAfter(StrictMode.allowThreadDiskReads()) {
-//            ReaderViewFeature(
-//                context = context,
-//                engine = context.components.core.engine,
-//                store = context.components.core.store,
-//                controlsView = binding.readerViewControlsBar,
-//            ) { available, active ->
-//                readerModeAvailable = available
-//                readerModeAction.setSelected(active)
-//                safeInvalidateBrowserToolbarView()
-//            }
-//        },
-//        owner = lifecycleOwner,
-//        view = view,
-//    )
+    readerViewFeature.set(
+        feature = context.components.strictMode.resetAfter(StrictMode.allowThreadDiskReads()) {
+            ReaderViewFeature(
+                context = context,
+                engine = context.components.core.engine,
+                store = context.components.core.store,
+                controlsView = binding.readerViewControlsBar,
+            ) { available, active ->
+                readerModeAvailable = available
+                readerModeAction.setSelected(active)
+                safeInvalidateBrowserToolbarView()
+            }
+        },
+        owner = lifecycleOwner,
+        view = view,
+    )
 }
 
 private fun initReviewQualityCheck(
