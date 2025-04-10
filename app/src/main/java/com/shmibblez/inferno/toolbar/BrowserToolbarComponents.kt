@@ -60,6 +60,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -83,6 +84,7 @@ import com.shmibblez.inferno.toolbar.ToolbarMenuItemsScopeInstance.DividerToolba
 import com.shmibblez.inferno.toolbar.ToolbarMenuItemsScopeInstance.FindInPageToolbarMenuItem
 import com.shmibblez.inferno.toolbar.ToolbarMenuItemsScopeInstance.NavOptionsToolbarMenuItem
 import com.shmibblez.inferno.toolbar.ToolbarMenuItemsScopeInstance.PrivateModeToolbarMenuItem
+import com.shmibblez.inferno.toolbar.ToolbarMenuItemsScopeInstance.ReaderViewToolbarMenuItem
 import com.shmibblez.inferno.toolbar.ToolbarMenuItemsScopeInstance.RequestDesktopSiteToolbarMenuItem
 import com.shmibblez.inferno.toolbar.ToolbarMenuItemsScopeInstance.SettingsToolbarMenuItem
 import com.shmibblez.inferno.toolbar.ToolbarMenuItemsScopeInstance.ShareToolbarMenuItem
@@ -419,15 +421,16 @@ fun ToolbarOrigin(
             handleColor = Color.White, backgroundColor = Color.White.copy(alpha = 0.4F)
         )
         // url editor
-        Box(modifier = Modifier
-            .fillMaxSize()
-            .padding(
-                start = indicatorWidth * (animationValue) + TOOLBAR_SEARCH_ENGINE_SELECTOR_WIDTH * (1F - animationValue),
-            )
-            .padding(
-                end = (TOOLBAR_ACTION_WIDTH * (1F - animationValue)) + 4.dp,
-            ),
-            ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(
+                    start = indicatorWidth * (animationValue) + TOOLBAR_SEARCH_ENGINE_SELECTOR_WIDTH * (1F - animationValue),
+                )
+                .padding(
+                    end = (TOOLBAR_ACTION_WIDTH * (1F - animationValue)) + 4.dp,
+                ),
+        ) {
             CompositionLocalProvider(LocalTextSelectionColors provides customTextSelectionColors) {
                 BasicTextField(
                     value = searchText,
@@ -513,8 +516,7 @@ fun ToolbarOrigin(
                     .background(
                         brush = Brush.horizontalGradient(
                             colors = listOf(
-                                Color.Transparent,
-                                Color.DarkGray
+                                Color.Transparent, Color.DarkGray
                             )
                         )
                     )
@@ -793,6 +795,11 @@ interface ToolbarMenuItemsScope {
     @Composable
     fun PrivateModeToolbarMenuItem(isPrivateMode: Boolean, dismissMenuSheet: () -> Unit)
 
+    @Composable
+    fun ReaderViewToolbarMenuItem(
+        enabled: Boolean, onActivateReaderView: () -> Unit, dismissMenuSheet: () -> Unit
+    )
+
     // stop, refresh, forward, back
     @Composable
     fun NavOptionsToolbarMenuItem(loading: Boolean)
@@ -943,6 +950,29 @@ object ToolbarMenuItemsScopeInstance : ToolbarMenuItemsScope {
     }
 
     @Composable
+    override fun ReaderViewToolbarMenuItem(
+        enabled: Boolean, onActivateReaderView: () -> Unit, dismissMenuSheet: () -> Unit
+    ) {
+        Box(
+            contentAlignment = Alignment.CenterStart,
+            modifier = Modifier
+                .alpha(if (enabled) 1F else 0.5F)
+                .height(OPTION_HEIGHT)
+                .fillMaxWidth()
+                .clickable(enabled) {
+                    onActivateReaderView.invoke()
+                    dismissMenuSheet.invoke()
+                },
+        ) {
+            Text(
+                text = stringResource(R.string.browser_menu_turn_on_reader_view),
+                color = Color.White,
+                modifier = Modifier.wrapContentHeight()
+            )
+        }
+    }
+
+    @Composable
     override fun NavOptionsToolbarMenuItem(loading: Boolean) {
         val tabSessionState = LocalContext.current.components.core.store.state.selectedTab
         Row(
@@ -975,6 +1005,8 @@ fun ToolbarMenuBottomSheet(
     loading: Boolean,
     onDismissMenuBottomSheet: () -> Unit,
     onActivateFindInPage: () -> Unit,
+    readerViewEnabled: Boolean,
+    onActivateReaderView: () -> Unit,
     onNavToSettings: () -> Unit,
 ) {
     if (tabSessionState == null) return
@@ -1016,6 +1048,13 @@ fun ToolbarMenuBottomSheet(
 
             FindInPageToolbarMenuItem(
                 onActivateFindInPage = onActivateFindInPage,
+                dismissMenuSheet = onDismissMenuBottomSheet,
+            )
+            DividerToolbarMenuItem()
+
+            ReaderViewToolbarMenuItem(
+                enabled = readerViewEnabled,
+                onActivateReaderView = onActivateReaderView,
                 dismissMenuSheet = onDismissMenuBottomSheet,
             )
             DividerToolbarMenuItem()

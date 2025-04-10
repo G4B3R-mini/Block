@@ -99,6 +99,7 @@ import com.shmibblez.inferno.browser.prompts.webPrompts.AndroidPhotoPicker
 import com.shmibblez.inferno.browser.prompts.webPrompts.FilePicker
 import com.shmibblez.inferno.browser.prompts.webPrompts.FilePicker.Companion.FILE_PICKER_ACTIVITY_REQUEST_CODE
 import com.shmibblez.inferno.browser.readermode.DefaultReaderModeController
+import com.shmibblez.inferno.browser.readermode.ReaderViewComponent
 import com.shmibblez.inferno.browser.tabstrip.isTabStripEnabled
 import com.shmibblez.inferno.components.Components
 import com.shmibblez.inferno.components.TabCollectionStorage
@@ -123,7 +124,6 @@ import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.consumeFlow
 import com.shmibblez.inferno.ext.getPreferenceKey
 import com.shmibblez.inferno.ext.isLargeWindow
-import com.shmibblez.inferno.ext.isToolbarAtBottom
 import com.shmibblez.inferno.ext.nav
 import com.shmibblez.inferno.ext.navigateWithBreadcrumb
 import com.shmibblez.inferno.ext.secure
@@ -351,7 +351,7 @@ fun nav(
 }
 
 enum class BrowserComponentMode {
-    TOOLBAR, TOOLBAR_SEARCH, FIND_IN_PAGE,
+    TOOLBAR, TOOLBAR_SEARCH, FIND_IN_PAGE, READER_VIEW,
 }
 
 enum class BrowserComponentPageType {
@@ -365,12 +365,14 @@ object ComponentDimens {
     val TAB_WIDTH = 112.dp
     val TAB_CORNER_RADIUS = 8.dp
     val FIND_IN_PAGE_BAR_HEIGHT = 50.dp
+    val READER_VIEW_HEIGHT = 50.dp
     val PROGRESS_BAR_HEIGHT = 1.dp
     fun bottom_bar_height(browserComponentMode: BrowserComponentMode): Dp {
         return when (browserComponentMode) {
             BrowserComponentMode.TOOLBAR -> TOOLBAR_HEIGHT + TAB_BAR_HEIGHT
             BrowserComponentMode.TOOLBAR_SEARCH -> TOOLBAR_HEIGHT + AWESOME_BAR_HEIGHT
             BrowserComponentMode.FIND_IN_PAGE -> FIND_IN_PAGE_BAR_HEIGHT
+            BrowserComponentMode.READER_VIEW -> READER_VIEW_HEIGHT
         }
     }
 }
@@ -622,6 +624,8 @@ fun BrowserComponent(
             loading = currentTab?.content?.loading ?: false,
             onDismissMenuBottomSheet = { showMenuBottomSheet = false },
             onActivateFindInPage = { browserMode = BrowserComponentMode.FIND_IN_PAGE },
+            readerViewEnabled = currentTab?.readerState?.readerable ?: false,
+            onActivateReaderView = { browserMode = BrowserComponentMode.READER_VIEW },
             onNavToSettings = { navToSettings(navController) })
     }
 
@@ -1131,12 +1135,12 @@ fun BrowserComponent(
             }
 
             // todo: readerView
-            val readerMenuController = DefaultReaderModeController(
-                readerViewFeature,
-                binding.readerViewControlsBar,
-                isPrivate = activity.browsingModeManager.mode.isPrivate,
-                onReaderModeChanged = { activity.finishActionMode() },
-            )
+//            val readerMenuController = DefaultReaderModeController(
+//                readerViewFeature,
+//                binding.readerViewControlsBar,
+//                isPrivate = activity.browsingModeManager.mode.isPrivate,
+//                onReaderModeChanged = { activity.finishActionMode() },
+//            )
             // todo: toolbar
 //    val browserToolbarController = DefaultBrowserToolbarController(
 //        store = store,
@@ -2206,6 +2210,19 @@ fun BrowserComponent(
                             engineSession = currentTab?.engineState?.engineSession,
                             engineView = engineView,
                             session = currentTab,
+                        )
+                    }
+                    if (browserMode == BrowserComponentMode.READER_VIEW) {
+                        ReaderViewComponent(
+                            tabSessionState = currentTab,
+                            engine = context.components.core.engine,
+                            store = store,
+                            onReaderViewStatusChange = { _, _ -> // available, active ->
+//                                readerModeAvailable = available
+//                                readerModeAction.setSelected(active)
+//                                safeInvalidateBrowserToolbarView()
+                            },
+                            onDismiss = { browserMode = BrowserComponentMode.TOOLBAR }
                         )
                     }
 //                    MozBrowserToolbar { bt -> toolbar = bt }
@@ -4187,25 +4204,22 @@ private fun initReaderMode(context: Context, view: View) {
 //        listener = browserToolbarInteractor::onReaderModePressed,
 //    )
 
-    // todo: toolbar
-//    browserToolbarView.view.addPageAction(readerModeAction)
-//
-    readerViewFeature.set(
-        feature = context.components.strictMode.resetAfter(StrictMode.allowThreadDiskReads()) {
-            ReaderViewFeature(
-                context = context,
-                engine = context.components.core.engine,
-                store = context.components.core.store,
-                controlsView = binding.readerViewControlsBar,
-            ) { available, active ->
-                readerModeAvailable = available
-                readerModeAction.setSelected(active)
-                safeInvalidateBrowserToolbarView()
-            }
-        },
-        owner = lifecycleOwner,
-        view = view,
-    )
+//    readerViewFeature.set(
+//        feature = context.components.strictMode.resetAfter(StrictMode.allowThreadDiskReads()) {
+//            ReaderViewFeature(
+//                context = context,
+//                engine = context.components.core.engine,
+//                store = context.components.core.store,
+//                controlsView = binding.readerViewControlsBar,
+//            ) { available, active ->
+//                readerModeAvailable = available
+//                readerModeAction.setSelected(active)
+//                safeInvalidateBrowserToolbarView()
+//            }
+//        },
+//        owner = lifecycleOwner,
+//        view = view,
+//    )
 }
 
 private fun initReviewQualityCheck(

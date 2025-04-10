@@ -15,7 +15,7 @@ import org.json.JSONObject
  * with a JSON object which should be sent to the content script so the new
  * config can be applied.
  */
-internal class ReaderViewConfig(
+internal class InfernoReaderViewConfig(
     context: Context,
     private val sendConfigMessage: (JSONObject) -> Unit,
 ) {
