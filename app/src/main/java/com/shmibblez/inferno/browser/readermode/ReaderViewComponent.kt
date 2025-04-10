@@ -535,7 +535,3 @@ private class ActiveReaderViewContentMessageHandler(
         }
     }
 }
-
-class B : Compos {
-
-}

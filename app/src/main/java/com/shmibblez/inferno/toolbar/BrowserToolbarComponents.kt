@@ -335,7 +335,7 @@ object ToolbarOptionsScopeInstance : ToolbarOptionsScope {
 
 // start padding + (width - vertical padding since 1:1 aspect ratio) + expand icon start padding + expand icon size + expand icon end padding
 private val TOOLBAR_SEARCH_ENGINE_SELECTOR_WIDTH =
-    4.dp + (ComponentDimens.TOOLBAR_HEIGHT - 16.dp - 8.dp - 4.dp) + (4.dp + 6.dp + 4.dp)
+    4.dp + (ComponentDimens.TOOLBAR_HEIGHT - 16.dp - 8.dp - 4.dp) + (4.dp + 6.dp + 4.dp) + 4.dp
 private val TOOLBAR_SEARCH_ENGINE_SELECTOR_WIDTH_PX = TOOLBAR_SEARCH_ENGINE_SELECTOR_WIDTH.toPx()
 
 // start padding + indicator icon size + end padding
