@@ -396,11 +396,7 @@ fun ToolbarOrigin(
         indicatorWidthPx = toolbarIndicatorWidthPx(siteTrackingProtection)
     }
 
-    LaunchedEffect(tabSessionState.id) {
-        setSearchText(TextFieldValue(tabSessionState.content.url))
-    }
-
-    LaunchedEffect(editMode) {
+    LaunchedEffect(editMode, tabSessionState.content.url, tabSessionState.content.searchTerms) {
         if (editMode) {
             setSearchText(parseInput())
         } else {
