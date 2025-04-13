@@ -30,6 +30,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -207,7 +208,8 @@ class BrowserComponentWrapperFragment : Fragment(), UserInteractionHandler, Acti
         val store = requireComponents.core.store
 
         browserStateObserver = store.flowScoped(viewLifecycleOwner) { flow ->
-            flow.map { it }.collect {
+            flow.map { it }
+                .collect {
                     var currentTab = it.selectedTab
 
                     var tabList: List<TabSessionState> = emptyList()

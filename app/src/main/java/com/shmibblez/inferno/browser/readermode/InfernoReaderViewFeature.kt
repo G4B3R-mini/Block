@@ -2,18 +2,15 @@ package com.shmibblez.inferno.browser.readermode
 
 
 import android.content.Context
+import android.util.Log
 import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.Saver
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.LocalContext
 import com.shmibblez.inferno.browser.infernoFeatureState.InfernoFeatureState
-import com.shmibblez.inferno.ext.components
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.mapNotNull
@@ -25,8 +22,6 @@ import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.concept.engine.Engine
 import mozilla.components.concept.engine.webextension.MessageHandler
 import mozilla.components.concept.engine.webextension.Port
-import mozilla.components.feature.readerview.ReaderViewFeature
-import mozilla.components.feature.readerview.ReaderViewFeature.FontType
 import mozilla.components.feature.readerview.UUIDCreator
 import mozilla.components.feature.readerview.onReaderViewStatusChange
 import mozilla.components.lib.state.ext.flowScoped
@@ -45,7 +40,7 @@ fun rememberInfernoReaderViewFeatureState(
     engine: Engine,
     store: BrowserStore,
     createUUID: UUIDCreator = { UUID.randomUUID().toString() },
-    onReaderViewStatusChange: onReaderViewStatusChange = { _, _ -> Unit },
+    onReaderViewStatusChange: onReaderViewStatusChange = { _, _ -> },
 ): InfernoReaderViewFeatureState {
     val state = InfernoReaderViewFeatureState(
         context = context,
@@ -67,17 +62,17 @@ fun rememberInfernoReaderViewFeatureState(
 //        InfernoReaderViewFeatureState()
 //    }
 
-    return remember() {
+    return remember {
         state
     }
 }
 
 class InfernoReaderViewFeatureState(
     context: Context,
-    private val engine: Engine,
-    private val store: BrowserStore,
-    private val createUUID: UUIDCreator = { UUID.randomUUID().toString() },
-    private val onReaderViewStatusChange: onReaderViewStatusChange = { _, _ -> Unit },
+    internal val engine: Engine,
+    internal val store: BrowserStore,
+    internal val createUUID: UUIDCreator = { UUID.randomUUID().toString() },
+    internal val onReaderViewStatusChange: onReaderViewStatusChange = { _, _ ->  },
 //    private val prefetchStrategy: InfernoReaderViewFeaturePrefetchStrategy = InfernoReaderViewFeaturePrefetchStrategy(),
     ): InfernoFeatureState {
 
@@ -94,17 +89,19 @@ class InfernoReaderViewFeatureState(
         READER_VIEW_CONTENT_PORT,
     )
 
-    @VisibleForTesting
     internal val config = InfernoReaderViewConfig(context) { message ->
         val engineSession = store.state.selectedTab?.engineState?.engineSession
         extensionController.sendContentMessage(message, engineSession, READER_VIEW_ACTIVE_CONTENT_PORT)
     }
 
+    var active by mutableStateOf(false)
+        private set
+
+    var readerable by mutableStateOf(false)
+        private set
+
     enum class FontType(val value: String) { SANSSERIF("sans-serif"), SERIF("serif") }
     enum class ColorScheme { LIGHT, SEPIA, DARK }
-
-    // todo: put logic here, create interface for feature lifecycle events (start, stop, onBackPressed,
-    //  etc, copy moz LifecycleAwareFeature)
 
     override fun start() {
         ensureExtensionInstalled()
@@ -115,6 +112,8 @@ class InfernoReaderViewFeatureState(
                     it.readerState
                 }
                 .collect { tab ->
+                    active = tab.readerState.active
+                    readerable = tab.readerState.readerable
                     if (tab.readerState.connectRequired) {
                         connectReaderViewContentScript(tab)
                     }
@@ -146,7 +145,8 @@ class InfernoReaderViewFeatureState(
                 )
 
                 val readerUrl = extensionController.createReaderUrl(it.content.url, id) ?: run {
-                    Logger.error("FeatureReaderView unable to create ReaderUrl.")
+                Log.e("InfernoReaderViewState", "unable to create ReaderUrl")
+                Logger.error("FeatureReaderView unable to create ReaderUrl.")
                     return@let
                 }
 
@@ -176,21 +176,6 @@ class InfernoReaderViewFeatureState(
                 }
             }
         }
-    }
-
-
-    /**
-     * Shows the reader view appearance controls.
-     */
-    fun showControls() {
-//        controlsPresenter.show()
-    }
-
-    /**
-     * Hides the reader view appearance controls.
-     */
-    fun hideControls() {
-//        controlsPresenter.hide()
     }
 
     @VisibleForTesting
@@ -237,17 +222,17 @@ class InfernoReaderViewFeatureState(
     }
 
     private fun ensureExtensionInstalled() {
-        val feature = WeakReference(this)
         extensionController.install(
             engine,
             onSuccess = {
                 it.getMetadata()?.run {
                     readerBaseUrl = baseUrl
                 } ?: run {
+                    Log.e("InfernoReaderViewState", "ReaderView extension missing Metadata")
                     Logger.error("ReaderView extension missing Metadata")
                 }
 
-                feature.get()?.connectReaderViewContentScript()
+                connectReaderViewContentScript()
             },
         )
     }
@@ -376,8 +361,8 @@ class InfernoReaderViewFeatureState(
             }
 
             val fontSize = config?.fontSize ?: FONT_SIZE_DEFAULT
-            val fontType = config?.fontType ?: ReaderViewFeature.FontType.SERIF
-            val colorScheme = config?.colorScheme ?: ReaderViewFeature.ColorScheme.LIGHT
+            val fontType = config?.fontType ?: FontType.SERIF
+            val colorScheme = config?.colorScheme ?: ColorScheme.LIGHT
             val configJson = JSONObject()
                 .put(ACTION_VALUE_SHOW_FONT_SIZE, fontSize)
                 .put(ACTION_VALUE_SHOW_FONT_TYPE, fontType.value.lowercase(Locale.ROOT))

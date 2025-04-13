@@ -4,5 +4,4 @@ interface InfernoFeatureState {
     fun start()
 
     fun stop()
-
 }

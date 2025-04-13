@@ -98,8 +98,8 @@ import com.shmibblez.inferno.browser.prompts.PromptComponent
 import com.shmibblez.inferno.browser.prompts.webPrompts.AndroidPhotoPicker
 import com.shmibblez.inferno.browser.prompts.webPrompts.FilePicker
 import com.shmibblez.inferno.browser.prompts.webPrompts.FilePicker.Companion.FILE_PICKER_ACTIVITY_REQUEST_CODE
-import com.shmibblez.inferno.browser.readermode.DefaultReaderModeController
-import com.shmibblez.inferno.browser.readermode.ReaderViewComponent
+import com.shmibblez.inferno.browser.readermode.InfernoReaderViewControls
+import com.shmibblez.inferno.browser.readermode.rememberInfernoReaderViewFeatureState
 import com.shmibblez.inferno.browser.tabstrip.isTabStripEnabled
 import com.shmibblez.inferno.components.Components
 import com.shmibblez.inferno.components.TabCollectionStorage
@@ -219,8 +219,6 @@ import mozilla.components.feature.prompts.dialog.GestureNavUtils
 import mozilla.components.feature.prompts.identitycredential.DialogColors
 import mozilla.components.feature.prompts.identitycredential.DialogColorsProvider
 import mozilla.components.feature.prompts.share.ShareDelegate
-import mozilla.components.feature.readerview.ReaderViewFeature
-import mozilla.components.feature.readerview.view.ReaderViewControlsBar
 import mozilla.components.feature.search.SearchFeature
 import mozilla.components.feature.session.FullScreenFeature
 import mozilla.components.feature.session.PictureInPictureFeature
@@ -263,7 +261,7 @@ import mozilla.components.browser.toolbar.BrowserToolbar as BrowserToolbarCompat
 // todo: implement layout from fragment_browser.xml
 // todo: from fragment_browser.xml, for below views first wrap views with AndroidView, then
 //  progressively implement in compose
-//   1. implement findInPageView
+//
 //   2. implement viewDynamicDownloadDialog
 //   3. implement readerViewControlsBar https://searchfox.org/mozilla-central/source/mobile/android/android-components/components/feature/readerview/src/main/res/layout/mozac_feature_readerview_view.xml
 //   7. implement loginSelectBar
@@ -271,6 +269,7 @@ import mozilla.components.browser.toolbar.BrowserToolbar as BrowserToolbarCompat
 //   9. implement addressSelectBar AddressSelectBar
 //   10. implement creditCardSelectBar CreditCardSelectBar
 // completed, (todo: test)
+//   1. findInPageView
 //   4. crash_reporter_view CrashContentView (com.shmibblez.inferno/crashes/CrashContentIntegration.kt)
 //   5. startDownloadDialogContainer
 //   6. dynamicSnackbarContainer
@@ -480,7 +479,6 @@ fun BrowserComponent(
 //    @VisibleForTesting
 //    var _menuButtonView: MenuButton? = null
 
-    val readerViewFeature = remember { ViewBoundFeatureWrapper<ReaderViewFeature>() }
     val thumbnailsFeature = remember { ViewBoundFeatureWrapper<BrowserThumbnails>() }
 
     @VisibleForTesting val messagingFeatureMicrosurvey = ViewBoundFeatureWrapper<MessagingFeature>()
@@ -503,7 +501,6 @@ fun BrowserComponent(
     val screenOrientationFeature = ViewBoundFeatureWrapper<ScreenOrientationFeature>()
     val biometricPromptFeature = ViewBoundFeatureWrapper<BiometricPromptFeature>()
 //    val crashContentIntegration = ViewBoundFeatureWrapper<CrashContentIntegration>()
-//    val readerViewBinding = ViewBoundFeatureWrapper<ReaderViewBinding>()
 //    val openInFirefoxBinding = ViewBoundFeatureWrapper<OpenInFirefoxBinding>()
 //    val snackbarBinding = ViewBoundFeatureWrapper<SnackbarBinding>()
 //    val standardSnackbarErrorBinding =
@@ -601,6 +598,18 @@ fun BrowserComponent(
         mutableStateOf(BrowserComponentMode.TOOLBAR)
     }
 
+    val infernoReaderViewState = rememberInfernoReaderViewFeatureState(
+        context = context,
+        engine = context.components.core.engine,
+        store = store,
+        onReaderViewStatusChange = { _, active ->
+            browserMode = when (active) {
+                true -> BrowserComponentMode.READER_VIEW
+                false -> BrowserComponentMode.TOOLBAR
+            }
+        },
+    )
+
     val backHandler = OnBackPressedHandler(
         context = context,
         toolbarBackPressedHandler = {
@@ -611,11 +620,19 @@ fun BrowserComponent(
                 false
             }
         },
-        readerViewFeature = readerViewFeature,
+        readerViewBackPressedHandler = {
+            if (infernoReaderViewState.active) {
+                infernoReaderViewState.hideReaderView()
+                true
+            } else {
+                false
+            }
+        },
         fullScreenFeature = fullScreenFeature,
 //        promptsFeature = promptsFeature,
         sessionFeature = sessionFeature,
     )
+
 
     // bottom sheet menu setup
     var showMenuBottomSheet by remember { mutableStateOf(false) }
@@ -624,8 +641,7 @@ fun BrowserComponent(
             loading = currentTab?.content?.loading ?: false,
             onDismissMenuBottomSheet = { showMenuBottomSheet = false },
             onActivateFindInPage = { browserMode = BrowserComponentMode.FIND_IN_PAGE },
-            readerViewEnabled = currentTab?.readerState?.readerable ?: false,
-            onActivateReaderView = { browserMode = BrowserComponentMode.READER_VIEW },
+            onActivateReaderView = { infernoReaderViewState.showReaderView() },
             onNavToSettings = { navToSettings(navController) })
     }
 
@@ -1058,8 +1074,6 @@ fun BrowserComponent(
     /// views
     var engineView by remember { mutableStateOf<EngineView?>(null) }
     var swipeRefresh by remember { mutableStateOf<SwipeRefreshLayout?>(null) }
-    var readerViewBar by remember { mutableStateOf<ReaderViewControlsBar?>(null) }
-    var readerViewAppearanceButton by remember { mutableStateOf<FloatingActionButton?>(null) }
 
     /// event handlers
     val activityResultHandler: List<ViewBoundFeatureWrapper<*>> = listOf(
@@ -1981,15 +1995,14 @@ fun BrowserComponent(
         tabId = customTabSessionId,
     )
 
-//    var startX by remember {mutableFloatStateOf(0F)}
-    var startY by remember { mutableFloatStateOf(0F) }
-
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         snackbarHost = { SnackbarHost(snackbarHostState = snackbarHostState) },
         contentWindowInsets = ScaffoldDefaults.contentWindowInsets,
         containerColor = Color.Transparent,
         content = {
+            //    var startX by remember {mutableFloatStateOf(0F)}
+            var startY by remember { mutableFloatStateOf(0F) }
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -2167,7 +2180,7 @@ fun BrowserComponent(
         },
         floatingActionButtonPosition = FabPosition.End,
         floatingActionButton = {
-            MozFloatingActionButton { fab -> readerViewAppearanceButton = fab }
+//            MozFloatingActionButton { fab -> readerViewAppearanceButton = fab }
         },
         bottomBar = {
             // hide and show when scrolling
@@ -2213,20 +2226,11 @@ fun BrowserComponent(
                         )
                     }
                     if (browserMode == BrowserComponentMode.READER_VIEW) {
-                        ReaderViewComponent(
-                            tabSessionState = currentTab,
-                            engine = context.components.core.engine,
-                            store = store,
-                            onReaderViewStatusChange = { _, _ -> // available, active ->
-//                                readerModeAvailable = available
-//                                readerModeAction.setSelected(active)
-//                                safeInvalidateBrowserToolbarView()
-                            },
-                            onDismiss = { browserMode = BrowserComponentMode.TOOLBAR }
+                        InfernoReaderViewControls(
+                            state = infernoReaderViewState,
                         )
                     }
-//                    MozBrowserToolbar { bt -> toolbar = bt }
-                    MozReaderViewControlsBar { cb -> readerViewBar = cb }
+//                    MozReaderViewControlsBar { cb -> readerViewBar = cb }
 //                    Box(
 //                        Modifier
 //                            .fillMaxWidth()
@@ -2288,7 +2292,7 @@ private fun navToSettings(nav: NavController) {
 private data class OnBackPressedHandler(
     val context: Context,
     val toolbarBackPressedHandler: () -> Boolean,
-    val readerViewFeature: ViewBoundFeatureWrapper<ReaderViewFeature>,
+    val readerViewBackPressedHandler: () -> Boolean,
     val fullScreenFeature: ViewBoundFeatureWrapper<FullScreenFeature>,
 //    val promptsFeature: ViewBoundFeatureWrapper<PromptFeature>,
     val sessionFeature: ViewBoundFeatureWrapper<SessionFeature>,
@@ -2300,9 +2304,9 @@ private fun onBackPressed(
 ): Boolean {
     with(onBackPressedHandler) {
         // todo: findInPageIntegration.onBackPressed() ||
-        return readerViewFeature.onBackPressed() || fullScreenFeature.onBackPressed() || toolbarBackPressedHandler.invoke() || /* promptsFeature.onBackPressed()  || */ sessionFeature.onBackPressed() || removeSessionIfNeeded(
-            context
-        )
+        return readerViewBackPressedHandler.invoke() || fullScreenFeature.onBackPressed() || toolbarBackPressedHandler.invoke()
+//                || promptsFeature.onBackPressed()
+                || sessionFeature.onBackPressed() || removeSessionIfNeeded(context)
     }
 }
 
@@ -2395,24 +2399,7 @@ fun MozBrowserToolbar(setView: (BrowserToolbarCompat) -> Unit) {
     })
 }
 
-@Composable
-fun MozReaderViewControlsBar(
-    setView: (ReaderViewControlsBar) -> Unit
-) {
-    AndroidView(modifier = Modifier
-        .fillMaxSize()
-        .background(colorResource(id = R.color.toolbarBackgroundColor))
-        .height(0.dp)
-        .width(0.dp),
-        factory = { context ->
-            val v = ReaderViewControlsBar(context)
-            setView(v)
-            v
-        },
-        update = { it.visibility = View.GONE })
-}
-
-// reader view button, what this for?
+// todo: reader view button, what this for?
 @Composable
 fun MozFloatingActionButton(
     setView: (FloatingActionButton) -> Unit

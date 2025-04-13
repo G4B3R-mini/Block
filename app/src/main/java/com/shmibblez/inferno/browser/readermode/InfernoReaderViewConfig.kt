@@ -4,6 +4,11 @@ package com.shmibblez.inferno.browser.readermode
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.res.Configuration
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import mozilla.components.feature.readerview.ReaderViewFeature
 import org.json.JSONObject
 
@@ -22,61 +27,82 @@ internal class InfernoReaderViewConfig(
 
     private val prefs by lazy { context.getSharedPreferences(SHARED_PREF_NAME, MODE_PRIVATE) }
     private val resources = context.resources
-    private var colorSchemeCache: ReaderViewFeature.ColorScheme? = null
-    private var fontTypeCache: ReaderViewFeature.FontType? = null
+    private var colorSchemeCache: InfernoReaderViewFeatureState.ColorScheme? = null
+    private var fontTypeCache: InfernoReaderViewFeatureState.FontType? = null
     private var fontSizeCache: Int? = null
 
-    var colorScheme: ReaderViewFeature.ColorScheme
-        get() {
-            if (colorSchemeCache == null) {
-                // Default to a dark theme if either the system or local dark theme is active
-                val defaultColor = if (isNightMode()) {
-                    ReaderViewFeature.ColorScheme.DARK
-                } else {
-                    ReaderViewFeature.ColorScheme.LIGHT
+    var colorScheme by run {
+        val state = mutableStateOf(InfernoReaderViewFeatureState.ColorScheme.DARK)
+        object: MutableState<InfernoReaderViewFeatureState.ColorScheme> by state {
+            override var value: InfernoReaderViewFeatureState.ColorScheme
+                get() = run {
+                    if (colorSchemeCache == null) {
+                        // Default to a dark theme if either the system or local dark theme is active
+                        val defaultColor = if (isNightMode()) {
+                            InfernoReaderViewFeatureState.ColorScheme.DARK
+                        } else {
+                            InfernoReaderViewFeatureState.ColorScheme.LIGHT
+                        }
+                        colorSchemeCache = getEnumFromPrefs(COLOR_SCHEME_KEY, defaultColor)
+                    }
+                    state.value = colorSchemeCache!!
+                    return state.value
                 }
-                colorSchemeCache = getEnumFromPrefs(COLOR_SCHEME_KEY, defaultColor)
-            }
-            return colorSchemeCache!!
+                set(value) {
+                    if (colorSchemeCache != value) {
+                        colorSchemeCache = value
+                        state.value = colorSchemeCache!!
+                        prefs.edit().putString(COLOR_SCHEME_KEY, value.name).apply()
+                        sendMessage(ACTION_SET_COLOR_SCHEME) { put(ACTION_VALUE, value.name) }
+                    }
+                }
         }
-        set(value) {
-            if (colorSchemeCache != value) {
-                colorSchemeCache = value
-                prefs.edit().putString(COLOR_SCHEME_KEY, value.name).apply()
-                sendMessage(ACTION_SET_COLOR_SCHEME) { put(ACTION_VALUE, value.name) }
-            }
-        }
+    }
 
-    var fontType: ReaderViewFeature.FontType
-        get() {
-            if (fontTypeCache == null) {
-                fontTypeCache = getEnumFromPrefs(FONT_TYPE_KEY, ReaderViewFeature.FontType.SERIF)
-            }
-            return fontTypeCache!!
+    var fontType by run {
+        val state = mutableStateOf(InfernoReaderViewFeatureState.FontType.SERIF)
+        object: MutableState<InfernoReaderViewFeatureState.FontType> by state {
+            override var value: InfernoReaderViewFeatureState.FontType
+                get() = run {
+                    if (fontTypeCache == null) {
+                        fontTypeCache = getEnumFromPrefs(FONT_TYPE_KEY, InfernoReaderViewFeatureState.FontType.SERIF)
+                    }
+                    state.value = fontTypeCache!!
+                    return state.value
+                }
+                set(value) {
+                    if (fontTypeCache != value) {
+                        fontTypeCache = value
+                        state.value = fontTypeCache!!
+                        prefs.edit().putString(FONT_TYPE_KEY, value.name).apply()
+                        sendMessage(ACTION_SET_FONT_TYPE) { put(ACTION_VALUE, value.value) }
+                    }
+                }
         }
-        set(value) {
-            if (fontTypeCache != value) {
-                fontTypeCache = value
-                prefs.edit().putString(FONT_TYPE_KEY, value.name).apply()
-                sendMessage(ACTION_SET_FONT_TYPE) { put(ACTION_VALUE, value.value) }
-            }
-        }
+    }
 
-    var fontSize: Int
-        get() {
-            if (fontSizeCache == null) {
-                fontSizeCache = prefs.getInt(FONT_SIZE_KEY, FONT_SIZE_DEFAULT)
-            }
-            return fontSizeCache!!
+    var fontSize by run {
+        val state = mutableIntStateOf(FONT_SIZE_DEFAULT)
+        object: MutableState<Int> by state {
+            override var value: Int
+                get() = run {
+                    if (fontSizeCache == null) {
+                        fontSizeCache = prefs.getInt(FONT_SIZE_KEY, FONT_SIZE_DEFAULT)
+                    }
+                    state.intValue = fontSizeCache!!
+                    return state.intValue
+                }
+                set(value) {
+                    if (fontSizeCache != value) {
+                        val diff = value - state.intValue
+                        fontSizeCache = value
+                        state.intValue = fontSizeCache!!
+                        prefs.edit().putInt(FONT_SIZE_KEY, value).apply()
+                        sendMessage(ACTION_CHANGE_FONT_SIZE) { put(ACTION_VALUE, diff) }
+                    }
+                }
         }
-        set(value) {
-            if (fontSizeCache != value) {
-                val diff = value - fontSize
-                fontSizeCache = value
-                prefs.edit().putInt(FONT_SIZE_KEY, value).apply()
-                sendMessage(ACTION_CHANGE_FONT_SIZE) { put(ACTION_VALUE, diff) }
-            }
-        }
+    }
 
     private inline fun <reified T : Enum<T>> getEnumFromPrefs(key: String, default: T): T {
         val enumName = prefs.getString(key, default.name) ?: default.name

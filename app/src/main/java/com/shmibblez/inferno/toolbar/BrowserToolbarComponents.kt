@@ -128,7 +128,7 @@ import kotlin.math.roundToInt
 //   - make options in menu a grid
 
 
-val ICON_SIZE = 20.dp
+val ICON_SIZE = 18.dp
 val ICON_PADDING = 8.dp
 val INDICATOR_ICON_SIZE = 16.dp
 val INDICATOR_ICON_PADDING = 4.dp
@@ -183,7 +183,7 @@ interface ToolbarOptionsScope {
 }
 
 object ToolbarOptionsScopeInstance : ToolbarOptionsScope {
-    private const val disabledAlpha = 0.5F
+    private const val DISABLED_ALPHA = 0.5F
 
     @Composable
     override fun ToolbarSeparator() {
@@ -200,7 +200,7 @@ object ToolbarOptionsScopeInstance : ToolbarOptionsScope {
         Icon(
             modifier = Modifier
                 .size(ICON_SIZE)
-                .alpha(if (enabled) 1F else disabledAlpha)
+                .alpha(if (enabled) 1F else DISABLED_ALPHA)
                 .clickable(enabled = enabled) { useCases.goBack.invoke() },
             painter = painterResource(id = R.drawable.baseline_chevron_left_24),
             contentDescription = "back",
@@ -214,7 +214,7 @@ object ToolbarOptionsScopeInstance : ToolbarOptionsScope {
         Icon(
             modifier = Modifier
                 .size(ICON_SIZE)
-                .alpha(if (enabled) 1F else disabledAlpha)
+                .alpha(if (enabled) 1F else DISABLED_ALPHA)
                 .clickable(enabled = enabled) { useCases.goForward.invoke() },
             painter = painterResource(id = R.drawable.baseline_chevron_right_24),
             contentDescription = "forward",
@@ -228,7 +228,7 @@ object ToolbarOptionsScopeInstance : ToolbarOptionsScope {
         Icon(
             modifier = Modifier
                 .size(ICON_SIZE)
-                .alpha(if (enabled) 1F else disabledAlpha)
+                .alpha(if (enabled) 1F else DISABLED_ALPHA)
                 .clickable(enabled = enabled) {
                     if (loading) useCases.stopLoading.invoke() else useCases.reload.invoke()
                 },
@@ -246,7 +246,7 @@ object ToolbarOptionsScopeInstance : ToolbarOptionsScope {
         Icon(
             modifier = Modifier
                 .size(ICON_SIZE)
-                .alpha(if (enabled) 1F else disabledAlpha)
+                .alpha(if (enabled) 1F else DISABLED_ALPHA)
                 .clickable(enabled = enabled) { useCases.stopLoading.invoke() },
             painter = painterResource(id = R.drawable.ic_cross_24),
             contentDescription = "stop loading",
@@ -285,7 +285,7 @@ object ToolbarOptionsScopeInstance : ToolbarOptionsScope {
         Icon(
             modifier = Modifier
                 .size(ICON_SIZE)
-                .alpha(if (enabled) 1F else disabledAlpha)
+                .alpha(if (enabled) 1F else DISABLED_ALPHA)
                 .clickable(enabled = enabled, onClick = ::share),
             painter = painterResource(id = R.drawable.ic_share),
             contentDescription = "share",
@@ -315,7 +315,7 @@ object ToolbarOptionsScopeInstance : ToolbarOptionsScope {
                 fontColor = Color.White,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
-                fontSize = 10.sp
+                fontSize = 9.sp
             )
         }
     }
@@ -949,6 +949,7 @@ object ToolbarMenuItemsScopeInstance : ToolbarMenuItemsScope {
     override fun ReaderViewToolbarMenuItem(
         enabled: Boolean, onActivateReaderView: () -> Unit, dismissMenuSheet: () -> Unit
     ) {
+        Log.d("ReaderViewToolbarMenuIt", "enabled/readerable: $enabled")
         Box(
             contentAlignment = Alignment.CenterStart,
             modifier = Modifier
@@ -1001,7 +1002,6 @@ fun ToolbarMenuBottomSheet(
     loading: Boolean,
     onDismissMenuBottomSheet: () -> Unit,
     onActivateFindInPage: () -> Unit,
-    readerViewEnabled: Boolean,
     onActivateReaderView: () -> Unit,
     onNavToSettings: () -> Unit,
 ) {
@@ -1049,7 +1049,7 @@ fun ToolbarMenuBottomSheet(
             DividerToolbarMenuItem()
 
             ReaderViewToolbarMenuItem(
-                enabled = readerViewEnabled,
+                enabled = tabSessionState.readerState.readerable,
                 onActivateReaderView = onActivateReaderView,
                 dismissMenuSheet = onDismissMenuBottomSheet,
             )

@@ -19,28 +19,22 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.painter.BitmapPainter
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -86,7 +80,7 @@ fun BrowserTabBar(tabList: List<TabSessionState>, selectedTab: TabSessionState?)
 
     // scroll to active tab
     val i = tabList.findIndex { it.id == selectedTab?.id }
-    LaunchedEffect(i) {
+    LaunchedEffect(i, LocalConfiguration.current.orientation) {
         val sw = localConfig.screenWidthDp.dp
         if (i != null) listState.animateScrollToItem(
             i, -(sw - ComponentDimens.TAB_WIDTH).toPx() / 2
@@ -186,14 +180,22 @@ private fun MiniTab(
                 // if last or to left of selected tab sw else hsw
                 strokeWidth = sw, start = Offset(w - hsw, hsw), end = Offset(w - hsw, h - hsw)
             )
-//            // bottom
-//            drawLine(
+//            // top selected indicator
+//            if (selected) drawLine(
 //                cap = cap,
-//                color = color,
+//                color = Color.Red,
 //                strokeWidth = sw,
 //                start = Offset(hsw, hsw),
 //                end = Offset(w - hsw, hsw)
 //            )
+            // bottom selected indicator
+            if (selected) drawLine(
+                cap = cap,
+                color = Color.Red,
+                strokeWidth = sw,
+                start = Offset(hsw, h - hsw),
+                end = Offset(w - hsw, h - hsw)
+            )
         }
         .clickable(enabled = !selected) {
             context.components.useCases.tabsUseCases.selectTab(
@@ -246,11 +248,11 @@ private fun MiniTab(
                 modifier = Modifier
                     .align(Alignment.CenterEnd)
                     .aspectRatio(0.5F)
+                    .padding(vertical = 1.dp)
                     .background(
                         brush = Brush.horizontalGradient(
                             colors = listOf(
-                                Color.Transparent,
-                                Color.Black
+                                Color.Transparent, Color.Black
                             )
                         )
                     )

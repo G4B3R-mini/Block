@@ -7,11 +7,15 @@ package com.shmibblez.inferno.compose.snackbar
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarData
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.window.Popup
 import com.shmibblez.inferno.compose.core.Action
 import com.shmibblez.inferno.compose.snackbar.SnackbarState.Type
 import com.shmibblez.inferno.theme.FirefoxTheme
 import androidx.compose.material3.SnackbarHost as MaterialSnackbarHost
+
+// todo: make popup show above tabstray, not working for some reason
 
 /**
  * Host for [Snackbar]s to properly show, hide, and dismiss items via [snackbarHostState] in Compose.
@@ -25,35 +29,40 @@ fun SnackbarHost(
     snackbarHostState: AcornSnackbarHostState,
     modifier: Modifier = Modifier,
 ) {
-    FirefoxTheme {
-        // We need separate hosts for the different use cases/styles until we migrate to material 3
-        // https://bugzilla.mozilla.org/show_bug.cgi?id=1925333
-        MaterialSnackbarHost(
-            hostState = snackbarHostState.defaultSnackbarHostState,
-            modifier = modifier,
-        ) { snackbarData ->
-            Snackbar(
-                snackbarState = SnackbarState(
-                    message = snackbarData.visuals.message,
-                    type = Type.Default,
-                    action = snackbarData.action,
-                ),
-            )
-        }
+//    Popup(
+//        alignment = Alignment.BottomCenter,
+//        onDismissRequest = { /* nothing for now */ }
+//    ) {
+        FirefoxTheme {
+            // We need separate hosts for the different use cases/styles until we migrate to material 3
+            // https://bugzilla.mozilla.org/show_bug.cgi?id=1925333
+            MaterialSnackbarHost(
+                hostState = snackbarHostState.defaultSnackbarHostState,
+                modifier = modifier,
+            ) { snackbarData ->
+                Snackbar(
+                    snackbarState = SnackbarState(
+                        message = snackbarData.visuals.message,
+                        type = Type.Default,
+                        action = snackbarData.action,
+                    ),
+                )
+            }
 
-        MaterialSnackbarHost(
-            hostState = snackbarHostState.warningSnackbarHostState,
-            modifier = modifier,
-        ) { snackbarData ->
-            Snackbar(
-                snackbarState = SnackbarState(
-                    message = snackbarData.visuals.message,
-                    type = Type.Warning,
-                    action = snackbarData.action,
-                ),
-            )
+            MaterialSnackbarHost(
+                hostState = snackbarHostState.warningSnackbarHostState,
+                modifier = modifier,
+            ) { snackbarData ->
+                Snackbar(
+                    snackbarState = SnackbarState(
+                        message = snackbarData.visuals.message,
+                        type = Type.Warning,
+                        action = snackbarData.action,
+                    ),
+                )
+            }
         }
-    }
+//    }
 }
 
 private val SnackbarData.action: Action?
