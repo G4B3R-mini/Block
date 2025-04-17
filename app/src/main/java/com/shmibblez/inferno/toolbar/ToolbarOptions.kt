@@ -48,207 +48,170 @@ import mozilla.components.support.ktx.android.content.createChooserExcludingCurr
 //   - make options in menu a grid
 
 
-val ICON_SIZE = 18.dp
-val ICON_PADDING = 8.dp
-val INDICATOR_ICON_SIZE = 16.dp
-val INDICATOR_ICON_PADDING = 4.dp
-val OPTION_HEIGHT = 40.dp
+internal val TOOLBAR_ICON_SIZE = 18.dp
+internal val TOOLBAR_ICON_PADDING = 8.dp
+internal val TOOLBAR_INDICATOR_ICON_SIZE = 16.dp
+internal val TOOLBAR_INDICATOR_ICON_PADDING = 4.dp
+internal val TOOLBAR_MENU_OPTION_HEIGHT = 40.dp
 
+internal class ToolbarOptions {
+    companion object {
+        /**
+         * @param progress 0.0 is 0%, 1.0 is 100%
+         */
+        @Composable
+        internal fun ProgressBar(progress: Float, modifier: Modifier = Modifier) {
+            LinearProgressIndicator(
+                progress = { progress },
+                modifier = modifier
+                    .height(ComponentDimens.PROGRESS_BAR_HEIGHT)
+                    .fillMaxWidth(),
+                color = Color.Red,
+                trackColor = Color.Black
+            )
+        }
+        // TODO: add options icons for
+        //  - find in page (search icon)
+        //  - switch to desktop site (desktop icon)
+        //  - share (share icon)
+        //  - settings (settings icon)
+        //  - private mode (incog symbol)
+        //  - print page
+        //  - scrolling screenshot
 
-/**
- * @param progress 0.0 is 0%, 1.0 is 100%
- */
-@Composable
-internal fun ProgressBar(progress: Float, modifier: Modifier = Modifier) {
-    LinearProgressIndicator(
-        progress = { progress },
-        modifier = modifier
-            .height(ComponentDimens.PROGRESS_BAR_HEIGHT)
-            .fillMaxWidth(),
-        color = Color.Red,
-        trackColor = Color.Black
-    )
-}
+        private const val DISABLED_ALPHA = 0.5F
 
-interface ToolbarOptionsScope {
-    // TODO: add options icons for
-    //  - find in page (search icon)
-    //  - switch to desktop site (desktop icon)
-    //  - share (share icon)
-    //  - settings (settings icon)
-    //  - private mode (incog symbol)
-    //  - print page
-    //  - scrolling screenshot
-
-    @Composable
-    fun ToolbarSeparator()
-
-    @Composable
-    fun ToolbarBack(enabled: Boolean)
-
-    @Composable
-    fun ToolbarForward(enabled: Boolean)
-
-    @Composable
-    fun ToolbarReload(enabled: Boolean, loading: Boolean)
-
-    @Composable
-    fun ToolbarStopLoading(enabled: Boolean)
-
-    @Composable
-    fun ToolbarShare(url: String?)
-
-    @Composable
-    fun ToolbarShowTabsTray(tabCount: Int, onNavToTabsTray: () -> Unit)
-}
-
-object ToolbarOptionsScopeInstance : ToolbarOptionsScope {
-    private const val DISABLED_ALPHA = 0.5F
-
-    @Composable
-    override fun ToolbarSeparator() {
-        VerticalDivider(
-            modifier = Modifier.height(ICON_SIZE),
-            color = Color.White,
-            thickness = 1.dp,
-        )
-    }
-
-    @Composable
-    override fun ToolbarBack(enabled: Boolean) {
-        val useCases = sessionUseCases()
-        Icon(
-            modifier = Modifier
-                .size(ICON_SIZE)
-                .alpha(if (enabled) 1F else DISABLED_ALPHA)
-                .clickable(enabled = enabled) { useCases.goBack.invoke() },
-            painter = painterResource(id = R.drawable.baseline_chevron_left_24),
-            contentDescription = "back",
-            tint = Color.White
-        )
-    }
-
-    @Composable
-    override fun ToolbarForward(enabled: Boolean) {
-        val useCases = sessionUseCases()
-        Icon(
-            modifier = Modifier
-                .size(ICON_SIZE)
-                .alpha(if (enabled) 1F else DISABLED_ALPHA)
-                .clickable(enabled = enabled) { useCases.goForward.invoke() },
-            painter = painterResource(id = R.drawable.baseline_chevron_right_24),
-            contentDescription = "forward",
-            tint = Color.White,
-        )
-    }
-
-    @Composable
-    override fun ToolbarReload(enabled: Boolean, loading: Boolean) {
-        val useCases = sessionUseCases()
-        Icon(
-            modifier = Modifier
-                .size(ICON_SIZE)
-                .alpha(if (enabled) 1F else DISABLED_ALPHA)
-                .clickable(enabled = enabled) {
-                    if (loading) useCases.stopLoading.invoke() else useCases.reload.invoke()
-                },
-            painter = if (loading) painterResource(id = R.drawable.ic_cross_24) else painterResource(
-                id = R.drawable.ic_arrow_clockwise_24
-            ),
-            contentDescription = "reload page",
-            tint = Color.White
-        )
-    }
-
-    @Composable
-    override fun ToolbarStopLoading(enabled: Boolean) {
-        val useCases = sessionUseCases()
-        Icon(
-            modifier = Modifier
-                .size(ICON_SIZE)
-                .alpha(if (enabled) 1F else DISABLED_ALPHA)
-                .clickable(enabled = enabled) { useCases.stopLoading.invoke() },
-            painter = painterResource(id = R.drawable.ic_cross_24),
-            contentDescription = "stop loading",
-            tint = Color.White
-        )
-    }
-
-    @Composable
-    override fun ToolbarShare(url: String?) {
-        val context = LocalContext.current
-        fun share() {
-            val intent = Intent(Intent.ACTION_SEND).apply {
-                type = "text/plain"
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                putExtra(Intent.EXTRA_TEXT, url)
-            }
-
-            try {
-                context.startActivity(
-                    intent.createChooserExcludingCurrentApp(
-                        context,
-                        context.getString(R.string.mozac_feature_contextmenu_share_link),
-                    ),
-                )
-            } catch (e: ActivityNotFoundException) {
-                mozilla.components.support.base.log.Log.log(
-                    mozilla.components.support.base.log.Log.Priority.WARN,
-                    message = "No activity to share to found",
-                    throwable = e,
-                    tag = "createShareLinkCandidate",
-                )
-            }
+        @Composable
+        fun ToolbarSeparator() {
+            VerticalDivider(
+                modifier = Modifier.height(TOOLBAR_ICON_SIZE),
+                color = Color.White,
+                thickness = 1.dp,
+            )
         }
 
-        val enabled = url != null
-        Icon(
-            modifier = Modifier
-                .size(ICON_SIZE)
-                .alpha(if (enabled) 1F else DISABLED_ALPHA)
-                .clickable(enabled = enabled, onClick = ::share),
-            painter = painterResource(id = R.drawable.ic_share),
-            contentDescription = "share",
-            tint = Color.White
-        )
-    }
-
-    @Composable
-    override fun ToolbarShowTabsTray(tabCount: Int, onNavToTabsTray: () -> Unit) {
-        Box(
-            modifier = Modifier
-                .size(ICON_SIZE)
-//                .alpha(0.5F)
-                .clickable { onNavToTabsTray.invoke() }
-                .wrapContentHeight(unbounded = true),
-            contentAlignment = Alignment.Center,
-        ) {
+        @Composable
+        fun ToolbarBack(enabled: Boolean) {
+            val useCases = sessionUseCases()
             Icon(
-                modifier = Modifier.fillMaxSize(),
-                painter = painterResource(id = R.drawable.ic_tabcounter_box_24),
-                contentDescription = "show tabs tray",
+                modifier = Modifier
+                    .size(TOOLBAR_ICON_SIZE)
+                    .alpha(if (enabled) 1F else DISABLED_ALPHA)
+                    .clickable(enabled = enabled) { useCases.goBack.invoke() },
+                painter = painterResource(id = R.drawable.ic_chevron_left_24),
+                contentDescription = "back",
+                tint = Color.White
+            )
+        }
+
+        @Composable
+        fun ToolbarForward(enabled: Boolean) {
+            val useCases = sessionUseCases()
+            Icon(
+                modifier = Modifier
+                    .size(TOOLBAR_ICON_SIZE)
+                    .alpha(if (enabled) 1F else DISABLED_ALPHA)
+                    .clickable(enabled = enabled) { useCases.goForward.invoke() },
+                painter = painterResource(id = R.drawable.ic_chevron_right_24),
+                contentDescription = "forward",
                 tint = Color.White,
             )
-            InfernoText(
-                modifier = Modifier.fillMaxSize(),
-                text = tabCount.toString(),
-                fontColor = Color.White,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-                fontSize = 9.sp
+        }
+
+        @Composable
+        fun ToolbarReload(enabled: Boolean, loading: Boolean) {
+            val useCases = sessionUseCases()
+            Icon(
+                modifier = Modifier
+                    .size(TOOLBAR_ICON_SIZE)
+                    .alpha(if (enabled) 1F else DISABLED_ALPHA)
+                    .clickable(enabled = enabled) {
+                        if (loading) useCases.stopLoading.invoke() else useCases.reload.invoke()
+                    },
+                painter = if (loading) painterResource(id = R.drawable.ic_cross_24) else painterResource(
+                    id = R.drawable.ic_arrow_clockwise_24
+                ),
+                contentDescription = "reload page",
+                tint = Color.White
             )
         }
-    }
 
-    @Composable
-    fun ToolbarMenuIcon(onShowMenuBottomSheet: () -> Unit) {
-        Icon(
-            modifier = Modifier
-                .size(ICON_SIZE)
-                .clickable(onClick = onShowMenuBottomSheet),
-            painter = painterResource(id = R.drawable.ic_app_menu_24),
-            contentDescription = "menu",
-            tint = Color.White
-        )
+        @Composable
+        fun ToolbarShare(url: String?) {
+            val context = LocalContext.current
+            fun share() {
+                val intent = Intent(Intent.ACTION_SEND).apply {
+                    type = "text/plain"
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    putExtra(Intent.EXTRA_TEXT, url)
+                }
+
+                try {
+                    context.startActivity(
+                        intent.createChooserExcludingCurrentApp(
+                            context,
+                            context.getString(R.string.mozac_feature_contextmenu_share_link),
+                        ),
+                    )
+                } catch (e: ActivityNotFoundException) {
+                    mozilla.components.support.base.log.Log.log(
+                        mozilla.components.support.base.log.Log.Priority.WARN,
+                        message = "No activity to share to found",
+                        throwable = e,
+                        tag = "createShareLinkCandidate",
+                    )
+                }
+            }
+
+            val enabled = url != null
+            Icon(
+                modifier = Modifier
+                    .size(TOOLBAR_ICON_SIZE)
+                    .alpha(if (enabled) 1F else DISABLED_ALPHA)
+                    .clickable(enabled = enabled, onClick = ::share),
+                painter = painterResource(id = R.drawable.ic_share),
+                contentDescription = "share",
+                tint = Color.White
+            )
+        }
+
+        @Composable
+        fun ToolbarShowTabsTray(tabCount: Int, onNavToTabsTray: () -> Unit) {
+            Box(
+                modifier = Modifier
+                    .size(TOOLBAR_ICON_SIZE)
+//                .alpha(0.5F)
+                    .clickable { onNavToTabsTray.invoke() }
+                    .wrapContentHeight(unbounded = true),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    modifier = Modifier.fillMaxSize(),
+                    painter = painterResource(id = R.drawable.ic_tabcounter_box_24),
+                    contentDescription = "show tabs tray",
+                    tint = Color.White,
+                )
+                InfernoText(
+                    modifier = Modifier.fillMaxSize(),
+                    text = tabCount.toString(),
+                    fontColor = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    fontSize = 9.sp
+                )
+            }
+        }
+
+        @Composable
+        fun ToolbarMenuIcon(onShowMenuBottomSheet: () -> Unit) {
+            Icon(
+                modifier = Modifier
+                    .size(TOOLBAR_ICON_SIZE)
+                    .clickable(onClick = onShowMenuBottomSheet),
+                painter = painterResource(id = R.drawable.ic_app_menu_24),
+                contentDescription = "menu",
+                tint = Color.White
+            )
+        }
     }
 }

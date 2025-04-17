@@ -41,7 +41,6 @@ import com.shmibblez.inferno.R
 import com.shmibblez.inferno.components.accounts.FenixAccountManager
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.settings
-import com.shmibblez.inferno.nimbus.FxNimbus
 import com.shmibblez.inferno.theme.ThemeManager
 
 /**
@@ -217,7 +216,7 @@ open class DefaultToolbarMenu(
     @VisibleForTesting
     internal val newTabItem = BrowserMenuImageText(
         context.getString(R.string.library_new_tab),
-        R.drawable.ic_new,
+        R.drawable.ic_new_24,
         primaryTextColor(),
     ) {
         onItemTapped.invoke(ToolbarMenu.Item.NewTab)

@@ -137,7 +137,7 @@ fun BrowserTabBar(tabList: List<TabSessionState>, selectedTab: TabSessionState?)
                             nextTo = selectedTab.id, // todo: next to current based on config, default is true
                         )
                     },
-                painter = painterResource(R.drawable.ic_new),
+                painter = painterResource(R.drawable.ic_new_24),
                 tint = Color.White,
                 contentDescription = "new tab"
             )

@@ -3,17 +3,40 @@
     android:height="24dp"
     android:autoMirrored="true"
     android:tint="#FFFFFF"
-    android:viewportWidth="24"
-    android:viewportHeight="24">
+    android:viewportWidth="960"
+    android:viewportHeight="960">
+
     <group
-        android:scaleX="1.5"
-        android:scaleY="1.5"
-        android:translateX="-6"
-        android:translateY="-6">
-        <!--  og cross  -->
-        <!--    <path android:fillColor="@android:color/white" android:pathData="M19,6.41L17.59,5 12,10.59 6.41,5 5,6.41 10.59,12 5,17.59 6.41,19 12,13.41 17.59,19 19,17.59 13.41,12z"/>-->
+        android:scaleX="1.82"
+        android:scaleY="1.82"
+        android:translateX="-394"
+        android:translateY="-394">
+
         <path
-            android:fillColor="@color/mozac_ui_icons_fill"
-            android:pathData="M12 10.753L5.238 3.99 4 5.228l6.762 6.762L4 18.752l1.238 1.238L12 13.227l6.762 6.763L20 18.752l-6.763-6.762L20 5.228 18.762 3.99 12 10.753z" />
+            android:fillColor="@android:color/white"
+            android:pathData="M480,536L284,732Q273,743 256,743Q239,743 228,732Q217,721 217,704Q217,687 228,676L424,480L228,284Q217,273 217,256Q217,239 228,228Q239,217 256,217Q273,217 284,228L480,424L676,228Q687,217 704,217Q721,217 732,228Q743,239 743,256Q743,273 732,284L536,480L732,676Q743,687 743,704Q743,721 732,732Q721,743 704,743Q687,743 676,732L480,536Z" />
+
     </group>
+
 </vector>
+
+    <!--  og  -->
+    <!--<vector xmlns:android="http://schemas.android.com/apk/res/android"-->
+    <!--    android:width="24dp"-->
+    <!--    android:height="24dp"-->
+    <!--    android:autoMirrored="true"-->
+    <!--    android:tint="#FFFFFF"-->
+    <!--    android:viewportWidth="24"-->
+    <!--    android:viewportHeight="24">-->
+    <!--    <group-->
+    <!--        android:scaleX="1.5"-->
+    <!--        android:scaleY="1.5"-->
+    <!--        android:translateX="-6"-->
+    <!--        android:translateY="-6">-->
+    <!--        &lt;!&ndash;  og cross  &ndash;&gt;-->
+    <!--        &lt;!&ndash;    <path android:fillColor="@android:color/white" android:pathData="M19,6.41L17.59,5 12,10.59 6.41,5 5,6.41 10.59,12 5,17.59 6.41,19 12,13.41 17.59,19 19,17.59 13.41,12z"/>&ndash;&gt;-->
+    <!--        <path-->
+    <!--            android:fillColor="@color/mozac_ui_icons_fill"-->
+    <!--            android:pathData="M12 10.753L5.238 3.99 4 5.228l6.762 6.762L4 18.752l1.238 1.238L12 13.227l6.762 6.763L20 18.752l-6.763-6.762L20 5.228 18.762 3.99 12 10.753z" />-->
+    <!--    </group>-->
+    <!--</vector>-->

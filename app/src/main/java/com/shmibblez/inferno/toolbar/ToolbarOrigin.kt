@@ -24,6 +24,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -63,13 +64,6 @@ import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.ComponentDimens
 import com.shmibblez.inferno.browser.toPx
 import com.shmibblez.inferno.ext.components
-import com.shmibblez.inferno.toolbar.ToolbarMenuItemsScopeInstance.DividerToolbarMenuItem
-import com.shmibblez.inferno.toolbar.ToolbarOptionsScopeInstance.ToolbarSeparator
-import com.shmibblez.inferno.toolbar.ToolbarOriginScopeInstance.ToolbarClearText
-import com.shmibblez.inferno.toolbar.ToolbarOriginScopeInstance.ToolbarSearchEngineSelector
-import com.shmibblez.inferno.toolbar.ToolbarOriginScopeInstance.ToolbarSecurityIndicator
-import com.shmibblez.inferno.toolbar.ToolbarOriginScopeInstance.ToolbarTrackingProtectionIndicator
-import com.shmibblez.inferno.toolbar.ToolbarOriginScopeInstance.ToolbarUndoClearText
 import mozilla.components.browser.state.search.SearchEngine
 import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.browser.state.state.searchEngines
@@ -77,6 +71,7 @@ import mozilla.components.browser.state.state.selectedOrDefaultSearchEngine
 import mozilla.components.support.ktx.kotlin.isUrl
 import mozilla.components.support.ktx.kotlin.toNormalizedUrl
 import kotlin.math.roundToInt
+import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarSeparator
 
 
 // start padding + (width - vertical padding since 1:1 aspect ratio) + expand icon start padding + expand icon size + expand icon end padding
@@ -85,12 +80,12 @@ private val TOOLBAR_SEARCH_ENGINE_SELECTOR_WIDTH =
 private val TOOLBAR_SEARCH_ENGINE_SELECTOR_WIDTH_PX = TOOLBAR_SEARCH_ENGINE_SELECTOR_WIDTH.toPx()
 
 // start padding + indicator icon size + end padding
-private val TOOLBAR_ACTION_WIDTH = 4.dp + INDICATOR_ICON_SIZE + 8.dp
+private val TOOLBAR_ACTION_WIDTH = 4.dp + TOOLBAR_INDICATOR_ICON_SIZE + 8.dp
 private val TOOLBAR_ACTION_WIDTH_PX = TOOLBAR_ACTION_WIDTH.toPx()
 
 //
 private fun toolbarIndicatorWidth(siteTrackingProtection: SiteTrackingProtection): Dp {
-    return 8.dp + INDICATOR_ICON_SIZE + INDICATOR_ICON_PADDING + (if (siteTrackingProtection != SiteTrackingProtection.OFF_GLOBALLY) INDICATOR_ICON_SIZE + INDICATOR_ICON_PADDING + 1.dp + INDICATOR_ICON_PADDING else 0.dp) + 4.dp
+    return 8.dp + TOOLBAR_INDICATOR_ICON_SIZE + TOOLBAR_INDICATOR_ICON_PADDING + (if (siteTrackingProtection != SiteTrackingProtection.OFF_GLOBALLY) TOOLBAR_INDICATOR_ICON_SIZE + TOOLBAR_INDICATOR_ICON_PADDING + 1.dp + TOOLBAR_INDICATOR_ICON_PADDING else 0.dp) + 4.dp
 }
 
 private fun toolbarIndicatorWidthPx(siteTrackingProtection: SiteTrackingProtection): Int {
@@ -290,7 +285,7 @@ fun ToolbarOrigin(
                 },
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(
-                INDICATOR_ICON_PADDING, Alignment.CenterHorizontally
+                TOOLBAR_INDICATOR_ICON_PADDING, Alignment.CenterHorizontally
             )
         ) {
             // toolbar indicators
@@ -308,7 +303,7 @@ fun ToolbarOrigin(
                 .padding(
                     start = 4.dp, end = 8.dp
                 )
-                .size(INDICATOR_ICON_SIZE)
+                .size(TOOLBAR_INDICATOR_ICON_SIZE)
                 .offset {
                     IntOffset(x = (TOOLBAR_ACTION_WIDTH_PX * animationValue).roundToInt(), y = 0)
                 },
@@ -330,29 +325,6 @@ fun ToolbarOrigin(
             }
         }
     }
-}
-
-interface ToolbarOriginScope {
-    @Composable
-    fun ToolbarEmptyIndicator(enabled: Boolean)
-
-    @Composable
-    fun ToolbarTrackingProtectionIndicator(trackingProtection: SiteTrackingProtection?)
-
-    @Composable
-    fun ToolbarSecurityIndicator(siteSecurity: SiteSecurity)
-
-    @Composable
-    fun ToolbarSearchEngineSelector(
-        currentSearchEngine: SearchEngine,
-        modifier: Modifier = Modifier,
-    )
-
-    @Composable
-    fun ToolbarClearText(onClick: () -> Unit, modifier: Modifier = Modifier)
-
-    @Composable
-    fun ToolbarUndoClearText(onClick: () -> Unit, modifier: Modifier = Modifier)
 }
 
 /**
@@ -384,139 +356,137 @@ enum class SiteSecurity {
     INSECURE, SECURE,
 }
 
-object ToolbarOriginScopeInstance : ToolbarOriginScope {
-    @Composable
-    override fun ToolbarEmptyIndicator(enabled: Boolean) {
-        if (enabled) Icon(
-            modifier = Modifier.size(INDICATOR_ICON_SIZE),
-            painter = painterResource(id = R.drawable.ic_search_24),
-            contentDescription = "empty indicator",
+@Composable
+fun ToolbarEmptyIndicator(enabled: Boolean) {
+    if (enabled) Icon(
+        modifier = Modifier.size(TOOLBAR_INDICATOR_ICON_SIZE),
+        painter = painterResource(id = R.drawable.ic_search_24),
+        contentDescription = "empty indicator",
+        tint = Color.White
+    )
+}
+
+@Composable
+private fun ToolbarTrackingProtectionIndicator(trackingProtection: SiteTrackingProtection?) {
+    when (trackingProtection) {
+        SiteTrackingProtection.ON_TRACKERS_BLOCKED, SiteTrackingProtection.ON_NO_TRACKERS_BLOCKED -> {
+            Icon(
+                modifier = Modifier.size(TOOLBAR_INDICATOR_ICON_SIZE),
+                painter = painterResource(id = R.drawable.ic_tracking_protection_on_trackers_blocked),
+                contentDescription = "tracking protection indicator",
+                tint = Color.White
+            )
+        }
+
+        SiteTrackingProtection.OFF_FOR_A_SITE -> {
+            Icon(
+                modifier = Modifier.size(TOOLBAR_INDICATOR_ICON_SIZE),
+                painter = painterResource(id = R.drawable.ic_tracking_protection_on_trackers_blocked),
+                contentDescription = "tracking protection indicator",
+                tint = Color.White
+            )
+        }
+
+        SiteTrackingProtection.OFF_GLOBALLY -> {}
+
+        else -> {}
+    }
+}
+
+@Composable
+private fun ToolbarSecurityIndicator(siteSecurity: SiteSecurity) {
+    if (siteSecurity == SiteSecurity.SECURE) {
+        Icon(
+            modifier = Modifier.size(TOOLBAR_INDICATOR_ICON_SIZE),
+            painter = painterResource(id = R.drawable.ic_lock_20),
+            contentDescription = "security indicator",
             tint = Color.White
         )
-    }
-
-    @Composable
-    override fun ToolbarTrackingProtectionIndicator(trackingProtection: SiteTrackingProtection?) {
-        when (trackingProtection) {
-            SiteTrackingProtection.ON_TRACKERS_BLOCKED, SiteTrackingProtection.ON_NO_TRACKERS_BLOCKED -> {
-                Icon(
-                    modifier = Modifier.size(INDICATOR_ICON_SIZE),
-                    painter = painterResource(id = R.drawable.ic_tracking_protection_on_trackers_blocked),
-                    contentDescription = "tracking protection indicator",
-                    tint = Color.White
-                )
-            }
-
-            SiteTrackingProtection.OFF_FOR_A_SITE -> {
-                Icon(
-                    modifier = Modifier.size(INDICATOR_ICON_SIZE),
-                    painter = painterResource(id = R.drawable.ic_tracking_protection_on_trackers_blocked),
-                    contentDescription = "tracking protection indicator",
-                    tint = Color.White
-                )
-            }
-
-            SiteTrackingProtection.OFF_GLOBALLY -> {}
-
-            else -> {}
-        }
-    }
-
-    @Composable
-    override fun ToolbarSecurityIndicator(siteSecurity: SiteSecurity) {
-        if (siteSecurity == SiteSecurity.SECURE) {
-            Icon(
-                modifier = Modifier.size(INDICATOR_ICON_SIZE),
-                painter = painterResource(id = R.drawable.ic_lock_20),
-                contentDescription = "security indicator",
-                tint = Color.White
-            )
-        } else if (siteSecurity == SiteSecurity.INSECURE) {
-            Icon(
-                modifier = Modifier.size(INDICATOR_ICON_SIZE),
-                painter = painterResource(id = R.drawable.ic_broken_lock),
-                contentDescription = "security indicator",
-                tint = Color.White
-            )
-        }
-    }
-
-    @Composable
-    override fun ToolbarSearchEngineSelector(
-        currentSearchEngine: SearchEngine,
-        modifier: Modifier,
-    ) {
-        val context = LocalContext.current
-        var showPopupMenu by remember { mutableStateOf(false) }
-        Box(
-            modifier = modifier
-                .fillMaxHeight()
-                .focusable(false)
-                .clickable { showPopupMenu = true },
-        ) {
-            ToolbarSearchEngineSelectorPopupMenu(
-                searchEngines = context.components.core.store.state.search.searchEngines,
-                showPopupMenu = showPopupMenu,
-                setShowPopupMenu = { showPopupMenu = it },
-            )
-            Row(
-                modifier = Modifier
-                    .background(
-                        color = Color.Black, shape = MaterialTheme.shapes.extraSmall
-                    )
-                    .fillMaxHeight()
-                    .focusGroup(),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Image(
-                    bitmap = currentSearchEngine.icon.asImageBitmap(),
-                    contentDescription = "search engine icon",
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .clip(MaterialTheme.shapes.extraSmall)
-                        .padding(start = 4.dp, top = 4.dp, bottom = 4.dp)
-                        .aspectRatio(1F),
-                )
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_chevron_down_24),
-                    contentDescription = "open menu",
-                    modifier = Modifier
-                        .padding(horizontal = 4.dp)
-                        .size(6.dp),
-                    tint = Color.White,
-                )
-            }
-        }
-    }
-
-    @Composable
-    override fun ToolbarClearText(onClick: () -> Unit, modifier: Modifier) {
+    } else if (siteSecurity == SiteSecurity.INSECURE) {
         Icon(
-            painter = painterResource(R.drawable.ic_clear_24),
-            contentDescription = "",
-            modifier = modifier
-                .size(INDICATOR_ICON_SIZE)
-                .clickable(onClick = onClick),
-            tint = Color.LightGray,
-        )
-    }
-
-    @Composable
-    override fun ToolbarUndoClearText(onClick: () -> Unit, modifier: Modifier) {
-        Icon(
-            painter = painterResource(R.drawable.ic_undo_24),
-            contentDescription = "",
-            modifier = modifier
-                .size(INDICATOR_ICON_SIZE)
-                .clickable(onClick = onClick),
-            tint = Color.LightGray,
+            modifier = Modifier.size(TOOLBAR_INDICATOR_ICON_SIZE),
+            painter = painterResource(id = R.drawable.ic_broken_lock),
+            contentDescription = "security indicator",
+            tint = Color.White
         )
     }
 }
 
+@Composable
+private fun ToolbarSearchEngineSelector(
+    currentSearchEngine: SearchEngine,
+    modifier: Modifier,
+) {
+    val context = LocalContext.current
+    var showPopupMenu by remember { mutableStateOf(false) }
+    Box(
+        modifier = modifier
+            .fillMaxHeight()
+            .focusable(false)
+            .clickable { showPopupMenu = true },
+    ) {
+        ToolbarSearchEngineSelectorPopupMenu(
+            searchEngines = context.components.core.store.state.search.searchEngines,
+            showPopupMenu = showPopupMenu,
+            setShowPopupMenu = { showPopupMenu = it },
+        )
+        Row(
+            modifier = Modifier
+                .background(
+                    color = Color.Black, shape = MaterialTheme.shapes.extraSmall
+                )
+                .fillMaxHeight()
+                .focusGroup(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Image(
+                bitmap = currentSearchEngine.icon.asImageBitmap(),
+                contentDescription = "search engine icon",
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .clip(MaterialTheme.shapes.extraSmall)
+                    .padding(start = 4.dp, top = 4.dp, bottom = 4.dp)
+                    .aspectRatio(1F),
+            )
+            Icon(
+                painter = painterResource(id = R.drawable.ic_chevron_down_24),
+                contentDescription = "open menu",
+                modifier = Modifier
+                    .padding(horizontal = 4.dp)
+                    .size(6.dp),
+                tint = Color.White,
+            )
+        }
+    }
+}
 
 @Composable
-fun ToolbarSearchEngineSelectorPopupMenu(
+private fun ToolbarClearText(onClick: () -> Unit, modifier: Modifier) {
+    Icon(
+        painter = painterResource(R.drawable.ic_clear_24),
+        contentDescription = "",
+        modifier = modifier
+            .size(TOOLBAR_INDICATOR_ICON_SIZE)
+            .clickable(onClick = onClick),
+        tint = Color.LightGray,
+    )
+}
+
+@Composable
+private fun ToolbarUndoClearText(onClick: () -> Unit, modifier: Modifier) {
+    Icon(
+        painter = painterResource(R.drawable.ic_undo_24),
+        contentDescription = "",
+        modifier = modifier
+            .size(TOOLBAR_INDICATOR_ICON_SIZE)
+            .clickable(onClick = onClick),
+        tint = Color.LightGray,
+    )
+}
+
+
+@Composable
+private fun ToolbarSearchEngineSelectorPopupMenu(
     searchEngines: List<SearchEngine>, showPopupMenu: Boolean, setShowPopupMenu: (Boolean) -> Unit
 ) {
     fun setCurrentSearchEngine(context: Context, searchEngine: SearchEngine) {
@@ -534,7 +504,7 @@ fun ToolbarSearchEngineSelectorPopupMenu(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(OPTION_HEIGHT)
+                    .height(TOOLBAR_MENU_OPTION_HEIGHT)
                     .clickable {
                         setCurrentSearchEngine(context, engine)
                         setShowPopupMenu(false)
@@ -546,7 +516,7 @@ fun ToolbarSearchEngineSelectorPopupMenu(
                     bitmap = engine.icon.asImageBitmap(),
                     contentDescription = "search engine icon",
                     modifier = Modifier
-                        .size(ICON_SIZE)
+                        .size(TOOLBAR_ICON_SIZE)
                         .clip(MaterialTheme.shapes.extraSmall)
 
                 )
@@ -560,7 +530,11 @@ fun ToolbarSearchEngineSelectorPopupMenu(
             }
 //            DividerToolbarMenuItem()
         }
-        DividerToolbarMenuItem()
+        HorizontalDivider(
+            modifier = Modifier.padding(horizontal = 8.dp),
+            thickness = 0.5.dp,
+            color = Color.White,
+        )
         // TODO: search engine settings
     }
 }

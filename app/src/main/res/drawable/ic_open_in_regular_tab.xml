@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- This Source Code Form is subject to the terms of the Mozilla Public
+<?xml version="1.0" encoding="utf-8"?><!-- This Source Code Form is subject to the terms of the Mozilla Public
    - License, v. 2.0. If a copy of the MPL was not distributed with this
    - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
 
@@ -17,9 +16,12 @@ NOTE: This is a copy of ic_open_in_new.xml with the following changes:
     android:viewportWidth="24"
     android:viewportHeight="24">
     <group
-        android:translateX="3"
-        android:translateY="3"
-    >
+        android:pivotX="12"
+        android:pivotY="12"
+        android:scaleX="1.325"
+        android:scaleY="1.325"
+        android:translateX="3.99"
+        android:translateY="3.99">
         <path
             android:fillColor="?attr/textPrimary"
             android:fillType="evenOdd"

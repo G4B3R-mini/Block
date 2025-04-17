@@ -31,11 +31,12 @@ import androidx.compose.ui.unit.dp
 import com.shmibblez.inferno.browser.ComponentDimens
 import com.shmibblez.inferno.browser.InfernoAwesomeBar
 import com.shmibblez.inferno.browser.toPx
-import com.shmibblez.inferno.toolbar.ToolbarOptionsScopeInstance.ToolbarBack
-import com.shmibblez.inferno.toolbar.ToolbarOptionsScopeInstance.ToolbarForward
-import com.shmibblez.inferno.toolbar.ToolbarOptionsScopeInstance.ToolbarMenuIcon
-import com.shmibblez.inferno.toolbar.ToolbarOptionsScopeInstance.ToolbarReload
-import com.shmibblez.inferno.toolbar.ToolbarOptionsScopeInstance.ToolbarShowTabsTray
+import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ProgressBar
+import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarBack
+import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarForward
+import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarMenuIcon
+import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarReload
+import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarShowTabsTray
 import mozilla.components.browser.state.search.SearchEngine
 import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.compose.browser.awesomebar.AwesomeBarDefaults
@@ -58,7 +59,7 @@ const val DISPLAY_VALUE = 1F
 const val EDIT_VALUE = 0F
 
 private fun iconsWidth(nOptions: Int):Dp {
-    return ICON_PADDING + (ICON_SIZE + ICON_PADDING) * nOptions
+    return TOOLBAR_ICON_PADDING + (TOOLBAR_ICON_SIZE + TOOLBAR_ICON_PADDING) * nOptions
 }
 
 private fun iconsWidthPx(nOptions: Int):Int {
@@ -162,7 +163,7 @@ fun BrowserToolbar(
             // icons on left
             Row(
                 modifier = Modifier
-                    .padding(start = ICON_PADDING, end = 4.dp)
+                    .padding(start = TOOLBAR_ICON_PADDING, end = 4.dp)
                     .align(Alignment.CenterStart)
                     .offset {
                         IntOffset(
@@ -171,7 +172,7 @@ fun BrowserToolbar(
                     },
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(
-                    ICON_PADDING, Alignment.CenterHorizontally
+                    TOOLBAR_ICON_PADDING, Alignment.CenterHorizontally
                 )
             ) {
                 ToolbarBack(enabled = tabSessionState.content.canGoBack)
@@ -181,7 +182,7 @@ fun BrowserToolbar(
             // icons on right
             Row(
                 modifier = Modifier
-                    .padding(horizontal = ICON_PADDING)
+                    .padding(horizontal = TOOLBAR_ICON_PADDING)
                     .align(Alignment.CenterEnd)
                     .offset {
                         IntOffset(
@@ -190,7 +191,7 @@ fun BrowserToolbar(
                     },
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(
-                    ICON_PADDING, Alignment.CenterHorizontally
+                    TOOLBAR_ICON_PADDING, Alignment.CenterHorizontally
                 )
             ) {
                 ToolbarReload(enabled = true, loading = loading)
