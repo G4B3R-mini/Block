@@ -339,7 +339,7 @@ fun InfernoTabsTray(
     ) {
     val context = LocalContext.current
     var selectedTab by remember { mutableStateOf(selectedTabsTrayTab) }
-    val normalTabCount = privateTabs.size
+    val normalTabCount = normalTabs.size
     val privateTabCount = privateTabs.size
     val sheetState = rememberModalBottomSheetState()
     var initialized by remember { mutableStateOf(false) }

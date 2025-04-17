@@ -26,7 +26,9 @@ import com.shmibblez.inferno.nimbus.FxNimbus
 import com.shmibblez.inferno.tabbar.toTabList
 import com.shmibblez.inferno.tabs.tabstray.InfernoTabsTraySelectedTab
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -110,6 +112,9 @@ class BrowserViewModel : ViewModel() {
     }
 }
 
+// 3 secs max
+private const val INIT_JOB_MILLIS = 3000L;
+
 class BrowserComponentWrapperFragment : Fragment(), UserInteractionHandler, ActivityResultHandler,
     AccessibilityManager.AccessibilityStateChangeListener {
 
@@ -121,6 +126,7 @@ class BrowserComponentWrapperFragment : Fragment(), UserInteractionHandler, Acti
     private var browserStateObserver: CoroutineScope? = null
 
     private var initialized = false
+    private var preinitialized = false
 
     private val baseComposeView: ComposeView
         get() = requireView().findViewById(R.id.baseComposeView)
@@ -212,6 +218,23 @@ class BrowserComponentWrapperFragment : Fragment(), UserInteractionHandler, Acti
                 .collect {
                     var currentTab = it.selectedTab
 
+                    if (!initialized && !preinitialized) {
+                        // if first run, preinit and delay for a bit
+                        preinitialized = true
+                        delay(INIT_JOB_MILLIS)
+                        initialized = true
+                        return@collect
+                    } else if (!initialized && preinitialized && currentTab != null) {
+                        // if not init, delaying, and current tab isn't null, warm up complete, set
+                        // init to true and continue
+                        initialized = true
+                    } else if (!initialized && preinitialized) {
+                        // if not init and delaying, return
+                        return@collect
+                    } else {
+                        // if init complete continue
+                    }
+
                     var tabList: List<TabSessionState> = emptyList()
                     var normalTabs: List<TabSessionState> = emptyList()
                     var privateTabs: List<TabSessionState> = emptyList()
@@ -220,11 +243,6 @@ class BrowserComponentWrapperFragment : Fragment(), UserInteractionHandler, Acti
                     var searchEngine: SearchEngine? = null
                     var pageType = BrowserComponentPageType.ENGINE
                     var selectedTabsTrayTab = InfernoTabsTraySelectedTab.NormalTabs
-
-                    if (!initialized) {
-                        initialized = true
-                        return@collect
-                    }
 
                     Log.d("WrapperFrag", "content update")
                     // if no tab selected, false

@@ -148,7 +148,7 @@ fun ToolbarOrigin(
     Box(
         modifier = originModifier
             .fillMaxSize()
-            .padding(vertical = 8.dp)
+            .padding(vertical = 8.dp, horizontal = 8.dp * (1F - animationValue))
             .clip(MaterialTheme.shapes.small)
             .background(Color.DarkGray),
     ) {

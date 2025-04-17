@@ -49,7 +49,7 @@ import mozilla.components.support.ktx.android.content.createChooserExcludingCurr
 
 
 internal val TOOLBAR_ICON_SIZE = 18.dp
-internal val TOOLBAR_ICON_PADDING = 8.dp
+internal val TOOLBAR_ICON_PADDING = 12.dp
 internal val TOOLBAR_INDICATOR_ICON_SIZE = 16.dp
 internal val TOOLBAR_INDICATOR_ICON_PADDING = 4.dp
 internal val TOOLBAR_MENU_OPTION_HEIGHT = 40.dp

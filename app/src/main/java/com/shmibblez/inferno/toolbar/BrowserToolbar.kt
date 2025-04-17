@@ -79,6 +79,7 @@ fun BrowserToolbar(
 ) {
     if (tabSessionState == null || searchEngine == null) {
         // don't show if null, TODO: show loading bar layout
+        PlaceholderBrowserToolbar()
         return
     }
 
