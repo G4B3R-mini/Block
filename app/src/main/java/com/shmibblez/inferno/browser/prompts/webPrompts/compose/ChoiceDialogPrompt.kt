@@ -56,16 +56,17 @@ fun choices(menuData: PromptRequest): Array<Choice> {
 }
 
 @Composable
-fun <T> ChoiceDialogPrompt(
-    menuData: T, sessionId: String, dialogType: Int
-) where T : PromptRequest {
+fun ChoiceDialogPrompt(
+    menuData: PromptRequest, sessionId: String, dialogType: Int
+) {
     if (menuData !is PromptRequest.SingleChoice && menuData !is PromptRequest.MultipleChoice && menuData !is PromptRequest.MenuChoice) {
         throw InvalidParameterException("menuData must be of types listed here")
     }
     val store = LocalContext.current.components.core.store
     var negativeAction: PromptBottomSheetTemplateAction? = null
     var positiveAction: PromptBottomSheetTemplateAction? = null
-    var mapSelectChoice = remember { HashMap<Choice, Choice>() }
+    val mapSelectChoice = remember { HashMap<Choice, Choice>() }
+
     when (dialogType) {
         SINGLE_CHOICE_DIALOG_TYPE, MENU_CHOICE_DIALOG_TYPE -> {
             negativeAction = PromptBottomSheetTemplateAction(

@@ -844,10 +844,10 @@ abstract class BaseBrowserFragment :
                 downloadState = downloadState,
                 downloadJobStatus = downloadJobStatus,
                 tryAgain = downloadFeature::tryAgain,
-//                browserToolbars = listOfNotNull(
-//                    browserToolbarView,
-//                    _bottomToolbarContainerView?.toolbarContainerView,
-//                ),
+                browserToolbars = listOfNotNull(
+                    browserToolbarView,
+                    _bottomToolbarContainerView?.toolbarContainerView,
+                ),
             )
         }
 

@@ -13,13 +13,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateMap
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.net.toUri
 import com.shmibblez.inferno.R
+import com.shmibblez.inferno.browser.getCurrentTab
 import com.shmibblez.inferno.browser.prompts.download.compose.DownloadAppChooserPrompt
 import com.shmibblez.inferno.browser.prompts.download.compose.DownloadPrompt
+import com.shmibblez.inferno.browser.prompts.download.compose.DynamicDownloadPrompt
 import com.shmibblez.inferno.browser.prompts.download.compose.FirstPartyDownloadPrompt
 import com.shmibblez.inferno.browser.prompts.download.compose.ThirdPartyDownloadPrompt
 import com.shmibblez.inferno.ext.realFilenameOrGuessed
@@ -32,7 +38,9 @@ import kotlinx.coroutines.flow.mapNotNull
 import mozilla.components.browser.state.selector.findTabOrCustomTabOrSelectedTab
 import mozilla.components.browser.state.state.SessionState
 import mozilla.components.browser.state.state.content.DownloadState
+import mozilla.components.browser.state.state.content.DownloadState.Status
 import mozilla.components.browser.state.store.BrowserStore
+import mozilla.components.feature.downloads.ContentSize
 import mozilla.components.feature.downloads.DownloadsUseCases
 import mozilla.components.feature.downloads.Filename
 import mozilla.components.feature.downloads.manager.AndroidDownloadManager
@@ -52,13 +60,18 @@ import mozilla.components.support.utils.Browsers
 //   - what to do on onDownloadStopped, where to call, check in [DownloadsFeature]
 //   - test
 
+private data class StoppedDownloadState(
+    val downloadState: DownloadState,
+    val downloadJobStatus: Status,
+)
+
 @Composable
 fun DownloadComponent(
     applicationContext: Context,
     store: BrowserStore,
     useCases: DownloadsUseCases,
     onNeedToRequestPermissions: OnNeedToRequestPermissions = { },
-    onDownloadStopped: onDownloadStopped = noop,
+    onCannotOpenFile: (DownloadState) -> Unit,
     downloadManager: DownloadManager = AndroidDownloadManager(
         applicationContext, store
     ),
@@ -73,10 +86,14 @@ fun DownloadComponent(
     var dismissPromptScope by remember { mutableStateOf<CoroutineScope?>(null) }
     var scope by remember { mutableStateOf<CoroutineScope?>(null) }
 
+    val context = LocalContext.current
     var previousTab by remember { mutableStateOf<SessionState?>(null) }
     var downloadState by remember { mutableStateOf<DownloadState?>(null) }
     var apps by remember { mutableStateOf<List<DownloaderApp>>(emptyList()) }
     var shouldShowAppDownloaderDialog by remember { mutableStateOf(false) }
+    // persisted with parent activity (as long as app is alive)
+    val stoppedDownloadStates: SnapshotStateMap<String, StoppedDownloadState> by rememberSaveable { mutableStateMapOf() }
+
 
     /**
      * Find all apps that can perform a download, including this app.
@@ -241,11 +258,13 @@ fun DownloadComponent(
         }
     }
     // set OnDownloadStopped callback
-    LaunchedEffect(onDownloadStopped) {
+    LaunchedEffect(downloadManager) {
         // todo: set callback that shows prompt when download completed
         //  to inform user, show option to close prompt or open downloaded file,
         //  in body show file name and content size, title is, open downloaded file?
-        downloadManager.onDownloadStopped = onDownloadStopped
+        downloadManager.onDownloadStopped = { state, _, status ->
+            stoppedDownloadStates.plus(state.id to StoppedDownloadState(state, status))
+        }
     }
 
     DisposableEffect(null) {
@@ -330,7 +349,7 @@ fun DownloadComponent(
                 useCustomFirstPartyDownloadPrompt && !downloadState!!.skipConfirmation -> {
                     FirstPartyDownloadPrompt(
                         filename = Filename(downloadState!!.realFilenameOrGuessed),
-                        contentSize = mozilla.components.feature.downloads.ContentSize(
+                        contentSize = ContentSize(
                             downloadState!!.contentLength ?: 0
                         ),
                         onPositiveAction = {
@@ -376,6 +395,37 @@ fun DownloadComponent(
             onNeedToRequestPermissions(downloadManager.permissions)
         }
     }
+
+    if (stoppedDownloadStates.isNotEmpty()) {
+        for (entry in stoppedDownloadStates) {
+            // If the download is just paused, don't show any in-app notification
+            if (shouldShowCompletedDownloadDialog(
+                    entry.value.downloadState, entry.value.downloadJobStatus, tabId
+                )
+            ) {
+                DynamicDownloadPrompt(
+                    downloadState = entry.value.downloadState,
+                    didFail = entry.value.downloadJobStatus == Status.FAILED,
+                    tryAgain = { downloadManager.tryAgain(entry.value.downloadState.id) },
+                    onCannotOpenFile = onCannotOpenFile,
+                    onDismiss = {
+                        stoppedDownloadStates.minus(entry.key)
+                    },
+                )
+            }
+        }
+    }
+}
+
+internal fun shouldShowCompletedDownloadDialog(
+    downloadState: DownloadState,
+    status: Status,
+    tabId: String?,
+): Boolean {
+    val isValidStatus = status in listOf(Status.COMPLETED, Status.FAILED)
+//    val isSameTab = downloadState.sessionId == (tabId ?: false)
+
+    return isValidStatus // && isSameTab
 }
 
 // extensions

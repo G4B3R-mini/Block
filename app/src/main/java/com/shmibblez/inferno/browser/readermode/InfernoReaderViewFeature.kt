@@ -52,8 +52,7 @@ fun rememberInfernoReaderViewFeatureState(
 
     DisposableEffect(null) {
         state.start()
-        // todo: how does composable react to state?
-        //  take a look at lazylist to see how it implements state updates
+
         onDispose {
             state.stop()
         }
@@ -67,7 +66,7 @@ fun rememberInfernoReaderViewFeatureState(
     }
 }
 
-class InfernoReaderViewFeatureState(
+class InfernoReaderViewFeatureState internal constructor(
     context: Context,
     internal val engine: Engine,
     internal val store: BrowserStore,

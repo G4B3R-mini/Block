@@ -216,7 +216,7 @@ class BrowserComponentWrapperFragment : Fragment(), UserInteractionHandler, Acti
         browserStateObserver = store.flowScoped(viewLifecycleOwner) { flow ->
             flow.map { it }
                 .collect {
-                    var currentTab = it.selectedTab
+                    val currentTab = it.selectedTab
 
                     if (!initialized && !preinitialized) {
                         // if first run, preinit and delay for a bit
@@ -235,28 +235,20 @@ class BrowserComponentWrapperFragment : Fragment(), UserInteractionHandler, Acti
                         // if init complete continue
                     }
 
-                    var tabList: List<TabSessionState> = emptyList()
-                    var normalTabs: List<TabSessionState> = emptyList()
-                    var privateTabs: List<TabSessionState> = emptyList()
-                    var closedTabs: List<TabState> = emptyList()
-                    var isPrivateSession = false
-                    var searchEngine: SearchEngine? = null
-                    var pageType = BrowserComponentPageType.ENGINE
-                    var selectedTabsTrayTab = InfernoTabsTraySelectedTab.NormalTabs
+                    val tabList: List<TabSessionState>
 
                     Log.d("WrapperFrag", "content update")
                     // if no tab selected, false
-                    isPrivateSession = currentTab?.content?.private ?: false
+                    val isPrivateSession: Boolean = currentTab?.content?.private ?: false
 //                val mode = BrowsingMode.fromBoolean(isPrivateSession)
 //                (context.getActivity()!! as HomeActivity).browsingModeManager.mode = mode
 //                context.components.appStore.dispatch(AppAction.ModeChange(mode))
-                    selectedTabsTrayTab =
-                        if (isPrivateSession) InfernoTabsTraySelectedTab.PrivateTabs else InfernoTabsTraySelectedTab.NormalTabs
+                    val selectedTabsTrayTab: InfernoTabsTraySelectedTab = if (isPrivateSession) InfernoTabsTraySelectedTab.PrivateTabs else InfernoTabsTraySelectedTab.NormalTabs
                     tabList =
                         if (isPrivateSession) it.privateTabs else it.normalTabs // it.toTabList().first
-                    normalTabs = it.normalTabs
-                    privateTabs = it.privateTabs
-                    closedTabs = it.closedTabs
+                    val normalTabs: List<TabSessionState> = it.normalTabs
+                    val privateTabs: List<TabSessionState> = it.privateTabs
+                    val closedTabs: List<TabState> = it.closedTabs
                     // if no tab selected, select one
                     if (currentTab == null) {
                         if (tabList.isNotEmpty()) {
@@ -273,8 +265,8 @@ class BrowserComponentWrapperFragment : Fragment(), UserInteractionHandler, Acti
                             requireComponents.newTab(false)
                         }
                     }
-                    searchEngine = it.search.selectedOrDefaultSearchEngine!!
-                    pageType = resolvePageType(currentTab)
+                    val searchEngine: SearchEngine? = it.search.selectedOrDefaultSearchEngine!!
+                    val pageType: BrowserComponentPageType = resolvePageType(currentTab)
 
                     browserViewModel.update(
                         tabList = tabList,
@@ -298,7 +290,6 @@ class BrowserComponentWrapperFragment : Fragment(), UserInteractionHandler, Acti
         super.onDestroyView()
         browserStateObserver?.cancel()
     }
-
 
     companion object {
         // todo: implement functionality, reference [HomeFragment]

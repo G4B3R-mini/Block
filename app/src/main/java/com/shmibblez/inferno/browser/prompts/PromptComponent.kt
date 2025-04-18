@@ -1,28 +1,8 @@
 package com.shmibblez.inferno.browser.prompts
 
 import android.util.Log
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.SheetValue
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -30,14 +10,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import com.shmibblez.inferno.R
+import com.shmibblez.inferno.browser.prompts.webPrompts.FilePicker
 import com.shmibblez.inferno.browser.prompts.webPrompts.compose.AlertDialogPrompt
 import com.shmibblez.inferno.browser.prompts.webPrompts.compose.AuthenticationPrompt
 import com.shmibblez.inferno.browser.prompts.webPrompts.compose.ChoiceDialogPrompt
@@ -62,8 +38,6 @@ import com.shmibblez.inferno.browser.prompts.webPrompts.compose.SelectProviderDi
 import com.shmibblez.inferno.browser.prompts.webPrompts.compose.SelectableListPrompt
 import com.shmibblez.inferno.browser.prompts.webPrompts.compose.TextPromptDialogPrompt
 import com.shmibblez.inferno.browser.prompts.webPrompts.compose.TimeSelectionPrompt
-import com.shmibblez.inferno.browser.prompts.webPrompts.FilePicker
-import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.ext.components
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
@@ -79,6 +53,7 @@ import mozilla.components.concept.engine.prompt.PromptRequest.Authentication
 import mozilla.components.concept.engine.prompt.PromptRequest.BeforeUnload
 import mozilla.components.concept.engine.prompt.PromptRequest.Confirm
 import mozilla.components.concept.engine.prompt.PromptRequest.File
+import mozilla.components.concept.engine.prompt.PromptRequest.IdentityCredential
 import mozilla.components.concept.engine.prompt.PromptRequest.MenuChoice
 import mozilla.components.concept.engine.prompt.PromptRequest.MultipleChoice
 import mozilla.components.concept.engine.prompt.PromptRequest.Popup
@@ -110,7 +85,7 @@ import java.util.Date
 
 // todo:
 //   - colors
-//   - some prompts not working nicely
+//   - some prompts not working nicely, maybe not dismissing properly
 //   - move file picker implementation here, make clean with callbacks and such
 //   - implement share dialog in compose
 //   - some minor problems in some components, go to ones with todos in their files
@@ -123,7 +98,7 @@ import java.util.Date
  */
 @Composable
 fun PromptComponent(
-    setPromptRequests: (List<PromptRequest>)->Unit,
+    setPromptRequests: (List<PromptRequest>) -> Unit,
     currentTab: TabSessionState?,
 
 //    /* private val */
@@ -167,7 +142,7 @@ fun PromptComponent(
     /* private var */
     shouldAutomaticallyShowSuggestedPassword: () -> Boolean = { false },
 //    /* private val */
-//    onFirstTimeEngagedWithSignup: () -> Unit = {},
+    onFirstTimeEngagedWithSignup: () -> Unit = {},
 //    /* private val */
 //    onSaveLoginWithStrongPassword: (String, String) -> Unit = { _, _ -> },
     /* private val */
@@ -201,16 +176,16 @@ fun PromptComponent(
     DisposableEffect(null) {
         listener = store.flowScoped { flow ->
             flow.map { state -> state.findTabOrCustomTabOrSelectedTab(customTabId) }.ifAnyChanged {
-                    arrayOf(it?.content?.promptRequests, it?.content?.loading)
-                }.collect { state ->
-                    state?.content?.let { content ->
-                        // for testing:
-                        // listOf(PromptComponentTestObjs.file, PromptComponentTestObjs.share, PromptComponentTestObjs.selectLoginPrompt)
-                        promptRequests = content.promptRequests
-                        setPromptRequests(promptRequests)
-                    }
-
+                arrayOf(it?.content?.promptRequests, it?.content?.loading)
+            }.collect { state ->
+                state?.content?.let { content ->
+                    // for testing:
+                    // listOf(PromptComponentTestObjs.file, PromptComponentTestObjs.share, PromptComponentTestObjs.selectLoginPrompt)
+                    promptRequests = content.promptRequests
+                    setPromptRequests(promptRequests)
                 }
+
+            }
         }
         onDispose {
             listener?.cancel()
@@ -232,11 +207,11 @@ fun PromptComponent(
                     AlertDialogPrompt(prompt, sessionId, promptAbuserDetector)
                 }
 
-                is PromptRequest.Authentication -> {
+                is Authentication -> {
                     AuthenticationPrompt(prompt, sessionId)
                 }
 
-                is PromptRequest.BeforeUnload -> {
+                is BeforeUnload -> {
                     val title =
                         stringResource(R.string.mozac_feature_prompt_before_unload_dialog_title)
                     val body =
@@ -254,7 +229,7 @@ fun PromptComponent(
                     ColorPickerDialogPrompt(prompt, sessionId)
                 }
 
-                is PromptRequest.Confirm -> {
+                is Confirm -> {
                     val positiveButton =
                         prompt.positiveButtonTitle.ifEmpty { stringResource(R.string.mozac_feature_prompts_ok) }
                     val negativeButton =
@@ -271,7 +246,7 @@ fun PromptComponent(
                     filePicker?.handleFileRequest(prompt)
                 }
 
-                is PromptRequest.IdentityCredential.PrivacyPolicy -> {
+                is IdentityCredential.PrivacyPolicy -> {
                     val title = context.getString(
                         R.string.mozac_feature_prompts_identity_credentials_privacy_policy_title,
                         prompt.providerDomain,
@@ -286,23 +261,23 @@ fun PromptComponent(
                     PrivacyPolicyDialog(prompt, sessionId, title, message)
                 }
 
-                is PromptRequest.IdentityCredential.SelectAccount -> {
+                is IdentityCredential.SelectAccount -> {
                     SelectAccountDialogPrompt(prompt, sessionId)
                 }
 
-                is PromptRequest.IdentityCredential.SelectProvider -> {
+                is IdentityCredential.SelectProvider -> {
                     SelectProviderDialogPrompt(prompt, sessionId)
                 }
 
-                is PromptRequest.MenuChoice -> {
+                is MenuChoice -> {
                     ChoiceDialogPrompt(prompt, sessionId, MENU_CHOICE_DIALOG_TYPE)
                 }
 
-                is PromptRequest.MultipleChoice -> {
+                is MultipleChoice -> {
                     ChoiceDialogPrompt(prompt, sessionId, MULTIPLE_CHOICE_DIALOG_TYPE)
                 }
 
-                is PromptRequest.Popup -> {
+                is Popup -> {
                     val title = context.getString(R.string.mozac_feature_prompts_popup_dialog_title)
                     val positiveLabel = context.getString(R.string.mozac_feature_prompts_allow)
                     val negativeLabel = context.getString(R.string.mozac_feature_prompts_deny)
@@ -318,7 +293,7 @@ fun PromptComponent(
                     )
                 }
 
-                is PromptRequest.Repost -> {
+                is Repost -> {
                     val title = stringResource(R.string.mozac_feature_prompt_repost_title)
                     val message = stringResource(R.string.mozac_feature_prompt_repost_message)
                     val positiveAction =
@@ -337,7 +312,7 @@ fun PromptComponent(
                     )
                 }
 
-                is PromptRequest.SaveCreditCard -> {
+                is SaveCreditCard -> {
                     if (!isCreditCardAutofillEnabled.invoke() || creditCardValidationDelegate == null || !prompt.creditCard.isValid) {
                         dismissDialogRequest(prompt, sessionId, store)
 
@@ -355,7 +330,7 @@ fun PromptComponent(
                     CreditCardSaveDialogPrompt(prompt, sessionId)
                 }
 
-                is PromptRequest.SaveLoginPrompt -> {
+                is SaveLoginPrompt -> {
                     if (!isSaveLoginEnabled.invoke() || loginValidationDelegate == null) {
                         dismissDialogRequest(prompt, sessionId, store)
 
@@ -433,16 +408,17 @@ fun PromptComponent(
                     }
                     if (prompt.generatedPassword != null) {
                         if (shouldAutomaticallyShowSuggestedPassword.invoke()) {
-//                        todo: onFirstTimeEngagedWithSignup.invoke()
+                            onFirstTimeEngagedWithSignup.invoke()
 //                        handleDialogsRequest(
 //                            promptRequest,
 //                            session,
 //                        )
                             val currentUrl =
                                 store.state.findTabOrCustomTabOrSelectedTab(customTabId)?.content?.url
-                            val generatedPassword = prompt.generatedPassword
+//                            val generatedPassword = prompt.generatedPassword
 
-                            if (generatedPassword == null || currentUrl == null) {
+//                            if (generatedPassword == null || currentUrl == null) {
+                            if (currentUrl == null) {
                                 logger.debug(
                                     "Ignoring received SelectLogin.onGeneratedPasswordPromptClick" + " when either the generated password or the currentUrl is null.",
                                 )
@@ -468,9 +444,10 @@ fun PromptComponent(
 //                        strongPasswordPromptViewListener?.handleSuggestStrongPasswordRequest()
                             val currentUrl =
                                 store.state.findTabOrCustomTabOrSelectedTab(customTabId)?.content?.url
-                            val generatedPassword = prompt.generatedPassword
+//                            val generatedPassword = prompt.generatedPassword
 
-                            if (generatedPassword == null || currentUrl == null) {
+//                            if (generatedPassword == null || currentUrl == null) {
+                            if (currentUrl == null) {
                                 logger.debug(
                                     "Ignoring received SelectLogin.onGeneratedPasswordPromptClick" + " when either the generated password or the currentUrl is null.",
                                 )
@@ -557,20 +534,20 @@ fun PromptComponent(
 fun onDismiss(promptRequest: PromptRequest) {
     when (promptRequest) {
         is Alert -> promptRequest.onDismiss.invoke()
-        is PromptRequest.Authentication -> promptRequest.onDismiss.invoke()
-        is PromptRequest.BeforeUnload -> promptRequest.onDismiss.invoke()
+        is Authentication -> promptRequest.onDismiss.invoke()
+        is BeforeUnload -> promptRequest.onDismiss.invoke()
         is PromptRequest.Color -> promptRequest.onDismiss.invoke()
-        is PromptRequest.Confirm -> promptRequest.onDismiss.invoke()
+        is Confirm -> promptRequest.onDismiss.invoke()
         is File -> promptRequest.onDismiss.invoke()
-        is PromptRequest.IdentityCredential.PrivacyPolicy -> promptRequest.onDismiss.invoke()
-        is PromptRequest.IdentityCredential.SelectAccount -> promptRequest.onDismiss.invoke()
-        is PromptRequest.IdentityCredential.SelectProvider -> promptRequest.onDismiss.invoke()
-        is PromptRequest.MenuChoice -> promptRequest.onDismiss.invoke()
-        is PromptRequest.MultipleChoice -> promptRequest.onDismiss.invoke()
-        is PromptRequest.Popup -> promptRequest.onDismiss.invoke()
-        is PromptRequest.Repost -> promptRequest.onDismiss.invoke()
-        is PromptRequest.SaveCreditCard -> promptRequest.onDismiss.invoke()
-        is PromptRequest.SaveLoginPrompt -> promptRequest.onDismiss.invoke()
+        is IdentityCredential.PrivacyPolicy -> promptRequest.onDismiss.invoke()
+        is IdentityCredential.SelectAccount -> promptRequest.onDismiss.invoke()
+        is IdentityCredential.SelectProvider -> promptRequest.onDismiss.invoke()
+        is MenuChoice -> promptRequest.onDismiss.invoke()
+        is MultipleChoice -> promptRequest.onDismiss.invoke()
+        is Popup -> promptRequest.onDismiss.invoke()
+        is Repost -> promptRequest.onDismiss.invoke()
+        is SaveCreditCard -> promptRequest.onDismiss.invoke()
+        is SaveLoginPrompt -> promptRequest.onDismiss.invoke()
         is SelectAddress -> promptRequest.onDismiss.invoke()
         is SelectCreditCard -> promptRequest.onDismiss.invoke()
         is SelectLoginPrompt -> promptRequest.onDismiss.invoke()
@@ -581,26 +558,27 @@ fun onDismiss(promptRequest: PromptRequest) {
     }
 }
 
+@SuppressWarnings("UNCHECKED_CAST")
 fun onPositiveAction(promptRequest: PromptRequest, value: Any? = null, value2: Any? = null) {
     when (promptRequest) {
-        is PromptRequest.MultipleChoice -> promptRequest.onConfirm.invoke(((value as HashMap<*, *>).mapKeys { it as Choice }).keys.toTypedArray())
-        is PromptRequest.MenuChoice -> promptRequest.onConfirm.invoke(value as Choice)
-        is PromptRequest.BeforeUnload -> promptRequest.onLeave.invoke()
+        is MultipleChoice -> promptRequest.onConfirm.invoke((value as HashMap<Choice, Choice>).keys.toTypedArray())
+        is MenuChoice -> promptRequest.onConfirm.invoke(value as Choice)
+        is BeforeUnload -> promptRequest.onLeave.invoke()
         is Alert -> promptRequest.onConfirm.invoke(value as Boolean)
-        is PromptRequest.Authentication -> promptRequest.onConfirm.invoke(
+        is Authentication -> promptRequest.onConfirm.invoke(
             value as String, value2 as String
         )
 
         is PromptRequest.Color -> promptRequest.onConfirm.invoke(value as String)
-        is PromptRequest.Confirm -> promptRequest.onConfirmPositiveButton.invoke(value as Boolean)
+        is Confirm -> promptRequest.onConfirmPositiveButton.invoke(value as Boolean)
         is File -> {}
-        is PromptRequest.IdentityCredential.PrivacyPolicy -> promptRequest.onConfirm.invoke(value as Boolean)
-        is PromptRequest.IdentityCredential.SelectAccount -> promptRequest.onConfirm.invoke(value as Account)
-        is PromptRequest.IdentityCredential.SelectProvider -> promptRequest.onConfirm.invoke(value as Provider)
-        is PromptRequest.Popup -> promptRequest.onAllow.invoke()
-        is PromptRequest.Repost -> promptRequest.onConfirm.invoke()
-        is PromptRequest.SaveCreditCard -> promptRequest.onConfirm.invoke(value as CreditCardEntry)
-        is PromptRequest.SaveLoginPrompt -> promptRequest.onConfirm.invoke(value as LoginEntry)
+        is IdentityCredential.PrivacyPolicy -> promptRequest.onConfirm.invoke(value as Boolean)
+        is IdentityCredential.SelectAccount -> promptRequest.onConfirm.invoke(value as Account)
+        is IdentityCredential.SelectProvider -> promptRequest.onConfirm.invoke(value as Provider)
+        is Popup -> promptRequest.onAllow.invoke()
+        is Repost -> promptRequest.onConfirm.invoke()
+        is SaveCreditCard -> promptRequest.onConfirm.invoke(value as CreditCardEntry)
+        is SaveLoginPrompt -> promptRequest.onConfirm.invoke(value as LoginEntry)
         is SelectAddress -> promptRequest.onConfirm.invoke(value as Address)
         is SelectCreditCard -> promptRequest.onConfirm.invoke(value as CreditCardEntry)
         is SelectLoginPrompt -> promptRequest.onConfirm.invoke(value as Login)
@@ -617,20 +595,20 @@ fun onPositiveAction(promptRequest: PromptRequest, value: Any? = null, value2: A
 fun onNeutralAction(promptRequest: PromptRequest, value: Any? = null) {
     when (promptRequest) {
         is Alert -> promptRequest.onDismiss.invoke()
-        is PromptRequest.Authentication -> promptRequest.onDismiss.invoke()
-        is PromptRequest.BeforeUnload -> promptRequest.onDismiss.invoke()
+        is Authentication -> promptRequest.onDismiss.invoke()
+        is BeforeUnload -> promptRequest.onDismiss.invoke()
         is PromptRequest.Color -> promptRequest.onDismiss.invoke()
-        is PromptRequest.Confirm -> promptRequest.onConfirmNeutralButton.invoke(value as Boolean)
+        is Confirm -> promptRequest.onConfirmNeutralButton.invoke(value as Boolean)
         is File -> promptRequest.onDismiss.invoke()
-        is PromptRequest.IdentityCredential.PrivacyPolicy -> promptRequest.onDismiss.invoke()
-        is PromptRequest.IdentityCredential.SelectAccount -> promptRequest.onDismiss.invoke()
-        is PromptRequest.IdentityCredential.SelectProvider -> promptRequest.onDismiss.invoke()
-        is PromptRequest.MenuChoice -> promptRequest.onDismiss.invoke()
-        is PromptRequest.MultipleChoice -> promptRequest.onDismiss.invoke()
-        is PromptRequest.Popup -> promptRequest.onDismiss.invoke()
-        is PromptRequest.Repost -> promptRequest.onDismiss.invoke()
-        is PromptRequest.SaveCreditCard -> promptRequest.onDismiss.invoke()
-        is PromptRequest.SaveLoginPrompt -> promptRequest.onDismiss.invoke()
+        is IdentityCredential.PrivacyPolicy -> promptRequest.onDismiss.invoke()
+        is IdentityCredential.SelectAccount -> promptRequest.onDismiss.invoke()
+        is IdentityCredential.SelectProvider -> promptRequest.onDismiss.invoke()
+        is MenuChoice -> promptRequest.onDismiss.invoke()
+        is MultipleChoice -> promptRequest.onDismiss.invoke()
+        is Popup -> promptRequest.onDismiss.invoke()
+        is Repost -> promptRequest.onDismiss.invoke()
+        is SaveCreditCard -> promptRequest.onDismiss.invoke()
+        is SaveLoginPrompt -> promptRequest.onDismiss.invoke()
         is SelectAddress -> promptRequest.onDismiss.invoke()
         is SelectCreditCard -> promptRequest.onDismiss.invoke()
         is SelectLoginPrompt -> promptRequest.onDismiss.invoke()
@@ -651,9 +629,9 @@ fun onNegativeAction(promptRequest: PromptRequest, value: Any? = null) {
         is File -> { /* not necessary */
         }
 
-        is PromptRequest.IdentityCredential.PrivacyPolicy -> promptRequest.onDismiss.invoke()
-        is PromptRequest.IdentityCredential.SelectAccount -> promptRequest.onDismiss.invoke()
-        is PromptRequest.IdentityCredential.SelectProvider -> promptRequest.onDismiss.invoke()
+        is IdentityCredential.PrivacyPolicy -> promptRequest.onDismiss.invoke()
+        is IdentityCredential.SelectAccount -> promptRequest.onDismiss.invoke()
+        is IdentityCredential.SelectProvider -> promptRequest.onDismiss.invoke()
         is MenuChoice -> promptRequest.onDismiss.invoke()
         is MultipleChoice -> promptRequest.onDismiss.invoke()
         is Popup -> promptRequest.onDismiss.invoke()
@@ -675,7 +653,7 @@ fun onNegativeAction(promptRequest: PromptRequest, value: Any? = null) {
  */
 //@VisibleForTesting
 internal fun dismissDialogRequest(
-    promptRequest: PromptRequest, sessionId: String, store: BrowserStore
+    promptRequest: PromptRequest, sessionId: String, store: BrowserStore,
 ) {
     onDismiss(promptRequest)
     store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, promptRequest))
@@ -683,7 +661,7 @@ internal fun dismissDialogRequest(
 }
 
 private fun canShowThisPrompt(
-    promptRequest: PromptRequest, promptAbuserDetector: PromptAbuserDetector
+    promptRequest: PromptRequest, promptAbuserDetector: PromptAbuserDetector,
 ): Boolean {
     return when (promptRequest) {
         is SingleChoice,
@@ -700,9 +678,9 @@ private fun canShowThisPrompt(
         is SaveCreditCard,
         is SelectAddress,
         is Share,
-        is PromptRequest.IdentityCredential.SelectProvider,
-        is PromptRequest.IdentityCredential.SelectAccount,
-        is PromptRequest.IdentityCredential.PrivacyPolicy,
+        is IdentityCredential.SelectProvider,
+        is IdentityCredential.SelectAccount,
+        is IdentityCredential.PrivacyPolicy,
             -> true
 
         is Alert, is TextPrompt, is Confirm, is Repost, is Popup -> promptAbuserDetector.shouldShowMoreDialogs

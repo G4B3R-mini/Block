@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -21,29 +22,84 @@ import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplate
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateAction
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateButtonPosition
 import com.shmibblez.inferno.compose.base.InfernoText
-import mozilla.components.feature.downloads.ContentSize
-import mozilla.components.feature.downloads.Filename
+import mozilla.components.browser.state.state.content.DownloadState
+import mozilla.components.feature.downloads.AbstractFetchDownloadService
 import mozilla.components.feature.downloads.toMegabyteOrKilobyteString
 
 private val ICON_SIZE = 24.dp
 
+/**
+ * [DynamicDownloadPrompt] is used to show a view in the current tab to the user, triggered when
+ *  downloadFeature.onDownloadStopped gets invoked. When download successful, it hides when the
+ *  users scrolls through a website (focus lost) as to not impede his activities.
+ */
 @Composable
-internal fun FirstPartyDownloadPrompt(
-    filename: Filename,
-    contentSize: ContentSize,
-    onPositiveAction: () -> Unit,
-    onNegativeAction: () -> Unit,
+fun DynamicDownloadPrompt(
+    downloadState: DownloadState?,
+    didFail: Boolean,
+    tryAgain: (String) -> Unit,
+    onCannotOpenFile: (DownloadState) -> Unit,
+    onDismiss: () -> Unit,
 ) {
+    // dismiss so no infinite loop
+    if (downloadState == null) {
+        onDismiss.invoke()
+        return
+    }
+
+    val context = LocalContext.current
+
+    val title = when (didFail) {
+        true -> context.getString(R.string.mozac_feature_downloads_failed_notification_text2)
+        false -> context.getString(
+            R.string.mozac_feature_downloads_completed_notification_text2,
+        ) + " (${downloadState.contentLength?.toMegabyteOrKilobyteString()})"
+    }
+
+    val iconRes = when (didFail) {
+        true -> R.drawable.mozac_feature_download_ic_download_failed
+        false -> R.drawable.mozac_feature_download_ic_download_complete
+    }
+
+    val actionText = when (didFail) {
+        true -> context.getString(R.string.mozac_feature_downloads_button_try_again)
+        false -> context.getString(R.string.mozac_feature_downloads_button_open)
+    }
+
+
+    val actionOnClick = when (didFail) {
+        true -> {
+            {
+                tryAgain(downloadState.id)
+                onDismiss()
+            }
+        }
+
+        false -> {
+            {
+                val fileWasOpened = AbstractFetchDownloadService.openFile(
+                    applicationContext = context.applicationContext,
+                    download = downloadState,
+                )
+                if (!fileWasOpened) {
+                    onCannotOpenFile(downloadState)
+                }
+                onDismiss()
+            }
+        }
+    }
+
+
     PromptBottomSheetTemplate(
-        onDismissRequest = onNegativeAction,
-        dismissOnSwipeDown = false,
+        onDismissRequest = onDismiss,
+        dismissOnSwipeDown = !didFail,
         negativeAction = PromptBottomSheetTemplateAction(
             text = stringResource(android.R.string.cancel),
-            action = onNegativeAction,
+            action = onDismiss,
         ),
         positiveAction = PromptBottomSheetTemplateAction(
-            text = stringResource(R.string.mozac_feature_downloads_dialog_download),
-            action = onPositiveAction,
+            text = actionText,
+            action = actionOnClick,
         ),
         buttonPosition = PromptBottomSheetTemplateButtonPosition.BOTTOM,
     ) {
@@ -57,11 +113,11 @@ internal fun FirstPartyDownloadPrompt(
             Icon(
                 modifier = Modifier.size(ICON_SIZE),
                 tint = Color.White,
-                contentDescription = "download complete icon",
-                painter = painterResource(R.drawable.ic_download_24)
+                contentDescription = "",
+                painter = painterResource(iconRes)
             )
             InfernoText(
-                text = contentSize.value.toMegabyteOrKilobyteString(),
+                text = title,
                 fontColor = Color.White,
                 textAlign = TextAlign.Start,
                 modifier = Modifier.weight(1F),
@@ -70,7 +126,7 @@ internal fun FirstPartyDownloadPrompt(
             )
         }
         InfernoText(
-            text = filename.value,
+            text = downloadState.fileName?: downloadState.url,
             fontColor = Color.White,
             textAlign = TextAlign.Start,
             modifier = Modifier

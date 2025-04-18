@@ -16,31 +16,30 @@ internal fun handleOnDownloadFinished(
     downloadState: DownloadState,
     downloadJobStatus: Status,
     tryAgain: (String) -> Unit,
-//    browserToolbars: List<ScrollableToolbar>,
+    browserToolbars: List<ScrollableToolbar>,
 ) {
-    // If the download is just paused, don't show any in-app notification
-    if (shouldShowCompletedDownloadDialog(downloadState, downloadJobStatus, context)) {
-        val safeContext = context ?: return
-        val onCannotOpenFile: (DownloadState) -> Unit = {
-            // todo: snackbar
-//            showCannotOpenFileError(binding.dynamicSnackbarContainer, safeContext, it)
-        }
-        if (downloadState.openInApp && downloadJobStatus == Status.COMPLETED) {
-            val fileWasOpened = AbstractFetchDownloadService.openFile(
-                applicationContext = safeContext.applicationContext,
-                download = downloadState,
-            )
-            if (!fileWasOpened) {
-                onCannotOpenFile(downloadState)
-            }
-        } else {
-            saveDownloadDialogState(
-                downloadState.sessionId,
-                downloadState,
-                downloadJobStatus,
-            )
+//    // If the download is just paused, don't show any in-app notification
+//    if (shouldShowCompletedDownloadDialog(downloadState, downloadJobStatus, context)) {
+//        val safeContext = context ?: return
+//        val onCannotOpenFile: (DownloadState) -> Unit = {
+//            // todo: snackbar
+////            showCannotOpenFileError(binding.dynamicSnackbarContainer, safeContext, it)
+//        }
+//        if (downloadState.openInApp && downloadJobStatus == Status.COMPLETED) {
+//            val fileWasOpened = AbstractFetchDownloadService.openFile(
+//                applicationContext = safeContext.applicationContext,
+//                download = downloadState,
+//            )
+//            if (!fileWasOpened) {
+//                onCannotOpenFile(downloadState)
+//            }
+//        } else {
+//            saveDownloadDialogState(
+//                downloadState.sessionId,
+//                downloadState,
+//                downloadJobStatus,
+//            )
 
-            // todo: dialog for downloads
 //            val dynamicDownloadDialog = DynamicDownloadDialog(
 //                context = safeContext,
 //                downloadState = downloadState,
@@ -51,8 +50,7 @@ internal fun handleOnDownloadFinished(
 //            ) { sharedViewModel.downloadDialogState.remove(downloadState.sessionId) }
 //
 //            dynamicDownloadDialog.show()
-            // todo: expand toolbars
 //            browserToolbars.forEach { it.expand() }
-        }
-    }
+//        }
+//    }
 }

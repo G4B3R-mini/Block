@@ -192,6 +192,7 @@ import mozilla.components.browser.state.state.CustomTabSessionState
 import mozilla.components.browser.state.state.SessionState
 import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.browser.state.state.content.DownloadState
+import mozilla.components.browser.state.state.content.DownloadState.Status
 import mozilla.components.browser.state.state.recover.TabState
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.browser.thumbnails.BrowserThumbnails
@@ -207,6 +208,7 @@ import mozilla.components.concept.engine.prompt.PromptRequest.File
 import mozilla.components.concept.engine.prompt.ShareData
 import mozilla.components.concept.storage.LoginEntry
 import mozilla.components.feature.accounts.push.CloseTabsUseCases
+import mozilla.components.feature.downloads.AbstractFetchDownloadService
 import mozilla.components.feature.downloads.DownloadsFeature
 import mozilla.components.feature.downloads.manager.FetchDownloadManager
 import mozilla.components.feature.downloads.temporary.CopyDownloadFeature
@@ -253,40 +255,35 @@ import mozilla.components.browser.toolbar.BrowserToolbar as BrowserToolbarCompat
 //   - make new tab next to current based on config, default is true
 //     - so far called from [BrowserTabBar] and from [TabTrayComponent]
 
-// fixme, bugs:
-//   - when opening a new page from a link in a tab, 2 tabs appear, very buggy
-
 // todo: huge drawable with diagonal red and black
-// todo: nav host should be base composable, BrowserComponent in this case since it is now base home screen
-// todo: implement layout from fragment_browser.xml
 // todo: from fragment_browser.xml, for below views first wrap views with AndroidView, then
 //  progressively implement in compose
 //
-//   2. implement viewDynamicDownloadDialog
-//   3. implement readerViewControlsBar https://searchfox.org/mozilla-central/source/mobile/android/android-components/components/feature/readerview/src/main/res/layout/mozac_feature_readerview_view.xml
-//   7. implement loginSelectBar
-//   8. implement suggestStrongPasswordBar
-//   9. implement addressSelectBar AddressSelectBar
-//   10. implement creditCardSelectBar CreditCardSelectBar
+
 // completed, (todo: test)
 //   1. findInPageView
+//   2. viewDynamicDownloadDialog
+//   3. readerViewControlsBar https://searchfox.org/mozilla-central/source/mobile/android/android-components/components/feature/readerview/src/main/res/layout/mozac_feature_readerview_view.xml
 //   4. crash_reporter_view CrashContentView (com.shmibblez.inferno/crashes/CrashContentIntegration.kt)
 //   5. startDownloadDialogContainer
 //   6. dynamicSnackbarContainer
+//   7. loginSelectBar, implemented in PromptComponent
+//   8. suggestStrongPasswordBar, implemented in PromptComponent
+//   9. addressSelectBar AddressSelectBar, implemented in PromptComponent
+//   10. creditCardSelectBar CreditCardSelectBar, implemented in PromptComponent
 //   11. tabPreview (TabPreview moved to toolbar (swipe to switch tabs))
 
 // todo: test
 //   - savedLoginsLauncher
 
-// TODO:
-//  - if not scrollable make bottom bar offset swipe up or down with scroll received
+// todo (long term):
+//  - add param callbacks in components (ex, DownloadComponent) for custom composable components
+//    (download dialogs, web dialogs, etc) and invoke where necessary, allows more customizability
+//    -> callbacks provide composable params, and composable fun is returned and called in component
+// todo:
 //  - implement biometric authentication in SelectableListPrompt for credit cards (urgent)
-//  - home page
-//  - move to selected tab on start
-//  - use nicer icons for toolbar options
 //  - fix external app browser implementation
-//  - improve splash screen
-//  - add home page (look at firefox source code)
+//  - animated splash screen not animating
 //  - add default search engines, select default
 //    - bundle in app
 //    - add search engine settings page
@@ -1031,37 +1028,17 @@ fun BrowserComponent(
                 false, // todo: test if true
             )
         },
-        // todo: download prompt styling
-//        promptsStyling = DownloadsFeature.PromptsStyling(
-//            gravity = Gravity.BOTTOM,
-//            shouldWidthMatchParent = true,
-//            positiveButtonBackgroundColor = ThemeManager.resolveAttribute(
-//                R.attr.accent,
-//                context,
-//            ),
-//            positiveButtonTextColor = ThemeManager.resolveAttribute(
-//                R.attr.textOnColorPrimary,
-//                context,
-//            ),
-//            positiveButtonRadius = ComponentDimens.TAB_CORNER_RADIUS.value,
-//        ),
         onNeedToRequestPermissions = { permissions ->
             // todo: test
             requestDownloadPermissionsLauncher.launch(permissions)
 //            requestPermissions(permissions, REQUEST_CODE_DOWNLOAD_PERMISSIONS)
         },
-        onDownloadStopped = { downloadState, _, downloadJobStatus ->
-            // todo: if download finished show
-            handleOnDownloadFinished(
+        onCannotOpenFile = {
+            showCannotOpenFileError(
                 context = context,
-                downloadState = downloadState,
-                downloadJobStatus = downloadJobStatus,
-                tryAgain = downloadManager::tryAgain, // downloadFeature::tryAgain,
-                // todo: toolbars
-//                browserToolbars = listOfNotNull(
-//                    browserToolbarView,
-//                    _bottomToolbarContainerView?.toolbarContainerView,
-//                ),
+                downloadState = it,
+                coroutineScope = coroutineScope,
+                snackbarHostState = snackbarHostState,
             )
         },
         useCustomFirstPartyDownloadPrompt = true,
@@ -1372,12 +1349,6 @@ fun BrowserComponent(
             )
 
             val bottomToolbarHeight = context.settings().getBottomToolbarHeight(context)
-
-            resumeDownloadDialogState(
-                getCurrentTab(context)?.id,
-                store,
-                context,
-            )
 
             shareDownloadsFeature.set(
                 shareDownloadFeature,
@@ -1941,6 +1912,9 @@ fun BrowserComponent(
 //                setLastSavedGeneratedPassword,
 //            )
 //        },
+        onFirstTimeEngagedWithSignup = {
+            context.settings().isFirstTimeEngagingWithSignup = false
+        },
         onSaveLogin = { isUpdate ->
             showSnackbarAfterLoginChange(
                 isUpdate,
@@ -2315,22 +2289,6 @@ fun Dp.toPx(): Int {
 }
 
 @Composable
-fun MozAwesomeBar(setView: (AwesomeBarWrapper) -> Unit) {
-    AndroidView(modifier = Modifier
-        .height(0.dp)
-        .width(0.dp), factory = { context ->
-        val v = AwesomeBarWrapper(context)
-        setView(v)
-        v
-    }, update = {
-        it.visibility = View.GONE
-        it.layoutParams.width = LayoutParams.MATCH_PARENT
-        it.layoutParams.height = LayoutParams.MATCH_PARENT
-        it.setPadding(4.dp.toPx(), 4.dp.toPx(), 4.dp.toPx(), 4.dp.toPx())
-    })
-}
-
-@Composable
 fun MozEngineView(
     modifier: Modifier = Modifier,
     setSwipeView: (VerticalSwipeRefreshLayout) -> Unit,
@@ -2380,25 +2338,6 @@ fun MozEngineView(
     })
 }
 
-@Composable
-fun MozBrowserToolbar(setView: (BrowserToolbarCompat) -> Unit) {
-    AndroidView(modifier = Modifier
-        .fillMaxWidth()
-        .height(dimensionResource(id = R.dimen.browser_toolbar_height))
-        .background(Color.Black)
-        .padding(horizontal = 8.dp, vertical = 0.dp), factory = { context ->
-        val v = BrowserToolbarCompat(context)
-        setView(v)
-        v
-    }, update = { bt ->
-        bt.layoutParams.height = R.dimen.browser_toolbar_height
-        bt.layoutParams.width = LayoutParams.MATCH_PARENT
-        bt.visibility = View.VISIBLE
-        bt.setBackgroundColor(0xFF0000)
-        bt.displayMode()
-    })
-}
-
 // todo: reader view button, what this for?
 @Composable
 fun MozFloatingActionButton(
@@ -2411,7 +2350,7 @@ fun MozFloatingActionButton(
     }, update = { it.visibility = View.GONE })
 }
 
-/* new functions *//* BaseBrowserFragment funs */
+/* BaseBrowserFragment funs */
 
 @VisibleForTesting
 internal fun showCancelledDownloadWarning(
@@ -2685,73 +2624,6 @@ private fun showPinDialogWarning(
     }.show().withCenterAlignedButtons().secure(context.getActivity())
 
     context.settings().incrementSecureWarningCount()
-}
-
-/**
- * Preserves current state of the [DynamicDownloadDialog] to persist through tab changes and
- * other fragments navigation.
- * */
-internal fun saveDownloadDialogState(
-    sessionId: String?,
-    downloadState: DownloadState,
-    downloadJobStatus: DownloadState.Status,
-) {
-    sessionId?.let { id ->
-        // todo: download
-//        sharedViewModel.downloadDialogState[id] = Pair(
-//            downloadState,
-//            downloadJobStatus == DownloadState.Status.FAILED,
-//        )
-    }
-}
-
-/**
- * Re-initializes [DynamicDownloadDialog] if the user hasn't dismissed the dialog
- * before navigating away from it's original tab.
- * onTryAgain it will use [ContentAction.UpdateDownloadAction] to re-enqueue the former failed
- * download, because [DownloadsFeature] clears any queued downloads onStop.
- * */
-@VisibleForTesting
-internal fun resumeDownloadDialogState(
-    sessionId: String?,
-    store: BrowserStore,
-    context: Context,
-) {
-    // todo: download
-//    val savedDownloadState = sharedViewModel.downloadDialogState[sessionId]
-//
-//    if (savedDownloadState == null || sessionId == null) {
-//        binding.viewDynamicDownloadDialog.root.visibility = View.GONE
-//        return
-//    }
-//
-//    val onTryAgain: (String) -> Unit = {
-//        savedDownloadState.first?.let { dlState ->
-//            store.dispatch(
-//                ContentAction.UpdateDownloadAction(
-//                    sessionId,
-//                    dlState.copy(skipConfirmation = true),
-//                ),
-//            )
-//        }
-//    }
-
-    // todo: dismiss
-//    val onDismiss: () -> Unit = { sharedViewModel.downloadDialogState.remove(sessionId) }
-
-//    DynamicDownloadDialog(
-//        context = context,
-//        downloadState = savedDownloadState.first,
-//        didFail = savedDownloadState.second,
-//        tryAgain = onTryAgain,
-//        onCannotOpenFile = {
-//            showCannotOpenFileError(binding.dynamicSnackbarContainer, context, it)
-//        },
-//        binding = binding.viewDynamicDownloadDialog,
-//        onDismiss = onDismiss,
-//    ).show()
-
-//    browserToolbarView.expand()
 }
 
 //@VisibleForTesting
@@ -3908,7 +3780,6 @@ internal fun reinitializeEngineView(
 //}
 
 internal fun showCannotOpenFileError(
-    container: ViewGroup,
     context: Context,
     downloadState: DownloadState,
     coroutineScope: CoroutineScope,
@@ -3970,11 +3841,11 @@ internal fun safeInvalidateBrowserToolbarView() {
 
 internal fun shouldShowCompletedDownloadDialog(
     downloadState: DownloadState,
-    status: DownloadState.Status,
+    status: Status,
     context: Context,
 ): Boolean {
     val isValidStatus =
-        status in listOf(DownloadState.Status.COMPLETED, DownloadState.Status.FAILED)
+        status in listOf(Status.COMPLETED, Status.FAILED)
     val isSameTab = downloadState.sessionId == (getCurrentTab(context)?.id ?: false)
 
     return isValidStatus && isSameTab
