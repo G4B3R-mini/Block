@@ -41,9 +41,8 @@ fun DynamicDownloadPrompt(
     onCannotOpenFile: (DownloadState) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    // dismiss so no infinite loop
     if (downloadState == null) {
-        onDismiss.invoke()
+//        onDismiss.invoke()
         return
     }
 

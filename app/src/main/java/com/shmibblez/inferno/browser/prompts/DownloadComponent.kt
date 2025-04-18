@@ -6,7 +6,6 @@ import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.pm.ResolveInfo
 import android.widget.Toast
-import androidx.annotation.ColorRes
 import androidx.annotation.VisibleForTesting
 import androidx.annotation.VisibleForTesting.Companion.PRIVATE
 import androidx.compose.runtime.Composable
@@ -16,21 +15,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateMap
-import androidx.compose.ui.platform.LocalContext
 import androidx.core.net.toUri
 import com.shmibblez.inferno.R
-import com.shmibblez.inferno.browser.getCurrentTab
 import com.shmibblez.inferno.browser.prompts.download.compose.DownloadAppChooserPrompt
 import com.shmibblez.inferno.browser.prompts.download.compose.DownloadPrompt
 import com.shmibblez.inferno.browser.prompts.download.compose.DynamicDownloadPrompt
 import com.shmibblez.inferno.browser.prompts.download.compose.FirstPartyDownloadPrompt
 import com.shmibblez.inferno.browser.prompts.download.compose.ThirdPartyDownloadPrompt
 import com.shmibblez.inferno.ext.realFilenameOrGuessed
-import com.shmibblez.inferno.feature.downloads.noop
-import com.shmibblez.inferno.feature.downloads.onDownloadStopped
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.distinctUntilChangedBy
@@ -86,13 +80,15 @@ fun DownloadComponent(
     var dismissPromptScope by remember { mutableStateOf<CoroutineScope?>(null) }
     var scope by remember { mutableStateOf<CoroutineScope?>(null) }
 
-    val context = LocalContext.current
     var previousTab by remember { mutableStateOf<SessionState?>(null) }
     var downloadState by remember { mutableStateOf<DownloadState?>(null) }
     var apps by remember { mutableStateOf<List<DownloaderApp>>(emptyList()) }
     var shouldShowAppDownloaderDialog by remember { mutableStateOf(false) }
     // persisted with parent activity (as long as app is alive)
-    val stoppedDownloadStates: SnapshotStateMap<String, StoppedDownloadState> by rememberSaveable { mutableStateMapOf() }
+    // todo: need custom saver in order to persist
+//    val stoppedDownloadStates: SnapshotStateMap<String, StoppedDownloadState> = rememberSaveable { mutableStateMapOf() }
+    val stoppedDownloadStates: SnapshotStateMap<String, StoppedDownloadState> =
+        remember { mutableStateMapOf() }
 
 
     /**
@@ -152,7 +148,7 @@ fun DownloadComponent(
 
     @VisibleForTesting
     fun onDownloaderAppSelected(
-        app: DownloaderApp, tab: SessionState, download: DownloadState
+        app: DownloaderApp, tab: SessionState, download: DownloadState,
     ) {
         if (app.packageName == applicationContext.packageName) {
             if (applicationContext.isPermissionGranted(downloadManager.permissions.asIterable())) {
@@ -259,11 +255,9 @@ fun DownloadComponent(
     }
     // set OnDownloadStopped callback
     LaunchedEffect(downloadManager) {
-        // todo: set callback that shows prompt when download completed
-        //  to inform user, show option to close prompt or open downloaded file,
-        //  in body show file name and content size, title is, open downloaded file?
+        // todo: not workin
         downloadManager.onDownloadStopped = { state, _, status ->
-            stoppedDownloadStates.plus(state.id to StoppedDownloadState(state, status))
+            stoppedDownloadStates[state.id] = StoppedDownloadState(state, status)
         }
     }
 
@@ -409,7 +403,7 @@ fun DownloadComponent(
                     tryAgain = { downloadManager.tryAgain(entry.value.downloadState.id) },
                     onCannotOpenFile = onCannotOpenFile,
                     onDismiss = {
-                        stoppedDownloadStates.minus(entry.key)
+                        stoppedDownloadStates.remove(entry.key)
                     },
                 )
             }

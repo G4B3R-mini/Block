@@ -558,10 +558,10 @@ fun onDismiss(promptRequest: PromptRequest) {
     }
 }
 
-@SuppressWarnings("UNCHECKED_CAST")
+
 fun onPositiveAction(promptRequest: PromptRequest, value: Any? = null, value2: Any? = null) {
     when (promptRequest) {
-        is MultipleChoice -> promptRequest.onConfirm.invoke((value as HashMap<Choice, Choice>).keys.toTypedArray())
+        is MultipleChoice -> promptRequest.onConfirm.invoke((value as HashMap<*, *>).keys.map { it as Choice }.toTypedArray())
         is MenuChoice -> promptRequest.onConfirm.invoke(value as Choice)
         is BeforeUnload -> promptRequest.onLeave.invoke()
         is Alert -> promptRequest.onConfirm.invoke(value as Boolean)
