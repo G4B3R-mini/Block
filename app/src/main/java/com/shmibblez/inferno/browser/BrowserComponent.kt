@@ -15,7 +15,6 @@ import android.util.Log
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
-import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -33,11 +32,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Scaffold
@@ -62,8 +59,6 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
@@ -94,7 +89,7 @@ import com.shmibblez.inferno.NavGraphDirections
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.browsingmode.BrowsingMode
 import com.shmibblez.inferno.browser.prompts.DownloadComponent
-import com.shmibblez.inferno.browser.prompts.PromptComponent
+import com.shmibblez.inferno.browser.prompts.InfernoWebPrompter
 import com.shmibblez.inferno.browser.prompts.webPrompts.AndroidPhotoPicker
 import com.shmibblez.inferno.browser.prompts.webPrompts.FilePicker
 import com.shmibblez.inferno.browser.prompts.webPrompts.FilePicker.Companion.FILE_PICKER_ACTIVITY_REQUEST_CODE
@@ -139,7 +134,6 @@ import com.shmibblez.inferno.microsurvey.ui.ext.MicrosurveyUIData
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.consumePromptFrom
 import com.shmibblez.inferno.perf.MarkersFragmentLifecycleCallbacks
 import com.shmibblez.inferno.pip.PictureInPictureIntegration
-import com.shmibblez.inferno.search.AwesomeBarWrapper
 import com.shmibblez.inferno.settings.SupportUtils
 import com.shmibblez.inferno.settings.biometric.BiometricPromptFeature
 import com.shmibblez.inferno.settings.quicksettings.protections.cookiebanners.getCookieBannerUIMode
@@ -176,7 +170,6 @@ import kotlinx.coroutines.withContext
 import mozilla.appservices.places.BookmarkRoot
 import mozilla.appservices.places.uniffi.PlacesApiException
 import mozilla.components.browser.engine.gecko.GeckoEngineView
-import mozilla.components.browser.state.action.ContentAction
 import mozilla.components.browser.state.action.DebugAction
 import mozilla.components.browser.state.action.LastAccessAction
 import mozilla.components.browser.state.action.RecentlyClosedAction
@@ -208,8 +201,6 @@ import mozilla.components.concept.engine.prompt.PromptRequest.File
 import mozilla.components.concept.engine.prompt.ShareData
 import mozilla.components.concept.storage.LoginEntry
 import mozilla.components.feature.accounts.push.CloseTabsUseCases
-import mozilla.components.feature.downloads.AbstractFetchDownloadService
-import mozilla.components.feature.downloads.DownloadsFeature
 import mozilla.components.feature.downloads.manager.FetchDownloadManager
 import mozilla.components.feature.downloads.temporary.CopyDownloadFeature
 import mozilla.components.feature.downloads.temporary.ShareDownloadFeature
@@ -249,7 +240,6 @@ import java.lang.ref.WeakReference
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 import kotlin.math.roundToInt
-import mozilla.components.browser.toolbar.BrowserToolbar as BrowserToolbarCompat
 
 // todo:
 //   - make new tab next to current based on config, default is true
@@ -1835,7 +1825,7 @@ fun BrowserComponent(
         }
     }
 
-    PromptComponent(
+    InfernoWebPrompter(
         setPromptRequests = setPromptRequests,
         currentTab = currentTab,
 //        store = store,

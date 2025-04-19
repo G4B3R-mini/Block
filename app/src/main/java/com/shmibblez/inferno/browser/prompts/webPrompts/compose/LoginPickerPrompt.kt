@@ -19,10 +19,26 @@ import mozilla.components.feature.prompts.login.LoginPickerColors
 
 // todo: not tested, probably broken
 @Composable
-fun LoginPickerPrompt(loginData: PromptRequest.SelectLoginPrompt, sessionId: String) {
+fun LoginPickerPrompt(
+    showStrongPasswordBar: Boolean,
+    loginData: PromptRequest.SelectLoginPrompt,
+    sessionId: String,
+    currentUrl: String,
+    onSavedGeneratedPassword: (Boolean) -> Unit,
+) {
+
+    if (showStrongPasswordBar) {
+        PasswordGeneratorDialogPrompt(
+            loginData,
+            sessionId,
+            currentUrl = currentUrl,
+            onSavedGeneratedPassword = onSavedGeneratedPassword,
+        )
+        return
+    }
+
     val context = LocalContext.current
     val store = LocalContext.current.components.core.store
-//    var logins by remember{mutableStateOf(listOf<Login>())}
     var isExpanded by remember { mutableStateOf(false) }
     val loginPickerColors = LoginPickerColors(context)
 

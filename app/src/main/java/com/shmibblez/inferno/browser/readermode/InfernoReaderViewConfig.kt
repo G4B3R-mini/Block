@@ -51,6 +51,7 @@ internal class InfernoReaderViewConfig(
                 set(value) {
                     if (colorSchemeCache != value) {
                         colorSchemeCache = value
+                        // todo: check if recursive
                         state.value = colorSchemeCache!!
                         prefs.edit().putString(COLOR_SCHEME_KEY, value.name).apply()
                         sendMessage(ACTION_SET_COLOR_SCHEME) { put(ACTION_VALUE, value.name) }

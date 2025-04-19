@@ -51,7 +51,7 @@ fun PasswordGeneratorDialogPrompt(
     loginData: PromptRequest.SelectLoginPrompt,
     sessionId: String,
     currentUrl: String,
-    onSavedGeneratedPassword: (Boolean) -> Unit
+    onSavedGeneratedPassword: (Boolean) -> Unit,
 ) {
     val store = LocalContext.current.components.core.store
 
