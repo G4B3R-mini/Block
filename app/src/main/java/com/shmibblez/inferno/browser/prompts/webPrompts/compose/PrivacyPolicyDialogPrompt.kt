@@ -20,8 +20,6 @@ import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplate
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateAction
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateButtonPosition
-import com.shmibblez.inferno.browser.prompts.onDismiss
-import com.shmibblez.inferno.browser.prompts.onPositiveAction
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.ext.components
 import mozilla.components.browser.state.action.ContentAction
@@ -29,39 +27,25 @@ import mozilla.components.concept.engine.prompt.PromptRequest
 
 @Composable
 fun PrivacyPolicyDialog(
-    privacyPolicyData: PromptRequest.IdentityCredential.PrivacyPolicy,
-    sessionId: String,
+    promptRequest: PromptRequest.IdentityCredential.PrivacyPolicy,
     title: String,
-    message: String
+    message: String,
+    onCancel: () -> Unit,
+    onConfirm: (Boolean) -> Unit,
 ) {
     val store = LocalContext.current.components.core.store
     PromptBottomSheetTemplate(
-        onDismissRequest = {
-            onDismiss(privacyPolicyData)
-            store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, privacyPolicyData))
-        },
+        onDismissRequest = onCancel,
         negativeAction = PromptBottomSheetTemplateAction(
             text = stringResource(R.string.mozac_feature_prompts_identity_credentials_cancel),
             action = {
-                onPositiveAction(privacyPolicyData, false)
-                store.dispatch(
-                    ContentAction.ConsumePromptRequestAction(
-                        sessionId,
-                        privacyPolicyData
-                    )
-                )
+                onConfirm.invoke(false)
             },
         ),
         positiveAction = PromptBottomSheetTemplateAction(
             text = stringResource(R.string.mozac_feature_prompts_identity_credentials_continue),
             action = {
-                onPositiveAction(privacyPolicyData, true)
-                store.dispatch(
-                    ContentAction.ConsumePromptRequestAction(
-                        sessionId,
-                        privacyPolicyData
-                    )
-                )
+                onConfirm.invoke(true)
             },
         ),
         buttonPosition = PromptBottomSheetTemplateButtonPosition.BOTTOM,

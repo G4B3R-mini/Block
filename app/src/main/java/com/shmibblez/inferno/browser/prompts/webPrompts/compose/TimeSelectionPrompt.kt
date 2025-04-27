@@ -26,11 +26,7 @@ import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateAction
 import com.shmibblez.inferno.browser.prompts.webPrompts.compose.sub.MonthAndYearPicker
 import com.shmibblez.inferno.browser.prompts.webPrompts.compose.sub.rememberMonthAndYearPickerState
 import com.shmibblez.inferno.browser.prompts.webPrompts.compose.sub.rememberNumberPickerState
-import com.shmibblez.inferno.browser.prompts.onDismiss
-import com.shmibblez.inferno.browser.prompts.onNegativeAction
-import com.shmibblez.inferno.browser.prompts.onNeutralAction
-import com.shmibblez.inferno.browser.prompts.onPositiveAction
-import com.shmibblez.inferno.ext.components
+
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.ext.hour
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.ext.minute
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.ext.month
@@ -39,6 +35,7 @@ import mozilla.components.browser.state.action.ContentAction
 import mozilla.components.concept.engine.prompt.PromptRequest
 import java.util.Calendar
 import java.util.Date
+import kotlin.time.Duration.Companion.hours
 
 // todo: not tested
 
@@ -53,11 +50,23 @@ const val SELECTION_TYPE_MONTH = 4
 //   - error when press ok and nothing selected
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TimeSelectionPrompt(timeData: PromptRequest.TimeSelection, sessionId: String, type: Int) {
-    val store = LocalContext.current.components.core.store
+fun TimeSelectionPrompt(
+    promptRequest: PromptRequest.TimeSelection,
+    type: Int,
+    onCancel: () -> Unit,
+    onConfirm: (Date) -> Unit,
+    onClear: () -> Unit,
+) {
     val context = LocalContext.current
     val cal = Calendar.getInstance()
-    val timeState = rememberTimePickerState()
+    val timeState = rememberTimePickerState(
+        initialHour = cal.apply {
+            time = promptRequest.initialDate
+        }.get(Calendar.HOUR_OF_DAY),
+        initialMinute = cal.apply {
+            time = promptRequest.initialDate
+        }.get(Calendar.MINUTE),
+    )
     val datePickerState = rememberDatePickerState()
     val monthState = rememberNumberPickerState()
     val yearState = rememberNumberPickerState()
@@ -67,22 +76,14 @@ fun TimeSelectionPrompt(timeData: PromptRequest.TimeSelection, sessionId: String
     )
 
     PromptBottomSheetTemplate(
-        onDismissRequest = {
-            onDismiss(timeData)
-            store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, timeData))
-        },
+        onDismissRequest = onCancel,
         negativeAction = PromptBottomSheetTemplateAction(
             text = stringResource(R.string.mozac_feature_prompts_cancel),
-            action = {
-                onNegativeAction(timeData)
-                store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, timeData))
-            },
+            action = onCancel,
         ),
         neutralAction = PromptBottomSheetTemplateAction(
             text = stringResource(R.string.mozac_feature_prompts_clear),
-            action = {
-                onNeutralAction(timeData)
-            },
+            action = onClear,
         ),
         positiveAction = PromptBottomSheetTemplateAction(
             text = stringResource(
@@ -101,34 +102,19 @@ fun TimeSelectionPrompt(timeData: PromptRequest.TimeSelection, sessionId: String
                     SELECTION_TYPE_TIME -> {
                         cal.hour = timeState.hour
                         cal.minute = timeState.minute
-                        onPositiveAction(timeData, cal.time)
-                        store.dispatch(
-                            ContentAction.ConsumePromptRequestAction(
-                                sessionId, timeData
-                            )
-                        )
+                        onConfirm.invoke(cal.time)
                     }
 
                     SELECTION_TYPE_DATE -> {
                         cal.time = Date(datePickerState.selectedDateMillis ?: Date().time)
-                        onPositiveAction(timeData, cal.time)
-                        store.dispatch(
-                            ContentAction.ConsumePromptRequestAction(
-                                sessionId, timeData
-                            )
-                        )
+                        onConfirm.invoke(cal.time)
                     }
 
                     SELECTION_TYPE_DATE_AND_TIME -> {
                         cal.time = Date(datePickerState.selectedDateMillis ?: Date().time)
                         cal.hour = timeState.hour
                         cal.minute = timeState.minute
-                        onPositiveAction(timeData, cal.time)
-                        store.dispatch(
-                            ContentAction.ConsumePromptRequestAction(
-                                sessionId, timeData
-                            )
-                        )
+                        onConfirm(cal.time)
                     }
 
                     SELECTION_TYPE_MONTH -> {
@@ -136,12 +122,7 @@ fun TimeSelectionPrompt(timeData: PromptRequest.TimeSelection, sessionId: String
                             context.resources.getStringArray(R.array.mozac_feature_prompts_months)
                                 .indexOf(monthAndYearPickerState.month.selectedItem) - 1
                         cal.year = monthAndYearPickerState.year.selectedItem.toInt()
-                        onPositiveAction(timeData, cal.time)
-                        store.dispatch(
-                            ContentAction.ConsumePromptRequestAction(
-                                sessionId, timeData
-                            )
-                        )
+                        onConfirm(cal.time)
                     }
 
                     else -> {}
@@ -150,8 +131,10 @@ fun TimeSelectionPrompt(timeData: PromptRequest.TimeSelection, sessionId: String
         ),
     ) {
         Column(
-            modifier = Modifier
-                .scrollable(rememberScrollState(0), orientation = Orientation.Vertical),
+            modifier = Modifier.scrollable(
+                    rememberScrollState(0),
+                    orientation = Orientation.Vertical
+                ),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             when (type) {

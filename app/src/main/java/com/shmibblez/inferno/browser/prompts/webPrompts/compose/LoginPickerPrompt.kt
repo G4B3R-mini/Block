@@ -7,8 +7,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplate
-import com.shmibblez.inferno.browser.prompts.onDismiss
-import com.shmibblez.inferno.browser.prompts.onPositiveAction
+import com.shmibblez.inferno.browser.prompts.login.SelectLoginPromptController
 import com.shmibblez.inferno.ext.components
 import mozilla.components.browser.state.action.ContentAction
 import mozilla.components.concept.engine.prompt.PromptRequest
@@ -20,45 +19,22 @@ import mozilla.components.feature.prompts.login.LoginPickerColors
 // todo: not tested, probably broken
 @Composable
 fun LoginPickerPrompt(
-    showStrongPasswordBar: Boolean,
-    loginData: PromptRequest.SelectLoginPrompt,
-    sessionId: String,
-    currentUrl: String,
-    onSavedGeneratedPassword: (Boolean) -> Unit,
+    promptRequest: PromptRequest.SelectLoginPrompt,
+    controller: SelectLoginPromptController.LoginPickerDialog,
+    onCancel: () -> Unit,
+    onConfirm: (Login) -> Unit,
 ) {
-
-    if (showStrongPasswordBar) {
-        PasswordGeneratorDialogPrompt(
-            loginData,
-            sessionId,
-            currentUrl = currentUrl,
-            onSavedGeneratedPassword = onSavedGeneratedPassword,
-        )
-        return
-    }
-
     val context = LocalContext.current
-    val store = LocalContext.current.components.core.store
     var isExpanded by remember { mutableStateOf(false) }
     val loginPickerColors = LoginPickerColors(context)
 
-    var listener: SelectablePromptView.Listener<Login>? = null
-
-
-    PromptBottomSheetTemplate(onDismissRequest = {
-        onDismiss(loginData)
-        store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, loginData))
-    }) {
+    PromptBottomSheetTemplate(onDismissRequest = onCancel) {
         LoginPicker(
-            logins = loginData.logins,
+            logins = promptRequest.logins,
             isExpanded = isExpanded,
             onExpandToggleClick = { isExpanded = it },
-            onLoginSelected = {
-                listener?.onOptionSelect(it)
-                onPositiveAction(loginData, it)
-                store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, loginData))
-            },
-            onManagePasswordClicked = { listener?.onManageOptions() },
+            onLoginSelected = onConfirm,
+            onManagePasswordClicked = { controller.onManageOptions() },
             loginPickerColors = loginPickerColors,
         )
     }

@@ -22,6 +22,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.CallSuper
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.HorizontalDivider
@@ -352,14 +353,14 @@ abstract class BaseBrowserFragment :
     // Registers a photo picker activity launcher in single-select mode.
     private val singleMediaPicker =
         AndroidPhotoPicker.singleMediaPicker(
-            { getFragment() },
+            { this },
             { null }, //getPromptsFeature() },
         )
 
     // Registers a photo picker activity launcher in multi-select mode.
     private val multipleMediaPicker =
         AndroidPhotoPicker.multipleMediaPicker(
-            { getFragment() },
+            { this },
             { null }, // getPromptsFeature() },
         )
 
@@ -2285,7 +2286,10 @@ abstract class BaseBrowserFragment :
             withContext(Main) {
                 nav(
                     R.id.browserComponentWrapperFragment,
-                    BrowserComponentWrapperFragmentDirections.actionGlobalBookmarkEditFragment(existing.guid, true),
+                    BrowserComponentWrapperFragmentDirections.actionGlobalBookmarkEditFragment(
+                        existing.guid,
+                        true
+                    ),
                 )
             }
         } else {
@@ -2573,7 +2577,7 @@ abstract class BaseBrowserFragment :
     }
 
     override fun onAccessibilityStateChanged(enabled: Boolean) {
-        registerForActivityResult {  }
+        registerForActivityResult { }
         if (_browserToolbarView != null) {
             browserToolbarView.setToolbarBehavior(enabled)
         }

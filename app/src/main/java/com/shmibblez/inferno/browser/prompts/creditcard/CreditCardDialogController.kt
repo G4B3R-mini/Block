@@ -1,6 +1,9 @@
 package com.shmibblez.inferno.browser.prompts.creditcard
 
 import androidx.annotation.VisibleForTesting
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import com.shmibblez.inferno.browser.prompts.consumePromptFrom
 import mozilla.components.browser.state.action.ContentAction
 import mozilla.components.browser.state.store.BrowserStore
@@ -15,20 +18,18 @@ import mozilla.components.support.base.log.logger.Logger
  * the user performed in the credit card picker.
  *
  * @property store The [BrowserStore] this feature should subscribe to.
- * @property creditCardSelectBar The [SelectablePromptView] view into which the select credit card
- * prompt will be inflated.
  * @property manageCreditCardsCallback A callback invoked when a user selects "Manage credit cards"
  * from the select credit card prompt.
  * @property selectCreditCardCallback A callback invoked when a user selects a credit card option
  * from the select credit card prompt
  * @property sessionId The session ID which requested the prompt.
  */
-class InfernoCreditCardPicker(
+class CreditCardDialogController(
     private val store: BrowserStore,
     private val manageCreditCardsCallback: () -> Unit = {},
     private val selectCreditCardCallback: () -> Unit = {},
     private var sessionId: String? = null,
-) : SelectablePromptView.Listener<CreditCardEntry> {
+) {
 
 //    init {
 //        creditCardSelectBar.listener = this
@@ -36,14 +37,14 @@ class InfernoCreditCardPicker(
 
     // The selected credit card option to confirm.
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    internal var selectedCreditCard: CreditCardEntry? = null
+    internal var selectedCreditCard by mutableStateOf<CreditCardEntry?>(null)
 
-    override fun onManageOptions() {
+    fun onManageOptions() {
         manageCreditCardsCallback.invoke()
         dismissSelectCreditCardRequest()
     }
 
-    override fun onOptionSelect(option: CreditCardEntry) {
+    fun onOptionSelect(option: CreditCardEntry) {
         selectedCreditCard = option
 //        creditCardSelectBar.hidePrompt()
         selectCreditCardCallback.invoke()

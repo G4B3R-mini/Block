@@ -17,14 +17,14 @@ open class SelectLoginPromptController {
         private val store: BrowserStore,
         private val manageLoginsCallback: () -> Unit = {},
         private var sessionId: String? = null,
-    ): SelectLoginPromptController() {
+    ) : SelectLoginPromptController() {
         fun onOptionSelect(option: Login) {
             store.consumePromptFrom<PromptRequest.SelectLoginPrompt>(sessionId) {
                 it.onConfirm(option)
             }
 //        emitLoginAutofillPerformedFact()
-            // todo:
-//        loginSelectBar.hidePrompt()
+            // hidden automatically when consumed
+//            loginSelectBar.hidePrompt()
         }
 
         fun onManageOptions() {
@@ -40,8 +40,8 @@ open class SelectLoginPromptController {
                     sessionId?.let {
                         store.dispatch(ContentAction.ConsumePromptRequestAction(it, promptRequest))
                     }
-                    // todo:
-//                loginSelectBar.hidePrompt()
+                    // hidden automatically when consumed
+//                    loginSelectBar.hidePrompt()
                     return
                 }
 
@@ -55,17 +55,43 @@ open class SelectLoginPromptController {
         }
     }
 
-    data object PasswordGeneratorDialog : SelectLoginPromptController()
+    data class PasswordGeneratorDialog(
+        private val browserStore: BrowserStore,
+        private var sessionId: String? = null,
+    ) : SelectLoginPromptController() {
+        fun dismissCurrentPasswordGenerator(promptRequest: PromptRequest.SelectLoginPrompt? = null) {
+            try {
+                if (promptRequest != null) {
+                    promptRequest.onDismiss()
+                    sessionId?.let {
+                        browserStore.dispatch(
+                            ContentAction.ConsumePromptRequestAction(
+                                it,
+                                promptRequest,
+                            ),
+                        )
+                    }
+                    return
+                }
+
+                browserStore.consumePromptFrom<PromptRequest.SelectLoginPrompt>(sessionId) {
+                    it.onDismiss()
+                }
+            } catch (e: RuntimeException) {
+                Logger.error("Can't dismiss this prompt", e)
+            }
+        }
+    }
 
     data class StrongPasswordBarDialog(
         private val browserStore: BrowserStore,
         private var sessionId: String? = null,
-        private var onGeneratedPasswordPromptClick: () -> Unit = { },
+//        private var onGeneratedPasswordPromptClick: () -> Unit = { },
     ) : SelectLoginPromptController() {
 
-        fun onGeneratedPasswordPromptClick() {
-            onGeneratedPasswordPromptClick.invoke()
-        }
+//        fun onGeneratedPasswordPromptClick() {
+//            onGeneratedPasswordPromptClick.invoke()
+//        }
 
         @Suppress("TooGenericExceptionCaught")
         fun dismissCurrentSuggestStrongPassword(promptRequest: PromptRequest.SelectLoginPrompt? = null) {

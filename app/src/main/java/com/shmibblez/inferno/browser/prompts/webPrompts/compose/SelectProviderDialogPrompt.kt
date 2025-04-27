@@ -13,14 +13,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.shmibblez.inferno.compose.base.InfernoText
-import mozilla.components.browser.state.action.ContentAction
 import mozilla.components.concept.engine.prompt.PromptRequest
 import mozilla.components.concept.identitycredential.Provider
 import mozilla.components.feature.prompts.identitycredential.DialogColors
@@ -29,29 +27,20 @@ import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplate
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateAction
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateButtonPosition
-import com.shmibblez.inferno.browser.prompts.onDismiss
-import com.shmibblez.inferno.browser.prompts.onPositiveAction
 import com.shmibblez.inferno.browser.prompts.webPrompts.compose.sub.IdentityCredentialItem
-import com.shmibblez.inferno.ext.components
 
 @Composable
 fun SelectProviderDialogPrompt(
-    selectData: PromptRequest.IdentityCredential.SelectProvider,
-    sessionId: String,
+    promptRequest: PromptRequest.IdentityCredential.SelectProvider,
+    onCancel: () -> Unit,
+    onConfirm: (Provider) -> Unit,
 ) {
     val colors = DialogColors.defaultProvider().provideColors()
-    val store = LocalContext.current.components.core.store
     PromptBottomSheetTemplate(
-        onDismissRequest = {
-            onDismiss(selectData)
-            store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, selectData))
-        },
+        onDismissRequest = onCancel,
         negativeAction = PromptBottomSheetTemplateAction(
             text = stringResource(android.R.string.cancel),
-            action = {
-                onDismiss(selectData)
-                store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, selectData))
-            }
+            action = onCancel,
         ),
         buttonPosition = PromptBottomSheetTemplateButtonPosition.TOP
     ) {
@@ -70,11 +59,8 @@ fun SelectProviderDialogPrompt(
             modifier = Modifier.padding(top = 8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
         ) {
-            items(selectData.providers) { provider ->
-                ProviderItem(provider = provider, onClick = {
-                    onPositiveAction(selectData, it)
-                    store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, selectData))
-                }, colors = colors)
+            items(promptRequest.providers) { provider ->
+                ProviderItem(provider = provider, onClick = onConfirm, colors = colors)
             }
         }
     }

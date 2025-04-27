@@ -1,7 +1,6 @@
 package com.shmibblez.inferno.browser
 
 import android.annotation.SuppressLint
-import android.app.Activity.RESULT_OK
 import android.app.KeyguardManager
 import android.content.Context
 import android.content.ContextWrapper
@@ -89,10 +88,11 @@ import com.shmibblez.inferno.NavGraphDirections
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.browsingmode.BrowsingMode
 import com.shmibblez.inferno.browser.prompts.DownloadComponent
+import com.shmibblez.inferno.browser.prompts.InfernoPromptFeatureState
 import com.shmibblez.inferno.browser.prompts.InfernoWebPrompter
-import com.shmibblez.inferno.browser.prompts.webPrompts.AndroidPhotoPicker
+import com.shmibblez.inferno.browser.prompts.login.InfernoLoginDelegate
+import com.shmibblez.inferno.browser.prompts.rememberInfernoPromptFeatureState
 import com.shmibblez.inferno.browser.prompts.webPrompts.FilePicker
-import com.shmibblez.inferno.browser.prompts.webPrompts.FilePicker.Companion.FILE_PICKER_ACTIVITY_REQUEST_CODE
 import com.shmibblez.inferno.browser.readermode.InfernoReaderViewControls
 import com.shmibblez.inferno.browser.readermode.rememberInfernoReaderViewFeatureState
 import com.shmibblez.inferno.browser.tabstrip.isTabStripEnabled
@@ -131,7 +131,6 @@ import com.shmibblez.inferno.library.bookmarks.friendlyRootTitle
 import com.shmibblez.inferno.messaging.FenixMessageSurfaceId
 import com.shmibblez.inferno.messaging.MessagingFeature
 import com.shmibblez.inferno.microsurvey.ui.ext.MicrosurveyUIData
-import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.consumePromptFrom
 import com.shmibblez.inferno.perf.MarkersFragmentLifecycleCallbacks
 import com.shmibblez.inferno.pip.PictureInPictureIntegration
 import com.shmibblez.inferno.settings.SupportUtils
@@ -196,8 +195,6 @@ import mozilla.components.compose.cfr.CFRPopupProperties
 import mozilla.components.concept.engine.EngineView
 import mozilla.components.concept.engine.mediasession.MediaSession
 import mozilla.components.concept.engine.permission.SitePermissions
-import mozilla.components.concept.engine.prompt.PromptRequest
-import mozilla.components.concept.engine.prompt.PromptRequest.File
 import mozilla.components.concept.engine.prompt.ShareData
 import mozilla.components.concept.storage.LoginEntry
 import mozilla.components.feature.accounts.push.CloseTabsUseCases
@@ -207,6 +204,8 @@ import mozilla.components.feature.downloads.temporary.ShareDownloadFeature
 import mozilla.components.feature.downloads.ui.DownloadCancelDialogFragment
 import mozilla.components.feature.media.fullscreen.MediaSessionFullscreenFeature
 import mozilla.components.feature.privatemode.feature.SecureWindowFeature
+import mozilla.components.feature.prompts.address.AddressDelegate
+import mozilla.components.feature.prompts.creditcard.CreditCardDelegate
 import mozilla.components.feature.prompts.dialog.FullScreenNotificationToast
 import mozilla.components.feature.prompts.dialog.GestureNavUtils
 import mozilla.components.feature.prompts.identitycredential.DialogColors
@@ -331,7 +330,7 @@ fun nav(
     navController: NavController,
     @IdRes id: Int?,
     directions: NavDirections,
-    options: NavOptions? = null
+    options: NavOptions? = null,
 ) {
     navController.nav(id, directions, options)
 }
@@ -379,10 +378,7 @@ fun BrowserComponent(
     navController: NavController,
     sessionId: String?,
     setOnActivityResultHandler: ((OnActivityResultModel) -> Boolean) -> Unit,
-    androidPhotoPicker: AndroidPhotoPicker,
-    setFilePicker: (FilePicker) -> Unit,
     // browser state vars
-    setPromptRequests: (List<PromptRequest>) -> Unit,
     setSelectedTabsTrayTab: (InfernoTabsTraySelectedTab) -> Unit,
     tabList: List<TabSessionState>,
     normalTabs: List<TabSessionState>,
@@ -390,7 +386,6 @@ fun BrowserComponent(
     closedTabs: List<TabState>,
     currentTab: TabSessionState?,
     searchEngine: SearchEngine?,
-    promptRequests: List<PromptRequest>,
     pageType: BrowserComponentPageType,
     selectedTabsTrayTab: InfernoTabsTraySelectedTab,
 //    args: HomeFragmentArgs
@@ -503,7 +498,7 @@ fun BrowserComponent(
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED) var webAppToolbarShouldBeVisible =
         true
 
-    val (lastSavedGeneratedPassword, setLastSavedGeneratedPassword) = remember {
+    var lastSavedGeneratedPassword by remember {
         mutableStateOf<String?>(
             null
         )
@@ -584,6 +579,115 @@ fun BrowserComponent(
     var browserMode by remember {
         mutableStateOf(BrowserComponentMode.TOOLBAR)
     }
+
+    val webPrompterState = rememberInfernoPromptFeatureState(
+        activity = context.getActivity()!!,
+        fragment = view.findFragment(),
+        store = store,
+        customTabId = customTabSessionId,
+        tabsUseCases = context.components.useCases.tabsUseCases,
+        fileUploadsDirCleaner = context.components.core.fileUploadsDirCleaner,
+        creditCardValidationDelegate = DefaultCreditCardValidationDelegate(
+            context.components.core.lazyAutofillStorage,
+        ),
+        loginValidationDelegate = DefaultLoginValidationDelegate(
+            context.components.core.lazyPasswordsStorage,
+        ),
+        isLoginAutofillEnabled = {
+            context.settings().shouldAutofillLogins
+        },
+        isSaveLoginEnabled = {
+            context.settings().shouldPromptToSaveLogins
+        },
+        isCreditCardAutofillEnabled = {
+            context.settings().shouldAutofillCreditCardDetails
+        },
+        isAddressAutofillEnabled = {
+            context.settings().addressFeature && context.settings().shouldAutofillAddressDetails
+        },
+        loginExceptionStorage = context.components.core.loginExceptionStorage,
+        shareDelegate = object : ShareDelegate {
+            override fun showShareSheet(
+                context: Context,
+                shareData: ShareData,
+                onDismiss: () -> Unit,
+                onSuccess: () -> Unit,
+            ) {
+                val directions = NavGraphDirections.actionGlobalShareFragment(
+                    data = arrayOf(shareData),
+                    showPage = true,
+                    sessionId = getCurrentTab(context)?.id,
+                )
+                navController.navigate(directions)
+            }
+        },
+        onNeedToRequestPermissions = { permissions ->
+//            requestPermissions(permissions, BaseBrowserFragment.REQUEST_CODE_PROMPT_PERMISSIONS)
+            requestPromptsPermissionsLauncher.launch(permissions)
+        },
+        loginDelegate = object : InfernoLoginDelegate {
+            override val onManageLogins = {
+                browserAnimator.captureEngineViewAndDrawStatically {
+                    val directions =
+                        NavGraphDirections.actionGlobalSavedLoginsAuthFragment()
+                    navController.navigate(directions)
+                }
+            }
+        },
+        shouldAutomaticallyShowSuggestedPassword = { context.settings().isFirstTimeEngagingWithSignup },
+        onFirstTimeEngagedWithSignup = {
+            context.settings().isFirstTimeEngagingWithSignup = false
+        },
+        onSaveLoginWithStrongPassword = { url, password ->
+            handleOnSaveLoginWithGeneratedStrongPassword(
+                passwordsStorage = context.components.core.passwordsStorage,
+                url = url,
+                password = password,
+                lifecycleScope = coroutineScope,
+                setLastSavedGeneratedPassword = { lastSavedGeneratedPassword = it },
+            )
+        },
+        onSaveLogin = { isUpdate ->
+            showSnackbarAfterLoginChange(
+                isUpdate = isUpdate,
+                context = context,
+                coroutineScope = coroutineScope,
+                snackbarHostState = snackbarHostState,
+            )
+        },
+        hideUpdateFragmentAfterSavingGeneratedPassword = { username, password ->
+            hideUpdateFragmentAfterSavingGeneratedPassword(
+                username = username,
+                password = password,
+                lastSavedGeneratedPassword = lastSavedGeneratedPassword
+            )
+        },
+        removeLastSavedGeneratedPassword = {
+            removeLastSavedGeneratedPassword({
+                lastSavedGeneratedPassword = it
+            })
+        },
+        creditCardDelegate = object : CreditCardDelegate {
+            override val creditCardPickerView
+                get() = null
+            override val onManageCreditCards = {
+                val directions =
+                    NavGraphDirections.actionGlobalAutofillSettingFragment()
+                navController.navigate(directions)
+            }
+            override val onSelectCreditCard = {
+                showBiometricPrompt(context, biometricPromptFeature, webPrompterState)
+            }
+        },
+        addressDelegate = object : AddressDelegate {
+            override val addressPickerView
+                get() = null
+            override val onManageAddresses = {
+                val directions = NavGraphDirections.actionGlobalAutofillSettingFragment()
+                navController.navigate(directions)
+            }
+        },
+    )
 
     val infernoReaderViewState = rememberInfernoReaderViewFeatureState(
         context = context,
@@ -1038,14 +1142,18 @@ fun BrowserComponent(
         },
     )
 
+    InfernoWebPrompter(
+        state = webPrompterState,
+        currentTab = currentTab,
+    )
+
     /// views
     var engineView by remember { mutableStateOf<EngineView?>(null) }
     var swipeRefresh by remember { mutableStateOf<SwipeRefreshLayout?>(null) }
 
     /// event handlers
-    val activityResultHandler: List<ViewBoundFeatureWrapper<*>> = listOf(
-        webAuthnFeature,
-
+    val activityResultHandler: List<ActivityResultHandler?> = listOf(
+        webAuthnFeature.get(), webPrompterState,
 //        promptsFeature,
     )
     // sets parent fragment handler for onActivityResult
@@ -1054,25 +1162,11 @@ fun BrowserComponent(
             "Fragment onActivityResult received with " + "requestCode: ${result.requestCode}, resultCode: ${result.resultCode}, data: ${result.data}",
         )
 
-        // filePicker results
-        with(result) {
-            for (promptRequest in promptRequests) {
-                if (requestCode == FILE_PICKER_ACTIVITY_REQUEST_CODE && promptRequest is File) {
-                    store.consumePromptFrom(sessionId, promptRequest.uid) {
-                        if (resultCode == RESULT_OK) {
-                            filePicker!!.handleFilePickerIntentResult(data, promptRequest)
-                        } else {
-                            promptRequest.onDismiss()
-                        }
-                    }
-                }
-            }
-        }
         // feature activity result handler
         activityResultHandler.any {
-            it.onActivityResult(
+            it?.onActivityResult(
                 result.requestCode, result.data, result.resultCode
-            )
+            ) ?: false
         }
 
     }
@@ -1364,12 +1458,12 @@ fun BrowserComponent(
                     context = context,
                     fragment = view.findFragment(),
                     onAuthFailure = {
-                        // todo: biometrics
-//                        promptsFeature.get()?.onBiometricResult(isAuthenticated = false)
+                        // todo: test biometrics
+                        webPrompterState.onBiometricResult(isAuthenticated = false)
                     },
                     onAuthSuccess = {
-                        // todo: biometrics
-//                        promptsFeature.get()?.onBiometricResult(isAuthenticated = true)
+                        // todo: test biometrics
+                        webPrompterState.onBiometricResult(isAuthenticated = true)
                     },
                 ),
                 owner = lifecycleOwner,
@@ -1687,24 +1781,6 @@ fun BrowserComponent(
         )/* BaseBrowserFragment onViewCreated */
     }
 
-    // run only once
-    LaunchedEffect(null) {
-        filePicker = FilePicker(
-            container = context.getActivity()!!,
-            store = store,
-            sessionId = customTabSessionId,
-            fileUploadsDirCleaner = context.components.core.fileUploadsDirCleaner,
-            androidPhotoPicker,
-            onNeedToRequestPermissions = { permissions ->
-                requestPromptsPermissionsLauncher.launch(
-                    permissions
-                )
-            },
-        )
-
-        setFilePicker(filePicker!!)
-    }
-
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
@@ -1824,133 +1900,6 @@ fun BrowserComponent(
             lifecycleOwner.lifecycle.removeObserver(observer)
         }
     }
-
-    InfernoWebPrompter(
-        setPromptRequests = setPromptRequests,
-        currentTab = currentTab,
-//        store = store,
-        customTabId = customTabSessionId,
-//        fragmentManager = parentFragmentManager,
-        filePicker = filePicker,
-//        identityCredentialColorsProvider = colorsProvider,
-//        tabsUseCases = context.components.useCases.tabsUseCases,
-//        fileUploadsDirCleaner = context.components.core.fileUploadsDirCleaner,
-        creditCardValidationDelegate = DefaultCreditCardValidationDelegate(
-            context.components.core.lazyAutofillStorage,
-        ),
-        loginValidationDelegate = DefaultLoginValidationDelegate(
-            context.components.core.lazyPasswordsStorage,
-        ),
-        isLoginAutofillEnabled = {
-            context.settings().shouldAutofillLogins
-        },
-        isSaveLoginEnabled = {
-            context.settings().shouldPromptToSaveLogins
-        },
-        isCreditCardAutofillEnabled = {
-            context.settings().shouldAutofillCreditCardDetails
-        },
-        isAddressAutofillEnabled = {
-            context.settings().addressFeature && context.settings().shouldAutofillAddressDetails
-        },
-//        loginExceptionStorage = context.components.core.loginExceptionStorage,
-        shareDelegate = object : ShareDelegate {
-            override fun showShareSheet(
-                context: Context,
-                shareData: ShareData,
-                onDismiss: () -> Unit,
-                onSuccess: () -> Unit,
-            ) {
-                val directions = NavGraphDirections.actionGlobalShareFragment(
-                    data = arrayOf(shareData),
-                    showPage = true,
-                    sessionId = getCurrentTab(context)?.id,
-                )
-                navController.navigate(directions)
-            }
-        },
-//        onNeedToRequestPermissions = { permissions ->
-//            // todo: test
-//            requestPromptsPermissionsLauncher.launch(permissions)
-//        },
-//        loginDelegate = object : LoginDelegate {
-//            // todo: login delegate
-////                        override val loginPickerView
-////                            get() = binding.loginSelectBar
-////                        override val onManageLogins = {
-////                            browserAnimator.captureEngineViewAndDrawStatically {
-////                                val directions = NavGraphDirections.actionGlobalSavedLoginsAuthFragment()
-////                                navController.navigate(directions)
-////                            }
-////                        }
-//        },
-//        suggestStrongPasswordDelegate = object : SuggestStrongPasswordDelegate {
-//            // todo: password delegate
-////                        override val strongPasswordPromptViewListenerView
-////                            get() = binding.suggestStrongPasswordBar
-//        },
-        shouldAutomaticallyShowSuggestedPassword = { context.settings().isFirstTimeEngagingWithSignup },
-//        onFirstTimeEngagedWithSignup = {
-//            context.settings().isFirstTimeEngagingWithSignup = false
-//        },
-//        onSaveLoginWithStrongPassword = { url, password ->
-//            handleOnSaveLoginWithGeneratedStrongPassword(
-//                passwordsStorage = context.components.core.passwordsStorage,
-//                url = url,
-//                password = password,
-//                lifecycleScope = coroutineScope,
-//                setLastSavedGeneratedPassword,
-//            )
-//        },
-        onFirstTimeEngagedWithSignup = {
-            context.settings().isFirstTimeEngagingWithSignup = false
-        },
-        onSaveLogin = { isUpdate ->
-            showSnackbarAfterLoginChange(
-                isUpdate,
-                context,
-                coroutineScope,
-                snackbarHostState,
-            )
-        },
-//        passwordGeneratorColorsProvider = passwordGeneratorColorsProvider,
-        hideUpdateFragmentAfterSavingGeneratedPassword = { username, password ->
-            hideUpdateFragmentAfterSavingGeneratedPassword(
-                username,
-                password,
-                lastSavedGeneratedPassword,
-            )
-        },
-        removeLastSavedGeneratedPassword = {
-            removeLastSavedGeneratedPassword(
-                setLastSavedGeneratedPassword
-            )
-        },
-//        creditCardDelegate = object : CreditCardDelegate {
-//            // todo: credit card delegate
-////                        override val creditCardPickerView
-////                            get() = binding.creditCardSelectBar
-//            override val onManageCreditCards = {
-//                val directions = NavGraphDirections.actionGlobalAutofillSettingFragment()
-//                navController.navigate(directions)
-//            }
-//            override val onSelectCreditCard = {
-//                // todo: biometrics
-////                showBiometricPrompt(context, biometricPromptFeature, promptsFeature)
-//            }
-//        },
-//        addressDelegate = object : AddressDelegate {
-//            // todo: address delegate
-//            override val addressPickerView
-//                // todo: address select bar
-//                get() = AddressSelectBar(context) // binding.addressSelectBar
-//            override val onManageAddresses = {
-//                val directions = NavGraphDirections.actionGlobalAutofillSettingFragment()
-//                navController.navigate(directions)
-//            }
-//        },
-//        androidPhotoPicker = androidPhotoPicker,
-    )
 
     ContextMenuComponent(
         store = store,
@@ -2264,7 +2213,7 @@ private data class OnBackPressedHandler(
 
 // combines Moz BrowserFragment and Moz BaseBrowserFragment implementations
 private fun onBackPressed(
-    onBackPressedHandler: OnBackPressedHandler
+    onBackPressedHandler: OnBackPressedHandler,
 ): Boolean {
     with(onBackPressedHandler) {
         // todo: findInPageIntegration.onBackPressed() ||
@@ -2282,7 +2231,7 @@ fun Dp.toPx(): Int {
 fun MozEngineView(
     modifier: Modifier = Modifier,
     setSwipeView: (VerticalSwipeRefreshLayout) -> Unit,
-    setEngineView: (GeckoEngineView) -> Unit
+    setEngineView: (GeckoEngineView) -> Unit,
 ) {
     AndroidView(modifier = modifier, factory = { context ->
         val vl = VerticalSwipeRefreshLayout(context)
@@ -2331,7 +2280,7 @@ fun MozEngineView(
 // todo: reader view button, what this for?
 @Composable
 fun MozFloatingActionButton(
-    setView: (FloatingActionButton) -> Unit
+    setView: (FloatingActionButton) -> Unit,
 ) {
     AndroidView(modifier = Modifier.fillMaxSize(), factory = { context ->
         val v = FloatingActionButton(context)
@@ -2383,7 +2332,7 @@ private fun showUndoSnackbar(
     message: String,
     context: Context,
     coroutineScope: CoroutineScope,
-    snackbarHostState: AcornSnackbarHostState
+    snackbarHostState: AcornSnackbarHostState,
 ) {
     coroutineScope.launch {
         val result = snackbarHostState.defaultSnackbarHostState.showSnackbar(
@@ -2406,7 +2355,7 @@ internal fun showUndoSnackbarForSyncedTab(
     closeOperation: CloseTabsUseCases.UndoableOperation,
     context: Context,
     coroutineScope: CoroutineScope,
-    snackbarHostState: AcornSnackbarHostState
+    snackbarHostState: AcornSnackbarHostState,
 ) {
     coroutineScope.launch {
         val result = snackbarHostState.defaultSnackbarHostState.showSnackbar(
@@ -2511,7 +2460,7 @@ internal fun showUndoSnackbarForTab(
  * [See details](https://developer.android.com/develop/ui/views/touch-and-input/copy-paste#duplicate-notifications).
  */
 private fun showSnackbarForClipboardCopy(
-    context: Context, coroutineScope: CoroutineScope, snackbarHostState: AcornSnackbarHostState
+    context: Context, coroutineScope: CoroutineScope, snackbarHostState: AcornSnackbarHostState,
 ) {
     if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2) {
         coroutineScope.launch {
@@ -2530,7 +2479,7 @@ private fun showSnackbarAfterLoginChange(
     isUpdate: Boolean,
     context: Context,
     coroutineScope: CoroutineScope,
-    snackbarHostState: AcornSnackbarHostState
+    snackbarHostState: AcornSnackbarHostState,
 ) {
     val snackbarText = if (isUpdate) {
         R.string.mozac_feature_prompt_login_snackbar_username_updated
@@ -2551,6 +2500,7 @@ private fun showSnackbarAfterLoginChange(
 private fun showBiometricPrompt(
     context: Context,
     biometricPromptFeature: ViewBoundFeatureWrapper<BiometricPromptFeature>,
+    webPrompterState: InfernoPromptFeatureState,
 //    promptFeature: ViewBoundFeatureWrapper<PromptFeature>
 ) {
     if (BiometricPromptFeature.canUseFeature(context)) {
@@ -2566,10 +2516,10 @@ private fun showBiometricPrompt(
     } else {
         // Warn that the device has not been secured
         if (context.settings().shouldShowSecurityPinWarning) {
-            // todo: biometrics, integrate with prompt component for credit card select
-//            showPinDialogWarning(context, promptFeature)
+            // todo: biometrics, test integrate with prompt component for credit card select
+            showPinDialogWarning(context, webPrompterState)
         } else {
-//            promptFeature.get()?.onBiometricResult(isAuthenticated = true)
+            webPrompterState.onBiometricResult(isAuthenticated = true)
         }
     }
 }
@@ -2593,7 +2543,8 @@ private fun showPinVerification(manager: KeyguardManager, context: Context) {
  */
 private fun showPinDialogWarning(
     context: Context, // promptsFeature: ViewBoundFeatureWrapper<PromptFeature>
-) {
+    webPrompterState: InfernoPromptFeatureState,
+    ) {
     AlertDialog.Builder(context).apply {
         setTitle(context.getString(R.string.credit_cards_warning_dialog_title_2))
         setMessage(context.getString(R.string.credit_cards_warning_dialog_message_3))
@@ -2795,7 +2746,7 @@ internal fun NavigationButtonsCFR(
     navController: NavController,
     activity: HomeActivity,
     showDivider: Boolean,
-    browserToolbarInteractor: BrowserToolbarInteractor
+    browserToolbarInteractor: BrowserToolbarInteractor,
 ) {
     var showCFR by remember { mutableStateOf(false) }
     val lastTimeNavigationButtonsClicked = remember { mutableLongStateOf(0L) }
@@ -2943,7 +2894,7 @@ internal fun NavigationButtonsCFR(
 private fun onTabCounterClicked(
     browsingMode: BrowsingMode,
     navController: NavController,
-    thumbnailsFeature: ViewBoundFeatureWrapper<BrowserThumbnails>
+    thumbnailsFeature: ViewBoundFeatureWrapper<BrowserThumbnails>,
 ) {
     thumbnailsFeature.get()?.requestScreenshot()
     navController.nav(
@@ -2961,7 +2912,7 @@ private fun onTabCounterClicked(
 internal fun initializeMicrosurveyFeature(
     context: Context,
     lifecycleOwner: LifecycleOwner,
-    messagingFeatureMicrosurvey: ViewBoundFeatureWrapper<MessagingFeature>
+    messagingFeatureMicrosurvey: ViewBoundFeatureWrapper<MessagingFeature>,
 ) {
     if (context.settings().isExperimentationEnabled && context.settings().microsurveyFeatureEnabled) {
         // todo: microsurvey
@@ -3194,7 +3145,7 @@ internal fun observeTabSource(
     store: BrowserStore,
     context: Context,
     lifecycleOwner: LifecycleOwner,
-    coroutineScope: CoroutineScope
+    coroutineScope: CoroutineScope,
 ) {
     consumeFlow(store, lifecycleOwner, context, coroutineScope) { flow ->
         flow.mapNotNull { state ->
@@ -3241,7 +3192,7 @@ fun onForwardPressed(sessionFeature: ViewBoundFeatureWrapper<SessionFeature>): B
 /**
  * Forwards activity results to the [ActivityResultHandler] features.
  *//* override */ fun onActivityResult(
-    requestCode: Int, data: Intent?, resultCode: Int
+    requestCode: Int, data: Intent?, resultCode: Int,
 ): Boolean {
     // todo: onActivityResult
 //    return listOf(
@@ -3255,7 +3206,7 @@ fun onForwardPressed(sessionFeature: ViewBoundFeatureWrapper<SessionFeature>): B
  * Navigate to GlobalTabHistoryDialogFragment.
  */
 private fun navigateToGlobalTabHistoryDialogFragment(
-    navController: NavController, customTabSessionId: String?
+    navController: NavController, customTabSessionId: String?,
 ) {
     navController.navigate(
         NavGraphDirections.actionGlobalTabHistoryDialogFragment(
@@ -3558,7 +3509,7 @@ private fun showBookmarkSavedSnackbar(
     context: Context,
     coroutineScope: CoroutineScope,
     snackbarHostState: AcornSnackbarHostState,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     coroutineScope.launch {
         val result = snackbarHostState.defaultSnackbarHostState.showSnackbar(
@@ -3582,7 +3533,7 @@ fun onHomePressed(pipFeature: PictureInPictureFeature) = pipFeature?.onHomePress
  * Exit fullscreen mode when exiting PIP mode
  */
 private fun pipModeChanged(
-    session: SessionState, context: Context, backPressedHandler: OnBackPressedHandler
+    session: SessionState, context: Context, backPressedHandler: OnBackPressedHandler,
 ) {
     // todo: isAdded
     if (!session.content.pictureInPictureEnabled && session.content.fullScreen) { // && isAdded) {
@@ -3773,7 +3724,7 @@ internal fun showCannotOpenFileError(
     context: Context,
     downloadState: DownloadState,
     coroutineScope: CoroutineScope,
-    snackbarHostState: AcornSnackbarHostState
+    snackbarHostState: AcornSnackbarHostState,
 ) {
     coroutineScope.launch {
         snackbarHostState.warningSnackbarHostState.showSnackbar(
@@ -3846,7 +3797,7 @@ private fun handleOnSaveLoginWithGeneratedStrongPassword(
     url: String,
     password: String,
     lifecycleScope: CoroutineScope,
-    setLastSavedGeneratedPassword: (String) -> Unit
+    setLastSavedGeneratedPassword: (String) -> Unit,
 ) {
     setLastSavedGeneratedPassword(password)
     val loginToSave = LoginEntry(
@@ -4508,7 +4459,7 @@ private fun collectionStorageObserver(
         }
 
         override fun onTabsAdded(
-            tabCollection: TabCollection, sessions: List<TabSessionState>
+            tabCollection: TabCollection, sessions: List<TabSessionState>,
         ) {
             showTabSavedToCollectionSnackbar(
                 sessions.size, context, navController, coroutineScope, snackbarHostState

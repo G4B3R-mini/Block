@@ -1,6 +1,5 @@
 package com.shmibblez.inferno.browser.prompts.webPrompts.compose
 
-import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -27,24 +26,22 @@ import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplate
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateAction
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateButtonPosition
-import com.shmibblez.inferno.browser.prompts.onDismiss
-import com.shmibblez.inferno.browser.prompts.onNegativeAction
-import com.shmibblez.inferno.browser.prompts.onPositiveAction
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.ext.components
-import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.facts.emitCreditCardAutofillCreatedFact
-import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.facts.emitCreditCardAutofillUpdatedFact
 import kotlinx.coroutines.launch
-import mozilla.components.browser.state.action.ContentAction
 import mozilla.components.concept.engine.prompt.PromptRequest
+import mozilla.components.concept.storage.CreditCardEntry
 import mozilla.components.concept.storage.CreditCardValidationDelegate.Result
 import mozilla.components.service.sync.autofill.DefaultCreditCardValidationDelegate
 import mozilla.components.support.ktx.android.content.appName
 import mozilla.components.support.utils.creditCardIssuerNetwork
 
 @Composable
-fun CreditCardSaveDialogPrompt(saveData: PromptRequest.SaveCreditCard, sessionId: String) {
-    val store = LocalContext.current.components.core.store
+fun CreditCardSaveDialogPrompt(
+    promptRequest: PromptRequest.SaveCreditCard,
+    onCancel: () -> Unit,
+    onConfirm: (CreditCardEntry) -> Unit,
+) {
     val context = LocalContext.current
     var confirmResult by remember { mutableStateOf<Result?>(null) }
     LaunchedEffect(null) {
@@ -52,24 +49,18 @@ fun CreditCardSaveDialogPrompt(saveData: PromptRequest.SaveCreditCard, sessionId
             val validationDelegate = DefaultCreditCardValidationDelegate(
                 context.components.core.lazyAutofillStorage,
             )
-            confirmResult = validationDelegate.shouldCreateOrUpdate(saveData.creditCard)
+            confirmResult = validationDelegate.shouldCreateOrUpdate(promptRequest.creditCard)
         }
     }
     PromptBottomSheetTemplate(
-        onDismissRequest = {
-            onDismiss(saveData)
-            store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, saveData))
-        },
+        onDismissRequest = onCancel,
         negativeAction = PromptBottomSheetTemplateAction(
             text = when (confirmResult) {
                 is Result.CanBeCreated -> stringResource(R.string.mozac_feature_prompt_not_now)
                 is Result.CanBeUpdated -> stringResource(R.string.mozac_feature_prompts_cancel)
                 else -> stringResource(R.string.mozac_feature_prompt_not_now)
             },
-            action = {
-                onNegativeAction(saveData)
-                store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, saveData))
-            },
+            action = onCancel,
         ),
         positiveAction = PromptBottomSheetTemplateAction(
             text = when (confirmResult) {
@@ -78,9 +69,7 @@ fun CreditCardSaveDialogPrompt(saveData: PromptRequest.SaveCreditCard, sessionId
                 else -> stringResource(R.string.mozac_feature_prompt_save_confirmation)
             },
             action = {
-                onPositiveAction(saveData, saveData.creditCard)
-                store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, saveData))
-                emitSaveUpdateFact(confirmResult)
+                onConfirm.invoke(promptRequest.creditCard)
             },
         ),
         buttonPosition = PromptBottomSheetTemplateButtonPosition.BOTTOM,
@@ -117,7 +106,11 @@ fun CreditCardSaveDialogPrompt(saveData: PromptRequest.SaveCreditCard, sessionId
                 // save credit card message
                 InfernoText(
                     text = when (confirmResult) {
-                        is Result.CanBeCreated -> stringResource(R.string.mozac_feature_prompts_save_credit_card_prompt_body_2, context.appName)
+                        is Result.CanBeCreated -> stringResource(
+                            R.string.mozac_feature_prompts_save_credit_card_prompt_body_2,
+                            context.appName
+                        )
+
                         is Result.CanBeUpdated -> ""
                         else -> ""
                     },
@@ -130,7 +123,7 @@ fun CreditCardSaveDialogPrompt(saveData: PromptRequest.SaveCreditCard, sessionId
                 ) {
                     // card type
                     Image(
-                        painter = painterResource(saveData.creditCard.cardType.creditCardIssuerNetwork().icon),
+                        painter = painterResource(promptRequest.creditCard.cardType.creditCardIssuerNetwork().icon),
                         contentDescription = "card type",
                         modifier = Modifier.size(40.dp),
                     )
@@ -140,13 +133,13 @@ fun CreditCardSaveDialogPrompt(saveData: PromptRequest.SaveCreditCard, sessionId
                     ) {
                         // credit card number
                         InfernoText(
-                            text = saveData.creditCard.obfuscatedCardNumber,
+                            text = promptRequest.creditCard.obfuscatedCardNumber,
                             fontSize = 16.sp,
                             modifier = Modifier.padding(start = 16.dp, end = 48.dp),
                         )
                         // card expiration date
                         InfernoText(
-                            text = saveData.creditCard.expiryDate,
+                            text = promptRequest.creditCard.expiryDate,
                             fontSize = 16.sp,
                             modifier = Modifier.padding(start = 16.dp, end = 48.dp),
                         )
@@ -154,24 +147,5 @@ fun CreditCardSaveDialogPrompt(saveData: PromptRequest.SaveCreditCard, sessionId
                 }
             }
         }
-    }
-}
-
-
-/**
- * Emit the save or update fact based on the confirm action for the credit card.
- */
-@VisibleForTesting
-internal fun emitSaveUpdateFact(confirmResult: Result?) {
-    when (confirmResult) {
-        is Result.CanBeCreated -> {
-            emitCreditCardAutofillCreatedFact()
-        }
-
-        is Result.CanBeUpdated -> {
-            emitCreditCardAutofillUpdatedFact()
-        }
-
-        null -> {}
     }
 }

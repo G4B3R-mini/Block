@@ -11,63 +11,47 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.shmibblez.inferno.compose.base.InfernoText
-import com.shmibblez.inferno.ext.components
-import mozilla.components.browser.state.action.ContentAction
-import mozilla.components.concept.engine.prompt.PromptRequest
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplate
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateAction
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateButtonPosition
-import com.shmibblez.inferno.browser.prompts.onDismiss
-import com.shmibblez.inferno.browser.prompts.onNegativeAction
-import com.shmibblez.inferno.browser.prompts.onPositiveAction
 import com.shmibblez.inferno.compose.base.InfernoOutlinedTextField
-import mozilla.components.support.ktx.util.PromptAbuserDetector
+import com.shmibblez.inferno.compose.base.InfernoText
+import mozilla.components.concept.engine.prompt.PromptRequest
 
 @Composable
 fun TextPromptDialogPrompt(
-    textData: PromptRequest.TextPrompt,
-    sessionId: String,
+    promptRequest: PromptRequest.TextPrompt,
     hasShownManyDialogs: Boolean,
-    promptAbuserDetector: PromptAbuserDetector
+    onCancel: () -> Unit,
+    onConfirm: (Pair<Boolean, String>) -> Unit,
 ) {
-    val store = LocalContext.current.components.core.store
     var noMoreDialogs by remember { mutableStateOf(false) }
-    var text by remember { mutableStateOf(textData.inputValue) }
+    var text by remember { mutableStateOf(promptRequest.inputValue) }
 
     PromptBottomSheetTemplate(
-        onDismissRequest = {
-            onDismiss(textData)
-            store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, textData))
-        },
+        onDismissRequest = onCancel,
         positiveAction = PromptBottomSheetTemplateAction(
             text = stringResource(android.R.string.ok),
             action = {
-                onPositiveAction(textData, noMoreDialogs, text)
-                promptAbuserDetector.userWantsMoreDialogs(!noMoreDialogs)
-                store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, textData))
+                onConfirm(noMoreDialogs to text)
             },
         ),
         negativeAction = PromptBottomSheetTemplateAction(
             text = stringResource(android.R.string.cancel),
-            action = {
-                onNegativeAction(textData)
-                store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, textData))
-            },
+            action = onCancel,
         ),
         buttonPosition = PromptBottomSheetTemplateButtonPosition.BOTTOM,
     ) {
         // label
         InfernoText(
-            textData.title,
+            promptRequest.title,
             modifier = Modifier.padding(horizontal = 16.dp),
             fontSize = 16.sp,
         )
@@ -79,7 +63,7 @@ fun TextPromptDialogPrompt(
             onValueChange = {
                 text = it
             },
-            label = { InfernoText(text = textData.title) },
+            label = { InfernoText(text = promptRequest.title) },
             textStyle = LocalTextStyle.current.copy(
                 fontSize = 16.sp,
             ),

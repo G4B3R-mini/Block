@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
@@ -34,13 +35,9 @@ import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplate
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateAction
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateButtonPosition
-import com.shmibblez.inferno.browser.prompts.onDismiss
-import com.shmibblez.inferno.browser.prompts.onNegativeAction
-import com.shmibblez.inferno.browser.prompts.onPositiveAction
+import com.shmibblez.inferno.browser.prompts.creditcard.CreditCardDialogController
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.ext.components
-import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.facts.emitAddressAutofillDismissedFact
-import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.facts.emitCreditCardAutofillDismissedFact
 import mozilla.components.browser.state.action.ContentAction
 import mozilla.components.concept.engine.prompt.PromptRequest
 import mozilla.components.concept.storage.Address
@@ -49,45 +46,27 @@ import mozilla.components.support.utils.creditCardIssuerNetwork
 
 @Composable
 fun SelectableListPrompt(
-    data: PromptRequest,
-    sessionId: String,
+    promptRequest: PromptRequest,
     header: String,
     manageText: String,
+    onCancel: () -> Unit,
+    onConfirm: (Any) -> Unit,
+    creditCardDialogController: CreditCardDialogController? = null,
 ) {
-    if (data !is PromptRequest.SelectAddress && data !is PromptRequest.SelectCreditCard) {
+    if (promptRequest !is PromptRequest.SelectAddress && promptRequest !is PromptRequest.SelectCreditCard) {
         throw IllegalArgumentException("unsupported prompt type, supported above")
     }
-    val store = LocalContext.current.components.core.store
+    if (promptRequest is PromptRequest.SelectCreditCard && creditCardDialogController == null) {
+        throw IllegalArgumentException("if ${PromptRequest::class.simpleName} is a ${PromptRequest.SelectCreditCard::class.simpleName} prompt, a ${CreditCardDialogController::class.simpleName} must be provided")
+    }
     var expanded by remember { mutableStateOf(true) }
     val navController = LocalView.current.findNavController()
 
     PromptBottomSheetTemplate(
-        onDismissRequest = {
-            when (data) {
-                is PromptRequest.SelectAddress -> {
-                    emitAddressAutofillDismissedFact()
-                }
-
-                is PromptRequest.SelectCreditCard -> {
-                    emitCreditCardAutofillDismissedFact()
-                }
-
-                else -> {
-                    throw IllegalArgumentException("unsupported prompt type, supported above")
-                }
-            }
-            onDismiss(data)
-            store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, data))
-//            store.consumePromptFrom<PromptRequest.SelectAddress>(sessionId) {
-//                it.onDismiss()
-//            }
-        },
+        onDismissRequest = onCancel,
         negativeAction = PromptBottomSheetTemplateAction(
-            text = stringResource(android.R.string.cancel),
-            action = {
-                onNegativeAction(data)
-                store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, data))
-            }),
+            text = stringResource(android.R.string.cancel), action = onCancel
+        ),
         buttonPosition = PromptBottomSheetTemplateButtonPosition.TOP,
     ) {
         Row(
@@ -100,8 +79,7 @@ fun SelectableListPrompt(
             InfernoText(
                 text = header,
                 fontSize = 16.sp,
-                modifier = Modifier
-                    .weight(1F),
+                modifier = Modifier.weight(1F),
             )
             // expand addresses
             Icon(
@@ -125,34 +103,22 @@ fun SelectableListPrompt(
                     .padding(top = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
             ) {
-                when (data) {
+                when (promptRequest) {
                     is PromptRequest.SelectAddress -> {
-                        items(data.addresses) {
+                        items(promptRequest.addresses) {
                             AddressItem(
                                 address = it,
-                                onClick = {
-                                    onPositiveAction(data, it)
-                                    store.dispatch(
-                                        ContentAction.ConsumePromptRequestAction(
-                                            sessionId, data
-                                        )
-                                    )
-                                },
+                                onClick = { onConfirm.invoke(it) },
                             )
                         }
                     }
 
                     is PromptRequest.SelectCreditCard -> {
-                        items(data.creditCards) {
+                        items(promptRequest.creditCards) {
                             CreditCardItem(
                                 creditCard = it,
                                 onClick = {
-                                    onPositiveAction(data, it)
-                                    store.dispatch(
-                                        ContentAction.ConsumePromptRequestAction(
-                                            sessionId, data
-                                        )
-                                    )
+                                    onConfirm.invoke(it)
                                 },
                             )
                         }
@@ -162,20 +128,27 @@ fun SelectableListPrompt(
                         throw IllegalArgumentException("unsupported prompt type")
                     }
                 }
-                item { ManageOptions(data, navController, manageText) }
+                item { ManageOptions(promptRequest, navController, manageText) }
             }
 
         }
         // todo: tint text color primary
         // manage addresses / credit cards
         if (!expanded) {
-            ManageOptions(data, navController, manageText, modifier = Modifier.padding(top = 8.dp))
+            ManageOptions(
+                promptRequest, navController, manageText, modifier = Modifier.padding(top = 8.dp)
+            )
         }
     }
 }
 
 @Composable
-fun ManageOptions(data: PromptRequest, navController: NavController, manageText: String, modifier: Modifier = Modifier,) {
+fun ManageOptions(
+    data: PromptRequest,
+    navController: NavController,
+    manageText: String,
+    modifier: Modifier = Modifier,
+) {
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -184,15 +157,13 @@ fun ManageOptions(data: PromptRequest, navController: NavController, manageText:
                 when (data) {
                     is PromptRequest.SelectAddress -> {
                         // go to manage directions page
-                        val directions =
-                            NavGraphDirections.actionGlobalAutofillSettingFragment()
+                        val directions = NavGraphDirections.actionGlobalAutofillSettingFragment()
                         navController.navigate(directions)
                     }
 
                     is PromptRequest.SelectCreditCard -> {
                         // go to manage credit cards page
-                        val directions =
-                            NavGraphDirections.actionGlobalAutofillSettingFragment()
+                        val directions = NavGraphDirections.actionGlobalAutofillSettingFragment()
                         navController.navigate(directions)
                     }
 
@@ -207,8 +178,7 @@ fun ManageOptions(data: PromptRequest, navController: NavController, manageText:
             painter = painterResource(R.drawable.mozac_ic_settings_24),
             tint = Color.White,
             contentDescription = "",
-            modifier = Modifier
-                .size(20.dp),
+            modifier = Modifier.size(20.dp),
         )
         // todo: text color primary
         InfernoText(
@@ -223,7 +193,7 @@ fun ManageOptions(data: PromptRequest, navController: NavController, manageText:
 }
 
 @Composable
-private fun ColumnScope.AddressItem(address: Address, onClick: () -> Unit) {
+private fun AddressItem(address: Address, onClick: () -> Unit) {
     InfernoText(
         text = address.streetAddress,
         modifier = Modifier
@@ -236,7 +206,7 @@ private fun ColumnScope.AddressItem(address: Address, onClick: () -> Unit) {
 }
 
 @Composable
-private fun ColumnScope.CreditCardItem(creditCard: CreditCardEntry, onClick: () -> Unit) {
+private fun CreditCardItem(creditCard: CreditCardEntry, onClick: () -> Unit) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier

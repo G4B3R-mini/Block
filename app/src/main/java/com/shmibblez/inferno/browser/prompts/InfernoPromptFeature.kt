@@ -8,18 +8,21 @@ import androidx.annotation.VisibleForTesting.Companion.PRIVATE
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.core.view.isVisible
-import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.Fragment
 import com.shmibblez.inferno.browser.infernoFeatureState.InfernoFeatureState
 import com.shmibblez.inferno.browser.prompts.address.InfernoAddressPicker
-import com.shmibblez.inferno.browser.prompts.creditcard.InfernoCreditCardPicker
+import com.shmibblez.inferno.browser.prompts.creditcard.CreditCardDialogController
 import com.shmibblez.inferno.browser.prompts.login.InfernoLoginDelegate
-import com.shmibblez.inferno.browser.prompts.login.InfernoStrongPasswordPromptStateListener
 import com.shmibblez.inferno.browser.prompts.login.SelectLoginPromptController
 import com.shmibblez.inferno.browser.prompts.webPrompts.AndroidPhotoPicker
 import com.shmibblez.inferno.browser.prompts.webPrompts.FilePicker
 import com.shmibblez.inferno.browser.prompts.webPrompts.FileUploadsDirCleaner
+import com.shmibblez.inferno.browser.prompts.webPrompts.compose.MultiButtonDialogButtonType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.map
@@ -60,12 +63,7 @@ import mozilla.components.feature.prompts.PromptFeature
 import mozilla.components.feature.prompts.address.AddressDelegate
 import mozilla.components.feature.prompts.address.DefaultAddressDelegate
 import mozilla.components.feature.prompts.creditcard.CreditCardDelegate
-import mozilla.components.feature.prompts.identitycredential.DialogColors
-import mozilla.components.feature.prompts.identitycredential.DialogColorsProvider
 import mozilla.components.feature.prompts.login.LoginExceptions
-import mozilla.components.feature.prompts.login.PasswordGeneratorDialogColors
-import mozilla.components.feature.prompts.login.PasswordGeneratorDialogColorsProvider
-import mozilla.components.feature.prompts.login.SuggestStrongPasswordDelegate
 import mozilla.components.feature.prompts.share.ShareDelegate
 import mozilla.components.feature.session.SessionUseCases
 import mozilla.components.feature.session.SessionUseCases.ExitFullScreenUseCase
@@ -81,18 +79,14 @@ import mozilla.components.support.ktx.kotlin.tryGetHostFromUrl
 import mozilla.components.support.ktx.kotlinx.coroutines.flow.ifAnyChanged
 import mozilla.components.support.ktx.util.PromptAbuserDetector
 import java.security.InvalidParameterException
-import java.util.Collections
 import java.util.Date
 
 @Composable
 fun rememberInfernoPromptFeatureState(
     activity: AppCompatActivity,
+    fragment: Fragment,
     store: BrowserStore,
     customTabId: String?,
-    fragmentManager: FragmentManager,
-    identityCredentialColorsProvider: DialogColorsProvider = DialogColorsProvider {
-        DialogColors.default()
-    },
     tabsUseCases: TabsUseCases,
     shareDelegate: ShareDelegate,
     exitFullscreenUsecase: ExitFullScreenUseCase = SessionUseCases(store).exitFullscreen,
@@ -104,27 +98,22 @@ fun rememberInfernoPromptFeatureState(
     isAddressAutofillEnabled: () -> Boolean = { false },
     loginExceptionStorage: LoginExceptions? = null,
     loginDelegate: InfernoLoginDelegate = object : InfernoLoginDelegate {},
-    suggestStrongPasswordDelegate: SuggestStrongPasswordDelegate = object :
-        SuggestStrongPasswordDelegate {},
     shouldAutomaticallyShowSuggestedPassword: () -> Boolean = { false },
     onFirstTimeEngagedWithSignup: () -> Unit = {},
     onSaveLoginWithStrongPassword: (String, String) -> Unit = { _, _ -> },
     onSaveLogin: (Boolean) -> Unit = { _ -> },
-    passwordGeneratorColorsProvider: PasswordGeneratorDialogColorsProvider = PasswordGeneratorDialogColorsProvider { PasswordGeneratorDialogColors.default() },
     hideUpdateFragmentAfterSavingGeneratedPassword: (String, String) -> Boolean = { _, _ -> true },
     removeLastSavedGeneratedPassword: () -> Unit = {},
     creditCardDelegate: CreditCardDelegate = object : CreditCardDelegate {},
     addressDelegate: AddressDelegate = DefaultAddressDelegate(),
     fileUploadsDirCleaner: FileUploadsDirCleaner,
     onNeedToRequestPermissions: OnNeedToRequestPermissions,
-    androidPhotoPicker: AndroidPhotoPicker?,
 ): InfernoPromptFeatureState {
     val state = InfernoPromptFeatureState(
         activity = activity,
+        fragment = fragment,
         store = store,
         customTabId = customTabId,
-        fragmentManager = fragmentManager,
-        identityCredentialColorsProvider = identityCredentialColorsProvider,
         tabsUseCases = tabsUseCases,
         shareDelegate = shareDelegate,
         exitFullscreenUsecase = exitFullscreenUsecase,
@@ -136,19 +125,16 @@ fun rememberInfernoPromptFeatureState(
         isAddressAutofillEnabled = isAddressAutofillEnabled,
         loginExceptionStorage = loginExceptionStorage,
         loginDelegate = loginDelegate,
-        suggestStrongPasswordDelegate = suggestStrongPasswordDelegate,
         shouldAutomaticallyShowSuggestedPassword = shouldAutomaticallyShowSuggestedPassword,
         onFirstTimeEngagedWithSignup = onFirstTimeEngagedWithSignup,
         onSaveLoginWithStrongPassword = onSaveLoginWithStrongPassword,
         onSaveLogin = onSaveLogin,
-        passwordGeneratorColorsProvider = passwordGeneratorColorsProvider,
         hideUpdateFragmentAfterSavingGeneratedPassword = hideUpdateFragmentAfterSavingGeneratedPassword,
         removeLastSavedGeneratedPassword = removeLastSavedGeneratedPassword,
         creditCardDelegate = creditCardDelegate,
         addressDelegate = addressDelegate,
         fileUploadsDirCleaner = fileUploadsDirCleaner,
         onNeedToRequestPermissions = onNeedToRequestPermissions,
-        androidPhotoPicker = androidPhotoPicker,
     )
 
     DisposableEffect(null) {
@@ -168,12 +154,9 @@ fun rememberInfernoPromptFeatureState(
 //   for biometric features, could also be called BiometricHandler
 class InfernoPromptFeatureState internal constructor(
     private val activity: AppCompatActivity,
+    fragment: Fragment,
     private val store: BrowserStore,
     private var customTabId: String?,
-    private val fragmentManager: FragmentManager,
-    private val identityCredentialColorsProvider: DialogColorsProvider = DialogColorsProvider {
-        DialogColors.default()
-    },
     private val tabsUseCases: TabsUseCases,
     private val shareDelegate: ShareDelegate,
     private val exitFullscreenUsecase: ExitFullScreenUseCase = SessionUseCases(store).exitFullscreen,
@@ -185,26 +168,34 @@ class InfernoPromptFeatureState internal constructor(
     private val isAddressAutofillEnabled: () -> Boolean = { false },
     override val loginExceptionStorage: LoginExceptions? = null,
     private val loginDelegate: InfernoLoginDelegate = object : InfernoLoginDelegate {},
-    private val suggestStrongPasswordDelegate: SuggestStrongPasswordDelegate = object :
-        SuggestStrongPasswordDelegate {},
     private var shouldAutomaticallyShowSuggestedPassword: () -> Boolean = { false },
     private val onFirstTimeEngagedWithSignup: () -> Unit = {},
     private val onSaveLoginWithStrongPassword: (String, String) -> Unit = { _, _ -> },
     internal val onSaveLogin: (Boolean) -> Unit = { _ -> },
-    private val passwordGeneratorColorsProvider: PasswordGeneratorDialogColorsProvider = PasswordGeneratorDialogColorsProvider { PasswordGeneratorDialogColors.default() },
     private val hideUpdateFragmentAfterSavingGeneratedPassword: (String, String) -> Boolean = { _, _ -> true },
     private val removeLastSavedGeneratedPassword: () -> Unit = {},
-    private val creditCardDelegate: CreditCardDelegate = object : CreditCardDelegate {},
+    creditCardDelegate: CreditCardDelegate = object : CreditCardDelegate {},
     private val addressDelegate: AddressDelegate = DefaultAddressDelegate(),
-    private val fileUploadsDirCleaner: FileUploadsDirCleaner,
+    fileUploadsDirCleaner: FileUploadsDirCleaner,
     onNeedToRequestPermissions: OnNeedToRequestPermissions,
-    androidPhotoPicker: AndroidPhotoPicker?,
 ) : InfernoFeatureState, PermissionsFeature, InfernoPrompter, ActivityResultHandler,
     UserInteractionHandler {
 
     // These three scopes have identical lifetimes. We do not yet have a way of combining scopes
     private var handlePromptScope: CoroutineScope? = null
     private var dismissPromptScope: CoroutineScope? = null
+
+    private val androidPhotoPicker = AndroidPhotoPicker(
+        activity.applicationContext,
+        singleMediaPicker = AndroidPhotoPicker.singleMediaPicker(
+            { fragment },
+            { this },
+        ),
+        multipleMediaPicker = AndroidPhotoPicker.multipleMediaPicker(
+            { fragment },
+            { this },
+        )
+    )
 
     @VisibleForTesting
     var activePromptRequest: PromptRequest? = null
@@ -226,12 +217,6 @@ class InfernoPromptFeatureState internal constructor(
     // prompt that will be shown by InfernoWebPrompter
     internal var visiblePrompt: PromptRequest? = null
 
-    // This set of weak references of fragments is only used for dismissing all prompts on navigation.
-    // For all other code only `activePrompt` is tracked for now.
-    @VisibleForTesting(otherwise = PRIVATE)
-    internal val activePromptsToDismiss =
-        Collections.newSetFromMap(HashMap<PromptRequest, Boolean>())
-
     /** private constructor here **/
 
     @VisibleForTesting
@@ -245,8 +230,10 @@ class InfernoPromptFeatureState internal constructor(
         onNeedToRequestPermissions,
     )
 
-    var selectLoginPromptController = SelectLoginPromptController(
-
+    var selectLoginPromptController by mutableStateOf(
+        SelectLoginPromptController(
+            // todo: see if can put all vars here so no need to reinit sub-objs
+        )
     )
 
     //    @VisibleForTesting(otherwise = PRIVATE)
@@ -272,9 +259,8 @@ class InfernoPromptFeatureState internal constructor(
 //        }
     // todo: implement as state to integrate with credit card picker component,
     //  store value for biometric auth, reset when dismissed
-    @VisibleForTesting(otherwise = PRIVATE)
-    internal var creditCardPicker = with(creditCardDelegate) {
-        InfernoCreditCardPicker(
+    internal var creditCardDialogController = with(creditCardDelegate) {
+        CreditCardDialogController(
             store = store,
             manageCreditCardsCallback = onManageCreditCards,
             selectCreditCardCallback = onSelectCreditCard,
@@ -332,11 +318,16 @@ class InfernoPromptFeatureState internal constructor(
                             is SelectLoginPrompt -> {
                                 if (selectLoginPromptController.isLoginPickerDialog()) {
                                     (selectLoginPromptController as SelectLoginPromptController.LoginPickerDialog).dismissCurrentLoginSelect(
-                                        activePromptRequest as SelectLoginPrompt
+                                        activePromptRequest as SelectLoginPrompt,
                                     )
                                 }
                                 if (selectLoginPromptController.isStrongPasswordBarDialog()) {
                                     (selectLoginPromptController as SelectLoginPromptController.StrongPasswordBarDialog).dismissCurrentSuggestStrongPassword(
+                                        activePromptRequest as SelectLoginPrompt,
+                                    )
+                                }
+                                if (selectLoginPromptController.isPasswordGeneratorDialog()) {
+                                    (selectLoginPromptController as SelectLoginPromptController.PasswordGeneratorDialog).dismissCurrentPasswordGenerator(
                                         activePromptRequest as SelectLoginPrompt,
                                     )
                                 }
@@ -354,7 +345,7 @@ class InfernoPromptFeatureState internal constructor(
 //                                }
 
                             is SelectCreditCard -> {
-                                creditCardPicker.dismissSelectCreditCardRequest(
+                                creditCardDialogController.dismissSelectCreditCardRequest(
                                     activePromptRequest as SelectCreditCard,
                                 )
                             }
@@ -455,9 +446,9 @@ class InfernoPromptFeatureState internal constructor(
     override fun onActivityResult(requestCode: Int, data: Intent?, resultCode: Int): Boolean {
         if (requestCode == PIN_REQUEST) {
             if (resultCode == Activity.RESULT_OK) {
-                creditCardPicker.onAuthSuccess()
+                creditCardDialogController.onAuthSuccess()
             } else {
-                creditCardPicker.onAuthFailure()
+                creditCardDialogController.onAuthFailure()
             }
 
             return true
@@ -475,9 +466,9 @@ class InfernoPromptFeatureState internal constructor(
      */
     fun onBiometricResult(isAuthenticated: Boolean) {
         if (isAuthenticated) {
-            creditCardPicker.onAuthSuccess()
+            creditCardDialogController.onAuthSuccess()
         } else {
-            creditCardPicker.onAuthFailure()
+            creditCardDialogController.onAuthFailure()
         }
     }
 
@@ -531,7 +522,8 @@ class InfernoPromptFeatureState internal constructor(
             is SelectCreditCard -> {
 //                emitSuccessfulCreditCardAutofillFormDetectedFact()
                 if (isCreditCardAutofillEnabled() && promptRequest.creditCards.isNotEmpty()) {
-                    creditCardPicker.handleSelectCreditCardRequest(promptRequest)
+//                    creditCardPicker.handleSelectCreditCardRequest(promptRequest)
+                    handleDialogsRequest(promptRequest, session)
                 }
             }
 
@@ -543,16 +535,18 @@ class InfernoPromptFeatureState internal constructor(
                     if (shouldAutomaticallyShowSuggestedPassword.invoke()) {
                         onFirstTimeEngagedWithSignup.invoke()
                         selectLoginPromptController =
-                            SelectLoginPromptController.PasswordGeneratorDialog
+                            SelectLoginPromptController.PasswordGeneratorDialog(store, session.id)
                     } else {
                         selectLoginPromptController =
                             SelectLoginPromptController.StrongPasswordBarDialog(
-                                store, session.id,
-                                onGeneratedPasswordPromptClick = {
-//                                    strongPasswordPromptStateListener.hideStrongPasswordBar()
-                                    visiblePrompt = null
-                                    // todo: dismiss also? or done in onConfirm
-                                }
+                                store,
+                                session.id,
+                                // handled in composable
+//                                onGeneratedPasswordPromptClick = {
+////                                    strongPasswordPromptStateListener.hideStrongPasswordBar()
+//                                    visiblePrompt = null
+//                                    // to do: dismiss also? or done in onConfirm
+//                                }
                             )
 //                        strongPasswordPromptStateListener.showStrongPasswordBar()
                     }
@@ -640,6 +634,7 @@ class InfernoPromptFeatureState internal constructor(
 
                 is Authentication -> {
                     val (user, password) = value as Pair<String, String>
+
                     it.onConfirm(user, password)
                 }
 
@@ -654,22 +649,19 @@ class InfernoPromptFeatureState internal constructor(
 
                 is SaveCreditCard -> it.onConfirm(value as CreditCardEntry)
                 is SaveLoginPrompt -> it.onConfirm(value as LoginEntry)
-
-                // todo: add onConfirm / onCancel callbacks to all prompt composables,
-                //  in this case specifically, include button type pressed
                 is Confirm -> {
-                    val (isCheckBoxChecked, buttonType) = value as Pair<Boolean, MultiButtonDialogFragment.ButtonType>
+                    val (isCheckBoxChecked, buttonType) = value as Pair<Boolean, MultiButtonDialogButtonType>
                     promptAbuserDetector.userWantsMoreDialogs(!isCheckBoxChecked)
                     when (buttonType) {
-                        MultiButtonDialogFragment.ButtonType.POSITIVE -> it.onConfirmPositiveButton(
+                        MultiButtonDialogButtonType.POSITIVE -> it.onConfirmPositiveButton(
                             !isCheckBoxChecked
                         )
 
-                        MultiButtonDialogFragment.ButtonType.NEGATIVE -> it.onConfirmNegativeButton(
+                        MultiButtonDialogButtonType.NEGATIVE -> it.onConfirmNegativeButton(
                             !isCheckBoxChecked
                         )
 
-                        MultiButtonDialogFragment.ButtonType.NEUTRAL -> it.onConfirmNeutralButton(!isCheckBoxChecked)
+                        MultiButtonDialogButtonType.NEUTRAL -> it.onConfirmNeutralButton(!isCheckBoxChecked)
                     }
                 }
 
@@ -917,12 +909,11 @@ class InfernoPromptFeatureState internal constructor(
 
         // todo
         (activePromptRequest as? SelectCreditCard)?.let { selectCreditCardPrompt ->
-            creditCardPicker.let { creditCardPicker ->
-                if (creditCardDelegate.creditCardPickerView?.asView()?.isVisible == true) {
-                    creditCardPicker.dismissSelectCreditCardRequest(selectCreditCardPrompt)
-                    result = true
-                }
-            }
+//            if (creditCardDelegate.creditCardPickerView?.asView()?.isVisible == true) {
+            creditCardDialogController.dismissSelectCreditCardRequest(selectCreditCardPrompt)
+            visiblePrompt = null
+            result = true
+//            }
         }
 
         (activePromptRequest as? SelectAddress)?.let { selectAddressPrompt ->
@@ -940,7 +931,7 @@ class InfernoPromptFeatureState internal constructor(
     /**
      * Handles the result received from the Android photo picker.
      *
-     * @param listOf An array of [Uri] objects representing the selected photos.
+     * @param uriList An array of [Uri] objects representing the selected photos.
      */
     // todo:
     //   - called from AndroidPhotoPicker, need to change to include prompt state, call from there

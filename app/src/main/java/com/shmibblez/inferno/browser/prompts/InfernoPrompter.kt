@@ -42,7 +42,7 @@ internal interface InfernoPrompter {
      * @param promptRequestUID id of the [PromptRequest] for which this dialog was shown.
      * @param value an optional value provided by the dialog as a result of confirming the action.
      */
-    fun onConfirm(sessionId: String, promptRequestUID: String, value: Any?)
+    fun onConfirm(sessionId: String, promptRequestUID: String, value: Any? = null)
 
     /**
      * Invoked when the user is requesting to clear the selected value from the dialog.

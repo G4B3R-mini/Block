@@ -34,9 +34,6 @@ import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplate
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateAction
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateButtonPosition
-import com.shmibblez.inferno.browser.prompts.onDismiss
-import com.shmibblez.inferno.browser.prompts.onNegativeAction
-import com.shmibblez.inferno.browser.prompts.onPositiveAction
 import com.shmibblez.inferno.compose.base.InfernoOutlinedTextField
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.ext.components
@@ -63,27 +60,26 @@ import kotlin.coroutines.cancellation.CancellationException
 //     ex: // todo: requires testing, test with dummy data prompt objects, visible only for testing
 @Composable
 fun SaveLoginDialogPrompt(
-    loginData: PromptRequest.SaveLoginPrompt,
-    sessionId: String,
+    promptRequest: PromptRequest.SaveLoginPrompt,
     icon: Bitmap? = null,
     onShowSnackbarAfterLoginChange: (Boolean) -> Unit,
     loginValidationDelegate: LoginValidationDelegate?,
+    onCancel: () -> Unit,
+    onConfirm: (LoginEntry) -> Unit,
 ) {
     val context = LocalContext.current
-    val store = context.components.core.store
     var shouldRender by remember { mutableStateOf(false) }/*
      * If an implementation of [LoginExceptions] is hooked up to [PromptFeature], we will not
      * show this save login dialog for any origin saved as an exception.
      */
     val coroutineScope = rememberCoroutineScope()
-    LaunchedEffect(loginData) {
+    LaunchedEffect(promptRequest) {
         CoroutineScope(IO).launch {
             if (context.components.core.loginExceptionStorage.isLoginExceptionByOrigin(
-                    loginData.logins[0].origin
+                    promptRequest.logins[0].origin
                 )
             ) {
-                onNegativeAction(loginData)
-                store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, loginData))
+                onCancel.invoke()
             } else {
                 shouldRender = true
             }
@@ -105,9 +101,9 @@ fun SaveLoginDialogPrompt(
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     fun update() = coroutineScope.launch(IO) {
         val entry = LoginEntry(
-            origin = loginData.logins[0].origin,
-            formActionOrigin = loginData.logins[0].formActionOrigin,
-            httpRealm = loginData.logins[0].httpRealm,
+            origin = promptRequest.logins[0].origin,
+            formActionOrigin = promptRequest.logins[0].formActionOrigin,
+            httpRealm = promptRequest.logins[0].httpRealm,
             username = username,
             password = password,
         )
@@ -171,28 +167,16 @@ fun SaveLoginDialogPrompt(
     }
     PromptBottomSheetTemplate(
         buttonPosition = PromptBottomSheetTemplateButtonPosition.BOTTOM,
-        onDismissRequest = {
-            onDismiss(loginData)
-            store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, loginData))
-        },
-        negativeAction = PromptBottomSheetTemplateAction(text = negativeText, action = {
-            onNegativeAction(loginData)
-//            emitCancelFact()
-            store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, loginData))
-        }),
+        onDismissRequest = onCancel,
+        negativeAction = PromptBottomSheetTemplateAction(text = negativeText, action = onCancel),
         positiveAction = PromptBottomSheetTemplateAction(text = confirmText, action = {
-            onPositiveAction(
-                loginData, LoginEntry(
-                    origin = loginData.logins[0].origin,
-                    formActionOrigin = loginData.logins[0].formActionOrigin,
-                    httpRealm = loginData.logins[0].httpRealm,
-                    username = username,
-                    password = password,
-                )
-            )
-            emitSaveFact()
-            store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, loginData))
-
+            onConfirm.invoke(LoginEntry(
+                origin = promptRequest.logins[0].origin,
+                formActionOrigin = promptRequest.logins[0].formActionOrigin,
+                httpRealm = promptRequest.logins[0].httpRealm,
+                username = username,
+                password = password,
+            ))
             onShowSnackbarAfterLoginChange.invoke(isUpdate)
         }),
     ) {
@@ -216,7 +200,7 @@ fun SaveLoginDialogPrompt(
                 modifier = Modifier
                     .weight(1F)
                     .padding(end = 12.dp),
-                text = loginData.logins[0].origin,
+                text = promptRequest.logins[0].origin,
                 textAlign = TextAlign.Start,
                 fontSize = 16.sp,
                 fontColor = Color.White,

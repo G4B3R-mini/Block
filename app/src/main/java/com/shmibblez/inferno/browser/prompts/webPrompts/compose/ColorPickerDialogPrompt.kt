@@ -31,8 +31,6 @@ import androidx.core.graphics.toColorInt
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplate
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateAction
-import com.shmibblez.inferno.browser.prompts.onDismiss
-import com.shmibblez.inferno.browser.prompts.onPositiveAction
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.compose.button.RadioButton
 import com.shmibblez.inferno.ext.components
@@ -45,10 +43,13 @@ import mozilla.components.concept.engine.prompt.PromptRequest
 
 
 @Composable
-fun ColorPickerDialogPrompt(colorData: PromptRequest.Color, sessionId: String) {
+fun ColorPickerDialogPrompt(
+    promptRequest: PromptRequest.Color,
+    onCancel: () -> Unit,
+    onConfirm: (String) -> Unit,
+) {
     val context = LocalContext.current
-    val store = context.components.core.store
-    var selectedColor by remember { mutableIntStateOf(colorData.defaultColor.toColorInt()) }
+    var selectedColor by remember { mutableIntStateOf(promptRequest.defaultColor.toColorInt()) }
     val (initiallySelectedCustomColor, setInitiallySelectedCustomColor) = remember {
         mutableStateOf<Int?>(
             selectedColor
@@ -62,20 +63,17 @@ fun ColorPickerDialogPrompt(colorData: PromptRequest.Color, sessionId: String) {
         )
     }
     PromptBottomSheetTemplate(
-        onDismissRequest = {
-            onDismiss(colorData)
-            store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, colorData))
-        },
-        negativeAction = PromptBottomSheetTemplateAction(text = stringResource(R.string.mozac_feature_prompts_cancel),
+        onDismissRequest = onCancel,
+        negativeAction = PromptBottomSheetTemplateAction(
+            text = stringResource(R.string.mozac_feature_prompts_cancel),
+            action = onCancel,
+        ),
+        positiveAction = PromptBottomSheetTemplateAction(
+            text = stringResource(R.string.mozac_feature_prompts_set_date),
             action = {
-                onDismiss(colorData)
-                store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, colorData))
-            }),
-        positiveAction = PromptBottomSheetTemplateAction(text = stringResource(R.string.mozac_feature_prompts_set_date),
-            action = {
-                onPositiveAction(colorData, selectedColor.toHexColor())
-                store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, colorData))
-            })
+                onConfirm.invoke(selectedColor.toHexColor())
+            },
+        )
     ) {
         FirefoxTheme {
             // title
@@ -148,7 +146,7 @@ private fun ColorListItem(colorItem: ColorItem, selected: Boolean, onColorChange
 private fun loadDefaultColors(
     context: Context,
     initiallySelectedCustomColor: Int?,
-    setInitiallySelectedCustomColor: (Int?) -> Unit
+    setInitiallySelectedCustomColor: (Int?) -> Unit,
 ): List<ColorItem> {
     // Load list of colors from resources
     val typedArray =

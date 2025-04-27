@@ -18,49 +18,40 @@ import androidx.compose.ui.unit.dp
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplate
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateAction
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateButtonPosition
-import com.shmibblez.inferno.browser.prompts.onDismiss
-import com.shmibblez.inferno.browser.prompts.onPositiveAction
 import com.shmibblez.inferno.compose.base.InfernoCheckbox
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.ext.components
 import mozilla.components.browser.state.action.ContentAction
 import mozilla.components.concept.engine.prompt.PromptRequest
-import mozilla.components.support.ktx.util.PromptAbuserDetector
 
 @Composable
 fun AlertDialogPrompt(
-    alertData: PromptRequest.Alert, sessionId: String, promptAbuserDetector: PromptAbuserDetector
+    promptRequest: PromptRequest.Alert,
+    onCancel: () -> Unit,
+    onConfirm: (Boolean) -> Unit,
 ) {
-//    promptRequest.
-    val store = LocalContext.current.components.core.store
     var noMoreDialogs by remember { mutableStateOf(false) }
     PromptBottomSheetTemplate(
-        onDismissRequest = {
-            onDismiss(alertData)
-            store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, alertData))
-        },
+        onDismissRequest = onCancel,
         positiveAction = PromptBottomSheetTemplateAction(
             text = stringResource(android.R.string.ok),
             action = {
-                onPositiveAction(alertData, noMoreDialogs)
-                promptAbuserDetector.userWantsMoreDialogs(!noMoreDialogs)
-                store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, alertData))
+                onConfirm.invoke(noMoreDialogs)
             },
         ),
-        negativeAction = PromptBottomSheetTemplateAction(text = stringResource(android.R.string.cancel),
-            action = {
-                onDismiss(alertData)
-                store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, alertData))
-            }),
+        negativeAction = PromptBottomSheetTemplateAction(
+            text = stringResource(android.R.string.cancel),
+            action = onCancel,
+        ),
         buttonPosition = PromptBottomSheetTemplateButtonPosition.BOTTOM
     ) {
         InfernoText(
-            text = alertData.title,
+            text = promptRequest.title,
             textAlign = TextAlign.Start,
             modifier = Modifier.padding(horizontal = 16.dp),
             fontWeight = FontWeight.Bold,
         )
-        if (alertData.hasShownManyDialogs) {
+        if (promptRequest.hasShownManyDialogs) {
             Row(
                 modifier = Modifier
                     .padding(horizontal = 16.dp)
@@ -74,7 +65,7 @@ fun AlertDialogPrompt(
                     onCheckedChange = { noMoreDialogs = !noMoreDialogs },
                 )
                 InfernoText(
-                    text = alertData.message,
+                    text = promptRequest.message,
                     textAlign = TextAlign.Start,
                     modifier = Modifier
                         .weight(1F)

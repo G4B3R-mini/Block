@@ -9,66 +9,59 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplate
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateAction
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateButtonPosition
-import com.shmibblez.inferno.browser.prompts.onDismiss
-import com.shmibblez.inferno.browser.prompts.onNegativeAction
-import com.shmibblez.inferno.browser.prompts.onNeutralAction
-import com.shmibblez.inferno.browser.prompts.onPositiveAction
 import com.shmibblez.inferno.compose.base.InfernoCheckbox
 import com.shmibblez.inferno.compose.base.InfernoText
-import com.shmibblez.inferno.ext.components
-import mozilla.components.browser.state.action.ContentAction
 import mozilla.components.concept.engine.prompt.PromptRequest
+
+enum class MultiButtonDialogButtonType {
+    POSITIVE, NEUTRAL, NEGATIVE
+}
 
 @Composable
 fun MultiButtonDialogPrompt(
-    multiButtonData: PromptRequest.Confirm,
-    sessionId: String,
+    promptRequest: PromptRequest.Confirm,
     negativeButtonText: String,
     neutralButtonText: String,
-    positiveButtonText: String
+    positiveButtonText: String,
+    onCancel: () -> Unit,
+    onConfirm: (Pair<Boolean, MultiButtonDialogButtonType>) -> Unit,
 ) {
-    val store = LocalContext.current.components.core.store
     var noMoreDialogs by remember { mutableStateOf(false) }
     PromptBottomSheetTemplate(
         onDismissRequest = {
-            onDismiss(multiButtonData)
-            store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, multiButtonData))
+            onCancel.invoke()
         },
         negativeAction = PromptBottomSheetTemplateAction(
             text = negativeButtonText,
             action = {
-                onNegativeAction(multiButtonData, noMoreDialogs)
-                store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, multiButtonData))
+                onConfirm(noMoreDialogs to MultiButtonDialogButtonType.NEGATIVE)
             },
         ),
         neutralAction = PromptBottomSheetTemplateAction(
             text = neutralButtonText,
             action = {
-                onNeutralAction(multiButtonData, noMoreDialogs)
-                store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, multiButtonData))
+                onConfirm(noMoreDialogs to MultiButtonDialogButtonType.NEUTRAL)
             },
         ),
         positiveAction = PromptBottomSheetTemplateAction(
             text = positiveButtonText,
             action = {
-                onPositiveAction(multiButtonData, noMoreDialogs)
-                store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, multiButtonData))
+                onConfirm(noMoreDialogs to MultiButtonDialogButtonType.POSITIVE)
             },
         ),
         buttonPosition = PromptBottomSheetTemplateButtonPosition.BOTTOM,
     ) {
         InfernoText(
-            text = multiButtonData.title,
+            text = promptRequest.title,
             textAlign = TextAlign.Start,
             modifier = Modifier.padding(horizontal = 16.dp),
         )
-        if (multiButtonData.hasShownManyDialogs) {
+        if (promptRequest.hasShownManyDialogs) {
             Row(
                 modifier = Modifier
                     .padding(horizontal = 16.dp)
@@ -80,7 +73,7 @@ fun MultiButtonDialogPrompt(
                     onCheckedChange = { noMoreDialogs = !noMoreDialogs },
                 )
                 InfernoText(
-                    text = multiButtonData.message,
+                    text = promptRequest.message,
                     textAlign = TextAlign.Start,
                     modifier = Modifier.weight(1F),
                 )

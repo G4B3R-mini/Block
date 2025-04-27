@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.accessibility.AccessibilityManager
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -49,7 +50,7 @@ import mozilla.components.support.base.feature.ActivityResultHandler
 import mozilla.components.support.base.feature.UserInteractionHandler
 
 class OnActivityResultModel(
-    val requestCode: Int, val data: Intent?, val resultCode: Int
+    val requestCode: Int, val data: Intent?, val resultCode: Int,
 )
 
 data class BrowserUiState(
@@ -60,7 +61,6 @@ data class BrowserUiState(
     var currentTab: TabSessionState? = null,
     var isPrivateSession: Boolean = false,
     var searchEngine: SearchEngine? = null,
-    var promptRequests: List<PromptRequest> = emptyList(),
     var pageType: BrowserComponentPageType = BrowserComponentPageType.ENGINE,
     var selectedTabsTrayTab: InfernoTabsTraySelectedTab = InfernoTabsTraySelectedTab.NormalTabs,
 )
@@ -91,14 +91,6 @@ class BrowserViewModel : ViewModel() {
                 searchEngine = searchEngine,
                 pageType = pageType,
                 selectedTabsTrayTab = selectedTabsTrayTab,
-            )
-        }
-    }
-
-    fun setPromptRequests(promptRequests: List<PromptRequest>) {
-        _uiState.update {
-            it.copy(
-                promptRequests = promptRequests,
             )
         }
     }
@@ -140,11 +132,6 @@ class BrowserComponentWrapperFragment : Fragment(), UserInteractionHandler, Acti
     private val setOnActivityResultHandler: ((OnActivityResultModel) -> Boolean) -> Unit =
         { f -> onActivityResultHandler = f }
 
-    private var filePicker: FilePicker? = null
-    private val setFilePicker: (FilePicker) -> Unit = { f ->
-        filePicker = f
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 //        bundleArgs = args.toBundle()
@@ -154,30 +141,12 @@ class BrowserComponentWrapperFragment : Fragment(), UserInteractionHandler, Acti
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?,
     ): View? {
         return inflater.inflate(R.layout.fragment_browser_component_wrapper, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        // Registers a photo picker activity launcher in single-select mode.
-        val singleMediaPicker = AndroidPhotoPicker.singleMediaPicker(
-            { this },
-            { filePicker },
-        )
-
-        // Registers a photo picker activity launcher in multi-select mode.
-        val multipleMediaPicker = AndroidPhotoPicker.multipleMediaPicker(
-            { this },
-            { filePicker },
-        )
-
-        val androidPhotoPicker = AndroidPhotoPicker(
-            requireContext(),
-            singleMediaPicker,
-            multipleMediaPicker,
-        )
-
         // todo: implement functionality, reference [HomeFragment]
         val focusOnAddressBar =
             arguments?.getBoolean(FOCUS_ON_ADDRESS_BAR) ?: false || FxNimbus.features.oneClickSearch.value().enabled
@@ -192,9 +161,6 @@ class BrowserComponentWrapperFragment : Fragment(), UserInteractionHandler, Acti
                             navController = findNavController(),
                             sessionId = sessionId,
                             setOnActivityResultHandler = setOnActivityResultHandler,
-                            androidPhotoPicker = androidPhotoPicker,
-                            setFilePicker = setFilePicker,
-                            setPromptRequests = { browserViewModel.setPromptRequests(it) },
                             setSelectedTabsTrayTab = { browserViewModel.setSelectedTabsTrayTab(it) },
                             tabList = it.tabList,
                             normalTabs = it.normalTabs,
@@ -202,7 +168,6 @@ class BrowserComponentWrapperFragment : Fragment(), UserInteractionHandler, Acti
                             closedTabs = it.closedTabs,
                             currentTab = it.currentTab,
                             searchEngine = it.searchEngine,
-                            promptRequests = it.promptRequests,
                             pageType = it.pageType,
                             selectedTabsTrayTab = it.selectedTabsTrayTab,
                         )
@@ -214,8 +179,7 @@ class BrowserComponentWrapperFragment : Fragment(), UserInteractionHandler, Acti
         val store = requireComponents.core.store
 
         browserStateObserver = store.flowScoped(viewLifecycleOwner) { flow ->
-            flow.map { it }
-                .collect {
+            flow.map { it }.collect {
                     val currentTab = it.selectedTab
 
                     if (!initialized && !preinitialized) {
@@ -243,7 +207,8 @@ class BrowserComponentWrapperFragment : Fragment(), UserInteractionHandler, Acti
 //                val mode = BrowsingMode.fromBoolean(isPrivateSession)
 //                (context.getActivity()!! as HomeActivity).browsingModeManager.mode = mode
 //                context.components.appStore.dispatch(AppAction.ModeChange(mode))
-                    val selectedTabsTrayTab: InfernoTabsTraySelectedTab = if (isPrivateSession) InfernoTabsTraySelectedTab.PrivateTabs else InfernoTabsTraySelectedTab.NormalTabs
+                    val selectedTabsTrayTab: InfernoTabsTraySelectedTab =
+                        if (isPrivateSession) InfernoTabsTraySelectedTab.PrivateTabs else InfernoTabsTraySelectedTab.NormalTabs
                     tabList =
                         if (isPrivateSession) it.privateTabs else it.normalTabs // it.toTabList().first
                     val normalTabs: List<TabSessionState> = it.normalTabs

@@ -15,8 +15,6 @@ import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplate
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateAction
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateButtonPosition
-import com.shmibblez.inferno.browser.prompts.onDismiss
-import com.shmibblez.inferno.browser.prompts.onPositiveAction
 import com.shmibblez.inferno.compose.base.InfernoOutlinedTextField
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.ext.components
@@ -24,44 +22,40 @@ import mozilla.components.browser.state.action.ContentAction
 import mozilla.components.concept.engine.prompt.PromptRequest
 
 @Composable
-fun AuthenticationPrompt(authData: PromptRequest.Authentication, sessionId: String) {
-    val store = LocalContext.current.components.core.store
-    var username by remember { mutableStateOf(authData.userName) }
-    var password by remember { mutableStateOf(authData.password) }
+fun AuthenticationPrompt(
+    promptRequest: PromptRequest.Authentication,
+    onCancel: () -> Unit,
+    onConfirm: (Pair<String, String>) -> Unit,
+) {
+    var username by remember { mutableStateOf(promptRequest.userName) }
+    var password by remember { mutableStateOf(promptRequest.password) }
     PromptBottomSheetTemplate(
-        onDismissRequest = {
-            onDismiss(authData)
-            store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, authData))
-        },
+        onDismissRequest = onCancel,
         negativeAction = PromptBottomSheetTemplateAction(
             text = stringResource(R.string.mozac_feature_prompts_cancel),
-            action = {
-                onDismiss(authData)
-                store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, authData))
-            },
+            action = onCancel,
         ),
         positiveAction = PromptBottomSheetTemplateAction(text = stringResource(android.R.string.ok),
             action = {
-                onPositiveAction(authData, username, password)
-                store.dispatch(ContentAction.ConsumePromptRequestAction(sessionId, authData))
+                onConfirm(username to password)
             }),
         buttonPosition = PromptBottomSheetTemplateButtonPosition.BOTTOM
     ) {
         // title
         InfernoText(
-            text = authData.title,
+            text = promptRequest.title,
             textAlign = TextAlign.Start,
             modifier = Modifier.padding(horizontal = 16.dp)
         )
         // message
         InfernoText(
-            text = authData.message,
+            text = promptRequest.message,
             textAlign = TextAlign.Start,
             modifier = Modifier
                 .padding(horizontal = 16.dp)
                 .padding(top = 8.dp)
         )
-        if (!authData.onlyShowPassword)
+        if (!promptRequest.onlyShowPassword)
             InfernoOutlinedTextField(
                 value = username,
                 onValueChange = {
