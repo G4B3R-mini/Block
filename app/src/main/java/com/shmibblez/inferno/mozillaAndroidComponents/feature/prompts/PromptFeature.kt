@@ -653,7 +653,7 @@ class PromptFeature private constructor(
                 } else {
                     loginPicker?.handleSelectLoginRequest(promptRequest)
                 }
-                emitPromptDisplayedFact(promptName = "SelectLoginPrompt")
+                emitPromptDisplayedFact(promptName = "SelectLoginPromptType")
             }
 
             is SelectAddress -> {

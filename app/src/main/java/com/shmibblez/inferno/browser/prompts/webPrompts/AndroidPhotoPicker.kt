@@ -5,10 +5,12 @@
 package com.shmibblez.inferno.browser.prompts.webPrompts
 
 import android.content.Context
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.runtime.Composable
 import androidx.fragment.app.Fragment
 import com.shmibblez.inferno.browser.prompts.InfernoPromptFeatureState
 import mozilla.components.feature.prompts.PromptFeature
@@ -56,6 +58,32 @@ class AndroidPhotoPicker(
         }
 
         /**
+         * Registers a photo picker activity launcher in single-select mode.
+         * Note that you must call singleMediaPicker before the fragment is created.
+         *
+         * @param getFragment A function that returns the [Fragment] which hosts the file picker.
+         * @param getWebPromptState A function that returns the [PromptFeature]
+         * that handles the result of the photo picker.
+         * @return An [ActivityResultLauncher] for picking a single photo.
+         */
+        @Composable
+        fun singleMediaPicker(
+            getWebPromptState: () -> InfernoPromptFeatureState?,
+        ): ActivityResultLauncher<PickVisualMediaRequest> {
+//            return getFragment.invoke()
+//                .registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+//                    uri?.let {
+//                        getWebPromptState.invoke()?.onAndroidPhotoPickerResult(arrayOf(uri))
+//                    }
+//                }
+            return rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+                uri?.let {
+                    getWebPromptState.invoke()?.onAndroidPhotoPickerResult(arrayOf(uri))
+                }
+            }
+        }
+
+        /**
          * Registers a photo picker activity launcher in multi-select mode.
          * Note that you must call multipleMediaPicker before the fragment is created.
          *
@@ -72,6 +100,30 @@ class AndroidPhotoPicker(
                 .registerForActivityResult(ActivityResultContracts.PickMultipleVisualMedia()) { uriList ->
                     getWebPromptState.invoke()?.onAndroidPhotoPickerResult(uriList.toTypedArray())
                 }
+//            return rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia()) { uriList ->
+//                getWebPromptState.invoke()?.onAndroidPhotoPickerResult(uriList.toTypedArray())
+//            }
+        }
+
+        /**
+         * Registers a photo picker activity launcher in multi-select mode.
+         * Note that you must call multipleMediaPicker before the fragment is created.
+         *
+         * @param getWebPromptState A function that returns the [PromptFeature]
+         * that handles the result of the photo picker.
+         * @return An [ActivityResultLauncher] for picking multiple photos.
+         */
+        @Composable
+        fun multipleMediaPicker(
+            getWebPromptState: () -> InfernoPromptFeatureState?,
+        ): ActivityResultLauncher<PickVisualMediaRequest> {
+//            return getFragment.invoke()
+//                .registerForActivityResult(ActivityResultContracts.PickMultipleVisualMedia()) { uriList ->
+//                    getWebPromptState.invoke()?.onAndroidPhotoPickerResult(uriList.toTypedArray())
+//                }
+            return rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia()) { uriList ->
+                getWebPromptState.invoke()?.onAndroidPhotoPickerResult(uriList.toTypedArray())
+            }
         }
     }
 }

@@ -102,14 +102,14 @@ class CreditCardDialogController(
         }
     }
 
-    /**
-     * Shows the select credit card prompt in response to the [PromptRequest] event.
-     *
-     * @param request The [PromptRequest] containing the the credit card request data to be shown.
-     */
-    internal fun handleSelectCreditCardRequest(request: PromptRequest.SelectCreditCard) {
-//        emitCreditCardAutofillShownFact()
-    // todo:
-//        creditCardSelectBar.showPrompt(request.creditCards)
-    }
+//    /**
+//     * Shows the select credit card prompt in response to the [PromptRequest] event.
+//     *
+//     * @param request The [PromptRequest] containing the the credit card request data to be shown.
+//     */
+//    internal fun handleSelectCreditCardRequest(request: PromptRequest.SelectCreditCard) {
+////        emitCreditCardAutofillShownFact()
+//    // todo:
+////        creditCardSelectBar.showPrompt(request.creditCards)
+//    }
 }

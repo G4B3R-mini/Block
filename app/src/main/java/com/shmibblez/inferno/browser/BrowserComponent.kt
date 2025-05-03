@@ -10,23 +10,26 @@ import android.content.res.Configuration
 import android.content.res.Resources
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup.LayoutParams
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.CallSuper
 import androidx.annotation.IdRes
 import androidx.annotation.VisibleForTesting
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -34,6 +37,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Scaffold
@@ -90,6 +94,8 @@ import com.shmibblez.inferno.browser.browsingmode.BrowsingMode
 import com.shmibblez.inferno.browser.prompts.DownloadComponent
 import com.shmibblez.inferno.browser.prompts.InfernoPromptFeatureState
 import com.shmibblez.inferno.browser.prompts.InfernoWebPrompter
+import com.shmibblez.inferno.browser.prompts.creditcard.InfernoCreditCardDelegate
+import com.shmibblez.inferno.browser.prompts.creditcard.PinDialogWarning
 import com.shmibblez.inferno.browser.prompts.login.InfernoLoginDelegate
 import com.shmibblez.inferno.browser.prompts.rememberInfernoPromptFeatureState
 import com.shmibblez.inferno.browser.prompts.webPrompts.FilePicker
@@ -102,11 +108,11 @@ import com.shmibblez.inferno.components.accounts.FenixFxAEntryPoint
 import com.shmibblez.inferno.components.accounts.FxaWebChannelIntegration
 import com.shmibblez.inferno.components.appstate.AppAction.MessagingAction
 import com.shmibblez.inferno.components.appstate.AppAction.ShoppingAction
-import com.shmibblez.inferno.components.toolbar.BrowserFragmentStore
 import com.shmibblez.inferno.components.toolbar.FenixTabCounterMenu
 import com.shmibblez.inferno.components.toolbar.ToolbarContainerView
 import com.shmibblez.inferno.components.toolbar.ToolbarPosition
 import com.shmibblez.inferno.components.toolbar.interactor.BrowserToolbarInteractor
+import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.compose.snackbar.AcornSnackbarHostState
 import com.shmibblez.inferno.compose.snackbar.Snackbar
 import com.shmibblez.inferno.compose.snackbar.SnackbarHost
@@ -121,7 +127,6 @@ import com.shmibblez.inferno.ext.getPreferenceKey
 import com.shmibblez.inferno.ext.isLargeWindow
 import com.shmibblez.inferno.ext.nav
 import com.shmibblez.inferno.ext.navigateWithBreadcrumb
-import com.shmibblez.inferno.ext.secure
 import com.shmibblez.inferno.ext.settings
 import com.shmibblez.inferno.findInPageBar.BrowserFindInPageBar
 import com.shmibblez.inferno.home.CrashComponent
@@ -132,7 +137,6 @@ import com.shmibblez.inferno.messaging.FenixMessageSurfaceId
 import com.shmibblez.inferno.messaging.MessagingFeature
 import com.shmibblez.inferno.microsurvey.ui.ext.MicrosurveyUIData
 import com.shmibblez.inferno.perf.MarkersFragmentLifecycleCallbacks
-import com.shmibblez.inferno.pip.PictureInPictureIntegration
 import com.shmibblez.inferno.settings.SupportUtils
 import com.shmibblez.inferno.settings.biometric.BiometricPromptFeature
 import com.shmibblez.inferno.settings.quicksettings.protections.cookiebanners.getCookieBannerUIMode
@@ -140,7 +144,6 @@ import com.shmibblez.inferno.shopping.DefaultShoppingExperienceFeature
 import com.shmibblez.inferno.shopping.ReviewQualityCheckFeature
 import com.shmibblez.inferno.shortcut.PwaOnboardingObserver
 import com.shmibblez.inferno.tabbar.BrowserTabBar
-import com.shmibblez.inferno.tabs.LastTabFeature
 import com.shmibblez.inferno.tabs.tabstray.InfernoTabsTray
 import com.shmibblez.inferno.tabs.tabstray.InfernoTabsTrayDisplayType
 import com.shmibblez.inferno.tabs.tabstray.InfernoTabsTrayMode
@@ -178,7 +181,6 @@ import mozilla.components.browser.state.selector.findTab
 import mozilla.components.browser.state.selector.findTabOrCustomTab
 import mozilla.components.browser.state.selector.findTabOrCustomTabOrSelectedTab
 import mozilla.components.browser.state.selector.getNormalOrPrivateTabs
-import mozilla.components.browser.state.selector.normalTabs
 import mozilla.components.browser.state.selector.selectedTab
 import mozilla.components.browser.state.state.CustomTabSessionState
 import mozilla.components.browser.state.state.SessionState
@@ -205,11 +207,8 @@ import mozilla.components.feature.downloads.ui.DownloadCancelDialogFragment
 import mozilla.components.feature.media.fullscreen.MediaSessionFullscreenFeature
 import mozilla.components.feature.privatemode.feature.SecureWindowFeature
 import mozilla.components.feature.prompts.address.AddressDelegate
-import mozilla.components.feature.prompts.creditcard.CreditCardDelegate
 import mozilla.components.feature.prompts.dialog.FullScreenNotificationToast
 import mozilla.components.feature.prompts.dialog.GestureNavUtils
-import mozilla.components.feature.prompts.identitycredential.DialogColors
-import mozilla.components.feature.prompts.identitycredential.DialogColorsProvider
 import mozilla.components.feature.prompts.share.ShareDelegate
 import mozilla.components.feature.search.SearchFeature
 import mozilla.components.feature.session.FullScreenFeature
@@ -234,7 +233,6 @@ import mozilla.components.support.ktx.android.view.hideKeyboard
 import mozilla.components.support.ktx.kotlin.getOrigin
 import mozilla.components.support.utils.ext.isLandscape
 import mozilla.components.ui.widgets.VerticalSwipeRefreshLayout
-import mozilla.components.ui.widgets.withCenterAlignedButtons
 import java.lang.ref.WeakReference
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
@@ -244,20 +242,24 @@ import kotlin.math.roundToInt
 //   - make new tab next to current based on config, default is true
 //     - so far called from [BrowserTabBar] and from [TabTrayComponent]
 
-// todo: huge drawable with diagonal red and black
+// todo:
+//  - change app name to ember, package too
+//  - splash screen, customize: https://medium.com/geekculture/implementing-the-perfect-splash-screen-in-android-295de045a8dc
+//    - add huge drawable with diagonal red and black in center (for ember will be gradient, bottom black top red)
+//    - center inferno logo drawable (for ember will be fire icon with white rounded letters below spelling "ember")
 // todo: from fragment_browser.xml, for below views first wrap views with AndroidView, then
 //  progressively implement in compose
 //
 
 // completed, (todo: test)
-//   1. findInPageView
-//   2. viewDynamicDownloadDialog
-//   3. readerViewControlsBar https://searchfox.org/mozilla-central/source/mobile/android/android-components/components/feature/readerview/src/main/res/layout/mozac_feature_readerview_view.xml
+//   ✅ 1. findInPageView
+//   ✅ 2. viewDynamicDownloadDialog
+//   ✅ 3. readerViewControlsBar https://searchfox.org/mozilla-central/source/mobile/android/android-components/components/feature/readerview/src/main/res/layout/mozac_feature_readerview_view.xml
 //   4. crash_reporter_view CrashContentView (com.shmibblez.inferno/crashes/CrashContentIntegration.kt)
-//   5. startDownloadDialogContainer
+//   ✅ 5. startDownloadDialogContainer
 //   6. dynamicSnackbarContainer
 //   7. loginSelectBar, implemented in PromptComponent
-//   8. suggestStrongPasswordBar, implemented in PromptComponent
+//   ✅ 8. suggestStrongPasswordBar, implemented in PromptComponent
 //   9. addressSelectBar AddressSelectBar, implemented in PromptComponent
 //   10. creditCardSelectBar CreditCardSelectBar, implemented in PromptComponent
 //   11. tabPreview (TabPreview moved to toolbar (swipe to switch tabs))
@@ -362,9 +364,6 @@ object ComponentDimens {
     }
 }
 
-/**
- * @param sessionId session id, from Moz BaseBrowserFragment
- */
 @OptIn(
     ExperimentalComposeUiApi::class, ExperimentalCoroutinesApi::class, DelicateAction::class
 )
@@ -376,7 +375,6 @@ object ComponentDimens {
 )
 fun BrowserComponent(
     navController: NavController,
-    sessionId: String?,
     setOnActivityResultHandler: ((OnActivityResultModel) -> Boolean) -> Unit,
     // browser state vars
     setSelectedTabsTrayTab: (InfernoTabsTraySelectedTab) -> Unit,
@@ -399,6 +397,7 @@ fun BrowserComponent(
 //    val localConfiguration = LocalConfiguration.current
     val parentFragmentManager = context.getActivity()!!.supportFragmentManager
     val snackbarHostState = remember { AcornSnackbarHostState() }
+    var activeAlertDialog by remember { mutableStateOf<(@Composable () -> Unit)?>(null) }
 
     // tabs tray vars
     var showTabsTray by remember { mutableStateOf(false) }
@@ -414,8 +413,7 @@ fun BrowserComponent(
     val reviewQualityCheckFeature = ViewBoundFeatureWrapper<ReviewQualityCheckFeature>()
 //    val translationsBinding = ViewBoundFeatureWrapper<TranslationsBinding>()
 
-    var readerModeAvailable = remember { mutableStateOf(false) }
-    val (reviewQualityCheckAvailable, setReviewQualityCheckAvailable) = remember {
+    var reviewQualityCheckAvailable by remember {
         mutableStateOf(
             false
         )
@@ -433,33 +431,7 @@ fun BrowserComponent(
     /* BrowserFragment  vars */
 
     /* BaseBrowserFragment vars */
-    lateinit var browserFragmentStore: BrowserFragmentStore
     lateinit var browserAnimator: BrowserAnimator
-    lateinit var startForResult: ActivityResultLauncher<Intent>
-
-    var (browserToolbarInteractor, setBrowserToolbarInteractor) = remember {
-        mutableStateOf<BrowserToolbarInteractor?>(
-            null
-        )
-    }
-
-//    @VisibleForTesting
-//    @Suppress("VariableNaming")
-//    var _browserToolbarView: BrowserToolbarView? = null
-
-//    @VisibleForTesting
-//    val browserToolbarView: BrowserToolbarView
-//    get() = _browserToolbarView!!
-
-//    @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
-//    @Suppress("VariableNaming")
-//    var _bottomToolbarContainerView: BottomToolbarContainerView? = null
-//    val bottomToolbarContainerView: BottomToolbarContainerView
-//    get() = _bottomToolbarContainerView!!
-
-//    @Suppress("VariableNaming")
-//    @VisibleForTesting
-//    var _menuButtonView: MenuButton? = null
 
     val thumbnailsFeature = remember { ViewBoundFeatureWrapper<BrowserThumbnails>() }
 
@@ -509,11 +481,6 @@ fun BrowserComponent(
 //    val webExtensionPromptFeature =
 //        remember { ViewBoundFeatureWrapper<WebExtensionPromptFeature>() }
     val sitePermissionFeature = remember { ViewBoundFeatureWrapper<SitePermissionsFeature>() }
-    val pictureInPictureIntegration =
-        remember { ViewBoundFeatureWrapper<PictureInPictureIntegration>() }
-
-    val lastTabFeature = remember { ViewBoundFeatureWrapper<LastTabFeature>() }
-//    val webExtToolbarFeature = remember { ViewBoundFeatureWrapper<WebExtensionToolbarFeature>() }
 
     var filePicker by remember { mutableStateOf<FilePicker?>(null) }
 
@@ -582,7 +549,6 @@ fun BrowserComponent(
 
     val webPrompterState = rememberInfernoPromptFeatureState(
         activity = context.getActivity()!!,
-        fragment = view.findFragment(),
         store = store,
         customTabId = customTabSessionId,
         tabsUseCases = context.components.useCases.tabsUseCases,
@@ -628,8 +594,7 @@ fun BrowserComponent(
         loginDelegate = object : InfernoLoginDelegate {
             override val onManageLogins = {
                 browserAnimator.captureEngineViewAndDrawStatically {
-                    val directions =
-                        NavGraphDirections.actionGlobalSavedLoginsAuthFragment()
+                    val directions = NavGraphDirections.actionGlobalSavedLoginsAuthFragment()
                     navController.navigate(directions)
                 }
             }
@@ -663,20 +628,33 @@ fun BrowserComponent(
             )
         },
         removeLastSavedGeneratedPassword = {
-            removeLastSavedGeneratedPassword({
-                lastSavedGeneratedPassword = it
-            })
+            removeLastSavedGeneratedPassword(
+                setLastSavedGeneratedPassword = {
+                    lastSavedGeneratedPassword = it
+                },
+            )
         },
-        creditCardDelegate = object : CreditCardDelegate {
-            override val creditCardPickerView
-                get() = null
-            override val onManageCreditCards = {
-                val directions =
-                    NavGraphDirections.actionGlobalAutofillSettingFragment()
-                navController.navigate(directions)
-            }
-            override val onSelectCreditCard = {
-                showBiometricPrompt(context, biometricPromptFeature, webPrompterState)
+        creditCardDelegate = { prompterState, activityResultLauncher ->
+            object : InfernoCreditCardDelegate {
+                override val creditCardPickerComposable
+                    get() = null
+                override val pinDialogWarningComposable =
+                    @Composable { state: InfernoPromptFeatureState ->
+                        PinDialogWarning(state)
+                    }
+                override val onManageCreditCards = {
+                    val directions = NavGraphDirections.actionGlobalAutofillSettingFragment()
+                    navController.navigate(directions)
+                }
+                override val onSelectCreditCard = {
+                    showBiometricPrompt(
+                        context = context,
+                        biometricPromptFeature = biometricPromptFeature,
+                        webPrompterState = prompterState,
+                        startForResult = activityResultLauncher,
+                        setAlertDialog = { activeAlertDialog = it },
+                    )
+                }
             }
         },
         addressDelegate = object : AddressDelegate {
@@ -724,7 +702,10 @@ fun BrowserComponent(
         sessionFeature = sessionFeature,
     )
 
-
+    // show alert dialog if not null
+    if (activeAlertDialog != null) {
+        activeAlertDialog!!.invoke()
+    }
     // bottom sheet menu setup
     var showMenuBottomSheet by remember { mutableStateOf(false) }
     if (showMenuBottomSheet) {
@@ -906,7 +887,7 @@ fun BrowserComponent(
                 }
                 run outer@{
                     if (!context.settings().hasShownTabSwipeCFR && !context.isTabStripEnabled() && context.settings().isSwipeToolbarToSwitchTabsEnabled) {
-                        val normalTabs = context.components.core.store.state.normalTabs
+//                        val normalTabs = context.components.core.store.state.normalTabs
                         val currentTabId = currentTab?.id
 
                         if (normalTabs.size >= 2) {
@@ -941,7 +922,7 @@ fun BrowserComponent(
 
 //                tabsTrayInteractor.onTabSelected(tab, TABS_TRAY_FEATURE_NAME)
             },
-            onTabClose = { tab ->
+            onTabClose = { closedTab ->
                 fun deleteTab(tabId: String, source: String?, isConfirmed: Boolean) {
                     val browserStore = context.components.core.store
                     val tab = browserStore.state.findTab(tabId)
@@ -956,7 +937,11 @@ fun BrowserComponent(
                                 context = context,
                                 coroutineScope = coroutineScope,
                                 snackbarHostState = snackbarHostState,
-                                setInitiallySelectedTabTray = { setSelectedTabsTrayTab(it) },
+                                setInitiallySelectedTabTray = { selectedTab ->
+                                    setSelectedTabsTrayTab(
+                                        selectedTab
+                                    )
+                                },
                                 tab = tab,
                             )
                         } else {
@@ -982,7 +967,7 @@ fun BrowserComponent(
                     }
                 }
 
-                deleteTab(tab.id, null, isConfirmed = false)
+                deleteTab(closedTab.id, null, isConfirmed = false)
             },
             onTabMediaClick = { tab ->
                 when (tab.mediaSessionState?.playbackState) {
@@ -1191,8 +1176,6 @@ fun BrowserComponent(
         val profilerStartTime = context.components.core.engine.profiler?.getProfilerTime()
 
         fun initializeUI() {
-            val store = context.components.core.store
-            val activity = context.getActivity()!! as HomeActivity
 
             // browser animations
 //            browserAnimator = BrowserAnimator(
@@ -1209,156 +1192,10 @@ fun BrowserComponent(
                 putExtra(HomeActivity.OPEN_TO_BROWSER, true)
             }
 
-            // todo: readerView
-//            val readerMenuController = DefaultReaderModeController(
-//                readerViewFeature,
-//                binding.readerViewControlsBar,
-//                isPrivate = activity.browsingModeManager.mode.isPrivate,
-//                onReaderModeChanged = { activity.finishActionMode() },
-//            )
-            // todo: toolbar
-//    val browserToolbarController = DefaultBrowserToolbarController(
-//        store = store,
-//        appStore = context.components.appStore,
-//        tabsUseCases = context.components.useCases.tabsUseCases,
-//        activity = activity,
-//        settings = context.settings(),
-//        navController = navController,
-//        readerModeController = readerMenuController,
-//        engineView = binding.engineView,
-//        homeViewModel = homeViewModel,
-//        customTabSessionId = customTabSessionId,
-//        browserAnimator = browserAnimator,
-//        onTabCounterClicked = {
-//            onTabCounterClicked(activity.browsingModeManager.mode)
-//        },
-//        onCloseTab = { closedSession ->
-//            val closedTab =
-//                store.state.findTab(closedSession.id) ?: return@DefaultBrowserToolbarController
-//            showUndoSnackbar(context.tabClosedUndoMessage(closedTab.content.private))
-//        },
-//    )
-//            val browserToolbarMenuController = DefaultBrowserToolbarMenuController(
-//                fragment = this,
-//                store = store,
-//                appStore = context.components.appStore,
-//                activity = activity,
-//                navController = navController,
-//                settings = context.settings(),
-//                readerModeController = readerMenuController,
-//                sessionFeature = sessionFeature,
-//                findInPageLauncher = {},
-//                browserAnimator = browserAnimator,
-//                customTabSessionId = customTabSessionId,
-//                openInFenixIntent = openInFenixIntent,
-//                bookmarkTapped = { url: String, title: String ->
-//                    lifecycleOwner.lifecycleScope.launch {
-//                        bookmarkTapped(url, title)
-//                    }
-//                },
-//                scope = lifecycleOwner.lifecycleScope,
-//                tabCollectionStorage = context.components.core.tabCollectionStorage,
-//                topSitesStorage = context.components.core.topSitesStorage,
-//                pinnedSiteStorage = context.components.core.pinnedSiteStorage,
-//            )
-////
-//            setBrowserToolbarInteractor(
-//                DefaultBrowserToolbarInteractor(
-//                    browserToolbarController,
-//                    browserToolbarMenuController,
-//                )
-//            )
-//
-//    _browserToolbarView = BrowserToolbarView(
-//        context = context,
-//        container = binding.browserLayout,
-//        snackbarParent = binding.dynamicSnackbarContainer,
-//        settings = context.settings(),
-//        interactor = browserToolbarInteractor,
-//        customTabSession = customTabSessionId?.let { store.state.findCustomTab(it) },
-//        lifecycleOwner = viewLifecycleOwner,
-//        tabStripContent = {
-//            FirefoxTheme {
-//                TabStrip(
-//                    onAddTabClick = {
-//                        navController.navigate(
-//                            NavGraphDirections.actionGlobalHome(
-//                                focusOnAddressBar = true,
-//                            ),
-//                        )
-//                    },
-//                    onLastTabClose = { isPrivate ->
-//                        context.components.appStore.dispatch(
-//                            AppAction.TabStripAction.UpdateLastTabClosed(isPrivate),
-//                        )
-//                        navController.navigate(
-//                            BrowserComponentWrapperFragmentDirections.actionGlobalHome(),
-//                        )
-//                    },
-//                    onSelectedTabClick = {},
-//                    onCloseTabClick = { isPrivate ->
-//                        showUndoSnackbar(context.tabClosedUndoMessage(isPrivate))
-//                    },
-//                    onPrivateModeToggleClick = { mode ->
-//                        activity.browsingModeManager.mode = mode
-//                        navController.navigate(
-//                            BrowserComponentWrapperFragmentDirections.actionGlobalHome(),
-//                        )
-//                    },
-//                    onTabCounterClick = {
-////                            onTabCounterClicked(activity.browsingModeManager.mode)
-//                    },
-//                )
-//            }
-//        },
-//    )
-
-            // todo: login bars
-//    loginBarsIntegration = LoginBarsIntegration(
-//        loginsBar = binding.loginSelectBar,
-//        passwordBar = binding.suggestStrongPasswordBar,
-//        settings = context.settings(),
-//        onLoginsBarShown = {
-//            removeBottomToolbarDivider(browserToolbarView.view)
-//            updateNavbarDivider()
-//        },
-//        onLoginsBarHidden = {
-//            restoreBottomToolbarDivider(browserToolbarView.view)
-//            updateNavbarDivider()
-//        },
-//    )
-
-            // todo: toolbar
-//    val shouldAddNavigationBar = context.shouldAddNavigationBar() // && webAppToolbarShouldBeVisible
-//    if (shouldAddNavigationBar) {
-//        initializeNavBar(
-//            browserToolbar = browserToolbarView.view,
-//            view = view,
-//            context = context,
-//            activity = activity,
-//        )
-//    }
-
             if (context.settings().microsurveyFeatureEnabled) {
                 listenForMicrosurveyMessage(context, lifecycleOwner)
             }
 
-            // todo: toolbar
-//    toolbarIntegration.set(
-//        feature = browserToolbarView.toolbarIntegration,
-//        owner = lifecycleOwner,
-//        view = view,
-//    )
-
-            // todo: readerView
-//    readerViewBinding.set(
-//        feature = ReaderViewBinding(
-//            appStore = context.components.appStore,
-//            readerMenuController = readerMenuController,
-//        ),
-//        owner = lifecycleOwner,
-//        view = view,
-//    )
 
             // todo: open in firefox
 //    openInFirefoxBinding.set(
@@ -1374,23 +1211,10 @@ fun BrowserComponent(
 //        view = view,
 //    )
 
-            // todo: toolbar
+            // todo: nav to quick settings when site security icons clicked
 //    browserToolbarView.view.display.setOnSiteSecurityClickedListener {
 //        showQuickSettingsDialog()
 //    }
-
-//    contextMenuFeature.set(
-//        feature = ContextMenuFeature(
-//            fragmentManager = parentFragmentManager,
-//            store = store,
-//            candidates = getContextMenuCandidates(context, binding.dynamicSnackbarContainer),
-//            engineView = engineView!!,
-//            useCases = context.components.useCases.contextMenuUseCases,
-//            tabId = customTabSessionId,
-//        ),
-//        owner = lifecycleOwner,
-//        view = view,
-//    )
 
             val allowScreenshotsInPrivateMode = context.settings().allowScreenshotsInPrivateMode
             secureWindowFeature.set(
@@ -1469,13 +1293,6 @@ fun BrowserComponent(
                 owner = lifecycleOwner,
                 view = view,
             )
-
-            val colorsProvider = DialogColorsProvider {
-                DialogColors(
-                    title = ThemeManager.resolveAttributeColor(attribute = R.attr.textPrimary),
-                    description = ThemeManager.resolveAttributeColor(attribute = R.attr.textSecondary),
-                )
-            }
 
             sessionFeature.set(
                 feature = SessionFeature(
@@ -1696,7 +1513,6 @@ fun BrowserComponent(
 
             updateBrowserToolbarMenuVisibility()
 
-            initReaderMode(context, view)
             // todo: translation, browser toolbar interactor
 //            initTranslationsAction(
 //                context, view, browserToolbarInteractor!!, translationsAvailable.value
@@ -1706,7 +1522,7 @@ fun BrowserComponent(
                 lifecycleOwner,
                 view,
                 navController,
-                setReviewQualityCheckAvailable,
+                { reviewQualityCheckAvailable = it },
                 reviewQualityCheckAvailable,
                 reviewQualityCheckFeature
             )
@@ -1734,7 +1550,7 @@ fun BrowserComponent(
 //                feature = OpenInAppOnboardingObserver(
 //                    context = context,
 //                    store = context.components.core.store,
-//                    lifecycleowner = lifecycleOwner,
+//                    lifecycleOwner = lifecycleOwner,
 //                    navController = navController,
 //                    settings = context.settings(),
 //                    appLinksUseCases = context.components.useCases.appLinksUseCases,
@@ -1850,7 +1666,7 @@ fun BrowserComponent(
                 Lifecycle.Event.ON_PAUSE -> {
 //                    super.onPause()
                     if (navController.currentDestination?.id != R.id.searchDialogFragment) {
-                        view?.hideKeyboard()
+                        view.hideKeyboard()
                     }
 
                     context.components.services.appLinksInterceptor.updateFragmentManger(
@@ -1871,7 +1687,7 @@ fun BrowserComponent(
                     components.services.appLinksInterceptor.updateFragmentManger(
                         fragmentManager = parentFragmentManager,
                     )
-                    context?.settings()?.shouldOpenLinksInApp(customTabSessionId != null)
+                    context.settings()?.shouldOpenLinksInApp(customTabSessionId != null)
                         ?.let { openLinksInExternalApp ->
                             components.services.appLinksInterceptor.updateLaunchInApp {
                                 openLinksInExternalApp
@@ -2122,7 +1938,7 @@ fun BrowserComponent(
                             searchEngine = searchEngine,
                             tabCount = tabList.size,
                             onShowMenuBottomSheet = { showMenuBottomSheet = true },
-                            onNavToTabsTray = { showTabsTray({ showTabsTray = true }) },
+                            onNavToTabsTray = { showTabsTray { showTabsTray = true } },
                             editMode = browserMode == BrowserComponentMode.TOOLBAR_SEARCH,
                             onStartSearch = { browserMode = BrowserComponentMode.TOOLBAR_SEARCH },
                             onStopSearch = { browserMode = BrowserComponentMode.TOOLBAR },
@@ -2500,8 +2316,9 @@ private fun showSnackbarAfterLoginChange(
 private fun showBiometricPrompt(
     context: Context,
     biometricPromptFeature: ViewBoundFeatureWrapper<BiometricPromptFeature>,
-    webPrompterState: InfernoPromptFeatureState,
-//    promptFeature: ViewBoundFeatureWrapper<PromptFeature>
+    webPrompterState: InfernoPromptFeatureState?,
+    startForResult: ManagedActivityResultLauncher<Intent, ActivityResult>,
+    setAlertDialog: ((@Composable () -> Unit)?) -> Unit,
 ) {
     if (BiometricPromptFeature.canUseFeature(context)) {
         biometricPromptFeature.get()
@@ -2512,14 +2329,13 @@ private fun showBiometricPrompt(
     // Fallback to prompting for password with the KeyguardManager
     val manager = context.getSystemService<KeyguardManager>()
     if (manager?.isKeyguardSecure == true) {
-        showPinVerification(manager, context)
+        showPinVerification(context, manager!!, startForResult)
     } else {
         // Warn that the device has not been secured
         if (context.settings().shouldShowSecurityPinWarning) {
-            // todo: biometrics, test integrate with prompt component for credit card select
-            showPinDialogWarning(context, webPrompterState)
+            showPinDialogWarning(context, setAlertDialog, webPrompterState)
         } else {
-            webPrompterState.onBiometricResult(isAuthenticated = true)
+//                promptsFeature.get()?.onBiometricResult(isAuthenticated = true)
         }
     }
 }
@@ -2528,44 +2344,68 @@ private fun showBiometricPrompt(
  * Shows a pin request prompt. This is only used when BiometricPrompt is unavailable.
  */
 @Suppress("DEPRECATION")
-private fun showPinVerification(manager: KeyguardManager, context: Context) {
+private fun showPinVerification(
+    context: Context,
+    manager: KeyguardManager,
+    startForResult: ManagedActivityResultLauncher<Intent, ActivityResult>,
+) {
     val intent = manager.createConfirmDeviceCredentialIntent(
         context.getString(R.string.credit_cards_biometric_prompt_message_pin),
         context.getString(R.string.credit_cards_biometric_prompt_unlock_message_2),
     )
 
-    // todo: start for result
-//    startForResult.launch(intent)
+    startForResult.launch(intent)
 }
 
 /**
  * Shows a dialog warning about setting up a device lock PIN.
  */
 private fun showPinDialogWarning(
-    context: Context, // promptsFeature: ViewBoundFeatureWrapper<PromptFeature>
-    webPrompterState: InfernoPromptFeatureState,
-    ) {
-    AlertDialog.Builder(context).apply {
-        setTitle(context.getString(R.string.credit_cards_warning_dialog_title_2))
-        setMessage(context.getString(R.string.credit_cards_warning_dialog_message_3))
-
-        // todo: biometric
+    context: Context,
+    setAlertDialog: ((@Composable () -> Unit)?) -> Unit,
+    webPrompterState: InfernoPromptFeatureState?,
+) {
+//    AlertDialog.Builder(context).apply {
+//        setTitle(context.getString(R.string.credit_cards_warning_dialog_title_2))
+//        setMessage(context.getString(R.string.credit_cards_warning_dialog_message_3))
+//
 //        setNegativeButton(context.getString(R.string.credit_cards_warning_dialog_later)) { _: DialogInterface, _ ->
-//            promptsFeature.get()?.onBiometricResult(isAuthenticated = false)
+////                promptsFeature.get()?.onBiometricResult(isAuthenticated = false)
 //        }
-
-        // todo: biometric
+//
 //        setPositiveButton(context.getString(R.string.credit_cards_warning_dialog_set_up_now)) { it: DialogInterface, _ ->
 //            it.dismiss()
-//            promptsFeature.get()?.onBiometricResult(isAuthenticated = false)
-//            context.getActivity()?.startActivity(Intent(Settings.ACTION_SECURITY_SETTINGS))
+////                promptsFeature.get()?.onBiometricResult(isAuthenticated = false)
+//            context.startActivity(Intent(Settings.ACTION_SECURITY_SETTINGS))
 //        }
+//
+//        create()
+//    }.show().withCenterAlignedButtons().secure(activity)
 
-        create()
-    }.show().withCenterAlignedButtons().secure(context.getActivity())
+    setAlertDialog {
+        AlertDialog(onDismissRequest = { setAlertDialog(null) }, confirmButton = {
+            InfernoText(
+                text = stringResource(R.string.credit_cards_warning_dialog_set_up_now),
+                modifier = Modifier.clickable {
+                    setAlertDialog(null)
+                    webPrompterState?.onBiometricResult(isAuthenticated = false)
+                    context.startActivity(Intent(Settings.ACTION_SECURITY_SETTINGS))
+                },
+            )
+        }, dismissButton = {
+            InfernoText(
+                text = stringResource(R.string.credit_cards_warning_dialog_later),
+                modifier = Modifier.clickable {
+                    webPrompterState?.onBiometricResult(isAuthenticated = false)
+                    context.startActivity(Intent(Settings.ACTION_SECURITY_SETTINGS))
+                },
+            )
+        })
+    }
 
     context.settings().incrementSecureWarningCount()
 }
+
 
 //@VisibleForTesting
 //internal fun shouldPullToRefreshBeEnabled(inFullScreen: Boolean, context: Context): Boolean {
@@ -3079,7 +2919,6 @@ private var currentMicrosurvey: MicrosurveyUIData? = null
 /**
  * Listens for the microsurvey message and initializes the microsurvey prompt if one is available.
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 private fun listenForMicrosurveyMessage(context: Context, lifecycleOwner: LifecycleOwner) {
     // todo: microsurvey
 //    binding.root.consumeFrom(context.components.appStore, lifecycleOwner) { state ->
@@ -3785,8 +3624,7 @@ internal fun shouldShowCompletedDownloadDialog(
     status: Status,
     context: Context,
 ): Boolean {
-    val isValidStatus =
-        status in listOf(Status.COMPLETED, Status.FAILED)
+    val isValidStatus = status in listOf(Status.COMPLETED, Status.FAILED)
     val isSameTab = downloadState.sessionId == (getCurrentTab(context)?.id ?: false)
 
     return isValidStatus && isSameTab
@@ -3980,47 +3818,6 @@ private fun initReloadAction(context: Context) {
 //    }
 }
 
-private fun initReaderMode(context: Context, view: View) {
-    // todo: reader mode
-//    val readerModeAction = BrowserToolbar.ToggleButton(
-//        image = AppCompatResources.getDrawable(
-//            context,
-//            R.drawable.ic_readermode,
-//        )!!,
-//        imageSelected = AppCompatResources.getDrawable(
-//            context,
-//            R.drawable.ic_readermode_selected,
-//        )!!,
-//        contentDescription = context.getString(R.string.browser_menu_read),
-//        contentDescriptionSelected = context.getString(R.string.browser_menu_read_close),
-//        visible = {
-//            readerModeAvailable && !reviewQualityCheckAvailable
-//        },
-//        weight = { READER_MODE_WEIGHT },
-//        selected = getSafeCurrentTab()?.let {
-//            activity?.components?.core?.store?.state?.findTab(it.id)?.readerState?.active
-//        } ?: false,
-//        listener = browserToolbarInteractor::onReaderModePressed,
-//    )
-
-//    readerViewFeature.set(
-//        feature = context.components.strictMode.resetAfter(StrictMode.allowThreadDiskReads()) {
-//            ReaderViewFeature(
-//                context = context,
-//                engine = context.components.core.engine,
-//                store = context.components.core.store,
-//                controlsView = binding.readerViewControlsBar,
-//            ) { available, active ->
-//                readerModeAvailable = available
-//                readerModeAction.setSelected(active)
-//                safeInvalidateBrowserToolbarView()
-//            }
-//        },
-//        owner = lifecycleOwner,
-//        view = view,
-//    )
-}
-
 private fun initReviewQualityCheck(
     context: Context,
     lifecycleOwner: LifecycleOwner,
@@ -4049,14 +3846,13 @@ private fun initReviewQualityCheck(
             context.components.appStore.dispatch(
                 ShoppingAction.ShoppingSheetStateUpdated(expanded = true),
             )
-            // todo: nonexistent
-//            navController.navigate(
-//                BrowserComponentWrapperFragmentDirections.actionBrowserFragmentToReviewQualityCheckDialogFragment(),
-//            )
+            navController.navigate(
+                BrowserComponentWrapperFragmentDirections.actionGlobalReviewQualityCheckDialogFragment(),
+            )
         },
     )
 
-    // todo: toolbar
+    // todo: qualityCheck???, also page actions not implemented
 //    browserToolbarView.view.addPageAction(reviewQualityCheck)
 
     reviewQualityCheckFeature.set(
@@ -4394,14 +4190,14 @@ fun navToQuickSettingsSheet(
 ) {
     val useCase = context.components.useCases.trackingProtectionUseCases
 //        FxNimbus.features.cookieBanners.recordExposure()
-    useCase.containsException(tab.id) { hasTrackingProtectionException ->
+    useCase.containsException(tab.id) { _ -> // hasTrackingProtectionException ->
 //        lifecycleScope.launch {
         coroutineScope.launch {
-            val cookieBannersStorage = context.components.core.cookieBannersStorage
-            val cookieBannerUIMode = cookieBannersStorage.getCookieBannerUIMode(
-                context,
-                tab,
-            )
+//            val cookieBannersStorage = context.components.core.cookieBannersStorage
+//            val cookieBannerUIMode = cookieBannersStorage.getCookieBannerUIMode(
+//                context,
+//                tab,
+//            )
             withContext(Main) {
                 // todo: check if fragment attached
 //                runIfFragmentIsAttached {

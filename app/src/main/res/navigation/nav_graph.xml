@@ -179,6 +179,9 @@
     <action
         android:id="@+id/action_global_trustPanelFragment"
         app:destination="@id/trust_panel_graph" />
+    <action
+        android:id="@+id/action_global_reviewQualityCheckDialogFragment"
+        app:destination="@id/reviewQualityCheckFragment" />
 
     <dialog
         android:id="@+id/tabsTrayFragment"

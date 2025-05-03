@@ -123,10 +123,6 @@ class BrowserComponentWrapperFragment : Fragment(), UserInteractionHandler, Acti
     private val baseComposeView: ComposeView
         get() = requireView().findViewById(R.id.baseComposeView)
 
-
-    private val sessionId: String?
-        get() = arguments?.getString(SESSION_ID)
-
     // helper for compose migration, might be a lil sloppy
     private var onActivityResultHandler: ((OnActivityResultModel) -> Boolean)? = null
     private val setOnActivityResultHandler: ((OnActivityResultModel) -> Boolean) -> Unit =
@@ -159,7 +155,6 @@ class BrowserComponentWrapperFragment : Fragment(), UserInteractionHandler, Acti
                     baseComposeView.setContent {
                         BrowserComponent(
                             navController = findNavController(),
-                            sessionId = sessionId,
                             setOnActivityResultHandler = setOnActivityResultHandler,
                             setSelectedTabsTrayTab = { browserViewModel.setSelectedTabsTrayTab(it) },
                             tabList = it.tabList,
@@ -278,14 +273,14 @@ class BrowserComponentWrapperFragment : Fragment(), UserInteractionHandler, Acti
         internal const val TOAST_ELEVATION = 80f
         private const val SESSION_ID = "session_id"
 
-        @JvmStatic
-        private fun Bundle.putSessionId(sessionId: String?) {
-            putString(SESSION_ID, sessionId)
-        }
+//        @JvmStatic
+//        private fun Bundle.putSessionId(sessionId: String?) {
+//            putString(SESSION_ID, sessionId)
+//        }
 
         fun create(sessionId: String? = null) = BrowserComponentWrapperFragment().apply {
             arguments = Bundle().apply {
-                putSessionId(sessionId)
+//                putSessionId(sessionId)
             }
         }
     }

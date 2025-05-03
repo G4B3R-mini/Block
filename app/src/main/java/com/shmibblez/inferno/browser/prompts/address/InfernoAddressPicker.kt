@@ -14,8 +14,6 @@ import mozilla.components.support.base.log.logger.Logger
  * the user performed in the address picker.
  *
  * @property store The [BrowserStore] this feature should subscribe to.
- * @property addressSelectBar The [SelectablePromptState] view into which the select address
- * prompt will be inflated.
  * @property onManageAddresses Callback invoked when user clicks on "Manage adresses" button from
  * select address prompt.
  * @property sessionId The session ID which requested the prompt.
@@ -30,16 +28,16 @@ class InfernoAddressPicker(
 //        addressSelectBar.listener = this
 //    }
 
-    /**
-     * Shows the select address prompt in response to the [PromptRequest] event.
-     *
-     * @param request The [PromptRequest] containing the the address request data to be shown.
-     */
-    internal fun handleSelectAddressRequest(request: PromptRequest.SelectAddress) {
-//        emitAddressAutofillShownFact()
-    // todo:
-//        addressSelectBar.showPrompt(request.addresses)
-    }
+//    /**
+//     * Shows the select address prompt in response to the [PromptRequest] event.
+//     *
+//     * @param request The [PromptRequest] containing the the address request data to be shown.
+//     */
+//    internal fun handleSelectAddressRequest(request: PromptRequest.SelectAddress) {
+////        emitAddressAutofillShownFact()
+//        // todo:
+////        addressSelectBar.showPrompt(request.addresses)
+//    }
 
     /**
      * Dismisses the active [PromptRequest.SelectAddress] request.
@@ -50,8 +48,6 @@ class InfernoAddressPicker(
     @Suppress("TooGenericExceptionCaught")
     fun dismissSelectAddressRequest(promptRequest: PromptRequest.SelectAddress? = null) {
 //        emitAddressAutofillDismissedFact()
-    // todo:
-//        addressSelectBar.hidePrompt()
 
         try {
             if (promptRequest != null) {
@@ -74,8 +70,6 @@ class InfernoAddressPicker(
         store.consumePromptFrom<PromptRequest.SelectAddress>(sessionId) {
             it.onConfirm(option)
         }
-    // todo:
-//        addressSelectBar.hidePrompt()
     }
 
     override fun onManageOptions() {

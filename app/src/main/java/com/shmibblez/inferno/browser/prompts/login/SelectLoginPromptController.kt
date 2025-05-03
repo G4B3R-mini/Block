@@ -59,6 +59,9 @@ open class SelectLoginPromptController {
         private val browserStore: BrowserStore,
         private var sessionId: String? = null,
     ) : SelectLoginPromptController() {
+
+        var dismissedSessionId: String? = null
+
         fun dismissCurrentPasswordGenerator(promptRequest: PromptRequest.SelectLoginPrompt? = null) {
             try {
                 if (promptRequest != null) {
@@ -88,6 +91,8 @@ open class SelectLoginPromptController {
         private var sessionId: String? = null,
 //        private var onGeneratedPasswordPromptClick: () -> Unit = { },
     ) : SelectLoginPromptController() {
+
+        var dismissedSessionId: String? = null
 
 //        fun onGeneratedPasswordPromptClick() {
 //            onGeneratedPasswordPromptClick.invoke()

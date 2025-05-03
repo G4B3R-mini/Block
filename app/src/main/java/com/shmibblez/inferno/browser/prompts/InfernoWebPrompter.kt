@@ -1,5 +1,6 @@
 package com.shmibblez.inferno.browser.prompts
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
@@ -52,14 +53,13 @@ import mozilla.components.concept.engine.prompt.PromptRequest.Share
 import mozilla.components.concept.engine.prompt.PromptRequest.SingleChoice
 import mozilla.components.concept.engine.prompt.PromptRequest.TextPrompt
 import mozilla.components.concept.engine.prompt.PromptRequest.TimeSelection
-import mozilla.components.feature.prompts.PromptFeature
 import mozilla.components.support.ktx.util.PromptAbuserDetector
 import java.security.InvalidParameterException
 
 // todo:
 //   - colors
 //   - some prompts not working nicely, maybe not dismissing properly
-//   - implement share dialog in compose
+//   - implement share dialog in compose (search Search -> in this file)
 //   - some minor problems in some components, go to ones with todos in their files
 
 /**
@@ -71,7 +71,6 @@ fun InfernoWebPrompter(
     state: InfernoPromptFeatureState,
     currentTab: TabSessionState?,
 ) {
-    PromptFeature
     if (currentTab == null) return
     val context = LocalContext.current
 //    val logger = remember { Logger("Prompt Component") }
@@ -252,6 +251,11 @@ fun InfernoWebPrompter(
             )
 
             is SelectLoginPrompt -> {
+                // todo: test login password prompter
+                Log.d(
+                    "InfernoWebPrompter",
+                    "SelectLoginPrompt uid: ${promptRequest.uid}, type: ${state.selectLoginPromptController.javaClass.simpleName}"
+                )
                 when (state.selectLoginPromptController) {
                     is SelectLoginPromptController.LoginPickerDialog -> LoginPickerPrompt(
                         promptRequest = promptRequest,
@@ -261,54 +265,59 @@ fun InfernoWebPrompter(
                     )
 
                     is SelectLoginPromptController.StrongPasswordBarDialog -> {
-                        PasswordGeneratorDialogPrompt(promptRequest = promptRequest,
-                            currentUrl = state.currentUrl ?: "<empty>",
-                            askFirst = true,
-                            onCancel = { state.onCancel(sessionId, promptRequest.uid) },
-                            onConfirm = {
-                                state.onConfirm(sessionId, promptRequest.uid, it)
-                                state.onSaveLogin.invoke(false)
-                            })
-                        R.string.mozac_feature_prompts_suggest_strong_password_2
+                        // if not shown already, show (prevents spam)
+                        if ((state.selectLoginPromptController as SelectLoginPromptController.StrongPasswordBarDialog).dismissedSessionId != sessionId) {
+                            PasswordGeneratorDialogPrompt(promptRequest = promptRequest,
+                                currentUrl = state.currentUrl ?: "<empty>",
+                                askFirst = true,
+                                onCancel = {
+                                    state.onCancel(sessionId, promptRequest.uid)
+                                    (state.selectLoginPromptController as SelectLoginPromptController.StrongPasswordBarDialog).dismissedSessionId =
+                                        sessionId
+                                },
+                                onConfirm = {
+                                    state.onConfirm(sessionId, promptRequest.uid, it)
+                                    state.onSaveLogin.invoke(false)
+                                    (state.selectLoginPromptController as SelectLoginPromptController.StrongPasswordBarDialog).dismissedSessionId =
+                                        sessionId
+                                })
+                            R.string.mozac_feature_prompts_suggest_strong_password_2
+                        }
                     }
 
                     is SelectLoginPromptController.PasswordGeneratorDialog -> {
-                        PasswordGeneratorDialogPrompt(promptRequest,
-                            currentUrl = state.currentUrl ?: "<empty>",
-                            askFirst = false,
-                            onCancel = { state.onCancel(sessionId, promptRequest.uid) },
-                            onConfirm = {
-                                state.onConfirm(sessionId, promptRequest.uid, it)
-                                state.onSaveLogin.invoke(false)
-                            })
+                        // if not shown already, show (prevents spam)
+                        if ((state.selectLoginPromptController as SelectLoginPromptController.PasswordGeneratorDialog).dismissedSessionId != sessionId) {
+                            PasswordGeneratorDialogPrompt(promptRequest,
+                                currentUrl = state.currentUrl ?: "<empty>",
+                                askFirst = false,
+                                onCancel = {
+                                    state.onCancel(sessionId, promptRequest.uid)
+                                    (state.selectLoginPromptController as SelectLoginPromptController.PasswordGeneratorDialog).dismissedSessionId =
+                                        sessionId
+                                },
+                                onConfirm = {
+                                    state.onConfirm(sessionId, promptRequest.uid, it)
+                                    state.onSaveLogin.invoke(false)
+                                    (state.selectLoginPromptController as SelectLoginPromptController.PasswordGeneratorDialog).dismissedSessionId =
+                                        sessionId
+                                })
+                        }
                     }
                 }
             }
 
             is Share -> {
 //                    emitPromptDisplayedFact(promptName = "ShareSheet")
-                // todo: customize this and make bottom prompt sheet
-//                shareDelegate.showShareSheet(
+                // todo: make bottom share sheet / convert to compose
+//                state.shareDelegate.showShareSheet(
 //                    context = context,
-//                    shareData = prompt.data,
+//                    shareData = promptRequest.data,
 //                    onDismiss = {
-////                            emitPromptDismissedFact(promptName = "ShareSheet")
-//                        onDismiss(prompt)
-//                        onNegativeAction(prompt)
-//                        store.dispatch(
-//                            ContentAction.ConsumePromptRequestAction(
-//                                sessionId, prompt
-//                            )
-//                        )
+//                        emitPromptDismissedFact(promptName = "ShareSheet")
+//                        state.onCancel(sessionId, promptRequest.uid)
 //                    },
-//                    onSuccess = {
-//                        onPositiveAction(prompt)
-//                        store.dispatch(
-//                            ContentAction.ConsumePromptRequestAction(
-//                                sessionId, prompt
-//                            )
-//                        )
-//                    },
+//                    onSuccess = { state.onConfirm(sessionId, promptRequest.uid, null) },
 //                )
             }
 
@@ -333,15 +342,14 @@ fun InfernoWebPrompter(
                     TimeSelection.Type.TIME -> SELECTION_TYPE_TIME
                     TimeSelection.Type.MONTH -> SELECTION_TYPE_MONTH
                 }
-                TimeSelectionPrompt(
-                    promptRequest = promptRequest,
+                TimeSelectionPrompt(promptRequest = promptRequest,
                     type = selectionType,
                     onCancel = { state.onCancel(sessionId, promptRequest.uid) },
                     onConfirm = { state.onConfirm(sessionId, promptRequest.uid, it) },
-                    onClear = {state.onClear(sessionId, promptRequest.uid)}
-                )
+                    onClear = { state.onClear(sessionId, promptRequest.uid) })
             }
 
+            null -> return
             else -> throw InvalidParameterException("Not valid prompt request type $promptRequest")
         }
     }

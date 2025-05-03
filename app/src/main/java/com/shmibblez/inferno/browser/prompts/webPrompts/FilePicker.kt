@@ -314,7 +314,7 @@ class FilePicker(
     }
 
     //    @VisibleForTesting(otherwise = PRIVATE)
-    fun handleFilePickerIntentResult(intent: Intent?, request: File) {
+    private fun handleFilePickerIntentResult(intent: Intent?, request: File) {
         if (intent?.clipData != null && request.isMultipleFilesSelection) {
             intent.clipData?.run {
                 val uris = Array<Uri>(itemCount) { index -> getItemAt(index).uri }
