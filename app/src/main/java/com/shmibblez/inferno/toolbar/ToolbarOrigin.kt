@@ -71,7 +71,7 @@ import mozilla.components.browser.state.state.selectedOrDefaultSearchEngine
 import mozilla.components.support.ktx.kotlin.isUrl
 import mozilla.components.support.ktx.kotlin.toNormalizedUrl
 import kotlin.math.roundToInt
-import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarSeparator
+import com.shmibblez.inferno.toolbar.ToolbarOnlyComponents.Companion.ToolbarSeparator
 
 
 // start padding + (width - vertical padding since 1:1 aspect ratio) + expand icon start padding + expand icon size + expand icon end padding

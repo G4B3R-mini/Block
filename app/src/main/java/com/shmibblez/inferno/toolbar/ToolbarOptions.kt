@@ -1,14 +1,18 @@
 package com.shmibblez.inferno.toolbar
 
-import android.content.ActivityNotFoundException
-import android.content.Intent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.VerticalDivider
@@ -16,43 +20,76 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.times
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.ComponentDimens
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.compose.sessionUseCases
-import mozilla.components.support.ktx.android.content.createChooserExcludingCurrentApp
+import com.shmibblez.inferno.ext.components
+import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarBack
+import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarForward
+import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarReload
+import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarShare
+import mozilla.components.browser.state.ext.getUrl
+import mozilla.components.browser.state.selector.normalTabs
+import mozilla.components.browser.state.selector.privateTabs
+import mozilla.components.browser.state.selector.selectedTab
+import mozilla.components.feature.tabs.TabsUseCases
+import mozilla.components.support.ktx.android.content.share
 
 internal val TOOLBAR_ICON_SIZE = 18.dp
+internal val TOOLBAR_SWITCH_ICON_SIZE = 8.dp
 internal val TOOLBAR_ICON_PADDING = 12.dp
 internal val TOOLBAR_INDICATOR_ICON_SIZE = 16.dp
 internal val TOOLBAR_INDICATOR_ICON_PADDING = 4.dp
 internal val TOOLBAR_MENU_OPTION_HEIGHT = 40.dp
 
-// todo:
-//   - test implementations
-//   - add settings screen for options shown on toolbar, max 7, rearrangeable and selectable from list
-//   - add double up and down chevron icon for options tray
-//     - options tray is a sheet that pops up or down and shows all options available as icons,
-//     scrollable horizontal
+internal val TOOLBAR_MENU_ICON_SIZE = 24.dp
+internal val TOOLBAR_MENU_SWITCH_ICON_SIZE =
+    (TOOLBAR_SWITCH_ICON_SIZE / TOOLBAR_ICON_SIZE) * TOOLBAR_MENU_ICON_SIZE
+
+private const val DISABLED_ALPHA = 0.5F
+
+/**
+ * @property ICON used to display icon inside toolbar, small and no description
+ * @property EXPANDED used to display icon inside menu, larger and with description
+ */
+enum class ToolbarOptionType {
+    ICON, EXPANDED
+}
 
 // current items:
+// - ToolbarShare
+// - ToolbarRequestDesktopSite
+// - ToolbarFindInPage
+// - ToolbarSettings
+// - ToolbarPrivateModeToggle
+// - ToolbarActivateReaderView
+// - NavOptionsToolbarMenuItem
 // - ToolbarBack
 // - ToolbarForward
 // - ToolbarReload
-// - ToolbarShare
+// - ToolbarShowTabsTray
 // - ToolbarShowTabsTray
 // - ToolbarMenuIcon
 // -
+// - toolbar only:
+//   - ToolbarMenuIcon
+// - menu only:
+//   - NavOptions
 // todo: left to add:
-//   - ToolbarHistory
-//   - ToolbarPrivateMode (incog/web symbol)
+//   - ToolbarHistory (history icon, go to history page)
 //   - ToolbarFindInPage (search icon)
 //   - ToolbarDesktopSite (desktop icon)
 //   - ToolbarShare (share icon)
@@ -63,7 +100,23 @@ internal val TOOLBAR_MENU_OPTION_HEIGHT = 40.dp
 //   - ToolbarReaderView (book icon, web icon, current is large, switch to small on bottom right)
 //   -
 
-internal class ToolbarOptions {
+internal class ToolbarOnlyOptions {
+    companion object {
+        @Composable
+        fun ToolbarMenuIcon(onShowMenuBottomSheet: () -> Unit) {
+            Icon(
+                modifier = Modifier
+                    .size(TOOLBAR_ICON_SIZE)
+                    .clickable(onClick = onShowMenuBottomSheet),
+                painter = painterResource(id = R.drawable.ic_app_menu_24),
+                contentDescription = stringResource(R.string.content_description_menu),
+                tint = Color.White
+            )
+        }
+    }
+}
+
+internal class ToolbarOnlyComponents {
     companion object {
         /**
          * @param progress 0.0 is 0%, 1.0 is 100%
@@ -80,8 +133,6 @@ internal class ToolbarOptions {
             )
         }
 
-        private const val DISABLED_ALPHA = 0.5F
-
         @Composable
         fun ToolbarSeparator() {
             VerticalDivider(
@@ -90,128 +141,461 @@ internal class ToolbarOptions {
                 thickness = 1.dp,
             )
         }
+    }
+}
 
+internal class MenuOnlyComponents {
+    companion object {
         @Composable
-        fun ToolbarBack(enabled: Boolean) {
-            val useCases = sessionUseCases()
-            Icon(
+        internal fun NavOptions(loading: Boolean) {
+            val tabSessionState = LocalContext.current.components.core.store.state.selectedTab
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier
-                    .size(TOOLBAR_ICON_SIZE)
-                    .alpha(if (enabled) 1F else DISABLED_ALPHA)
-                    .clickable(enabled = enabled) { useCases.goBack.invoke() },
-                painter = painterResource(id = R.drawable.ic_chevron_left_24),
-                contentDescription = "back",
-                tint = Color.White
-            )
-        }
-
-        @Composable
-        fun ToolbarForward(enabled: Boolean) {
-            val useCases = sessionUseCases()
-            Icon(
-                modifier = Modifier
-                    .size(TOOLBAR_ICON_SIZE)
-                    .alpha(if (enabled) 1F else DISABLED_ALPHA)
-                    .clickable(enabled = enabled) { useCases.goForward.invoke() },
-                painter = painterResource(id = R.drawable.ic_chevron_right_24),
-                contentDescription = "forward",
-                tint = Color.White,
-            )
-        }
-
-        @Composable
-        fun ToolbarReload(enabled: Boolean, loading: Boolean) {
-            val useCases = sessionUseCases()
-            Icon(
-                modifier = Modifier
-                    .size(TOOLBAR_ICON_SIZE)
-                    .alpha(if (enabled) 1F else DISABLED_ALPHA)
-                    .clickable(enabled = enabled) {
-                        if (loading) useCases.stopLoading.invoke() else useCases.reload.invoke()
-                    },
-                painter = if (loading) painterResource(id = R.drawable.ic_cross_24) else painterResource(
-                    id = R.drawable.ic_arrow_clockwise_24
-                ),
-                contentDescription = "reload page",
-                tint = Color.White
-            )
-        }
-
-        @Composable
-        fun ToolbarShare(url: String?) {
-            val context = LocalContext.current
-            fun share() {
-                val intent = Intent(Intent.ACTION_SEND).apply {
-                    type = "text/plain"
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                    putExtra(Intent.EXTRA_TEXT, url)
-                }
-
-                try {
-                    context.startActivity(
-                        intent.createChooserExcludingCurrentApp(
-                            context,
-                            context.getString(R.string.mozac_feature_contextmenu_share_link),
-                        ),
-                    )
-                } catch (e: ActivityNotFoundException) {
-                    mozilla.components.support.base.log.Log.log(
-                        mozilla.components.support.base.log.Log.Priority.WARN,
-                        message = "No activity to share to found",
-                        throwable = e,
-                        tag = "createShareLinkCandidate",
-                    )
-                }
-            }
-
-            val enabled = url != null
-            Icon(
-                modifier = Modifier
-                    .size(TOOLBAR_ICON_SIZE)
-                    .alpha(if (enabled) 1F else DISABLED_ALPHA)
-                    .clickable(enabled = enabled, onClick = ::share),
-                painter = painterResource(id = R.drawable.ic_share),
-                contentDescription = "share",
-                tint = Color.White
-            )
-        }
-
-        @Composable
-        fun ToolbarShowTabsTray(tabCount: Int, onNavToTabsTray: () -> Unit) {
-            Box(
-                modifier = Modifier
-                    .size(TOOLBAR_ICON_SIZE)
-//                .alpha(0.5F)
-                    .clickable { onNavToTabsTray.invoke() }
-                    .wrapContentHeight(unbounded = true),
-                contentAlignment = Alignment.Center,
+                    .height(TOOLBAR_MENU_OPTION_HEIGHT)
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Icon(
-                    modifier = Modifier.fillMaxSize(),
-                    painter = painterResource(id = R.drawable.ic_tabcounter_box_24),
-                    contentDescription = "show tabs tray",
-                    tint = Color.White,
+                ToolbarBack(
+                    type = ToolbarOptionType.ICON,
+                    enabled = tabSessionState?.content?.canGoBack ?: false,
                 )
-                InfernoText(
-                    modifier = Modifier.fillMaxSize(),
-                    text = tabCount.toString(),
-                    fontColor = Color.White,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
-                    fontSize = 9.sp
+                ToolbarReload(
+                    type = ToolbarOptionType.ICON,
+                    enabled = tabSessionState != null, loading = loading,
                 )
+                ToolbarShare(
+                    type = ToolbarOptionType.ICON,
+                )
+                ToolbarForward(
+                    type = ToolbarOptionType.ICON,
+                    enabled = tabSessionState?.content?.canGoForward ?: false,
+                )
+            }
+        }
+    }
+}
+
+internal class ToolbarOptions {
+    companion object {
+
+        /**
+         * @param icon icon composable, must use params provided to be displayed properly
+         */
+        @Composable
+        private fun ToolbarOptionTemplate(
+            icon: @Composable (modifier: Modifier, contentDescription: String, tint: Color) -> Unit,
+            description: String,
+            contentDescription: String = description,
+            onClick: () -> Unit,
+            enabled: Boolean = true,
+            type: ToolbarOptionType,
+        ) {
+            when (type) {
+                ToolbarOptionType.ICON -> {
+                    icon.invoke(
+                        Modifier
+                            .size(TOOLBAR_ICON_SIZE)
+                            .alpha(if (enabled) 1F else DISABLED_ALPHA)
+                            .clickable(enabled = enabled, onClick = onClick),
+                        contentDescription,
+                        Color.White,
+                    )
+                }
+
+                ToolbarOptionType.EXPANDED -> {
+                    Column(
+                        modifier = Modifier
+                            .clickable(enabled = enabled, onClick = onClick)
+                            .alpha(if (enabled) 1F else DISABLED_ALPHA),
+//                    .padding(horizontal = 8.dp, vertical = 16.dp),
+                        verticalArrangement = Arrangement.spacedBy(
+                            16.dp, Alignment.CenterVertically
+                        ),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        icon.invoke(
+                            Modifier.size(TOOLBAR_MENU_ICON_SIZE),
+                            contentDescription,
+                            Color.White,
+                        )
+                        InfernoText(
+                            text = description,
+                            textAlign = TextAlign.Center,
+                            lineHeight = 14.sp,
+                            overflow = TextOverflow.Ellipsis,
+                            maxLines = 3,
+                            fontSize = 10.sp,
+                            fontColor = Color.White,
+                        )
+                    }
+                }
             }
         }
 
         @Composable
-        fun ToolbarMenuIcon(onShowMenuBottomSheet: () -> Unit) {
-            Icon(
-                modifier = Modifier
-                    .size(TOOLBAR_ICON_SIZE)
-                    .clickable(onClick = onShowMenuBottomSheet),
-                painter = painterResource(id = R.drawable.ic_app_menu_24),
-                contentDescription = "menu",
-                tint = Color.White
+        private fun ToolbarOptionTemplate(
+            iconPainter: Painter,
+            description: String,
+            contentDescription: String = description,
+            onClick: () -> Unit,
+            enabled: Boolean = true,
+            type: ToolbarOptionType,
+        ) {
+            when (type) {
+                ToolbarOptionType.ICON -> {
+                    Icon(
+                        modifier = Modifier
+                            .size(TOOLBAR_ICON_SIZE)
+                            .alpha(if (enabled) 1F else DISABLED_ALPHA)
+                            .clickable(enabled = enabled, onClick = onClick),
+                        painter = iconPainter,
+                        contentDescription = contentDescription,
+                        tint = Color.White,
+                    )
+                }
+
+                ToolbarOptionType.EXPANDED -> {
+                    Column(
+                        modifier = Modifier
+                            .clickable(enabled = enabled, onClick = onClick)
+                            .alpha(if (enabled) 1F else DISABLED_ALPHA),
+//                    .padding(horizontal = 8.dp, vertical = 16.dp),
+                        verticalArrangement = Arrangement.spacedBy(
+                            16.dp, Alignment.CenterVertically
+                        ),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        Icon(
+                            painter = iconPainter,
+                            tint = Color.White,
+                            contentDescription = contentDescription,
+                            modifier = Modifier.size(TOOLBAR_MENU_ICON_SIZE)
+                        )
+                        InfernoText(
+                            text = description,
+                            textAlign = TextAlign.Center,
+                            lineHeight = 14.sp,
+                            overflow = TextOverflow.Ellipsis,
+                            maxLines = 3,
+                            fontSize = 10.sp,
+                            fontColor = Color.White,
+                        )
+                    }
+                }
+            }
+        }
+
+        @Composable
+        internal fun ToolbarShare(type: ToolbarOptionType) {
+            val context = LocalContext.current
+            val description = stringResource(R.string.share_header_2)
+            ToolbarOptionTemplate(
+                iconPainter = painterResource(R.drawable.ic_share),
+                description = description,
+                onClick = {
+                    val url = context.components.core.store.state.selectedTab?.getUrl().orEmpty()
+                    context.share(url)
+                },
+                type = type,
+            )
+        }
+
+        @Composable
+        internal fun ToolbarRequestDesktopSite(
+            type: ToolbarOptionType,
+            desktopMode: Boolean,
+        ) {
+            val useCases = sessionUseCases()
+            val context = LocalContext.current
+            val isDesktopSite =
+                context.components.core.store.state.selectedTab?.content?.desktopMode
+                    ?: context.components.core.store.state.desktopMode
+            ToolbarOptionTemplate(
+                icon = { modifier, contentDescription, tint ->
+                    Box(
+                        modifier = modifier,
+                    ) {
+                        // current mode, big icon
+                        Icon(
+                            modifier = Modifier
+                                .align(Alignment.Center),
+                            painter = when (isDesktopSite) {
+                                true -> painterResource(id = R.drawable.mozac_ic_device_mobile_24)
+                                false -> painterResource(id = R.drawable.mozac_ic_device_desktop_24)
+                            },
+                            contentDescription = contentDescription,
+                            tint = tint,
+                        )
+                        // switch to, smol icon
+                        Icon(
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .background(Color.Black)
+                                .padding(2.dp)
+                                .size(
+                                    when (type) {
+                                        ToolbarOptionType.ICON -> TOOLBAR_SWITCH_ICON_SIZE
+                                        ToolbarOptionType.EXPANDED -> TOOLBAR_MENU_SWITCH_ICON_SIZE
+                                    }
+                                )
+                                .align(Alignment.BottomEnd),
+                            painter = when (isDesktopSite) {
+                                true -> painterResource(id = R.drawable.mozac_ic_device_desktop_24)
+                                false -> painterResource(id = R.drawable.mozac_ic_device_mobile_24)
+                            },
+                            contentDescription = contentDescription,
+                            tint = tint,
+                        )
+                    }
+                },
+                description = stringResource(
+                    when (isDesktopSite) {
+                        true -> R.string.browser_menu_switch_to_mobile_site
+                        false -> R.string.browser_menu_switch_to_desktop_site
+                    }
+                ),
+                onClick = { useCases.requestDesktopSite.invoke(!desktopMode) },
+                type = type,
+            )
+        }
+
+        @Composable
+        internal fun ToolbarFindInPage(
+            type: ToolbarOptionType,
+            onActivateFindInPage: () -> Unit,
+            dismissMenuSheet: () -> Unit,
+        ) {
+            ToolbarOptionTemplate(
+                iconPainter = painterResource(R.drawable.ic_search_24),
+                description = stringResource(R.string.browser_menu_find_in_page),
+                onClick = {
+                    onActivateFindInPage.invoke()
+                    dismissMenuSheet.invoke()
+                },
+                type = type,
+            )
+        }
+
+        @Composable
+        internal fun ToolbarSettings(
+            type: ToolbarOptionType,
+            onNavToSettings: () -> Unit,
+        ) {
+            ToolbarOptionTemplate(
+                iconPainter = painterResource(R.drawable.mozac_ic_settings_24),
+                description = stringResource(R.string.browser_menu_settings),
+                onClick = onNavToSettings,
+                type = type,
+            )
+        }
+
+        @Composable
+        internal fun ToolbarPrivateModeToggle(
+            type: ToolbarOptionType,
+            isPrivateMode: Boolean,
+            dismissMenuSheet: () -> Unit = {},
+        ) {
+            fun newTab(tabsUseCases: TabsUseCases, isPrivateSession: Boolean) {
+                tabsUseCases.addTab(
+                    url = if (isPrivateSession) "inferno:privatebrowsing" else "inferno:home",
+                    selectTab = true,
+                    private = isPrivateSession,
+                )
+            }
+
+            val state = LocalContext.current.components.core.store.state
+            val tabsUseCases = LocalContext.current.components.useCases.tabsUseCases
+
+            fun disablePrivateMode() {
+                // if private switch to normal tabs
+                val lastNormalTab = try {
+                    state.normalTabs.last()
+                } catch (e: NoSuchElementException) {
+                    null
+                }
+                if (lastNormalTab != null) {
+                    // if previous tabs exist switch to last one
+                    tabsUseCases.selectTab(lastNormalTab.id)
+                } else {
+                    // if no normal tabs create new one
+                    newTab(tabsUseCases, false)
+                }
+            }
+
+            fun enablePrivateMode() {
+                // if normal mode switch to private tabs
+                val lastPrivateTab = try {
+                    state.privateTabs.last()
+                } catch (e: NoSuchElementException) {
+                    null
+                }
+                if (lastPrivateTab != null) {
+                    // if private tabs exist switch to last one
+                    tabsUseCases.selectTab(lastPrivateTab.id)
+                } else {
+                    // if no private tabs exist create new one
+                    newTab(tabsUseCases, true)
+                }
+            }
+
+            ToolbarOptionTemplate(
+                icon = { modifier, contentDescription, tint ->
+                    Box(
+                        modifier = modifier,
+                    ) {
+                        // current mode, big icon
+                        Icon(
+                            modifier = Modifier
+                                .align(Alignment.Center),
+                            painter = when (isPrivateMode) {
+                                true -> painterResource(id = R.drawable.ic_private_browsing)
+                                false -> painterResource(id = R.drawable.mozac_ic_globe_24)
+                            },
+                            contentDescription = contentDescription,
+                            tint = tint,
+                        )
+                        // switch to, smol icon
+                        Icon(
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .background(Color.Black)
+                                .padding(2.dp)
+                                .size(
+                                    when (type) {
+                                        ToolbarOptionType.ICON -> TOOLBAR_SWITCH_ICON_SIZE
+                                        ToolbarOptionType.EXPANDED -> TOOLBAR_MENU_SWITCH_ICON_SIZE
+                                    }
+                                )
+                                .align(Alignment.BottomEnd),
+                            painter = when (isPrivateMode) {
+                                true -> painterResource(id = R.drawable.mozac_ic_globe_24)
+                                false -> painterResource(id = R.drawable.ic_private_browsing)
+                            },
+                            contentDescription = contentDescription,
+                            tint = tint,
+                        )
+                    }
+                },
+                description = stringResource(
+                    when (isPrivateMode) {
+                        true -> R.string.content_description_disable_private_browsing_button
+                        false -> R.string.content_description_private_browsing_button
+                    }
+                ),
+                onClick = {
+                    if (isPrivateMode) {
+                        disablePrivateMode()
+                    } else {
+                        enablePrivateMode()
+                    }
+
+                    dismissMenuSheet()
+                },
+                type = type,
+            )
+        }
+
+        @Composable
+        internal fun ToolbarActivateReaderView(
+            type: ToolbarOptionType,
+            enabled: Boolean,
+            onActivateReaderView: () -> Unit,
+            dismissMenuSheet: (() -> Unit)? = null,
+        ) {
+            ToolbarOptionTemplate(
+                iconPainter = painterResource(R.drawable.mozac_ic_reader_view_24),
+                description = stringResource(R.string.browser_menu_turn_on_reader_view),
+                onClick = {
+                    onActivateReaderView.invoke()
+                    dismissMenuSheet?.invoke()
+                },
+                enabled = enabled,
+                type = type,
+            )
+        }
+
+        @Composable
+        fun ToolbarBack(type: ToolbarOptionType, enabled: Boolean) {
+            val useCases = sessionUseCases()
+            ToolbarOptionTemplate(
+                iconPainter = painterResource(id = R.drawable.ic_chevron_left_24),
+                description = stringResource(R.string.browser_menu_back),
+                onClick = { useCases.goBack.invoke() },
+                enabled = enabled,
+                type = type,
+            )
+        }
+
+        @Composable
+        fun ToolbarForward(type: ToolbarOptionType, enabled: Boolean) {
+            val useCases = sessionUseCases()
+            ToolbarOptionTemplate(
+                iconPainter = painterResource(id = R.drawable.ic_chevron_right_24),
+                description = stringResource(R.string.browser_menu_forward),
+                onClick = { useCases.goForward.invoke() },
+                enabled = enabled,
+                type = type,
+            )
+        }
+
+        @Composable
+        fun ToolbarReload(type: ToolbarOptionType, enabled: Boolean, loading: Boolean) {
+            val useCases = sessionUseCases()
+            ToolbarOptionTemplate(
+                iconPainter = when (loading) {
+                    true -> painterResource(id = R.drawable.ic_cross_24)
+                    false -> painterResource(id = R.drawable.ic_arrow_clockwise_24)
+                },
+                description = when (loading) {
+                    true -> stringResource(android.R.string.cancel)
+                    false -> stringResource(R.string.browser_menu_refresh)
+                },
+                onClick = { if (loading) useCases.stopLoading.invoke() else useCases.reload.invoke() },
+                enabled = enabled,
+                type = type,
+            )
+        }
+
+
+        @Composable
+        fun ToolbarShowTabsTray(
+            type: ToolbarOptionType,
+            tabCount: Int,
+            onNavToTabsTray: () -> Unit,
+        ) {
+            ToolbarOptionTemplate(
+                icon = { modifier, contentDescription, tint ->
+                    Box(
+                        modifier = modifier.wrapContentHeight(unbounded = true),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(
+                            modifier = Modifier.fillMaxSize(),
+                            painter = painterResource(id = R.drawable.ic_tabcounter_box_24),
+                            contentDescription = contentDescription,
+                            tint = tint,
+                        )
+                        InfernoText(
+                            modifier = Modifier.fillMaxSize(),
+                            text = tabCount.toString(),
+                            fontColor = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center,
+                            fontSize = 9.sp,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+                },
+                description = when (tabCount) {
+                    1 -> stringResource(R.string.mozac_tab_counter_open_tab_tray_single)
+                    else -> stringResource(
+                        R.string.mozac_tab_counter_open_tab_tray_plural, tabCount
+                    )
+                },
+                onClick = { onNavToTabsTray.invoke() },
+                type = type,
             )
         }
     }

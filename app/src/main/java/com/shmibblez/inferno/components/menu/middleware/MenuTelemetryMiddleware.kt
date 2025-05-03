@@ -140,7 +140,7 @@
 //
 //            MenuAction.Navigate.ReleaseNotes -> Events.whatsNewTapped.record(
 //                Events.WhatsNewTappedExtra(
-//                    source = "MENU",
+//                    source = "EXPANDED",
 //                ),
 //            )
 //

@@ -97,7 +97,6 @@ import com.shmibblez.inferno.browser.prompts.DownloadComponent
 import com.shmibblez.inferno.browser.prompts.InfernoPromptFeatureState
 import com.shmibblez.inferno.browser.prompts.InfernoWebPrompter
 import com.shmibblez.inferno.browser.prompts.creditcard.InfernoCreditCardDelegate
-import com.shmibblez.inferno.browser.prompts.creditcard.PinDialogWarning
 import com.shmibblez.inferno.browser.prompts.login.InfernoLoginDelegate
 import com.shmibblez.inferno.browser.prompts.rememberInfernoPromptFeatureState
 import com.shmibblez.inferno.browser.readermode.InfernoReaderViewControls
@@ -149,6 +148,7 @@ import com.shmibblez.inferno.tabs.tabstray.InfernoTabsTrayDisplayType
 import com.shmibblez.inferno.tabs.tabstray.InfernoTabsTrayMode
 import com.shmibblez.inferno.tabs.tabstray.InfernoTabsTraySelectedTab
 import com.shmibblez.inferno.tabstray.Page
+import com.shmibblez.inferno.tabstray.TabsTrayAction
 import com.shmibblez.inferno.tabstray.TabsTrayFragmentDirections
 import com.shmibblez.inferno.tabstray.ext.isActiveDownload
 import com.shmibblez.inferno.tabstray.ext.isNormalTab
@@ -293,11 +293,11 @@ import kotlin.math.roundToInt
 
 //companion object {
 //private const val KEY_CUSTOM_TAB_SESSION_ID = "custom_tab_session_id"
-private const val REQUEST_CODE_DOWNLOAD_PERMISSIONS = 1
-private const val REQUEST_CODE_PROMPT_PERMISSIONS = 2
-private const val REQUEST_CODE_APP_PERMISSIONS = 3
-private const val METRIC_SOURCE = "page_action_menu"
-private const val TOAST_METRIC_SOURCE = "add_bookmark_toast"
+//private const val REQUEST_CODE_DOWNLOAD_PERMISSIONS = 1
+//private const val REQUEST_CODE_PROMPT_PERMISSIONS = 2
+//private const val REQUEST_CODE_APP_PERMISSIONS = 3
+//private const val METRIC_SOURCE = "page_action_menu"
+//private const val TOAST_METRIC_SOURCE = "add_bookmark_toast"
 //private const val LAST_SAVED_GENERATED_PASSWORD = "last_saved_generated_password"
 
 val onboardingLinksList: List<String> = listOf(
@@ -312,17 +312,17 @@ val onboardingLinksList: List<String> = listOf(
  *
  * A weight of -1 indicates the position is not cared for and the action will be appended at the end.
  */
-const val READER_MODE_WEIGHT = 1
-const val TRANSLATIONS_WEIGHT = 2
+//const val READER_MODE_WEIGHT = 1
+//const val TRANSLATIONS_WEIGHT = 2
 const val REVIEW_QUALITY_CHECK_WEIGHT = 3
 const val SHARE_WEIGHT = 4
-const val RELOAD_WEIGHT = 5
+//const val RELOAD_WEIGHT = 5
 const val OPEN_IN_ACTION_WEIGHT = 6
 //}
 
 private const val NAVIGATION_CFR_VERTICAL_OFFSET = 10
 private const val NAVIGATION_CFR_ARROW_OFFSET = 24
-private const val NAVIGATION_CFR_MAX_MS_BETWEEN_CLICKS = 5000
+//private const val NAVIGATION_CFR_MAX_MS_BETWEEN_CLICKS = 5000
 
 fun Context.getActivity(): AppCompatActivity? = when (this) {
     is AppCompatActivity -> this
@@ -352,11 +352,12 @@ object ComponentDimens {
     val TAB_BAR_HEIGHT = 32.dp
     val AWESOME_BAR_HEIGHT = 200.dp
     val TAB_WIDTH = 112.dp
-    val TAB_CORNER_RADIUS = 8.dp
+
+    //    val TAB_CORNER_RADIUS = 8.dp
     val FIND_IN_PAGE_BAR_HEIGHT = 50.dp
     val READER_VIEW_HEIGHT = 50.dp
     val PROGRESS_BAR_HEIGHT = 1.dp
-    val FULLSCREEN_BOTTOM_BAR_HEIGHT = 0.dp
+    private val FULLSCREEN_BOTTOM_BAR_HEIGHT = 0.dp
     fun calcBottomBarHeight(browserComponentMode: BrowserComponentMode): Dp {
         return when (browserComponentMode) {
             BrowserComponentMode.TOOLBAR -> TOOLBAR_HEIGHT + TAB_BAR_HEIGHT
@@ -426,11 +427,7 @@ fun BrowserComponent(
 
     var pwaOnboardingObserver: PwaOnboardingObserver? = null
 
-//    @VisibleForTesting var leadingAction: BrowserToolbar.Button? = null
-//    var forwardAction: BrowserToolbar.TwoStateButton? = null
-//    var backAction: BrowserToolbar.TwoStateButton? = null
-//    var refreshAction: BrowserToolbar.TwoStateButton? = null
-    var isTablet: Boolean = false
+    var isTablet = false
 
     /* BrowserFragment  vars */
 
@@ -461,10 +458,10 @@ fun BrowserComponent(
 
     var pipFeature by remember { mutableStateOf<PictureInPictureFeature?>(null) }
 
-    var customTabSessionId by remember { mutableStateOf<String?>(null) }
+    val customTabSessionId by remember { mutableStateOf<String?>(null) }
 
-    var browserInitialized by remember { mutableStateOf(false) }
-    var initUIJob by remember { mutableStateOf<Job?>(null) }
+    val browserInitialized by remember { mutableStateOf(false) }
+    val initUIJob by remember { mutableStateOf<Job?>(null) }
 
     // todo:
 //    @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED) var webAppToolbarShouldBeVisible =
@@ -504,16 +501,14 @@ fun BrowserComponent(
                 it.onPermissionsResult(permissions, grantResults)
             }
         }
-    // todo: prompt permissions
+    var tempWebPrompterState by remember { mutableStateOf<InfernoPromptFeatureState?>(null) }
     val requestPromptsPermissionsLauncher: ActivityResultLauncher<Array<String>> =
         rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { results ->
             val permissions = results.keys.toTypedArray()
             val grantResults = results.values.map {
                 if (it) PackageManager.PERMISSION_GRANTED else PackageManager.PERMISSION_DENIED
             }.toIntArray()
-//            promptsFeature.withFeature {
-//                it.onPermissionsResult(permissions, grantResults)
-//            }
+            tempWebPrompterState?.onPermissionsResult(permissions, grantResults)
         }
 
 
@@ -651,12 +646,6 @@ fun BrowserComponent(
         },
         creditCardDelegate = { prompterState, activityResultLauncher ->
             object : InfernoCreditCardDelegate {
-                override val creditCardPickerComposable
-                    get() = null
-                override val pinDialogWarningComposable =
-                    @Composable { state: InfernoPromptFeatureState ->
-                        PinDialogWarning(state)
-                    }
                 override val onManageCreditCards = {
                     val directions = NavGraphDirections.actionGlobalAutofillSettingFragment()
                     navController.navigate(directions)
@@ -681,6 +670,7 @@ fun BrowserComponent(
             }
         },
     )
+    tempWebPrompterState = webPrompterState
 
     val infernoReaderViewState = rememberInfernoReaderViewFeatureState(
         context = context,
@@ -724,12 +714,16 @@ fun BrowserComponent(
     // bottom sheet menu setup
     var showMenuBottomSheet by remember { mutableStateOf(false) }
     if (showMenuBottomSheet) {
-        ToolbarMenuBottomSheet(tabSessionState = currentTab,
+        ToolbarMenuBottomSheet(
+            tabSessionState = currentTab,
             loading = currentTab?.content?.loading ?: false,
+            tabCount = tabList.size,
             onDismissMenuBottomSheet = { showMenuBottomSheet = false },
             onActivateFindInPage = { browserMode = BrowserComponentMode.FIND_IN_PAGE },
             onActivateReaderView = { infernoReaderViewState.showReaderView() },
-            onNavToSettings = { navToSettings(navController) })
+            onNavToSettings = { navToSettings(navController) },
+            onNavToTabsTray = { showTabsTray = true },
+        )
     }
 
     if (showTabsTray) {
@@ -970,7 +964,16 @@ fun BrowserComponent(
                                     source = source,
                                     context = context,
                                     coroutineScope = coroutineScope,
-                                    snackbarHostState = snackbarHostState
+                                    setAlertDialog = { activeAlertDialog = it },
+                                    snackbarHostState = snackbarHostState,
+                                    setInitiallySelectedTabTray = {
+                                        { selectedTab: InfernoTabsTraySelectedTab ->
+                                            setSelectedTabsTrayTab(
+                                                selectedTab
+                                            )
+                                        }
+                                    },
+                                    dismissTabsTray = { dismissTabsTray() }
                                 )
                                 return
                             } else {
@@ -1463,8 +1466,8 @@ fun BrowserComponent(
                             activity = context.getActivity()!!,
                             engineView = engineView!!,
                             swipeRefresh = swipeRefresh!!,
-                            enableFullscreen = {browserMode = BrowserComponentMode.FULLSCREEN },
-                            disableFullscreen = {browserMode = BrowserComponentMode.TOOLBAR},
+                            enableFullscreen = { browserMode = BrowserComponentMode.FULLSCREEN },
+                            disableFullscreen = { browserMode = BrowserComponentMode.TOOLBAR },
                         )
                     }
             }
@@ -1690,8 +1693,10 @@ fun BrowserComponent(
                                 activity = context.getActivity()!!,
                                 engineView = engineView!!,
                                 swipeRefresh = swipeRefresh!!,
-                                enableFullscreen = {browserMode = BrowserComponentMode.FULLSCREEN },
-                                disableFullscreen = {browserMode = BrowserComponentMode.TOOLBAR },
+                                enableFullscreen = {
+                                    browserMode = BrowserComponentMode.FULLSCREEN
+                                },
+                                disableFullscreen = { browserMode = BrowserComponentMode.TOOLBAR },
                             )
                         }
                     }
@@ -1725,7 +1730,7 @@ fun BrowserComponent(
                     components.services.appLinksInterceptor.updateFragmentManger(
                         fragmentManager = parentFragmentManager,
                     )
-                    context.settings()?.shouldOpenLinksInApp(customTabSessionId != null)
+                    context.settings().shouldOpenLinksInApp(customTabSessionId != null)
                         ?.let { openLinksInExternalApp ->
                             components.services.appLinksInterceptor.updateLaunchInApp {
                                 openLinksInExternalApp
@@ -1976,7 +1981,7 @@ fun BrowserComponent(
                             searchEngine = searchEngine,
                             tabCount = tabList.size,
                             onShowMenuBottomSheet = { showMenuBottomSheet = true },
-                            onNavToTabsTray = { showTabsTray { showTabsTray = true } },
+                            onNavToTabsTray = { showTabsTray = true },
                             editMode = browserMode == BrowserComponentMode.TOOLBAR_SEARCH,
                             onStartSearch = { browserMode = BrowserComponentMode.TOOLBAR_SEARCH },
                             onStopSearch = { browserMode = BrowserComponentMode.TOOLBAR },
@@ -2004,7 +2009,7 @@ fun BrowserComponent(
 }
 
 fun hideToolbar(context: Context) {
-    (context.getActivity()!! as AppCompatActivity).supportActionBar?.hide()
+    context.getActivity()?.supportActionBar?.hide()
 }
 
 private fun viewportFitChanged(viewportFit: Int, context: Context) {
@@ -2032,12 +2037,6 @@ private fun viewportFitChanged(viewportFit: Int, context: Context) {
 //}
 
 /*** navigation ***/
-/**
- * navigate to tabs tray fragment
- */
-private fun showTabsTray(showTabsTray: () -> Unit) {
-    showTabsTray.invoke()
-}
 
 /**
  * navigate to settings fragment
@@ -2125,19 +2124,20 @@ fun MozEngineView(
 }
 
 // todo: reader view button, what this for?
-@Composable
-fun MozFloatingActionButton(
-    setView: (FloatingActionButton) -> Unit,
-) {
-    AndroidView(modifier = Modifier.fillMaxSize(), factory = { context ->
-        val v = FloatingActionButton(context)
-        setView(v)
-        v
-    }, update = { it.visibility = View.GONE })
-}
+//@Composable
+//fun MozFloatingActionButton(
+//    setView: (FloatingActionButton) -> Unit,
+//) {
+//    AndroidView(modifier = Modifier.fillMaxSize(), factory = { context ->
+//        val v = FloatingActionButton(context)
+//        setView(v)
+//        v
+//    }, update = { it.visibility = View.GONE })
+//}
 
 /* BaseBrowserFragment funs */
 
+// todo: show download cancelled dialog as bottom prompt
 @VisibleForTesting
 internal fun showCancelledDownloadWarning(
     downloadCount: Int,
@@ -2145,14 +2145,49 @@ internal fun showCancelledDownloadWarning(
     source: String?,
     context: Context,
     coroutineScope: CoroutineScope,
+    setAlertDialog: ((@Composable () -> Unit)?) -> Unit,
     snackbarHostState: AcornSnackbarHostState,
+    setInitiallySelectedTabTray: ((InfernoTabsTraySelectedTab) -> Unit)? = null,
+    dismissTabsTray: () -> Unit,
 ) {
 //        context?.components?.analytics?.crashReporter?.recordCrashBreadcrumb(
 //            Breadcrumb("DownloadCancelDialogFragment show"),
 //        )
-    // todo: create dialog component, basically DownloadComponent but not based on browser state,
-    //  but based on events passed
-    //  (make list of data obj events with event info, if dismissed remove event from list)
+
+    // TODO: set text according to content in [DownloadCancelDialogFragment]
+    DownloadCancelDialogFragment
+    setAlertDialog {
+        AlertDialog(
+            onDismissRequest = { setAlertDialog(null) },
+            confirmButton = {
+                InfernoText(
+                    text = stringResource(R.string.credit_cards_warning_dialog_set_up_now),
+                    modifier = Modifier.clickable {
+                        setAlertDialog(null)
+                        onCancelDownloadWarningAccepted(
+                            tabId = tabId,
+                            source = source,
+                            context = context,
+                            coroutineScope = coroutineScope,
+                            setAlertDialog = setAlertDialog,
+                            snackbarHostState = snackbarHostState,
+                            setInitiallySelectedTabTray = setInitiallySelectedTabTray,
+                            dismissTabsTray = dismissTabsTray,
+                        )
+                    },
+                )
+            },
+            dismissButton = {
+                InfernoText(
+                    text = stringResource(R.string.credit_cards_warning_dialog_later),
+                    modifier = Modifier.clickable {
+                        setAlertDialog(null)
+                        // todo
+                    },
+                )
+            },
+        )
+    }
     val dialog = DownloadCancelDialogFragment.newInstance(downloadCount = downloadCount,
         tabId = tabId,
         source = source,
@@ -2170,9 +2205,155 @@ internal fun showCancelledDownloadWarning(
             positiveButtonRadius = (context.resources.getDimensionPixelSize(R.dimen.tab_corner_radius)).toFloat(),
         ),
 
-        onPositiveButtonClicked = { _, _ -> } // ::onCancelDownloadWarningAccepted,
+        onPositiveButtonClicked = { tabId, source ->
+            onCancelDownloadWarningAccepted(
+                tabId = tabId,
+                source = source,
+                context = context,
+                coroutineScope = coroutineScope,
+                setAlertDialog = setAlertDialog,
+                snackbarHostState = snackbarHostState,
+                setInitiallySelectedTabTray = setInitiallySelectedTabTray,
+                dismissTabsTray = dismissTabsTray
+            )
+        }
     )
 //    dialog.show(parentFragmentManager, DOWNLOAD_CANCEL_DIALOG_FRAGMENT_TAG)
+}
+
+@VisibleForTesting
+internal fun onCancelDownloadWarningAccepted(
+    tabId: String?,
+    source: String?,
+    context: Context,
+    coroutineScope: CoroutineScope,
+    setAlertDialog: ((@Composable () -> Unit)?) -> Unit,
+    snackbarHostState: AcornSnackbarHostState,
+    setInitiallySelectedTabTray: ((InfernoTabsTraySelectedTab) -> Unit)? = null,
+    dismissTabsTray: () -> Unit,
+) {
+    if (tabId != null) {
+        deleteTab(
+            tabId = tabId,
+            source = source,
+            isConfirmed = true,
+            context = context,
+            coroutineScope = coroutineScope,
+            setAlertDialog = setAlertDialog,
+            snackbarHostState = snackbarHostState,
+            setInitiallySelectedTabTray = setInitiallySelectedTabTray,
+            dismissTabsTray = dismissTabsTray,
+        )
+//        tabsTrayInteractor.onDeletePrivateTabWarningAccepted(tabId, source)
+    } else {
+        closeAllTabs(
+            private = true,
+            isConfirmed = true,
+            context = context,
+            coroutineScope = coroutineScope,
+            setAlertDialog = setAlertDialog,
+            snackbarHostState = snackbarHostState,
+            setInitiallySelectedTabTray = setInitiallySelectedTabTray,
+            dismissTabsTray = dismissTabsTray,
+        )
+//        navigationInteractor.onCloseAllPrivateTabsWarningConfirmed(private = true)
+    }
+}
+
+private fun deleteTab(
+    tabId: String,
+    source: String?,
+    isConfirmed: Boolean,
+    context: Context,
+    coroutineScope: CoroutineScope,
+    setAlertDialog: ((@Composable () -> Unit)?) -> Unit,
+    snackbarHostState: AcornSnackbarHostState,
+    setInitiallySelectedTabTray: ((InfernoTabsTraySelectedTab) -> Unit)? = null,
+    dismissTabsTray: () -> Unit,
+) {
+    val browserStore = context.components.core.store
+    val tabsUseCases = context.components.useCases.tabsUseCases
+    val tab = browserStore.state.findTab(tabId)
+
+    tab?.let {
+        val isLastTab = browserStore.state.getNormalOrPrivateTabs(it.content.private).size == 1
+        val isCurrentTab = browserStore.state.selectedTabId.equals(tabId)
+        if (!isLastTab || !isCurrentTab) {
+            tabsUseCases.removeTab(tabId)
+            showUndoSnackbarForTab(
+                it.content.private,
+                context,
+                coroutineScope,
+                snackbarHostState,
+                setInitiallySelectedTabTray,
+                it
+            )
+        } else {
+            val privateDownloads = browserStore.state.downloads.filter { map ->
+                map.value.private && map.value.isActiveDownload()
+            }
+            if (!isConfirmed && privateDownloads.isNotEmpty()) {
+                showCancelledDownloadWarning(
+                    privateDownloads.size,
+                    tabId,
+                    source,
+                    context,
+                    coroutineScope = coroutineScope,
+                    setAlertDialog = setAlertDialog,
+                    snackbarHostState = snackbarHostState,
+                    setInitiallySelectedTabTray = setInitiallySelectedTabTray,
+                    dismissTabsTray = dismissTabsTray,
+                )
+                return
+            } else {
+                tabsUseCases.removeTab(tabId)
+                dismissTabsTray.invoke()
+            }
+        }
+//            TabsTray.closedExistingTab.record(TabsTray.ClosedExistingTabExtra(source ?: "unknown"))
+    }
+
+//    todo: tabsTrayStore.dispatch(TabsTrayAction.ExitSelectMode)
+}
+
+private fun closeAllTabs(
+    private: Boolean,
+    isConfirmed: Boolean,
+    context: Context,
+    coroutineScope: CoroutineScope,
+    setAlertDialog: ((@Composable () -> Unit)?) -> Unit,
+    snackbarHostState: AcornSnackbarHostState,
+    setInitiallySelectedTabTray: ((InfernoTabsTraySelectedTab) -> Unit)? = null,
+    dismissTabsTray: () -> Unit,
+) {
+    val browserStore = context.components.core.store
+//    val sessionsToClose = if (private) {
+//        HomeFragment.ALL_PRIVATE_TABS
+//    } else {
+//        HomeFragment.ALL_NORMAL_TABS
+//    }
+
+    if (private && !isConfirmed) {
+        val privateDownloads = browserStore.state.downloads.filter {
+            it.value.private && it.value.isActiveDownload()
+        }
+        if (privateDownloads.isNotEmpty()) {
+            showCancelledDownloadWarning(
+                downloadCount = privateDownloads.size,
+                tabId = null,
+                source = null,
+                context = context,
+                coroutineScope = coroutineScope,
+                setAlertDialog = setAlertDialog,
+                snackbarHostState = snackbarHostState,
+                setInitiallySelectedTabTray = setInitiallySelectedTabTray,
+                dismissTabsTray = dismissTabsTray,
+            )
+            return
+        }
+    }
+    dismissTabsTray.invoke()
+//    dismissTabTrayAndNavigateHome(sessionsToClose)
 }
 
 private fun showUndoSnackbar(
@@ -2414,24 +2595,29 @@ private fun showPinDialogWarning(
 //    }.show().withCenterAlignedButtons().secure(activity)
 
     setAlertDialog {
-        AlertDialog(onDismissRequest = { setAlertDialog(null) }, confirmButton = {
-            InfernoText(
-                text = stringResource(R.string.credit_cards_warning_dialog_set_up_now),
-                modifier = Modifier.clickable {
-                    setAlertDialog(null)
-                    webPrompterState?.onBiometricResult(isAuthenticated = false)
-                    context.startActivity(Intent(Settings.ACTION_SECURITY_SETTINGS))
-                },
-            )
-        }, dismissButton = {
-            InfernoText(
-                text = stringResource(R.string.credit_cards_warning_dialog_later),
-                modifier = Modifier.clickable {
-                    webPrompterState?.onBiometricResult(isAuthenticated = false)
-                    context.startActivity(Intent(Settings.ACTION_SECURITY_SETTINGS))
-                },
-            )
-        })
+        AlertDialog(
+            onDismissRequest = { setAlertDialog(null) },
+            confirmButton = {
+                InfernoText(
+                    text = stringResource(R.string.credit_cards_warning_dialog_set_up_now),
+                    modifier = Modifier.clickable {
+                        setAlertDialog(null)
+                        webPrompterState?.onBiometricResult(isAuthenticated = false)
+                        context.startActivity(Intent(Settings.ACTION_SECURITY_SETTINGS))
+                    },
+                )
+            },
+            dismissButton = {
+                InfernoText(
+                    text = stringResource(R.string.credit_cards_warning_dialog_later),
+                    modifier = Modifier.clickable {
+                        setAlertDialog(null)
+                        webPrompterState?.onBiometricResult(isAuthenticated = false)
+                        context.startActivity(Intent(Settings.ACTION_SECURITY_SETTINGS))
+                    },
+                )
+            },
+        )
     }
 
     context.settings().incrementSecureWarningCount()

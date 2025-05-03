@@ -31,10 +31,10 @@ import androidx.compose.ui.unit.dp
 import com.shmibblez.inferno.browser.ComponentDimens
 import com.shmibblez.inferno.browser.InfernoAwesomeBar
 import com.shmibblez.inferno.browser.toPx
-import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ProgressBar
+import com.shmibblez.inferno.toolbar.ToolbarOnlyComponents.Companion.ProgressBar
 import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarBack
 import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarForward
-import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarMenuIcon
+import com.shmibblez.inferno.toolbar.ToolbarOnlyOptions.Companion.ToolbarMenuIcon
 import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarReload
 import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarShowTabsTray
 import mozilla.components.browser.state.search.SearchEngine
@@ -45,12 +45,12 @@ import kotlin.math.roundToInt
 
 // TODO:
 //  -[x] progress with tabSessionState.content.progress
-//  -[ ] when app started, new home tab added, instead go to last used tab
-//  -[ ] when last private tab closed doesn't switch to normal tabs
+//  -[x] when app started, new home tab added, instead go to last used tab
+//  -[x] when last private tab closed doesn't switch to normal tabs
 //  -[ ] swipe gesture to switch tabs, left and right
-//  -[ ] implement moz AwesomeBarFeature
+//  -[x] implement moz AwesomeBarFeature
 //  -[ ] implement moz TabsToolbarFeature
-//  -[ ] implement moz ReaderViewIntegration
+//  -[x] implement moz ReaderViewIntegration
 //  -[ ] implement moz WebExtensionToolbarFeature
 //  -[ ] implement moz engineView!!.setDynamicToolbarMaxHeight
 //  -[ ] implement moz ToolbarIntegration
@@ -58,11 +58,11 @@ import kotlin.math.roundToInt
 const val DISPLAY_VALUE = 1F
 const val EDIT_VALUE = 0F
 
-private fun iconsWidth(nOptions: Int):Dp {
+private fun iconsWidth(nOptions: Int): Dp {
     return TOOLBAR_ICON_PADDING + (TOOLBAR_ICON_SIZE + TOOLBAR_ICON_PADDING) * nOptions
 }
 
-private fun iconsWidthPx(nOptions: Int):Int {
+private fun iconsWidthPx(nOptions: Int): Int {
     return iconsWidth(nOptions).toPx()
 }
 
@@ -78,7 +78,7 @@ fun BrowserToolbar(
     onStopSearch: () -> Unit,
 ) {
     if (tabSessionState == null || searchEngine == null) {
-        // don't show if null, TODO: show loading bar layout
+        // don't show if null, TODO: show loading toolbar layout
         PlaceholderBrowserToolbar()
         return
     }
@@ -120,12 +120,14 @@ fun BrowserToolbar(
                 orientation = AwesomeBarOrientation.BOTTOM,
                 // todo: move cursor to end on suggestion set
                 onSuggestionClicked = { providerGroup, suggestion ->
+                    // todo: change action based on providerGroup
                     val t = suggestion.title
                     if (t != null) {
                         searchText = TextFieldValue(t, TextRange(t.length))
                     }
                 },
                 onAutoComplete = { providerGroup, suggestion ->
+                    // todo: filter out based on providerGroup
                     val t = suggestion.title
                     if (t != null) {
                         searchText = TextFieldValue(t, TextRange(t.length))
@@ -143,8 +145,7 @@ fun BrowserToolbar(
             // todo: padding between elements is ICON_PADDING
             // origin
             ToolbarOrigin(
-                originModifier = Modifier
-                    .padding(
+                originModifier = Modifier.padding(
                         start = (leftWidth * animationValue.value),
                         end = (rightWidth * animationValue.value),
                     ),
@@ -176,8 +177,12 @@ fun BrowserToolbar(
                     TOOLBAR_ICON_PADDING, Alignment.CenterHorizontally
                 )
             ) {
-                ToolbarBack(enabled = tabSessionState.content.canGoBack)
-                ToolbarForward(enabled = tabSessionState.content.canGoForward)
+                ToolbarBack(
+                    type = ToolbarOptionType.ICON, enabled = tabSessionState.content.canGoBack
+                )
+                ToolbarForward(
+                    type = ToolbarOptionType.ICON, enabled = tabSessionState.content.canGoForward
+                )
             }
 
             // icons on right
@@ -195,14 +200,18 @@ fun BrowserToolbar(
                     TOOLBAR_ICON_PADDING, Alignment.CenterHorizontally
                 )
             ) {
-                ToolbarReload(enabled = true, loading = loading)
-                ToolbarShowTabsTray(tabCount = tabCount, onNavToTabsTray = onNavToTabsTray)
+                ToolbarReload(type = ToolbarOptionType.ICON, enabled = true, loading = loading)
+                ToolbarShowTabsTray(
+                    type = ToolbarOptionType.ICON,
+                    tabCount = tabCount,
+                    onNavToTabsTray = onNavToTabsTray
+                )
                 ToolbarMenuIcon(onShowMenuBottomSheet = onShowMenuBottomSheet)
             }
             // loading bar
             if (loading) {
                 ProgressBar(
-                    progress = (tabSessionState.content.progress.toFloat() ?: 0F) / 100F,
+                    progress = (tabSessionState.content.progress.toFloat()) / 100F,
                     modifier = Modifier.align(Alignment.TopCenter),
                 )
             }

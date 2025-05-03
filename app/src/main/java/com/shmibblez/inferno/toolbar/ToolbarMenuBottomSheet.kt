@@ -17,14 +17,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
-import com.shmibblez.inferno.toolbar.ToolbarMenuOptions.Companion.FindInPageToolbarMenuItem
+import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarFindInPage
 import mozilla.components.browser.state.state.TabSessionState
-import com.shmibblez.inferno.toolbar.ToolbarMenuOptions.Companion.NavOptionsToolbarMenuItem
-import com.shmibblez.inferno.toolbar.ToolbarMenuOptions.Companion.PrivateModeToolbarMenuItem
-import com.shmibblez.inferno.toolbar.ToolbarMenuOptions.Companion.ReaderViewToolbarMenuItem
-import com.shmibblez.inferno.toolbar.ToolbarMenuOptions.Companion.RequestDesktopSiteToolbarMenuItem
-import com.shmibblez.inferno.toolbar.ToolbarMenuOptions.Companion.SettingsToolbarMenuItem
-import com.shmibblez.inferno.toolbar.ToolbarMenuOptions.Companion.ShareToolbarMenuItem
+import com.shmibblez.inferno.toolbar.MenuOnlyComponents.Companion.NavOptions
+import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarPrivateModeToggle
+import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarActivateReaderView
+import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarBack
+import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarForward
+import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarReload
+import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarRequestDesktopSite
+import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarSettings
+import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarShare
+import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarShowTabsTray
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -32,10 +36,12 @@ import com.shmibblez.inferno.toolbar.ToolbarMenuOptions.Companion.ShareToolbarMe
 fun ToolbarMenuBottomSheet(
     tabSessionState: TabSessionState?,
     loading: Boolean,
+    tabCount: Int,
     onDismissMenuBottomSheet: () -> Unit,
     onActivateFindInPage: () -> Unit,
     onActivateReaderView: () -> Unit,
     onNavToSettings: () -> Unit,
+    onNavToTabsTray: () -> Unit,
 ) {
     if (tabSessionState == null) return
     ModalBottomSheet(
@@ -57,40 +63,85 @@ fun ToolbarMenuBottomSheet(
         //  red marker top right for new (if not in prefs list), popup menu for move to bottom
         //  or move to top
         val items: List<@Composable LazyGridItemScope.() -> Unit> = listOf(
-            { ShareToolbarMenuItem() },
+            { ToolbarShare(type = ToolbarOptionType.EXPANDED) },
             {
-                PrivateModeToolbarMenuItem(
+                ToolbarPrivateModeToggle(
+                    type = ToolbarOptionType.EXPANDED,
                     isPrivateMode = tabSessionState.content.private,
                     dismissMenuSheet = onDismissMenuBottomSheet,
                 )
             },
-            { RequestDesktopSiteToolbarMenuItem(desktopMode = tabSessionState.content.desktopMode) },
             {
-                FindInPageToolbarMenuItem(
+                ToolbarRequestDesktopSite(
+                    type = ToolbarOptionType.EXPANDED,
+                    desktopMode = tabSessionState.content.desktopMode
+                )
+            },
+            {
+                ToolbarFindInPage(
+                    type = ToolbarOptionType.EXPANDED,
                     onActivateFindInPage = onActivateFindInPage,
                     dismissMenuSheet = onDismissMenuBottomSheet,
                 )
             },
             {
-                ReaderViewToolbarMenuItem(
+                ToolbarActivateReaderView(
+                    type = ToolbarOptionType.EXPANDED,
                     enabled = tabSessionState.readerState.readerable,
                     onActivateReaderView = onActivateReaderView,
                     dismissMenuSheet = onDismissMenuBottomSheet,
                 )
             },
-            { SettingsToolbarMenuItem(onNavToSettings = onNavToSettings) },
+            {
+                ToolbarShowTabsTray(
+                    type = ToolbarOptionType.EXPANDED,
+                    tabCount = tabCount,
+                   onNavToTabsTray =   onNavToTabsTray,
+                )
+            },
+            {
+                ToolbarBack(
+                    type = ToolbarOptionType.EXPANDED,
+                    enabled = tabSessionState.content.canGoBack,
+                )
+            },
+            {
+                ToolbarForward(
+                    type = ToolbarOptionType.EXPANDED,
+                    enabled = tabSessionState.content.canGoForward,
+                )
+            },
+            {
+                ToolbarReload(
+                    type = ToolbarOptionType.EXPANDED,
+                    enabled = true,
+                    loading = loading,
+                )
+            },
+            {
+                ToolbarSettings(
+                    type = ToolbarOptionType.EXPANDED,
+                    onNavToSettings = onNavToSettings
+                )
+            },
         )
         LazyVerticalGrid(
             columns = GridCells.Adaptive(minSize = 72.dp),
 //            modifier = Modifier.padding(horizontal = 16.dp), doable?
             contentPadding = PaddingValues(start = 16.dp, bottom = 16.dp, end = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp, alignment = Alignment.CenterVertically),
-            horizontalArrangement = Arrangement.spacedBy(8.dp, alignment = Alignment.CenterHorizontally),
+            verticalArrangement = Arrangement.spacedBy(
+                16.dp,
+                alignment = Alignment.CenterVertically
+            ),
+            horizontalArrangement = Arrangement.spacedBy(
+                8.dp,
+                alignment = Alignment.CenterHorizontally
+            ),
         ) {
             navHeader {
                 // todo: move to bottom sticky when switch to grid view
                 // stop, refresh, forward, back
-                NavOptionsToolbarMenuItem(loading)
+                NavOptions(loading)
             }
 
             items(items) { option ->

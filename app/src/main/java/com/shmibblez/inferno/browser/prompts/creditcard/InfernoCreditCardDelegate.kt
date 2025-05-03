@@ -13,14 +13,7 @@ interface InfernoCreditCardDelegate {
      * selectable prompt list of credit cards.
      */
     val creditCardPickerComposable: (@Composable (InfernoPromptFeatureState) -> Unit)?
-        get() = null
-
-    /**
-     * The [Composable] used when biometric authentication not available to authenticate
-     * [CreditCardPicker] selection
-     */
-    val pinDialogWarningComposable: (@Composable (InfernoPromptFeatureState) -> Unit)?
-        get() = null
+        get() = null // todo: override in BrowserComponent, call in InfernoWebPrompter, if null use default
 
     /**
      * Callback invoked when a user selects "Manage credit cards"
