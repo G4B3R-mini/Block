@@ -48,6 +48,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableLongStateOf
@@ -70,6 +71,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat.getColor
 import androidx.core.content.getSystemService
+import androidx.core.view.OnApplyWindowInsetsListener
 import androidx.core.view.children
 import androidx.core.view.isVisible
 import androidx.fragment.app.findFragment
@@ -98,7 +100,6 @@ import com.shmibblez.inferno.browser.prompts.creditcard.InfernoCreditCardDelegat
 import com.shmibblez.inferno.browser.prompts.creditcard.PinDialogWarning
 import com.shmibblez.inferno.browser.prompts.login.InfernoLoginDelegate
 import com.shmibblez.inferno.browser.prompts.rememberInfernoPromptFeatureState
-import com.shmibblez.inferno.browser.prompts.webPrompts.FilePicker
 import com.shmibblez.inferno.browser.readermode.InfernoReaderViewControls
 import com.shmibblez.inferno.browser.readermode.rememberInfernoReaderViewFeatureState
 import com.shmibblez.inferno.browser.tabstrip.isTabStripEnabled
@@ -139,7 +140,6 @@ import com.shmibblez.inferno.microsurvey.ui.ext.MicrosurveyUIData
 import com.shmibblez.inferno.perf.MarkersFragmentLifecycleCallbacks
 import com.shmibblez.inferno.settings.SupportUtils
 import com.shmibblez.inferno.settings.biometric.BiometricPromptFeature
-import com.shmibblez.inferno.settings.quicksettings.protections.cookiebanners.getCookieBannerUIMode
 import com.shmibblez.inferno.shopping.DefaultShoppingExperienceFeature
 import com.shmibblez.inferno.shopping.ReviewQualityCheckFeature
 import com.shmibblez.inferno.shortcut.PwaOnboardingObserver
@@ -229,6 +229,8 @@ import mozilla.components.service.sync.logins.SyncableLoginsStorage
 import mozilla.components.support.base.feature.ActivityResultHandler
 import mozilla.components.support.base.feature.ViewBoundFeatureWrapper
 import mozilla.components.support.base.log.logger.Logger
+import mozilla.components.support.ktx.android.view.enterImmersiveMode
+import mozilla.components.support.ktx.android.view.exitImmersiveMode
 import mozilla.components.support.ktx.android.view.hideKeyboard
 import mozilla.components.support.ktx.kotlin.getOrigin
 import mozilla.components.support.utils.ext.isLandscape
@@ -251,18 +253,15 @@ import kotlin.math.roundToInt
 //  progressively implement in compose
 //
 
-// completed, (todo: test)
-//   ✅ 1. findInPageView
-//   ✅ 2. viewDynamicDownloadDialog
-//   ✅ 3. readerViewControlsBar https://searchfox.org/mozilla-central/source/mobile/android/android-components/components/feature/readerview/src/main/res/layout/mozac_feature_readerview_view.xml
+// todo: test
 //   4. crash_reporter_view CrashContentView (com.shmibblez.inferno/crashes/CrashContentIntegration.kt)
-//   ✅ 5. startDownloadDialogContainer
 //   6. dynamicSnackbarContainer
 //   7. loginSelectBar, implemented in PromptComponent
-//   ✅ 8. suggestStrongPasswordBar, implemented in PromptComponent
 //   9. addressSelectBar AddressSelectBar, implemented in PromptComponent
 //   10. creditCardSelectBar CreditCardSelectBar, implemented in PromptComponent
+//     - test biometric authentication in SelectableListPrompt for credit cards (urgent)
 //   11. tabPreview (TabPreview moved to toolbar (swipe to switch tabs))
+
 
 // todo: test
 //   - savedLoginsLauncher
@@ -272,7 +271,6 @@ import kotlin.math.roundToInt
 //    (download dialogs, web dialogs, etc) and invoke where necessary, allows more customizability
 //    -> callbacks provide composable params, and composable fun is returned and called in component
 // todo:
-//  - implement biometric authentication in SelectableListPrompt for credit cards (urgent)
 //  - fix external app browser implementation
 //  - animated splash screen not animating
 //  - add default search engines, select default
@@ -288,6 +286,10 @@ import kotlin.math.roundToInt
 //  - create Mozilla Location Service (MLS) token and put in components/Core.kt
 //  - BuildConfig.MLS_TOKEN
 //  - color scheme, search for FirefoxTheme usages
+//    - all components should have colors baked in with theme
+//    - add constructor for InfernoText with just text, modifier, and text type (theme/color, font size,
+//      font weight, etc. all auto based on type (title, normal, subtitle, description, etc))
+//      - abstracts text/base components for next material update, need to only update base components, not all instances
 
 //companion object {
 //private const val KEY_CUSTOM_TAB_SESSION_ID = "custom_tab_session_id"
@@ -338,7 +340,7 @@ fun nav(
 }
 
 enum class BrowserComponentMode {
-    TOOLBAR, TOOLBAR_SEARCH, FIND_IN_PAGE, READER_VIEW,
+    TOOLBAR, TOOLBAR_SEARCH, FIND_IN_PAGE, READER_VIEW, FULLSCREEN,
 }
 
 enum class BrowserComponentPageType {
@@ -354,12 +356,14 @@ object ComponentDimens {
     val FIND_IN_PAGE_BAR_HEIGHT = 50.dp
     val READER_VIEW_HEIGHT = 50.dp
     val PROGRESS_BAR_HEIGHT = 1.dp
-    fun bottom_bar_height(browserComponentMode: BrowserComponentMode): Dp {
+    val FULLSCREEN_BOTTOM_BAR_HEIGHT = 0.dp
+    fun calcBottomBarHeight(browserComponentMode: BrowserComponentMode): Dp {
         return when (browserComponentMode) {
             BrowserComponentMode.TOOLBAR -> TOOLBAR_HEIGHT + TAB_BAR_HEIGHT
             BrowserComponentMode.TOOLBAR_SEARCH -> TOOLBAR_HEIGHT + AWESOME_BAR_HEIGHT
             BrowserComponentMode.FIND_IN_PAGE -> FIND_IN_PAGE_BAR_HEIGHT
             BrowserComponentMode.READER_VIEW -> READER_VIEW_HEIGHT
+            BrowserComponentMode.FULLSCREEN -> FULLSCREEN_BOTTOM_BAR_HEIGHT
         }
     }
 }
@@ -440,8 +444,6 @@ fun BrowserComponent(
     val sessionFeature = remember { ViewBoundFeatureWrapper<SessionFeature>() }
     val shareDownloadsFeature = remember { ViewBoundFeatureWrapper<ShareDownloadFeature>() }
     val copyDownloadsFeature = remember { ViewBoundFeatureWrapper<CopyDownloadFeature>() }
-//    val promptsFeature = remember { ViewBoundFeatureWrapper<PromptFeature>() }
-//    lateinit var loginBarsIntegration: LoginBarsIntegration
 
     val sitePermissionsFeature = ViewBoundFeatureWrapper<SitePermissionsFeature>()
     val fullScreenFeature = ViewBoundFeatureWrapper<FullScreenFeature>()
@@ -449,26 +451,24 @@ fun BrowserComponent(
     val webchannelIntegration = ViewBoundFeatureWrapper<FxaWebChannelIntegration>()
     val sitePermissionWifiIntegration = ViewBoundFeatureWrapper<SitePermissionsWifiIntegration>()
     val secureWindowFeature = ViewBoundFeatureWrapper<SecureWindowFeature>()
-    var fullScreenMediaSessionFeature = ViewBoundFeatureWrapper<MediaSessionFullscreenFeature>()
+    val fullScreenMediaSessionFeature = ViewBoundFeatureWrapper<MediaSessionFullscreenFeature>()
     val searchFeature = ViewBoundFeatureWrapper<SearchFeature>()
     val webAuthnFeature = ViewBoundFeatureWrapper<WebAuthnFeature>()
     val screenOrientationFeature = ViewBoundFeatureWrapper<ScreenOrientationFeature>()
     val biometricPromptFeature = ViewBoundFeatureWrapper<BiometricPromptFeature>()
 //    val crashContentIntegration = ViewBoundFeatureWrapper<CrashContentIntegration>()
 //    val openInFirefoxBinding = ViewBoundFeatureWrapper<OpenInFirefoxBinding>()
-//    val snackbarBinding = ViewBoundFeatureWrapper<SnackbarBinding>()
-//    val standardSnackbarErrorBinding =
-//        ViewBoundFeatureWrapper<StandardSnackbarErrorBinding>()
 
     var pipFeature by remember { mutableStateOf<PictureInPictureFeature?>(null) }
 
-    val (customTabSessionId, setCustomTabSessionId) = remember { mutableStateOf<String?>(null) }
+    var customTabSessionId by remember { mutableStateOf<String?>(null) }
 
-    val (browserInitialized, setBrowserInitialized) = remember { mutableStateOf(false) }
+    var browserInitialized by remember { mutableStateOf(false) }
     var initUIJob by remember { mutableStateOf<Job?>(null) }
 
-    @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED) var webAppToolbarShouldBeVisible =
-        true
+    // todo:
+//    @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED) var webAppToolbarShouldBeVisible =
+//        true
 
     var lastSavedGeneratedPassword by remember {
         mutableStateOf<String?>(
@@ -477,12 +477,8 @@ fun BrowserComponent(
     }
 
     /// old component features
-//    val appLinksFeature = remember { ViewBoundFeatureWrapper<AppLinksFeature>() }
 //    val webExtensionPromptFeature =
 //        remember { ViewBoundFeatureWrapper<WebExtensionPromptFeature>() }
-    val sitePermissionFeature = remember { ViewBoundFeatureWrapper<SitePermissionsFeature>() }
-
-    var filePicker by remember { mutableStateOf<FilePicker?>(null) }
 
     var requestDownloadPermissionsCallback by remember {
         mutableStateOf<((permissions: Array<String>, grantResults: IntArray) -> Unit)?>(
@@ -504,10 +500,11 @@ fun BrowserComponent(
             val grantResults = results.values.map {
                 if (it) PackageManager.PERMISSION_GRANTED else PackageManager.PERMISSION_DENIED
             }.toIntArray()
-            sitePermissionFeature.withFeature {
+            sitePermissionsFeature.withFeature {
                 it.onPermissionsResult(permissions, grantResults)
             }
         }
+    // todo: prompt permissions
     val requestPromptsPermissionsLauncher: ActivityResultLauncher<Array<String>> =
         rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { results ->
             val permissions = results.keys.toTypedArray()
@@ -517,7 +514,6 @@ fun BrowserComponent(
 //            promptsFeature.withFeature {
 //                it.onPermissionsResult(permissions, grantResults)
 //            }
-            filePicker?.onPermissionsResult(permissions, grantResults)
         }
 
 
@@ -542,10 +538,29 @@ fun BrowserComponent(
 //        )
 //    }
 
-    // browser display mode
-    var browserMode by remember {
-        mutableStateOf(BrowserComponentMode.TOOLBAR)
+    // connection to the nested scroll system and listen to the scroll
+    var bottomBarHeightDp by remember {
+        mutableStateOf(
+            ComponentDimens.calcBottomBarHeight(
+                BrowserComponentMode.TOOLBAR
+            )
+        )
     }
+    val bottomBarOffsetPx = remember { Animatable(0F) }
+
+    // browser display mode, also sets bottomBarHeightDp
+    var browserMode by run {
+        val state = mutableStateOf(BrowserComponentMode.TOOLBAR)
+        object : MutableState<BrowserComponentMode> by state {
+            override var value
+                get() = state.value
+                set(value) {
+                    state.value = value
+                    bottomBarHeightDp = ComponentDimens.calcBottomBarHeight(value)
+                }
+        }
+    }
+
 
     val webPrompterState = rememberInfernoPromptFeatureState(
         activity = context.getActivity()!!,
@@ -1156,11 +1171,6 @@ fun BrowserComponent(
 
     }
 
-    // connection to the nested scroll system and listen to the scroll
-    val bottomBarHeightDp = ComponentDimens.bottom_bar_height(browserMode)
-    val bottomBarOffsetPx = remember { Animatable(0F) }
-
-
     // on back pressed handlers
     BackHandler {
         onBackPressed(backHandler)
@@ -1413,10 +1423,9 @@ fun BrowserComponent(
 //                // If the user connects to WIFI while on the BrowserFragment, this will update the
 //                // SitePermissionsRules (specifically autoplay) accordingly
 //                runIfFragmentIsAttached {
-//                    assignSitePermissionsRules()
+//                    assignSitePermissionsRules(context, sitePermissionsFeature)
 //                }
 //            }
-            assignSitePermissionsRules(context, sitePermissionFeature)
 
             fullScreenFeature.set(
                 feature = FullScreenFeature(
@@ -1424,7 +1433,17 @@ fun BrowserComponent(
                     context.components.useCases.sessionUseCases,
                     customTabSessionId,
                     { viewportFitChange(it, context) },
-                    { fullScreen -> fullScreenChanged(fullScreen, context) },
+                    { inFullScreen ->
+                        fullScreenChanged(
+                            inFullScreen = inFullScreen,
+                            context = context,
+                            activity = context.getActivity()!!,
+                            engineView = engineView!!,
+                            swipeRefresh = swipeRefresh!!,
+                            enableFullscreen = { browserMode = BrowserComponentMode.FULLSCREEN },
+                            disableFullscreen = { browserMode = BrowserComponentMode.TOOLBAR },
+                        )
+                    },
                 ),
                 owner = lifecycleOwner,
                 view = view,
@@ -1436,7 +1455,18 @@ fun BrowserComponent(
                         customTabSessionId
                     )
                 }.distinctUntilChangedBy { tab -> tab.content.pictureInPictureEnabled }
-                    .collect { tab -> pipModeChanged(tab, context, backHandler) }
+                    .collect { tab ->
+                        pipModeChanged(
+                            session = tab,
+                            backPressedHandler = backHandler,
+                            context = context,
+                            activity = context.getActivity()!!,
+                            engineView = engineView!!,
+                            swipeRefresh = swipeRefresh!!,
+                            enableFullscreen = {browserMode = BrowserComponentMode.FULLSCREEN },
+                            disableFullscreen = {browserMode = BrowserComponentMode.TOOLBAR},
+                        )
+                    }
             }
 
             // todo: swipe refresh
@@ -1654,7 +1684,15 @@ fun BrowserComponent(
                     )?.let { session ->
                         // If we didn't enter PiP, exit full screen on stop
                         if (!session.content.pictureInPictureEnabled && fullScreenFeature.onBackPressed()) {
-                            fullScreenChanged(false, context)
+                            fullScreenChanged(
+                                inFullScreen = false,
+                                context = context,
+                                activity = context.getActivity()!!,
+                                engineView = engineView!!,
+                                swipeRefresh = swipeRefresh!!,
+                                enableFullscreen = {browserMode = BrowserComponentMode.FULLSCREEN },
+                                disableFullscreen = {browserMode = BrowserComponentMode.TOOLBAR },
+                            )
                         }
                     }
 
@@ -1959,13 +1997,6 @@ fun BrowserComponent(
                             state = infernoReaderViewState,
                         )
                     }
-//                    MozReaderViewControlsBar { cb -> readerViewBar = cb }
-//                    Box(
-//                        Modifier
-//                            .fillMaxWidth()
-//                            .height(10.dp)
-//                            .background(Color.Magenta)
-//                    )
                 }
             }
         },
@@ -3366,18 +3397,32 @@ private fun showBookmarkSavedSnackbar(
     }
 }
 
-fun onHomePressed(pipFeature: PictureInPictureFeature) = pipFeature?.onHomePressed() ?: false
+fun onHomePressed(pipFeature: PictureInPictureFeature?) = pipFeature?.onHomePressed() ?: false
 
 /**
  * Exit fullscreen mode when exiting PIP mode
  */
 private fun pipModeChanged(
-    session: SessionState, context: Context, backPressedHandler: OnBackPressedHandler,
+    session: SessionState,
+    backPressedHandler: OnBackPressedHandler,
+    context: Context,
+    activity: AppCompatActivity,
+    engineView: EngineView,
+    swipeRefresh: SwipeRefreshLayout,
+    enableFullscreen: () -> Unit,
+    disableFullscreen: () -> Unit,
 ) {
-    // todo: isAdded
-    if (!session.content.pictureInPictureEnabled && session.content.fullScreen) { // && isAdded) {
+    if (!session.content.pictureInPictureEnabled && session.content.fullScreen) {
         onBackPressed(backPressedHandler)
-        fullScreenChanged(false, context)
+        fullScreenChanged(
+            inFullScreen = false,
+            context = context,
+            activity = activity,
+            engineView = engineView,
+            swipeRefresh = swipeRefresh,
+            enableFullscreen = enableFullscreen,
+            disableFullscreen = disableFullscreen,
+        )
     }
 }
 
@@ -3397,37 +3442,44 @@ private fun viewportFitChange(layoutInDisplayCutoutMode: Int, context: Context) 
 internal fun fullScreenChanged(
     inFullScreen: Boolean,
     context: Context,
+    activity: AppCompatActivity,
+    engineView: EngineView,
+    swipeRefresh: SwipeRefreshLayout,
+    enableFullscreen: () -> Unit,
+    disableFullscreen: () -> Unit,
 ) {
-    val activity = context.getActivity() ?: return
+//    val activity = context.getActivity() ?: return
     if (inFullScreen) {
         // Close find in page bar if opened
-        // todo: find in page
 //        findInPageIntegration.onBackPressed()
+        // todo: hide bottom bar -> set offset to max and disable scroll listener (dont change offset on scroll if in fullscreen)
+        enableFullscreen.invoke()
 
         FullScreenNotificationToast(
             activity = activity,
-            gestureNavString = context.getString(R.string.exit_fullscreen_with_gesture_short),
+            gestureNavString = activity.getString(R.string.exit_fullscreen_with_gesture_short),
             backButtonString = context.getString(R.string.exit_fullscreen_with_back_button_short),
             GestureNavUtils,
         ).show()
 
-        // todo: engine view
-//        activity.enterImmersiveMode(
-//            setOnApplyWindowInsetsListener = { key: String, listener: OnApplyWindowInsetsListener ->
-//                binding.engineView.addWindowInsetsListener(key, listener)
-//            },
-//        )
+        activity.enterImmersiveMode(
+            setOnApplyWindowInsetsListener = { key: String, listener: OnApplyWindowInsetsListener ->
+                engineView.addWindowInsetsListener(key, listener)
+            },
+        )
 //        (view as? SwipeGestureLayout)?.isSwipeEnabled = false
-        expandBrowserView()
+        // todo:
+        //  expandBrowserView()
 
     } else {
-        // todo: engine view
-//        activity.exitImmersiveMode(
-//            unregisterOnApplyWindowInsetsListener = binding.engineView::removeWindowInsetsListener,
-//        )
+        disableFullscreen.invoke()
+
+        activity.exitImmersiveMode(
+            unregisterOnApplyWindowInsetsListener = engineView::removeWindowInsetsListener,
+        )
 
 //        (view as? SwipeGestureLayout)?.isSwipeEnabled = true
-        (context.getActivity() as? HomeActivity)?.let { homeActivity ->
+        (activity as? HomeActivity)?.let { homeActivity ->
             // ExternalAppBrowserActivity exclusively handles it's own theming unless in private mode.
             if (homeActivity !is ExternalAppBrowserActivity || homeActivity.browsingModeManager.mode.isPrivate) {
                 homeActivity.themeManager.applyStatusBarTheme(
@@ -3435,11 +3487,12 @@ internal fun fullScreenChanged(
                 )
             }
         }
-        collapseBrowserView()
+        // todo:
+        //  collapseBrowserView()
     }
 
     // todo: swipe refresh
-//    binding.swipeRefresh.isEnabled = shouldPullToRefreshBeEnabled(inFullScreen)
+//    binding.swipeRefresh.isEnabled = false // same as shouldPullToRefreshBeEnabled(inFullScreen)
 }
 
 @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
@@ -3705,7 +3758,7 @@ private fun navigateToSavedLoginsFragment(navController: NavController) {
 //        browserToolbarInteractor.onShareActionClicked()
 //    }
 //
-//    // todo: toolbar
+//    // todo: add share action to toolbar
 ////    browserToolbarView.view.addPageAction(sharePageAction)
 //}
 
@@ -3733,7 +3786,7 @@ private fun navigateToSavedLoginsFragment(navController: NavController) {
 ////            browserToolbarInteractor.onTranslationsButtonClicked()
 //        },
 //    )
-//    // todo: toolbar
+//    // todo: add translation action to toolbar
 ////    browserToolbarView.view.addPageAction(translationsAction)
 //
 //    // todo: translations
@@ -3762,7 +3815,6 @@ private fun navigateToSavedLoginsFragment(navController: NavController) {
 ////                safeInvalidateBrowserToolbarView()
 ////
 ////                if (!it.isTranslateProcessing) {
-//    // todo: snackbar dismiss
 ////                    context.components.appStore.dispatch(SnackbarAction.SnackbarDismissed)
 ////                }
 ////            },

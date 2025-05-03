@@ -6,9 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.grid.LazyGridItemScope
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -39,6 +37,20 @@ import mozilla.components.feature.tabs.TabsUseCases
 import mozilla.components.support.ktx.android.content.share
 
 internal val TOOLBAR_MENU_ICON_SIZE = 24.dp
+
+// current items:
+// - ShareToolbarMenuItem
+// - RequestDesktopSiteToolbarMenuItem
+// - FindInPageToolbarMenuItem
+// - SettingsToolbarMenuItem
+// - PrivateModeToolbarMenuItem
+// - ReaderViewToolbarMenuItem
+// - NavOptionsToolbarMenuItem
+// -
+// todo: items left to add
+//   - BookmarksToolbarMenuItem
+//   - HistoryToolbarMenuItem
+//   -
 
 internal class ToolbarMenuOptions {
     companion object {
@@ -76,7 +88,7 @@ internal class ToolbarMenuOptions {
         }
 
         @Composable
-        internal fun LazyGridItemScope.ShareToolbarMenuItem() {
+        internal fun ShareToolbarMenuItem() {
             val context = LocalContext.current
             val description = stringResource(R.string.share_header_2)
             ToolbarMenuOptionTemplate(
@@ -90,7 +102,7 @@ internal class ToolbarMenuOptions {
         }
 
         @Composable
-        internal fun LazyGridItemScope.RequestDesktopSiteToolbarMenuItem(desktopMode: Boolean) {
+        internal fun RequestDesktopSiteToolbarMenuItem(desktopMode: Boolean) {
             val useCases = sessionUseCases()
             val context = LocalContext.current
             val isDesktopSite =
@@ -114,7 +126,7 @@ internal class ToolbarMenuOptions {
         }
 
         @Composable
-        internal fun LazyGridItemScope.FindInPageToolbarMenuItem(
+        internal fun FindInPageToolbarMenuItem(
             onActivateFindInPage: () -> Unit, dismissMenuSheet: () -> Unit
         ) {
             ToolbarMenuOptionTemplate(
@@ -128,7 +140,7 @@ internal class ToolbarMenuOptions {
         }
 
         @Composable
-        internal fun LazyGridItemScope.SettingsToolbarMenuItem(onNavToSettings: () -> Unit) {
+        internal fun SettingsToolbarMenuItem(onNavToSettings: () -> Unit) {
             ToolbarMenuOptionTemplate(
                 iconPainter = painterResource(R.drawable.mozac_ic_settings_24),
                 description = stringResource(R.string.browser_menu_settings),
@@ -137,7 +149,7 @@ internal class ToolbarMenuOptions {
         }
 
         @Composable
-        internal fun LazyGridItemScope.PrivateModeToolbarMenuItem(
+        internal fun PrivateModeToolbarMenuItem(
             isPrivateMode: Boolean, dismissMenuSheet: () -> Unit
         ) {
             fun newTab(tabsUseCases: TabsUseCases, isPrivateSession: Boolean) {
@@ -201,7 +213,7 @@ internal class ToolbarMenuOptions {
         }
 
         @Composable
-        internal fun LazyGridItemScope.ReaderViewToolbarMenuItem(
+        internal fun ReaderViewToolbarMenuItem(
             enabled: Boolean, onActivateReaderView: () -> Unit, dismissMenuSheet: () -> Unit
         ) {
             ToolbarMenuOptionTemplate(
@@ -216,7 +228,7 @@ internal class ToolbarMenuOptions {
         }
 
         @Composable
-        internal fun LazyGridItemScope.NavOptionsToolbarMenuItem(loading: Boolean) {
+        internal fun NavOptionsToolbarMenuItem(loading: Boolean) {
             val tabSessionState = LocalContext.current.components.core.store.state.selectedTab
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,

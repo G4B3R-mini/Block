@@ -29,30 +29,39 @@ import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.compose.sessionUseCases
 import mozilla.components.support.ktx.android.content.createChooserExcludingCurrentApp
 
-// TODO: test implementations
-// todo: add options icons for
-//  - settings (settings icon)
-//  - find in page (search icon)
-//  - view desktop site toggle (desktop icon)
-//  - share (share icon)
-//  - private mode toggle (incog symbol) (incog with browser icon bottom right, reversed for switch back)
-//  - print page
-//  - scrolling screenshot
-//  - extensions (go to extensions page, installed)
-//  - reader view (if enabled for page)
-// todo:
-//   - add settings screen for options shown on toolbar, max 7, rearrangeable and selectable from list
-//   - add double up and down chevron icon for options tray
-//     - options tray is a sheet that pops up or down and shows all options available as icons,
-//     scrollable horizontal
-//   - make options in menu a grid
-
-
 internal val TOOLBAR_ICON_SIZE = 18.dp
 internal val TOOLBAR_ICON_PADDING = 12.dp
 internal val TOOLBAR_INDICATOR_ICON_SIZE = 16.dp
 internal val TOOLBAR_INDICATOR_ICON_PADDING = 4.dp
 internal val TOOLBAR_MENU_OPTION_HEIGHT = 40.dp
+
+// todo:
+//   - test implementations
+//   - add settings screen for options shown on toolbar, max 7, rearrangeable and selectable from list
+//   - add double up and down chevron icon for options tray
+//     - options tray is a sheet that pops up or down and shows all options available as icons,
+//     scrollable horizontal
+
+// current items:
+// - ToolbarBack
+// - ToolbarForward
+// - ToolbarReload
+// - ToolbarShare
+// - ToolbarShowTabsTray
+// - ToolbarMenuIcon
+// -
+// todo: left to add:
+//   - ToolbarHistory
+//   - ToolbarPrivateMode (incog/web symbol)
+//   - ToolbarFindInPage (search icon)
+//   - ToolbarDesktopSite (desktop icon)
+//   - ToolbarShare (share icon)
+//   - ToolbarSettings (settings icon)
+//   - ToolbarPrintPage (printer icon)
+//   - ToolbarScrollingScreenshot (scan icon)
+//   - ToolbarExtensions (extensions icon) - go to extensions page, installed
+//   - ToolbarReaderView (book icon, web icon, current is large, switch to small on bottom right)
+//   -
 
 internal class ToolbarOptions {
     companion object {
@@ -70,14 +79,6 @@ internal class ToolbarOptions {
                 trackColor = Color.Black
             )
         }
-        // TODO: add options icons for
-        //  - find in page (search icon)
-        //  - switch to desktop site (desktop icon)
-        //  - share (share icon)
-        //  - settings (settings icon)
-        //  - private mode (incog symbol)
-        //  - print page
-        //  - scrolling screenshot
 
         private const val DISABLED_ALPHA = 0.5F
 
