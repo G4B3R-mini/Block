@@ -119,10 +119,9 @@ fun BrowserTabBar(tabList: List<TabSessionState>, selectedTab: TabSessionState?)
         modifier = Modifier
             .fillMaxWidth()
             .height(ComponentDimens.TAB_BAR_HEIGHT)
-            .background(Color.Black)
-            .padding(top = 4.dp),
+            .background(Color.Black),
     ) {
-        Row(modifier = Modifier.fillMaxSize()) {
+        Row(modifier = Modifier.fillMaxSize().padding(top = 4.dp)) {
             // tabs
             Box(
                 modifier = Modifier
