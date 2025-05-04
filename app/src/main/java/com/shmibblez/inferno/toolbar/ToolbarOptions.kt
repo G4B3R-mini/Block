@@ -29,6 +29,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
@@ -50,6 +51,7 @@ import mozilla.components.support.ktx.android.content.share
 
 internal val TOOLBAR_ICON_SIZE = 18.dp
 internal val TOOLBAR_SWITCH_ICON_SIZE = 8.dp
+internal val TOOLBAR_SWITCH_ICON_EXTRA = 4.dp
 internal val TOOLBAR_ICON_PADDING = 12.dp
 internal val TOOLBAR_INDICATOR_ICON_SIZE = 16.dp
 internal val TOOLBAR_INDICATOR_ICON_PADDING = 4.dp
@@ -168,8 +170,9 @@ internal class MenuOnlyComponents {
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier
-                    .height(TOOLBAR_MENU_OPTION_HEIGHT)
-                    .fillMaxWidth(),
+//                    .height(TOOLBAR_MENU_OPTION_HEIGHT)
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 ToolbarBack(
@@ -200,7 +203,7 @@ internal class ToolbarOptions {
          */
         @Composable
         private fun ToolbarOptionTemplate(
-            icon: @Composable (modifier: Modifier, contentDescription: String, tint: Color) -> Unit,
+            icon: @Composable (modifier: Modifier, extraPadding: Dp, contentDescription: String, tint: Color) -> Unit,
             description: String,
             contentDescription: String = description,
             onClick: () -> Unit,
@@ -211,9 +214,10 @@ internal class ToolbarOptions {
                 ToolbarOptionType.ICON -> {
                     icon.invoke(
                         Modifier
-                            .size(TOOLBAR_ICON_SIZE)
+                            .size(TOOLBAR_ICON_SIZE + TOOLBAR_SWITCH_ICON_EXTRA)
                             .alpha(if (enabled) 1F else DISABLED_ALPHA)
                             .clickable(enabled = enabled, onClick = onClick),
+                        TOOLBAR_SWITCH_ICON_EXTRA / 2,
                         contentDescription,
                         Color.White,
                     )
@@ -226,12 +230,13 @@ internal class ToolbarOptions {
                             .alpha(if (enabled) 1F else DISABLED_ALPHA),
 //                    .padding(horizontal = 8.dp, vertical = 16.dp),
                         verticalArrangement = Arrangement.spacedBy(
-                            16.dp, Alignment.CenterVertically
+                            16.dp - TOOLBAR_SWITCH_ICON_EXTRA, Alignment.CenterVertically
                         ),
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         icon.invoke(
-                            Modifier.size(TOOLBAR_MENU_ICON_SIZE),
+                            Modifier.size(TOOLBAR_MENU_ICON_SIZE + TOOLBAR_SWITCH_ICON_EXTRA),
+                            TOOLBAR_SWITCH_ICON_EXTRA,
                             contentDescription,
                             Color.White,
                         )
@@ -308,7 +313,7 @@ internal class ToolbarOptions {
             onNavToSettings: () -> Unit,
         ) {
             ToolbarOptionTemplate(
-                iconPainter = painterResource(R.drawable.mozac_ic_settings_24),
+                iconPainter = painterResource(R.drawable.ic_settings_24),
                 description = stringResource(R.string.browser_menu_settings),
                 onClick = onNavToSettings,
                 type = type,
@@ -319,16 +324,19 @@ internal class ToolbarOptions {
         internal fun ToolbarOriginMini(
             type: ToolbarOptionType,
             onRequestSearchBar: () -> Unit,
-            ) {
+        ) {
             ToolbarOptionTemplate(
-                icon = { modifier, contentDescription, tint ->
+                icon = { modifier, extraPadding, contentDescription, tint ->
                     Box(
                         modifier = modifier,
                     ) {
                         // current mode, big icon
                         Icon(
-                            modifier = Modifier.align(Alignment.Center),
-                            painter = painterResource(id = R.drawable.mozac_ic_globe_24),
+                            modifier = Modifier
+                                .align(Alignment.Center)
+                                .fillMaxSize()
+                                .padding(extraPadding),
+                            painter = painterResource(id = R.drawable.ic_globe_24),
                             contentDescription = contentDescription,
                             tint = tint,
                         )
@@ -419,16 +427,19 @@ internal class ToolbarOptions {
                 context.components.core.store.state.selectedTab?.content?.desktopMode
                     ?: context.components.core.store.state.desktopMode
             ToolbarOptionTemplate(
-                icon = { modifier, contentDescription, tint ->
+                icon = { modifier, extraPadding, contentDescription, tint ->
                     Box(
                         modifier = modifier,
                     ) {
                         // current mode, big icon
                         Icon(
-                            modifier = Modifier.align(Alignment.Center),
+                            modifier = Modifier
+                                .align(Alignment.Center)
+                                .fillMaxSize()
+                                .padding(extraPadding),
                             painter = when (isDesktopSite) {
-                                true -> painterResource(id = R.drawable.mozac_ic_device_mobile_24)
-                                false -> painterResource(id = R.drawable.mozac_ic_device_desktop_24)
+                                true -> painterResource(id = R.drawable.ic_device_mobile_24)
+                                false -> painterResource(id = R.drawable.ic_device_desktop_24)
                             },
                             contentDescription = contentDescription,
                             tint = tint,
@@ -447,8 +458,8 @@ internal class ToolbarOptions {
                                 )
                                 .align(Alignment.BottomEnd),
                             painter = when (isDesktopSite) {
-                                true -> painterResource(id = R.drawable.mozac_ic_device_desktop_24)
-                                false -> painterResource(id = R.drawable.mozac_ic_device_mobile_24)
+                                true -> painterResource(id = R.drawable.ic_device_desktop_24)
+                                false -> painterResource(id = R.drawable.ic_device_mobile_24)
                             },
                             contentDescription = contentDescription,
                             tint = tint,
@@ -494,7 +505,7 @@ internal class ToolbarOptions {
             onActivateReaderView: () -> Unit,
         ) {
             ToolbarOptionTemplate(
-                iconPainter = painterResource(R.drawable.mozac_ic_reader_view_24),
+                iconPainter = painterResource(R.drawable.ic_reader_view_24),
                 description = stringResource(R.string.browser_menu_turn_on_reader_view),
                 onClick = {
                     onActivateReaderView.invoke()
@@ -555,16 +566,19 @@ internal class ToolbarOptions {
             }
 
             ToolbarOptionTemplate(
-                icon = { modifier, contentDescription, tint ->
+                icon = { modifier, extraPadding, contentDescription, tint ->
                     Box(
                         modifier = modifier,
                     ) {
                         // current mode, big icon
                         Icon(
-                            modifier = Modifier.align(Alignment.Center),
+                            modifier = Modifier
+                                .align(Alignment.Center)
+                                .fillMaxSize()
+                                .padding(extraPadding),
                             painter = when (isPrivateMode) {
                                 true -> painterResource(id = R.drawable.ic_private_browsing)
-                                false -> painterResource(id = R.drawable.mozac_ic_globe_24)
+                                false -> painterResource(id = R.drawable.ic_globe_24)
                             },
                             contentDescription = contentDescription,
                             tint = tint,
@@ -583,7 +597,7 @@ internal class ToolbarOptions {
                                 )
                                 .align(Alignment.BottomEnd),
                             painter = when (isPrivateMode) {
-                                true -> painterResource(id = R.drawable.mozac_ic_globe_24)
+                                true -> painterResource(id = R.drawable.ic_globe_24)
                                 false -> painterResource(id = R.drawable.ic_private_browsing)
                             },
                             contentDescription = contentDescription,
@@ -618,13 +632,16 @@ internal class ToolbarOptions {
             onNavToTabsTray: () -> Unit,
         ) {
             ToolbarOptionTemplate(
-                icon = { modifier, contentDescription, tint ->
+                icon = { modifier, extraPadding, contentDescription, tint ->
                     Box(
                         modifier = modifier.wrapContentHeight(unbounded = true),
                         contentAlignment = Alignment.Center,
                     ) {
                         Icon(
-                            modifier = Modifier.fillMaxSize(),
+                            modifier = Modifier
+                                .align(Alignment.Center)
+                                .fillMaxSize()
+                                .padding(extraPadding),
                             painter = painterResource(id = R.drawable.ic_tabcounter_box_24),
                             contentDescription = contentDescription,
                             tint = tint,

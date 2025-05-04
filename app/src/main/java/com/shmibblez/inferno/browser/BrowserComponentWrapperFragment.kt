@@ -7,7 +7,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.accessibility.AccessibilityManager
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -17,23 +16,18 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.shmibblez.inferno.R
-import com.shmibblez.inferno.browser.prompts.webPrompts.AndroidPhotoPicker
-import com.shmibblez.inferno.browser.prompts.webPrompts.FilePicker
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.lastOpenedNormalTab
 import com.shmibblez.inferno.ext.newTab
 import com.shmibblez.inferno.ext.requireComponents
 import com.shmibblez.inferno.nimbus.FxNimbus
-import com.shmibblez.inferno.tabbar.toTabList
 import com.shmibblez.inferno.tabs.tabstray.InfernoTabsTraySelectedTab
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -44,7 +38,6 @@ import mozilla.components.browser.state.selector.selectedTab
 import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.browser.state.state.recover.TabState
 import mozilla.components.browser.state.state.selectedOrDefaultSearchEngine
-import mozilla.components.concept.engine.prompt.PromptRequest
 import mozilla.components.lib.state.ext.flowScoped
 import mozilla.components.support.base.feature.ActivityResultHandler
 import mozilla.components.support.base.feature.UserInteractionHandler
@@ -119,6 +112,7 @@ class BrowserComponentWrapperFragment : Fragment(), UserInteractionHandler, Acti
 
     private var initialized = false
     private var preinitialized = false
+    // todo: test, before run also make changes to tab bar (tab layout)
     private var awaitingNewTab = false
 
     private val baseComposeView: ComposeView

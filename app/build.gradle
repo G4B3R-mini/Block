@@ -563,6 +563,7 @@ dependencies {
     implementation libs.androidx.paging.runtime.ktx
     implementation libs.androidx.biometric.ktx
     implementation libs.androidx.lifecycle.service
+    implementation libs.androidx.animation.graphics.android
 
     testImplementation libs.androidx.paging.common
 

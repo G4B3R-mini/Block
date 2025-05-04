@@ -24,6 +24,7 @@ import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarPrivateMode
 import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarRequestReaderView
 import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarBack
 import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarForward
+import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarOriginMini
 import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarReload
 import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarRequestDesktopSite
 import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarSettings
@@ -40,6 +41,7 @@ fun ToolbarMenuBottomSheet(
     onDismissMenuBottomSheet: () -> Unit,
     onActivateFindInPage: () -> Unit,
     onActivateReaderView: () -> Unit,
+    onRequestSearchBar: () -> Unit,
     onNavToSettings: () -> Unit,
     onNavToTabsTray: () -> Unit,
 ) {
@@ -123,6 +125,12 @@ fun ToolbarMenuBottomSheet(
                 )
             },
             {
+                ToolbarOriginMini(
+                    type = ToolbarOptionType.EXPANDED,
+                    onRequestSearchBar = onRequestSearchBar,
+                )
+            },
+            {
                 ToolbarSettings(
                     type = ToolbarOptionType.EXPANDED,
                     onNavToSettings = onNavToSettings,
@@ -132,9 +140,9 @@ fun ToolbarMenuBottomSheet(
         LazyVerticalGrid(
             columns = GridCells.Adaptive(minSize = 72.dp),
 //            modifier = Modifier.padding(horizontal = 16.dp), doable?
-            contentPadding = PaddingValues(start = 16.dp, bottom = 16.dp, end = 16.dp),
+            contentPadding = PaddingValues(start = 16.dp, bottom = 16.dp, end = 16.dp, top = 16.dp),
             verticalArrangement = Arrangement.spacedBy(
-                16.dp,
+                24.dp,
                 alignment = Alignment.CenterVertically
             ),
             horizontalArrangement = Arrangement.spacedBy(

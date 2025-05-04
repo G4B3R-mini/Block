@@ -66,6 +66,7 @@ import com.shmibblez.inferno.compose.HorizontalFadingEdgeBox
 import com.shmibblez.inferno.compose.SwipeToDismissBox
 import com.shmibblez.inferno.compose.SwipeToDismissState
 import com.shmibblez.inferno.compose.TabThumbnail
+import com.shmibblez.inferno.compose.rememberSwipeToDismissState
 import com.shmibblez.inferno.tabstray.TabsTrayTestTag
 import com.shmibblez.inferno.tabstray.ext.toDisplayTitle
 import com.shmibblez.inferno.theme.FirefoxTheme
@@ -98,7 +99,7 @@ fun TabGridItem(
     multiSelectionEnabled: Boolean = false,
     multiSelectionSelected: Boolean = false,
     shouldClickListen: Boolean = true,
-    swipeState: SwipeToDismissState = SwipeToDismissState(
+    swipeState: SwipeToDismissState = rememberSwipeToDismissState(
         density = LocalDensity.current,
         decayAnimationSpec = rememberSplineBasedDecay(),
     ),

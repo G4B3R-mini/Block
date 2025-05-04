@@ -132,8 +132,9 @@ class InfernoReaderViewFeatureState internal constructor(
 
     /**
      * Shows the reader view UI.
+     * @return whether operation success
      */
-    fun showReaderView(session: TabSessionState? = store.state.selectedTab) {
+    fun showReaderView(session: TabSessionState? = store.state.selectedTab): Boolean {
         session?.let {
             if (!it.readerState.active) {
                 val id = createUUID()
@@ -151,8 +152,10 @@ class InfernoReaderViewFeatureState internal constructor(
 
                 store.dispatch(EngineAction.LoadUrlAction(it.id, readerUrl))
                 store.dispatch(ReaderAction.UpdateReaderActiveAction(it.id, true))
+                return true
             }
         }
+        return false
     }
 
     /**

@@ -33,7 +33,7 @@ internal class InfernoReaderViewConfig(
 
     var colorScheme by run {
         val state = mutableStateOf(InfernoReaderViewFeatureState.ColorScheme.DARK)
-        object: MutableState<InfernoReaderViewFeatureState.ColorScheme> by state {
+        object : MutableState<InfernoReaderViewFeatureState.ColorScheme> by state {
             override var value: InfernoReaderViewFeatureState.ColorScheme
                 get() = run {
                     if (colorSchemeCache == null) {
@@ -62,11 +62,13 @@ internal class InfernoReaderViewConfig(
 
     var fontType by run {
         val state = mutableStateOf(InfernoReaderViewFeatureState.FontType.SERIF)
-        object: MutableState<InfernoReaderViewFeatureState.FontType> by state {
+        object : MutableState<InfernoReaderViewFeatureState.FontType> by state {
             override var value: InfernoReaderViewFeatureState.FontType
                 get() = run {
                     if (fontTypeCache == null) {
-                        fontTypeCache = getEnumFromPrefs(FONT_TYPE_KEY, InfernoReaderViewFeatureState.FontType.SERIF)
+                        fontTypeCache = getEnumFromPrefs(
+                            FONT_TYPE_KEY, InfernoReaderViewFeatureState.FontType.SERIF
+                        )
                     }
                     state.value = fontTypeCache!!
                     return state.value
@@ -84,7 +86,7 @@ internal class InfernoReaderViewConfig(
 
     var fontSize by run {
         val state = mutableIntStateOf(FONT_SIZE_DEFAULT)
-        object: MutableState<Int> by state {
+        object : MutableState<Int> by state {
             override var value: Int
                 get() = run {
                     if (fontSizeCache == null) {

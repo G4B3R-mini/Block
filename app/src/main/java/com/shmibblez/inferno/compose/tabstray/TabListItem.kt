@@ -54,6 +54,7 @@ import com.shmibblez.inferno.compose.DismissibleItemBackground
 import com.shmibblez.inferno.compose.SwipeToDismissBox
 import com.shmibblez.inferno.compose.SwipeToDismissState
 import com.shmibblez.inferno.compose.TabThumbnail
+import com.shmibblez.inferno.compose.rememberSwipeToDismissState
 import com.shmibblez.inferno.ext.toShortUrl
 import com.shmibblez.inferno.tabstray.TabsTrayTestTag
 import com.shmibblez.inferno.tabstray.ext.toDisplayTitle
@@ -93,11 +94,11 @@ fun TabListItem(
     onClick: (tab: TabSessionState) -> Unit,
     onLongClick: ((tab: TabSessionState) -> Unit)? = null,
 ) {
-    val contentBackgroundColor = if (isSelected) {
-        FirefoxTheme.colors.layerAccentNonOpaque
-    } else {
-        FirefoxTheme.colors.layer1
-    }
+//    val contentBackgroundColor = if (isSelected) {
+//        FirefoxTheme.colors.layerAccentNonOpaque
+//    } else {
+//        FirefoxTheme.colors.layer1
+//    }
 
     // Used to propagate the ripple effect to the whole tab
     val interactionSource = remember { MutableInteractionSource() }
@@ -126,13 +127,13 @@ fun TabListItem(
     val decayAnimationSpec: DecayAnimationSpec<Float> = rememberSplineBasedDecay()
 
     val density = LocalDensity.current
-    val swipeState = remember(multiSelectionEnabled, swipingEnabled) {
-        SwipeToDismissState(
-            density = density,
-            enabled = !multiSelectionEnabled && swipingEnabled,
-            decayAnimationSpec = decayAnimationSpec,
-        )
-    }
+    val swipeState = rememberSwipeToDismissState(
+        key1 = multiSelectionEnabled,
+        key2 = swipingEnabled,
+        density = density,
+        enabled = !multiSelectionEnabled && swipingEnabled,
+        decayAnimationSpec = decayAnimationSpec,
+    )
 
     SwipeToDismissBox(
         state = swipeState,
@@ -252,7 +253,7 @@ private fun Thumbnail(
                     .size(size = 40.dp)
                     .align(alignment = Alignment.Center),
                 shape = CircleShape,
-                colors = CardDefaults.cardColors(containerColor =FirefoxTheme.colors.layerAccent ),
+                colors = CardDefaults.cardColors(containerColor = FirefoxTheme.colors.layerAccent),
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.mozac_ic_checkmark_24),

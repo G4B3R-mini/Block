@@ -2,15 +2,13 @@ package com.shmibblez.inferno.ext
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.res.Resources
 import androidx.annotation.MainThread
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
-import androidx.fragment.app.Fragment
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.shmibblez.inferno.browser.getActivity
 import kotlinx.coroutines.CoroutineScope
@@ -23,15 +21,11 @@ import mozilla.components.lib.state.Action
 import mozilla.components.lib.state.State
 import mozilla.components.lib.state.Store
 import mozilla.components.lib.state.ext.channel
-import mozilla.components.lib.state.ext.consumeFlow
 import mozilla.components.lib.state.ext.flow
-import mozilla.components.support.ktx.android.view.toScope
 
-@Composable
-fun Dp.dpToPx() = with(LocalDensity.current) { this@dpToPx.toPx() }
+fun Int.pxToDp() = (this@pxToDp / Resources.getSystem().displayMetrics.density).dp
 
-@Composable
-fun Int.pxToDp() = with(LocalDensity.current) { this@pxToDp.toDp() }
+fun Dp.dpToPx() = (this.value * Resources.getSystem().displayMetrics.density).toInt()
 
 @SuppressLint("ComposableNaming")
 @OptIn(ExperimentalCoroutinesApi::class)

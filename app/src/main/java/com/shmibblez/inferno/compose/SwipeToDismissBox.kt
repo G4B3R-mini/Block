@@ -9,8 +9,10 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.AnchoredDraggableDefaults
 import androidx.compose.foundation.gestures.AnchoredDraggableState
 import androidx.compose.foundation.gestures.DraggableAnchors
+import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.anchoredDraggable
 import androidx.compose.foundation.layout.Arrangement
@@ -90,6 +92,40 @@ private val VELOCITY_THRESHOLD_DP = 150.dp
  */
 private const val SWIPE_ANIMATION_DURATION_MS = 230
 
+@Composable
+fun rememberSwipeToDismissState(
+    key1: Any? = null,
+    key2: Any? = null,
+    enabled: Boolean = true,
+    density: Density = LocalDensity.current,
+    decayAnimationSpec: DecayAnimationSpec<Float> = rememberSplineBasedDecay(),
+    anchors: List<SwipeToDismissAnchor> = SwipeToDismissAnchor.swipeBothDirectionsAnchors(),
+):SwipeToDismissState {
+    val swipeWidth = with(LocalDensity.current) {
+        LocalConfiguration.current.screenWidthDp.dp.toPx()
+    }
+    val draggableAnchors = DraggableAnchors {
+        anchors.forEach { anchor ->
+            val anchorPosition = when (anchor) {
+                SwipeToDismissAnchor.Start -> -swipeWidth
+                SwipeToDismissAnchor.Default -> 0f
+                SwipeToDismissAnchor.End -> swipeWidth
+            }
+            anchor at anchorPosition
+        }
+    }
+    val state = remember(key1, key2) {
+        SwipeToDismissState(
+            enabled = enabled,
+            density = density,
+            decayAnimationSpec = decayAnimationSpec,
+            draggableAnchors = draggableAnchors,
+        )
+    }
+
+    return state
+}
+
 /**
  * The UI state for [SwipeToDismissBox].
  *
@@ -99,20 +135,15 @@ private const val SWIPE_ANIMATION_DURATION_MS = 230
  * @property anchors A list of [SwipeToDismissAnchor] which establish the swipe directions of [SwipeToDismissBox].
  * @property enabled Whether the swipe gesture is active.
  */
-@OptIn(ExperimentalFoundationApi::class)
 class SwipeToDismissState(
     density: Density,
     decayAnimationSpec: DecayAnimationSpec<Float>,
+    val draggableAnchors: DraggableAnchors<SwipeToDismissAnchor>,
     val anchoredDraggableState: AnchoredDraggableState<SwipeToDismissAnchor> = AnchoredDraggableState(
         initialValue = SwipeToDismissAnchor.Default,
-        positionalThreshold = { distance: Float -> distance * DISMISS_THRESHOLD },
-        velocityThreshold = { with(density) { VELOCITY_THRESHOLD_DP.toPx() } },
-        snapAnimationSpec = tween(
-            durationMillis = SWIPE_ANIMATION_DURATION_MS,
-        ),
-        decayAnimationSpec = decayAnimationSpec,
+        anchors = draggableAnchors,
     ),
-    val anchors: List<SwipeToDismissAnchor> = SwipeToDismissAnchor.swipeBothDirectionsAnchors(),
+    private val anchors: List<SwipeToDismissAnchor> = SwipeToDismissAnchor.swipeBothDirectionsAnchors(),
     val enabled: Boolean = true,
 ) {
 
@@ -166,27 +197,12 @@ class SwipeToDismissState(
 @Composable
 fun SwipeToDismissBox(
     modifier: Modifier = Modifier,
-    state: SwipeToDismissState = SwipeToDismissState(
-        density = LocalDensity.current,
-        decayAnimationSpec = rememberSplineBasedDecay(),
-    ),
+    state: SwipeToDismissState,
     onItemDismiss: () -> Unit,
     backgroundContent: @Composable BoxScope.() -> Unit,
     dismissContent: @Composable BoxScope.() -> Unit,
 ) {
-    val swipeWidth = with(LocalDensity.current) {
-        LocalConfiguration.current.screenWidthDp.dp.toPx()
-    }
-    val draggableAnchors = DraggableAnchors {
-        state.anchors.forEach { anchor ->
-            val anchorPosition = when (anchor) {
-                SwipeToDismissAnchor.Start -> -swipeWidth
-                SwipeToDismissAnchor.Default -> 0f
-                SwipeToDismissAnchor.End -> swipeWidth
-            }
-            anchor at anchorPosition
-        }
-    }
+    val draggableAnchors = state.draggableAnchors
 
     SideEffect {
         state.anchoredDraggableState.updateAnchors(draggableAnchors)
@@ -199,6 +215,8 @@ fun SwipeToDismissBox(
         }
     }
 
+
+
     Box(
         modifier = Modifier
             .anchoredDraggable(
@@ -206,6 +224,16 @@ fun SwipeToDismissBox(
                 orientation = Orientation.Horizontal,
                 enabled = state.enabled,
                 reverseDirection = LocalLayoutDirection.current == LayoutDirection.Rtl,
+                flingBehavior = AnchoredDraggableDefaults.flingBehavior(
+                    state = state.anchoredDraggableState,
+                    positionalThreshold = { distance: Float -> distance * DISMISS_THRESHOLD },
+                    animationSpec = tween(
+                        durationMillis = SWIPE_ANIMATION_DURATION_MS,
+                    ),
+                ),
+                // todo:
+//                velocityThreshold = { with(density) { VELOCITY_THRESHOLD_DP.toPx() } },
+//                decayAnimationSpec = decayAnimationSpec, // property depracated
             )
             .then(modifier),
     ) {
@@ -281,7 +309,6 @@ private fun SwipeToDismissBoxPreview() {
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun SwipeableItem(
     text: String,
@@ -292,13 +319,10 @@ private fun SwipeableItem(
     val density = LocalDensity.current
     val decayAnimationSpec: DecayAnimationSpec<Float> = rememberSplineBasedDecay()
 
-    val swipeState = remember {
-        SwipeToDismissState(
+    val swipeState = rememberSwipeToDismissState(
             density = density,
-            anchors = anchors,
             decayAnimationSpec = decayAnimationSpec,
         )
-    }
 
     Box(
         modifier = Modifier

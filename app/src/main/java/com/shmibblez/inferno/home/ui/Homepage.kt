@@ -91,105 +91,104 @@ internal fun Homepage(
             .verticalScroll(rememberScrollState()),
     ) {
         Spacer(modifier = Modifier.height(16.dp))
-        with(state) {
-            when (isPrivate) {
-                true -> {
-                    val feltPrivateBrowsingEnabled =
-                        if (state is HomepageState.Private) state.feltPrivateBrowsingEnabled else false
-                    if (feltPrivateBrowsingEnabled) {
-                        FeltPrivacyModeInfoCard(
-                            onLearnMoreClick = interactor::onLearnMoreClicked,
-                        )
-                    } else {
-                        PrivateBrowsingDescription(
-                            onLearnMoreClick = interactor::onLearnMoreClicked,
+        when (isPrivate) {
+            true -> {
+                val feltPrivateBrowsingEnabled =
+                    if (state is HomepageState.Private) state.feltPrivateBrowsingEnabled else false
+                if (feltPrivateBrowsingEnabled) {
+                    FeltPrivacyModeInfoCard(
+                        onLearnMoreClick = interactor::onLearnMoreClicked,
+                    )
+                } else {
+                    PrivateBrowsingDescription(
+                        onLearnMoreClick = interactor::onLearnMoreClicked,
+                    )
+                }
+            }
+
+            false -> {
+                val appState = LocalContext.current.components.appStore.state
+                val settings = LocalContext.current.settings()
+                val topSites = appState.topSites
+                val showTopSites = settings.showTopSitesFeature && topSites.isNotEmpty()
+                if (state is HomepageState.Normal) state.showRecentTabs else false
+                val recentTabs = appState.recentTabs
+                val showRecentTabs = appState.shouldShowRecentTabs(settings)
+                val cardBackgroundColor = Color.Black // wallpaperState.cardBackgroundColor,
+                val syncedTab = when (appState.recentSyncedTabState) {
+                    RecentSyncedTabState.None,
+                    RecentSyncedTabState.Loading,
+                        -> null
+
+                    is RecentSyncedTabState.Success -> appState.recentSyncedTabState.tabs.firstOrNull()
+                }
+                val showRecentSyncedTab = appState.shouldShowRecentSyncedTabs()
+
+                val buttonBackgroundColor = appState.wallpaperState.buttonBackgroundColor
+                val buttonTextColor = appState.wallpaperState.buttonTextColor
+                val bookmarks = appState.bookmarks
+                val showBookmarks = settings.showBookmarksHomeFeature && bookmarks.isNotEmpty()
+                val recentlyVisited = appState.recentHistory
+                val showRecentlyVisited =
+                    settings.historyMetadataUIFeature && recentlyVisited.isNotEmpty()
+                val collectionsState = CollectionsState.build(
+                    appState = appState,
+                    browserState = components.core.store.state,
+                    isPrivate = false,
+                )
+                val showCustomizeHome =
+                    showTopSites || showRecentTabs || showBookmarks || showRecentlyVisited // || showPocketStories
+
+                if (showTopSites) {
+                    TopSites(
+                        topSites = topSites,
+                        topSiteColors = TopSiteColors.colors(),
+                        interactor = interactor,
+                        onTopSitesItemBound = onTopSitesItemBound,
+                    )
+                }
+
+                if (showRecentTabs) {
+                    RecentTabsSection(
+                        interactor = interactor,
+//                            cardBackgroundColor = cardBackgroundColor,
+                        recentTabs = recentTabs,
+                    )
+
+                    if (showRecentSyncedTab) {
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        RecentSyncedTab(
+                            tab = syncedTab,
+                            backgroundColor = cardBackgroundColor,
+                            buttonBackgroundColor = buttonBackgroundColor,
+                            buttonTextColor = buttonTextColor,
+                            onRecentSyncedTabClick = interactor::onRecentSyncedTabClicked,
+                            onSeeAllSyncedTabsButtonClick = interactor::onSyncedTabShowAllClicked,
+                            onRemoveSyncedTab = interactor::onRemovedRecentSyncedTab,
                         )
                     }
                 }
 
-                false -> {
-                    val appState = LocalContext.current.components.appStore.state
-                    val settings = LocalContext.current.settings()
-                    val topSites = appState.topSites
-                    val showTopSites = settings.showTopSitesFeature && topSites.isNotEmpty()
-                    if (state is HomepageState.Normal) state.showRecentTabs else false
-                    val recentTabs = appState.recentTabs
-                    val showRecentTabs = appState.shouldShowRecentTabs(settings)
-                    val cardBackgroundColor = Color.Black // wallpaperState.cardBackgroundColor,
-                    val syncedTab = when (appState.recentSyncedTabState) {
-                        RecentSyncedTabState.None,
-                        RecentSyncedTabState.Loading,
-                            -> null
-
-                        is RecentSyncedTabState.Success -> appState.recentSyncedTabState.tabs.firstOrNull()
-                    }
-                    val showRecentSyncedTab = appState.shouldShowRecentSyncedTabs()
-
-                    val buttonBackgroundColor = appState.wallpaperState.buttonBackgroundColor
-                    val buttonTextColor = appState.wallpaperState.buttonTextColor
-                    val bookmarks = appState.bookmarks
-                    val showBookmarks = settings.showBookmarksHomeFeature && bookmarks.isNotEmpty()
-                    val recentlyVisited = appState.recentHistory
-                    val showRecentlyVisited =
-                        settings.historyMetadataUIFeature && recentlyVisited.isNotEmpty()
-                    val collectionsState = CollectionsState.build(
-                        appState = appState,
-                        browserState = components.core.store.state,
-                        isPrivate = false,
+                if (showBookmarks) {
+                    BookmarksSection(
+                        bookmarks = bookmarks,
+                        cardBackgroundColor = cardBackgroundColor,
+                        interactor = interactor,
                     )
-                    val showCustomizeHome =
-                        showTopSites || showRecentTabs || showBookmarks || showRecentlyVisited // || showPocketStories
+                }
 
-                    if (showTopSites) {
-                        TopSites(
-                            topSites = topSites,
-                            topSiteColors = TopSiteColors.colors(),
-                            interactor = interactor,
-                            onTopSitesItemBound = onTopSitesItemBound,
-                        )
-                    }
-
-                    if (showRecentTabs) {
-                        RecentTabsSection(
-                            interactor = interactor,
-                            cardBackgroundColor = cardBackgroundColor,
-                            recentTabs = recentTabs,
-                        )
-
-                        if (showRecentSyncedTab) {
-                            Spacer(modifier = Modifier.height(8.dp))
-
-                            RecentSyncedTab(
-                                tab = syncedTab,
-                                backgroundColor = cardBackgroundColor,
-                                buttonBackgroundColor = buttonBackgroundColor,
-                                buttonTextColor = buttonTextColor,
-                                onRecentSyncedTabClick = interactor::onRecentSyncedTabClicked,
-                                onSeeAllSyncedTabsButtonClick = interactor::onSyncedTabShowAllClicked,
-                                onRemoveSyncedTab = interactor::onRemovedRecentSyncedTab,
-                            )
-                        }
-                    }
-
-                    if (showBookmarks) {
-                        BookmarksSection(
-                            bookmarks = bookmarks,
-                            cardBackgroundColor = cardBackgroundColor,
-                            interactor = interactor,
-                        )
-                    }
-
-                    if (showRecentlyVisited) {
-                        RecentlyVisitedSection(
-                            recentVisits = recentlyVisited,
-                            cardBackgroundColor = cardBackgroundColor,
-                            interactor = interactor,
-                        )
-                    }
-
-                    CollectionsSection(
-                        collectionsState = collectionsState, interactor = interactor
+                if (showRecentlyVisited) {
+                    RecentlyVisitedSection(
+                        recentVisits = recentlyVisited,
+                        cardBackgroundColor = cardBackgroundColor,
+                        interactor = interactor,
                     )
+                }
+
+                CollectionsSection(
+                    collectionsState = collectionsState, interactor = interactor
+                )
 
 //                    if (showPocketStories) {
 //                        PocketSection(
@@ -199,16 +198,15 @@ internal fun Homepage(
 //                        )
 //                    }
 
-                    if (showCustomizeHome) {
-                        CustomizeHomeButton(
-                            buttonBackgroundColor = buttonBackgroundColor,
-                            interactor = interactor,
-                        )
-                    }
-
-                    // This is a temporary value until I can fix layout issues
-                    Spacer(Modifier.height(100.dp))
+                if (showCustomizeHome) {
+                    CustomizeHomeButton(
+                        buttonBackgroundColor = buttonBackgroundColor,
+                        interactor = interactor,
+                    )
                 }
+
+                // This is a temporary value until I can fix layout issues
+                Spacer(Modifier.height(100.dp))
             }
         }
     }
@@ -217,7 +215,6 @@ internal fun Homepage(
 @Composable
 private fun RecentTabsSection(
     interactor: RecentTabInteractor,
-    cardBackgroundColor: Color,
     recentTabs: List<RecentTab>,
 ) {
 //    Spacer(modifier = Modifier.height(ITEM_PADDING))
@@ -353,7 +350,11 @@ private fun CollectionsSection(
 
         CollectionsState.Gone -> {} // no-op. Nothing is shown where there are no collections.
         is CollectionsState.Placeholder -> {
-            CollectionsPlaceholder(collectionsState.showSaveTabsToCollection, interactor)
+            Column {
+                Spacer(Modifier.height(ITEM_PADDING))
+
+                CollectionsPlaceholder(collectionsState.showSaveTabsToCollection, interactor)
+            }
         }
     }
 }

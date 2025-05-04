@@ -41,6 +41,7 @@ import mozilla.components.browser.state.state.TabSessionState
 import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.annotation.LightDarkPreview
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.SwipeToDismissState
+import com.shmibblez.inferno.compose.rememberSwipeToDismissState
 import com.shmibblez.inferno.compose.tabstray.TabGridItem
 import com.shmibblez.inferno.compose.tabstray.TabListItem
 import com.shmibblez.inferno.tabstray.browser.compose.DragItemContainer
@@ -103,7 +104,7 @@ fun TabLayout(
     }
 
     if (displayTabsInGrid) {
-        Log.d("TabLayout" , "showing tabs in grid")
+        Log.d("TabLayout", "showing tabs in grid")
         TabGrid(
             tabs = tabs,
             selectedTabId = selectedTabId,
@@ -119,7 +120,7 @@ fun TabLayout(
             header = header,
         )
     } else {
-        Log.d("TabLayout" , "showing tabs in list")
+        Log.d("TabLayout", "showing tabs in list")
         TabList(
             tabs = tabs,
             selectedTabId = selectedTabId,
@@ -209,13 +210,14 @@ private fun TabGrid(
         ) { index, tab ->
             val decayAnimationSpec: DecayAnimationSpec<Float> = rememberSplineBasedDecay()
             val density = LocalDensity.current
-            val swipeState = remember(isInMultiSelectMode, !state.isScrollInProgress) {
-                SwipeToDismissState(
-                    density = density,
-                    enabled = !isInMultiSelectMode && !state.isScrollInProgress,
-                    decayAnimationSpec = decayAnimationSpec,
-                )
-            }
+            val swipeState = rememberSwipeToDismissState(
+                key1 = isInMultiSelectMode,
+                key2 = !state.isScrollInProgress,
+                density = density,
+                enabled = !isInMultiSelectMode && !state.isScrollInProgress,
+                decayAnimationSpec = decayAnimationSpec,
+            )
+
             val swipingActive by remember(swipeState.swipingActive) {
                 derivedStateOf {
                     swipeState.swipingActive
@@ -317,7 +319,7 @@ private fun TabList(
             items = tabs,
             key = { _, tab -> tab.id },
         ) { index, tab ->
-            Log.d("TabList","rendering tab, index: $index")
+            Log.d("TabList", "rendering tab, index: $index")
             DragItemContainer(
                 state = reorderState,
                 position = index + if (header != null) 1 else 0,

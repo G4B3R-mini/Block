@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -31,6 +32,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -62,8 +64,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.ComponentDimens
-import com.shmibblez.inferno.browser.toPx
 import com.shmibblez.inferno.ext.components
+import com.shmibblez.inferno.ext.dpToPx
 import mozilla.components.browser.state.search.SearchEngine
 import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.browser.state.state.searchEngines
@@ -76,12 +78,12 @@ import com.shmibblez.inferno.toolbar.ToolbarOnlyComponents.Companion.ToolbarSepa
 
 // start padding + (width - vertical padding since 1:1 aspect ratio) + expand icon start padding + expand icon size + expand icon end padding
 private val TOOLBAR_SEARCH_ENGINE_SELECTOR_WIDTH =
-    4.dp + (ComponentDimens.TOOLBAR_HEIGHT - 16.dp - 8.dp - 4.dp) + (4.dp + 6.dp + 4.dp) + 4.dp
-private val TOOLBAR_SEARCH_ENGINE_SELECTOR_WIDTH_PX = TOOLBAR_SEARCH_ENGINE_SELECTOR_WIDTH.toPx()
+    4.dp + (ComponentDimens.TOOLBAR_HEIGHT - 16.dp - 4.dp) + (4.dp + 6.dp + 4.dp) + 4.dp
+private val TOOLBAR_SEARCH_ENGINE_SELECTOR_WIDTH_PX = TOOLBAR_SEARCH_ENGINE_SELECTOR_WIDTH.dpToPx()
 
 // start padding + indicator icon size + end padding
 private val TOOLBAR_ACTION_WIDTH = 4.dp + TOOLBAR_INDICATOR_ICON_SIZE + 8.dp
-private val TOOLBAR_ACTION_WIDTH_PX = TOOLBAR_ACTION_WIDTH.toPx()
+private val TOOLBAR_ACTION_WIDTH_PX = TOOLBAR_ACTION_WIDTH.dpToPx()
 
 //
 private fun toolbarIndicatorWidth(siteTrackingProtection: SiteTrackingProtection): Dp {
@@ -89,17 +91,31 @@ private fun toolbarIndicatorWidth(siteTrackingProtection: SiteTrackingProtection
 }
 
 private fun toolbarIndicatorWidthPx(siteTrackingProtection: SiteTrackingProtection): Int {
-    return toolbarIndicatorWidth(siteTrackingProtection).toPx()
+    return toolbarIndicatorWidth(siteTrackingProtection).dpToPx()
 }
 
+/**
+ * @param tabSessionState
+ * @param searchEngine
+ * @param siteSecure
+ * @param siteTrackingProtection
+ * @param setAwesomeSearchText callback used to set AwesomeBar in parent search text
+ * @param setOnAutocomplete callback used to set callback to set autocomplete text from parent
+ * @param originModifier
+ * @param indicatorModifier
+ * @param editMode whether in edit mode
+ * @param onStartSearch
+ * @param onStopSearch
+ * @param animationValue
+ */
 @Composable
 fun ToolbarOrigin(
     tabSessionState: TabSessionState,
     searchEngine: SearchEngine,
     siteSecure: SiteSecurity,
     siteTrackingProtection: SiteTrackingProtection,
-    searchText: TextFieldValue,
-    setSearchText: (TextFieldValue) -> Unit,
+    setAwesomeSearchText: (String) -> Unit,
+    setOnAutocomplete: ((TextFieldValue) -> Unit) -> Unit,
     originModifier: Modifier = Modifier,
     indicatorModifier: Modifier = Modifier,
     editMode: Boolean,
@@ -115,6 +131,20 @@ fun ToolbarOrigin(
                     tabSessionState.content.searchTerms.length
                 )
             )
+        }
+    }
+
+    var searchText by remember {
+        run {
+            val state = mutableStateOf(TextFieldValue(tabSessionState.content.url))
+            object : MutableState<TextFieldValue> by state {
+                override var value
+                    get() = state.value
+                    set(value) {
+                        state.value = value
+                        setAwesomeSearchText(value.text)
+                    }
+            }
         }
     }
 
@@ -138,17 +168,18 @@ fun ToolbarOrigin(
 
     LaunchedEffect(editMode, tabSessionState.content.url, tabSessionState.content.searchTerms) {
         if (editMode) {
-            setSearchText(parseInput())
+            searchText = parseInput()
+            setOnAutocomplete.invoke { searchText = it }
         } else {
             focusManager.clearFocus(force = true)
-            setSearchText(TextFieldValue(tabSessionState.content.url))
+            searchText = TextFieldValue(tabSessionState.content.url)
         }
     }
 
     Box(
         modifier = originModifier
             .fillMaxSize()
-            .padding(vertical = 8.dp, horizontal = 8.dp * (1F - animationValue))
+            .padding(vertical = 4.dp, horizontal = 8.dp * (1F - animationValue))
             .clip(MaterialTheme.shapes.small)
             .background(Color.DarkGray),
     ) {
@@ -172,7 +203,7 @@ fun ToolbarOrigin(
                     value = searchText,
                     onValueChange = { v ->
                         // move cursor to end
-                        setSearchText(v)
+                        searchText = v
                         undoClearText = null
                     },
                     modifier = Modifier
@@ -244,19 +275,22 @@ fun ToolbarOrigin(
                     ),
                 )
             }
-            // end gradient
-            Box(
-                modifier = Modifier
-                    .align(Alignment.CenterEnd)
-                    .aspectRatio(1F)
-                    .background(
-                        brush = Brush.horizontalGradient(
-                            colors = listOf(
-                                Color.Transparent, Color.DarkGray
-                            )
-                        )
-                    )
-            )
+            // end gradient, only show if not editing
+            if (!editMode) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .aspectRatio(1F)
+                        .fillMaxHeight()
+                        .background(
+                            brush = Brush.horizontalGradient(
+                                colors = listOf(
+                                    Color.Transparent, Color.DarkGray
+                                ),
+                            ),
+                        ),
+                )
+            }
         }
 
         // search engine selector
@@ -264,7 +298,8 @@ fun ToolbarOrigin(
             currentSearchEngine = searchEngine,
             modifier = Modifier
                 .padding(start = 4.dp)
-                .height(ComponentDimens.TOOLBAR_HEIGHT - 16.dp - 8.dp)
+                // toolbar height - other padding
+                .height(ComponentDimens.TOOLBAR_HEIGHT - 16.dp)
                 .align(Alignment.CenterStart)
                 .offset {
                     IntOffset(
@@ -311,7 +346,7 @@ fun ToolbarOrigin(
             if (editMode && undoClearText != null) {
                 ToolbarUndoClearText(
                     onClick = {
-                        setSearchText(undoClearText!!)
+                        searchText = undoClearText!!
                         undoClearText = null
                     }, modifier = Modifier.align(Alignment.CenterEnd)
                 )
@@ -319,7 +354,7 @@ fun ToolbarOrigin(
                 ToolbarClearText(
                     onClick = {
                         undoClearText = searchText
-                        setSearchText(TextFieldValue(""))
+                        searchText = TextFieldValue("")
                     }, modifier = Modifier.align(Alignment.CenterEnd)
                 )
             }
@@ -487,7 +522,7 @@ private fun ToolbarUndoClearText(onClick: () -> Unit, modifier: Modifier) {
 
 @Composable
 private fun ToolbarSearchEngineSelectorPopupMenu(
-    searchEngines: List<SearchEngine>, showPopupMenu: Boolean, setShowPopupMenu: (Boolean) -> Unit
+    searchEngines: List<SearchEngine>, showPopupMenu: Boolean, setShowPopupMenu: (Boolean) -> Unit,
 ) {
     fun setCurrentSearchEngine(context: Context, searchEngine: SearchEngine) {
         context.components.useCases.searchUseCases.selectSearchEngine.invoke(searchEngine)

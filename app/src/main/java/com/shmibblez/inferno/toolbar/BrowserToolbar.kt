@@ -5,6 +5,7 @@
 package com.shmibblez.inferno.toolbar
 
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -30,8 +31,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.shmibblez.inferno.browser.ComponentDimens
 import com.shmibblez.inferno.browser.InfernoAwesomeBar
-import com.shmibblez.inferno.browser.toPx
-import com.shmibblez.inferno.toolbar.ToolbarOnlyComponents.Companion.ProgressBar
+import com.shmibblez.inferno.ext.dpToPx
 import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarBack
 import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarForward
 import com.shmibblez.inferno.toolbar.ToolbarOnlyOptions.Companion.ToolbarMenuIcon
@@ -63,7 +63,7 @@ private fun iconsWidth(nOptions: Int): Dp {
 }
 
 private fun iconsWidthPx(nOptions: Int): Int {
-    return iconsWidth(nOptions).toPx()
+    return iconsWidth(nOptions).dpToPx()
 }
 
 @Composable
@@ -78,7 +78,6 @@ fun BrowserToolbar(
     onStopSearch: () -> Unit,
 ) {
     if (tabSessionState == null || searchEngine == null) {
-        // don't show if null, TODO: show loading toolbar layout
         PlaceholderBrowserToolbar()
         return
     }
@@ -89,16 +88,18 @@ fun BrowserToolbar(
     val rightWidth = remember { iconsWidth(3) }
     val rightWidthPx = remember { iconsWidthPx(3) }
 
-    var searchText by remember { mutableStateOf(TextFieldValue(tabSessionState.content.url)) }
+    var awesomeSearchText by remember { mutableStateOf("") }
     val loading = tabSessionState.content.loading
 
     LaunchedEffect(editMode) {
         if (editMode) {
-            animationValue.animateTo(EDIT_VALUE)
+            animationValue.animateTo(targetValue = EDIT_VALUE, animationSpec = tween(250))
         } else {
-            animationValue.animateTo(DISPLAY_VALUE)
+            animationValue.animateTo(targetValue = DISPLAY_VALUE, animationSpec = tween(250))
         }
     }
+
+    var onAutocomplete: (TextFieldValue) -> Unit by remember { mutableStateOf({}) }
 
     Column(
         modifier = Modifier
@@ -114,7 +115,7 @@ fun BrowserToolbar(
         // awesome bar
         if (editMode) {
             InfernoAwesomeBar(
-                text = searchText.text,
+                text = awesomeSearchText,
                 colors = AwesomeBarDefaults.colors(),
 //                    providers = emptyList(),
                 orientation = AwesomeBarOrientation.BOTTOM,
@@ -123,14 +124,14 @@ fun BrowserToolbar(
                     // todo: change action based on providerGroup
                     val t = suggestion.title
                     if (t != null) {
-                        searchText = TextFieldValue(t, TextRange(t.length))
+                        onAutocomplete(TextFieldValue(t, TextRange(t.length)))
                     }
                 },
                 onAutoComplete = { providerGroup, suggestion ->
                     // todo: filter out based on providerGroup
                     val t = suggestion.title
                     if (t != null) {
-                        searchText = TextFieldValue(t, TextRange(t.length))
+                        onAutocomplete(TextFieldValue(t, TextRange(t.length)))
                     }
                 },
             )
@@ -142,18 +143,17 @@ fun BrowserToolbar(
                 .height(ComponentDimens.TOOLBAR_HEIGHT)
                 .background(Color.Black),
         ) {
-            // todo: padding between elements is ICON_PADDING
             // origin
             ToolbarOrigin(
                 originModifier = Modifier.padding(
-                        start = (leftWidth * animationValue.value),
-                        end = (rightWidth * animationValue.value),
-                    ),
+                    start = (leftWidth * animationValue.value),
+                    end = (rightWidth * animationValue.value),
+                ),
                 indicatorModifier = Modifier,
                 tabSessionState = tabSessionState,
                 searchEngine = searchEngine,
-                searchText = searchText,
-                setSearchText = { searchText = it },
+                setAwesomeSearchText = { awesomeSearchText = it },
+                setOnAutocomplete = { onAutocomplete = it },
                 siteSecure = detectSiteSecurity(tabSessionState),
                 siteTrackingProtection = detectSiteTrackingProtection(tabSessionState),
                 editMode = editMode,
@@ -207,13 +207,6 @@ fun BrowserToolbar(
                     onNavToTabsTray = onNavToTabsTray
                 )
                 ToolbarMenuIcon(onShowMenuBottomSheet = onShowMenuBottomSheet)
-            }
-            // loading bar
-            if (loading) {
-                ProgressBar(
-                    progress = (tabSessionState.content.progress.toFloat()) / 100F,
-                    modifier = Modifier.align(Alignment.TopCenter),
-                )
             }
         }
     }

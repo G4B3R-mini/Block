@@ -7,7 +7,6 @@ import android.content.ContextWrapper
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
-import android.content.res.Resources
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
@@ -126,6 +125,7 @@ import com.shmibblez.inferno.ext.isLargeWindow
 import com.shmibblez.inferno.ext.nav
 import com.shmibblez.inferno.ext.navigateWithBreadcrumb
 import com.shmibblez.inferno.ext.settings
+import com.shmibblez.inferno.ext.dpToPx
 import com.shmibblez.inferno.findInPageBar.BrowserFindInPageBar
 import com.shmibblez.inferno.home.CrashComponent
 import com.shmibblez.inferno.home.HomeComponent
@@ -313,6 +313,7 @@ val onboardingLinksList: List<String> = listOf(
 //const val TRANSLATIONS_WEIGHT = 2
 const val REVIEW_QUALITY_CHECK_WEIGHT = 3
 const val SHARE_WEIGHT = 4
+
 //const val RELOAD_WEIGHT = 5
 const val OPEN_IN_ACTION_WEIGHT = 6
 //}
@@ -345,8 +346,8 @@ enum class BrowserComponentPageType {
 }
 
 object ComponentDimens {
-    val TOOLBAR_HEIGHT = 48.dp
-    val TAB_BAR_HEIGHT = 32.dp
+    val TOOLBAR_HEIGHT = 44.dp
+    val TAB_BAR_HEIGHT = 36.dp
     val AWESOME_BAR_HEIGHT = 200.dp
     val TAB_WIDTH = 112.dp
 
@@ -541,15 +542,21 @@ fun BrowserComponent(
     val bottomBarOffsetPx = remember { Animatable(0F) }
 
     // browser display mode, also sets bottomBarHeightDp
-    var browserMode by run {
-        val state = mutableStateOf(BrowserComponentMode.TOOLBAR)
-        object : MutableState<BrowserComponentMode> by state {
-            override var value
-                get() = state.value
-                set(value) {
-                    state.value = value
-                    bottomBarHeightDp = ComponentDimens.calcBottomBarHeight(value)
-                }
+    var browserMode by remember {
+        run {
+            val state = mutableStateOf(BrowserComponentMode.TOOLBAR)
+            object : MutableState<BrowserComponentMode> by state {
+                override var value
+                    get() = state.value
+                    set(value) {
+                        state.value = value
+                        bottomBarHeightDp = ComponentDimens.calcBottomBarHeight(value)
+                        // reset bottom bar offset
+                        coroutineScope.launch {
+                            bottomBarOffsetPx.snapTo(0F)
+                        }
+                    }
+            }
         }
     }
 
@@ -717,7 +724,13 @@ fun BrowserComponent(
             tabCount = tabList.size,
             onDismissMenuBottomSheet = { showToolbarMenuBottomSheet = false },
             onActivateFindInPage = { browserMode = BrowserComponentMode.FIND_IN_PAGE },
-            onActivateReaderView = { infernoReaderViewState.showReaderView() },
+            onActivateReaderView = {
+                val successful = infernoReaderViewState.showReaderView()
+                if (successful) {
+                    browserMode = BrowserComponentMode.READER_VIEW
+                }
+            },
+            onRequestSearchBar = { /* todo */ },
             onNavToSettings = { navToSettings(navController) },
             onNavToTabsTray = { showTabsTray = true },
         )
@@ -1179,7 +1192,7 @@ fun BrowserComponent(
     // moz components setup and shared preferences
     LaunchedEffect(engineView == null) {
         if (engineView == null) return@LaunchedEffect
-        engineView!!.setDynamicToolbarMaxHeight(bottomBarHeightDp.toPx() - bottomBarOffsetPx.value.toInt())
+        engineView!!.setDynamicToolbarMaxHeight(bottomBarHeightDp.dpToPx() - bottomBarOffsetPx.value.toInt())
 
         /* BaseBrowserFragment onViewCreated */
         // DO NOT ADD ANYTHING ABOVE THIS getProfilerTime CALL!
@@ -1875,13 +1888,13 @@ fun BrowserComponent(
                             val newOffset = (bottomBarOffsetPx.value - dy).coerceIn(
                                 0F,
                                 bottomBarHeightDp
-                                    .toPx()
+                                    .dpToPx()
                                     .toFloat()
                             )
                             coroutineScope.launch {
                                 bottomBarOffsetPx.snapTo(newOffset)
                                 engineView!!.setDynamicToolbarMaxHeight(
-                                    bottomBarHeightDp.toPx() - newOffset.toInt()
+                                    bottomBarHeightDp.dpToPx() - newOffset.toInt()
                                 )
                             }
 //                                }
@@ -1889,19 +1902,19 @@ fun BrowserComponent(
                         if (it.action == MotionEvent.ACTION_UP || it.action == MotionEvent.ACTION_CANCEL) {
                             // set bottom bar position
                             coroutineScope.launch {
-                                if (bottomBarOffsetPx.value <= (bottomBarHeightDp.toPx() / 2)) {
+                                if (bottomBarOffsetPx.value <= (bottomBarHeightDp.dpToPx() / 2)) {
                                     // if more than halfway up, go up
                                     bottomBarOffsetPx.animateTo(0F)
                                 } else {
                                     // if more than halfway down, go down
                                     bottomBarOffsetPx.animateTo(
                                         bottomBarHeightDp
-                                            .toPx()
+                                            .dpToPx()
                                             .toFloat()
                                     )
                                 }
                                 engineView!!.setDynamicToolbarMaxHeight(
-                                    bottomBarHeightDp.toPx() - bottomBarOffsetPx.value.toInt()
+                                    bottomBarHeightDp.dpToPx() - bottomBarOffsetPx.value.toInt()
                                 )
                             }
                         }
@@ -2058,10 +2071,6 @@ private fun onBackPressed(
     }
 }
 
-fun Dp.toPx(): Int {
-    return (this.value * Resources.getSystem().displayMetrics.density).toInt()
-}
-
 @Composable
 fun MozEngineView(
     modifier: Modifier = Modifier,
@@ -2150,7 +2159,10 @@ internal fun showCancelledDownloadWarning(
             onDismissRequest = { setAlertDialog(null) },
             title = {
                 InfernoText(
-                    text = String.format(stringResource(R.string.mozac_feature_downloads_cancel_active_downloads_warning_content_title), downloadCount),
+                    text = String.format(
+                        stringResource(R.string.mozac_feature_downloads_cancel_active_downloads_warning_content_title),
+                        downloadCount
+                    ),
                     fontColor = Color.White,
                     fontWeight = FontWeight.Bold,
                 )
@@ -2645,10 +2657,10 @@ private fun showPinDialogWarning(
 }
 
 
-//@VisibleForTesting
-//internal fun shouldPullToRefreshBeEnabled(inFullScreen: Boolean, context: Context): Boolean {
-//    return /* FeatureFlags.pullToRefreshEnabled && */ context.settings().isPullToRefreshEnabledInBrowser && !inFullScreen
-//}
+@VisibleForTesting
+internal fun shouldPullToRefreshBeEnabled(inFullScreen: Boolean, context: Context): Boolean {
+    return /* FeatureFlags.pullToRefreshEnabled && */ context.settings().isPullToRefreshEnabledInBrowser && !inFullScreen
+}
 
 //@Suppress("LongMethod")
 //private fun initializeNavBar(
@@ -3591,6 +3603,7 @@ internal fun fullScreenChanged(
     enableFullscreen: () -> Unit,
     disableFullscreen: () -> Unit,
 ) {
+    Log.d("BrowserComponent", "full screen changed, inFullScreen: $inFullScreen")
 //    val activity = context.getActivity() ?: return
     if (inFullScreen) {
         // Close find in page bar if opened
@@ -3630,12 +3643,9 @@ internal fun fullScreenChanged(
                 )
             }
         }
-        // todo:
-        //  collapseBrowserView()
     }
 
-    // todo: swipe refresh
-//    binding.swipeRefresh.isEnabled = false // same as shouldPullToRefreshBeEnabled(inFullScreen)
+    swipeRefresh.isEnabled = shouldPullToRefreshBeEnabled(inFullScreen, context)
 }
 
 @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)

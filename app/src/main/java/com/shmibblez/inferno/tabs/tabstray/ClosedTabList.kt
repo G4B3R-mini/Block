@@ -41,6 +41,7 @@ import com.shmibblez.inferno.compose.SwipeToDismissBox
 import com.shmibblez.inferno.compose.SwipeToDismissState
 import com.shmibblez.inferno.compose.base.InfernoCheckbox
 import com.shmibblez.inferno.compose.base.InfernoText
+import com.shmibblez.inferno.compose.rememberSwipeToDismissState
 import com.shmibblez.inferno.ext.toShortUrl
 import com.shmibblez.inferno.tabstray.HEADER_ITEM_KEY
 import com.shmibblez.inferno.tabstray.TabsTrayTestTag
@@ -168,13 +169,13 @@ private fun ClosedTabListItem(
     val decayAnimationSpec: DecayAnimationSpec<Float> = rememberSplineBasedDecay()
 
     val density = LocalDensity.current
-    val swipeState = remember(multiSelectionEnabled, swipingEnabled) {
-        SwipeToDismissState(
-            density = density,
-            enabled = !multiSelectionEnabled && swipingEnabled,
-            decayAnimationSpec = decayAnimationSpec,
-        )
-    }
+    val swipeState = rememberSwipeToDismissState(
+        key1 = multiSelectionEnabled,
+        key2 = swipingEnabled,
+        density = density,
+        enabled = !multiSelectionEnabled && swipingEnabled,
+        decayAnimationSpec = decayAnimationSpec,
+    )
 
     SwipeToDismissBox(
         state = swipeState,

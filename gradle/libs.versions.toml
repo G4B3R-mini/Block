@@ -64,6 +64,7 @@ toolingNimbusGradleAppService = "134.0"
 pagingRuntimeKtx = "3.3.6"
 biometricKtx = "1.4.0-alpha02"
 lifecycleService = "2.8.7"
+animationGraphicsAndroid = "1.8.0"
 
 [libraries]
 # Kotlin
@@ -231,6 +232,7 @@ tooling-nimbus-gradle-app-services = { module = "org.mozilla.appservices:tooling
 androidx-paging-runtime-ktx = { group = "androidx.paging", name = "paging-runtime-ktx", version.ref = "pagingRuntimeKtx" }
 androidx-biometric-ktx = { group = "androidx.biometric", name = "biometric-ktx", version.ref = "biometricKtx" }
 androidx-lifecycle-service = { group = "androidx.lifecycle", name = "lifecycle-service", version.ref = "lifecycleService" }
+androidx-animation-graphics-android = { group = "androidx.compose.animation", name = "animation-graphics-android", version.ref = "animationGraphicsAndroid" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "android-gradle-plugin" }
