@@ -64,11 +64,12 @@ import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.ContextCompat.getColor
 import androidx.core.content.getSystemService
 import androidx.core.view.OnApplyWindowInsetsListener
@@ -86,7 +87,6 @@ import androidx.navigation.NavDirections
 import androidx.navigation.NavOptions
 import androidx.preference.PreferenceManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.shmibblez.inferno.BrowserDirection
 import com.shmibblez.inferno.HomeActivity
 import com.shmibblez.inferno.IntentReceiverActivity
@@ -109,8 +109,6 @@ import com.shmibblez.inferno.components.accounts.FxaWebChannelIntegration
 import com.shmibblez.inferno.components.appstate.AppAction.MessagingAction
 import com.shmibblez.inferno.components.appstate.AppAction.ShoppingAction
 import com.shmibblez.inferno.components.toolbar.FenixTabCounterMenu
-import com.shmibblez.inferno.components.toolbar.ToolbarContainerView
-import com.shmibblez.inferno.components.toolbar.ToolbarPosition
 import com.shmibblez.inferno.components.toolbar.interactor.BrowserToolbarInteractor
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.compose.snackbar.AcornSnackbarHostState
@@ -148,7 +146,6 @@ import com.shmibblez.inferno.tabs.tabstray.InfernoTabsTrayDisplayType
 import com.shmibblez.inferno.tabs.tabstray.InfernoTabsTrayMode
 import com.shmibblez.inferno.tabs.tabstray.InfernoTabsTraySelectedTab
 import com.shmibblez.inferno.tabstray.Page
-import com.shmibblez.inferno.tabstray.TabsTrayAction
 import com.shmibblez.inferno.tabstray.TabsTrayFragmentDirections
 import com.shmibblez.inferno.tabstray.ext.isActiveDownload
 import com.shmibblez.inferno.tabstray.ext.isNormalTab
@@ -712,13 +709,13 @@ fun BrowserComponent(
         activeAlertDialog!!.invoke()
     }
     // bottom sheet menu setup
-    var showMenuBottomSheet by remember { mutableStateOf(false) }
-    if (showMenuBottomSheet) {
+    var showToolbarMenuBottomSheet by remember { mutableStateOf(false) }
+    if (showToolbarMenuBottomSheet) {
         ToolbarMenuBottomSheet(
             tabSessionState = currentTab,
             loading = currentTab?.content?.loading ?: false,
             tabCount = tabList.size,
-            onDismissMenuBottomSheet = { showMenuBottomSheet = false },
+            onDismissMenuBottomSheet = { showToolbarMenuBottomSheet = false },
             onActivateFindInPage = { browserMode = BrowserComponentMode.FIND_IN_PAGE },
             onActivateReaderView = { infernoReaderViewState.showReaderView() },
             onNavToSettings = { navToSettings(navController) },
@@ -1508,14 +1505,6 @@ fun BrowserComponent(
                 view = view,
             )
 
-            initializeEngineView(
-                topToolbarHeight = context.settings().getTopToolbarHeight(
-                    includeTabStrip = customTabSessionId == null && context.isTabStripEnabled(),
-                ),
-                bottomToolbarHeight = bottomToolbarHeight,
-                context = context,
-            )
-
             initializeMicrosurveyFeature(context, lifecycleOwner, messagingFeatureMicrosurvey)
 
             // TODO: super
@@ -1980,7 +1969,7 @@ fun BrowserComponent(
                             tabSessionState = currentTab,
                             searchEngine = searchEngine,
                             tabCount = tabList.size,
-                            onShowMenuBottomSheet = { showMenuBottomSheet = true },
+                            onShowMenuBottomSheet = { showToolbarMenuBottomSheet = true },
                             onNavToTabsTray = { showTabsTray = true },
                             editMode = browserMode == BrowserComponentMode.TOOLBAR_SEARCH,
                             onStartSearch = { browserMode = BrowserComponentMode.TOOLBAR_SEARCH },
@@ -2159,9 +2148,22 @@ internal fun showCancelledDownloadWarning(
     setAlertDialog {
         AlertDialog(
             onDismissRequest = { setAlertDialog(null) },
+            title = {
+                InfernoText(
+                    text = String.format(stringResource(R.string.mozac_feature_downloads_cancel_active_downloads_warning_content_title), downloadCount),
+                    fontColor = Color.White,
+                    fontWeight = FontWeight.Bold,
+                )
+            },
+            text = {
+                InfernoText(
+                    text = stringResource(R.string.mozac_feature_downloads_cancel_active_private_downloads_warning_content_body),
+                    fontColor = Color.White,
+                )
+            },
             confirmButton = {
                 InfernoText(
-                    text = stringResource(R.string.credit_cards_warning_dialog_set_up_now),
+                    text = stringResource(R.string.mozac_feature_downloads_cancel_active_downloads_accept),
                     modifier = Modifier.clickable {
                         setAlertDialog(null)
                         onCancelDownloadWarningAccepted(
@@ -2179,13 +2181,18 @@ internal fun showCancelledDownloadWarning(
             },
             dismissButton = {
                 InfernoText(
-                    text = stringResource(R.string.credit_cards_warning_dialog_later),
+                    text = stringResource(R.string.mozac_feature_downloads_cancel_active_private_downloads_deny),
                     modifier = Modifier.clickable {
+                        // dismiss
                         setAlertDialog(null)
-                        // todo
                     },
                 )
             },
+            properties = DialogProperties(
+                dismissOnBackPress = true,
+                dismissOnClickOutside = false,
+                usePlatformDefaultWidth = true,
+            ),
         )
     }
     val dialog = DownloadCancelDialogFragment.newInstance(downloadCount = downloadCount,
@@ -2578,9 +2585,6 @@ private fun showPinDialogWarning(
     webPrompterState: InfernoPromptFeatureState?,
 ) {
 //    AlertDialog.Builder(context).apply {
-//        setTitle(context.getString(R.string.credit_cards_warning_dialog_title_2))
-//        setMessage(context.getString(R.string.credit_cards_warning_dialog_message_3))
-//
 //        setNegativeButton(context.getString(R.string.credit_cards_warning_dialog_later)) { _: DialogInterface, _ ->
 ////                promptsFeature.get()?.onBiometricResult(isAuthenticated = false)
 //        }
@@ -2597,6 +2601,19 @@ private fun showPinDialogWarning(
     setAlertDialog {
         AlertDialog(
             onDismissRequest = { setAlertDialog(null) },
+            title = {
+                InfernoText(
+                    text = stringResource(R.string.credit_cards_warning_dialog_title_2),
+                    fontColor = Color.White,
+                    fontWeight = FontWeight.Bold,
+                )
+            },
+            text = {
+                InfernoText(
+                    text = stringResource(R.string.credit_cards_warning_dialog_message_3),
+                    fontColor = Color.White,
+                )
+            },
             confirmButton = {
                 InfernoText(
                     text = stringResource(R.string.credit_cards_warning_dialog_set_up_now),
@@ -2613,10 +2630,14 @@ private fun showPinDialogWarning(
                     modifier = Modifier.clickable {
                         setAlertDialog(null)
                         webPrompterState?.onBiometricResult(isAuthenticated = false)
-                        context.startActivity(Intent(Settings.ACTION_SECURITY_SETTINGS))
                     },
                 )
             },
+            properties = DialogProperties(
+                dismissOnBackPress = true,
+                dismissOnClickOutside = false,
+                usePlatformDefaultWidth = true,
+            ),
         )
     }
 
@@ -2628,70 +2649,6 @@ private fun showPinDialogWarning(
 //internal fun shouldPullToRefreshBeEnabled(inFullScreen: Boolean, context: Context): Boolean {
 //    return /* FeatureFlags.pullToRefreshEnabled && */ context.settings().isPullToRefreshEnabledInBrowser && !inFullScreen
 //}
-
-/**
- * Sets up the necessary layout configurations for the engine view. If the toolbar is dynamic, this method sets a
- * [CoordinatorLayout.Behavior] that will adjust the top/bottom paddings when the tab content is being scrolled.
- * If the toolbar is not dynamic, it simply sets the top and bottom margins to ensure that content is always
- * displayed above or below the respective toolbars.
- *
- * @param topToolbarHeight The height of the top toolbar, which could be zero if the toolbar is positioned at the
- * bottom, or it could be equal to the height of [BrowserToolbar].
- * @param bottomToolbarHeight The height of the bottom toolbar, which could be equal to the height of
- * [BrowserToolbar] or [ToolbarContainerView], or zero if the toolbar is positioned at the top without a navigation
- * bar.
- */
-@VisibleForTesting
-internal fun initializeEngineView(
-    topToolbarHeight: Int,
-    bottomToolbarHeight: Int,
-    context: Context,
-) {
-    if (isToolbarDynamic(context)) { // && webAppToolbarShouldBeVisible) {
-        // todo: engine view
-//        getEngineView().setDynamicToolbarMaxHeight(topToolbarHeight + bottomToolbarHeight)
-
-        if (context.settings().navigationToolbarEnabled || shouldShowMicrosurveyPrompt(context)) {
-            // todo: swipe refresh
-//            (getSwipeRefreshLayout().layoutParams as CoordinatorLayout.LayoutParams).behavior =
-//                EngineViewClippingBehavior(
-//                    context = context,
-//                    attrs = null,
-//                    engineViewParent = getSwipeRefreshLayout(),
-//                    topToolbarHeight = topToolbarHeight,
-//                )
-        } else {
-            val toolbarPosition = when (context.settings().toolbarPosition) {
-                ToolbarPosition.BOTTOM -> mozilla.components.ui.widgets.behavior.ToolbarPosition.BOTTOM
-                ToolbarPosition.TOP -> mozilla.components.ui.widgets.behavior.ToolbarPosition.TOP
-            }
-
-            val toolbarHeight = when (toolbarPosition) {
-                mozilla.components.ui.widgets.behavior.ToolbarPosition.BOTTOM -> bottomToolbarHeight
-                mozilla.components.ui.widgets.behavior.ToolbarPosition.TOP -> topToolbarHeight
-            }
-            // todo: swipe refresh
-//            (getSwipeRefreshLayout().layoutParams as CoordinatorLayout.LayoutParams).behavior =
-//                mozilla.components.ui.widgets.behavior.EngineViewClippingBehavior(
-//                    context,
-//                    null,
-//                    getSwipeRefreshLayout(),
-//                    toolbarHeight,
-//                    toolbarPosition,
-//                )
-        }
-    } else {
-        // todo: engine view
-//        // Ensure webpage's bottom elements are aligned to the very bottom of the engineView.
-//        getEngineView().setDynamicToolbarMaxHeight(0)
-//
-//        // Effectively place the engineView on top/below of the toolbars if that is not dynamic.
-//        val swipeRefreshParams =
-//            getSwipeRefreshLayout().layoutParams as CoordinatorLayout.LayoutParams
-//        swipeRefreshParams.topMargin = topToolbarHeight
-//        swipeRefreshParams.bottomMargin = bottomToolbarHeight
-    }
-}
 
 //@Suppress("LongMethod")
 //private fun initializeNavBar(
@@ -3755,36 +3712,6 @@ internal fun collapseBrowserView() {
 ////        )
 //    }
 //}
-
-private fun reinitializeNavBar() {
-    // todo: navbar
-//    initializeNavBar(
-//        browserToolbar = browserToolbarView.view,
-//        view = requireView(),
-//        context = context,
-//        activity = context.getActivity()!! as HomeActivity,
-//    )
-}
-
-@VisibleForTesting
-internal fun reinitializeEngineView(
-    context: Context,
-    fullScreenFeature: ViewBoundFeatureWrapper<FullScreenFeature>,
-    customTabSessionId: String? = null,
-) {
-    val isFullscreen = fullScreenFeature.get()?.isFullScreen == true
-    val shouldToolbarsBeHidden = isFullscreen // || !webAppToolbarShouldBeVisible
-    val topToolbarHeight = context.settings().getTopToolbarHeight(
-        includeTabStrip = customTabSessionId == null && context.isTabStripEnabled(),
-    )
-    val bottomToolbarHeight = context.settings().getBottomToolbarHeight(context)
-
-    initializeEngineView(
-        topToolbarHeight = if (shouldToolbarsBeHidden) 0 else topToolbarHeight,
-        bottomToolbarHeight = if (shouldToolbarsBeHidden) 0 else bottomToolbarHeight,
-        context = context,
-    )
-}
 
 /*
  * Dereference these views when the fragment view is destroyed to prevent memory leaks

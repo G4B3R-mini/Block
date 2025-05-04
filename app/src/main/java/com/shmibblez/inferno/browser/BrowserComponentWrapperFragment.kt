@@ -119,6 +119,7 @@ class BrowserComponentWrapperFragment : Fragment(), UserInteractionHandler, Acti
 
     private var initialized = false
     private var preinitialized = false
+    private var awaitingNewTab = false
 
     private val baseComposeView: ComposeView
         get() = requireView().findViewById(R.id.baseComposeView)
@@ -220,10 +221,13 @@ class BrowserComponentWrapperFragment : Fragment(), UserInteractionHandler, Acti
                             } else {
                                 requireComponents.useCases.tabsUseCases.selectTab(tabList.last().id)
                             }
-                        } else {
+                        } else if (!awaitingNewTab) {
                             // if tab list empty add new tab
                             requireComponents.newTab(false)
+                            awaitingNewTab = true
                         }
+                    } else {
+                        awaitingNewTab = false
                     }
                     val searchEngine: SearchEngine? = it.search.selectedOrDefaultSearchEngine!!
                     val pageType: BrowserComponentPageType = resolvePageType(currentTab)

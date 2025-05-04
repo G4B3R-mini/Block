@@ -69,36 +69,52 @@ enum class ToolbarOptionType {
     ICON, EXPANDED
 }
 
+// todo: selected tab has rounded borders and bg color is lighter, unselected tabs will not be darkened by alpha,
+//  just have vertical separator between them with top + bottom padding (4dp for now) and darker background (no border, just plain)
+// todo: add search bar in BrowserComponent, shows up close to keyboard, awesomebar above
+//  - add SearchBar in BrowserComponent, shown if user presses mini origin, keyboard pops up
+//    - shown by default just above keyboard, awesome bar pops up above, settings to invert (bar above, awesomebar below)
+//    - SearchBar has padding all around
+//  - toolbar settings
+//    - origin section: radio button with options origin (full size) and mini origin, one must be selected to be able to use search function
+//    - toolbar actions section:
+//      - for v1 make checkbox selection, with max n items (if more selected show toast saying max n can be selected), menu cannot be unselected
+//        - user can reorder selected actions, preview is shown at top
+//      - for v2 can make drag and drop, selected origin type is shown and cannot be removed, menu can also not be removed
+//
+// todo: user setting for toolbar top or bottom when vertical
+// todo: user setting for toolbar left, right, top, or bottom when horizontal, for now just vertical
+//  will need to add vertical tabs for horizontal mode
+
 // current items:
-// - ToolbarShare
-// - ToolbarRequestDesktopSite
-// - ToolbarFindInPage
 // - ToolbarSettings
-// - ToolbarPrivateModeToggle
-// - ToolbarActivateReaderView
-// - NavOptionsToolbarMenuItem
+// - ToolbarOriginMini
 // - ToolbarBack
 // - ToolbarForward
 // - ToolbarReload
+// - ToolbarRequestDesktopSite
+// - ToolbarFindInPage
+// - ToolbarRequestReaderView
+// - ToolbarPrivateModeToggle
 // - ToolbarShowTabsTray
-// - ToolbarShowTabsTray
-// - ToolbarMenuIcon
+// - ToolbarShare
 // -
 // - toolbar only:
 //   - ToolbarMenuIcon
+//   - ToolbarOrigin
 // - menu only:
 //   - NavOptions
 // todo: left to add:
 //   - ToolbarHistory (history icon, go to history page)
 //   - ToolbarFindInPage (search icon)
-//   - ToolbarDesktopSite (desktop icon)
-//   - ToolbarShare (share icon)
 //   - ToolbarSettings (settings icon)
 //   - ToolbarPrintPage (printer icon)
 //   - ToolbarScrollingScreenshot (scan icon)
 //   - ToolbarExtensions (extensions icon) - go to extensions page, installed
 //   - ToolbarReaderView (book icon, web icon, current is large, switch to small on bottom right)
 //   -
+
+// todo: store toolbar items in settings, add item that converts string key to composable, when() for all keys possible
 
 internal class ToolbarOnlyOptions {
     companion object {
@@ -287,16 +303,106 @@ internal class ToolbarOptions {
         }
 
         @Composable
-        internal fun ToolbarShare(type: ToolbarOptionType) {
-            val context = LocalContext.current
-            val description = stringResource(R.string.share_header_2)
+        internal fun ToolbarSettings(
+            type: ToolbarOptionType,
+            onNavToSettings: () -> Unit,
+        ) {
             ToolbarOptionTemplate(
-                iconPainter = painterResource(R.drawable.ic_share),
-                description = description,
-                onClick = {
-                    val url = context.components.core.store.state.selectedTab?.getUrl().orEmpty()
-                    context.share(url)
+                iconPainter = painterResource(R.drawable.mozac_ic_settings_24),
+                description = stringResource(R.string.browser_menu_settings),
+                onClick = onNavToSettings,
+                type = type,
+            )
+        }
+
+        @Composable
+        internal fun ToolbarOriginMini(
+            type: ToolbarOptionType,
+            onRequestSearchBar: () -> Unit,
+            ) {
+            ToolbarOptionTemplate(
+                icon = { modifier, contentDescription, tint ->
+                    Box(
+                        modifier = modifier,
+                    ) {
+                        // current mode, big icon
+                        Icon(
+                            modifier = Modifier.align(Alignment.Center),
+                            painter = painterResource(id = R.drawable.mozac_ic_globe_24),
+                            contentDescription = contentDescription,
+                            tint = tint,
+                        )
+                        // switch to, smol icon
+                        Icon(
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .background(Color.Black)
+                                .padding(2.dp)
+                                .size(
+                                    when (type) {
+                                        ToolbarOptionType.ICON -> TOOLBAR_SWITCH_ICON_SIZE
+                                        ToolbarOptionType.EXPANDED -> TOOLBAR_MENU_SWITCH_ICON_SIZE
+                                    }
+                                )
+                                .align(Alignment.BottomEnd),
+                            painter = painterResource(id = R.drawable.ic_search_24),
+                            contentDescription = contentDescription,
+                            tint = tint,
+                        )
+                    }
                 },
+                description = stringResource(R.string.search_hint),
+                onClick = onRequestSearchBar,
+                type = type,
+            )
+        }
+
+        @Composable
+        fun ToolbarBack(type: ToolbarOptionType, enabled: Boolean) {
+            val useCases = sessionUseCases()
+            ToolbarOptionTemplate(
+                iconPainter = painterResource(id = R.drawable.ic_chevron_left_24),
+                description = stringResource(R.string.browser_menu_back),
+                onClick = { useCases.goBack.invoke() },
+                enabled = enabled,
+                type = type,
+            )
+        }
+
+        @Composable
+        fun ToolbarForward(type: ToolbarOptionType, enabled: Boolean) {
+            val useCases = sessionUseCases()
+            ToolbarOptionTemplate(
+                iconPainter = painterResource(id = R.drawable.ic_chevron_right_24),
+                description = stringResource(R.string.browser_menu_forward),
+                onClick = { useCases.goForward.invoke() },
+                enabled = enabled,
+                type = type,
+            )
+        }
+
+        @Composable
+        fun ToolbarReload(
+            type: ToolbarOptionType,
+            enabled: Boolean,
+            loading: Boolean,
+            dismissMenuSheet: (() -> Unit)? = null,
+        ) {
+            val useCases = sessionUseCases()
+            ToolbarOptionTemplate(
+                iconPainter = when (loading) {
+                    true -> painterResource(id = R.drawable.ic_cross_24)
+                    false -> painterResource(id = R.drawable.ic_arrow_clockwise_24)
+                },
+                description = when (loading) {
+                    true -> stringResource(android.R.string.cancel)
+                    false -> stringResource(R.string.browser_menu_refresh)
+                },
+                onClick = {
+                    if (loading) useCases.stopLoading.invoke() else useCases.reload.invoke()
+                    dismissMenuSheet?.invoke()
+                },
+                enabled = enabled,
                 type = type,
             )
         }
@@ -305,6 +411,7 @@ internal class ToolbarOptions {
         internal fun ToolbarRequestDesktopSite(
             type: ToolbarOptionType,
             desktopMode: Boolean,
+            dismissMenuSheet: (() -> Unit)? = null,
         ) {
             val useCases = sessionUseCases()
             val context = LocalContext.current
@@ -318,8 +425,7 @@ internal class ToolbarOptions {
                     ) {
                         // current mode, big icon
                         Icon(
-                            modifier = Modifier
-                                .align(Alignment.Center),
+                            modifier = Modifier.align(Alignment.Center),
                             painter = when (isDesktopSite) {
                                 true -> painterResource(id = R.drawable.mozac_ic_device_mobile_24)
                                 false -> painterResource(id = R.drawable.mozac_ic_device_desktop_24)
@@ -355,7 +461,10 @@ internal class ToolbarOptions {
                         false -> R.string.browser_menu_switch_to_desktop_site
                     }
                 ),
-                onClick = { useCases.requestDesktopSite.invoke(!desktopMode) },
+                onClick = {
+                    useCases.requestDesktopSite.invoke(!desktopMode)
+                    dismissMenuSheet?.invoke()
+                },
                 type = type,
             )
         }
@@ -378,14 +487,20 @@ internal class ToolbarOptions {
         }
 
         @Composable
-        internal fun ToolbarSettings(
+        internal fun ToolbarRequestReaderView(
             type: ToolbarOptionType,
-            onNavToSettings: () -> Unit,
+            enabled: Boolean,
+            dismissMenuSheet: (() -> Unit)? = null,
+            onActivateReaderView: () -> Unit,
         ) {
             ToolbarOptionTemplate(
-                iconPainter = painterResource(R.drawable.mozac_ic_settings_24),
-                description = stringResource(R.string.browser_menu_settings),
-                onClick = onNavToSettings,
+                iconPainter = painterResource(R.drawable.mozac_ic_reader_view_24),
+                description = stringResource(R.string.browser_menu_turn_on_reader_view),
+                onClick = {
+                    onActivateReaderView.invoke()
+                    dismissMenuSheet?.invoke()
+                },
+                enabled = enabled,
                 type = type,
             )
         }
@@ -446,8 +561,7 @@ internal class ToolbarOptions {
                     ) {
                         // current mode, big icon
                         Icon(
-                            modifier = Modifier
-                                .align(Alignment.Center),
+                            modifier = Modifier.align(Alignment.Center),
                             painter = when (isPrivateMode) {
                                 true -> painterResource(id = R.drawable.ic_private_browsing)
                                 false -> painterResource(id = R.drawable.mozac_ic_globe_24)
@@ -497,71 +611,10 @@ internal class ToolbarOptions {
         }
 
         @Composable
-        internal fun ToolbarActivateReaderView(
-            type: ToolbarOptionType,
-            enabled: Boolean,
-            onActivateReaderView: () -> Unit,
-            dismissMenuSheet: (() -> Unit)? = null,
-        ) {
-            ToolbarOptionTemplate(
-                iconPainter = painterResource(R.drawable.mozac_ic_reader_view_24),
-                description = stringResource(R.string.browser_menu_turn_on_reader_view),
-                onClick = {
-                    onActivateReaderView.invoke()
-                    dismissMenuSheet?.invoke()
-                },
-                enabled = enabled,
-                type = type,
-            )
-        }
-
-        @Composable
-        fun ToolbarBack(type: ToolbarOptionType, enabled: Boolean) {
-            val useCases = sessionUseCases()
-            ToolbarOptionTemplate(
-                iconPainter = painterResource(id = R.drawable.ic_chevron_left_24),
-                description = stringResource(R.string.browser_menu_back),
-                onClick = { useCases.goBack.invoke() },
-                enabled = enabled,
-                type = type,
-            )
-        }
-
-        @Composable
-        fun ToolbarForward(type: ToolbarOptionType, enabled: Boolean) {
-            val useCases = sessionUseCases()
-            ToolbarOptionTemplate(
-                iconPainter = painterResource(id = R.drawable.ic_chevron_right_24),
-                description = stringResource(R.string.browser_menu_forward),
-                onClick = { useCases.goForward.invoke() },
-                enabled = enabled,
-                type = type,
-            )
-        }
-
-        @Composable
-        fun ToolbarReload(type: ToolbarOptionType, enabled: Boolean, loading: Boolean) {
-            val useCases = sessionUseCases()
-            ToolbarOptionTemplate(
-                iconPainter = when (loading) {
-                    true -> painterResource(id = R.drawable.ic_cross_24)
-                    false -> painterResource(id = R.drawable.ic_arrow_clockwise_24)
-                },
-                description = when (loading) {
-                    true -> stringResource(android.R.string.cancel)
-                    false -> stringResource(R.string.browser_menu_refresh)
-                },
-                onClick = { if (loading) useCases.stopLoading.invoke() else useCases.reload.invoke() },
-                enabled = enabled,
-                type = type,
-            )
-        }
-
-
-        @Composable
         fun ToolbarShowTabsTray(
             type: ToolbarOptionType,
             tabCount: Int,
+            dismissMenuSheet: (() -> Unit)? = null,
             onNavToTabsTray: () -> Unit,
         ) {
             ToolbarOptionTemplate(
@@ -594,7 +647,25 @@ internal class ToolbarOptions {
                         R.string.mozac_tab_counter_open_tab_tray_plural, tabCount
                     )
                 },
-                onClick = { onNavToTabsTray.invoke() },
+                onClick = {
+                    onNavToTabsTray.invoke()
+                    dismissMenuSheet?.invoke()
+                },
+                type = type,
+            )
+        }
+
+        @Composable
+        internal fun ToolbarShare(type: ToolbarOptionType) {
+            val context = LocalContext.current
+            val description = stringResource(R.string.share_header_2)
+            ToolbarOptionTemplate(
+                iconPainter = painterResource(R.drawable.ic_share),
+                description = description,
+                onClick = {
+                    val url = context.components.core.store.state.selectedTab?.getUrl().orEmpty()
+                    context.share(url)
+                },
                 type = type,
             )
         }

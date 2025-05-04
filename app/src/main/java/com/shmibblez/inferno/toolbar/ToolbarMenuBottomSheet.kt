@@ -21,7 +21,7 @@ import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarFindInPage
 import mozilla.components.browser.state.state.TabSessionState
 import com.shmibblez.inferno.toolbar.MenuOnlyComponents.Companion.NavOptions
 import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarPrivateModeToggle
-import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarActivateReaderView
+import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarRequestReaderView
 import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarBack
 import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarForward
 import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarReload
@@ -74,7 +74,8 @@ fun ToolbarMenuBottomSheet(
             {
                 ToolbarRequestDesktopSite(
                     type = ToolbarOptionType.EXPANDED,
-                    desktopMode = tabSessionState.content.desktopMode
+                    desktopMode = tabSessionState.content.desktopMode,
+                    dismissMenuSheet = onDismissMenuBottomSheet,
                 )
             },
             {
@@ -85,18 +86,20 @@ fun ToolbarMenuBottomSheet(
                 )
             },
             {
-                ToolbarActivateReaderView(
+                ToolbarRequestReaderView(
                     type = ToolbarOptionType.EXPANDED,
                     enabled = tabSessionState.readerState.readerable,
-                    onActivateReaderView = onActivateReaderView,
                     dismissMenuSheet = onDismissMenuBottomSheet,
+                    onActivateReaderView = onActivateReaderView,
                 )
             },
             {
                 ToolbarShowTabsTray(
                     type = ToolbarOptionType.EXPANDED,
                     tabCount = tabCount,
-                   onNavToTabsTray =   onNavToTabsTray,
+                    dismissMenuSheet = onDismissMenuBottomSheet,
+                    onNavToTabsTray =   onNavToTabsTray,
+
                 )
             },
             {
@@ -116,12 +119,13 @@ fun ToolbarMenuBottomSheet(
                     type = ToolbarOptionType.EXPANDED,
                     enabled = true,
                     loading = loading,
+                    dismissMenuSheet = onDismissMenuBottomSheet,
                 )
             },
             {
                 ToolbarSettings(
                     type = ToolbarOptionType.EXPANDED,
-                    onNavToSettings = onNavToSettings
+                    onNavToSettings = onNavToSettings,
                 )
             },
         )
