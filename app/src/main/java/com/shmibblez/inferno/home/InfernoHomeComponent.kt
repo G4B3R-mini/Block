@@ -44,7 +44,6 @@ import com.shmibblez.inferno.tabstray.TabsTrayAccessPoint
 import com.shmibblez.inferno.theme.FirefoxTheme
 import com.shmibblez.inferno.utils.Settings.Companion.TOP_SITES_PROVIDER_MAX_THRESHOLD
 import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.browser.state.state.selectedOrDefaultSearchEngine
@@ -84,9 +83,8 @@ internal const val TOAST_ELEVATION = 80f
 /**
  * Home page in new tabs, replaces [HomeFragment]
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @Composable
-fun HomeComponent(isPrivate: Boolean, navController: NavController, modifier: Modifier = Modifier) {
+fun InfernoHomeComponent(isPrivate: Boolean, navController: NavController, modifier: Modifier = Modifier) {
     val settings = LocalContext.current.settings()
     val context = LocalContext.current
     val components = context.components

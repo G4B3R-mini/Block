@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -25,6 +26,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
@@ -104,15 +106,19 @@ internal fun OriginBrowserToolbar(
     var onAutocomplete: (TextFieldValue) -> Unit by remember { mutableStateOf({}) }
 
     // todo: launchedeffect on config change, or better yet, pass from parent
-    var toolbarItemKeys by remember { mutableStateOf(ToolbarItems.defaultToolbarItemKeys) }
-    var indexOrigin by remember { mutableIntStateOf(toolbarItemKeys.indexOf(ToolbarItemKey.toolbar_item_origin)) }
-    var leftKeys by remember { mutableStateOf(toolbarItemKeys.take(indexOrigin)) }
-    var rightKeys by remember { mutableStateOf(toolbarItemKeys.drop(indexOrigin + 1)) }
+
+    val toolbarItemKeys by remember {mutableStateOf(ToolbarItems.defaultToolbarItemKeys)}
+    val indexOrigin by remember { mutableIntStateOf(toolbarItemKeys.indexOf(ToolbarItemKey.toolbar_item_origin)) }
+    val leftKeys by remember { mutableStateOf(toolbarItemKeys.take(indexOrigin)) }
+    val rightKeys by remember { mutableStateOf(toolbarItemKeys.drop(indexOrigin + 1)) }
     val context = LocalContext.current
     val leftWidth = remember { iconsWidth(leftKeys.size) }
     val leftWidthPx = remember { leftWidth.dpToPx(context) }
     val rightWidth = remember { iconsWidth(rightKeys.size) }
     val rightWidthPx = remember { rightWidth.dpToPx(context) }
+
+    // todo: might not need to reset keys on pref change, prefs are on different screen, will
+    //  reload when return to BrowserComponent
 
     Column(
         modifier = Modifier

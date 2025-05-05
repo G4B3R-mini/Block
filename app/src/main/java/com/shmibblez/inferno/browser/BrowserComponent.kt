@@ -128,9 +128,10 @@ import com.shmibblez.inferno.ext.settings
 import com.shmibblez.inferno.ext.dpToPx
 import com.shmibblez.inferno.findInPageBar.BrowserFindInPageBar
 import com.shmibblez.inferno.home.CrashComponent
-import com.shmibblez.inferno.home.HomeComponent
+import com.shmibblez.inferno.home.InfernoHomeComponent
 import com.shmibblez.inferno.home.HomeFragment
 import com.shmibblez.inferno.library.bookmarks.friendlyRootTitle
+import com.shmibblez.inferno.loading.InfernoLoadingComponent
 import com.shmibblez.inferno.messaging.FenixMessageSurfaceId
 import com.shmibblez.inferno.messaging.MessagingFeature
 import com.shmibblez.inferno.microsurvey.ui.ext.MicrosurveyUIData
@@ -1930,21 +1931,26 @@ fun BrowserComponent(
                     setEngineView = { ev -> engineView = ev },
                     setSwipeView = { sr -> swipeRefresh = sr },
                 )
-                when (pageType) {
-                    BrowserComponentPageType.HOME_PRIVATE -> {
-                        HomeComponent(isPrivate = true, navController)
-                    }
 
-                    BrowserComponentPageType.HOME -> {
-                        HomeComponent(isPrivate = false, navController)
-                    }
+                if (currentTab == null) {
+                    InfernoLoadingComponent()
+                } else {
+                    when (pageType) {
+                        BrowserComponentPageType.HOME_PRIVATE -> {
+                            InfernoHomeComponent(isPrivate = true, navController)
+                        }
 
-                    BrowserComponentPageType.CRASH -> {
-                        CrashComponent()
-                    }
+                        BrowserComponentPageType.HOME -> {
+                            InfernoHomeComponent(isPrivate = false, navController)
+                        }
 
-                    else -> {
-                        // engine view already shown, kept there so engine view doesn't reset
+                        BrowserComponentPageType.CRASH -> {
+                            CrashComponent()
+                        }
+
+                        else -> {
+                            // engine view already shown, kept there so engine view doesn't reset
+                        }
                     }
                 }
             }

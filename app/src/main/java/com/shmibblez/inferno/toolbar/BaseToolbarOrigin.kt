@@ -109,7 +109,7 @@ private fun toolbarIndicatorWidth(siteTrackingProtection: SiteTrackingProtection
 @Composable
 internal fun BaseToolbarOrigin(
     tabSessionState: TabSessionState,
-    searchEngine: SearchEngine,
+    searchEngine: SearchEngine?,
     siteSecure: SiteSecurity,
     siteTrackingProtection: SiteTrackingProtection,
     setAwesomeSearchText: (String) -> Unit,
@@ -444,7 +444,7 @@ private fun ToolbarSecurityIndicator(siteSecurity: SiteSecurity) {
 
 @Composable
 private fun ToolbarSearchEngineSelector(
-    currentSearchEngine: SearchEngine,
+    currentSearchEngine: SearchEngine?,
     modifier: Modifier,
 ) {
     val context = LocalContext.current
@@ -469,15 +469,28 @@ private fun ToolbarSearchEngineSelector(
                 .focusGroup(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Image(
-                bitmap = currentSearchEngine.icon.asImageBitmap(),
-                contentDescription = "search engine icon",
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .clip(MaterialTheme.shapes.extraSmall)
-                    .padding(start = 4.dp, top = 4.dp, bottom = 4.dp)
-                    .aspectRatio(1F),
-            )
+            when (currentSearchEngine) {
+                null -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .clip(MaterialTheme.shapes.extraSmall)
+                            .padding(start = 4.dp, top = 4.dp, bottom = 4.dp)
+                            .aspectRatio(1F),
+                    )
+                }
+                else -> {
+                    Image(
+                        bitmap = currentSearchEngine.icon.asImageBitmap(),
+                        contentDescription = "search engine icon",
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .clip(MaterialTheme.shapes.extraSmall)
+                            .padding(start = 4.dp, top = 4.dp, bottom = 4.dp)
+                            .aspectRatio(1F),
+                    )
+                }
+            }
             Icon(
                 painter = painterResource(id = R.drawable.ic_chevron_down_24),
                 contentDescription = "open menu",

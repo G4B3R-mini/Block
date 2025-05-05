@@ -99,13 +99,8 @@ fun InfernoTabBar(tabList: List<TabSessionState>, selectedTab: TabSessionState?)
         )
     }
 
-    // if tab list empty or no tab selected return empty tab list
-    if (tabList.isEmpty() || selectedTab == null) return Box(
-        Modifier
-            .fillMaxWidth()
-            .height(ComponentDimens.TAB_BAR_HEIGHT)
-            .background(Color.Black)
-    )
+    // if tab list empty or no tab selected return empty tab list, return nothing
+    if (tabList.isEmpty() || selectedTab == null) return
 
     return Box(
         modifier = Modifier

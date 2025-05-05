@@ -136,7 +136,7 @@ internal class ToolbarOnlyOptions {
         @Composable
         fun ToolbarOrigin(
             tabSessionState: TabSessionState,
-            searchEngine: SearchEngine,
+            searchEngine: SearchEngine?,
             siteSecure: SiteSecurity,
             siteTrackingProtection: SiteTrackingProtection,
             setAwesomeSearchText: (String) -> Unit,
