@@ -441,7 +441,7 @@ class AwesomeBarView(
             historyStorage = components.core.historyStorage,
             searchUseCase = historySearchTermUseCase,
             searchEngine = validSearchEngine,
-            icon = getDrawable(activity, R.drawable.ic_history)?.toBitmap(),
+            icon = getDrawable(activity, R.drawable.ic_history_24)?.toBitmap(),
             engine = engineForSpeculativeConnects,
             suggestionsHeader = getSearchEngineSuggestionsHeader(searchEngineSource.searchEngine),
         )

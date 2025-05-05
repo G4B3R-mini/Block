@@ -1,21 +1,29 @@
 package com.shmibblez.inferno.toolbar
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.TextFieldValue
+import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarBack
+import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarFindInPage
+import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarForward
+import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarHistory
+import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarOriginMini
+import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarPrivateModeToggle
+import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarReload
+import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarRequestDesktopSite
+import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarRequestReaderView
+import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarSettings
+import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarShare
+import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarShowTabsTray
+import com.shmibblez.inferno.toolbar.ToolbarOnlyOptions.Companion.ToolbarMenuIcon
+import com.shmibblez.inferno.toolbar.ToolbarOnlyOptions.Companion.ToolbarOrigin
+import mozilla.components.browser.state.search.SearchEngine
+import mozilla.components.browser.state.state.TabSessionState
 
 internal enum class ToolbarItemKey {
-    toolbar_item_settings,
-    toolbar_item_origin,
-    toolbar_item_origin_mini,
-    toolbar_item_back,
-    toolbar_item_forward,
-    toolbar_item_reload,
-    toolbar_item_request_desktop,
-    toolbar_item_find_in_page,
-    toolbar_item_request_reader_view,
-    toolbar_item_private_mode,
-    toolbar_item_show_tabs_tray,
-    toolbar_item_share,
-    toolbar_item_menu,
+    toolbar_item_settings, toolbar_item_origin, toolbar_item_origin_mini, toolbar_item_back, toolbar_item_forward, toolbar_item_reload, toolbar_item_history, toolbar_item_request_desktop, toolbar_item_find_in_page, toolbar_item_request_reader_view, toolbar_item_private_mode, toolbar_item_show_tabs_tray, toolbar_item_share, toolbar_item_menu;
+
+    companion object
 }
 
 //internal object ToolbarItemKey {
@@ -32,14 +40,15 @@ internal enum class ToolbarItemKey {
 //    const val TOOLBAR_ITEM_MENU = "toolbar_item_menu"
 //}
 
-internal fun ToolbarItemKey.fromString(key: String): ToolbarItemKey {
-    return when(key) {
+internal fun ToolbarItemKey.Companion.fromString(key: String): ToolbarItemKey {
+    return when (key) {
         "toolbar_item_settings" -> ToolbarItemKey.toolbar_item_settings
         "toolbar_item_origin" -> ToolbarItemKey.toolbar_item_origin
         "toolbar_item_origin_mini" -> ToolbarItemKey.toolbar_item_origin_mini
         "toolbar_item_back" -> ToolbarItemKey.toolbar_item_back
         "toolbar_item_forward" -> ToolbarItemKey.toolbar_item_forward
         "toolbar_item_reload" -> ToolbarItemKey.toolbar_item_reload
+        "toolbar_item_history" -> ToolbarItemKey.toolbar_item_history
         "toolbar_item_request_desktop" -> ToolbarItemKey.toolbar_item_request_desktop
         "toolbar_item_find_in_page" -> ToolbarItemKey.toolbar_item_find_in_page
         "toolbar_item_request_reader_view" -> ToolbarItemKey.toolbar_item_request_reader_view
@@ -47,51 +56,243 @@ internal fun ToolbarItemKey.fromString(key: String): ToolbarItemKey {
         "toolbar_item_show_tabs_tray" -> ToolbarItemKey.toolbar_item_show_tabs_tray
         "toolbar_item_share" -> ToolbarItemKey.toolbar_item_share
         "toolbar_item_menu" -> ToolbarItemKey.toolbar_item_menu
-        else -> {throw IllegalArgumentException("unknown key $key provided, make sure member of ${ToolbarItemKey::class.simpleName}")}
+        else -> {
+            throw IllegalArgumentException("unknown key $key provided, make sure member of ${ToolbarItemKey::class.simpleName}")
+        }
+    }
+}
+
+internal fun ToolbarItemKey.Companion.fromStrings(keys: List<String>): List<ToolbarItemKey> {
+    return List(size = keys.size, init = { ToolbarItemKey.fromString(keys[it]) })
+}
+
+internal class ToolbarItems {
+    companion object {
+        val defaultToolbarItemKeysStr = listOf(
+            ToolbarItemKey.toolbar_item_back,
+            ToolbarItemKey.toolbar_item_forward,
+            ToolbarItemKey.toolbar_item_origin,
+            ToolbarItemKey.toolbar_item_reload,
+            ToolbarItemKey.toolbar_item_show_tabs_tray,
+            ToolbarItemKey.toolbar_item_menu,
+        ).map { it.name }
+
+        val defaultToolbarItemKeys = ToolbarItemKey.fromStrings(defaultToolbarItemKeysStr)
+
+        fun fromKeys(
+            keys: List<ToolbarItemKey>,
+            // item params
+            type: ToolbarOptionType,
+            tabSessionState: TabSessionState,
+            loading: Boolean,
+            tabCount: Int,
+            onShowMenuBottomSheet: () -> Unit,
+            onDismissMenuBottomSheet: () -> Unit,
+            onRequestSearchBar: () -> Unit,
+            onActivateFindInPage: () -> Unit,
+            onActivateReaderView: () -> Unit,
+            onNavToSettings: () -> Unit,
+            onNavToHistory: () -> Unit,
+            onNavToTabsTray: () -> Unit,
+//            // origin params
+//            searchEngine: SearchEngine,
+//            siteSecure: SiteSecurity,
+//            siteTrackingProtection: SiteTrackingProtection,
+//            setAwesomeSearchText: (String) -> Unit,
+//            setOnAutocomplete: ((TextFieldValue) -> Unit) -> Unit,
+//            originModifier: Modifier = Modifier,
+//            editMode: Boolean,
+//            onStartSearch: () -> Unit,
+//            onStopSearch: () -> Unit,
+//            animationValue: Float,
+        ): List<@Composable () -> Unit> {
+            return List(
+                size = keys.size,
+                init = {
+                    {
+                        ToolbarItem(
+                            key = keys[it],
+                            type = type,
+                            tabSessionState = tabSessionState,
+                            loading = loading,
+                            tabCount = tabCount,
+                            onShowMenuBottomSheet = onShowMenuBottomSheet,
+                            onDismissMenuBottomSheet = onDismissMenuBottomSheet,
+                            onRequestSearchBar = onRequestSearchBar,
+                            onActivateFindInPage = onActivateFindInPage,
+                            onActivateReaderView = onActivateReaderView,
+                            onNavToSettings = onNavToSettings,
+                            onNavToHistory = onNavToHistory,
+                            onNavToTabsTray = onNavToTabsTray,
+//                            searchEngine = searchEngine,
+//                            siteSecure = siteSecure,
+//                            siteTrackingProtection = siteTrackingProtection,
+//                            setAwesomeSearchText = setAwesomeSearchText,
+//                            setOnAutocomplete = setOnAutocomplete,
+//                            originModifier = originModifier,
+//                            editMode = editMode,
+//                            onStartSearch = onStartSearch,
+//                            onStopSearch = onStopSearch,
+//                            animationValue = animationValue,
+                        )
+                    }
+                },
+            )
+        }
     }
 }
 
 @Composable
-internal fun ToolbarItem(key: ToolbarItemKey) {
+internal fun ToolbarItem(
+    key: ToolbarItemKey,
+    type: ToolbarOptionType,
+    tabSessionState: TabSessionState,
+    loading: Boolean,
+    tabCount: Int,
+    onShowMenuBottomSheet: () -> Unit,
+    onDismissMenuBottomSheet: () -> Unit,
+    onRequestSearchBar: () -> Unit,
+    onActivateFindInPage: () -> Unit,
+    onActivateReaderView: () -> Unit,
+    onNavToSettings: () -> Unit,
+    onNavToHistory: () -> Unit,
+    onNavToTabsTray: () -> Unit,
+//    // origin params
+//    searchEngine: SearchEngine,
+//    siteSecure: SiteSecurity,
+//    siteTrackingProtection: SiteTrackingProtection,
+//    setAwesomeSearchText: (String) -> Unit,
+//    setOnAutocomplete: ((TextFieldValue) -> Unit) -> Unit,
+//    originModifier: Modifier = Modifier,
+//    editMode: Boolean,
+//    onStartSearch: () -> Unit,
+//    onStopSearch: () -> Unit,
+//    animationValue: Float,
+) {
     when (key) {
         ToolbarItemKey.toolbar_item_settings -> {
-            /* todo: pair with composable, add all possible params in order at the top */
+            ToolbarSettings(
+                type = type,
+                onNavToSettings = onNavToSettings,
+            )
         }
+
         ToolbarItemKey.toolbar_item_origin -> {
-            /* todo: pair with composable, add all possible params in order at the top */
+            when (type) {
+                ToolbarOptionType.ICON -> {
+//                    ToolbarOrigin(
+//                        tabSessionState = tabSessionState,
+//                        searchEngine = searchEngine,
+//                        siteSecure = siteSecure,
+//                        siteTrackingProtection = siteTrackingProtection,
+//                        setAwesomeSearchText = setAwesomeSearchText,
+//                        setOnAutocomplete = setOnAutocomplete,
+//                        originModifier = originModifier,
+//                        editMode = editMode,
+//                        onStartSearch = onStartSearch,
+//                        onStopSearch = onStopSearch,
+//                        animationValue = animationValue,
+//                    )
+                }
+
+                ToolbarOptionType.EXPANDED -> {} // no-op, origin can only be shown in toolbar
+            }
         }
+
         ToolbarItemKey.toolbar_item_origin_mini -> {
-            /* todo: pair with composable, add all possible params in order at the top */
+            ToolbarOriginMini(
+                type = type,
+                onRequestSearchBar = onRequestSearchBar,
+            )
         }
+
         ToolbarItemKey.toolbar_item_back -> {
-            /* todo: pair with composable, add all possible params in order at the top */
+            ToolbarBack(
+                type = type,
+                enabled = tabSessionState.content.canGoBack,
+            )
         }
+
         ToolbarItemKey.toolbar_item_forward -> {
-            /* todo: pair with composable, add all possible params in order at the top */
+            ToolbarForward(
+                type = type,
+                enabled = tabSessionState.content.canGoForward,
+            )
         }
+
         ToolbarItemKey.toolbar_item_reload -> {
-            /* todo: pair with composable, add all possible params in order at the top */
+            ToolbarReload(
+                type = type,
+                enabled = true,
+                loading = loading,
+                dismissMenuSheet = onDismissMenuBottomSheet,
+            )
         }
+
+        ToolbarItemKey.toolbar_item_history -> {
+            ToolbarHistory(
+                type = type,
+                onNavToHistory = onNavToHistory,
+                dismissMenuSheet = onDismissMenuBottomSheet,
+            )
+        }
+
         ToolbarItemKey.toolbar_item_request_desktop -> {
-            /* todo: pair with composable, add all possible params in order at the top */
+            ToolbarRequestDesktopSite(
+                type = type,
+                desktopMode = tabSessionState.content.desktopMode,
+                dismissMenuSheet = onDismissMenuBottomSheet,
+            )
         }
+
         ToolbarItemKey.toolbar_item_find_in_page -> {
-            /* todo: pair with composable, add all possible params in order at the top */
+            ToolbarFindInPage(
+                type = type,
+                onActivateFindInPage = onActivateFindInPage,
+                dismissMenuSheet = onDismissMenuBottomSheet,
+            )
         }
+
         ToolbarItemKey.toolbar_item_request_reader_view -> {
-            /* todo: pair with composable, add all possible params in order at the top */
+            ToolbarRequestReaderView(
+                type = type,
+                enabled = tabSessionState.readerState.readerable,
+                dismissMenuSheet = onDismissMenuBottomSheet,
+                onActivateReaderView = onActivateReaderView,
+            )
         }
+
         ToolbarItemKey.toolbar_item_private_mode -> {
-            /* todo: pair with composable, add all possible params in order at the top */
+            ToolbarPrivateModeToggle(
+                type = type,
+                isPrivateMode = tabSessionState.content.private,
+                dismissMenuSheet = onDismissMenuBottomSheet,
+            )
         }
+
         ToolbarItemKey.toolbar_item_show_tabs_tray -> {
-            /* todo: pair with composable, add all possible params in order at the top */
+            ToolbarShowTabsTray(
+                type = type,
+                tabCount = tabCount,
+                dismissMenuSheet = onDismissMenuBottomSheet,
+                onNavToTabsTray = onNavToTabsTray,
+            )
         }
+
         ToolbarItemKey.toolbar_item_share -> {
-            /* todo: pair with composable, add all possible params in order at the top */
+            ToolbarShare(type = ToolbarOptionType.EXPANDED)
         }
+
         ToolbarItemKey.toolbar_item_menu -> {
-            /* todo: pair with composable, add all possible params in order at the top */
+            when (type) {
+                ToolbarOptionType.ICON -> {
+                    ToolbarMenuIcon(
+                        onShowMenuBottomSheet = onShowMenuBottomSheet,
+                    )
+                }
+
+                ToolbarOptionType.EXPANDED -> {} // no-op, menu can only be shown in toolbar
+            }
         }
     }
 }

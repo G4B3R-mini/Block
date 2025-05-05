@@ -37,36 +37,34 @@
     </aapt:attr>
     <target android:name="bg">
         <aapt:attr name="android:animation">
-            <set
+            <!--            <set-->
+            <!--                android:repeatCount="infinite"-->
+            <!--                android:repeatMode="restart">-->
+            <objectAnimator
+                android:duration="3000"
+                android:interpolator="@android:anim/accelerate_decelerate_interpolator"
+                android:propertyName="rotation"
                 android:repeatCount="infinite"
-                android:repeatMode="restart">
-                <objectAnimator
-                    android:duration="3000"
-                    android:interpolator="@android:anim/accelerate_decelerate_interpolator"
-                    android:propertyName="rotation"
-                    android:repeatCount="infinite"
-                    android:repeatMode="reverse"
-                    android:startOffset="500"
-                    android:valueFrom="0"
-                    android:valueTo="-360"
-                    android:valueType="floatType"/>
-            </set>
+                android:repeatMode="reverse"
+                android:valueFrom="0"
+                android:valueTo="-360"
+                android:valueType="floatType" />
+            <!--            </set>-->
         </aapt:attr>
     </target>
     <target android:name="fg">
         <aapt:attr name="android:animation">
-            <set>
-                <objectAnimator
-                    android:duration="3000"
-                    android:interpolator="@android:anim/accelerate_decelerate_interpolator"
-                    android:propertyName="rotation"
-                    android:repeatCount="infinite"
-                    android:repeatMode="reverse"
-                    android:startOffset="500"
-                    android:valueFrom="0"
-                    android:valueTo="360"
-                    android:valueType="floatType"/>
-            </set>
+            <!--            <set>-->
+            <objectAnimator
+                android:duration="3000"
+                android:interpolator="@android:anim/accelerate_decelerate_interpolator"
+                android:propertyName="rotation"
+                android:repeatCount="infinite"
+                android:repeatMode="reverse"
+                android:valueFrom="0"
+                android:valueTo="360"
+                android:valueType="floatType" />
+            <!--            </set>-->
         </aapt:attr>
     </target>
 </animated-vector>

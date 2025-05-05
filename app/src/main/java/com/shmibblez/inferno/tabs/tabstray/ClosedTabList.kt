@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -38,7 +37,6 @@ import androidx.compose.ui.unit.sp
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.DismissibleItemBackground
 import com.shmibblez.inferno.compose.SwipeToDismissBox
-import com.shmibblez.inferno.compose.SwipeToDismissState
 import com.shmibblez.inferno.compose.base.InfernoCheckbox
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.compose.rememberSwipeToDismissState
@@ -124,7 +122,7 @@ private fun ViewFullHistoryItem(
         horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.Start),
     ) {
         Icon(
-            painter = painterResource(R.drawable.ic_history),
+            painter = painterResource(R.drawable.ic_history_24),
             contentDescription = stringResource(R.string.recently_closed_show_full_history),
             modifier = Modifier.size(24.dp),
             tint = Color.White,

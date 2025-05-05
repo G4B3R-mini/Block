@@ -224,7 +224,7 @@ open class DefaultToolbarMenu(
 
     private val historyItem = BrowserMenuImageText(
         context.getString(R.string.library_history),
-        R.drawable.ic_history,
+        R.drawable.ic_history_24,
         primaryTextColor(),
     ) {
         onItemTapped.invoke(ToolbarMenu.Item.History)

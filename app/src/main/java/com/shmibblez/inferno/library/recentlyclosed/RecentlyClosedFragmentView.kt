@@ -62,7 +62,7 @@ class RecentlyClosedFragmentView(
             iconView.setImageDrawable(
                 AppCompatResources.getDrawable(
                     containerView.context,
-                    R.drawable.ic_history,
+                    R.drawable.ic_history_24,
                 ),
             )
             setOnClickListener {

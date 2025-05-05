@@ -22,10 +22,16 @@ import mozilla.components.lib.state.State
 import mozilla.components.lib.state.Store
 import mozilla.components.lib.state.ext.channel
 import mozilla.components.lib.state.ext.flow
+import kotlin.math.roundToInt
+@Composable
+fun Int.pxToDp() = with(LocalDensity.current) {(this@pxToDp / density).dp}
 
-fun Int.pxToDp() = (this@pxToDp / Resources.getSystem().displayMetrics.density).dp
+@Composable
+fun Dp.dpToPx() = with(LocalDensity.current) { (this@dpToPx.value * density).roundToInt()}
 
-fun Dp.dpToPx() = (this.value * Resources.getSystem().displayMetrics.density).toInt()
+fun Int.pxToDp(context: Context) = (this@pxToDp / context.resources.displayMetrics.density).dp
+
+fun Dp.dpToPx(context: Context) = (this@dpToPx.value * context.resources.displayMetrics.density).roundToInt()
 
 @SuppressLint("ComposableNaming")
 @OptIn(ExperimentalCoroutinesApi::class)

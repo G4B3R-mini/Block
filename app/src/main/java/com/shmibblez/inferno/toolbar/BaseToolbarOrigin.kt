@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -79,20 +78,19 @@ import com.shmibblez.inferno.toolbar.ToolbarOnlyComponents.Companion.ToolbarSepa
 // start padding + (width - vertical padding since 1:1 aspect ratio) + expand icon start padding + expand icon size + expand icon end padding
 private val TOOLBAR_SEARCH_ENGINE_SELECTOR_WIDTH =
     4.dp + (ComponentDimens.TOOLBAR_HEIGHT - 16.dp - 4.dp) + (4.dp + 6.dp + 4.dp) + 4.dp
-private val TOOLBAR_SEARCH_ENGINE_SELECTOR_WIDTH_PX = TOOLBAR_SEARCH_ENGINE_SELECTOR_WIDTH.dpToPx()
+//private val TOOLBAR_SEARCH_ENGINE_SELECTOR_WIDTH_PX = TOOLBAR_SEARCH_ENGINE_SELECTOR_WIDTH.dpToPx(context)
 
 // start padding + indicator icon size + end padding
 private val TOOLBAR_ACTION_WIDTH = 4.dp + TOOLBAR_INDICATOR_ICON_SIZE + 8.dp
-private val TOOLBAR_ACTION_WIDTH_PX = TOOLBAR_ACTION_WIDTH.dpToPx()
+//private val TOOLBAR_ACTION_WIDTH_PX = TOOLBAR_ACTION_WIDTH.dpToPx()
 
-//
 private fun toolbarIndicatorWidth(siteTrackingProtection: SiteTrackingProtection): Dp {
     return 8.dp + TOOLBAR_INDICATOR_ICON_SIZE + TOOLBAR_INDICATOR_ICON_PADDING + (if (siteTrackingProtection != SiteTrackingProtection.OFF_GLOBALLY) TOOLBAR_INDICATOR_ICON_SIZE + TOOLBAR_INDICATOR_ICON_PADDING + 1.dp + TOOLBAR_INDICATOR_ICON_PADDING else 0.dp) + 4.dp
 }
 
-private fun toolbarIndicatorWidthPx(siteTrackingProtection: SiteTrackingProtection): Int {
-    return toolbarIndicatorWidth(siteTrackingProtection).dpToPx()
-}
+//private fun toolbarIndicatorWidthPx(siteTrackingProtection: SiteTrackingProtection): Int {
+//    return toolbarIndicatorWidth(siteTrackingProtection).dpToPx()
+//}
 
 /**
  * @param tabSessionState
@@ -109,7 +107,7 @@ private fun toolbarIndicatorWidthPx(siteTrackingProtection: SiteTrackingProtecti
  * @param animationValue
  */
 @Composable
-fun ToolbarOrigin(
+internal fun BaseToolbarOrigin(
     tabSessionState: TabSessionState,
     searchEngine: SearchEngine,
     siteSecure: SiteSecurity,
@@ -117,7 +115,6 @@ fun ToolbarOrigin(
     setAwesomeSearchText: (String) -> Unit,
     setOnAutocomplete: ((TextFieldValue) -> Unit) -> Unit,
     originModifier: Modifier = Modifier,
-    indicatorModifier: Modifier = Modifier,
     editMode: Boolean,
     onStartSearch: () -> Unit,
     onStopSearch: () -> Unit,
@@ -153,9 +150,7 @@ fun ToolbarOrigin(
     var indicatorWidth by remember { mutableStateOf(toolbarIndicatorWidth(siteTrackingProtection)) }
     var indicatorWidthPx by remember {
         mutableIntStateOf(
-            toolbarIndicatorWidthPx(
-                siteTrackingProtection
-            )
+            indicatorWidth.dpToPx(context)
         )
     }
     val originFocusRequester = remember { FocusRequester() }
@@ -163,7 +158,7 @@ fun ToolbarOrigin(
 
     LaunchedEffect(siteTrackingProtection) {
         indicatorWidth = toolbarIndicatorWidth(siteTrackingProtection)
-        indicatorWidthPx = toolbarIndicatorWidthPx(siteTrackingProtection)
+        indicatorWidthPx = indicatorWidth.dpToPx(context)
     }
 
     LaunchedEffect(editMode, tabSessionState.content.url, tabSessionState.content.searchTerms) {
@@ -303,7 +298,7 @@ fun ToolbarOrigin(
                 .align(Alignment.CenterStart)
                 .offset {
                     IntOffset(
-                        x = (-TOOLBAR_SEARCH_ENGINE_SELECTOR_WIDTH_PX * animationValue).roundToInt(),
+                        x = (-TOOLBAR_SEARCH_ENGINE_SELECTOR_WIDTH.dpToPx(context) * animationValue).roundToInt(),
                         y = 0,
                     )
                 },
@@ -311,7 +306,7 @@ fun ToolbarOrigin(
 
         // indicators
         Row(
-            modifier = indicatorModifier
+            modifier = Modifier
                 .padding(start = 8.dp, top = 4.dp, bottom = 4.dp)
                 .background(Color.Transparent)
                 .align(Alignment.CenterStart)
@@ -340,7 +335,7 @@ fun ToolbarOrigin(
                 )
                 .size(TOOLBAR_INDICATOR_ICON_SIZE)
                 .offset {
-                    IntOffset(x = (TOOLBAR_ACTION_WIDTH_PX * animationValue).roundToInt(), y = 0)
+                    IntOffset(x = (TOOLBAR_ACTION_WIDTH.toPx() * animationValue).roundToInt(), y = 0)
                 },
         ) {
             if (editMode && undoClearText != null) {

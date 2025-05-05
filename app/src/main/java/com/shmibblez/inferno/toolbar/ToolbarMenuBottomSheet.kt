@@ -24,6 +24,7 @@ import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarPrivateMode
 import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarRequestReaderView
 import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarBack
 import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarForward
+import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarHistory
 import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarOriginMini
 import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarReload
 import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarRequestDesktopSite
@@ -44,6 +45,7 @@ fun ToolbarMenuBottomSheet(
     onRequestSearchBar: () -> Unit,
     onNavToSettings: () -> Unit,
     onNavToTabsTray: () -> Unit,
+    onNavToHistory: () -> Unit,
 ) {
     if (tabSessionState == null) return
     ModalBottomSheet(
@@ -101,7 +103,6 @@ fun ToolbarMenuBottomSheet(
                     tabCount = tabCount,
                     dismissMenuSheet = onDismissMenuBottomSheet,
                     onNavToTabsTray =   onNavToTabsTray,
-
                 )
             },
             {
@@ -129,6 +130,13 @@ fun ToolbarMenuBottomSheet(
                     type = ToolbarOptionType.EXPANDED,
                     onRequestSearchBar = onRequestSearchBar,
                 )
+            },
+            {
+                ToolbarHistory(
+                    type = ToolbarOptionType.EXPANDED,
+                    onNavToHistory= onNavToHistory,
+                    dismissMenuSheet = onDismissMenuBottomSheet,
+                    )
             },
             {
                 ToolbarSettings(

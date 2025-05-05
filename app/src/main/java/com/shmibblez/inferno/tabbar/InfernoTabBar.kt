@@ -2,13 +2,8 @@ package com.shmibblez.inferno.tabbar
 
 import android.content.Context
 import android.util.Log
-import androidx.compose.animation.Animatable
-import androidx.compose.animation.animateColor
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -53,8 +48,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.lifecycleScope
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.ComponentDimens
 import com.shmibblez.inferno.compose.base.InfernoText
@@ -63,7 +56,6 @@ import com.shmibblez.inferno.ext.dpToPx
 import com.shmibblez.inferno.ext.newTab
 import com.shmibblez.inferno.ext.pxToDp
 import com.shmibblez.inferno.toolbar.ToolbarOnlyComponents.Companion.ProgressBar
-import kotlinx.coroutines.launch
 import mozilla.components.browser.state.ext.getUrl
 import mozilla.components.browser.state.state.TabSessionState
 
@@ -85,7 +77,7 @@ inline fun <T> Iterable<T>.findIndex(predicate: (T) -> Boolean): Int? {
 val verticalDividerPadding = 6.dp
 
 @Composable
-fun BrowserTabBar(tabList: List<TabSessionState>, selectedTab: TabSessionState?) {
+fun InfernoTabBar(tabList: List<TabSessionState>, selectedTab: TabSessionState?) {
     val context = LocalContext.current
     val localConfig = LocalConfiguration.current
     val listState = rememberLazyListState()
@@ -101,9 +93,9 @@ fun BrowserTabBar(tabList: List<TabSessionState>, selectedTab: TabSessionState?)
     // scroll to active tab
     val i = tabList.findIndex { it.id == selectedTab?.id }
     LaunchedEffect(i, LocalConfiguration.current.orientation) {
-        val sw = localConfig.screenWidthDp.dp
+        // scroll to selected tab, auto centers
         if (i != null) listState.animateScrollToItem(
-            i, -(sw - ComponentDimens.TAB_WIDTH).dpToPx() / 2
+            i, 0,
         )
     }
 
@@ -136,7 +128,7 @@ fun BrowserTabBar(tabList: List<TabSessionState>, selectedTab: TabSessionState?)
                         .fillMaxSize()
                         .onGloballyPositioned {
                             Log.d("BrowserTabBar", "onGloballyPositioned called")
-                            val w = (it.size.width.pxToDp() - 16.dp) / tabList.size
+                            val w = (it.size.width.pxToDp(context) - 16.dp) / tabList.size
                             tabAutoWidth = when (w > ComponentDimens.TAB_WIDTH) {
                                 true -> w
                                 false -> ComponentDimens.TAB_WIDTH
@@ -225,7 +217,8 @@ fun BrowserTabBar(tabList: List<TabSessionState>, selectedTab: TabSessionState?)
             ProgressBar(
                 progress = (selectedTab.content.progress.toFloat()) / 100F,
                 modifier = Modifier
-                    .align(Alignment.TopCenter),
+                    .align(Alignment.TopCenter)
+                    .height(2.dp),
             )
         }
     }

@@ -18,13 +18,11 @@ import mozilla.components.browser.menu.ext.getHighlight
 import mozilla.components.browser.menu.item.BrowserMenuDivider
 import mozilla.components.browser.menu.item.BrowserMenuHighlightableItem
 import mozilla.components.browser.menu.item.BrowserMenuImageText
-import mozilla.components.browser.menu.item.SimpleBrowserMenuItem
 import mozilla.components.concept.sync.AccountObserver
 import mozilla.components.concept.sync.AuthType
 import mozilla.components.concept.sync.OAuthAccount
 import mozilla.components.support.ktx.android.content.getColorFromAttr
 //import mozilla.telemetry.glean.private.NoExtras
-import com.shmibblez.inferno.Config
 //import com.shmibblez.inferno.GleanMetrics.AppMenu
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.components.accounts.AccountState
@@ -122,7 +120,7 @@ class HomeMenu(
 
         val historyItem = BrowserMenuImageText(
             context.getString(R.string.library_history),
-            R.drawable.ic_history,
+            R.drawable.ic_history_24,
             primaryTextColor,
         ) {
             onItemTapped.invoke(Item.History)

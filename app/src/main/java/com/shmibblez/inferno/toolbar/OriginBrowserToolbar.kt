@@ -18,12 +18,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.Dp
@@ -37,6 +39,7 @@ import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarForward
 import com.shmibblez.inferno.toolbar.ToolbarOnlyOptions.Companion.ToolbarMenuIcon
 import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarReload
 import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarShowTabsTray
+import com.shmibblez.inferno.toolbar.ToolbarOnlyOptions.Companion.ToolbarOrigin
 import mozilla.components.browser.state.search.SearchEngine
 import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.compose.browser.awesomebar.AwesomeBarDefaults
@@ -62,31 +65,30 @@ private fun iconsWidth(nOptions: Int): Dp {
     return TOOLBAR_ICON_PADDING + (TOOLBAR_ICON_SIZE + TOOLBAR_ICON_PADDING) * nOptions
 }
 
-private fun iconsWidthPx(nOptions: Int): Int {
-    return iconsWidth(nOptions).dpToPx()
-}
+//private fun iconsWidthPx(nOptions: Int): Int {
+//    return iconsWidth(nOptions).dpToPx()
+//}
 
 @Composable
-fun BrowserToolbar(
-    tabSessionState: TabSessionState?,
-    searchEngine: SearchEngine?,
+internal fun OriginBrowserToolbar(
+    // item params
+    tabSessionState: TabSessionState,
     tabCount: Int,
     onShowMenuBottomSheet: () -> Unit,
+    onDismissMenuBottomSheet: () -> Unit,
+    onRequestSearchBar: () -> Unit,
+    onActivateFindInPage: () -> Unit,
+    onActivateReaderView: () -> Unit,
+    onNavToSettings: () -> Unit,
+    onNavToHistory: () -> Unit,
     onNavToTabsTray: () -> Unit,
+    // origin params
+    searchEngine: SearchEngine?,
     editMode: Boolean,
     onStartSearch: () -> Unit,
     onStopSearch: () -> Unit,
 ) {
-    if (tabSessionState == null || searchEngine == null) {
-        PlaceholderBrowserToolbar()
-        return
-    }
-
     val animationValue = remember { Animatable(if (editMode) EDIT_VALUE else DISPLAY_VALUE) }
-    val leftWidth = remember { iconsWidth(2) }
-    val leftWidthPx = remember { iconsWidthPx(2) }
-    val rightWidth = remember { iconsWidth(3) }
-    val rightWidthPx = remember { iconsWidthPx(3) }
 
     var awesomeSearchText by remember { mutableStateOf("") }
     val loading = tabSessionState.content.loading
@@ -100,6 +102,17 @@ fun BrowserToolbar(
     }
 
     var onAutocomplete: (TextFieldValue) -> Unit by remember { mutableStateOf({}) }
+
+    // todo: launchedeffect on config change, or better yet, pass from parent
+    var toolbarItemKeys by remember { mutableStateOf(ToolbarItems.defaultToolbarItemKeys) }
+    var indexOrigin by remember { mutableIntStateOf(toolbarItemKeys.indexOf(ToolbarItemKey.toolbar_item_origin)) }
+    var leftKeys by remember { mutableStateOf(toolbarItemKeys.take(indexOrigin)) }
+    var rightKeys by remember { mutableStateOf(toolbarItemKeys.drop(indexOrigin + 1)) }
+    val context = LocalContext.current
+    val leftWidth = remember { iconsWidth(leftKeys.size) }
+    val leftWidthPx = remember { leftWidth.dpToPx(context) }
+    val rightWidth = remember { iconsWidth(rightKeys.size) }
+    val rightWidthPx = remember { rightWidth.dpToPx(context) }
 
     Column(
         modifier = Modifier
@@ -149,7 +162,6 @@ fun BrowserToolbar(
                     start = (leftWidth * animationValue.value),
                     end = (rightWidth * animationValue.value),
                 ),
-                indicatorModifier = Modifier,
                 tabSessionState = tabSessionState,
                 searchEngine = searchEngine,
                 setAwesomeSearchText = { awesomeSearchText = it },
@@ -177,12 +189,35 @@ fun BrowserToolbar(
                     TOOLBAR_ICON_PADDING, Alignment.CenterHorizontally
                 )
             ) {
-                ToolbarBack(
-                    type = ToolbarOptionType.ICON, enabled = tabSessionState.content.canGoBack
-                )
-                ToolbarForward(
-                    type = ToolbarOptionType.ICON, enabled = tabSessionState.content.canGoForward
-                )
+                for (k in leftKeys) {
+                    ToolbarItem(
+                        key = k,
+                        type = ToolbarOptionType.ICON,
+                        tabSessionState = tabSessionState,
+                        loading = loading,
+                        tabCount = tabCount,
+                        onShowMenuBottomSheet = onShowMenuBottomSheet,
+                        onDismissMenuBottomSheet = onDismissMenuBottomSheet,
+                        onRequestSearchBar = onRequestSearchBar,
+                        onActivateFindInPage = onActivateFindInPage,
+                        onActivateReaderView = onActivateReaderView,
+                        onNavToSettings = onNavToSettings,
+                        onNavToHistory = onNavToHistory,
+                        onNavToTabsTray = onNavToTabsTray,
+//                searchEngine = searchEngine,
+//                siteSecure = siteSecure,
+//                siteTrackingProtection = siteTrackingProtection,
+//                setAwesomeSearchText = setAwesomeSearchText,
+//                setOnAutocomplete = setOnAutocomplete,
+//                originModifier = originModifier,
+//                editMode = editMode,
+//                onStartSearch = onStartSearch,
+//                onStopSearch = onStopSearch,
+//                // todo: test if still recomposes if animationValue passed directly and remembered
+//                //  in toolbar origin, might also have to have different animatable in origin composable
+//                animationValue = animationValue.value,
+                    )
+                }
             }
 
             // icons on right
@@ -200,13 +235,35 @@ fun BrowserToolbar(
                     TOOLBAR_ICON_PADDING, Alignment.CenterHorizontally
                 )
             ) {
-                ToolbarReload(type = ToolbarOptionType.ICON, enabled = true, loading = loading)
-                ToolbarShowTabsTray(
-                    type = ToolbarOptionType.ICON,
-                    tabCount = tabCount,
-                    onNavToTabsTray = onNavToTabsTray
-                )
-                ToolbarMenuIcon(onShowMenuBottomSheet = onShowMenuBottomSheet)
+                for (k in rightKeys) {
+                    ToolbarItem(
+                        key = k,
+                        type = ToolbarOptionType.ICON,
+                        tabSessionState = tabSessionState,
+                        loading = loading,
+                        tabCount = tabCount,
+                        onShowMenuBottomSheet = onShowMenuBottomSheet,
+                        onDismissMenuBottomSheet = onDismissMenuBottomSheet,
+                        onRequestSearchBar = onRequestSearchBar,
+                        onActivateFindInPage = onActivateFindInPage,
+                        onActivateReaderView = onActivateReaderView,
+                        onNavToSettings = onNavToSettings,
+                        onNavToHistory = onNavToHistory,
+                        onNavToTabsTray = onNavToTabsTray,
+//                searchEngine = searchEngine,
+//                siteSecure = siteSecure,
+//                siteTrackingProtection = siteTrackingProtection,
+//                setAwesomeSearchText = setAwesomeSearchText,
+//                setOnAutocomplete = setOnAutocomplete,
+//                originModifier = originModifier,
+//                editMode = editMode,
+//                onStartSearch = onStartSearch,
+//                onStopSearch = onStopSearch,
+//                // todo: test if still recomposes if animationValue passed directly and remembered
+//                //  in toolbar origin, might also have to have different animatable in origin composable
+//                animationValue = animationValue.value,
+                    )
+                }
             }
         }
     }

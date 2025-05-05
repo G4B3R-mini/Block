@@ -27,6 +27,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -43,9 +44,11 @@ import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarForward
 import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarReload
 import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarShare
 import mozilla.components.browser.state.ext.getUrl
+import mozilla.components.browser.state.search.SearchEngine
 import mozilla.components.browser.state.selector.normalTabs
 import mozilla.components.browser.state.selector.privateTabs
 import mozilla.components.browser.state.selector.selectedTab
+import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.feature.tabs.TabsUseCases
 import mozilla.components.support.ktx.android.content.share
 
@@ -94,6 +97,7 @@ enum class ToolbarOptionType {
 // - ToolbarBack
 // - ToolbarForward
 // - ToolbarReload
+// - ToolbarHistory
 // - ToolbarRequestDesktopSite
 // - ToolbarFindInPage
 // - ToolbarRequestReaderView
@@ -107,13 +111,10 @@ enum class ToolbarOptionType {
 // - menu only:
 //   - NavOptions
 // todo: left to add:
-//   - ToolbarHistory (history icon, go to history page)
-//   - ToolbarFindInPage (search icon)
-//   - ToolbarSettings (settings icon)
+//   - ToolbarBookmarks (bookmark icon)
 //   - ToolbarPrintPage (printer icon)
 //   - ToolbarScrollingScreenshot (scan icon)
 //   - ToolbarExtensions (extensions icon) - go to extensions page, installed
-//   - ToolbarReaderView (book icon, web icon, current is large, switch to small on bottom right)
 //   -
 
 // todo: store toolbar items in settings, add item that converts string key to composable, when() for all keys possible
@@ -129,6 +130,35 @@ internal class ToolbarOnlyOptions {
                 painter = painterResource(id = R.drawable.ic_app_menu_24),
                 contentDescription = stringResource(R.string.content_description_menu),
                 tint = Color.White
+            )
+        }
+
+        @Composable
+        fun ToolbarOrigin(
+            tabSessionState: TabSessionState,
+            searchEngine: SearchEngine,
+            siteSecure: SiteSecurity,
+            siteTrackingProtection: SiteTrackingProtection,
+            setAwesomeSearchText: (String) -> Unit,
+            setOnAutocomplete: ((TextFieldValue) -> Unit) -> Unit,
+            originModifier: Modifier = Modifier,
+            editMode: Boolean,
+            onStartSearch: () -> Unit,
+            onStopSearch: () -> Unit,
+            animationValue: Float,
+        ) {
+            BaseToolbarOrigin(
+                originModifier = originModifier,
+                tabSessionState = tabSessionState,
+                searchEngine = searchEngine,
+                setAwesomeSearchText = setAwesomeSearchText,
+                setOnAutocomplete = setOnAutocomplete,
+                siteSecure = siteSecure,
+                siteTrackingProtection = siteTrackingProtection,
+                editMode = editMode,
+                onStartSearch = onStartSearch,
+                onStopSearch = onStopSearch,
+                animationValue = animationValue,
             )
         }
     }
@@ -411,6 +441,24 @@ internal class ToolbarOptions {
                     dismissMenuSheet?.invoke()
                 },
                 enabled = enabled,
+                type = type,
+            )
+        }
+
+        @Composable
+        fun ToolbarHistory(
+            type: ToolbarOptionType,
+            onNavToHistory: () -> Unit,
+            dismissMenuSheet: (() -> Unit)? = null,
+        ) {
+            ToolbarOptionTemplate(
+                iconPainter = painterResource(R.drawable.ic_history_24),
+                description = stringResource(R.string.library_history),
+                onClick = {
+                    onNavToHistory.invoke()
+                    dismissMenuSheet?.invoke()
+                },
+                enabled = true,
                 type = type,
             )
         }

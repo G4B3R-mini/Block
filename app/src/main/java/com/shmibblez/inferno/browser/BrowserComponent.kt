@@ -140,7 +140,7 @@ import com.shmibblez.inferno.settings.biometric.BiometricPromptFeature
 import com.shmibblez.inferno.shopping.DefaultShoppingExperienceFeature
 import com.shmibblez.inferno.shopping.ReviewQualityCheckFeature
 import com.shmibblez.inferno.shortcut.PwaOnboardingObserver
-import com.shmibblez.inferno.tabbar.BrowserTabBar
+import com.shmibblez.inferno.tabbar.InfernoTabBar
 import com.shmibblez.inferno.tabs.tabstray.InfernoTabsTray
 import com.shmibblez.inferno.tabs.tabstray.InfernoTabsTrayDisplayType
 import com.shmibblez.inferno.tabs.tabstray.InfernoTabsTrayMode
@@ -151,7 +151,7 @@ import com.shmibblez.inferno.tabstray.ext.isActiveDownload
 import com.shmibblez.inferno.tabstray.ext.isNormalTab
 import com.shmibblez.inferno.theme.FirefoxTheme
 import com.shmibblez.inferno.theme.ThemeManager
-import com.shmibblez.inferno.toolbar.BrowserToolbar
+import com.shmibblez.inferno.toolbar.InfernoToolbar
 import com.shmibblez.inferno.toolbar.ToolbarMenuBottomSheet
 import com.shmibblez.inferno.wifi.SitePermissionsWifiIntegration
 import kotlinx.coroutines.CancellationException
@@ -718,8 +718,7 @@ fun BrowserComponent(
     // bottom sheet menu setup
     var showToolbarMenuBottomSheet by remember { mutableStateOf(false) }
     if (showToolbarMenuBottomSheet) {
-        ToolbarMenuBottomSheet(
-            tabSessionState = currentTab,
+        ToolbarMenuBottomSheet(tabSessionState = currentTab,
             loading = currentTab?.content?.loading ?: false,
             tabCount = tabList.size,
             onDismissMenuBottomSheet = { showToolbarMenuBottomSheet = false },
@@ -733,7 +732,7 @@ fun BrowserComponent(
             onRequestSearchBar = { /* todo */ },
             onNavToSettings = { navToSettings(navController) },
             onNavToTabsTray = { showTabsTray = true },
-        )
+            onNavToHistory = { navToHistory(navController) })
     }
 
     if (showTabsTray) {
@@ -968,8 +967,7 @@ fun BrowserComponent(
                                 map.value.private && map.value.isActiveDownload()
                             }
                             if (!isConfirmed && privateDownloads.isNotEmpty()) {
-                                showCancelledDownloadWarning(
-                                    downloadCount = privateDownloads.size,
+                                showCancelledDownloadWarning(downloadCount = privateDownloads.size,
                                     tabId = tabId,
                                     source = source,
                                     context = context,
@@ -983,8 +981,7 @@ fun BrowserComponent(
                                             )
                                         }
                                     },
-                                    dismissTabsTray = { dismissTabsTray() }
-                                )
+                                    dismissTabsTray = { dismissTabsTray() })
                                 return
                             } else {
                                 dismissTabsTray()
@@ -1192,7 +1189,7 @@ fun BrowserComponent(
     // moz components setup and shared preferences
     LaunchedEffect(engineView == null) {
         if (engineView == null) return@LaunchedEffect
-        engineView!!.setDynamicToolbarMaxHeight(bottomBarHeightDp.dpToPx() - bottomBarOffsetPx.value.toInt())
+        engineView!!.setDynamicToolbarMaxHeight(bottomBarHeightDp.dpToPx(context) - bottomBarOffsetPx.value.toInt())
 
         /* BaseBrowserFragment onViewCreated */
         // DO NOT ADD ANYTHING ABOVE THIS getProfilerTime CALL!
@@ -1888,13 +1885,13 @@ fun BrowserComponent(
                             val newOffset = (bottomBarOffsetPx.value - dy).coerceIn(
                                 0F,
                                 bottomBarHeightDp
-                                    .dpToPx()
+                                    .dpToPx(context)
                                     .toFloat()
                             )
                             coroutineScope.launch {
                                 bottomBarOffsetPx.snapTo(newOffset)
                                 engineView!!.setDynamicToolbarMaxHeight(
-                                    bottomBarHeightDp.dpToPx() - newOffset.toInt()
+                                    bottomBarHeightDp.dpToPx(context) - newOffset.toInt()
                                 )
                             }
 //                                }
@@ -1902,19 +1899,19 @@ fun BrowserComponent(
                         if (it.action == MotionEvent.ACTION_UP || it.action == MotionEvent.ACTION_CANCEL) {
                             // set bottom bar position
                             coroutineScope.launch {
-                                if (bottomBarOffsetPx.value <= (bottomBarHeightDp.dpToPx() / 2)) {
+                                if (bottomBarOffsetPx.value <= (bottomBarHeightDp.dpToPx(context) / 2)) {
                                     // if more than halfway up, go up
                                     bottomBarOffsetPx.animateTo(0F)
                                 } else {
                                     // if more than halfway down, go down
                                     bottomBarOffsetPx.animateTo(
                                         bottomBarHeightDp
-                                            .dpToPx()
+                                            .dpToPx(context)
                                             .toFloat()
                                     )
                                 }
                                 engineView!!.setDynamicToolbarMaxHeight(
-                                    bottomBarHeightDp.dpToPx() - bottomBarOffsetPx.value.toInt()
+                                    bottomBarHeightDp.dpToPx(context) - bottomBarOffsetPx.value.toInt()
                                 )
                             }
                         }
@@ -1976,14 +1973,27 @@ fun BrowserComponent(
                 ) {
                     if (browserMode == BrowserComponentMode.TOOLBAR || browserMode == BrowserComponentMode.TOOLBAR_SEARCH) {
                         if (browserMode == BrowserComponentMode.TOOLBAR) {
-                            BrowserTabBar(tabList, currentTab)
+                            InfernoTabBar(tabList, currentTab)
                         }
-                        BrowserToolbar(
+                        InfernoToolbar(
                             tabSessionState = currentTab,
-                            searchEngine = searchEngine,
                             tabCount = tabList.size,
                             onShowMenuBottomSheet = { showToolbarMenuBottomSheet = true },
+                            onDismissMenuBottomSheet = { showToolbarMenuBottomSheet = false },
+                            onRequestSearchBar = { /* todo: search bar */ },
+                            onActivateFindInPage = {
+                                browserMode = BrowserComponentMode.FIND_IN_PAGE
+                            },
+                            onActivateReaderView = {
+                                val successful = infernoReaderViewState.showReaderView()
+                                if (successful) {
+                                    browserMode = BrowserComponentMode.READER_VIEW
+                                }
+                            },
+                            onNavToSettings = { navToSettings(navController) },
+                            onNavToHistory = { navToHistory(navController) },
                             onNavToTabsTray = { showTabsTray = true },
+                            searchEngine = searchEngine,
                             editMode = browserMode == BrowserComponentMode.TOOLBAR_SEARCH,
                             onStartSearch = { browserMode = BrowserComponentMode.TOOLBAR_SEARCH },
                             onStopSearch = { browserMode = BrowserComponentMode.TOOLBAR },
@@ -2047,6 +2057,13 @@ private fun navToSettings(nav: NavController) {
     nav.nav(
         R.id.browserComponentWrapperFragment,
         BrowserComponentWrapperFragmentDirections.actionGlobalSettingsFragment(),
+    )
+}
+
+private fun navToHistory(nav: NavController) {
+    nav.nav(
+        R.id.browserComponentWrapperFragment,
+        BrowserComponentWrapperFragmentDirections.actionGlobalHistoryFragment(),
     )
 }
 
@@ -2235,8 +2252,7 @@ internal fun showCancelledDownloadWarning(
                 setInitiallySelectedTabTray = setInitiallySelectedTabTray,
                 dismissTabsTray = dismissTabsTray
             )
-        }
-    )
+        })
 //    dialog.show(parentFragmentManager, DOWNLOAD_CANCEL_DIALOG_FRAGMENT_TAG)
 }
 
@@ -4099,7 +4115,7 @@ internal fun removeLeadingAction() {
 }
 
 /**
- * This code takes care of the [BrowserToolbar] leading and navigation actions.
+ * This code takes care of the [InfernoToolbar] leading and navigation actions.
  * The older design requires a HomeButton followed by navigation buttons for tablets.
  * The newer design expects NavigationButtons and a HomeButton in landscape mode for phones and in both modes
  * for tablets.
