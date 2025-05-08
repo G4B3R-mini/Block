@@ -110,6 +110,7 @@ import com.shmibblez.inferno.share.SaveToPDFMiddleware
 //import com.shmibblez.inferno.telemetry.TelemetryMiddleware
 import com.shmibblez.inferno.utils.getUndoDelay
 import org.mozilla.geckoview.GeckoRuntime
+import org.mozilla.geckoview.GeckoWebExecutor
 import java.util.concurrent.TimeUnit
 
 /**
@@ -127,22 +128,40 @@ class Core(
      */
     val engine: Engine by lazyMonitored {
         val defaultSettings = DefaultSettings(
-            requestInterceptor = requestInterceptor,
-            remoteDebuggingEnabled = context.settings().isRemoteDebuggingEnabled && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M,
-            testingModeEnabled = false,
-            trackingProtectionPolicy = trackingProtectionPolicyFactory.createTrackingProtectionPolicy(),
-            historyTrackingDelegate = HistoryDelegate(lazyHistoryStorage),
-            preferredColorScheme = getPreferredColorScheme(),
+//            javascriptEnabled = ,
+//            domStorageEnabled = ,
+//            webFontsEnabled = ,
             automaticFontSizeAdjustment = context.settings().shouldUseAutoSize,
-            fontInflationEnabled = context.settings().shouldUseAutoSize,
+//            automaticLanguageAdjustment = ,
+//            mediaPlaybackRequiresUserGesture = ,
+            trackingProtectionPolicy = trackingProtectionPolicyFactory.createTrackingProtectionPolicy(),
+            requestInterceptor = requestInterceptor,
+            historyTrackingDelegate = HistoryDelegate(lazyHistoryStorage),
+//            userAgentString = ,
+//            javaScriptCanOpenWindowsAutomatically = ,
+//            displayZoomControls = ,
+//            loadWithOverviewMode = ,
+//            useWideViewPort = ,
+//            allowFileAccess = ,
+//            allowFileAccessFromFileURLs = ,
+//            allowUniversalAccessFromFileURLs = ,
+//            allowContentAccess = ,
+//            verticalScrollBarEnabled = ,
+//            horizontalScrollBarEnabled = ,
+            remoteDebuggingEnabled = context.settings().isRemoteDebuggingEnabled && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M,
+//            supportMultipleWindows = ,
+            preferredColorScheme = getPreferredColorScheme(),
+            testingModeEnabled = false,
             suspendMediaWhenInactive = false,
+            fontInflationEnabled = context.settings().shouldUseAutoSize,
+//            fontSizeFactor = ,
             forceUserScalableContent = context.settings().forceEnableZoom,
             loginAutofillEnabled = context.settings().shouldAutofillLogins,
-            enterpriseRootsEnabled = context.settings().allowThirdPartyRootCerts,
             clearColor = ContextCompat.getColor(
                 context,
                 R.color.fx_mobile_layer_color_1,
             ),
+            enterpriseRootsEnabled = context.settings().allowThirdPartyRootCerts,
             httpsOnlyMode = context.settings().getHttpsOnlyMode(),
             globalPrivacyControlEnabled = context.settings().shouldEnableGlobalPrivacyControl,
             fingerprintingProtection = if (FxNimbus.features.fingerprintingProtection.value().enabled) {
@@ -155,6 +174,7 @@ class Core(
             } else {
                 context.settings().blockSuspectedFingerprintersPrivateBrowsing
             },
+//            fingerprintingProtectionOverrides = ,
             fdlibmMathEnabled = FxNimbus.features.fingerprintingProtection.value().fdlibmMath,
             cookieBannerHandlingMode = context.settings().getCookieBannerHandling(),
             cookieBannerHandlingModePrivateBrowsing = context.settings()
@@ -162,14 +182,20 @@ class Core(
             cookieBannerHandlingDetectOnlyMode = context.settings().shouldEnableCookieBannerDetectOnly,
             cookieBannerHandlingGlobalRules = context.settings().shouldEnableCookieBannerGlobalRules,
             cookieBannerHandlingGlobalRulesSubFrames = context.settings().shouldEnableCookieBannerGlobalRulesSubFrame,
+//            queryParameterStripping = ,
+//            queryParameterStrippingPrivateBrowsing = ,
+//            queryParameterStrippingAllowList = ,
+//            queryParameterStrippingStripList = ,
             emailTrackerBlockingPrivateBrowsing = true,
             userCharacteristicPingCurrentVersion = FxNimbus.features.userCharacteristics.value().currentVersion,
-            getDesktopMode = {
-                store.state.desktopMode
-            },
             webContentIsolationStrategy = WebContentIsolationStrategy.ISOLATE_HIGH_VALUE,
             fetchPriorityEnabled = FxNimbus.features.networking.value().fetchPriorityEnabled,
             parallelMarkingEnabled = FxNimbus.features.javascript.value().parallelMarkingEnabled,
+            getDesktopMode = {
+                store.state.desktopMode
+            }, 
+//            cookieBehaviorOptInPartitioning =,
+//            cookieBehaviorOptInPartitioningPBM =
         )
 
         // Apply fingerprinting protection overrides if the feature is enabled in Nimbus
@@ -238,6 +264,7 @@ class Core(
         )
     }
 
+    // TODO: datastore
     private val Context.dataStore by preferencesDataStore(
         name = ReportSiteDomainsRepository.REPORT_SITE_DOMAINS_REPOSITORY_NAME,
     )
@@ -424,6 +451,7 @@ class Core(
 //    val adsTelemetry by lazyMonitored {
 //        AdsTelemetry()
 //    }
+
 
     val searchTelemetry by lazyMonitored {
         InContentTelemetry()

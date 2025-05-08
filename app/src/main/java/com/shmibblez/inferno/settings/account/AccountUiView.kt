@@ -28,7 +28,6 @@ class AccountUiView(
     private val httpClient: Client,
     private val updateFxAAllowDomesticChinaServerMenu: () -> Unit,
 ) {
-
     private val preferenceSignIn =
         fragment.requirePreference<Preference>(R.string.pref_key_sign_in)
     private val preferenceFirefoxAccount =

@@ -6,6 +6,7 @@ package com.shmibblez.inferno
 
 import android.content.Context
 import android.net.ConnectivityManager
+import android.util.Log
 import androidx.core.content.getSystemService
 import androidx.navigation.NavController
 import mozilla.components.browser.errorpages.ErrorPages

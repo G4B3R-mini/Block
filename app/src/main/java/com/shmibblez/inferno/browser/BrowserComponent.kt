@@ -2118,6 +2118,7 @@ fun MozEngineView(
         gv.layoutParams.height = LayoutParams.MATCH_PARENT
         gv.setBackgroundColor(android.graphics.Color.TRANSPARENT)
         gv.visibility = View.VISIBLE
+        gv.setBackgroundColor(android.graphics.Color.DKGRAY)
         gv.isEnabled = true
         gv.isActivated = true
         gv.isVisible = true

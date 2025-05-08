@@ -3,17 +3,22 @@
 accompanistDrawablepainter = "0.37.0"
 activityCompose = "1.10.1"
 android-components = "134.0.20241117092920"
+datastore = "1.1.6"
+datastorePreferences = "1.1.6"
+gradle = "3.2.1"
+kotlinGradlePlugin = "1.2.10"
 mozilla-browser-engine-gecko = "134.0.20241117092920"
 #compose-base-v = "135.0b3"
 #browser-search = "75.0.9"
 pagingCommon = "3.3.6"
+protobufGradlePlugin = "0.9.5"
+protobufJavalite = "4.28.2"
 tooling-nimbus-gradle = "111.0.20230213143237"
 
 # AGP
 android-gradle-plugin = "8.7.3"
 
 # Kotlin
-datastorePreferences = "1.1.3"
 kotlin = "2.0.21"
 kotlinx-coroutines = "1.9.0"
 
@@ -26,16 +31,16 @@ androidx-annotation = "1.9.1"
 androidx-appcompat = "1.7.0"
 androidx-browser = "1.8.0"
 androidx-cardview = "1.0.0"
-androidx-composeBom = "2025.02.00"
+androidx-composeBom = "2025.05.00"
 androidx-constraintlayout = "2.2.1"
 androidx-coordinatorlayout = "1.3.0"
-androidx-core = "1.15.0"
+androidx-core = "1.16.0"
 androidx-fragment = "1.8.6"
-androidx-lifecycle = "2.8.7"
+androidx-lifecycle = "2.9.0"
 androidx-preference = "1.2.1"
 androidx-recyclerview = "1.4.0"
 androidx-swiperefreshlayout = "1.1.0"
-androidx-work = "2.10.0"
+androidx-work = "2.10.1"
 
 # AndroidX Testing
 androidx-test-core = "1.6.1"
@@ -54,21 +59,22 @@ ktlint = "0.50.0"
 hamcrest = "2.2"
 jacoco = "0.8.12"
 junit = "4.13.2"
-navigationCompose = "2.8.8"
+navigationCompose = "2.9.0"
 okhttp = "4.12.0"
 #okio = "3.9.0"
 pagingCommonAndroid = "3.3.6"
 coreSplashscreen = "1.0.1"
-navigationUiKtx = "2.8.8"
+navigationUiKtx = "2.9.0"
 toolingNimbusGradleAppService = "134.0"
 pagingRuntimeKtx = "3.3.6"
 biometricKtx = "1.4.0-alpha02"
-lifecycleService = "2.8.7"
-animationGraphicsAndroid = "1.8.0"
+lifecycleService = "2.9.0"
+animationGraphicsAndroid = "1.8.1"
 
 [libraries]
 # Kotlin
 accompanist-drawablepainter = { module = "com.google.accompanist:accompanist-drawablepainter", version.ref = "accompanistDrawablepainter" }
+androidx-datastore = { module = "androidx.datastore:datastore", version.ref = "datastore" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 androidx-navigation-fragment = { module = "androidx.navigation:navigation-fragment", version.ref = "navigationCompose" }
@@ -78,6 +84,8 @@ androidx-paging-common = { module = "androidx.paging:paging-common", version.ref
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
 androidx-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest" }
 androidx-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
+gradle = { module = "com.android.tools.build:gradle", version.ref = "gradle" }
+kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlinGradlePlugin" }
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 
 # Google
@@ -228,6 +236,8 @@ mozilla-ui-widgets = { group = "org.mozilla.components", name = "ui-widgets", ve
 androidx-paging-common-android = { group = "androidx.paging", name = "paging-common-android", version.ref = "pagingCommonAndroid" }
 androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "coreSplashscreen" }
 androidx-navigation-ui-ktx = { group = "androidx.navigation", name = "navigation-ui-ktx", version.ref = "navigationUiKtx" }
+protobuf-gradle-plugin = {module = "com.google.protobuf:protobuf-gradle-plugin", version.ref = "protobufGradlePlugin"}
+protobuf-javalite = { module = "com.google.protobuf:protobuf-javalite", version.ref = "protobufJavalite" }
 tooling-nimbus-gradle-app-services = { module = "org.mozilla.appservices:tooling-nimbus-gradle", version.ref = "toolingNimbusGradleAppService" }
 androidx-paging-runtime-ktx = { group = "androidx.paging", name = "paging-runtime-ktx", version.ref = "pagingRuntimeKtx" }
 androidx-biometric-ktx = { group = "androidx.biometric", name = "biometric-ktx", version.ref = "biometricKtx" }

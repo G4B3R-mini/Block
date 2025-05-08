@@ -31,6 +31,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import mozilla.components.browser.engine.gecko.GeckoEngineSession
 import mozilla.components.browser.state.search.SearchEngine
 import mozilla.components.browser.state.selector.normalTabs
 import mozilla.components.browser.state.selector.privateTabs
@@ -41,6 +42,7 @@ import mozilla.components.browser.state.state.selectedOrDefaultSearchEngine
 import mozilla.components.lib.state.ext.flowScoped
 import mozilla.components.support.base.feature.ActivityResultHandler
 import mozilla.components.support.base.feature.UserInteractionHandler
+import org.mozilla.geckoview.GeckoSession
 
 class OnActivityResultModel(
     val requestCode: Int, val data: Intent?, val resultCode: Int,
@@ -112,6 +114,7 @@ class BrowserComponentWrapperFragment : Fragment(), UserInteractionHandler, Acti
 
     private var initialized = false
     private var preinitialized = false
+
     // todo: test, before run also make changes to tab bar (tab layout)
     private var awaitingNewTab = false
 
@@ -170,74 +173,74 @@ class BrowserComponentWrapperFragment : Fragment(), UserInteractionHandler, Acti
 
         browserStateObserver = store.flowScoped(viewLifecycleOwner) { flow ->
             flow.map { it }.collect {
-                    val currentTab = it.selectedTab
+                val currentTab = it.selectedTab
 
-                    if (!initialized && !preinitialized) {
-                        // if first run, preinit and delay for a bit
-                        preinitialized = true
-                        delay(INIT_JOB_MILLIS)
-                        initialized = true
-                        return@collect
-                    } else if (!initialized && preinitialized && currentTab != null) {
-                        // if not init, delaying, and current tab isn't null, warm up complete, set
-                        // init to true and continue
-                        initialized = true
-                    } else if (!initialized && preinitialized) {
-                        // if not init and delaying, return
-                        return@collect
-                    } else {
-                        // if init complete continue
-                    }
+                if (!initialized && !preinitialized) {
+                    // if first run, preinit and delay for a bit
+                    preinitialized = true
+                    delay(INIT_JOB_MILLIS)
+                    initialized = true
+                    return@collect
+                } else if (!initialized && currentTab != null) {
+                    // if not init, delaying, and current tab isn't null, warm up complete, set
+                    // init to true and continue
+                    initialized = true
+                } else if (!initialized) {
+                    // if not init and delaying, return
+                    return@collect
+                } else {
+                    // if init complete continue
+                }
 
-                    val tabList: List<TabSessionState>
+                val tabList: List<TabSessionState>
 
-                    Log.d("WrapperFrag", "content update")
-                    // if no tab selected, false
-                    val isPrivateSession: Boolean = currentTab?.content?.private ?: false
+//                Log.d("BrowserWrapperFrag", "content update")
+                // if no tab selected, false
+                val isPrivateSession: Boolean = currentTab?.content?.private ?: false
 //                val mode = BrowsingMode.fromBoolean(isPrivateSession)
 //                (context.getActivity()!! as HomeActivity).browsingModeManager.mode = mode
 //                context.components.appStore.dispatch(AppAction.ModeChange(mode))
-                    val selectedTabsTrayTab: InfernoTabsTraySelectedTab =
-                        if (isPrivateSession) InfernoTabsTraySelectedTab.PrivateTabs else InfernoTabsTraySelectedTab.NormalTabs
-                    tabList =
-                        if (isPrivateSession) it.privateTabs else it.normalTabs // it.toTabList().first
-                    val normalTabs: List<TabSessionState> = it.normalTabs
-                    val privateTabs: List<TabSessionState> = it.privateTabs
-                    val closedTabs: List<TabState> = it.closedTabs
-                    // if no tab selected, select one
-                    if (currentTab == null) {
-                        if (tabList.isNotEmpty()) {
-                            val lastNormalTabId = store.state.lastOpenedNormalTab?.id
-                            if (tabList.any { tab -> tab.id == lastNormalTabId }) {
-                                requireComponents.useCases.tabsUseCases.selectTab(
-                                    lastNormalTabId!!
-                                )
-                            } else {
-                                requireComponents.useCases.tabsUseCases.selectTab(tabList.last().id)
-                            }
-                        } else if (!awaitingNewTab) {
-                            // if tab list empty add new tab
-                            requireComponents.newTab(false)
-                            awaitingNewTab = true
+                val selectedTabsTrayTab: InfernoTabsTraySelectedTab =
+                    if (isPrivateSession) InfernoTabsTraySelectedTab.PrivateTabs else InfernoTabsTraySelectedTab.NormalTabs
+                tabList =
+                    if (isPrivateSession) it.privateTabs else it.normalTabs // it.toTabList().first
+                val normalTabs: List<TabSessionState> = it.normalTabs
+                val privateTabs: List<TabSessionState> = it.privateTabs
+                val closedTabs: List<TabState> = it.closedTabs
+                // if no tab selected, select one
+                if (currentTab == null) {
+                    if (tabList.isNotEmpty()) {
+                        val lastNormalTabId = store.state.lastOpenedNormalTab?.id
+                        if (tabList.any { tab -> tab.id == lastNormalTabId }) {
+                            requireComponents.useCases.tabsUseCases.selectTab(
+                                lastNormalTabId!!
+                            )
+                        } else {
+                            requireComponents.useCases.tabsUseCases.selectTab(tabList.last().id)
                         }
-                    } else {
-                        awaitingNewTab = false
+                    } else if (!awaitingNewTab) {
+                        // if tab list empty add new tab
+                        requireComponents.newTab(false)
+                        awaitingNewTab = true
                     }
-                    val searchEngine: SearchEngine? = it.search.selectedOrDefaultSearchEngine!!
-                    val pageType: BrowserComponentPageType = resolvePageType(currentTab)
-
-                    browserViewModel.update(
-                        tabList = tabList,
-                        normalTabs = normalTabs,
-                        privateTabs = privateTabs,
-                        closedTabs = closedTabs,
-                        currentTab = currentTab,
-                        isPrivateSession = isPrivateSession,
-                        searchEngine = searchEngine,
-                        pageType = pageType,
-                        selectedTabsTrayTab = selectedTabsTrayTab,
-                    )
+                } else {
+                    awaitingNewTab = false
                 }
+                val searchEngine: SearchEngine? = it.search.selectedOrDefaultSearchEngine!!
+                val pageType: BrowserComponentPageType = resolvePageType(currentTab)
+
+                browserViewModel.update(
+                    tabList = tabList,
+                    normalTabs = normalTabs,
+                    privateTabs = privateTabs,
+                    closedTabs = closedTabs,
+                    currentTab = currentTab,
+                    isPrivateSession = isPrivateSession,
+                    searchEngine = searchEngine,
+                    pageType = pageType,
+                    selectedTabsTrayTab = selectedTabsTrayTab,
+                )
+            }
         }
 
         requireContext().components.crashReporter.install(requireContext())
@@ -284,15 +287,15 @@ class BrowserComponentWrapperFragment : Fragment(), UserInteractionHandler, Acti
     }
 
     override fun onActivityResult(requestCode: Int, data: Intent?, resultCode: Int): Boolean {
-        Log.d("BrowserComponentWFrag", "BrowserComponentWrapperFragment.onActivityResult called")
+        Log.d("BrowserWrapperFrag", "BrowserComponentWrapperFragment.onActivityResult called")
         Log.d(
-            "BrowserComponentWFrag",
+            "BrowserWrapperFrag",
             "BrowserComponentWrapperFragment.onActivityResult, onActivityResultHandler: $onActivityResultHandler"
         )
 
         if (onActivityResultHandler != null) {
             Log.d(
-                "BrowserComponentWFrag",
+                "BrowserWrapperFrag",
                 "BrowserComponentWrapperFragment.onActivityResult, handled correctly"
             )
             return onActivityResultHandler!!.invoke(

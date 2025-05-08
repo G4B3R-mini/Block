@@ -1,8 +1,7 @@
 package com.shmibblez.inferno.toolbar
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.TextFieldValue
+import com.shmibblez.inferno.toolbar.ToolbarOnlyOptions.Companion.ToolbarMenuIcon
 import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarBack
 import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarFindInPage
 import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarForward
@@ -15,13 +14,23 @@ import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarRequestRead
 import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarSettings
 import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarShare
 import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarShowTabsTray
-import com.shmibblez.inferno.toolbar.ToolbarOnlyOptions.Companion.ToolbarMenuIcon
-import com.shmibblez.inferno.toolbar.ToolbarOnlyOptions.Companion.ToolbarOrigin
-import mozilla.components.browser.state.search.SearchEngine
 import mozilla.components.browser.state.state.TabSessionState
 
 internal enum class ToolbarItemKey {
-    toolbar_item_settings, toolbar_item_origin, toolbar_item_origin_mini, toolbar_item_back, toolbar_item_forward, toolbar_item_reload, toolbar_item_history, toolbar_item_request_desktop, toolbar_item_find_in_page, toolbar_item_request_reader_view, toolbar_item_private_mode, toolbar_item_show_tabs_tray, toolbar_item_share, toolbar_item_menu;
+    toolbar_item_settings,
+    toolbar_item_origin,
+    toolbar_item_origin_mini,
+    toolbar_item_back,
+    toolbar_item_forward,
+    toolbar_item_reload,
+    toolbar_item_history,
+    toolbar_item_request_desktop,
+    toolbar_item_find_in_page,
+    toolbar_item_request_reader_view,
+    toolbar_item_private_mode,
+    toolbar_item_show_tabs_tray,
+    toolbar_item_share,
+    toolbar_item_menu;
 
     companion object
 }

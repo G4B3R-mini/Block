@@ -46,13 +46,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.sp
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.ComponentDimens
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.ext.components
-import com.shmibblez.inferno.ext.dpToPx
 import com.shmibblez.inferno.ext.newTab
 import com.shmibblez.inferno.ext.pxToDp
 import com.shmibblez.inferno.toolbar.ToolbarOnlyComponents.Companion.ProgressBar
@@ -79,7 +77,7 @@ val verticalDividerPadding = 6.dp
 @Composable
 fun InfernoTabBar(tabList: List<TabSessionState>, selectedTab: TabSessionState?) {
     val context = LocalContext.current
-    val localConfig = LocalConfiguration.current
+    context.components.core.store
     val listState = rememberLazyListState()
     var tabAutoWidth by remember { mutableStateOf(0.dp) }
     // if no tab selected return

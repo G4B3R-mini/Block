@@ -4,7 +4,8 @@ import io.gitlab.arturbosch.detekt.Detekt
 
 buildscript {
     repositories {
-        google()
+//        google()
+//        mavenCentral()
         maven { url "https://maven.mozilla.org/maven2" }
         if (project.hasProperty("googleRepo")) {
             maven {
@@ -30,6 +31,9 @@ buildscript {
         classpath(libs.androidx.navigation.safe.args.gradle.plugin)
 //        classpath libs.mozilla.tooling.nimbus.gradle
         classpath libs.tooling.nimbus.gradle.app.services
+        classpath libs.gradle
+        classpath libs.kotlin.gradle.plugin
+        classpath libs.protobuf.gradle.plugin
         // TODO: fix this
 //        classpath "${ApplicationServicesConfig.groupId}:tooling-nimbus-gradle:${ApplicationServicesConfig.version}"
     }
@@ -45,6 +49,8 @@ plugins {
 
 allprojects {
     repositories {
+//        google()
+//        mavenCentral()
         if (project.hasProperty("googleRepo")) {
             maven {
                 name "Google"
