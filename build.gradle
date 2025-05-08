@@ -134,13 +134,13 @@ subprojects {
 
                     def fileFilter = ['**/R.class', '**/R$*.class', '**/BuildConfig.*', '**/Manifest*.*',
                                       '**/*Test*.*', 'android/**/*.*', '**/*$[0-9].*']
-                    def kotlinDebugTree = fileTree(dir: "$project.buildDir/tmp/kotlin-classes/debug", excludes: fileFilter)
-                    def javaDebugTree = fileTree(dir: "$project.buildDir/intermediates/classes/debug", excludes: fileFilter)
+                    def kotlinDebugTree = fileTree(dir: "$project.layout.buildDirectory/tmp/kotlin-classes/debug", excludes: fileFilter)
+                    def javaDebugTree = fileTree(dir: "$project.layout.buildDirectory/intermediates/classes/debug", excludes: fileFilter)
                     def mainSrc = "$project.projectDir/src/main/java"
 
                     sourceDirectories = files([mainSrc])
                     classDirectories = files([kotlinDebugTree, javaDebugTree])
-                    executionData = fileTree(dir: project.buildDir, includes: [
+                    executionData = fileTree(dir: project.layout.buildDirectory, includes: [
                             'jacoco/testDebugUnitTest.exec', 'outputs/code-coverage/connected/*coverage.ec'
                     ])
                 }
@@ -159,7 +159,7 @@ subprojects {
 
 
 tasks.register('clean', Delete) {
-    delete rootProject.buildDir
+    delete rootProject.layout.buildDirectory
 }
 
 dependencyAnalysis {
@@ -212,6 +212,7 @@ dependencies {
 }
 
 tasks.register('ktlint', JavaExec) {
+//    preBuild.dependsOn = ":protobuf"
     description = "Check Kotlin code style."
     classpath = configurations.ktlint
     mainClass.set("com.pinterest.ktlint.Main")

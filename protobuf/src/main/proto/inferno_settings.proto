@@ -1,9 +1,10 @@
 syntax = "proto3";
 
 option java_package = "com.shmibblez.inferno.proto";
-option java_outer_classname = "InfernoSettingsProtos";
 option java_multiple_files = true;
 
 message InfernoSettings {
-  int32 example_counter = 1;
+  int32 toolbarVerticalPosition = 1;
+  int32 tabsEnabled = 2;
+  int32 tabsVerticalPosition = 3;
 }

@@ -17,8 +17,6 @@ import com.android.build.api.variant.FilterConfiguration
 import com.android.build.gradle.internal.tasks.AppPreBuildTask
 import groovy.json.JsonOutput
 
-int a = 1;
-
 android {
     defaultConfig {
         applicationId "com.shmibblez.inferno"
@@ -107,12 +105,18 @@ android {
         }
     }
 
-    variantFilter {
-        // There's a "release" build type that exists by default that we don't use (it's replaced by "nightly" and "beta")
-        if (buildType.name == 'release') {
-            setIgnore true
+    androidComponents {
+        beforeVariants(selector().withBuildType("release")) { variantBuilder ->
+            // There's a "release" build type that exists by default that we don't use (it's replaced by "nightly" and "beta")
+            variantBuilder.enable = false
         }
     }
+    // ^^ replaces:
+//    variantFilter {
+//        if (buildType.name == 'release') {
+//            setIgnore true
+//        }
+//    }
 
     testOptions {
         execution 'ANDROIDX_TEST_ORCHESTRATOR'
@@ -182,7 +186,7 @@ android.applicationVariants.configureEach { variant ->
     }
 
 // -------------------------------------------------------------------------------------------------
-// Activating telemetry  with command line paramter.
+// Activating telemetry  with command line parameter.
 // -------------------------------------------------------------------------------------------------
 
     if (project.hasProperty("telemetry") && project.property("telemetry") == "true") {
@@ -525,8 +529,6 @@ nimbus {
             ? gradle.getProperty('localProperties.autoPublish.application-services.dir') : null
 }
 
-//apply plugin: 'com.google.protobuf'
-
 dependencies {
     // Android
     implementation libs.androidx.activity
@@ -568,7 +570,7 @@ dependencies {
     implementation libs.androidx.lifecycle.service
     implementation libs.androidx.animation.graphics.android
 
-    // Testing?
+    // Testing
     testImplementation libs.androidx.paging.common
 
     // Android Studio Preview support
@@ -591,7 +593,7 @@ dependencies {
     implementation libs.kotlinx.coroutines.core
 
     // Protobuf
-//    implementation project(":protobuf")
+    implementation project(":protobuf")
 //    implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation(libs.protobuf.javalite) {
         exclude module: 'protobuf-java'

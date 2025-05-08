@@ -24,7 +24,7 @@ dependencies {
 sourceSets {
     main {
         java {
-            srcDir 'build/generated/source/proto/main/java'
+            srcDir 'build/generated/sources/proto/main/java'
 //        srcDir '${protobuf.generatedFilesBaseDir}/main/java'
         }
         proto {
@@ -39,6 +39,6 @@ java {
     targetCompatibility = JavaVersion.VERSION_1_8
 }
 
-tasks.withType(ProcessResources) {
+tasks.withType(ProcessResources).configureEach {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }

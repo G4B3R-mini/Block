@@ -14,8 +14,8 @@ pluginManagement {
 //    }
 //}
 rootProject.name = "Inferno Browser"
+include ':protobuf'
 include ':app'
-include ":protobuf"
 
 def log(message) {
     logger.lifecycle("[settings] ${message}")
