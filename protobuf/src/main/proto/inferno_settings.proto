@@ -4,7 +4,59 @@ option java_package = "com.shmibblez.inferno.proto";
 option java_multiple_files = true;
 
 message InfernoSettings {
+
+  /*** toolbar settings ***/
+
+  enum VerticalToolbarPosition {
+    TOOLBAR_BOTTOM = 0;
+    TOOLBAR_TOP = 1;
+  }
+
+  // general
   int32 toolbarVerticalPosition = 1;
-  int32 tabsEnabled = 2;
-  int32 tabsVerticalPosition = 3;
+
+  // address bar settings
+  string defaultSearchEngine = 25;
+  bool shouldAutocompleteInAwesomebar = 26;
+  bool shouldAutocompleteInAwesomebarPrivate = 27;
+  bool shouldShowHistorySuggestions = 28;
+  bool shouldShowBookmarkSuggestions = 29;
+  bool shouldShowSyncedTabsSuggestions = 30;
+  bool shouldShowClipboardSuggestions = 31;
+  bool shouldShowVoiceSearch = 32;
+  bool shouldAutocompleteUrls = 33;
+  // bool showSponsoredSuggestions = ?; // sponsored not enabled
+
+  /*** tab settings ***/
+
+  enum VerticalTabBarPosition {
+    TAB_BAR_BOTTOM = 0;
+    TAB_BAR_TOP = 1;
+  }
+
+  // general
+  bool shouldCloseTabsAutomatically = 4;
+  uint32 closeTabsAfterDays = 5; // todo: test with custom time in MS first, replacing settings.getTabTimeout() in BrowserApplication
+  bool shouldSeparateInactiveTabs = 6;
+  uint32 makeTabsInactiveAfterDays = 7;
+
+  // tab bar
+  bool tabBarEnabled = 2;
+  VerticalTabBarPosition tabBarVerticalPosition = 3;
+
+  /* home settings */
+
+  // general
+  bool showTopSites = 8;
+  // bool contile = ? // sponsored suggestions not shown
+  bool showRecentTabs = 9;
+  bool showBookmarks = 10;
+  // bool showPocketRecommendations = ? // pocket recommendations not implemented
+  // bool showPocketSponsoredStories = ? // pocket recommendations not implemented
+  bool showHistory = 11;
+
+  /* theme settings */
+  // todo: colors to define
+
+  // todo: left off figuring out how to organize this shi
 }
