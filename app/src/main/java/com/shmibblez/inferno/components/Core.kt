@@ -193,7 +193,7 @@ class Core(
             parallelMarkingEnabled = FxNimbus.features.javascript.value().parallelMarkingEnabled,
             getDesktopMode = {
                 store.state.desktopMode
-            }, 
+            },
 //            cookieBehaviorOptInPartitioning =,
 //            cookieBehaviorOptInPartitioningPBM =
         )

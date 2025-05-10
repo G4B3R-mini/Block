@@ -5,7 +5,26 @@ option java_multiple_files = true;
 
 message InfernoSettings {
 
+
+  /*** general ***/
+
+
+  // browsing data
+  bool deleteBrowsingDataOnQuit = 61;
+  bool deleteOpenTabsOnQuit = 62;
+  bool deleteBrowsingHistoryOnQuit = 63;
+  bool deleteCookiesAndSiteDataOnQuit = 64;
+  bool deleteCachesOnQuit = 65;
+  bool deletePermissionsOnQuit = 66;
+  bool deleteDownloadsOnQuit = 67;
+
+  // other
+  bool shouldUseExternalDownloadManager = 68;
+  bool remoteDebuggingOverUsb = 69;
+
+
   /*** toolbar settings ***/
+
 
   enum VerticalToolbarPosition {
     TOOLBAR_BOTTOM = 0;
@@ -13,7 +32,8 @@ message InfernoSettings {
   }
 
   // general
-  int32 toolbarVerticalPosition = 1;
+  VerticalToolbarPosition toolbarVerticalPosition = 1;
+  VerticalToolbarPosition inAppToolbarVerticalPosition = 15;
 
   // address bar settings
   string defaultSearchEngine = 25;
@@ -27,7 +47,9 @@ message InfernoSettings {
   bool shouldAutocompleteUrls = 33;
   // bool showSponsoredSuggestions = ?; // sponsored not enabled
 
+
   /*** tab settings ***/
+
 
   enum VerticalTabBarPosition {
     TAB_BAR_BOTTOM = 0;
@@ -41,22 +63,200 @@ message InfernoSettings {
   uint32 makeTabsInactiveAfterDays = 7;
 
   // tab bar
-  bool tabBarEnabled = 2;
+  bool isTabBarEnabled = 2;
   VerticalTabBarPosition tabBarVerticalPosition = 3;
 
-  /* home settings */
+
+  /*** home settings ***/
+
 
   // general
-  bool showTopSites = 8;
+  bool shouldShowTopSites = 8;
   // bool contile = ? // sponsored suggestions not shown
-  bool showRecentTabs = 9;
-  bool showBookmarks = 10;
+  bool shouldShowRecentTabs = 9;
+  bool shouldShowBookmarks = 10;
   // bool showPocketRecommendations = ? // pocket recommendations not implemented
   // bool showPocketSponsoredStories = ? // pocket recommendations not implemented
-  bool showHistory = 11;
+  bool shouldShowHistory = 11;
 
-  /* theme settings */
-  // todo: colors to define
+  // navigation
+  bool shouldStartInHome = 12;
+  string homeUrl = 14;
+
+
+  /*** theme settings ***/
+
+
+  enum DefaultTheme {
+    // default themes set in kotlin as default objects
+    INFERNO_DARK = 0;
+    INFERNO_LIGHT = 1;
+  }
+  message InfernoTheme {
+    // todo: define and use colors, take a look at material for some naming ideas
+    // in settings show description for where each color is shown
+    string name = 1;
+    string textColor = 2;
+  }
+
+  DefaultTheme selectedTheme = 21;
+  string selectedCustomTheme = 22;
+  // { [theme name set by user]: [theme data] }
+  map<string, InfernoTheme> customThemes = 19;
+
+
+  /*** gesture settings ***/
+
+
+  bool isPullToRefreshEnabled = 16;
+  bool isDynamicToolbarEnabled = 17;
+  bool isSwipeHorizontalToSwitchTabsEnabled = 18;
+  bool isSwipeUpToCloseTabEnabled = 20;
+
+
+  /*** autofill data ***/
+
+
+  enum LoginsStorage {
+    ASK_TO_SAVE = 0;
+    DONT_SAVE = 1;
+  }
+
+  // login storage
+  LoginsStorage saveLoginsSettings = 23;
+  bool shouldSyncLogins = 35;
+  bool isAutofillEnabled = 24;
+  bool isAndroidAutofillEnabled = 34; // autofill in other apps
+  bool isAddressSaveAndAutofillEnabled = 36;
+  bool isCardSaveAndAutofillEnabled = 37;
+  bool shouldSyncCards = 38;
+
+
+
+  /*** web content / site settings ***/
+
+
+  // site settings
+  enum AppLinks {
+    APP_LINKS_ASK_TO_OPEN = 0;
+    APP_LINKS_ALLOWED = 1;
+    APP_LINKS_BLOCKED = 2;
+  }
+  enum AutoPlay {
+    BLOCK_AUDIO_ONLY = 0;
+    BLOCK_AUDIO_AND_VIDEO = 1;
+    ALLOW_AUDIO_AND_VIDEO = 2;
+    BLOCK_AUDIO_AND_VIDEO_ON_CELLULAR_DATA_ONLY = 3;
+  }
+  enum Camera {
+    CAMERA_ASK_TO_ALLOW = 0;
+    CAMERA_BLOCKED = 1;
+  }
+  enum Location {
+    LOCATION_ASK_TO_ALLOW = 0;
+    LOCATION_BLOCKED = 1;
+  }
+  enum Microphone {
+    MICROPHONE_ASK_TO_ALLOW = 0;
+    MICROPHONE_BLOCKED = 1;
+  }
+  enum Notifications {
+    NOTIFICATIONS_ASK_TO_ALLOW = 0;
+    NOTIFICATIONS_BLOCKED = 1;
+  }
+  enum PersistentStorage {
+    PERSISTENT_STORAGE_ASK_TO_ALLOW = 0;
+    PERSISTENT_STORAGE_BLOCKED = 1;
+  }
+  enum CrossSiteCookies {
+    CROSS_SITE_COOKIES_ASK_TO_ALLOW = 0;
+    CROSS_SITE_COOKIES_BLOCKED = 1;
+  }
+  enum DrmControlledContent {
+    DRM_CONTROLLED_CONTENT_ASK_TO_ALLOW = 0;
+    DRM_CONTROLLED_CONTENT_ALLOWED = 1;
+    DRM_CONTROLLED_CONTENT_BLOCKED = 2;
+  }
+
+  // accessibility / content
+  bool shouldSizeFontAutomatically = 40;
+  uint32 fontScale = 41;
+  bool shouldForceZoomInWebsites = 39;
+  bool alwaysRequestDesktopSite = 51;
+
+  // site permissions
+  AppLinks appLinksSetting = 60;
+  AutoPlay autoplaySetting = 52;
+  Camera cameraSetting = 53;
+  Location locationSetting = 54;
+  Microphone microphoneSetting = 55;
+  Notifications notificationsSetting = 56;
+  PersistentStorage persistentStorageSetting = 57;
+  CrossSiteCookies crossSiteCookiesSetting = 58;
+  DrmControlledContent drmControlledContentSetting = 59;
+  // exceptions managed through Core by PermissionStorage
+
+
+  /*** locale/language is set through Storage with LocaleManager ***/
+
+
+  /*** translation is managed through browserStore with TranslationsAction ***/
+
+
+  /*** private mode settings ***/
+
+
+  bool openLinksInPrivateTab = 42;
+  bool allowScreenshotsInPrivateMode = 43;
+
+
+  /*** https-only mode settings ***/
+
+
+  bool shouldUseHttpsOnly = 44;
+  bool shouldUseHttpsOnlyInPrivateMode = 45;
+
+
+  /*** enhanced tracking protection settings ***/
+
+
+  enum TrackingProtectionDefault {
+    NONE = 0;
+    STANDARD = 1;
+    STRICT = 2;
+    CUSTOM = 3;
+  }
+  message CustomTrackingProtection {
+    enum CustomCookies {
+      NONE = 0;
+      ISOLATE_CROSS_SITE_COOKIES = 1;
+      CROSS_SITE_AND_SOCIAL_MEDIA_TRACKERS = 2;
+      COOKIES_FROM_UNVISITED_SITES = 3;
+      ALL_THIRD_PARTY_COOKIES = 4;
+      ALL_COOKIES = 5;
+    }
+    CustomCookies blockCustomCookies = 1;
+    bool trackingContentBlocked = 2;
+    bool trackingContentBlockedInPrivateMode = 3;
+    bool blockCryptominers = 4;
+    bool blockKnownFingerprinters = 5;
+    bool blockRedirectTrackers = 6;
+    bool blockSuspectedFingerPrinters = 7;
+    bool blockSuspectedFingerPrintersInPrivateMode = 8;
+  }
+
+  bool isEnhancedTrackingProtectionEnabled = 47;
+  TrackingProtectionDefault selectedTrackingProtection = 48;
+  CustomTrackingProtection customTrackingProtection = 49;
+  bool isGlobalPrivacyControlEnabled = 50; // tell websites not to share & sell data
+  // exceptions managed through Core by LoginExceptionStorage
+
+
+
+
+
+
+
 
   // todo: left off figuring out how to organize this shi
 }
