@@ -5,6 +5,13 @@ option java_multiple_files = true;
 
 message InfernoSettings {
 
+  // todo: reorder settings and renumber
+
+  /*** vars ***/
+
+
+  int64 numberOfAppLaunches = 70;
+
 
   /*** general ***/
 
@@ -36,7 +43,9 @@ message InfernoSettings {
   VerticalToolbarPosition inAppToolbarVerticalPosition = 15;
 
   // address bar settings
+  // todo: make enum
   string defaultSearchEngine = 25;
+  // todo: custom search engine
   bool shouldAutocompleteInAwesomebar = 26;
   bool shouldAutocompleteInAwesomebarPrivate = 27;
   bool shouldShowHistorySuggestions = 28;
@@ -45,6 +54,7 @@ message InfernoSettings {
   bool shouldShowClipboardSuggestions = 31;
   bool shouldShowVoiceSearch = 32;
   bool shouldAutocompleteUrls = 33;
+  bool shouldShowSearchShortcuts = 71; // on awesomebar
   // bool showSponsoredSuggestions = ?; // sponsored not enabled
 
 
@@ -55,20 +65,36 @@ message InfernoSettings {
     TAB_BAR_BOTTOM = 0;
     TAB_BAR_TOP = 1;
   }
+  enum TabTrayStyle {
+    TAB_TRAY_LIST = 0;
+    TAB_TRAY_GRID = 1;
+  }
 
   // general
-  bool shouldCloseTabsAutomatically = 4;
-  uint32 closeTabsAfterDays = 5; // todo: test with custom time in MS first, replacing settings.getTabTimeout() in BrowserApplication
+  bool closeTabsManually = 4;
+  bool closeTabsAfterOneDay = 5;
+  bool closeTabsAfterOneWeek = 7;
+  bool closeTabsAfterOneMonth = 72;
+//  uint32 closeTabsAfterDays = 5; // todo: test with custom time in MS first, replacing settings.getTabTimeout() in BrowserApplication
   bool shouldSeparateInactiveTabs = 6;
-  uint32 makeTabsInactiveAfterDays = 7;
+//  uint32 makeTabsInactiveAfterDays = 7;
 
   // tab bar
   bool isTabBarEnabled = 2;
   VerticalTabBarPosition tabBarVerticalPosition = 3;
 
+  // tab tray
+  TabTrayStyle tabTrayStyle = 76;
+
 
   /*** home settings ***/
 
+
+  enum PageWhenBrowserReopened {
+    OPEN_ON_LAST_TAB = 0;
+    OPEN_ON_HOME_ALWAYS = 1;
+    OPEN_ON_HOME_AFTER_FOUR_HOURS = 2;
+  }
 
   // general
   bool shouldShowTopSites = 8;
@@ -80,7 +106,8 @@ message InfernoSettings {
   bool shouldShowHistory = 11;
 
   // navigation
-  bool shouldStartInHome = 12;
+  PageWhenBrowserReopened pageWhenBrowserReopened = 75;
+  bool shouldUseInfernoHome = 73;
   string homeUrl = 14;
 
 
@@ -130,7 +157,7 @@ message InfernoSettings {
   bool isAddressSaveAndAutofillEnabled = 36;
   bool isCardSaveAndAutofillEnabled = 37;
   bool shouldSyncCards = 38;
-
+  // managed in Core by LoginExceptionStorage
 
 
   /*** web content / site settings ***/
@@ -180,8 +207,8 @@ message InfernoSettings {
 
   // accessibility / content
   bool shouldSizeFontAutomatically = 40;
-  uint32 fontScale = 41;
-  bool shouldForceZoomInWebsites = 39;
+  float fontSizeFactor = 41;
+  bool shouldForceEnableZoomInWebsites = 39;
   bool alwaysRequestDesktopSite = 51;
 
   // site permissions
@@ -213,8 +240,13 @@ message InfernoSettings {
   /*** https-only mode settings ***/
 
 
-  bool shouldUseHttpsOnly = 44;
-  bool shouldUseHttpsOnlyInPrivateMode = 45;
+  enum HttpsOnlyMode {
+    HTTPS_ONLY_DISABLED = 0;
+    HTTPS_ONLY_ENABLED = 2;
+    HTTPS_ONLY_ENABLED_PRIVATE_ONLY = 3;
+  }
+
+  HttpsOnlyMode httpsOnlyMode = 44;
 
 
   /*** enhanced tracking protection settings ***/
@@ -252,11 +284,4 @@ message InfernoSettings {
   // exceptions managed through Core by LoginExceptionStorage
 
 
-
-
-
-
-
-
-  // todo: left off figuring out how to organize this shi
 }

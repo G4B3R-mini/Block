@@ -9,6 +9,7 @@ import android.util.AttributeSet
 import androidx.annotation.VisibleForTesting
 import androidx.annotation.VisibleForTesting.Companion.PACKAGE_PRIVATE
 import com.shmibblez.inferno.ext.components
+import com.shmibblez.inferno.proto.InfernoSettings
 
 class PrivateBrowserTrayList @JvmOverloads constructor(
     context: Context,
@@ -24,7 +25,7 @@ class PrivateBrowserTrayList @JvmOverloads constructor(
         TabsTouchHelper(
             interactionDelegate = (adapter as BrowserTabsAdapter).delegate,
             onViewHolderTouched = { swipeToDelete.isSwipeable },
-            onViewHolderDraw = { context.components.settings.gridTabView.not() },
+            onViewHolderDraw = { (context.components.settings.tabTrayStyle == InfernoSettings.TabTrayStyle.TAB_TRAY_GRID).not() },
             featureNameHolder = (adapter as BrowserTabsAdapter),
         )
     }

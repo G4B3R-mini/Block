@@ -20,6 +20,7 @@ import com.shmibblez.inferno.components.Components
 import com.shmibblez.inferno.databinding.TabTrayGridItemBinding
 import com.shmibblez.inferno.databinding.TabTrayItemBinding
 import com.shmibblez.inferno.ext.components
+import com.shmibblez.inferno.proto.InfernoSettings
 import com.shmibblez.inferno.selection.SelectionHolder
 import com.shmibblez.inferno.tabstray.TabsTrayInteractor
 import com.shmibblez.inferno.tabstray.TabsTrayStore
@@ -63,7 +64,7 @@ class BrowserTabsAdapter(
 
     override fun getItemViewType(position: Int): Int {
         return when {
-            context.components.settings.gridTabView -> {
+            context.components.settings.tabTrayStyle == InfernoSettings.TabTrayStyle.TAB_TRAY_GRID -> {
                 if (context.components.settings.enableTabsTrayToCompose) {
                     ViewType.COMPOSE_GRID.layoutRes
                 } else {

@@ -61,9 +61,7 @@ fun rememberInfernoReaderViewFeatureState(
 //        InfernoReaderViewFeatureState()
 //    }
 
-    return remember {
-        state
-    }
+    return remember { state }
 }
 
 class InfernoReaderViewFeatureState internal constructor(
@@ -96,8 +94,8 @@ class InfernoReaderViewFeatureState internal constructor(
     var active by mutableStateOf(false)
         private set
 
-    var readerable by mutableStateOf(false)
-        private set
+    private var readerable by mutableStateOf(false)
+//        private set
 
     enum class FontType(val value: String) { SANSSERIF("sans-serif"), SERIF("serif") }
     enum class ColorScheme { LIGHT, SEPIA, DARK }

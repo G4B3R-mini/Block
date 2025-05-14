@@ -6,6 +6,7 @@ package com.shmibblez.inferno.tabstray.ext
 
 import android.content.Context
 import com.shmibblez.inferno.ext.components
+import com.shmibblez.inferno.proto.InfernoSettings
 
 const val MIN_COLUMN_WIDTH_DP = 180
 
@@ -25,7 +26,7 @@ internal val Context.numberOfGridColumns: Int
  */
 internal val Context.defaultBrowserLayoutColumns: Int
     get() {
-        return if (components.settings.gridTabView) {
+        return if (components.settings.tabTrayStyle == InfernoSettings.TabTrayStyle.TAB_TRAY_GRID) {
             numberOfGridColumns
         } else {
             1

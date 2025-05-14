@@ -62,6 +62,7 @@ import com.shmibblez.inferno.ext.requireComponents
 import com.shmibblez.inferno.ext.runIfFragmentIsAttached
 import com.shmibblez.inferno.ext.settings
 import com.shmibblez.inferno.home.HomeScreenViewModel
+import com.shmibblez.inferno.proto.InfernoSettings
 import com.shmibblez.inferno.share.ShareFragment
 import com.shmibblez.inferno.tabstray.browser.SelectionBannerBinding
 import com.shmibblez.inferno.tabstray.browser.SelectionBannerBinding.VisibilityModifier
@@ -257,7 +258,7 @@ class TabsTrayFragment : AppCompatDialogFragment() {
                 FirefoxTheme(theme = Theme.getTheme(allowPrivateTheme = false)) {
                     TabsTray(
                         tabsTrayStore = tabsTrayStore,
-                        displayTabsInGrid = requireContext().settings().gridTabView,
+                        displayTabsInGrid = requireContext().settings().tabTrayStyle == InfernoSettings.TabTrayStyle.TAB_TRAY_GRID,
                         isInDebugMode = Config.channel.isDebug ||
                             requireComponents.settings.showSecretDebugMenuThisSession,
                         shouldShowTabAutoCloseBanner = requireContext().settings().shouldShowAutoCloseTabsBanner &&
@@ -462,7 +463,7 @@ class TabsTrayFragment : AppCompatDialogFragment() {
                 requireContext().components.core.store.state.normalTabs.size,
                 requireContext().components.core.store.state.privateTabs.size,
             ),
-            numberForExpandingTray = if (requireContext().settings().gridTabView) {
+            numberForExpandingTray = if (requireContext().settings().tabTrayStyle == InfernoSettings.TabTrayStyle.TAB_TRAY_GRID) {
                 EXPAND_AT_GRID_SIZE
             } else {
                 EXPAND_AT_LIST_SIZE
@@ -645,7 +646,7 @@ class TabsTrayFragment : AppCompatDialogFragment() {
         super.onConfigurationChanged(newConfig)
 
         trayBehaviorManager.updateDependingOnOrientation(newConfig.orientation)
-        if (!requireContext().settings().enableTabsTrayToCompose && requireContext().settings().gridTabView) {
+        if (!requireContext().settings().enableTabsTrayToCompose && requireContext().settings().tabTrayStyle == InfernoSettings.TabTrayStyle.TAB_TRAY_GRID) {
             tabsTrayBinding.tabsTray.adapter?.notifyDataSetChanged()
         }
     }

@@ -9,6 +9,7 @@ import android.util.AttributeSet
 import androidx.recyclerview.widget.ConcatAdapter
 import mozilla.components.browser.tabstray.TabViewHolder
 import com.shmibblez.inferno.ext.components
+import com.shmibblez.inferno.proto.InfernoSettings
 import com.shmibblez.inferno.tabstray.ext.browserAdapter
 
 class NormalBrowserTrayList @JvmOverloads constructor(
@@ -29,7 +30,7 @@ class NormalBrowserTrayList @JvmOverloads constructor(
             onViewHolderTouched = {
                 it is TabViewHolder && swipeToDelete.isSwipeable
             },
-            onViewHolderDraw = { context.components.settings.gridTabView.not() },
+            onViewHolderDraw = { (context.components.settings.tabTrayStyle == InfernoSettings.TabTrayStyle.TAB_TRAY_GRID).not() },
             featureNameHolder = concatAdapter.browserAdapter,
         )
     }

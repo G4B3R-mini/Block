@@ -5,7 +5,6 @@
 package com.shmibblez.inferno.utils
 
 import android.accessibilityservice.AccessibilityServiceInfo.CAPABILITY_CAN_PERFORM_GESTURES
-import android.app.Application
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
@@ -23,14 +22,12 @@ import mozilla.components.feature.sitepermissions.SitePermissionsRules.AutoplayA
 //import mozilla.components.service.contile.ContileTopSitesProvider
 import mozilla.components.support.ktx.android.content.PreferencesHolder
 import mozilla.components.support.ktx.android.content.booleanPreference
-import mozilla.components.support.ktx.android.content.floatPreference
 import mozilla.components.support.ktx.android.content.intPreference
 import mozilla.components.support.ktx.android.content.longPreference
 import mozilla.components.support.ktx.android.content.stringPreference
 import mozilla.components.support.ktx.android.content.stringSetPreference
 //import mozilla.components.support.locale.LocaleManager
 import mozilla.components.support.utils.BrowsersCache
-import com.shmibblez.inferno.BuildConfig
 import com.shmibblez.inferno.Config
 import com.shmibblez.inferno.FeatureFlags
 import com.shmibblez.inferno.R
@@ -58,6 +55,8 @@ import com.shmibblez.inferno.nimbus.QueryParameterStrippingSection.QUERY_PARAMET
 import com.shmibblez.inferno.nimbus.QueryParameterStrippingSection.QUERY_PARAMETER_STRIPPING_ALLOW_LIST
 import com.shmibblez.inferno.nimbus.QueryParameterStrippingSection.QUERY_PARAMETER_STRIPPING_PMB
 import com.shmibblez.inferno.nimbus.QueryParameterStrippingSection.QUERY_PARAMETER_STRIPPING_STRIP_LIST
+import com.shmibblez.inferno.proto.InfernoSettings
+import com.shmibblez.inferno.proto.infernoSettingsDataStore
 import com.shmibblez.inferno.settings.PhoneFeature
 import com.shmibblez.inferno.settings.deletebrowsingdata.DeleteBrowsingDataOnQuitType
 import com.shmibblez.inferno.settings.logins.SavedLoginsSortingStrategyMenu
@@ -66,6 +65,10 @@ import com.shmibblez.inferno.settings.registerOnSharedPreferenceChangeListener
 import com.shmibblez.inferno.settings.sitepermissions.AUTOPLAY_BLOCK_ALL
 import com.shmibblez.inferno.settings.sitepermissions.AUTOPLAY_BLOCK_AUDIBLE
 import com.shmibblez.inferno.wallpapers.Wallpaper
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.flow.lastOrNull
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import mozilla.components.support.locale.LocaleManager
 import java.security.InvalidParameterException
 import java.util.UUID
@@ -145,28 +148,60 @@ class Settings(private val appContext: Context) : PreferencesHolder {
 //    internal val isCrashReportEnabledInBuild: Boolean =
 //        BuildConfig.CRASH_REPORTING && Config.channel.isReleased
 
+    private fun <T> getPref(default: () -> T, getter: (InfernoSettings?) -> T?): T {
+        return getter.invoke(runBlocking { appContext.infernoSettingsDataStore.data.lastOrNull() })
+            ?: default.invoke()
+    }
+
+    private fun <T> getPref(default: T, getter: (InfernoSettings?) -> T?): T {
+        return getter.invoke(runBlocking { appContext.infernoSettingsDataStore.data.lastOrNull() })
+            ?: default
+    }
+
+    private fun setPref(setter: (InfernoSettings.Builder) -> Unit) {
+        MainScope().launch {
+            appContext.infernoSettingsDataStore.updateData {
+                val builder = it.toBuilder()
+                setter.invoke(builder)
+                builder.build()
+            }
+        }
+    }
+
     override val preferences: SharedPreferences =
         appContext.getSharedPreferences(FENIX_PREFERENCES, MODE_PRIVATE)
 
     /**
      * Indicates whether or not top sites should be shown on the home screen.
      */
-    var showTopSitesFeature by lazyFeatureFlagPreference(
-        appContext.getPreferenceKey(R.string.pref_key_show_top_sites),
-        featureFlag = true,
-        default = { homescreenSections[HomeScreenSection.TOP_SITES] == true },
-    )
+    var showTopSitesFeature: Boolean
+        get() = getPref(default = { homescreenSections[HomeScreenSection.TOP_SITES] == true }) { it?.shouldShowTopSites }
+        set(value) {
+            setPref { it.setShouldShowTopSites(value) }
+        }
+//    var showTopSitesFeature by lazyFeatureFlagPreference(
+//        appContext.getPreferenceKey(R.string.pref_key_show_top_sites),
+//        featureFlag = true,
+//        default = { homescreenSections[HomeScreenSection.TOP_SITES] == true },
+//    )
 
-    var numberOfAppLaunches by intPreference(
-        appContext.getPreferenceKey(R.string.pref_key_times_app_opened),
-        default = 0,
-    )
+    var numberOfAppLaunches: Long
+        get() = getPref(default = 0L) { it?.numberOfAppLaunches }
+        set(value) {
+            setPref { it.setNumberOfAppLaunches(value) }
+        }
+//    var numberOfAppLaunches by intPreference(
+//        appContext.getPreferenceKey(R.string.pref_key_times_app_opened),
+//        default = 0,
+//    )
 
-    var lastReviewPromptTimeInMillis by longPreference(
-        appContext.getPreferenceKey(R.string.pref_key_last_review_prompt_shown_time),
-        default = 0L,
-    )
+    // not used
+//    var lastReviewPromptTimeInMillis by longPreference(
+//        appContext.getPreferenceKey(R.string.pref_key_last_review_prompt_shown_time),
+//        default = 0L,
+//    )
 
+    // todo: check usages to see if need to remove
     var lastCfrShownTimeInMillis by longPreference(
         appContext.getPreferenceKey(R.string.pref_key_last_cfr_shown_time),
         default = 0L,
@@ -175,71 +210,89 @@ class Settings(private val appContext: Context) : PreferencesHolder {
     val canShowCfr: Boolean
         get() = (System.currentTimeMillis() - lastCfrShownTimeInMillis) > THREE_DAYS_MS
 
-    var forceEnableZoom by booleanPreference(
-        appContext.getPreferenceKey(R.string.pref_key_accessibility_force_enable_zoom),
-        default = false,
-    )
+    var forceEnableZoom: Boolean
+        get() = getPref(default = false) { it?.shouldForceEnableZoomInWebsites }
+        set(value) {
+            setPref { it.setShouldForceEnableZoomInWebsites(value) }
+        }
+//    var forceEnableZoom by booleanPreference(
+//        appContext.getPreferenceKey(R.string.pref_key_accessibility_force_enable_zoom),
+//        default = false,
+//    )
 
+    // todo: check usages to see if need to remove
     var adjustCampaignId by stringPreference(
         appContext.getPreferenceKey(R.string.pref_key_adjust_campaign),
         default = "",
     )
 
+    // todo: check usages to see if need to remove
     var adjustNetwork by stringPreference(
         appContext.getPreferenceKey(R.string.pref_key_adjust_network),
         default = "",
     )
 
+    // todo: check usages to see if need to remove
     var adjustAdGroup by stringPreference(
         appContext.getPreferenceKey(R.string.pref_key_adjust_adgroup),
         default = "",
     )
 
+    // todo: check usages to see if need to remove
     var adjustCreative by stringPreference(
         appContext.getPreferenceKey(R.string.pref_key_adjust_creative),
         default = "",
     )
 
+    // todo: check usages to see if need to remove
     var nimbusExperimentsFetched by booleanPreference(
         appContext.getPreferenceKey(R.string.pref_key_nimbus_experiments_fetched),
         default = false,
     )
 
-    var utmParamsKnown by booleanPreference(
-        appContext.getPreferenceKey(R.string.pref_key_utm_params_known),
-        default = false,
-    )
+    // not used
+//    var utmParamsKnown by booleanPreference(
+//        appContext.getPreferenceKey(R.string.pref_key_utm_params_known),
+//        default = false,
+//    )
 
+    // todo: check usages to see if need to remove
     var utmSource by stringPreference(
         appContext.getPreferenceKey(R.string.pref_key_utm_source),
         default = "",
     )
 
+    // todo: check usages to see if need to remove
     var utmMedium by stringPreference(
         appContext.getPreferenceKey(R.string.pref_key_utm_medium),
         default = "",
     )
 
+    // todo: check usages to see if need to remove
     var utmCampaign by stringPreference(
         appContext.getPreferenceKey(R.string.pref_key_utm_campaign),
         default = "",
     )
 
+    // todo: check usages to see if need to remove
     var utmTerm by stringPreference(
         appContext.getPreferenceKey(R.string.pref_key_utm_term),
         default = "",
     )
 
+    // todo: check usages to see if need to remove
     var utmContent by stringPreference(
         appContext.getPreferenceKey(R.string.pref_key_utm_content),
         default = "",
     )
 
+    // todo: check usages to see if need to remove
     var contileContextId by stringPreference(
         appContext.getPreferenceKey(R.string.pref_key_contile_context_id),
         default = "",
     )
 
+    // todo: check usages to see if need to remove
     var currentWallpaperName by stringPreference(
         appContext.getPreferenceKey(R.string.pref_key_current_wallpaper),
         default = Wallpaper.Default.name,
@@ -249,6 +302,7 @@ class Settings(private val appContext: Context) : PreferencesHolder {
      * A cache of the text color to use on text overlaying the current wallpaper.
      * The value will be `0` if the color is unavailable.
      */
+    // todo: check usages to see if need to remove
     var currentWallpaperTextColor by longPreference(
         appContext.getPreferenceKey(R.string.pref_key_current_wallpaper_text_color),
         default = 0,
@@ -258,6 +312,7 @@ class Settings(private val appContext: Context) : PreferencesHolder {
      * A cache of the background color to use on cards overlaying the current wallpaper when the user's
      * theme is set to Light.
      */
+    // todo: check usages to see if need to remove
     var currentWallpaperCardColorLight by longPreference(
         appContext.getPreferenceKey(R.string.pref_key_current_wallpaper_card_color_light),
         default = 0,
@@ -267,6 +322,7 @@ class Settings(private val appContext: Context) : PreferencesHolder {
      * A cache of the background color to use on cards overlaying the current wallpaper when the user's
      * theme is set to Dark.
      */
+    // todo: check usages to see if need to remove
     var currentWallpaperCardColorDark by longPreference(
         appContext.getPreferenceKey(R.string.pref_key_current_wallpaper_card_color_dark),
         default = 0,
@@ -275,6 +331,7 @@ class Settings(private val appContext: Context) : PreferencesHolder {
     /**
      * Indicates if the current legacy wallpaper should be migrated.
      */
+    // todo: check usages to see if need to remove
     var shouldMigrateLegacyWallpaper by booleanPreference(
         key = appContext.getPreferenceKey(R.string.pref_key_should_migrate_wallpaper),
         default = true,
@@ -283,6 +340,7 @@ class Settings(private val appContext: Context) : PreferencesHolder {
     /**
      * Indicates if the current legacy wallpaper card colors should be migrated.
      */
+    // todo: check usages to see if need to remove
     var shouldMigrateLegacyWallpaperCardColors by booleanPreference(
         key = appContext.getPreferenceKey(R.string.pref_key_should_migrate_wallpaper_card_colors),
         default = true,
@@ -291,47 +349,64 @@ class Settings(private val appContext: Context) : PreferencesHolder {
     /**
      * Indicates if the wallpaper onboarding dialog should be shown.
      */
+    // todo: check usages to see if need to remove
     var showWallpaperOnboarding by lazyFeatureFlagPreference(
         key = appContext.getPreferenceKey(R.string.pref_key_wallpapers_onboarding),
         featureFlag = true,
         default = { mr2022Sections[Mr2022Section.WALLPAPERS_SELECTION_TOOL] == true },
     )
 
-    var openLinksInAPrivateTab by booleanPreference(
-        appContext.getPreferenceKey(R.string.pref_key_open_links_in_a_private_tab),
-        default = false,
-    )
+    var openLinksInAPrivateTab: Boolean
+        get() = getPref(default = false) { it?.openLinksInPrivateTab }
+        set(value) {
+            setPref { it.setOpenLinksInPrivateTab(value) }
+        }
+//    var openLinksInAPrivateTab by booleanPreference(
+//        appContext.getPreferenceKey(R.string.pref_key_open_links_in_a_private_tab),
+//        default = false,
+//    )
 
-    var allowScreenshotsInPrivateMode by booleanPreference(
-        appContext.getPreferenceKey(R.string.pref_key_allow_screenshots_in_private_mode),
-        default = false,
-    )
+    var allowScreenshotsInPrivateMode: Boolean
+        get() = getPref(default = false) { it?.allowScreenshotsInPrivateMode }
+        set(value) {
+            setPref { it.setAllowScreenshotsInPrivateMode(value) }
+        }
+//    var allowScreenshotsInPrivateMode by booleanPreference(
+//        appContext.getPreferenceKey(R.string.pref_key_allow_screenshots_in_private_mode),
+//        default = false,
+//    )
 
+    // todo: check usages to see if need to remove
     var shouldReturnToBrowser by booleanPreference(
         appContext.getString(R.string.pref_key_return_to_browser),
         false,
     )
 
+    // todo: add
     var defaultSearchEngineName by stringPreference(
         appContext.getPreferenceKey(R.string.pref_key_search_engine),
         default = "",
     )
 
+    // todo: check usages to see if need to remove
     var openInAppOpened by booleanPreference(
         appContext.getPreferenceKey(R.string.pref_key_open_in_app_opened),
         default = false,
     )
 
+    // todo: check usages to see if need to remove
     var installPwaOpened by booleanPreference(
         appContext.getPreferenceKey(R.string.pref_key_install_pwa_opened),
         default = false,
     )
 
+    // todo: add
     var showCollectionsPlaceholderOnHome by booleanPreference(
         appContext.getPreferenceKey(R.string.pref_key_show_collections_placeholder_home),
         default = true,
     )
 
+    // not used
 //    val isCrashReportingEnabled: Boolean
 //        get() = isCrashReportEnabledInBuild &&
 //            preferences.getBoolean(
@@ -339,26 +414,31 @@ class Settings(private val appContext: Context) : PreferencesHolder {
 //                true,
 //            )
 
+    // todo: check usages to see if need to remove
     val isRemoteDebuggingEnabled by booleanPreference(
         appContext.getPreferenceKey(R.string.pref_key_remote_debugging),
         default = false,
     )
 
+    // todo: check usages to see if need to remove
     var isTelemetryEnabled by booleanPreference(
         appContext.getPreferenceKey(R.string.pref_key_telemetry),
         default = true,
     )
 
-    var isMarketingTelemetryEnabled by booleanPreference(
-        appContext.getPreferenceKey(R.string.pref_key_marketing_telemetry),
-        default = false,
-    )
+    // not used
+//    var isMarketingTelemetryEnabled by booleanPreference(
+//        appContext.getPreferenceKey(R.string.pref_key_marketing_telemetry),
+//        default = false,
+//    )
 
+    // todo: check usages to see if need to remove
     var isExperimentationEnabled by booleanPreference(
         appContext.getPreferenceKey(R.string.pref_key_experimentation_v2),
         default = isTelemetryEnabled,
     )
 
+    // todo: check usages to see if need to remove
     var isOverrideTPPopupsForPerformanceTest = false
 
     // We do not use `booleanPreference` because we only want the "read" part of this setting to be
@@ -366,6 +446,7 @@ class Settings(private val appContext: Context) : PreferencesHolder {
     // and disable this pref. Other than that, the `SecretDebugMenuTrigger` should be able to change
     // this setting for the duration of the session only, i.e. `SecretDebugMenuTrigger` should never
     // be able to (indirectly) change the value of the shared pref.
+    // todo: check usages to see if need to remove
     var showSecretDebugMenuThisSession: Boolean = false
         get() = field || preferences.getBoolean(
             appContext.getPreferenceKey(R.string.pref_key_persistent_debug_menu),
@@ -378,96 +459,163 @@ class Settings(private val appContext: Context) : PreferencesHolder {
     val shouldShowSecurityPinWarning: Boolean
         get() = secureWarningCount.underMaxCount()
 
-    var shouldShowPrivacyPopWindow by booleanPreference(
-        appContext.getPreferenceKey(R.string.pref_key_privacy_pop_window),
-        default = true,
-    )
+    // not used
+//    var shouldShowPrivacyPopWindow by booleanPreference(
+//        appContext.getPreferenceKey(R.string.pref_key_privacy_pop_window),
+//        default = true,
+//    )
 
+    // todo: check usages to see if need to remove
     var shouldUseLightTheme by booleanPreference(
         appContext.getPreferenceKey(R.string.pref_key_light_theme),
         default = false,
     )
 
-    var shouldUseAutoSize by booleanPreference(
-        appContext.getPreferenceKey(R.string.pref_key_accessibility_auto_size),
-        default = true,
-    )
+    var shouldUseAutoSize: Boolean
+        get() = getPref(default = true) { it?.shouldSizeFontAutomatically }
+        set(value) {
+            setPref { it.setShouldSizeFontAutomatically(value) }
+        }
+//    var shouldUseAutoSize by booleanPreference(
+//        appContext.getPreferenceKey(R.string.pref_key_accessibility_auto_size),
+//        default = true,
+//    )
 
-    var fontSizeFactor by floatPreference(
-        appContext.getPreferenceKey(R.string.pref_key_accessibility_font_scale),
-        default = 1f,
-    )
+    var fontSizeFactor: Float
+        get() = getPref(default = 1f) { it?.fontSizeFactor }
+        set(value) {
+            setPref { it.setFontSizeFactor(value) }
+        }
+//    var fontSizeFactor by floatPreference(
+//        appContext.getPreferenceKey(R.string.pref_key_accessibility_font_scale),
+//        default = 1f,
+//    )
 
-    val shouldShowHistorySuggestions by booleanPreference(
-        appContext.getPreferenceKey(R.string.pref_key_search_browsing_history),
-        default = true,
-    )
+    var shouldShowHistorySuggestions: Boolean
+        get() = getPref(default = true) { it?.shouldShowHistorySuggestions }
+        set(value) {
+            setPref { it.setShouldShowHistorySuggestions(value) }
+        }
+//    val shouldShowHistorySuggestions by booleanPreference(
+//        appContext.getPreferenceKey(R.string.pref_key_search_browsing_history),
+//        default = true,
+//    )
 
-    val shouldShowBookmarkSuggestions by booleanPreference(
-        appContext.getPreferenceKey(R.string.pref_key_search_bookmarks),
-        default = true,
-    )
+    var shouldShowBookmarkSuggestions: Boolean
+        get() = getPref(default = true) { it?.shouldShowBookmarkSuggestions }
+        set(value) {
+            setPref { it.setShouldShowBookmarkSuggestions(value) }
+        }
+//    val shouldShowBookmarkSuggestions by booleanPreference(
+//        appContext.getPreferenceKey(R.string.pref_key_search_bookmarks),
+//        default = true,
+//    )
 
-    val shouldShowSyncedTabsSuggestions by booleanPreference(
-        appContext.getPreferenceKey(R.string.pref_key_search_synced_tabs),
-        default = true,
-    )
+    var shouldShowSyncedTabsSuggestions: Boolean
+        get() = getPref(default = true) { it?.shouldShowSyncedTabsSuggestions }
+        set(value) {
+            setPref { it.setShouldShowSyncedTabsSuggestions(value) }
+        }
+//    val shouldShowSyncedTabsSuggestions by booleanPreference(
+//        appContext.getPreferenceKey(R.string.pref_key_search_synced_tabs),
+//        default = true,
+//    )
 
-    val shouldShowClipboardSuggestions by booleanPreference(
-        appContext.getPreferenceKey(R.string.pref_key_show_clipboard_suggestions),
-        default = true,
-    )
+    var shouldShowClipboardSuggestions: Boolean
+        get() = getPref(default = true) { it?.shouldShowClipboardSuggestions }
+        set(value) {
+            setPref { it.setShouldShowClipboardSuggestions(value) }
+        }
+//    val shouldShowClipboardSuggestions by booleanPreference(
+//        appContext.getPreferenceKey(R.string.pref_key_show_clipboard_suggestions),
+//        default = true,
+//    )
 
-    val shouldShowSearchShortcuts by booleanPreference(
-        appContext.getPreferenceKey(R.string.pref_key_show_search_engine_shortcuts),
-        default = false,
-    )
+    var shouldShowSearchShortcuts: Boolean
+        get() = getPref(default = false) { it?.shouldShowSearchShortcuts }
+        set(value) {
+            setPref { it.setShouldShowSearchShortcuts(value) }
+        }
+//    val shouldShowSearchShortcuts by booleanPreference(
+//        appContext.getPreferenceKey(R.string.pref_key_show_search_engine_shortcuts),
+//        default = false,
+//    )
 
-    var gridTabView by booleanPreference(
-        appContext.getPreferenceKey(R.string.pref_key_tab_view_grid),
-        default = true,
-    )
+    var tabTrayStyle: InfernoSettings.TabTrayStyle
+        get() = getPref(default = InfernoSettings.TabTrayStyle.TAB_TRAY_LIST) { it?.tabTrayStyle }
+        set(value) {
+            setPref { it.setTabTrayStyle(value) }
+        }
+//    var gridTabView by booleanPreference(
+//        appContext.getPreferenceKey(R.string.pref_key_tab_view_grid),
+//        default = true,
+//    )
 
-    var manuallyCloseTabs by booleanPreference(
-        appContext.getPreferenceKey(R.string.pref_key_close_tabs_manually),
-        default = true,
-    )
+    var manuallyCloseTabs: Boolean
+        get() = getPref(default = true) { it?.closeTabsManually }
+        set(value) {
+            setPref { it.setCloseTabsManually(value) }
+        }
+//    var manuallyCloseTabs by booleanPreference(
+//        appContext.getPreferenceKey(R.string.pref_key_close_tabs_manually),
+//        default = true,
+//    )
 
-    var closeTabsAfterOneDay by booleanPreference(
-        appContext.getPreferenceKey(R.string.pref_key_close_tabs_after_one_day),
-        default = false,
-    )
+    var closeTabsAfterOneDay: Boolean
+        get() = getPref(default = false) { it?.closeTabsAfterOneDay }
+        set(value) {
+            setPref { it.setCloseTabsAfterOneDay(value) }
+        }
+//    var closeTabsAfterOneDay by booleanPreference(
+//        appContext.getPreferenceKey(R.string.pref_key_close_tabs_after_one_day),
+//        default = false,
+//    )
 
-    var closeTabsAfterOneWeek by booleanPreference(
-        appContext.getPreferenceKey(R.string.pref_key_close_tabs_after_one_week),
-        default = false,
-    )
+    var closeTabsAfterOneWeek: Boolean
+        get() = getPref(default = false) { it?.closeTabsAfterOneWeek }
+        set(value) {
+            setPref { it.setCloseTabsAfterOneWeek(value) }
+        }
+//    var closeTabsAfterOneWeek by booleanPreference(
+//        appContext.getPreferenceKey(R.string.pref_key_close_tabs_after_one_week),
+//        default = false,
+//    )
 
-    var closeTabsAfterOneMonth by booleanPreference(
-        appContext.getPreferenceKey(R.string.pref_key_close_tabs_after_one_month),
-        default = false,
-    )
+    var closeTabsAfterOneMonth: Boolean
+        get() = getPref(default = false) { it?.closeTabsAfterOneMonth }
+        set(value) {
+            setPref { it.setCloseTabsAfterOneMonth(value) }
+        }
+//    var closeTabsAfterOneMonth by booleanPreference(
+//        appContext.getPreferenceKey(R.string.pref_key_close_tabs_after_one_month),
+//        default = false,
+//    )
 
+    // todo: check usages to see if need to remove
     var allowThirdPartyRootCerts by booleanPreference(
         appContext.getPreferenceKey(R.string.pref_key_allow_third_party_root_certs),
         default = false,
     )
 
+    // todo: check usages to see if need to remove
     var nimbusUsePreview by booleanPreference(
         appContext.getPreferenceKey(R.string.pref_key_nimbus_use_preview),
         default = false,
     )
 
+    // todo: check usages to see if need to remove
     var isFirstNimbusRun: Boolean by booleanPreference(
         appContext.getPreferenceKey(R.string.pref_key_is_first_run),
         default = true,
     )
 
+    // todo: check usages to see if need to remove
     var isFirstSplashScreenShown: Boolean by booleanPreference(
         appContext.getPreferenceKey(R.string.pref_key_is_first_splash_screen_shown),
         default = false,
     )
 
+    // todo: check usages to see if need to remove
     var nimbusLastFetchTime: Long by longPreference(
         appContext.getPreferenceKey(R.string.pref_key_nimbus_last_fetch),
         default = 0L,
@@ -481,6 +629,7 @@ class Settings(private val appContext: Context) : PreferencesHolder {
      * This value defaults to 0L because we want to know if the user never had any interaction
      * with the [BrowserFragment]
      */
+    // todo: check usages to see if need to remove
     var lastBrowseActivity by longPreference(
         appContext.getPreferenceKey(R.string.pref_key_last_browse_activity_time),
         default = 0L,
@@ -490,27 +639,48 @@ class Settings(private val appContext: Context) : PreferencesHolder {
      * Indicates if the user has selected the option to start on the home screen after
      * four hours of inactivity.
      */
-    var openHomepageAfterFourHoursOfInactivity by booleanPreference(
-        appContext.getPreferenceKey(R.string.pref_key_start_on_home_after_four_hours),
-        default = true,
-    )
+    var openHomepageAfterFourHoursOfInactivity: Boolean
+        get() = getPref(default = true) { it?.pageWhenBrowserReopened == InfernoSettings.PageWhenBrowserReopened.OPEN_ON_HOME_AFTER_FOUR_HOURS }
+        set(value) {
+            if (value) setPref { it.setPageWhenBrowserReopened(InfernoSettings.PageWhenBrowserReopened.OPEN_ON_HOME_AFTER_FOUR_HOURS) }
+        }
+
+    var useInfernoHome: Boolean
+        get() = getPref(default = true) { it?.shouldUseInfernoHome }
+        set(value) {
+            setPref { it.setShouldUseInfernoHome(value) }
+        }
+//    var openHomepageAfterFourHoursOfInactivity by booleanPreference(
+//        appContext.getPreferenceKey(R.string.pref_key_start_on_home_after_four_hours),
+//        default = true,
+//    )
 
     /**
      * Indicates if the user has selected the option to always start on the home screen.
      */
-    var alwaysOpenTheHomepageWhenOpeningTheApp by booleanPreference(
-        appContext.getPreferenceKey(R.string.pref_key_start_on_home_always),
-        default = false,
-    )
+    var alwaysOpenTheHomepageWhenOpeningTheApp: Boolean
+        get() = getPref(default = false) { it?.pageWhenBrowserReopened == InfernoSettings.PageWhenBrowserReopened.OPEN_ON_HOME_ALWAYS }
+        set(value) {
+            if (value) setPref { it.setPageWhenBrowserReopened(InfernoSettings.PageWhenBrowserReopened.OPEN_ON_HOME_ALWAYS) }
+        }
+//    var alwaysOpenTheHomepageWhenOpeningTheApp by booleanPreference(
+//        appContext.getPreferenceKey(R.string.pref_key_start_on_home_always),
+//        default = false,
+//    )
 
     /**
      * Indicates if the user has selected the option to never start on the home screen and have
      * their last tab opened.
      */
-    var alwaysOpenTheLastTabWhenOpeningTheApp by booleanPreference(
-        appContext.getPreferenceKey(R.string.pref_key_start_on_home_never),
-        default = false,
-    )
+    var alwaysOpenTheLastTabWhenOpeningTheApp: Boolean
+        get() = getPref(default = false) { it?.pageWhenBrowserReopened == InfernoSettings.PageWhenBrowserReopened.OPEN_ON_LAST_TAB }
+        set(value) {
+            if (value) setPref { it.setPageWhenBrowserReopened(InfernoSettings.PageWhenBrowserReopened.OPEN_ON_LAST_TAB) }
+        }
+//    var alwaysOpenTheLastTabWhenOpeningTheApp by booleanPreference(
+//        appContext.getPreferenceKey(R.string.pref_key_start_on_home_never),
+//        default = false,
+//    )
 
     /**
      * Indicates if the user should start on the home screen, based on the user's preferences.
@@ -527,14 +697,20 @@ class Settings(private val appContext: Context) : PreferencesHolder {
     /**
      * Indicates if the user has enabled the inactive tabs feature.
      */
-    var inactiveTabsAreEnabled by booleanPreference(
-        appContext.getPreferenceKey(R.string.pref_key_inactive_tabs),
-        default = true,
-    )
+    var inactiveTabsAreEnabled: Boolean
+        get() = getPref(default = true) { it?.shouldSeparateInactiveTabs }
+        set(value) {
+            setPref { it.setShouldSeparateInactiveTabs(value) }
+        }
+//    var inactiveTabsAreEnabled by booleanPreference(
+//        appContext.getPreferenceKey(R.string.pref_key_inactive_tabs),
+//        default = true,
+//    )
 
     /**
      * Indicates if the user has completed successfully first translation.
      */
+    // todo: check usages to see if need to remove
     var showFirstTimeTranslation: Boolean by booleanPreference(
         appContext.getPreferenceKey(R.string.pref_key_show_first_time_translation),
         default = true,
@@ -543,6 +719,7 @@ class Settings(private val appContext: Context) : PreferencesHolder {
     /**
      * Indicates if the user wants translations to automatically be offered as a popup of the dialog.
      */
+    // todo: check usages to see if need to remove
     var offerTranslation: Boolean by booleanPreference(
         appContext.getPreferenceKey(R.string.pref_key_translations_offer),
         default = true,
@@ -562,7 +739,8 @@ class Settings(private val appContext: Context) : PreferencesHolder {
         GRID, LIST
     }
 
-    fun getTabViewPingString() = if (gridTabView) TabView.GRID.name else TabView.LIST.name
+    fun getTabViewPingString() =
+        if (tabTrayStyle == InfernoSettings.TabTrayStyle.TAB_TRAY_GRID) TabView.GRID.name else TabView.LIST.name
 
     enum class TabTimout {
         ONE_DAY, ONE_WEEK, ONE_MONTH, MANUAL
@@ -572,12 +750,15 @@ class Settings(private val appContext: Context) : PreferencesHolder {
         closeTabsAfterOneDay -> {
             TabTimout.ONE_DAY.name
         }
+
         closeTabsAfterOneWeek -> {
             TabTimout.ONE_WEEK.name
         }
+
         closeTabsAfterOneMonth -> {
             TabTimout.ONE_MONTH.name
         }
+
         else -> {
             TabTimout.MANUAL.name
         }
@@ -587,12 +768,15 @@ class Settings(private val appContext: Context) : PreferencesHolder {
         closeTabsAfterOneDay -> {
             appContext.getString(R.string.close_tabs_after_one_day_summary)
         }
+
         closeTabsAfterOneWeek -> {
             appContext.getString(R.string.close_tabs_after_one_week_summary)
         }
+
         closeTabsAfterOneMonth -> {
             appContext.getString(R.string.close_tabs_after_one_month_summary)
         }
+
         else -> {
             appContext.getString(R.string.close_tabs_manually_summary)
         }
@@ -601,108 +785,158 @@ class Settings(private val appContext: Context) : PreferencesHolder {
     /**
      * Get the display string for the current open links in apps setting
      */
-    fun getOpenLinksInAppsString(): String =
-        when (openLinksInExternalApp) {
-            appContext.getString(R.string.pref_key_open_links_in_apps_always) -> {
-                if (lastKnownMode == BrowsingMode.Normal) {
-                    appContext.getString(R.string.preferences_open_links_in_apps_always)
-                } else {
-                    appContext.getString(R.string.preferences_open_links_in_apps_ask)
-                }
-            }
-            appContext.getString(R.string.pref_key_open_links_in_apps_ask) -> {
+    fun getOpenLinksInAppsString(): String = when (openLinksInExternalApp) {
+        appContext.getString(R.string.pref_key_open_links_in_apps_always) -> {
+            if (lastKnownMode == BrowsingMode.Normal) {
+                appContext.getString(R.string.preferences_open_links_in_apps_always)
+            } else {
                 appContext.getString(R.string.preferences_open_links_in_apps_ask)
-            }
-            else -> {
-                appContext.getString(R.string.preferences_open_links_in_apps_never)
             }
         }
 
+        appContext.getString(R.string.pref_key_open_links_in_apps_ask) -> {
+            appContext.getString(R.string.preferences_open_links_in_apps_ask)
+        }
+
+        else -> {
+            appContext.getString(R.string.preferences_open_links_in_apps_never)
+        }
+    }
+
+    // todo: check usages to see if need to remove
     var shouldUseDarkTheme by booleanPreference(
         appContext.getPreferenceKey(R.string.pref_key_dark_theme),
         default = false,
     )
 
+    // todo: check usages to see if need to remove
     var shouldFollowDeviceTheme by booleanPreference(
         appContext.getPreferenceKey(R.string.pref_key_follow_device_theme),
         default = false,
     )
 
-    var shouldUseHttpsOnly by booleanPreference(
-        appContext.getPreferenceKey(R.string.pref_key_https_only),
-        default = false,
-    )
+    var httpsOnlyMode: InfernoSettings.HttpsOnlyMode
+        get() = getPref(default = InfernoSettings.HttpsOnlyMode.HTTPS_ONLY_DISABLED) { it?.httpsOnlyMode }
+        set(value) {
+            setPref { it.setHttpsOnlyMode(value) }
+        }
 
-    var shouldUseHttpsOnlyInAllTabs by booleanPreference(
-        appContext.getPreferenceKey(R.string.pref_key_https_only_in_all_tabs),
-        default = true,
-    )
+    var shouldUseHttpsOnly: Boolean
+        get() = getPref(default = true) { it?.httpsOnlyMode == InfernoSettings.HttpsOnlyMode.HTTPS_ONLY_ENABLED }
+        set(value) {
+            if (value) setPref { it.setHttpsOnlyMode(InfernoSettings.HttpsOnlyMode.HTTPS_ONLY_ENABLED) }
+        }
+//    var shouldUseHttpsOnly by booleanPreference(
+//        appContext.getPreferenceKey(R.string.pref_key_https_only),
+//        default = false,
+//    )
 
-    var shouldUseHttpsOnlyInPrivateTabsOnly by booleanPreference(
-        appContext.getPreferenceKey(R.string.pref_key_https_only_in_private_tabs),
-        default = false,
-    )
+    var shouldUseHttpsOnlyInAllTabs: Boolean
+        get() = getPref(default = true) { it?.httpsOnlyMode == InfernoSettings.HttpsOnlyMode.HTTPS_ONLY_ENABLED }
+        set(value) {
+            if (value) setPref { it.setHttpsOnlyMode(InfernoSettings.HttpsOnlyMode.HTTPS_ONLY_ENABLED) }
+        }
+//    var shouldUseHttpsOnlyInAllTabs by booleanPreference(
+//        appContext.getPreferenceKey(R.string.pref_key_https_only_in_all_tabs),
+//        default = true,
+//    )
 
-    var shouldUseTrackingProtection by booleanPreference(
-        appContext.getPreferenceKey(R.string.pref_key_tracking_protection),
-        default = true,
-    )
+    var shouldUseHttpsOnlyInPrivateTabsOnly: Boolean
+        get() = getPref(default = true) { it?.httpsOnlyMode == InfernoSettings.HttpsOnlyMode.HTTPS_ONLY_ENABLED_PRIVATE_ONLY }
+        set(value) {
+            if (value) setPref { it.setHttpsOnlyMode(InfernoSettings.HttpsOnlyMode.HTTPS_ONLY_ENABLED_PRIVATE_ONLY) }
+        }
+//    var shouldUseHttpsOnlyInPrivateTabsOnly by booleanPreference(
+//        appContext.getPreferenceKey(R.string.pref_key_https_only_in_private_tabs),
+//        default = false,
+//    )
 
-    var shouldEnableGlobalPrivacyControl by booleanPreference(
-        appContext.getPreferenceKey(R.string.pref_key_privacy_enable_global_privacy_control),
-        false,
-    )
+    var shouldUseTrackingProtection: Boolean
+        get() = getPref(default = true) { it?.selectedTrackingProtection != InfernoSettings.TrackingProtectionDefault.NONE }
+        set(value) {
+            if (value) {
+                setPref { it.setSelectedTrackingProtection(InfernoSettings.TrackingProtectionDefault.STANDARD) }
+            } else {
+                setPref { it.setSelectedTrackingProtection(InfernoSettings.TrackingProtectionDefault.NONE) }
+            }
+        }
+//    var shouldUseTrackingProtection by booleanPreference(
+//        appContext.getPreferenceKey(R.string.pref_key_tracking_protection),
+//        default = true,
+//    )
 
+    var shouldEnableGlobalPrivacyControl: Boolean
+        get() = getPref(default = true) { it?.isGlobalPrivacyControlEnabled }
+        set(value) {
+            setPref { it.setIsGlobalPrivacyControlEnabled(value) }
+        }
+//    var shouldEnableGlobalPrivacyControl by booleanPreference(
+//        appContext.getPreferenceKey(R.string.pref_key_privacy_enable_global_privacy_control),
+//        false,
+//    )
+
+    // todo: check usages to see if need to remove
     var shouldUseCookieBannerPrivateMode by lazyFeatureFlagPreference(
         appContext.getPreferenceKey(R.string.pref_key_cookie_banner_private_mode),
         featureFlag = true,
         default = { shouldUseCookieBannerPrivateModeDefaultValue },
     )
 
+    // todo: check usages to see if need to remove
     val shouldUseCookieBannerPrivateModeDefaultValue: Boolean
         get() = cookieBannersSection[CookieBannersSection.FEATURE_SETTING_VALUE_PBM] == 1
 
+    // todo: check usages to see if need to remove
     val shouldUseCookieBanner: Boolean
         get() = cookieBannersSection[CookieBannersSection.FEATURE_SETTING_VALUE] == 1
 
+    // todo: check usages to see if need to remove
     val shouldShowCookieBannerUI: Boolean
         get() = cookieBannersSection[CookieBannersSection.FEATURE_UI] == 1
 
+    // todo: check usages to see if need to remove
     val shouldEnableCookieBannerDetectOnly: Boolean
         get() = cookieBannersSection[CookieBannersSection.FEATURE_SETTING_DETECT_ONLY] == 1
 
+    // todo: check usages to see if need to remove
     val shouldEnableCookieBannerGlobalRules: Boolean
         get() = cookieBannersSection[CookieBannersSection.FEATURE_SETTING_GLOBAL_RULES] == 1
 
+    // todo: check usages to see if need to remove
     val shouldEnableCookieBannerGlobalRulesSubFrame: Boolean
         get() = cookieBannersSection[CookieBannersSection.FEATURE_SETTING_GLOBAL_RULES_SUB_FRAMES] == 1
 
+    // todo: check usages to see if need to remove
     val shouldEnableQueryParameterStripping: Boolean
         get() = queryParameterStrippingSection[QUERY_PARAMETER_STRIPPING] == "1"
 
+    // todo: check usages to see if need to remove
     val shouldEnableQueryParameterStrippingPrivateBrowsing: Boolean
         get() = queryParameterStrippingSection[QUERY_PARAMETER_STRIPPING_PMB] == "1"
 
+    // todo: check usages to see if need to remove
     val queryParameterStrippingAllowList: String
         get() = queryParameterStrippingSection[QUERY_PARAMETER_STRIPPING_ALLOW_LIST].orEmpty()
 
+    // todo: check usages to see if need to remove
     val queryParameterStrippingStripList: String
         get() = queryParameterStrippingSection[QUERY_PARAMETER_STRIPPING_STRIP_LIST].orEmpty()
 
-    /**
-     * Declared as a function for performance purposes. This could be declared as a variable using
-     * booleanPreference like other members of this class. However, doing so will make it so it will
-     * be initialized once Settings.kt is first called, which in turn will call `isDefaultBrowserBlocking()`.
-     * This will lead to a performance regression since that function can be expensive to call.
-     */
-    fun checkIfFenixIsDefaultBrowserOnAppResume(): Boolean {
-        val prefKey = appContext.getPreferenceKey(R.string.pref_key_default_browser)
-        val isDefaultBrowserNow = isDefaultBrowserBlocking()
-        val wasDefaultBrowserOnLastResume =
-            this.preferences.getBoolean(prefKey, isDefaultBrowserNow)
-        this.preferences.edit().putBoolean(prefKey, isDefaultBrowserNow).apply()
-        return isDefaultBrowserNow && !wasDefaultBrowserOnLastResume
-    }
+    // todo: not used
+//    /**
+//     * Declared as a function for performance purposes. This could be declared as a variable using
+//     * booleanPreference like other members of this class. However, doing so will make it so it will
+//     * be initialized once Settings.kt is first called, which in turn will call `isDefaultBrowserBlocking()`.
+//     * This will lead to a performance regression since that function can be expensive to call.
+//     */
+//    fun checkIfFenixIsDefaultBrowserOnAppResume(): Boolean {
+//        val prefKey = appContext.getPreferenceKey(R.string.pref_key_default_browser)
+//        val isDefaultBrowserNow = isDefaultBrowserBlocking()
+//        val wasDefaultBrowserOnLastResume =
+//            this.preferences.getBoolean(prefKey, isDefaultBrowserNow)
+//        this.preferences.edit().putBoolean(prefKey, isDefaultBrowserNow).apply()
+//        return isDefaultBrowserNow && !wasDefaultBrowserOnLastResume
+//    }
 
     /**
      * This function is "blocking" since calling this can take approx. 30-40ms (timing taken on a
@@ -713,6 +947,7 @@ class Settings(private val appContext: Context) : PreferencesHolder {
         return browsers.isDefaultBrowser
     }
 
+    // todo: check usages to see if need to remove
     var reEngagementNotificationShown by booleanPreference(
         appContext.getPreferenceKey(R.string.pref_key_re_engagement_notification_shown),
         default = false,
@@ -721,6 +956,7 @@ class Settings(private val appContext: Context) : PreferencesHolder {
     /**
      * Check if we should set the re-engagement notification.
      */
+    // todo: check usages to see if need to remove
     fun shouldSetReEngagementNotification(): Boolean {
         return numberOfAppLaunches <= 1 && !reEngagementNotificationShown
     }
@@ -728,6 +964,7 @@ class Settings(private val appContext: Context) : PreferencesHolder {
     /**
      * Check if we should show the re-engagement notification.
      */
+    // todo: check usages to see if need to remove
     fun shouldShowReEngagementNotification(): Boolean {
         return !reEngagementNotificationShown && !isDefaultBrowserBlocking()
     }
@@ -735,6 +972,7 @@ class Settings(private val appContext: Context) : PreferencesHolder {
     /**
      * Indicates if the re-engagement notification feature is enabled
      */
+    // todo: check usages to see if need to remove
     var reEngagementNotificationEnabled by lazyFeatureFlagPreference(
         key = appContext.getPreferenceKey(R.string.pref_key_re_engagement_notification_enabled),
         default = { FxNimbus.features.reEngagementNotification.value().enabled },
@@ -744,52 +982,81 @@ class Settings(private val appContext: Context) : PreferencesHolder {
     /**
      * Indicates if the re-engagement notification feature is enabled
      */
+    // todo: check usages to see if need to remove
     val reEngagementNotificationType: Int
-        get() =
-            FxNimbus.features.reEngagementNotification.value().type
+        get() = FxNimbus.features.reEngagementNotification.value().type
 
+    // todo: check usages to see if need to remove
     val shouldUseAutoBatteryTheme by booleanPreference(
         appContext.getPreferenceKey(R.string.pref_key_auto_battery_theme),
         default = false,
     )
 
-    val useStandardTrackingProtection by booleanPreference(
-        appContext.getPreferenceKey(R.string.pref_key_tracking_protection_standard_option),
-        true,
-    )
-
-    val useStrictTrackingProtection by booleanPreference(
-        appContext.getPreferenceKey(R.string.pref_key_tracking_protection_strict_default),
-        false,
-    )
-
-    val useCustomTrackingProtection by booleanPreference(
-        appContext.getPreferenceKey(R.string.pref_key_tracking_protection_custom_option),
-        false,
-    )
-
-    @VisibleForTesting(otherwise = PRIVATE)
-    fun setStrictETP() {
-        preferences.edit().putBoolean(
-            appContext.getPreferenceKey(R.string.pref_key_tracking_protection_strict_default),
-            true,
-        ).apply()
-        preferences.edit().putBoolean(
-            appContext.getPreferenceKey(R.string.pref_key_tracking_protection_standard_option),
-            false,
-        ).apply()
-        appContext.components.let {
-            val policy = it.core.trackingProtectionPolicyFactory
-                .createTrackingProtectionPolicy()
-            it.useCases.settingsUseCases.updateTrackingProtection.invoke(policy)
-            it.useCases.sessionUseCases.reload.invoke()
+    var useStandardTrackingProtection: Boolean
+        get() = getPref(default = true) { it?.selectedTrackingProtection == InfernoSettings.TrackingProtectionDefault.STANDARD }
+        set(value) {
+            if (value) setPref { it.setSelectedTrackingProtection(InfernoSettings.TrackingProtectionDefault.STANDARD) }
         }
-    }
+//    val useStandardTrackingProtection by booleanPreference(
+//        appContext.getPreferenceKey(R.string.pref_key_tracking_protection_standard_option),
+//        true,
+//    )
 
-    val blockCookiesInCustomTrackingProtection by booleanPreference(
-        appContext.getPreferenceKey(R.string.pref_key_tracking_protection_custom_cookies),
-        true,
-    )
+    var useStrictTrackingProtection: Boolean
+        get() = getPref(default = true) { it?.selectedTrackingProtection == InfernoSettings.TrackingProtectionDefault.STRICT }
+        set(value) {
+            if (value) setPref { it.setSelectedTrackingProtection(InfernoSettings.TrackingProtectionDefault.STRICT) }
+        }
+//    val useStrictTrackingProtection by booleanPreference(
+//        appContext.getPreferenceKey(R.string.pref_key_tracking_protection_strict_default),
+//        false,
+//    )
+
+    var useCustomTrackingProtection: Boolean
+        get() = getPref(default = true) { it?.selectedTrackingProtection == InfernoSettings.TrackingProtectionDefault.CUSTOM }
+        set(value) {
+            if (value) setPref { it.setSelectedTrackingProtection(InfernoSettings.TrackingProtectionDefault.CUSTOM) }
+        }
+//    val useCustomTrackingProtection by booleanPreference(
+//        appContext.getPreferenceKey(R.string.pref_key_tracking_protection_custom_option),
+//        false,
+//    )
+
+    // todo: what is this & why not used
+//    @VisibleForTesting(otherwise = PRIVATE)
+//    fun setStrictETP() {
+//        preferences.edit().putBoolean(
+//            appContext.getPreferenceKey(R.string.pref_key_tracking_protection_strict_default),
+//            true,
+//        ).apply()
+//        preferences.edit().putBoolean(
+//            appContext.getPreferenceKey(R.string.pref_key_tracking_protection_standard_option),
+//            false,
+//        ).apply()
+//        appContext.components.let {
+//            val policy = it.core.trackingProtectionPolicyFactory.createTrackingProtectionPolicy()
+//            it.useCases.settingsUseCases.updateTrackingProtection.invoke(policy)
+//            it.useCases.sessionUseCases.reload.invoke()
+//        }
+//    }
+
+    // todo: boolean or cookie type? check usages or if another pref for cookie type to block
+    var blockCookiesInCustomTrackingProtection: Boolean
+        get() = getPref(default = true) { it?.customTrackingProtection?.blockCustomCookies != InfernoSettings.CustomTrackingProtection.CustomCookies.NONE }
+        set(value) {
+            // todo: does this work?
+            if (!value) setPref {
+                it.setCustomTrackingProtection(
+                    it.customTrackingProtection.toBuilder()
+                        .setBlockCustomCookies(InfernoSettings.CustomTrackingProtection.CustomCookies.NONE)
+                        .build()
+                )
+            }
+        }
+//    val blockCookiesInCustomTrackingProtection by booleanPreference(
+//        appContext.getPreferenceKey(R.string.pref_key_tracking_protection_custom_cookies),
+//        true,
+//    )
 
     val useProductionRemoteSettingsServer by booleanPreference(
         key = appContext.getPreferenceKey(R.string.pref_key_remote_server_prod),
@@ -873,16 +1140,16 @@ class Settings(private val appContext: Context) : PreferencesHolder {
 
     val blockSuspectedFingerprinters: Boolean
         get() {
-            return blockSuspectedFingerprintersInCustomTrackingProtection &&
-                blockSuspectedFingerprintersSelectionInCustomTrackingProtection == appContext.getString(R.string.all)
+            return blockSuspectedFingerprintersInCustomTrackingProtection && blockSuspectedFingerprintersSelectionInCustomTrackingProtection == appContext.getString(
+                R.string.all
+            )
         }
 
     val blockSuspectedFingerprintersPrivateBrowsing: Boolean
         get() {
-            return blockSuspectedFingerprintersInCustomTrackingProtection &&
-                blockSuspectedFingerprintersSelectionInCustomTrackingProtection == appContext.getString(
-                    R.string.private_string,
-                )
+            return blockSuspectedFingerprintersInCustomTrackingProtection && blockSuspectedFingerprintersSelectionInCustomTrackingProtection == appContext.getString(
+                R.string.private_string,
+            )
         }
 
     /**
@@ -913,12 +1180,10 @@ class Settings(private val appContext: Context) : PreferencesHolder {
         set(value) {
             val lastKnownModeWasPrivate = (value == BrowsingMode.Private)
 
-            preferences.edit()
-                .putBoolean(
-                    appContext.getPreferenceKey(R.string.pref_key_last_known_mode_private),
-                    lastKnownModeWasPrivate,
-                )
-                .apply()
+            preferences.edit().putBoolean(
+                appContext.getPreferenceKey(R.string.pref_key_last_known_mode_private),
+                lastKnownModeWasPrivate,
+            ).apply()
 
             field = value
         }
@@ -1133,9 +1398,7 @@ class Settings(private val appContext: Context) : PreferencesHolder {
      * and if the auto-close setting is already set to [closeTabsAfterOneMonth].
      */
     fun shouldShowInactiveTabsAutoCloseDialog(numbersOfTabs: Int): Boolean {
-        return !hasInactiveTabsAutoCloseDialogBeenDismissed &&
-            numbersOfTabs >= INACTIVE_TAB_MINIMUM_TO_SHOW_AUTO_CLOSE_DIALOG &&
-            !closeTabsAfterOneMonth
+        return !hasInactiveTabsAutoCloseDialogBeenDismissed && numbersOfTabs >= INACTIVE_TAB_MINIMUM_TO_SHOW_AUTO_CLOSE_DIALOG && !closeTabsAfterOneMonth
     }
 
     /**
@@ -1144,8 +1407,7 @@ class Settings(private val appContext: Context) : PreferencesHolder {
     fun getSitePermissionsPhoneFeatureAction(
         feature: PhoneFeature,
         default: Action = Action.ASK_TO_ALLOW,
-    ) =
-        preferences.getInt(feature.getPreferenceKey(appContext), default.toInt()).toAction()
+    ) = preferences.getInt(feature.getPreferenceKey(appContext), default.toInt()).toAction()
 
     /**
      * Saves the user selected autoplay setting.
@@ -1265,9 +1527,7 @@ class Settings(private val appContext: Context) : PreferencesHolder {
      */
     fun setSearchWidgetInstalled(installed: Boolean) {
         val key = appContext.getPreferenceKey(R.string.pref_key_search_widget_installed_2)
-        preferences.edit()
-            .putBoolean(key, installed)
-            .apply()
+        preferences.edit().putBoolean(key, installed).apply()
     }
 
     /**
@@ -1286,8 +1546,7 @@ class Settings(private val appContext: Context) : PreferencesHolder {
 
         if (installedCount > 0) {
             setSearchWidgetInstalled(true)
-            preferences.edit()
-                .remove(oldKey).apply()
+            preferences.edit().remove(oldKey).apply()
         }
     }
 
@@ -1338,8 +1597,7 @@ class Settings(private val appContext: Context) : PreferencesHolder {
     fun shouldOpenLinksInApp(isCustomTab: Boolean = false): Boolean {
         return when (openLinksInExternalApp) {
             appContext.getString(R.string.pref_key_open_links_in_apps_always) -> true
-            appContext.getString(R.string.pref_key_open_links_in_apps_ask) -> true
-            /* Some applications will not work if custom tab never open links in apps, return true if it's custom tab */
+            appContext.getString(R.string.pref_key_open_links_in_apps_ask) -> true/* Some applications will not work if custom tab never open links in apps, return true if it's custom tab */
             appContext.getString(R.string.pref_key_open_links_in_apps_never) -> isCustomTab
             else -> false
         }
@@ -1501,10 +1759,9 @@ class Settings(private val appContext: Context) : PreferencesHolder {
         }
         set(value) {
             savedLoginsSortingStrategyString = when (value) {
-                is SortingStrategy.Alphabetically ->
-                    SavedLoginsSortingStrategyMenu.Item.AlphabeticallySort.strategyString
-                is SortingStrategy.LastUsed ->
-                    SavedLoginsSortingStrategyMenu.Item.LastUsedSort.strategyString
+                is SortingStrategy.Alphabetically -> SavedLoginsSortingStrategyMenu.Item.AlphabeticallySort.strategyString
+
+                is SortingStrategy.LastUsed -> SavedLoginsSortingStrategyMenu.Item.LastUsedSort.strategyString
             }
         }
 
@@ -1539,32 +1796,28 @@ class Settings(private val appContext: Context) : PreferencesHolder {
             "fr-CA",
         )
         val currentlyEnabledLanguages = if (Config.channel.isNightlyOrDebug) {
-            releaseEnabledLanguages + SharedPrefsAddressesDebugLocalesRepository(context)
-                .getAllEnabledLocales().map { it.langTag }
+            releaseEnabledLanguages + SharedPrefsAddressesDebugLocalesRepository(context).getAllEnabledLocales()
+                .map { it.langTag }
         } else {
             releaseEnabledLanguages
         }
 
-        val userLangTag = LocaleManager.getCurrentLocale(context)
-            ?.toLanguageTag() ?: LocaleManager.getSystemDefault().toLanguageTag()
+        val userLangTag = LocaleManager.getCurrentLocale(context)?.toLanguageTag()
+            ?: LocaleManager.getSystemDefault().toLanguageTag()
         return currentlyEnabledLanguages.contains(userLangTag)
     }
 
     private val mr2022Sections: Map<Mr2022Section, Boolean>
-        get() =
-            FxNimbus.features.mr2022.value().sectionsEnabled
+        get() = FxNimbus.features.mr2022.value().sectionsEnabled
 
     private val cookieBannersSection: Map<CookieBannersSection, Int>
-        get() =
-            FxNimbus.features.cookieBanners.value().sectionsEnabled
+        get() = FxNimbus.features.cookieBanners.value().sectionsEnabled
 
     private val queryParameterStrippingSection: Map<QueryParameterStrippingSection, String>
-        get() =
-            FxNimbus.features.queryParameterStripping.value().sectionsEnabled
+        get() = FxNimbus.features.queryParameterStripping.value().sectionsEnabled
 
     private val homescreenSections: Map<HomeScreenSection, Boolean>
-        get() =
-            FxNimbus.features.homescreen.value().sectionsEnabled
+        get() = FxNimbus.features.homescreen.value().sectionsEnabled
 
     var historyMetadataUIFeature by lazyFeatureFlagPreference(
         appContext.getPreferenceKey(R.string.pref_key_history_metadata_feature),
@@ -1961,7 +2214,8 @@ class Settings(private val appContext: Context) : PreferencesHolder {
     /**
      * Indicates if the new Search settings UI is enabled.
      */
-    var enableUnifiedSearchSettingsUI: Boolean = showUnifiedSearchFeature // && FeatureFlags.unifiedSearchSettings
+    var enableUnifiedSearchSettingsUI: Boolean =
+        showUnifiedSearchFeature // && FeatureFlags.unifiedSearchSettings
 
     /**
      * Indicates if hidden engines were restored due to migration to unified search settings UI.
@@ -2056,8 +2310,7 @@ class Settings(private val appContext: Context) : PreferencesHolder {
             appContext.resources.getDimensionPixelSize(R.dimen.browser_toolbar_height)
 
         return when {
-            isNavbarVisible && isMicrosurveyEnabled && isToolbarAtBottom ->
-                navbarHeight + microsurveyHeight + toolbarHeight
+            isNavbarVisible && isMicrosurveyEnabled && isToolbarAtBottom -> navbarHeight + microsurveyHeight + toolbarHeight
 
             isNavbarVisible && isMicrosurveyEnabled -> navbarHeight + microsurveyHeight
             isNavbarVisible && isToolbarAtBottom -> navbarHeight + toolbarHeight
@@ -2078,7 +2331,8 @@ class Settings(private val appContext: Context) : PreferencesHolder {
      */
     fun getTopToolbarHeight(includeTabStrip: Boolean): Int {
         val isToolbarAtTop = toolbarPosition == ToolbarPosition.TOP
-        val toolbarHeight = appContext.resources.getDimensionPixelSize(R.dimen.browser_toolbar_height)
+        val toolbarHeight =
+            appContext.resources.getDimensionPixelSize(R.dimen.browser_toolbar_height)
 
         return if (isToolbarAtTop && includeTabStrip) {
             toolbarHeight + appContext.resources.getDimensionPixelSize(R.dimen.tab_strip_height)
@@ -2191,11 +2445,7 @@ class Settings(private val appContext: Context) : PreferencesHolder {
      * Indicates if the Set as default Browser prompt should be displayed to the user.
      */
     val shouldShowSetAsDefaultPrompt: Boolean
-        get() = setAsDefaultBrowserPromptForExistingUsersEnabled &&
-            (System.currentTimeMillis() - lastSetAsDefaultPromptShownTimeInMillis) >
-            daysBetweenDefaultBrowserPrompts * ONE_DAY_MS &&
-            numberOfSetAsDefaultPromptShownTimes < maxNumberOfDefaultBrowserPrompts &&
-            coldStartsBetweenSetAsDefaultPrompts >= appColdStartsToShowDefaultPrompt
+        get() = setAsDefaultBrowserPromptForExistingUsersEnabled && (System.currentTimeMillis() - lastSetAsDefaultPromptShownTimeInMillis) > daysBetweenDefaultBrowserPrompts * ONE_DAY_MS && numberOfSetAsDefaultPromptShownTimes < maxNumberOfDefaultBrowserPrompts && coldStartsBetweenSetAsDefaultPrompts >= appColdStartsToShowDefaultPrompt
 
     /**
      * Updates the relevant settings when the "Set as Default Browser" prompt is shown.

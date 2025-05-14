@@ -15,6 +15,7 @@ import com.shmibblez.inferno.compose.base.InfernoText
 @Composable
 fun SwitchPreference(
     text: String,
+    summary: String?,
     selected: Boolean,
     onSelectedChange: (Boolean) -> Unit,
     enabled: Boolean = true,
@@ -28,6 +29,7 @@ fun SwitchPreference(
             ),
         horizontalArrangement = Arrangement.spacedBy(PreferenceConstants.PREFERENCE_INTERNAL_PADDING),
     ) {
+        // title
         InfernoText(
             text = text,
             modifier = Modifier
@@ -38,8 +40,23 @@ fun SwitchPreference(
                         false -> 0.75F
                     }
                 ),
-            fontColor = Color.White,
+            fontColor = Color.White, // todo: theme
         )
+        // summary
+        if (summary != null) {
+            InfernoText(
+                text = summary,
+                modifier = Modifier
+                    .weight(1F)
+                    .alpha(
+                        when (enabled) {
+                            true -> 1F
+                            false -> 0.75F
+                        }
+                    ),
+                fontColor = Color.DarkGray, // todo: theme
+            )
+        }
         Switch(
             checked = selected,
             onCheckedChange = onSelectedChange,

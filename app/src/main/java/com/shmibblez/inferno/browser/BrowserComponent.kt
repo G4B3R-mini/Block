@@ -368,9 +368,6 @@ object ComponentDimens {
     }
 }
 
-@OptIn(
-    ExperimentalComposeUiApi::class, ExperimentalCoroutinesApi::class, DelicateAction::class
-)
 @Composable
 @SuppressLint(
     "UnusedMaterialScaffoldPaddingParameter",
