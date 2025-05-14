@@ -9,7 +9,7 @@ import androidx.annotation.VisibleForTesting
 import mozilla.components.concept.engine.EngineSession.TrackingProtectionPolicy
 import mozilla.components.concept.engine.EngineSession.TrackingProtectionPolicy.CookiePolicy
 import mozilla.components.concept.engine.EngineSession.TrackingProtectionPolicyForSessionTypes
-import com.shmibblez.inferno.R
+import com.shmibblez.inferno.proto.InfernoSettings
 import com.shmibblez.inferno.utils.Settings
 
 /**
@@ -56,8 +56,12 @@ class TrackingProtectionPolicyFactory(
             cookiePurging = getCustomCookiePurgingPolicy(),
             strictSocialTrackingProtection = settings.blockTrackingContentInCustomTrackingProtection,
         ).let {
-            if (settings.blockTrackingContentSelectionInCustomTrackingProtection == "private") {
+            val blockInNormal = settings.blockTrackingContentSelectionInCustomTrackingProtectionInNormalTabs
+            val blockInPrivate = settings.blockTrackingContentSelectionInCustomTrackingProtectionInPrivateTabs
+            if (!blockInNormal && blockInPrivate) {
                 it.forPrivateSessionsOnly()
+            } else if(blockInNormal && !blockInPrivate) {
+                it.forRegularSessionsOnly()
             } else {
                 it
             }
@@ -65,15 +69,16 @@ class TrackingProtectionPolicyFactory(
     }
 
     private fun getCustomCookiePolicy(): CookiePolicy {
-        return if (!settings.blockCookiesInCustomTrackingProtection) {
+         return if (!settings.blockCookiesInCustomTrackingProtection) {
             CookiePolicy.ACCEPT_ALL
         } else {
             when (settings.blockCookiesSelectionInCustomTrackingProtection) {
-                resources.getString(R.string.all) -> CookiePolicy.ACCEPT_NONE
-                resources.getString(R.string.social) -> CookiePolicy.ACCEPT_NON_TRACKERS
-                resources.getString(R.string.unvisited) -> CookiePolicy.ACCEPT_VISITED
-                resources.getString(R.string.third_party) -> CookiePolicy.ACCEPT_ONLY_FIRST_PARTY
-                resources.getString(R.string.total_protection) -> CookiePolicy.ACCEPT_FIRST_PARTY_AND_ISOLATE_OTHERS
+                InfernoSettings.CustomTrackingProtection.CookiePolicy.ISOLATE_CROSS_SITE_COOKIES -> CookiePolicy.ACCEPT_FIRST_PARTY_AND_ISOLATE_OTHERS
+                InfernoSettings.CustomTrackingProtection.CookiePolicy.CROSS_SITE_AND_SOCIAL_MEDIA_TRACKERS -> CookiePolicy.ACCEPT_NON_TRACKERS
+                InfernoSettings.CustomTrackingProtection.CookiePolicy.COOKIES_FROM_UNVISITED_SITES -> CookiePolicy.ACCEPT_VISITED
+                InfernoSettings.CustomTrackingProtection.CookiePolicy.ALL_THIRD_PARTY_COOKIES -> CookiePolicy.ACCEPT_ONLY_FIRST_PARTY
+                InfernoSettings.CustomTrackingProtection.CookiePolicy.ALL_COOKIES -> CookiePolicy.ACCEPT_NONE
+                InfernoSettings.CustomTrackingProtection.CookiePolicy.NONE -> CookiePolicy.ACCEPT_NONE
                 else -> CookiePolicy.ACCEPT_NONE
             }
         }

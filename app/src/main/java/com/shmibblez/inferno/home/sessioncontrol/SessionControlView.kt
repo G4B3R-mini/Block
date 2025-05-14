@@ -81,7 +81,7 @@ internal fun normalModeAdapterItems(
         items.add(AdapterItem.Bookmarks)
     }
 
-    if (settings.historyMetadataUIFeature && recentVisits.isNotEmpty()) {
+    if (settings.shouldShowHistory && recentVisits.isNotEmpty()) {
         shouldShowCustomizeHome = true
         items.add(AdapterItem.RecentVisitsHeader)
         items.add(AdapterItem.RecentVisitsItems)

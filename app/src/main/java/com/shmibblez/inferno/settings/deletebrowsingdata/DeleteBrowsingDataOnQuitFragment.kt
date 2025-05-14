@@ -73,7 +73,7 @@ class DeleteBrowsingDataOnQuitFragment : PreferenceFragmentCompat() {
     private fun setAllCheckboxes(newValue: Boolean) {
         checkboxes.forEach { (type, pref) ->
             pref.isChecked = newValue
-            pref.context.settings().setDeleteDataOnQuit(type, newValue)
+            pref.context.settings().shouldDeleteBrowsingDataOnQuit =  newValue
         }
     }
 }

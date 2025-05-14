@@ -368,6 +368,7 @@ object ComponentDimens {
     }
 }
 
+@OptIn(ExperimentalCoroutinesApi::class, DelicateAction::class)
 @Composable
 @SuppressLint(
     "UnusedMaterialScaffoldPaddingParameter",
@@ -1273,8 +1274,6 @@ fun BrowserComponent(
                     showSnackbarForClipboardCopy(context, coroutineScope, snackbarHostState)
                 },
             )
-
-            val bottomToolbarHeight = context.settings().getBottomToolbarHeight(context)
 
             shareDownloadsFeature.set(
                 shareDownloadFeature,

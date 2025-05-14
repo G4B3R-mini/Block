@@ -7,7 +7,6 @@ package com.shmibblez.inferno.home.store
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import mozilla.components.feature.top.sites.TopSite
-import com.shmibblez.inferno.browser.browsingmode.BrowsingModeManager
 import com.shmibblez.inferno.components.appstate.AppState
 import com.shmibblez.inferno.components.components
 import com.shmibblez.inferno.ext.shouldShowRecentSyncedTabs
@@ -127,7 +126,7 @@ internal sealed class HomepageState {
                         showRecentTabs = shouldShowRecentTabs(settings),
                         showBookmarks = settings.showBookmarksHomeFeature && bookmarks.isNotEmpty(),
                         showRecentSyncedTab = shouldShowRecentSyncedTabs(),
-                        showRecentlyVisited = settings.historyMetadataUIFeature && recentHistory.isNotEmpty(),
+                        showRecentlyVisited = settings.shouldShowHistory && recentHistory.isNotEmpty(),
 //                        showPocketStories = settings.showPocketRecommendationsFeature &&
 //                            recommendationState.pocketStories.isNotEmpty(),
                         topSiteColors = TopSiteColors.colors(wallpaperState = wallpaperState),

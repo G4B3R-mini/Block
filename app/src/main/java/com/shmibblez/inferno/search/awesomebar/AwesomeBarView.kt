@@ -381,7 +381,7 @@ class AwesomeBarView(
     internal fun getHistoryProvider(
         filter: SearchResultFilter? = null,
     ): AwesomeBar.SuggestionProvider {
-        return if (activity.settings().historyMetadataUIFeature) {
+        return if (activity.settings().shouldShowHistory) {
             if (filter != null) {
                 CombinedHistorySuggestionProvider(
                     historyStorage = components.core.historyStorage,

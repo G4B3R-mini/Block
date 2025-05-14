@@ -285,10 +285,10 @@ class TrackingProtectionFragment : PreferenceFragmentCompat() {
 
         context?.components?.let {
             if (isCustomSelected) {
-                if (it.settings.blockSuspectedFingerprintersInCustomTrackingProtection) {
+                if (it.settings.blockSuspectedFingerprintersInCustomTrackingProtectionInNormalTabs) {
                     it.core.engine.settings.fingerprintingProtection = it.settings.blockSuspectedFingerprinters
                     it.core.engine.settings.fingerprintingProtectionPrivateBrowsing = it.settings
-                        .blockSuspectedFingerprintersPrivateBrowsing
+                        .blockSuspectedFingerprintersInCustomTrackingProtectionInPrivateTabs
                 } else {
                     it.core.engine.settings.fingerprintingProtection = false
                     it.core.engine.settings.fingerprintingProtectionPrivateBrowsing = false

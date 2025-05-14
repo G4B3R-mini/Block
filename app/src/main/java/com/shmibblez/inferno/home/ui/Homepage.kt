@@ -130,7 +130,7 @@ internal fun Homepage(
                 val showBookmarks = settings.showBookmarksHomeFeature && bookmarks.isNotEmpty()
                 val recentlyVisited = appState.recentHistory
                 val showRecentlyVisited =
-                    settings.historyMetadataUIFeature && recentlyVisited.isNotEmpty()
+                    settings.shouldShowHistory && recentlyVisited.isNotEmpty()
                 val collectionsState = CollectionsState.build(
                     appState = appState,
                     browserState = components.core.store.state,

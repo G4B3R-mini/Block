@@ -6,7 +6,6 @@ import android.net.Uri
 import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.focusable
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -172,7 +171,7 @@ fun InfernoHomeComponent(isPrivate: Boolean, navController: NavController, modif
         )
     }
 
-    if (context.settings().historyMetadataUIFeature) {
+    if (context.settings().shouldShowHistory) {
         historyMetadataFeature.set(
             feature = RecentVisitsFeature(
                 appStore = components.appStore,

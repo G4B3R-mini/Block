@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import com.shmibblez.inferno.browser.ComponentDimens
 import com.shmibblez.inferno.browser.InfernoAwesomeBar
 import com.shmibblez.inferno.ext.dpToPx
+import com.shmibblez.inferno.proto.InfernoSettings
 import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarBack
 import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarForward
 import com.shmibblez.inferno.toolbar.ToolbarOnlyOptions.Companion.ToolbarMenuIcon
@@ -107,8 +108,8 @@ internal fun OriginBrowserToolbar(
 
     // todo: launchedeffect on config change, or better yet, pass from parent
 
-    val toolbarItemKeys by remember {mutableStateOf(ToolbarItems.defaultToolbarItemKeys)}
-    val indexOrigin by remember { mutableIntStateOf(toolbarItemKeys.indexOf(ToolbarItemKey.toolbar_item_origin)) }
+    val toolbarItemKeys by remember {mutableStateOf(ToolbarItems.defaultToolbarItems)}
+    val indexOrigin by remember { mutableIntStateOf(toolbarItemKeys.indexOf(InfernoSettings.ToolbarItem.TOOLBAR_ITEM_ORIGIN)) }
     val leftKeys by remember { mutableStateOf(toolbarItemKeys.take(indexOrigin)) }
     val rightKeys by remember { mutableStateOf(toolbarItemKeys.drop(indexOrigin + 1)) }
     val context = LocalContext.current

@@ -56,7 +56,7 @@ class TrackingProtectionBlockingFragment :
                 binding.categoryRedirectTrackers.isVisible =
                     settings.blockRedirectTrackersInCustomTrackingProtection
                 binding.categorySuspectedFingerprinters.isVisible =
-                    settings.blockSuspectedFingerprintersInCustomTrackingProtection
+                    settings.blockSuspectedFingerprintersInCustomTrackingProtectionInNormalTabs
             }
         }
     }

@@ -414,7 +414,7 @@ class HomeFragment : Fragment() {
             )
         }
 
-        if (requireContext().settings().historyMetadataUIFeature) {
+        if (requireContext().settings().shouldShowHistory) {
             historyMetadataFeature.set(
                 feature = RecentVisitsFeature(
                     appStore = components.appStore,

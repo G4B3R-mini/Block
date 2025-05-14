@@ -46,6 +46,7 @@ import androidx.core.view.OnApplyWindowInsetsListener
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
@@ -222,6 +223,7 @@ import com.shmibblez.inferno.microsurvey.ui.MicrosurveyRequestPrompt
 import com.shmibblez.inferno.microsurvey.ui.ext.MicrosurveyUIData
 import com.shmibblez.inferno.microsurvey.ui.ext.toMicrosurveyUIData
 import com.shmibblez.inferno.perf.MarkersFragmentLifecycleCallbacks
+import com.shmibblez.inferno.proto.infernoSettingsDataStore
 import com.shmibblez.inferno.settings.SupportUtils
 import com.shmibblez.inferno.settings.biometric.BiometricPromptFeature
 import com.shmibblez.inferno.snackbar.FenixSnackbarDelegate

@@ -7,27 +7,11 @@ message InfernoSettings {
 
   // todo: reorder settings and renumber
 
+
   /*** vars ***/
 
 
-  int64 numberOfAppLaunches = 70;
-
-
-  /*** general ***/
-
-
-  // browsing data
-  bool deleteBrowsingDataOnQuit = 61;
-  bool deleteOpenTabsOnQuit = 62;
-  bool deleteBrowsingHistoryOnQuit = 63;
-  bool deleteCookiesAndSiteDataOnQuit = 64;
-  bool deleteCachesOnQuit = 65;
-  bool deletePermissionsOnQuit = 66;
-  bool deleteDownloadsOnQuit = 67;
-
-  // other
-  bool shouldUseExternalDownloadManager = 68;
-  bool remoteDebuggingOverUsb = 69;
+  int64 numberOfAppLaunches = 1;
 
 
   /*** toolbar settings ***/
@@ -37,24 +21,43 @@ message InfernoSettings {
     TOOLBAR_BOTTOM = 0;
     TOOLBAR_TOP = 1;
   }
+  enum ToolbarItem {
+    TOOLBAR_ITEM_SETTINGS = 0;
+    TOOLBAR_ITEM_ORIGIN = 1;
+    TOOLBAR_ITEM_ORIGIN_MINI = 2;
+    TOOLBAR_ITEM_BACK = 3;
+    TOOLBAR_ITEM_FORWARD = 4;
+    TOOLBAR_ITEM_RELOAD = 5;
+    TOOLBAR_ITEM_HISTORY = 6;
+    TOOLBAR_ITEM_REQUEST_DESKTOP = 7;
+    TOOLBAR_ITEM_FIND_IN_PAGE = 8;
+    TOOLBAR_ITEM_REQUEST_READER_VIEW = 9;
+    TOOLBAR_ITEM_PRIVATE_MODE = 10;
+    TOOLBAR_ITEM_SHOW_TABS_TRAY = 11;
+    TOOLBAR_ITEM_SHARE = 12;
+    TOOLBAR_ITEM_MENU = 13;
+  }
 
   // general
-  VerticalToolbarPosition toolbarVerticalPosition = 1;
-  VerticalToolbarPosition inAppToolbarVerticalPosition = 15;
+  VerticalToolbarPosition toolbarVerticalPosition = 2;
+  VerticalToolbarPosition inAppToolbarVerticalPosition = 3;
+  repeated ToolbarItem toolbarItems = 4;
 
   // address bar settings
   // todo: make enum
-  string defaultSearchEngine = 25;
+  string defaultSearchEngine = 5;
   // todo: custom search engine
-  bool shouldAutocompleteInAwesomebar = 26;
-  bool shouldAutocompleteInAwesomebarPrivate = 27;
-  bool shouldShowHistorySuggestions = 28;
-  bool shouldShowBookmarkSuggestions = 29;
-  bool shouldShowSyncedTabsSuggestions = 30;
-  bool shouldShowClipboardSuggestions = 31;
-  bool shouldShowVoiceSearch = 32;
-  bool shouldAutocompleteUrls = 33;
-  bool shouldShowSearchShortcuts = 71; // on awesomebar
+  bool shouldAutocompleteInAwesomebar = 6;
+  bool shouldAutocompleteInAwesomebarPrivate = 7;
+  bool shouldShowSearchSuggestions = 8;
+  bool shouldShowSearchSuggestionsInPrivate = 9;
+  bool shouldShowHistorySuggestions = 10;
+  bool shouldShowBookmarkSuggestions = 11;
+  bool shouldShowSyncedTabsSuggestions = 12;
+  bool shouldShowClipboardSuggestions = 13;
+  bool shouldShowVoiceSearch = 14;
+  bool shouldAutocompleteUrls = 15;
+  bool shouldShowSearchShortcuts = 16; // on awesomebar
   // bool showSponsoredSuggestions = ?; // sponsored not enabled
 
 
@@ -71,44 +74,29 @@ message InfernoSettings {
   }
 
   // general
-  bool closeTabsManually = 4;
-  bool closeTabsAfterOneDay = 5;
-  bool closeTabsAfterOneWeek = 7;
-  bool closeTabsAfterOneMonth = 72;
-//  uint32 closeTabsAfterDays = 5; // todo: test with custom time in MS first, replacing settings.getTabTimeout() in BrowserApplication
-  bool shouldSeparateInactiveTabs = 6;
-//  uint32 makeTabsInactiveAfterDays = 7;
+  bool closeTabsManually = 17;
+  bool closeTabsAfterOneDay = 18;
+  bool closeTabsAfterOneWeek = 19;
+  bool closeTabsAfterOneMonth = 20;
+  //  uint32 closeTabsAfterDays = 5; // todo: test with custom time in MS first, replacing settings.getTabTimeout() in BrowserApplication
+  bool shouldSeparateInactiveTabs = 21;
+  //  uint32 makeTabsInactiveAfterDays = 22;
 
   // tab bar
-  bool isTabBarEnabled = 2;
-  VerticalTabBarPosition tabBarVerticalPosition = 3;
+  bool isTabBarEnabled = 23;
+  VerticalTabBarPosition tabBarVerticalPosition = 24;
 
   // tab tray
-  TabTrayStyle tabTrayStyle = 76;
+  TabTrayStyle tabTrayStyle = 25;
 
 
-  /*** home settings ***/
+  /*** gesture settings ***/
 
 
-  enum PageWhenBrowserReopened {
-    OPEN_ON_LAST_TAB = 0;
-    OPEN_ON_HOME_ALWAYS = 1;
-    OPEN_ON_HOME_AFTER_FOUR_HOURS = 2;
-  }
-
-  // general
-  bool shouldShowTopSites = 8;
-  // bool contile = ? // sponsored suggestions not shown
-  bool shouldShowRecentTabs = 9;
-  bool shouldShowBookmarks = 10;
-  // bool showPocketRecommendations = ? // pocket recommendations not implemented
-  // bool showPocketSponsoredStories = ? // pocket recommendations not implemented
-  bool shouldShowHistory = 11;
-
-  // navigation
-  PageWhenBrowserReopened pageWhenBrowserReopened = 75;
-  bool shouldUseInfernoHome = 73;
-  string homeUrl = 14;
+  bool isPullToRefreshEnabled = 26;
+  bool isDynamicToolbarEnabled = 27;
+  bool isSwipeHorizontalToSwitchTabsEnabled = 28;
+  bool isSwipeUpToCloseTabEnabled = 29;
 
 
   /*** theme settings ***/
@@ -126,19 +114,53 @@ message InfernoSettings {
     string textColor = 2;
   }
 
-  DefaultTheme selectedTheme = 21;
-  string selectedCustomTheme = 22;
+  DefaultTheme selectedTheme = 30;
+  string selectedCustomTheme = 31;
   // { [theme name set by user]: [theme data] }
-  map<string, InfernoTheme> customThemes = 19;
+  map<string, InfernoTheme> customThemes = 32;
 
 
-  /*** gesture settings ***/
+  /*** home screen settings ***/
 
 
-  bool isPullToRefreshEnabled = 16;
-  bool isDynamicToolbarEnabled = 17;
-  bool isSwipeHorizontalToSwitchTabsEnabled = 18;
-  bool isSwipeUpToCloseTabEnabled = 20;
+  enum PageWhenBrowserReopened {
+    OPEN_ON_LAST_TAB = 0;
+    OPEN_ON_HOME_ALWAYS = 1;
+    OPEN_ON_HOME_AFTER_FOUR_HOURS = 2;
+  }
+
+  // general
+  bool defaultTopSitesAdded = 33;
+  bool shouldShowTopSites = 34;
+  // bool contile = ? // sponsored suggestions not shown
+  bool shouldShowRecentTabs = 35;
+  bool shouldShowBookmarks = 36;
+  // bool showPocketRecommendations = ? // pocket recommendations not implemented
+  // bool showPocketSponsoredStories = ? // pocket recommendations not implemented
+  bool shouldShowHistory = 37;
+  bool shouldShowSearchWidget = 38;
+
+  // navigation
+  PageWhenBrowserReopened pageWhenBrowserReopened = 39;
+  bool shouldUseInfernoHome = 40;
+  string homeUrl = 41;
+
+
+  /*** general ***/
+
+
+  // on quit
+  bool deleteBrowsingDataOnQuit = 42;
+  bool deleteOpenTabsOnQuit = 43;
+  bool deleteBrowsingHistoryOnQuit = 44;
+  bool deleteCookiesAndSiteDataOnQuit = 45;
+  bool deleteCachesOnQuit = 46;
+  bool deletePermissionsOnQuit = 47;
+  bool deleteDownloadsOnQuit = 48;
+
+  // other
+  bool shouldUseExternalDownloadManager = 49;
+  bool remoteDebuggingOverUsb = 50;
 
 
   /*** autofill data ***/
@@ -150,17 +172,17 @@ message InfernoSettings {
   }
 
   // login storage
-  LoginsStorage saveLoginsSettings = 23;
-  bool shouldSyncLogins = 35;
-  bool isAutofillEnabled = 24;
-  bool isAndroidAutofillEnabled = 34; // autofill in other apps
-  bool isAddressSaveAndAutofillEnabled = 36;
-  bool isCardSaveAndAutofillEnabled = 37;
-  bool shouldSyncCards = 38;
+  LoginsStorage saveLoginsSettings = 51;
+  bool shouldSyncLogins = 52;
+  bool shouldAutofillLogins = 53;
+  bool isAndroidAutofillEnabled = 54; // autofill in other apps
+  bool isAddressSaveAndAutofillEnabled = 55;
+  bool isCardSaveAndAutofillEnabled = 56;
+  bool shouldSyncCards = 57;
   // managed in Core by LoginExceptionStorage
 
 
-  /*** web content / site settings ***/
+  /*** site settings ***/
 
 
   // site settings
@@ -177,27 +199,33 @@ message InfernoSettings {
   }
   enum Camera {
     CAMERA_ASK_TO_ALLOW = 0;
-    CAMERA_BLOCKED = 1;
+    CAMERA_ALLOWED = 1;
+    CAMERA_BLOCKED = 2;
   }
   enum Location {
     LOCATION_ASK_TO_ALLOW = 0;
-    LOCATION_BLOCKED = 1;
+    LOCATION_ALLOWED = 1;
+    LOCATION_BLOCKED = 2;
   }
   enum Microphone {
     MICROPHONE_ASK_TO_ALLOW = 0;
-    MICROPHONE_BLOCKED = 1;
+    MICROPHONE_ALLOWED = 1;
+    MICROPHONE_BLOCKED = 2;
   }
   enum Notifications {
     NOTIFICATIONS_ASK_TO_ALLOW = 0;
-    NOTIFICATIONS_BLOCKED = 1;
+    NOTIFICATIONS_ALLOWED = 1;
+    NOTIFICATIONS_BLOCKED = 2;
   }
   enum PersistentStorage {
     PERSISTENT_STORAGE_ASK_TO_ALLOW = 0;
-    PERSISTENT_STORAGE_BLOCKED = 1;
+    PERSISTENT_STORAGE_ALLOWED = 1;
+    PERSISTENT_STORAGE_BLOCKED = 2;
   }
   enum CrossSiteCookies {
     CROSS_SITE_COOKIES_ASK_TO_ALLOW = 0;
-    CROSS_SITE_COOKIES_BLOCKED = 1;
+    CROSS_SITE_COOKIES_ALLOWED = 1;
+    CROSS_SITE_COOKIES_BLOCKED = 2;
   }
   enum DrmControlledContent {
     DRM_CONTROLLED_CONTENT_ASK_TO_ALLOW = 0;
@@ -205,23 +233,26 @@ message InfernoSettings {
     DRM_CONTROLLED_CONTENT_BLOCKED = 2;
   }
 
-  // accessibility / content
-  bool shouldSizeFontAutomatically = 40;
-  float fontSizeFactor = 41;
-  bool shouldForceEnableZoomInWebsites = 39;
-  bool alwaysRequestDesktopSite = 51;
-
   // site permissions
-  AppLinks appLinksSetting = 60;
-  AutoPlay autoplaySetting = 52;
-  Camera cameraSetting = 53;
-  Location locationSetting = 54;
-  Microphone microphoneSetting = 55;
-  Notifications notificationsSetting = 56;
-  PersistentStorage persistentStorageSetting = 57;
-  CrossSiteCookies crossSiteCookiesSetting = 58;
-  DrmControlledContent drmControlledContentSetting = 59;
+  AppLinks appLinksSetting = 58;
+  AutoPlay autoplaySetting = 59;
+  Camera cameraSetting = 60;
+  Location locationSetting = 61;
+  Microphone microphoneSetting = 62;
+  Notifications notificationsSetting = 63;
+  PersistentStorage persistentStorageSetting = 64;
+  CrossSiteCookies crossSiteCookiesSetting = 65;
+  DrmControlledContent drmControlledContentSetting = 66;
   // exceptions managed through Core by PermissionStorage
+
+
+  /*** accessibility ***/
+
+
+  bool shouldSizeFontAutomatically = 67;
+  float fontSizeFactor = 68;
+  bool shouldForceEnableZoomInWebsites = 69;
+  bool alwaysRequestDesktopSite = 70;
 
 
   /*** locale/language is set through Storage with LocaleManager ***/
@@ -233,20 +264,8 @@ message InfernoSettings {
   /*** private mode settings ***/
 
 
-  bool openLinksInPrivateTab = 42;
-  bool allowScreenshotsInPrivateMode = 43;
-
-
-  /*** https-only mode settings ***/
-
-
-  enum HttpsOnlyMode {
-    HTTPS_ONLY_DISABLED = 0;
-    HTTPS_ONLY_ENABLED = 2;
-    HTTPS_ONLY_ENABLED_PRIVATE_ONLY = 3;
-  }
-
-  HttpsOnlyMode httpsOnlyMode = 44;
+  bool openLinksInPrivateTab = 71;
+  bool allowScreenshotsInPrivateMode = 72;
 
 
   /*** enhanced tracking protection settings ***/
@@ -259,7 +278,7 @@ message InfernoSettings {
     CUSTOM = 3;
   }
   message CustomTrackingProtection {
-    enum CustomCookies {
+    enum CookiePolicy {
       NONE = 0;
       ISOLATE_CROSS_SITE_COOKIES = 1;
       CROSS_SITE_AND_SOCIAL_MEDIA_TRACKERS = 2;
@@ -267,21 +286,33 @@ message InfernoSettings {
       ALL_THIRD_PARTY_COOKIES = 4;
       ALL_COOKIES = 5;
     }
-    CustomCookies blockCustomCookies = 1;
-    bool trackingContentBlocked = 2;
-    bool trackingContentBlockedInPrivateMode = 3;
-    bool blockCryptominers = 4;
-    bool blockKnownFingerprinters = 5;
-    bool blockRedirectTrackers = 6;
-    bool blockSuspectedFingerPrinters = 7;
-    bool blockSuspectedFingerPrintersInPrivateMode = 8;
+    CookiePolicy blockCustomCookies = 73;
+    bool trackingContentBlockedInNormalMode = 74; // in normal mode
+    bool trackingContentBlockedInPrivateMode = 75; // in private mode
+    bool blockCryptominers = 76;
+    bool blockKnownFingerprinters = 77;
+    bool blockRedirectTrackers = 78;
+    bool blockSuspectedFingerPrintersInNormalMode = 79; // in normal mode
+    bool blockSuspectedFingerPrintersInPrivateMode = 80; // in private mode
   }
 
-  bool isEnhancedTrackingProtectionEnabled = 47;
-  TrackingProtectionDefault selectedTrackingProtection = 48;
-  CustomTrackingProtection customTrackingProtection = 49;
-  bool isGlobalPrivacyControlEnabled = 50; // tell websites not to share & sell data
+  bool isEnhancedTrackingProtectionEnabled = 81;
+  TrackingProtectionDefault selectedTrackingProtection = 82;
+  CustomTrackingProtection customTrackingProtection = 83;
+  bool isGlobalPrivacyControlEnabled = 84; // tell websites not to share & sell data
   // exceptions managed through Core by LoginExceptionStorage
+
+
+  /*** https-only mode settings ***/
+
+
+  enum HttpsOnlyMode {
+    HTTPS_ONLY_DISABLED = 0;
+    HTTPS_ONLY_ENABLED = 2;
+    HTTPS_ONLY_ENABLED_PRIVATE_ONLY = 3;
+  }
+
+  HttpsOnlyMode httpsOnlyMode = 85;
 
 
 }

@@ -14,7 +14,6 @@ import com.shmibblez.inferno.FeatureFlags
 //import com.shmibblez.inferno.GleanMetrics.CustomizeHome
 import com.shmibblez.inferno.R
 //import com.shmibblez.inferno.components.appstate.AppAction.ContentRecommendationsAction
-import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.navigateWithBreadcrumb
 import com.shmibblez.inferno.ext.settings
 import com.shmibblez.inferno.ext.showToolbar
@@ -148,7 +147,7 @@ class HomeSettingsFragment : PreferenceFragmentCompat() {
         }
 
         requirePreference<SwitchPreference>(R.string.pref_key_history_metadata_feature).apply {
-            isChecked = context.settings().historyMetadataUIFeature
+            isChecked = context.settings().shouldShowHistory
             onPreferenceChangeListener = object : SharedPreferenceUpdater() {
                 override fun onPreferenceChange(preference: Preference, newValue: Any?): Boolean {
 //                    CustomizeHome.preferenceToggled.record(
