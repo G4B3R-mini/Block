@@ -1126,10 +1126,11 @@ fun BrowserComponent(
         tabId = customTabSessionId,
         downloadManager = downloadManager,
         shouldForwardToThirdParties = {
-            PreferenceManager.getDefaultSharedPreferences(context).getBoolean(
-                context.getPreferenceKey(R.string.pref_key_external_download_manager),
-                false, // todo: test if true
-            )
+            context.settings().shouldUseExternalDownloadManager
+//            PreferenceManager.getDefaultSharedPreferences(context).getBoolean(
+//                context.getPreferenceKey(R.string.pref_key_external_download_manager),
+//                false, // todo: test if true
+//            )
         },
         onNeedToRequestPermissions = { permissions ->
             // todo: test

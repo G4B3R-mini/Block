@@ -4,6 +4,7 @@
 
 package com.shmibblez.inferno.search.toolbar
 
+import android.annotation.SuppressLint
 import android.view.ViewGroup
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.content.res.AppCompatResources
@@ -70,7 +71,12 @@ class ToolbarView(
     internal val autocompleteFeature = ToolbarAutocompleteFeature(
         toolbar = view,
         engine = if (!isPrivate) components.core.engine else null,
-        shouldAutocomplete = { settings.shouldAutocompleteInAwesomebar },
+        shouldAutocomplete = {
+            when (isPrivate) {
+                true -> settings.shouldAutocompleteInAwesomebarPrivate
+                false -> settings.shouldAutocompleteInAwesomebar
+            }
+        },
     )
 
     init {
@@ -78,7 +84,8 @@ class ToolbarView(
             editMode()
 
             if (context.settings().navigationToolbarEnabled) {
-                val toolbarPadding = context.resources.getDimensionPixelSize(R.dimen.toolbar_horizontal_margin_end)
+                val toolbarPadding =
+                    context.resources.getDimensionPixelSize(R.dimen.toolbar_horizontal_margin_end)
                 setPadding(toolbarPadding, 0, toolbarPadding, 0)
             }
 
@@ -141,6 +148,7 @@ class ToolbarView(
         }
     }
 
+    @SuppressLint("VisibleForTests")
     fun update(searchState: SearchFragmentState) {
         if (!isInitialized) {
             view.url = searchState.pastedText ?: searchState.query
@@ -193,6 +201,7 @@ class ToolbarView(
                     ),
                 )
             }
+
             else -> {
                 autocompleteFeature.updateAutocompleteProviders(emptyList())
             }
@@ -216,6 +225,7 @@ class ToolbarView(
                     ),
                 )
             }
+
             is SearchEngineSource.Tabs -> {
                 autocompleteFeature.updateAutocompleteProviders(
                     listOf(
@@ -224,6 +234,7 @@ class ToolbarView(
                     ),
                 )
             }
+
             is SearchEngineSource.Bookmarks -> {
                 autocompleteFeature.updateAutocompleteProviders(
                     listOf(
@@ -231,6 +242,7 @@ class ToolbarView(
                     ),
                 )
             }
+
             is SearchEngineSource.History -> {
                 autocompleteFeature.updateAutocompleteProviders(
                     listOf(
@@ -238,6 +250,7 @@ class ToolbarView(
                     ),
                 )
             }
+
             else -> {
                 autocompleteFeature.updateAutocompleteProviders(emptyList())
             }

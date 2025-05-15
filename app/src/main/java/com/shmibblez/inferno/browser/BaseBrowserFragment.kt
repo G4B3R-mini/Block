@@ -770,10 +770,11 @@ abstract class BaseBrowserFragment :
                 notificationsDelegate = context.components.notificationsDelegate,
             ),
             shouldForwardToThirdParties = {
-                PreferenceManager.getDefaultSharedPreferences(context).getBoolean(
-                    context.getPreferenceKey(R.string.pref_key_external_download_manager),
-                    false,
-                )
+                context.settings().shouldUseExternalDownloadManager
+//                PreferenceManager.getDefaultSharedPreferences(context).getBoolean(
+//                    context.getPreferenceKey(R.string.pref_key_external_download_manager),
+//                    false,
+//                )
             },
             promptsStyling = DownloadsFeature.PromptsStyling(
                 gravity = Gravity.BOTTOM,

@@ -11,7 +11,8 @@ message InfernoSettings {
   /*** vars ***/
 
 
-  int64 numberOfAppLaunches = 1;
+  uint64 numberOfAppLaunches = 1;
+  uint64 lastBrowseActivityMillis = 2;
 
 
   /*** toolbar settings ***/
@@ -39,24 +40,22 @@ message InfernoSettings {
   }
 
   // general
-  VerticalToolbarPosition toolbarVerticalPosition = 2;
-  VerticalToolbarPosition inAppToolbarVerticalPosition = 3;
-  repeated ToolbarItem toolbarItems = 4;
-
+  VerticalToolbarPosition toolbarVerticalPosition = 3;
+  VerticalToolbarPosition inAppToolbarVerticalPosition = 4;
+  repeated ToolbarItem toolbarItems = 5;
   // address bar settings
   // todo: make enum
-  string defaultSearchEngine = 5;
+  string defaultSearchEngine = 6;
   // todo: custom search engine
-  bool shouldAutocompleteInAwesomebar = 6;
-  bool shouldAutocompleteInAwesomebarPrivate = 7;
-  bool shouldShowSearchSuggestions = 8;
-  bool shouldShowSearchSuggestionsInPrivate = 9;
-  bool shouldShowHistorySuggestions = 10;
-  bool shouldShowBookmarkSuggestions = 11;
-  bool shouldShowSyncedTabsSuggestions = 12;
-  bool shouldShowClipboardSuggestions = 13;
-  bool shouldShowVoiceSearch = 14;
-  bool shouldAutocompleteUrls = 15;
+  bool shouldAutocompleteUrls = 7;
+  bool shouldAutocompleteUrlsInPrivate = 8;
+  bool shouldShowSearchSuggestions = 9;
+  bool shouldShowSearchSuggestionsInPrivate = 10;
+  bool shouldShowHistorySuggestions = 11;
+  bool shouldShowBookmarkSuggestions = 12;
+  bool shouldShowSyncedTabsSuggestions = 13;
+  bool shouldShowClipboardSuggestions = 14;
+  bool shouldShowVoiceSearch = 15;
   bool shouldShowSearchShortcuts = 16; // on awesomebar
   // bool showSponsoredSuggestions = ?; // sponsored not enabled
 
@@ -72,6 +71,10 @@ message InfernoSettings {
     TAB_TRAY_LIST = 0;
     TAB_TRAY_GRID = 1;
   }
+  enum TabBarPosition {
+    TAB_BAR_ABOVE_TOOLBAR = 0;
+    TAB_BAR_BELOW_TOOLBAR = 1;
+  }
 
   // general
   bool closeTabsManually = 17;
@@ -83,8 +86,9 @@ message InfernoSettings {
   //  uint32 makeTabsInactiveAfterDays = 22;
 
   // tab bar
-  bool isTabBarEnabled = 23;
-  VerticalTabBarPosition tabBarVerticalPosition = 24;
+  bool isTabBarEnabled = 22;
+  VerticalTabBarPosition tabBarVerticalPosition = 23;
+  TabBarPosition tabBarPosition = 24;
 
   // tab tray
   TabTrayStyle tabTrayStyle = 25;
@@ -114,7 +118,7 @@ message InfernoSettings {
     string textColor = 2;
   }
 
-  DefaultTheme selectedTheme = 30;
+  DefaultTheme selectedDefaultTheme = 30;
   string selectedCustomTheme = 31;
   // { [theme name set by user]: [theme data] }
   map<string, InfernoTheme> customThemes = 32;

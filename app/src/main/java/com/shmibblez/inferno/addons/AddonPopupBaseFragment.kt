@@ -42,6 +42,7 @@ import com.shmibblez.inferno.downloads.dialog.ThirdPartyDownloadDialog
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.getPreferenceKey
 import com.shmibblez.inferno.ext.requireComponents
+import com.shmibblez.inferno.ext.settings
 import com.shmibblez.inferno.theme.ThemeManager
 
 /**
@@ -89,10 +90,11 @@ abstract class AddonPopupBaseFragment : Fragment(), EngineSession.Observer, User
                     notificationsDelegate = requireContext().components.notificationsDelegate,
                 ),
                 shouldForwardToThirdParties = {
-                    PreferenceManager.getDefaultSharedPreferences(requireContext()).getBoolean(
-                        requireContext().getPreferenceKey(R.string.pref_key_external_download_manager),
-                        false,
-                    )
+                    requireContext().settings().shouldUseExternalDownloadManager
+//                    PreferenceManager.getDefaultSharedPreferences(requireContext()).getBoolean(
+//                        requireContext().getPreferenceKey(R.string.pref_key_external_download_manager),
+//                        false,
+//                    )
                 },
                 promptsStyling = DownloadsFeature.PromptsStyling(
                     gravity = Gravity.BOTTOM,

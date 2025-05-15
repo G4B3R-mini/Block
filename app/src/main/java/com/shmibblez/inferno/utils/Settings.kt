@@ -52,6 +52,7 @@ import com.shmibblez.inferno.settings.sitepermissions.AUTOPLAY_ALLOW_ALL
 import com.shmibblez.inferno.settings.sitepermissions.AUTOPLAY_ALLOW_ON_WIFI
 import com.shmibblez.inferno.settings.sitepermissions.AUTOPLAY_BLOCK_ALL
 import com.shmibblez.inferno.settings.sitepermissions.AUTOPLAY_BLOCK_AUDIBLE
+import com.shmibblez.inferno.toolbar.ToolbarItems
 import com.shmibblez.inferno.wallpapers.Wallpaper
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -172,6 +173,307 @@ class Settings(private val appContext: Context) : PreferencesHolder {
     override val preferences: SharedPreferences =
         appContext.getSharedPreferences(FENIX_PREFERENCES, MODE_PRIVATE)
 
+
+    /*** vars ***/
+
+
+    var numberOfAppLaunches: Long
+        get() = getPref(default = 0L) { it?.numberOfAppLaunches }
+        set(value) {
+            setPref { it.setNumberOfAppLaunches(value) }
+        }
+//    var numberOfAppLaunches by intPreference(
+//        appContext.getPreferenceKey(R.string.pref_key_times_app_opened),
+//        default = 0,
+//    )
+    /**
+     * Indicates the last time when the user was interacting with the [BrowserFragment],
+     * This is useful to determine if the user has to start on the [HomeFragment]
+     * or it should go directly to the [BrowserFragment].
+     *
+     * This value defaults to 0L because we want to know if the user never had any interaction
+     * with the [BrowserFragment]
+     */
+    // todo: check usages to see if need to remove
+    var lastBrowseActivity: Long
+    get() = getPref(default = 0L) { it?.lastBrowseActivityMillis }
+    set(value) {
+        setPref { it.setLastBrowseActivityMillis(value) }
+    }
+//    var lastBrowseActivity by longPreference(
+//        appContext.getPreferenceKey(R.string.pref_key_last_browse_activity_time),
+//        default = 0L,
+//    )
+
+
+    /*** toolbar settings ***/
+
+
+    var shouldUseBottomToolbar: Boolean
+        get() = getPref(default = true) { it?.toolbarVerticalPosition == InfernoSettings.VerticalToolbarPosition.TOOLBAR_BOTTOM }
+        set(value) {
+            when (value) {
+                true -> setPref { it.setToolbarVerticalPosition(InfernoSettings.VerticalToolbarPosition.TOOLBAR_BOTTOM) }
+                false -> setPref { it.setToolbarVerticalPosition(InfernoSettings.VerticalToolbarPosition.TOOLBAR_TOP) }
+            }
+        }
+
+    //    var shouldUseBottomToolbar by booleanPreference(
+//        key = appContext.getPreferenceKey(R.string.pref_key_toolbar_bottom),
+//        default = false,
+//        persistDefaultIfNotExists = true,
+//    )
+    var inAppToolbarVerticalPosition: InfernoSettings.VerticalToolbarPosition
+        get() = getPref(default = InfernoSettings.VerticalToolbarPosition.TOOLBAR_BOTTOM) { it?.inAppToolbarVerticalPosition }
+        set(value) {
+            setPref { it.setToolbarVerticalPosition(value) }
+        }
+    var toolbarItems: List<InfernoSettings.ToolbarItem>
+        get() = getPref(default = ToolbarItems.defaultToolbarItems) { it?.toolbarItemsList }
+        set(value) {
+            setPref {
+                it.toolbarItemsList.apply {
+                    this.clear()
+                    this.addAll(value)
+                }
+            }
+        }
+    var defaultSearchEngineName: String
+        get() = getPref(default = "") { it?.defaultSearchEngine }
+        set(value) {
+            setPref { it.setDefaultSearchEngine(value) }
+        }
+
+    //    var defaultSearchEngineName by stringPreference(
+//        appContext.getPreferenceKey(R.string.pref_key_search_engine),
+//        default = "",
+//    )
+    var shouldAutocompleteInAwesomebar: Boolean
+        get() = getPref(default = true) { it?.shouldAutocompleteUrls }
+        set(value) {
+            setPref { it.setShouldAutocompleteUrls(value) }
+        }
+
+    //    val shouldAutocompleteInAwesomebar by booleanPreference(
+//        appContext.getPreferenceKey(R.string.pref_key_enable_autocomplete_urls),
+//        default = true,
+//    )
+    var shouldAutocompleteInAwesomebarPrivate: Boolean
+        get() = getPref(default = true) { it?.shouldAutocompleteUrlsInPrivate }
+        set(value) {
+            setPref { it.setShouldAutocompleteUrlsInPrivate(value) }
+        }
+    var shouldShowSearchSuggestions: Boolean
+        get() = getPref(default = true) { it?.shouldShowSearchSuggestions }
+        set(value) {
+            setPref { it.setShouldShowSearchSuggestions(value) }
+        }
+
+    //    val shouldShowSearchSuggestions by booleanPreference(
+//        appContext.getPreferenceKey(R.string.pref_key_show_search_suggestions),
+//        default = true,
+//    )
+    var shouldShowSearchSuggestionsInPrivate: Boolean
+        get() = getPref(default = true) { it?.shouldShowSearchSuggestionsInPrivate }
+        set(value) {
+            setPref { it.setShouldShowSearchSuggestionsInPrivate(value) }
+        }
+
+    //    var shouldShowSearchSuggestionsInPrivate by booleanPreference(
+//        appContext.getPreferenceKey(R.string.pref_key_show_search_suggestions_in_private),
+//        default = false,
+//    )
+    var shouldShowHistorySuggestions: Boolean
+        get() = getPref(default = true) { it?.shouldShowHistorySuggestions }
+        set(value) {
+            setPref { it.setShouldShowHistorySuggestions(value) }
+        }
+//    val shouldShowHistorySuggestions by booleanPreference(
+//        appContext.getPreferenceKey(R.string.pref_key_search_browsing_history),
+//        default = true,
+//    )
+
+    var shouldShowBookmarkSuggestions: Boolean
+        get() = getPref(default = true) { it?.shouldShowBookmarkSuggestions }
+        set(value) {
+            setPref { it.setShouldShowBookmarkSuggestions(value) }
+        }
+//    val shouldShowBookmarkSuggestions by booleanPreference(
+//        appContext.getPreferenceKey(R.string.pref_key_search_bookmarks),
+//        default = true,
+//    )
+
+    var shouldShowSyncedTabsSuggestions: Boolean
+        get() = getPref(default = true) { it?.shouldShowSyncedTabsSuggestions }
+        set(value) {
+            setPref { it.setShouldShowSyncedTabsSuggestions(value) }
+        }
+//    val shouldShowSyncedTabsSuggestions by booleanPreference(
+//        appContext.getPreferenceKey(R.string.pref_key_search_synced_tabs),
+//        default = true,
+//    )
+
+    var shouldShowClipboardSuggestions: Boolean
+        get() = getPref(default = true) { it?.shouldShowClipboardSuggestions }
+        set(value) {
+            setPref { it.setShouldShowClipboardSuggestions(value) }
+        }
+
+    //    val shouldShowClipboardSuggestions by booleanPreference(
+//        appContext.getPreferenceKey(R.string.pref_key_show_clipboard_suggestions),
+//        default = true,
+//    )
+    var shouldShowVoiceSearch: Boolean
+        get() = getPref(default = true) { it?.shouldShowVoiceSearch }
+        set(value) {
+            setPref { it.setShouldShowVoiceSearch(value) }
+        }
+
+    //    var shouldShowVoiceSearch by booleanPreference(
+//        appContext.getPreferenceKey(R.string.pref_key_show_voice_search),
+//        default = true,
+//    )
+    var shouldShowSearchShortcuts: Boolean
+        get() = getPref(default = false) { it?.shouldShowSearchShortcuts }
+        set(value) {
+            setPref { it.setShouldShowSearchShortcuts(value) }
+        }
+//    val shouldShowSearchShortcuts by booleanPreference(
+//        appContext.getPreferenceKey(R.string.pref_key_show_search_engine_shortcuts),
+//        default = false,
+//    )
+
+
+    /*** tab settings ***/
+
+
+    // general
+
+    var manuallyCloseTabs: Boolean
+        get() = getPref(default = true) { it?.closeTabsManually }
+        set(value) {
+            setPref { it.setCloseTabsManually(value) }
+        }
+
+    //    var manuallyCloseTabs by booleanPreference(
+//        appContext.getPreferenceKey(R.string.pref_key_close_tabs_manually),
+//        default = true,
+//    )
+    var closeTabsAfterOneDay: Boolean
+        get() = getPref(default = false) { it?.closeTabsAfterOneDay }
+        set(value) {
+            setPref { it.setCloseTabsAfterOneDay(value) }
+        }
+//    var closeTabsAfterOneDay by booleanPreference(
+//        appContext.getPreferenceKey(R.string.pref_key_close_tabs_after_one_day),
+//        default = false,
+//    )
+
+    var closeTabsAfterOneWeek: Boolean
+        get() = getPref(default = false) { it?.closeTabsAfterOneWeek }
+        set(value) {
+            setPref { it.setCloseTabsAfterOneWeek(value) }
+        }
+//    var closeTabsAfterOneWeek by booleanPreference(
+//        appContext.getPreferenceKey(R.string.pref_key_close_tabs_after_one_week),
+//        default = false,
+//    )
+
+    var closeTabsAfterOneMonth: Boolean
+        get() = getPref(default = false) { it?.closeTabsAfterOneMonth }
+        set(value) {
+            setPref { it.setCloseTabsAfterOneMonth(value) }
+        }
+//    var closeTabsAfterOneMonth by booleanPreference(
+//        appContext.getPreferenceKey(R.string.pref_key_close_tabs_after_one_month),
+//        default = false,
+//    )
+    /**
+     * Indicates if the user has enabled the inactive tabs feature.
+     */
+    var inactiveTabsAreEnabled: Boolean
+        get() = getPref(default = true) { it?.shouldSeparateInactiveTabs }
+        set(value) {
+            setPref { it.setShouldSeparateInactiveTabs(value) }
+        }
+
+    //    var inactiveTabsAreEnabled by booleanPreference(
+//        appContext.getPreferenceKey(R.string.pref_key_inactive_tabs),
+//        default = true,
+//    )
+    var isTabBarEnabled: Boolean
+        get() = getPref(default = true) { it?.isTabBarEnabled }
+        set(value) {
+            setPref { it.setIsTabBarEnabled(value) }
+        }
+    var tabBarVerticalPosition: InfernoSettings.VerticalTabBarPosition
+        get() = getPref(default = InfernoSettings.VerticalTabBarPosition.TAB_BAR_BOTTOM) { it?.tabBarVerticalPosition }
+        set(value) {
+            setPref { it.setTabBarVerticalPosition(value) }
+        }
+    var tabBarPosition: InfernoSettings.TabBarPosition
+        get() = getPref(default = InfernoSettings.TabBarPosition.TAB_BAR_ABOVE_TOOLBAR) { it?.tabBarPosition }
+        set(value) {
+            setPref { it.setTabBarPosition(value) }
+        }
+    var tabTrayStyle: InfernoSettings.TabTrayStyle
+        get() = getPref(default = InfernoSettings.TabTrayStyle.TAB_TRAY_LIST) { it?.tabTrayStyle }
+        set(value) {
+            setPref { it.setTabTrayStyle(value) }
+        }
+    var isPullToRefreshEnabledInBrowser: Boolean
+        get() = getPref(default = true) { it?.isPullToRefreshEnabled }
+        set(value) {
+            setPref { it.setIsPullToRefreshEnabled(value) }
+        }
+    var isDynamicToolbarEnabled: Boolean
+        get() = getPref(default = true) { it?.isDynamicToolbarEnabled }
+        set(value) {
+            setPref { it.setIsDynamicToolbarEnabled(value) }
+        }
+    var isSwipeToolbarToSwitchTabsEnabled: Boolean
+        get() = getPref(default = true) { it?.isSwipeHorizontalToSwitchTabsEnabled }
+        set(value) {
+            setPref { it.setIsSwipeHorizontalToSwitchTabsEnabled(value) }
+        }
+    var isSwipeUpToCloseTabEnabled: Boolean
+        get() = getPref(default = true) { it?.isSwipeUpToCloseTabEnabled }
+        set(value) {
+            setPref { it.setIsSwipeUpToCloseTabEnabled(value) }
+        }
+    var selectedDefaultTheme: InfernoSettings.DefaultTheme
+        get() = getPref(default = InfernoSettings.DefaultTheme.INFERNO_DARK) { it?.selectedDefaultTheme }
+        set(value) {
+            setPref { it.setSelectedDefaultTheme(value) }
+        }
+    var selectedCustomTheme: String
+        get() = getPref(default = "") { it?.selectedCustomTheme }
+        set(value) {
+            setPref { it.setSelectedCustomTheme(value) }
+        }
+    var customThemes: Map<String, InfernoSettings.InfernoTheme>
+        get() = getPref(default = emptyMap()) { it?.customThemesMap }
+        set(value) {
+            setPref {
+                it.customThemesMap.apply {
+                    this.clear()
+                    this += value
+                }
+            }
+        }
+
+
+    /*** theme settings ***/
+
+
+    // general
+
+    var defaultTopSitesAdded: Boolean
+        get() = getPref(default = false) { it?.defaultTopSitesAdded } // todo: set to true and add sponsors if ever get to that point
+        set(value) {
+            setPref { it.setDefaultTopSitesAdded(value) }
+        }
+
     /**
      * Indicates whether or not top sites should be shown on the home screen.
      */
@@ -185,16 +487,182 @@ class Settings(private val appContext: Context) : PreferencesHolder {
 //        featureFlag = true,
 //        default = { homescreenSections[HomeScreenSection.TOP_SITES] == true },
 //    )
-
-    var numberOfAppLaunches: Long
-        get() = getPref(default = 0L) { it?.numberOfAppLaunches }
+    /**
+     * Indicates if the recent tabs functionality should be visible.
+     */
+    var showRecentTabsFeature: Boolean
+        get() = getPref(default = true) { it?.shouldShowRecentTabs }
         set(value) {
-            setPref { it.setNumberOfAppLaunches(value) }
+            setPref { it.setShouldShowRecentTabs(value) }
         }
-//    var numberOfAppLaunches by intPreference(
-//        appContext.getPreferenceKey(R.string.pref_key_times_app_opened),
-//        default = 0,
+//    var showRecentTabsFeature by lazyFeatureFlagPreference(
+//        appContext.getPreferenceKey(R.string.pref_key_recent_tabs),
+//        featureFlag = true,
+//        default = { homescreenSections[HomeScreenSection.JUMP_BACK_IN] == true },
 //    )
+
+    /**
+     * Indicates if the recent saved bookmarks functionality should be visible.
+     */
+    var showBookmarksHomeFeature: Boolean
+        get() = getPref(default = true) { it?.shouldShowBookmarks }
+        set(value) {
+            setPref { it.setShouldShowBookmarks(value) }
+        }
+
+    //    var showBookmarksHomeFeature by lazyFeatureFlagPreference(
+//        appContext.getPreferenceKey(R.string.pref_key_customization_bookmarks),
+//        default = { homescreenSections[HomeScreenSection.BOOKMARKS] == true },
+//        featureFlag = true,
+//    )
+    var shouldShowHistory: Boolean
+        get() = getPref(default = true) { it?.shouldShowHistory }
+        set(value) {
+            setPref { it.setShouldShowHistory(value) }
+        }
+
+    //    var historyMetadataUIFeature by lazyFeatureFlagPreference(
+//        appContext.getPreferenceKey(R.string.pref_key_history_metadata_feature),
+//        default = { homescreenSections[HomeScreenSection.RECENT_EXPLORATIONS] == true },
+//        featureFlag = true,
+//    )
+    var shouldShowSearchWidget: Boolean
+        get() = getPref(default = true) { it?.shouldShowSearchWidget }
+        set(value) {
+            setPref { it.setShouldShowSearchWidget(value) }
+        }
+//    val searchWidgetInstalled by booleanPreference(
+//        appContext.getPreferenceKey(R.string.pref_key_search_widget_installed_2),
+//        default = false,
+//    )
+
+
+    // navigation
+
+    var pageWhenBrowserReopened: InfernoSettings.PageWhenBrowserReopened
+        get() = getPref(default = InfernoSettings.PageWhenBrowserReopened.OPEN_ON_HOME_AFTER_FOUR_HOURS) { it?.pageWhenBrowserReopened }
+        set(value) {
+            setPref { it.setPageWhenBrowserReopened(value) }
+        }
+
+    /**
+     * Indicates if the user should start on the home screen, based on the user's preferences.
+     */
+    fun shouldStartOnHome(): Boolean {
+        return when {
+            openHomepageAfterFourHoursOfInactivity -> timeNowInMillis() - lastBrowseActivity >= FOUR_HOURS_MS
+            alwaysOpenTheHomepageWhenOpeningTheApp -> true
+            alwaysOpenTheLastTabWhenOpeningTheApp -> false
+            else -> false
+        }
+    }
+
+    /**
+     * Indicates if the user has selected the option to start on the home screen after
+     * four hours of inactivity.
+     */
+    var openHomepageAfterFourHoursOfInactivity: Boolean
+        get() = getPref(default = true) { it?.pageWhenBrowserReopened == InfernoSettings.PageWhenBrowserReopened.OPEN_ON_HOME_AFTER_FOUR_HOURS }
+        set(value) {
+            if (value) setPref { it.setPageWhenBrowserReopened(InfernoSettings.PageWhenBrowserReopened.OPEN_ON_HOME_AFTER_FOUR_HOURS) }
+        }
+
+    /**
+     * Indicates if the user has selected the option to always start on the home screen.
+     */
+    var alwaysOpenTheHomepageWhenOpeningTheApp: Boolean
+        get() = getPref(default = false) { it?.pageWhenBrowserReopened == InfernoSettings.PageWhenBrowserReopened.OPEN_ON_HOME_ALWAYS }
+        set(value) {
+            if (value) setPref { it.setPageWhenBrowserReopened(InfernoSettings.PageWhenBrowserReopened.OPEN_ON_HOME_ALWAYS) }
+        }
+
+    /**
+     * Indicates if the user has selected the option to never start on the home screen and have
+     * their last tab opened.
+     */
+    var alwaysOpenTheLastTabWhenOpeningTheApp: Boolean
+        get() = getPref(default = false) { it?.pageWhenBrowserReopened == InfernoSettings.PageWhenBrowserReopened.OPEN_ON_LAST_TAB }
+        set(value) {
+            if (value) setPref { it.setPageWhenBrowserReopened(InfernoSettings.PageWhenBrowserReopened.OPEN_ON_LAST_TAB) }
+        }
+    var useInfernoHome: Boolean
+        get() = getPref(default = true) { it?.shouldUseInfernoHome }
+        set(value) {
+            setPref { it.setShouldUseInfernoHome(value) }
+        }
+    var homeUrl: String
+        get() = getPref(default = "") { it?.homeUrl }
+        set(value) {
+            setPref { it.setHomeUrl(value) }
+        }
+
+
+    /*** general ***/
+
+
+    // on quit
+
+    var shouldDeleteBrowsingDataOnQuit: Boolean
+        get() = getPref(default = false) { it?.deleteBrowsingDataOnQuit }
+        set(value) {
+            setPref { it.setDeleteBrowsingDataOnQuit(value) }
+        }
+    var deleteOpenTabs: Boolean
+        get() = getPref(default = true) { it?.deleteOpenTabsOnQuit }
+        set(value) {
+            setPref { it.setDeleteOpenTabsOnQuit(value) }
+        }
+    var deleteBrowsingHistory: Boolean
+        get() = getPref(default = true) { it?.deleteBrowsingHistoryOnQuit }
+        set(value) {
+            setPref { it.setDeleteBrowsingHistoryOnQuit(value) }
+        }
+    var deleteCookies: Boolean
+        get() = getPref(default = true) { it?.deleteCookiesAndSiteDataOnQuit }
+        set(value) {
+            setPref { it.setDeleteCookiesAndSiteDataOnQuit(value) }
+        }
+    var deleteCache: Boolean
+        get() = getPref(default = true) { it?.deleteCachesOnQuit }
+        set(value) {
+            setPref { it.setDeleteCachesOnQuit(value) }
+        }
+    var deleteSitePermissions: Boolean
+        get() = getPref(default = true) { it?.deletePermissionsOnQuit }
+        set(value) {
+            setPref { it.setDeletePermissionsOnQuit(value) }
+        }
+    var deleteDownloads: Boolean
+        get() = getPref(default = true) { it?.deleteDownloadsOnQuit }
+        set(value) {
+            setPref { it.setDeleteDownloadsOnQuit(value) }
+        }
+
+    // other
+
+    var shouldUseExternalDownloadManager: Boolean
+        get() = getPref(default = false) { it?.shouldUseExternalDownloadManager }
+        set(value) {
+            setPref { it.setShouldUseExternalDownloadManager(value) }
+        }
+
+    var isRemoteDebuggingEnabled: Boolean
+        get() = getPref(default = false) { it?.remoteDebuggingOverUsb }
+        set(value) {
+            setPref { it.setRemoteDebuggingOverUsb(value) }
+        }
+//    val isRemoteDebuggingEnabled by booleanPreference(
+//        appContext.getPreferenceKey(R.string.pref_key_remote_debugging),
+//        default = false,
+//    )
+
+
+    /*** autofill data ***/
+
+
+    // login storage
+
+    // todo: left off here, reorganizing settings
 
     // not used
 //    var lastReviewPromptTimeInMillis by longPreference(
@@ -383,12 +851,6 @@ class Settings(private val appContext: Context) : PreferencesHolder {
         false,
     )
 
-    // todo: add
-    var defaultSearchEngineName by stringPreference(
-        appContext.getPreferenceKey(R.string.pref_key_search_engine),
-        default = "",
-    )
-
     // todo: check usages to see if need to remove
     var openInAppOpened by booleanPreference(
         appContext.getPreferenceKey(R.string.pref_key_open_in_app_opened),
@@ -414,12 +876,6 @@ class Settings(private val appContext: Context) : PreferencesHolder {
 //                appContext.getPreferenceKey(R.string.pref_key_crash_reporter),
 //                true,
 //            )
-
-    // todo: check usages to see if need to remove
-    val isRemoteDebuggingEnabled by booleanPreference(
-        appContext.getPreferenceKey(R.string.pref_key_remote_debugging),
-        default = false,
-    )
 
     // todo: check usages to see if need to remove
     var isTelemetryEnabled by booleanPreference(
@@ -492,106 +948,6 @@ class Settings(private val appContext: Context) : PreferencesHolder {
 //        default = 1f,
 //    )
 
-    var shouldShowHistorySuggestions: Boolean
-        get() = getPref(default = true) { it?.shouldShowHistorySuggestions }
-        set(value) {
-            setPref { it.setShouldShowHistorySuggestions(value) }
-        }
-//    val shouldShowHistorySuggestions by booleanPreference(
-//        appContext.getPreferenceKey(R.string.pref_key_search_browsing_history),
-//        default = true,
-//    )
-
-    var shouldShowBookmarkSuggestions: Boolean
-        get() = getPref(default = true) { it?.shouldShowBookmarkSuggestions }
-        set(value) {
-            setPref { it.setShouldShowBookmarkSuggestions(value) }
-        }
-//    val shouldShowBookmarkSuggestions by booleanPreference(
-//        appContext.getPreferenceKey(R.string.pref_key_search_bookmarks),
-//        default = true,
-//    )
-
-    var shouldShowSyncedTabsSuggestions: Boolean
-        get() = getPref(default = true) { it?.shouldShowSyncedTabsSuggestions }
-        set(value) {
-            setPref { it.setShouldShowSyncedTabsSuggestions(value) }
-        }
-//    val shouldShowSyncedTabsSuggestions by booleanPreference(
-//        appContext.getPreferenceKey(R.string.pref_key_search_synced_tabs),
-//        default = true,
-//    )
-
-    var shouldShowClipboardSuggestions: Boolean
-        get() = getPref(default = true) { it?.shouldShowClipboardSuggestions }
-        set(value) {
-            setPref { it.setShouldShowClipboardSuggestions(value) }
-        }
-//    val shouldShowClipboardSuggestions by booleanPreference(
-//        appContext.getPreferenceKey(R.string.pref_key_show_clipboard_suggestions),
-//        default = true,
-//    )
-
-    var shouldShowSearchShortcuts: Boolean
-        get() = getPref(default = false) { it?.shouldShowSearchShortcuts }
-        set(value) {
-            setPref { it.setShouldShowSearchShortcuts(value) }
-        }
-//    val shouldShowSearchShortcuts by booleanPreference(
-//        appContext.getPreferenceKey(R.string.pref_key_show_search_engine_shortcuts),
-//        default = false,
-//    )
-
-    var tabTrayStyle: InfernoSettings.TabTrayStyle
-        get() = getPref(default = InfernoSettings.TabTrayStyle.TAB_TRAY_LIST) { it?.tabTrayStyle }
-        set(value) {
-            setPref { it.setTabTrayStyle(value) }
-        }
-//    var gridTabView by booleanPreference(
-//        appContext.getPreferenceKey(R.string.pref_key_tab_view_grid),
-//        default = true,
-//    )
-
-    var manuallyCloseTabs: Boolean
-        get() = getPref(default = true) { it?.closeTabsManually }
-        set(value) {
-            setPref { it.setCloseTabsManually(value) }
-        }
-//    var manuallyCloseTabs by booleanPreference(
-//        appContext.getPreferenceKey(R.string.pref_key_close_tabs_manually),
-//        default = true,
-//    )
-
-    var closeTabsAfterOneDay: Boolean
-        get() = getPref(default = false) { it?.closeTabsAfterOneDay }
-        set(value) {
-            setPref { it.setCloseTabsAfterOneDay(value) }
-        }
-//    var closeTabsAfterOneDay by booleanPreference(
-//        appContext.getPreferenceKey(R.string.pref_key_close_tabs_after_one_day),
-//        default = false,
-//    )
-
-    var closeTabsAfterOneWeek: Boolean
-        get() = getPref(default = false) { it?.closeTabsAfterOneWeek }
-        set(value) {
-            setPref { it.setCloseTabsAfterOneWeek(value) }
-        }
-//    var closeTabsAfterOneWeek by booleanPreference(
-//        appContext.getPreferenceKey(R.string.pref_key_close_tabs_after_one_week),
-//        default = false,
-//    )
-
-    var closeTabsAfterOneMonth: Boolean
-        get() = getPref(default = false) { it?.closeTabsAfterOneMonth }
-        set(value) {
-            setPref { it.setCloseTabsAfterOneMonth(value) }
-        }
-//    var closeTabsAfterOneMonth by booleanPreference(
-//        appContext.getPreferenceKey(R.string.pref_key_close_tabs_after_one_month),
-//        default = false,
-//    )
-
     // todo: check usages to see if need to remove
     var allowThirdPartyRootCerts by booleanPreference(
         appContext.getPreferenceKey(R.string.pref_key_allow_third_party_root_certs),
@@ -622,91 +978,6 @@ class Settings(private val appContext: Context) : PreferencesHolder {
         default = 0L,
     )
 
-    /**
-     * Indicates the last time when the user was interacting with the [BrowserFragment],
-     * This is useful to determine if the user has to start on the [HomeFragment]
-     * or it should go directly to the [BrowserFragment].
-     *
-     * This value defaults to 0L because we want to know if the user never had any interaction
-     * with the [BrowserFragment]
-     */
-    // todo: check usages to see if need to remove
-    var lastBrowseActivity by longPreference(
-        appContext.getPreferenceKey(R.string.pref_key_last_browse_activity_time),
-        default = 0L,
-    )
-
-    /**
-     * Indicates if the user has selected the option to start on the home screen after
-     * four hours of inactivity.
-     */
-    var openHomepageAfterFourHoursOfInactivity: Boolean
-        get() = getPref(default = true) { it?.pageWhenBrowserReopened == InfernoSettings.PageWhenBrowserReopened.OPEN_ON_HOME_AFTER_FOUR_HOURS }
-        set(value) {
-            if (value) setPref { it.setPageWhenBrowserReopened(InfernoSettings.PageWhenBrowserReopened.OPEN_ON_HOME_AFTER_FOUR_HOURS) }
-        }
-
-    var useInfernoHome: Boolean
-        get() = getPref(default = true) { it?.shouldUseInfernoHome }
-        set(value) {
-            setPref { it.setShouldUseInfernoHome(value) }
-        }
-//    var openHomepageAfterFourHoursOfInactivity by booleanPreference(
-//        appContext.getPreferenceKey(R.string.pref_key_start_on_home_after_four_hours),
-//        default = true,
-//    )
-
-    /**
-     * Indicates if the user has selected the option to always start on the home screen.
-     */
-    var alwaysOpenTheHomepageWhenOpeningTheApp: Boolean
-        get() = getPref(default = false) { it?.pageWhenBrowserReopened == InfernoSettings.PageWhenBrowserReopened.OPEN_ON_HOME_ALWAYS }
-        set(value) {
-            if (value) setPref { it.setPageWhenBrowserReopened(InfernoSettings.PageWhenBrowserReopened.OPEN_ON_HOME_ALWAYS) }
-        }
-//    var alwaysOpenTheHomepageWhenOpeningTheApp by booleanPreference(
-//        appContext.getPreferenceKey(R.string.pref_key_start_on_home_always),
-//        default = false,
-//    )
-
-    /**
-     * Indicates if the user has selected the option to never start on the home screen and have
-     * their last tab opened.
-     */
-    var alwaysOpenTheLastTabWhenOpeningTheApp: Boolean
-        get() = getPref(default = false) { it?.pageWhenBrowserReopened == InfernoSettings.PageWhenBrowserReopened.OPEN_ON_LAST_TAB }
-        set(value) {
-            if (value) setPref { it.setPageWhenBrowserReopened(InfernoSettings.PageWhenBrowserReopened.OPEN_ON_LAST_TAB) }
-        }
-//    var alwaysOpenTheLastTabWhenOpeningTheApp by booleanPreference(
-//        appContext.getPreferenceKey(R.string.pref_key_start_on_home_never),
-//        default = false,
-//    )
-
-    /**
-     * Indicates if the user should start on the home screen, based on the user's preferences.
-     */
-    fun shouldStartOnHome(): Boolean {
-        return when {
-            openHomepageAfterFourHoursOfInactivity -> timeNowInMillis() - lastBrowseActivity >= FOUR_HOURS_MS
-            alwaysOpenTheHomepageWhenOpeningTheApp -> true
-            alwaysOpenTheLastTabWhenOpeningTheApp -> false
-            else -> false
-        }
-    }
-
-    /**
-     * Indicates if the user has enabled the inactive tabs feature.
-     */
-    var inactiveTabsAreEnabled: Boolean
-        get() = getPref(default = true) { it?.shouldSeparateInactiveTabs }
-        set(value) {
-            setPref { it.setShouldSeparateInactiveTabs(value) }
-        }
-//    var inactiveTabsAreEnabled by booleanPreference(
-//        appContext.getPreferenceKey(R.string.pref_key_inactive_tabs),
-//        default = true,
-//    )
 
     /**
      * Indicates if the user has completed successfully first translation.
@@ -1277,90 +1548,6 @@ class Settings(private val appContext: Context) : PreferencesHolder {
             field = value
         }
 
-    var shouldDeleteBrowsingDataOnQuit: Boolean
-        get() = getPref(default = false) { it?.deleteBrowsingDataOnQuit }
-        set(value) {
-            setPref { it.setDeleteBrowsingDataOnQuit(value) }
-        }
-//    var shouldDeleteBrowsingDataOnQuit by booleanPreference(
-//        appContext.getPreferenceKey(R.string.pref_key_delete_browsing_data_on_quit),
-//        default = false,
-//    )
-
-    var deleteOpenTabs: Boolean
-        get() = getPref(default = true) { it?.deleteOpenTabsOnQuit }
-        set(value) {
-            setPref { it.setDeleteOpenTabsOnQuit(value) }
-        }
-//    var deleteOpenTabs by booleanPreference(
-//        appContext.getPreferenceKey(R.string.pref_key_delete_open_tabs_now),
-//        default = true,
-//    )
-
-    var deleteBrowsingHistory: Boolean
-        get() = getPref(default = true) { it?.deleteBrowsingHistoryOnQuit }
-        set(value) {
-            setPref { it.setDeleteBrowsingHistoryOnQuit(value) }
-        }
-//    var deleteBrowsingHistory by booleanPreference(
-//        appContext.getPreferenceKey(R.string.pref_key_delete_browsing_history_now),
-//        default = true,
-//    )
-
-    var deleteCookies: Boolean
-        get() = getPref(default = true) { it?.deleteCookiesAndSiteDataOnQuit }
-        set(value) {
-            setPref { it.setDeleteCookiesAndSiteDataOnQuit(value) }
-        }
-//    var deleteCookies by booleanPreference(
-//        appContext.getPreferenceKey(R.string.pref_key_delete_cookies_now),
-//        default = true,
-//    )
-
-    var deleteCache: Boolean
-        get() = getPref(default = true) { it?.deleteCachesOnQuit }
-        set(value) {
-            setPref { it.setDeleteCachesOnQuit(value) }
-        }
-//    var deleteCache by booleanPreference(
-//        appContext.getPreferenceKey(R.string.pref_key_delete_caches_now),
-//        default = true,
-//    )
-
-    var deleteSitePermissions: Boolean
-        get() = getPref(default = true) { it?.deletePermissionsOnQuit }
-        set(value) {
-            setPref { it.setDeletePermissionsOnQuit(value) }
-        }
-//    var deleteSitePermissions by booleanPreference(
-//        appContext.getPreferenceKey(R.string.pref_key_delete_permissions_now),
-//        default = true,
-//    )
-
-    var deleteDownloads: Boolean
-        get() = getPref(default = true) { it?.deleteDownloadsOnQuit }
-        set(value) {
-            setPref { it.setDeleteDownloadsOnQuit(value) }
-        }
-//    var deleteDownloads by booleanPreference(
-//        appContext.getPreferenceKey(R.string.pref_key_delete_downloads_now),
-//        default = true,
-//    )
-
-    var shouldUseBottomToolbar: Boolean
-        get() = getPref(default = true) { it?.toolbarVerticalPosition == InfernoSettings.VerticalToolbarPosition.TOOLBAR_BOTTOM }
-        set(value) {
-            when (value) {
-                true -> setPref { it.setToolbarVerticalPosition(InfernoSettings.VerticalToolbarPosition.TOOLBAR_BOTTOM) }
-                false -> setPref { it.setToolbarVerticalPosition(InfernoSettings.VerticalToolbarPosition.TOOLBAR_TOP) }
-            }
-        }
-//    var shouldUseBottomToolbar by booleanPreference(
-//        key = appContext.getPreferenceKey(R.string.pref_key_toolbar_bottom),
-//        default = false,
-//        persistDefaultIfNotExists = true,
-//    )
-
     val toolbarPosition: ToolbarPosition
         get() = if (appContext.isTabStripEnabled()) {
             ToolbarPosition.BOTTOM
@@ -1454,45 +1641,6 @@ class Settings(private val appContext: Context) : PreferencesHolder {
     // todo: check usages to see if need to remove
     fun incrementShowLoginsSecureWarningSyncCount() = loginsSecureWarningSyncCount.increment()
 
-    var shouldShowSearchSuggestions: Boolean
-        get() = getPref(default = true) { it?.shouldShowSearchSuggestions }
-        set(value) {
-            setPref { it.setShouldShowSearchSuggestions(value) }
-        }
-//    val shouldShowSearchSuggestions by booleanPreference(
-//        appContext.getPreferenceKey(R.string.pref_key_show_search_suggestions),
-//        default = true,
-//    )
-
-    var shouldAutocompleteInAwesomebar: Boolean
-        get() = getPref(default = true) { it?.shouldAutocompleteInAwesomebar }
-        set(value) {
-            setPref { it.setShouldAutocompleteInAwesomebar(value) }
-        }
-//    val shouldAutocompleteInAwesomebar by booleanPreference(
-//        appContext.getPreferenceKey(R.string.pref_key_enable_autocomplete_urls),
-//        default = true,
-//    )
-
-    var defaultTopSitesAdded: Boolean
-        get() = getPref(default = false) { it?.defaultTopSitesAdded } // todo: set to true and add sponsors if ever get to that point
-        set(value) {
-            setPref { it.setDefaultTopSitesAdded(value) }
-        }
-//    var defaultTopSitesAdded by booleanPreference(
-//        appContext.getPreferenceKey(R.string.default_top_sites_added),
-//        default = false,
-//    )
-
-    var shouldShowSearchSuggestionsInPrivate: Boolean
-        get() = getPref(default = true) { it?.shouldShowSearchSuggestionsInPrivate }
-        set(value) {
-            setPref { it.setShouldShowSearchSuggestionsInPrivate(value) }
-        }
-//    var shouldShowSearchSuggestionsInPrivate by booleanPreference(
-//        appContext.getPreferenceKey(R.string.pref_key_show_search_suggestions_in_private),
-//        default = false,
-//    )
 
     // todo: check usages to see if need to remove
     var showSearchSuggestionsInPrivateOnboardingFinished by booleanPreference(
@@ -1826,15 +1974,6 @@ class Settings(private val appContext: Context) : PreferencesHolder {
 //        }
     }
 
-    var shouldShowVoiceSearch : Boolean
-        get() = getPref(default = true) { it?.shouldShowVoiceSearch }
-        set(value) {
-            setPref { it.setShouldShowVoiceSearch(value) }
-        }
-//    var shouldShowVoiceSearch by booleanPreference(
-//        appContext.getPreferenceKey(R.string.pref_key_show_voice_search),
-//        default = true,
-//    )
 
     /**
      * Used in [SearchDialogFragment.kt], [SearchFragment.kt] (deprecated), and [PairFragment.kt]
@@ -1857,11 +1996,11 @@ class Settings(private val appContext: Context) : PreferencesHolder {
     )
 
     var shouldPromptToSaveLogins: Boolean
-        get() = getPref(default = true) { it?.saveLoginsSettings == InfernoSettings.LoginsStorage.ASK_TO_SAVE}
+        get() = getPref(default = true) { it?.saveLoginsSettings == InfernoSettings.LoginsStorage.ASK_TO_SAVE }
         set(value) {
             when (value) {
-                true ->setPref { it.setSaveLoginsSettings(InfernoSettings.LoginsStorage.ASK_TO_SAVE) }
-                false ->setPref { it.setSaveLoginsSettings(InfernoSettings.LoginsStorage.DONT_SAVE) }
+                true -> setPref { it.setSaveLoginsSettings(InfernoSettings.LoginsStorage.ASK_TO_SAVE) }
+                false -> setPref { it.setSaveLoginsSettings(InfernoSettings.LoginsStorage.DONT_SAVE) }
             }
         }
 //    var shouldPromptToSaveLogins by booleanPreference(
@@ -1879,15 +2018,6 @@ class Settings(private val appContext: Context) : PreferencesHolder {
 //        default = true,
 //    )
 
-    var shouldShowSearchWidget: Boolean
-        get() = getPref(default = true) { it?.shouldShowSearchWidget }
-        set(value) {
-            setPref { it.setShouldShowSearchWidget(value) }
-        }
-//    val searchWidgetInstalled by booleanPreference(
-//        appContext.getPreferenceKey(R.string.pref_key_search_widget_installed_2),
-//        default = false,
-//    )
     /**
      * Used in [SearchWidgetProvider] to update when the search widget
      * exists on home screen or if it has been removed completely.
@@ -1897,7 +2027,6 @@ class Settings(private val appContext: Context) : PreferencesHolder {
 //        val key = appContext.getPreferenceKey(R.string.pref_key_search_widget_installed_2)
 //        preferences.edit().putBoolean(key, installed).apply()
     }
-
 
 
     // todo: check usages to see if need to remove
@@ -2093,36 +2222,6 @@ class Settings(private val appContext: Context) : PreferencesHolder {
             }
         }
 
-    var isPullToRefreshEnabledInBrowser: Boolean
-        get() = getPref(default = true) { it?.isPullToRefreshEnabled }
-        set(value) {
-            setPref { it.setIsPullToRefreshEnabled(value) }
-        }
-//    var isPullToRefreshEnabledInBrowser by booleanPreference(
-//        appContext.getPreferenceKey(R.string.pref_key_website_pull_to_refresh),
-//        default = true,
-//    )
-
-    var isDynamicToolbarEnabled: Boolean
-        get() = getPref(default = true) { it?.isDynamicToolbarEnabled }
-        set(value) {
-            setPref { it.setIsDynamicToolbarEnabled(value) }
-        }
-//    var isDynamicToolbarEnabled by booleanPreference(
-//        appContext.getPreferenceKey(R.string.pref_key_dynamic_toolbar),
-//        default = true,
-//    )
-
-    var isSwipeToolbarToSwitchTabsEnabled: Boolean
-        get() = getPref(default = true) { it?.isSwipeHorizontalToSwitchTabsEnabled }
-        set(value) {
-            setPref { it.setIsSwipeHorizontalToSwitchTabsEnabled(value) }
-        }
-//    var isSwipeToolbarToSwitchTabsEnabled by booleanPreference(
-//        appContext.getPreferenceKey(R.string.pref_key_swipe_toolbar_switch_tabs),
-//        default = true,
-//    )
-
     // todo: check usages to see if need to remove
     var addressFeature by featureFlagPreference(
         appContext.getPreferenceKey(R.string.pref_key_show_address_feature),
@@ -2168,17 +2267,6 @@ class Settings(private val appContext: Context) : PreferencesHolder {
     private val homescreenSections: Map<HomeScreenSection, Boolean>
         get() = FxNimbus.features.homescreen.value().sectionsEnabled
 
-    var shouldShowHistory: Boolean
-        get() = getPref(default = true) { it?.shouldShowHistory }
-        set(value) {
-            setPref { it.setShouldShowHistory(value) }
-        }
-//    var historyMetadataUIFeature by lazyFeatureFlagPreference(
-//        appContext.getPreferenceKey(R.string.pref_key_history_metadata_feature),
-//        default = { homescreenSections[HomeScreenSection.RECENT_EXPLORATIONS] == true },
-//        featureFlag = true,
-//    )
-
     /**
      * Indicates if sync onboarding CFR should be shown.
      */
@@ -2198,34 +2286,6 @@ class Settings(private val appContext: Context) : PreferencesHolder {
         featureFlag = true,
         default = { mr2022Sections[Mr2022Section.HOME_ONBOARDING_DIALOG_EXISTING_USERS] == true },
     )
-
-    /**
-     * Indicates if the recent tabs functionality should be visible.
-     */
-    var showRecentTabsFeature: Boolean
-        get() = getPref(default = true) { it?.shouldShowRecentTabs }
-        set(value) {
-            setPref { it.setShouldShowRecentTabs(value) }
-        }
-//    var showRecentTabsFeature by lazyFeatureFlagPreference(
-//        appContext.getPreferenceKey(R.string.pref_key_recent_tabs),
-//        featureFlag = true,
-//        default = { homescreenSections[HomeScreenSection.JUMP_BACK_IN] == true },
-//    )
-
-    /**
-     * Indicates if the recent saved bookmarks functionality should be visible.
-     */
-    var showBookmarksHomeFeature: Boolean
-        get() = getPref(default = true) { it?.shouldShowBookmarks }
-        set(value) {
-            setPref { it.setShouldShowBookmarks(value) }
-        }
-//    var showBookmarksHomeFeature by lazyFeatureFlagPreference(
-//        appContext.getPreferenceKey(R.string.pref_key_customization_bookmarks),
-//        default = { homescreenSections[HomeScreenSection.BOOKMARKS] == true },
-//        featureFlag = true,
-//    )
 
     // todo: check usages to see if need to remove
     var signedInFxaAccount by booleanPreference(
