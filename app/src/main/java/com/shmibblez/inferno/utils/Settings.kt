@@ -4,13 +4,6 @@
 
 package com.shmibblez.inferno.utils
 
-//import mozilla.components.service.contile.ContileTopSitesProvider
-//import mozilla.components.support.locale.LocaleManager
-//import com.shmibblez.inferno.components.metrics.MozillaProductDetector
-//import com.shmibblez.inferno.components.settings.counterPreference
-//import com.shmibblez.inferno.components.settings.featureFlagPreference
-//import com.shmibblez.inferno.components.settings.lazyFeatureFlagPreference
-//import com.shmibblez.inferno.debugsettings.addresses.SharedPrefsAddressesDebugLocalesRepository
 import android.accessibilityservice.AccessibilityServiceInfo.CAPABILITY_CAN_PERFORM_GESTURES
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
@@ -21,9 +14,11 @@ import android.view.accessibility.AccessibilityManager
 import androidx.annotation.VisibleForTesting
 import androidx.annotation.VisibleForTesting.Companion.PRIVATE
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import com.shmibblez.inferno.Config
 import com.shmibblez.inferno.FeatureFlags
 import com.shmibblez.inferno.R
+import com.shmibblez.inferno.browser.BrowserFragment
 import com.shmibblez.inferno.browser.browsingmode.BrowsingMode
 import com.shmibblez.inferno.browser.tabstrip.isTabStripEnabled
 import com.shmibblez.inferno.components.settings.counterPreference
@@ -32,7 +27,9 @@ import com.shmibblez.inferno.components.settings.lazyFeatureFlagPreference
 import com.shmibblez.inferno.components.toolbar.ToolbarPosition
 import com.shmibblez.inferno.components.toolbar.navbar.shouldAddNavigationBar
 import com.shmibblez.inferno.debugsettings.addresses.SharedPrefsAddressesDebugLocalesRepository
+import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.getPreferenceKey
+import com.shmibblez.inferno.home.HomeFragment
 import com.shmibblez.inferno.nimbus.CookieBannersSection
 import com.shmibblez.inferno.nimbus.FxNimbus
 import com.shmibblez.inferno.nimbus.HomeScreenSection
@@ -52,7 +49,7 @@ import com.shmibblez.inferno.settings.sitepermissions.AUTOPLAY_ALLOW_ALL
 import com.shmibblez.inferno.settings.sitepermissions.AUTOPLAY_ALLOW_ON_WIFI
 import com.shmibblez.inferno.settings.sitepermissions.AUTOPLAY_BLOCK_ALL
 import com.shmibblez.inferno.settings.sitepermissions.AUTOPLAY_BLOCK_AUDIBLE
-import com.shmibblez.inferno.toolbar.ToolbarItems
+import com.shmibblez.inferno.toolbar.defaultToolbarItems
 import com.shmibblez.inferno.wallpapers.Wallpaper
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -73,9 +70,8 @@ import mozilla.components.support.ktx.android.content.stringSetPreference
 import mozilla.components.support.locale.LocaleManager
 import mozilla.components.support.utils.BrowsersCache
 import java.security.InvalidParameterException
-import java.util.UUID
 
-private const val AUTOPLAY_USER_SETTING = "AUTOPLAY_USER_SETTING"
+//private const val AUTOPLAY_USER_SETTING = "AUTOPLAY_USER_SETTING"
 
 /**
  * A simple wrapper for SharedPreferences that makes reading preference a little bit easier.
@@ -91,18 +87,19 @@ class Settings(private val appContext: Context) : PreferencesHolder {
         private const val BLOCKED_INT = 0
         private const val ASK_TO_ALLOW_INT = 1
         private const val ALLOWED_INT = 2
-        private const val CFR_COUNT_CONDITION_FOCUS_INSTALLED = 1
-        private const val CFR_COUNT_CONDITION_FOCUS_NOT_INSTALLED = 3
+
+        //        private const val CFR_COUNT_CONDITION_FOCUS_INSTALLED = 1
+//        private const val CFR_COUNT_CONDITION_FOCUS_NOT_INSTALLED = 3
         private const val INACTIVE_TAB_MINIMUM_TO_SHOW_AUTO_CLOSE_DIALOG = 20
 
-        const val FOUR_HOURS_MS = 60 * 60 * 4 * 1000L
         const val ONE_MINUTE_MS = 60 * 1000L
-        const val ONE_HOUR_MS = 60 * ONE_MINUTE_MS
-        const val ONE_DAY_MS = 60 * 60 * 24 * 1000L
+        private const val ONE_HOUR_MS = 60 * ONE_MINUTE_MS
+        const val ONE_DAY_MS = 24 * ONE_HOUR_MS
         const val TWO_DAYS_MS = 2 * ONE_DAY_MS
         const val THREE_DAYS_MS = 3 * ONE_DAY_MS
         const val ONE_WEEK_MS = 60 * 60 * 24 * 7 * 1000L
         const val ONE_MONTH_MS = (60 * 60 * 24 * 365 * 1000L) / 12
+        const val FOUR_HOURS_MS = 4 * ONE_HOUR_MS
 
         /**
          * The minimum number a search groups should contain.
@@ -194,12 +191,11 @@ class Settings(private val appContext: Context) : PreferencesHolder {
      * This value defaults to 0L because we want to know if the user never had any interaction
      * with the [BrowserFragment]
      */
-    // todo: check usages to see if need to remove
     var lastBrowseActivity: Long
-    get() = getPref(default = 0L) { it?.lastBrowseActivityMillis }
-    set(value) {
-        setPref { it.setLastBrowseActivityMillis(value) }
-    }
+        get() = getPref(default = 0L) { it?.lastBrowseActivityMs }
+        set(value) {
+            setPref { it.setLastBrowseActivityMs(value) }
+        }
 //    var lastBrowseActivity by longPreference(
 //        appContext.getPreferenceKey(R.string.pref_key_last_browse_activity_time),
 //        default = 0L,
@@ -229,7 +225,7 @@ class Settings(private val appContext: Context) : PreferencesHolder {
             setPref { it.setToolbarVerticalPosition(value) }
         }
     var toolbarItems: List<InfernoSettings.ToolbarItem>
-        get() = getPref(default = ToolbarItems.defaultToolbarItems) { it?.toolbarItemsList }
+        get() = getPref(default = (null as InfernoSettings.ToolbarItem?).defaultToolbarItems) { it?.toolbarItemsList }
         set(value) {
             setPref {
                 it.toolbarItemsList.apply {
@@ -350,9 +346,12 @@ class Settings(private val appContext: Context) : PreferencesHolder {
     // general
 
     var manuallyCloseTabs: Boolean
-        get() = getPref(default = true) { it?.closeTabsManually }
+        get() = getPref(default = true) { it?.closeTabsMethod == InfernoSettings.CloseTabsMethod.CLOSE_TABS_MANUALLY }
         set(value) {
-            setPref { it.setCloseTabsManually(value) }
+            when (value) {
+                true -> setPref { it.setCloseTabsMethod(InfernoSettings.CloseTabsMethod.CLOSE_TABS_MANUALLY) }
+                false -> setPref { it.setCloseTabsMethod(InfernoSettings.CloseTabsMethod.CLOSE_TABS_AFTER_ONE_MONTH) }
+            }
         }
 
     //    var manuallyCloseTabs by booleanPreference(
@@ -360,29 +359,34 @@ class Settings(private val appContext: Context) : PreferencesHolder {
 //        default = true,
 //    )
     var closeTabsAfterOneDay: Boolean
-        get() = getPref(default = false) { it?.closeTabsAfterOneDay }
+        get() = getPref(default = true) { it?.closeTabsMethod == InfernoSettings.CloseTabsMethod.CLOSE_TABS_AFTER_ONE_DAY }
         set(value) {
-            setPref { it.setCloseTabsAfterOneDay(value) }
+            when (value) {
+                true -> setPref { it.setCloseTabsMethod(InfernoSettings.CloseTabsMethod.CLOSE_TABS_AFTER_ONE_DAY) }
+                false -> setPref { it.setCloseTabsMethod(InfernoSettings.CloseTabsMethod.CLOSE_TABS_AFTER_ONE_MONTH) }
+            }
         }
-//    var closeTabsAfterOneDay by booleanPreference(
-//        appContext.getPreferenceKey(R.string.pref_key_close_tabs_after_one_day),
-//        default = false,
-//    )
 
     var closeTabsAfterOneWeek: Boolean
-        get() = getPref(default = false) { it?.closeTabsAfterOneWeek }
+        get() = getPref(default = true) { it?.closeTabsMethod == InfernoSettings.CloseTabsMethod.CLOSE_TABS_AFTER_ONE_WEEK }
         set(value) {
-            setPref { it.setCloseTabsAfterOneWeek(value) }
+            when (value) {
+                true -> setPref { it.setCloseTabsMethod(InfernoSettings.CloseTabsMethod.CLOSE_TABS_AFTER_ONE_WEEK) }
+                false -> setPref { it.setCloseTabsMethod(InfernoSettings.CloseTabsMethod.CLOSE_TABS_AFTER_ONE_MONTH) }
+            }
         }
 //    var closeTabsAfterOneWeek by booleanPreference(
 //        appContext.getPreferenceKey(R.string.pref_key_close_tabs_after_one_week),
 //        default = false,
 //    )
 
-    var closeTabsAfterOneMonth: Boolean
-        get() = getPref(default = false) { it?.closeTabsAfterOneMonth }
+    private var closeTabsAfterOneMonth: Boolean
+        get() = getPref(default = true) { it?.closeTabsMethod == InfernoSettings.CloseTabsMethod.CLOSE_TABS_AFTER_ONE_MONTH }
         set(value) {
-            setPref { it.setCloseTabsAfterOneMonth(value) }
+            when (value) {
+                true -> setPref { it.setCloseTabsMethod(InfernoSettings.CloseTabsMethod.CLOSE_TABS_AFTER_ONE_MONTH) }
+                false -> setPref { it.setCloseTabsMethod(InfernoSettings.CloseTabsMethod.CLOSE_TABS_AFTER_ONE_MONTH) }
+            }
         }
 //    var closeTabsAfterOneMonth by booleanPreference(
 //        appContext.getPreferenceKey(R.string.pref_key_close_tabs_after_one_month),
@@ -662,6 +666,520 @@ class Settings(private val appContext: Context) : PreferencesHolder {
 
     // login storage
 
+    var shouldPromptToSaveLogins: Boolean
+        get() = getPref(default = true) { it?.saveLoginsSettings == InfernoSettings.LoginsStorage.ASK_TO_SAVE }
+        set(value) {
+            when (value) {
+                true -> setPref { it.setSaveLoginsSettings(InfernoSettings.LoginsStorage.ASK_TO_SAVE) }
+                false -> setPref { it.setSaveLoginsSettings(InfernoSettings.LoginsStorage.DONT_SAVE) }
+            }
+        }
+    var shouldSyncLogins: Boolean
+        get() = getPref(default = true) { it?.shouldSyncLogins }
+        set(value) {
+            setPref { it.setShouldSyncLogins(value) }
+        }
+    var shouldAutofillLogins: Boolean
+        get() = getPref(default = true) { it?.shouldAutofillLogins }
+        set(value) {
+            setPref { it.setShouldAutofillLogins(value) }
+        }
+    var isAndroidAutofillEnabled: Boolean
+        get() = getPref(default = true) { it?.isAndroidAutofillEnabled }
+        set(value) {
+            setPref { it.setIsAndroidAutofillEnabled(value) }
+        }
+
+    /**
+     * Stores the user choice from the "Autofill Addresses" settings for whether
+     * save and autofill addresses should be enabled or not.
+     * If set to `true` when the user focuses on address fields in a webpage an Android prompt is shown,
+     * allowing the selection of an address details to be automatically filled in the webpage fields.
+     */
+    var shouldAutofillAddressDetails: Boolean
+        get() = getPref(default = true) { it?.isAddressSaveAndAutofillEnabled }
+        set(value) {
+            setPref { it.setIsAddressSaveAndAutofillEnabled(value) }
+        }
+
+    /**
+     * Storing the user choice from the "Payment methods" settings for whether save and autofill cards
+     * should be enabled or not.
+     * If set to `true` when the user focuses on credit card fields in the webpage an Android prompt letting her
+     * select the card details to be automatically filled will appear.
+     */
+    var shouldAutofillCreditCardDetails: Boolean
+        get() = getPref(default = true) { it?.isCardSaveAndAutofillEnabled }
+        set(value) {
+            setPref { it.setIsCardSaveAndAutofillEnabled(value) }
+        }
+    var shouldSyncCards: Boolean
+        get() = getPref(default = true) { it?.shouldSyncCards }
+        set(value) {
+            setPref { it.setShouldSyncCards(value) }
+        }
+
+
+    /*** site settings ***/
+
+
+    // site settings
+
+    private var appLinksSetting: InfernoSettings.AppLinks
+        get() = getPref(default = InfernoSettings.AppLinks.APP_LINKS_ASK_TO_OPEN) { it?.appLinksSetting }
+        set(value) {
+            setPref { it.setAppLinksSetting(value) }
+        }
+    private var autoPlaySetting: InfernoSettings.AutoPlay
+        get() = getPref(default = InfernoSettings.AutoPlay.BLOCK_AUDIO_ONLY) { it?.autoplaySetting }
+        set(value) {
+            setPref { it.setAutoplaySetting(value) }
+        }
+    private var cameraSetting: InfernoSettings.Camera
+        get() = getPref(default = InfernoSettings.Camera.CAMERA_ASK_TO_ALLOW) { it?.cameraSetting }
+        set(value) {
+            setPref { it.setCameraSetting(value) }
+        }
+    private var locationSetting: InfernoSettings.Location
+        get() = getPref(default = InfernoSettings.Location.LOCATION_ASK_TO_ALLOW) { it?.locationSetting }
+        set(value) {
+            setPref { it.setLocationSetting(value) }
+        }
+    private var microphoneSetting: InfernoSettings.Microphone
+        get() = getPref(default = InfernoSettings.Microphone.MICROPHONE_ASK_TO_ALLOW) { it?.microphoneSetting }
+        set(value) {
+            setPref { it.setMicrophoneSetting(value) }
+        }
+    private var notificationsSetting: InfernoSettings.Notifications
+        get() = getPref(default = InfernoSettings.Notifications.NOTIFICATIONS_ASK_TO_ALLOW) { it?.notificationsSetting }
+        set(value) {
+            setPref { it.setNotificationsSetting(value) }
+        }
+    private var persistentStorageSetting: InfernoSettings.PersistentStorage
+        get() = getPref(default = InfernoSettings.PersistentStorage.PERSISTENT_STORAGE_ASK_TO_ALLOW) { it?.persistentStorageSetting }
+        set(value) {
+            setPref { it.setPersistentStorageSetting(value) }
+        }
+    private var crossSiteCookiesSetting: InfernoSettings.CrossSiteCookies
+        get() = getPref(default = InfernoSettings.CrossSiteCookies.CROSS_SITE_COOKIES_ASK_TO_ALLOW) { it?.crossSiteCookiesSetting }
+        set(value) {
+            setPref { it.setCrossSiteCookiesSetting(value) }
+        }
+    private var drmControlledContentSetting: InfernoSettings.DrmControlledContent
+        get() = getPref(default = InfernoSettings.DrmControlledContent.DRM_CONTROLLED_CONTENT_ASK_TO_ALLOW) { it?.drmControlledContentSetting }
+        set(value) {
+            setPref { it.setDrmControlledContentSetting(value) }
+        }
+
+    /**
+     *  Returns a sitePermissions action for the provided [feature].
+     */
+    fun getSitePermissionsPhoneFeatureAction(
+        feature: PhoneFeature,
+        default: Action = Action.ASK_TO_ALLOW,
+    ) = preferences.getInt(feature.getPreferenceKey(appContext), default.toInt()).toAction()
+
+    /**
+     * Gets the user selected autoplay setting.
+     *
+     * Under the hood, autoplay is represented by two settings, [PhoneFeature.AUTOPLAY_AUDIBLE] and
+     * [PhoneFeature.AUTOPLAY_INAUDIBLE]. The user selection cannot be inferred from the combination of these
+     * settings because, while on [AUTOPLAY_ALLOW_ON_WIFI], they will be indistinguishable from
+     * either [AUTOPLAY_ALLOW_ALL] or [AUTOPLAY_BLOCK_ALL]. Because of this, we are forced to save
+     * the user selected setting as well.
+     */
+    fun getAutoplayUserSetting() = when (autoPlaySetting) {
+        InfernoSettings.AutoPlay.BLOCK_AUDIO_ONLY -> AUTOPLAY_BLOCK_AUDIBLE
+        InfernoSettings.AutoPlay.BLOCK_AUDIO_AND_VIDEO -> AUTOPLAY_BLOCK_ALL
+        InfernoSettings.AutoPlay.ALLOW_AUDIO_AND_VIDEO -> AUTOPLAY_ALLOW_ALL
+        InfernoSettings.AutoPlay.BLOCK_AUDIO_AND_VIDEO_ON_CELLULAR_DATA_ONLY -> AUTOPLAY_ALLOW_ON_WIFI
+        InfernoSettings.AutoPlay.UNRECOGNIZED -> AUTOPLAY_BLOCK_AUDIBLE
+    }
+//    fun getAutoplayUserSetting() = preferences.getInt(AUTOPLAY_USER_SETTING, AUTOPLAY_BLOCK_AUDIBLE)
+
+    /**
+     * Saves the user selected autoplay setting.
+     *
+     * Under the hood, autoplay is represented by two settings, [PhoneFeature.AUTOPLAY_AUDIBLE] and
+     * [PhoneFeature.AUTOPLAY_INAUDIBLE]. The user selection cannot be inferred from the combination of these
+     * settings because, while on [AUTOPLAY_ALLOW_ON_WIFI], they will be indistinguishable from
+     * either [AUTOPLAY_ALLOW_ALL] or [AUTOPLAY_BLOCK_ALL]. Because of this, we are forced to save
+     * the user selected setting as well.
+     */
+    fun setAutoplayUserSetting(
+        autoplaySetting: Int,
+    ) {
+        this.autoPlaySetting = when (autoplaySetting.toInt()) {
+            AUTOPLAY_ALLOW_ALL -> InfernoSettings.AutoPlay.ALLOW_AUDIO_AND_VIDEO
+            AUTOPLAY_ALLOW_ON_WIFI -> InfernoSettings.AutoPlay.BLOCK_AUDIO_AND_VIDEO_ON_CELLULAR_DATA_ONLY
+            AUTOPLAY_BLOCK_AUDIBLE -> InfernoSettings.AutoPlay.BLOCK_AUDIO_ONLY
+            AUTOPLAY_BLOCK_ALL -> InfernoSettings.AutoPlay.BLOCK_AUDIO_AND_VIDEO
+            else -> InfernoSettings.AutoPlay.BLOCK_AUDIO_AND_VIDEO
+        }
+//        preferences.edit().putInt(AUTOPLAY_USER_SETTING, autoplaySetting).apply()
+    }
+
+    private fun getSitePermissionsPhoneFeatureAutoplayAction(
+        feature: PhoneFeature,
+        default: AutoplayAction = AutoplayAction.BLOCKED,
+    ) = when (autoPlaySetting) {
+        InfernoSettings.AutoPlay.ALLOW_AUDIO_AND_VIDEO -> AutoplayAction.ALLOWED
+        InfernoSettings.AutoPlay.BLOCK_AUDIO_AND_VIDEO -> AutoplayAction.BLOCKED
+        else -> default
+    }
+//    private fun getSitePermissionsPhoneFeatureAutoplayAction(
+//        feature: PhoneFeature,
+//        default: AutoplayAction = AutoplayAction.BLOCKED,
+//    ) = preferences.getInt(feature.getPreferenceKey(appContext), default.toInt()).toAutoplayAction()
+
+
+    /**
+     *  Sets a sitePermissions action for the provided [feature].
+     */
+    fun setSitePermissionsPhoneFeatureAction(
+        feature: PhoneFeature,
+        value: Action,
+    ) {
+        when (feature) {
+            PhoneFeature.CAMERA -> {
+                cameraSetting = when (value) {
+                    Action.ALLOWED -> InfernoSettings.Camera.CAMERA_ALLOWED
+                    Action.BLOCKED -> InfernoSettings.Camera.CAMERA_BLOCKED
+                    Action.ASK_TO_ALLOW -> InfernoSettings.Camera.CAMERA_ASK_TO_ALLOW
+                }
+            }
+
+            PhoneFeature.LOCATION -> {
+                locationSetting = when (value) {
+                    Action.ALLOWED -> InfernoSettings.Location.LOCATION_ALLOWED
+                    Action.BLOCKED -> InfernoSettings.Location.LOCATION_BLOCKED
+                    Action.ASK_TO_ALLOW -> InfernoSettings.Location.LOCATION_ASK_TO_ALLOW
+                }
+            }
+
+            PhoneFeature.MICROPHONE -> {
+                microphoneSetting = when (value) {
+                    Action.ALLOWED -> InfernoSettings.Microphone.MICROPHONE_ALLOWED
+                    Action.BLOCKED -> InfernoSettings.Microphone.MICROPHONE_BLOCKED
+                    Action.ASK_TO_ALLOW -> InfernoSettings.Microphone.MICROPHONE_ASK_TO_ALLOW
+                }
+            }
+
+            PhoneFeature.NOTIFICATION -> {
+                notificationsSetting = when (value) {
+                    Action.ALLOWED -> InfernoSettings.Notifications.NOTIFICATIONS_ALLOWED
+                    Action.BLOCKED -> InfernoSettings.Notifications.NOTIFICATIONS_BLOCKED
+                    Action.ASK_TO_ALLOW -> InfernoSettings.Notifications.NOTIFICATIONS_ASK_TO_ALLOW
+                }
+            }
+
+            PhoneFeature.AUTOPLAY -> {
+                autoPlaySetting = when (value) {
+                    Action.ALLOWED -> InfernoSettings.AutoPlay.ALLOW_AUDIO_AND_VIDEO
+                    Action.BLOCKED -> InfernoSettings.AutoPlay.BLOCK_AUDIO_AND_VIDEO
+                    Action.ASK_TO_ALLOW -> InfernoSettings.AutoPlay.BLOCK_AUDIO_ONLY
+                }
+            }
+
+            PhoneFeature.AUTOPLAY_AUDIBLE -> {
+                autoPlaySetting = when (value.toInt()) {
+                    AUTOPLAY_ALLOW_ALL -> InfernoSettings.AutoPlay.ALLOW_AUDIO_AND_VIDEO
+                    AUTOPLAY_ALLOW_ON_WIFI -> InfernoSettings.AutoPlay.BLOCK_AUDIO_AND_VIDEO_ON_CELLULAR_DATA_ONLY
+                    AUTOPLAY_BLOCK_AUDIBLE -> InfernoSettings.AutoPlay.BLOCK_AUDIO_ONLY
+                    AUTOPLAY_BLOCK_ALL -> InfernoSettings.AutoPlay.BLOCK_AUDIO_AND_VIDEO
+                    else -> InfernoSettings.AutoPlay.BLOCK_AUDIO_AND_VIDEO
+                }
+            }
+
+            PhoneFeature.AUTOPLAY_INAUDIBLE -> {
+                autoPlaySetting = when (value) {
+                    Action.ALLOWED -> InfernoSettings.AutoPlay.ALLOW_AUDIO_AND_VIDEO
+                    Action.BLOCKED -> InfernoSettings.AutoPlay.BLOCK_AUDIO_AND_VIDEO
+                    Action.ASK_TO_ALLOW -> InfernoSettings.AutoPlay.BLOCK_AUDIO_ONLY
+                }
+            }
+
+            PhoneFeature.PERSISTENT_STORAGE -> {
+                persistentStorageSetting = when (value) {
+                    Action.ALLOWED -> InfernoSettings.PersistentStorage.PERSISTENT_STORAGE_ALLOWED
+                    Action.BLOCKED -> InfernoSettings.PersistentStorage.PERSISTENT_STORAGE_BLOCKED
+                    Action.ASK_TO_ALLOW -> InfernoSettings.PersistentStorage.PERSISTENT_STORAGE_ASK_TO_ALLOW
+                }
+            }
+
+            PhoneFeature.MEDIA_KEY_SYSTEM_ACCESS -> {
+                drmControlledContentSetting = when (value) {
+                    Action.ALLOWED -> InfernoSettings.DrmControlledContent.DRM_CONTROLLED_CONTENT_ALLOWED
+                    Action.BLOCKED -> InfernoSettings.DrmControlledContent.DRM_CONTROLLED_CONTENT_BLOCKED
+                    Action.ASK_TO_ALLOW -> InfernoSettings.DrmControlledContent.DRM_CONTROLLED_CONTENT_ASK_TO_ALLOW
+                }
+            }
+
+            PhoneFeature.CROSS_ORIGIN_STORAGE_ACCESS -> {
+                crossSiteCookiesSetting = when (value) {
+                    Action.ALLOWED -> InfernoSettings.CrossSiteCookies.CROSS_SITE_COOKIES_ALLOWED
+                    Action.BLOCKED -> InfernoSettings.CrossSiteCookies.CROSS_SITE_COOKIES_BLOCKED
+                    Action.ASK_TO_ALLOW -> InfernoSettings.CrossSiteCookies.CROSS_SITE_COOKIES_ASK_TO_ALLOW
+                }
+            }
+        }
+//        preferences.edit().putInt(feature.getPreferenceKey(appContext), value.toInt()).apply()
+    }
+
+    fun getSitePermissionsCustomSettingsRules(): SitePermissionsRules {
+        return SitePermissionsRules(
+            notification = getSitePermissionsPhoneFeatureAction(PhoneFeature.NOTIFICATION),
+            microphone = getSitePermissionsPhoneFeatureAction(PhoneFeature.MICROPHONE),
+            location = getSitePermissionsPhoneFeatureAction(PhoneFeature.LOCATION),
+            camera = getSitePermissionsPhoneFeatureAction(PhoneFeature.CAMERA),
+            autoplayAudible = getSitePermissionsPhoneFeatureAutoplayAction(
+                feature = PhoneFeature.AUTOPLAY_AUDIBLE,
+                default = AutoplayAction.BLOCKED,
+            ),
+            autoplayInaudible = getSitePermissionsPhoneFeatureAutoplayAction(
+                feature = PhoneFeature.AUTOPLAY_INAUDIBLE,
+                default = AutoplayAction.ALLOWED,
+            ),
+            persistentStorage = getSitePermissionsPhoneFeatureAction(PhoneFeature.PERSISTENT_STORAGE),
+            crossOriginStorageAccess = getSitePermissionsPhoneFeatureAction(PhoneFeature.CROSS_ORIGIN_STORAGE_ACCESS),
+            mediaKeySystemAccess = getSitePermissionsPhoneFeatureAction(PhoneFeature.MEDIA_KEY_SYSTEM_ACCESS),
+        )
+    }
+
+    fun setSitePermissionSettingListener(lifecycleOwner: LifecycleOwner, listener: () -> Unit) {
+        // todo: check if works
+//        MainScope().launch {
+        lifecycleOwner.lifecycleScope.launch {
+            appContext.infernoSettingsDataStore.data.distinctUntilChanged(areEquivalent = { old, new ->
+                old.appLinksSetting == new.appLinksSetting && old.autoplaySetting == new.autoplaySetting && old.cameraSetting == new.cameraSetting && old.locationSetting == new.locationSetting && old.microphoneSetting == new.microphoneSetting && old.notificationsSetting == new.notificationsSetting && old.persistentStorageSetting == new.persistentStorageSetting && old.crossSiteCookiesSetting == new.crossSiteCookiesSetting && old.drmControlledContentSetting == new.drmControlledContentSetting
+            }).collect {
+                listener.invoke()
+            }
+        }
+
+//        val sitePermissionKeys = listOf(
+//            PhoneFeature.NOTIFICATION,
+//            PhoneFeature.MICROPHONE,
+//            PhoneFeature.LOCATION,
+//            PhoneFeature.CAMERA,
+//            PhoneFeature.AUTOPLAY_AUDIBLE,
+//            PhoneFeature.AUTOPLAY_INAUDIBLE,
+//            PhoneFeature.PERSISTENT_STORAGE,
+//            PhoneFeature.CROSS_ORIGIN_STORAGE_ACCESS,
+//            PhoneFeature.MEDIA_KEY_SYSTEM_ACCESS,
+//        ).map { it.getPreferenceKey(appContext) }
+//
+//        preferences.registerOnSharedPreferenceChangeListener(lifecycleOwner) { _, key ->
+//            if (key in sitePermissionKeys) listener.invoke()
+//        }
+    }
+
+
+    /*** accessibility ***/
+
+
+    var shouldUseAutoSize: Boolean
+        get() = getPref(default = true) { it?.shouldSizeFontAutomatically }
+        set(value) {
+            setPref { it.setShouldSizeFontAutomatically(value) }
+        }
+    var fontSizeFactor: Float
+        get() = getPref(default = 1f) { it?.fontSizeFactor }
+        set(value) {
+            setPref { it.setFontSizeFactor(value) }
+        }
+    var forceEnableZoom: Boolean
+        get() = getPref(default = false) { it?.shouldForceEnableZoomInWebsites }
+        set(value) {
+            setPref { it.setShouldForceEnableZoomInWebsites(value) }
+        }
+    var alwaysRequestDesktopSite: Boolean
+        get() = getPref(default = false) { it?.alwaysRequestDesktopSite }
+        set(value) {
+            setPref { it.setAlwaysRequestDesktopSite(value) }
+        }
+
+
+    /*** locale/language is set through Storage with LocaleManager ***/
+
+
+    /*** translation is managed through browserStore with TranslationsAction ***/
+
+
+    /*** private mode settings ***/
+
+
+    var openLinksInAPrivateTab: Boolean
+        get() = getPref(default = false) { it?.openLinksInPrivateTab }
+        set(value) {
+            setPref { it.setOpenLinksInPrivateTab(value) }
+        }
+    var allowScreenshotsInPrivateMode: Boolean
+        get() = getPref(default = false) { it?.allowScreenshotsInPrivateMode }
+        set(value) {
+            setPref { it.setAllowScreenshotsInPrivateMode(value) }
+        }
+
+
+    /*** enhanced tracking protection settings ***/
+
+
+    var shouldUseTrackingProtection: Boolean
+        get() = getPref(default = true) { it?.isEnhancedTrackingProtectionEnabled }
+        set(value) {
+            setPref { it.setIsEnhancedTrackingProtectionEnabled(value) }
+        }
+    var shouldEnableGlobalPrivacyControl: Boolean
+        get() = getPref(default = false) { it?.isGlobalPrivacyControlEnabled }
+        set(value) {
+            setPref { it.setIsGlobalPrivacyControlEnabled(value) }
+        }
+    var selectedTrackingProtection: InfernoSettings.TrackingProtectionDefault
+        get() = getPref(default = InfernoSettings.TrackingProtectionDefault.STANDARD) { it?.selectedTrackingProtection }
+        set(value) {
+            setPref {
+                it.setSelectedTrackingProtection(value)
+                appContext.components.let { components ->
+                    val policy =
+                        components.core.trackingProtectionPolicyFactory.createTrackingProtectionPolicy()
+                    components.useCases.settingsUseCases.updateTrackingProtection.invoke(policy)
+                    components.useCases.sessionUseCases.reload.invoke()
+                }
+            }
+        }
+
+    // todo: what is this & why not used, check moz search
+//    @VisibleForTesting(otherwise = PRIVATE)
+//    fun setStrictETP() {
+//        preferences.edit().putBoolean(
+//            appContext.getPreferenceKey(R.string.pref_key_tracking_protection_strict_default),
+//            true,
+//        ).apply()
+//        preferences.edit().putBoolean(
+//            appContext.getPreferenceKey(R.string.pref_key_tracking_protection_standard_option),
+//            false,
+//        ).apply()
+//        appContext.components.let {
+//            val policy = it.core.trackingProtectionPolicyFactory.createTrackingProtectionPolicy()
+//            it.useCases.settingsUseCases.updateTrackingProtection.invoke(policy)
+//            it.useCases.sessionUseCases.reload.invoke()
+//        }
+//    }
+    val enabledTotalCookieProtection: Boolean
+        get() = mr2022Sections[Mr2022Section.TCP_FEATURE] == true
+    var blockCookiesInCustomTrackingProtection: Boolean
+        get() = getPref(default = true) { it?.customTrackingProtection?.blockCustomCookies != InfernoSettings.CustomTrackingProtection.CookiePolicy.NONE }
+        set(value) {
+            // todo: does this work?
+            if (!value) setPref {
+                it.setCustomTrackingProtection(
+                    it.customTrackingProtection.toBuilder()
+                        .setBlockCustomCookies(InfernoSettings.CustomTrackingProtection.CookiePolicy.NONE)
+                        .build()
+                )
+            }
+        }
+    var blockCookiesSelectionInCustomTrackingProtection: InfernoSettings.CustomTrackingProtection.CookiePolicy
+        get() = getPref(
+            default = when (enabledTotalCookieProtection) {
+                true -> InfernoSettings.CustomTrackingProtection.CookiePolicy.ALL_COOKIES
+                false -> InfernoSettings.CustomTrackingProtection.CookiePolicy.CROSS_SITE_AND_SOCIAL_MEDIA_TRACKERS
+            }
+        ) { it?.customTrackingProtection?.blockCustomCookies }
+        set(value) {
+            setPref {
+                it.setCustomTrackingProtection(
+                    it.customTrackingProtection.toBuilder().setBlockCustomCookies(value)
+                )
+            }
+        }
+    val blockTrackingContentInCustomTrackingProtection: Boolean
+        get() {
+            return blockTrackingContentInCustomTrackingProtectionInNormalTabs || blockTrackingContentInCustomTrackingProtectionInPrivateTabs
+        }
+    var blockTrackingContentInCustomTrackingProtectionInNormalTabs: Boolean
+        get() = getPref(default = true) { it?.customTrackingProtection?.trackingContentBlockedInNormalMode }
+        set(value) {
+            setPref {
+                it.setCustomTrackingProtection(
+                    it.customTrackingProtection.toBuilder()
+                        .setTrackingContentBlockedInNormalMode(value)
+                )
+            }
+        }
+    var blockTrackingContentInCustomTrackingProtectionInPrivateTabs: Boolean
+        get() = getPref(default = true) { it?.customTrackingProtection?.trackingContentBlockedInPrivateMode }
+        set(value) {
+            setPref {
+                it.setCustomTrackingProtection(
+                    it.customTrackingProtection.toBuilder()
+                        .setTrackingContentBlockedInPrivateMode(value)
+                )
+            }
+        }
+    var blockCryptominersInCustomTrackingProtection: Boolean
+        get() = getPref(default = true) { it?.customTrackingProtection?.blockCryptominers }
+        set(value) {
+            setPref {
+                it.setCustomTrackingProtection(
+                    it.customTrackingProtection.toBuilder().setBlockCryptominers(value)
+                )
+            }
+        }
+    var blockFingerprintersInCustomTrackingProtection: Boolean
+        get() = getPref(default = true) { it?.customTrackingProtection?.blockKnownFingerprinters }
+        set(value) {
+            setPref {
+                it.setCustomTrackingProtection(
+                    it.customTrackingProtection.toBuilder().setBlockKnownFingerprinters(value)
+                )
+            }
+        }
+    var blockRedirectTrackersInCustomTrackingProtection: Boolean
+        get() = getPref(default = true) { it?.customTrackingProtection?.blockRedirectTrackers }
+        set(value) {
+            setPref {
+                it.setCustomTrackingProtection(
+                    it.customTrackingProtection.toBuilder().setBlockRedirectTrackers(value)
+                )
+            }
+        }
+    val blockSuspectedFingerprinters: Boolean
+        get() {
+            return blockSuspectedFingerprintersInCustomTrackingProtectionInNormalTabs || blockSuspectedFingerprintersInCustomTrackingProtectionInPrivateTabs
+        }
+    var blockSuspectedFingerprintersInCustomTrackingProtectionInNormalTabs: Boolean
+        get() = getPref(default = true) { it?.customTrackingProtection?.blockSuspectedFingerPrintersInNormalMode }
+        set(value) {
+            setPref {
+                it.setCustomTrackingProtection(
+                    it.customTrackingProtection.toBuilder()
+                        .setBlockSuspectedFingerPrintersInNormalMode(value)
+                )
+            }
+        }
+    var blockSuspectedFingerprintersInCustomTrackingProtectionInPrivateTabs: Boolean
+        get() = getPref(default = true) { it?.customTrackingProtection?.blockSuspectedFingerPrintersInPrivateMode }
+        set(value) {
+            setPref {
+                it.setCustomTrackingProtection(
+                    it.customTrackingProtection.toBuilder()
+                        .setBlockSuspectedFingerPrintersInPrivateMode(value)
+                )
+            }
+        }
+
+
+    /*** https-only mode settings ***/
+
+
+    var httpsOnlyMode: InfernoSettings.HttpsOnlyMode
+        get() = getPref(default = InfernoSettings.HttpsOnlyMode.HTTPS_ONLY_DISABLED) { it?.httpsOnlyMode }
+        set(value) {
+            setPref { it.setHttpsOnlyMode(value) }
+        }
+
+
     // todo: left off here, reorganizing settings
 
     // not used
@@ -679,15 +1197,6 @@ class Settings(private val appContext: Context) : PreferencesHolder {
     val canShowCfr: Boolean
         get() = (System.currentTimeMillis() - lastCfrShownTimeInMillis) > THREE_DAYS_MS
 
-    var forceEnableZoom: Boolean
-        get() = getPref(default = false) { it?.shouldForceEnableZoomInWebsites }
-        set(value) {
-            setPref { it.setShouldForceEnableZoomInWebsites(value) }
-        }
-//    var forceEnableZoom by booleanPreference(
-//        appContext.getPreferenceKey(R.string.pref_key_accessibility_force_enable_zoom),
-//        default = false,
-//    )
 
     // todo: check usages to see if need to remove
     var adjustCampaignId by stringPreference(
@@ -825,26 +1334,6 @@ class Settings(private val appContext: Context) : PreferencesHolder {
         default = { mr2022Sections[Mr2022Section.WALLPAPERS_SELECTION_TOOL] == true },
     )
 
-    var openLinksInAPrivateTab: Boolean
-        get() = getPref(default = false) { it?.openLinksInPrivateTab }
-        set(value) {
-            setPref { it.setOpenLinksInPrivateTab(value) }
-        }
-//    var openLinksInAPrivateTab by booleanPreference(
-//        appContext.getPreferenceKey(R.string.pref_key_open_links_in_a_private_tab),
-//        default = false,
-//    )
-
-    var allowScreenshotsInPrivateMode: Boolean
-        get() = getPref(default = false) { it?.allowScreenshotsInPrivateMode }
-        set(value) {
-            setPref { it.setAllowScreenshotsInPrivateMode(value) }
-        }
-//    var allowScreenshotsInPrivateMode by booleanPreference(
-//        appContext.getPreferenceKey(R.string.pref_key_allow_screenshots_in_private_mode),
-//        default = false,
-//    )
-
     // todo: check usages to see if need to remove
     var shouldReturnToBrowser by booleanPreference(
         appContext.getString(R.string.pref_key_return_to_browser),
@@ -909,7 +1398,6 @@ class Settings(private val appContext: Context) : PreferencesHolder {
             appContext.getPreferenceKey(R.string.pref_key_persistent_debug_menu),
             false,
         )
-
     val shouldShowSecurityPinWarningSync: Boolean
         get() = loginsSecureWarningSyncCount.underMaxCount()
 
@@ -927,26 +1415,6 @@ class Settings(private val appContext: Context) : PreferencesHolder {
         appContext.getPreferenceKey(R.string.pref_key_light_theme),
         default = false,
     )
-
-    var shouldUseAutoSize: Boolean
-        get() = getPref(default = true) { it?.shouldSizeFontAutomatically }
-        set(value) {
-            setPref { it.setShouldSizeFontAutomatically(value) }
-        }
-//    var shouldUseAutoSize by booleanPreference(
-//        appContext.getPreferenceKey(R.string.pref_key_accessibility_auto_size),
-//        default = true,
-//    )
-
-    var fontSizeFactor: Float
-        get() = getPref(default = 1f) { it?.fontSizeFactor }
-        set(value) {
-            setPref { it.setFontSizeFactor(value) }
-        }
-//    var fontSizeFactor by floatPreference(
-//        appContext.getPreferenceKey(R.string.pref_key_accessibility_font_scale),
-//        default = 1f,
-//    )
 
     // todo: check usages to see if need to remove
     var allowThirdPartyRootCerts by booleanPreference(
@@ -1087,66 +1555,6 @@ class Settings(private val appContext: Context) : PreferencesHolder {
         default = false,
     )
 
-    var httpsOnlyMode: InfernoSettings.HttpsOnlyMode
-        get() = getPref(default = InfernoSettings.HttpsOnlyMode.HTTPS_ONLY_DISABLED) { it?.httpsOnlyMode }
-        set(value) {
-            setPref { it.setHttpsOnlyMode(value) }
-        }
-
-    var shouldUseHttpsOnly: Boolean
-        get() = getPref(default = true) { it?.httpsOnlyMode == InfernoSettings.HttpsOnlyMode.HTTPS_ONLY_ENABLED }
-        set(value) {
-            if (value) setPref { it.setHttpsOnlyMode(InfernoSettings.HttpsOnlyMode.HTTPS_ONLY_ENABLED) }
-        }
-//    var shouldUseHttpsOnly by booleanPreference(
-//        appContext.getPreferenceKey(R.string.pref_key_https_only),
-//        default = false,
-//    )
-
-    var shouldUseHttpsOnlyInAllTabs: Boolean
-        get() = getPref(default = true) { it?.httpsOnlyMode == InfernoSettings.HttpsOnlyMode.HTTPS_ONLY_ENABLED }
-        set(value) {
-            if (value) setPref { it.setHttpsOnlyMode(InfernoSettings.HttpsOnlyMode.HTTPS_ONLY_ENABLED) }
-        }
-//    var shouldUseHttpsOnlyInAllTabs by booleanPreference(
-//        appContext.getPreferenceKey(R.string.pref_key_https_only_in_all_tabs),
-//        default = true,
-//    )
-
-    var shouldUseHttpsOnlyInPrivateTabsOnly: Boolean
-        get() = getPref(default = true) { it?.httpsOnlyMode == InfernoSettings.HttpsOnlyMode.HTTPS_ONLY_ENABLED_PRIVATE_ONLY }
-        set(value) {
-            if (value) setPref { it.setHttpsOnlyMode(InfernoSettings.HttpsOnlyMode.HTTPS_ONLY_ENABLED_PRIVATE_ONLY) }
-        }
-//    var shouldUseHttpsOnlyInPrivateTabsOnly by booleanPreference(
-//        appContext.getPreferenceKey(R.string.pref_key_https_only_in_private_tabs),
-//        default = false,
-//    )
-
-    var shouldUseTrackingProtection: Boolean
-        get() = getPref(default = true) { it?.selectedTrackingProtection != InfernoSettings.TrackingProtectionDefault.NONE }
-        set(value) {
-            if (value) {
-                setPref { it.setSelectedTrackingProtection(InfernoSettings.TrackingProtectionDefault.STANDARD) }
-            } else {
-                setPref { it.setSelectedTrackingProtection(InfernoSettings.TrackingProtectionDefault.NONE) }
-            }
-        }
-//    var shouldUseTrackingProtection by booleanPreference(
-//        appContext.getPreferenceKey(R.string.pref_key_tracking_protection),
-//        default = true,
-//    )
-
-    var shouldEnableGlobalPrivacyControl: Boolean
-        get() = getPref(default = true) { it?.isGlobalPrivacyControlEnabled }
-        set(value) {
-            setPref { it.setIsGlobalPrivacyControlEnabled(value) }
-        }
-//    var shouldEnableGlobalPrivacyControl by booleanPreference(
-//        appContext.getPreferenceKey(R.string.pref_key_privacy_enable_global_privacy_control),
-//        false,
-//    )
-
     // todo: check usages to see if need to remove
     var shouldUseCookieBannerPrivateMode by lazyFeatureFlagPreference(
         appContext.getPreferenceKey(R.string.pref_key_cookie_banner_private_mode),
@@ -1264,81 +1672,12 @@ class Settings(private val appContext: Context) : PreferencesHolder {
         default = false,
     )
 
-    var useStandardTrackingProtection: Boolean
-        get() = getPref(default = true) { it?.selectedTrackingProtection == InfernoSettings.TrackingProtectionDefault.STANDARD }
-        set(value) {
-            if (value) setPref { it.setSelectedTrackingProtection(InfernoSettings.TrackingProtectionDefault.STANDARD) }
-        }
-//    val useStandardTrackingProtection by booleanPreference(
-//        appContext.getPreferenceKey(R.string.pref_key_tracking_protection_standard_option),
-//        true,
-//    )
-
-    var useStrictTrackingProtection: Boolean
-        get() = getPref(default = false) { it?.selectedTrackingProtection == InfernoSettings.TrackingProtectionDefault.STRICT }
-        set(value) {
-            if (value) setPref { it.setSelectedTrackingProtection(InfernoSettings.TrackingProtectionDefault.STRICT) }
-        }
-//    val useStrictTrackingProtection by booleanPreference(
-//        appContext.getPreferenceKey(R.string.pref_key_tracking_protection_strict_default),
-//        false,
-//    )
-
-    var useCustomTrackingProtection: Boolean
-        get() = getPref(default = false) { it?.selectedTrackingProtection == InfernoSettings.TrackingProtectionDefault.CUSTOM }
-        set(value) {
-            if (value) setPref { it.setSelectedTrackingProtection(InfernoSettings.TrackingProtectionDefault.CUSTOM) }
-        }
-//    val useCustomTrackingProtection by booleanPreference(
-//        appContext.getPreferenceKey(R.string.pref_key_tracking_protection_custom_option),
-//        false,
-//    )
-
-    // todo: what is this & why not used
-//    @VisibleForTesting(otherwise = PRIVATE)
-//    fun setStrictETP() {
-//        preferences.edit().putBoolean(
-//            appContext.getPreferenceKey(R.string.pref_key_tracking_protection_strict_default),
-//            true,
-//        ).apply()
-//        preferences.edit().putBoolean(
-//            appContext.getPreferenceKey(R.string.pref_key_tracking_protection_standard_option),
-//            false,
-//        ).apply()
-//        appContext.components.let {
-//            val policy = it.core.trackingProtectionPolicyFactory.createTrackingProtectionPolicy()
-//            it.useCases.settingsUseCases.updateTrackingProtection.invoke(policy)
-//            it.useCases.sessionUseCases.reload.invoke()
-//        }
-//    }
-
-    // todo: boolean or cookie type? check usages or if another pref for cookie type to block
-    var blockCookiesInCustomTrackingProtection: Boolean
-        get() = getPref(default = true) { it?.customTrackingProtection?.blockCustomCookies != InfernoSettings.CustomTrackingProtection.CookiePolicy.NONE }
-        set(value) {
-            // todo: does this work?
-            if (!value) setPref {
-                it.setCustomTrackingProtection(
-                    it.customTrackingProtection.toBuilder()
-                        .setBlockCustomCookies(InfernoSettings.CustomTrackingProtection.CookiePolicy.NONE)
-                        .build()
-                )
-            }
-        }
-//    val blockCookiesInCustomTrackingProtection by booleanPreference(
-//        appContext.getPreferenceKey(R.string.pref_key_tracking_protection_custom_cookies),
-//        true,
-//    )
 
     // todo: check usages to see if need to remove
     val useProductionRemoteSettingsServer by booleanPreference(
         key = appContext.getPreferenceKey(R.string.pref_key_remote_server_prod),
         default = true,
     )
-
-    // todo: check usages to see if need to remove
-    val enabledTotalCookieProtection: Boolean
-        get() = mr2022Sections[Mr2022Section.TCP_FEATURE] == true
 
     /**
      * Indicates if the total cookie protection CRF should be shown.
@@ -1371,143 +1710,6 @@ class Settings(private val appContext: Context) : PreferencesHolder {
         appContext.getPreferenceKey(R.string.pref_key_toolbar_has_shown_tab_swipe_cfr),
         default = false,
     )
-
-    var blockCookiesSelectionInCustomTrackingProtection: InfernoSettings.CustomTrackingProtection.CookiePolicy
-        get() = getPref(default = InfernoSettings.CustomTrackingProtection.CookiePolicy.ALL_COOKIES) { it?.customTrackingProtection?.blockCustomCookies }
-        set(value) {
-            setPref {
-                it.setCustomTrackingProtection(
-                    it.customTrackingProtection.toBuilder().setBlockCustomCookies(value)
-                )
-            }
-        }
-//    val blockCookiesSelectionInCustomTrackingProtection by stringPreference(
-//        key = appContext.getPreferenceKey(R.string.pref_key_tracking_protection_custom_cookies_select),
-//        default = if (enabledTotalCookieProtection) {
-//            appContext.getString(R.string.total_protection)
-//        } else {
-//            appContext.getString(R.string.social)
-//        },
-//    )
-
-    var blockTrackingContentInCustomTrackingProtection: Boolean
-        get() = getPref(default = true) { it?.customTrackingProtection?.trackingContentBlockedInNormalMode }
-        set(value) {
-            setPref {
-                it.setCustomTrackingProtection(
-                    it.customTrackingProtection.toBuilder()
-                        .setTrackingContentBlockedInNormalMode(value)
-                )
-            }
-        }
-//    val blockTrackingContentInCustomTrackingProtection by booleanPreference(
-//        appContext.getPreferenceKey(R.string.pref_key_tracking_protection_custom_tracking_content),
-//        true,
-//    )
-
-    var blockTrackingContentSelectionInCustomTrackingProtectionInPrivateTabs: Boolean
-        get() = getPref(default = true) { it?.customTrackingProtection?.trackingContentBlockedInPrivateMode }
-        set(value) {
-            setPref {
-                it.setCustomTrackingProtection(
-                    it.customTrackingProtection.toBuilder()
-                        .setTrackingContentBlockedInPrivateMode(value)
-                )
-            }
-        }
-    var blockTrackingContentSelectionInCustomTrackingProtectionInNormalTabs: Boolean
-        get() = getPref(default = true) { it?.customTrackingProtection?.trackingContentBlockedInNormalMode }
-        set(value) {
-            setPref {
-                it.setCustomTrackingProtection(
-                    it.customTrackingProtection.toBuilder()
-                        .setTrackingContentBlockedInNormalMode(value)
-                )
-            }
-        }
-//    val blockTrackingContentSelectionInCustomTrackingProtection by stringPreference(
-//        appContext.getPreferenceKey(R.string.pref_key_tracking_protection_custom_tracking_content_select),
-//        appContext.getString(R.string.all),
-//    )
-
-    var blockCryptominersInCustomTrackingProtection: Boolean
-        get() = getPref(default = true) { it?.customTrackingProtection?.blockCryptominers }
-        set(value) {
-            setPref {
-                it.setCustomTrackingProtection(
-                    it.customTrackingProtection.toBuilder().setBlockCryptominers(value)
-                )
-            }
-        }
-//    val blockCryptominersInCustomTrackingProtection by booleanPreference(
-//        appContext.getPreferenceKey(R.string.pref_key_tracking_protection_custom_cryptominers),
-//        true,
-//    )
-
-    var blockFingerprintersInCustomTrackingProtection: Boolean
-        get() = getPref(default = true) { it?.customTrackingProtection?.blockKnownFingerprinters }
-        set(value) {
-            setPref {
-                it.setCustomTrackingProtection(
-                    it.customTrackingProtection.toBuilder().setBlockKnownFingerprinters(value)
-                )
-            }
-        }
-//    val blockFingerprintersInCustomTrackingProtection by booleanPreference(
-//        appContext.getPreferenceKey(R.string.pref_key_tracking_protection_custom_fingerprinters),
-//        true,
-//    )
-
-    var blockRedirectTrackersInCustomTrackingProtection: Boolean
-        get() = getPref(default = true) { it?.customTrackingProtection?.blockRedirectTrackers }
-        set(value) {
-            setPref {
-                it.setCustomTrackingProtection(
-                    it.customTrackingProtection.toBuilder().setBlockRedirectTrackers(value)
-                )
-            }
-        }
-//    val blockRedirectTrackersInCustomTrackingProtection by booleanPreference(
-//        appContext.getPreferenceKey(R.string.pref_key_tracking_protection_redirect_trackers),
-//        true,
-//    )
-
-    var blockSuspectedFingerprintersInCustomTrackingProtectionInNormalTabs: Boolean
-        get() = getPref(default = true) { it?.customTrackingProtection?.blockSuspectedFingerPrintersInNormalMode }
-        set(value) {
-            setPref {
-                it.setCustomTrackingProtection(
-                    it.customTrackingProtection.toBuilder()
-                        .setBlockSuspectedFingerPrintersInNormalMode(value)
-                )
-            }
-        }
-//    val blockSuspectedFingerprintersInCustomTrackingProtection by booleanPreference(
-//        appContext.getPreferenceKey(R.string.pref_key_tracking_protection_suspected_fingerprinters),
-//        true,
-//    )
-
-    var blockSuspectedFingerprintersInCustomTrackingProtectionInPrivateTabs: Boolean
-        get() = getPref(default = true) { it?.customTrackingProtection?.blockSuspectedFingerPrintersInPrivateMode }
-        set(value) {
-            setPref {
-                it.setCustomTrackingProtection(
-                    it.customTrackingProtection.toBuilder()
-                        .setBlockSuspectedFingerPrintersInPrivateMode(value)
-                )
-            }
-        }
-    //    val blockSuspectedFingerprintersPrivateBrowsing: Boolean
-//        get() {
-//            return blockSuspectedFingerprintersInCustomTrackingProtection && blockSuspectedFingerprintersSelectionInCustomTrackingProtection == appContext.getString(
-//                R.string.private_string,
-//            )
-//        }
-
-    val blockSuspectedFingerprinters: Boolean
-        get() {
-            return blockSuspectedFingerprintersInCustomTrackingProtectionInNormalTabs && blockSuspectedFingerprintersInCustomTrackingProtectionInPrivateTabs
-        }
 
 
     /**
@@ -1727,253 +1929,6 @@ class Settings(private val appContext: Context) : PreferencesHolder {
         return !hasInactiveTabsAutoCloseDialogBeenDismissed && numbersOfTabs >= INACTIVE_TAB_MINIMUM_TO_SHOW_AUTO_CLOSE_DIALOG && !closeTabsAfterOneMonth
     }
 
-    /**
-     *  Returns a sitePermissions action for the provided [feature].
-     */
-    fun getSitePermissionsPhoneFeatureAction(
-        feature: PhoneFeature,
-        default: Action = Action.ASK_TO_ALLOW,
-    ) = preferences.getInt(feature.getPreferenceKey(appContext), default.toInt()).toAction()
-
-    /**
-     * Saves the user selected autoplay setting.
-     *
-     * Under the hood, autoplay is represented by two settings, [AUTOPLAY_AUDIBLE] and
-     * [AUTOPLAY_INAUDIBLE]. The user selection cannot be inferred from the combination of these
-     * settings because, while on [AUTOPLAY_ALLOW_ON_WIFI], they will be indistinguishable from
-     * either [AUTOPLAY_ALLOW_ALL] or [AUTOPLAY_BLOCK_ALL]. Because of this, we are forced to save
-     * the user selected setting as well.
-     */
-    fun setAutoplayUserSetting(
-        autoplaySetting: Int,
-    ) {
-        this.autoPlaySetting = when (autoplaySetting.toInt()) {
-            AUTOPLAY_ALLOW_ALL -> InfernoSettings.AutoPlay.ALLOW_AUDIO_AND_VIDEO
-            AUTOPLAY_ALLOW_ON_WIFI -> InfernoSettings.AutoPlay.BLOCK_AUDIO_AND_VIDEO_ON_CELLULAR_DATA_ONLY
-            AUTOPLAY_BLOCK_AUDIBLE -> InfernoSettings.AutoPlay.BLOCK_AUDIO_ONLY
-            AUTOPLAY_BLOCK_ALL -> InfernoSettings.AutoPlay.BLOCK_AUDIO_AND_VIDEO
-            else -> InfernoSettings.AutoPlay.BLOCK_AUDIO_AND_VIDEO
-        }
-//        preferences.edit().putInt(AUTOPLAY_USER_SETTING, autoplaySetting).apply()
-    }
-
-    /**
-     * Gets the user selected autoplay setting.
-     *
-     * Under the hood, autoplay is represented by two settings, [AUTOPLAY_AUDIBLE] and
-     * [AUTOPLAY_INAUDIBLE]. The user selection cannot be inferred from the combination of these
-     * settings because, while on [AUTOPLAY_ALLOW_ON_WIFI], they will be indistinguishable from
-     * either [AUTOPLAY_ALLOW_ALL] or [AUTOPLAY_BLOCK_ALL]. Because of this, we are forced to save
-     * the user selected setting as well.
-     */
-    fun getAutoplayUserSetting() = when (autoPlaySetting) {
-        InfernoSettings.AutoPlay.BLOCK_AUDIO_ONLY -> AUTOPLAY_BLOCK_AUDIBLE
-        InfernoSettings.AutoPlay.BLOCK_AUDIO_AND_VIDEO -> AUTOPLAY_BLOCK_ALL
-        InfernoSettings.AutoPlay.ALLOW_AUDIO_AND_VIDEO -> AUTOPLAY_ALLOW_ALL
-        InfernoSettings.AutoPlay.BLOCK_AUDIO_AND_VIDEO_ON_CELLULAR_DATA_ONLY -> AUTOPLAY_ALLOW_ON_WIFI
-        InfernoSettings.AutoPlay.UNRECOGNIZED -> AUTOPLAY_BLOCK_AUDIBLE
-    }
-//    fun getAutoplayUserSetting() = preferences.getInt(AUTOPLAY_USER_SETTING, AUTOPLAY_BLOCK_AUDIBLE)
-
-    private fun getSitePermissionsPhoneFeatureAutoplayAction(
-        feature: PhoneFeature,
-        default: AutoplayAction = AutoplayAction.BLOCKED,
-    ) = when (autoPlaySetting) {
-        InfernoSettings.AutoPlay.ALLOW_AUDIO_AND_VIDEO -> AutoplayAction.ALLOWED
-        InfernoSettings.AutoPlay.BLOCK_AUDIO_AND_VIDEO -> AutoplayAction.BLOCKED
-        else -> default
-    }
-//    private fun getSitePermissionsPhoneFeatureAutoplayAction(
-//        feature: PhoneFeature,
-//        default: AutoplayAction = AutoplayAction.BLOCKED,
-//    ) = preferences.getInt(feature.getPreferenceKey(appContext), default.toInt()).toAutoplayAction()
-
-    private var appLinksSetting: InfernoSettings.AppLinks
-        get() = getPref(default = InfernoSettings.AppLinks.APP_LINKS_ASK_TO_OPEN) { it?.appLinksSetting }
-        set(value) {
-            setPref { it.setAppLinksSetting(value) }
-        }
-    private var autoPlaySetting: InfernoSettings.AutoPlay
-        get() = getPref(default = InfernoSettings.AutoPlay.BLOCK_AUDIO_ONLY) { it?.autoplaySetting }
-        set(value) {
-            setPref { it.setAutoplaySetting(value) }
-        }
-    private var cameraSetting: InfernoSettings.Camera
-        get() = getPref(default = InfernoSettings.Camera.CAMERA_ASK_TO_ALLOW) { it?.cameraSetting }
-        set(value) {
-            setPref { it.setCameraSetting(value) }
-        }
-    private var locationSetting: InfernoSettings.Location
-        get() = getPref(default = InfernoSettings.Location.LOCATION_ASK_TO_ALLOW) { it?.locationSetting }
-        set(value) {
-            setPref { it.setLocationSetting(value) }
-        }
-    private var microphoneSetting: InfernoSettings.Microphone
-        get() = getPref(default = InfernoSettings.Microphone.MICROPHONE_ASK_TO_ALLOW) { it?.microphoneSetting }
-        set(value) {
-            setPref { it.setMicrophoneSetting(value) }
-        }
-    private var notificationsSetting: InfernoSettings.Notifications
-        get() = getPref(default = InfernoSettings.Notifications.NOTIFICATIONS_ASK_TO_ALLOW) { it?.notificationsSetting }
-        set(value) {
-            setPref { it.setNotificationsSetting(value) }
-        }
-    private var persistentStorageSetting: InfernoSettings.PersistentStorage
-        get() = getPref(default = InfernoSettings.PersistentStorage.PERSISTENT_STORAGE_ASK_TO_ALLOW) { it?.persistentStorageSetting }
-        set(value) {
-            setPref { it.setPersistentStorageSetting(value) }
-        }
-    private var crossSiteCookiesSetting: InfernoSettings.CrossSiteCookies
-        get() = getPref(default = InfernoSettings.CrossSiteCookies.CROSS_SITE_COOKIES_ASK_TO_ALLOW) { it?.crossSiteCookiesSetting }
-        set(value) {
-            setPref { it.setCrossSiteCookiesSetting(value) }
-        }
-    private var drmControlledContentSetting: InfernoSettings.DrmControlledContent
-        get() = getPref(default = InfernoSettings.DrmControlledContent.DRM_CONTROLLED_CONTENT_ASK_TO_ALLOW) { it?.drmControlledContentSetting }
-        set(value) {
-            setPref { it.setDrmControlledContentSetting(value) }
-        }
-
-    /**
-     *  Sets a sitePermissions action for the provided [feature].
-     */
-    fun setSitePermissionsPhoneFeatureAction(
-        feature: PhoneFeature,
-        value: Action,
-    ) {
-        when (feature) {
-            PhoneFeature.CAMERA -> {
-                cameraSetting = when (value) {
-                    Action.ALLOWED -> InfernoSettings.Camera.CAMERA_ALLOWED
-                    Action.BLOCKED -> InfernoSettings.Camera.CAMERA_BLOCKED
-                    Action.ASK_TO_ALLOW -> InfernoSettings.Camera.CAMERA_ASK_TO_ALLOW
-                }
-            }
-
-            PhoneFeature.LOCATION -> {
-                locationSetting = when (value) {
-                    Action.ALLOWED -> InfernoSettings.Location.LOCATION_ALLOWED
-                    Action.BLOCKED -> InfernoSettings.Location.LOCATION_BLOCKED
-                    Action.ASK_TO_ALLOW -> InfernoSettings.Location.LOCATION_ASK_TO_ALLOW
-                }
-            }
-
-            PhoneFeature.MICROPHONE -> {
-                microphoneSetting = when (value) {
-                    Action.ALLOWED -> InfernoSettings.Microphone.MICROPHONE_ALLOWED
-                    Action.BLOCKED -> InfernoSettings.Microphone.MICROPHONE_BLOCKED
-                    Action.ASK_TO_ALLOW -> InfernoSettings.Microphone.MICROPHONE_ASK_TO_ALLOW
-                }
-            }
-
-            PhoneFeature.NOTIFICATION -> {
-                notificationsSetting = when (value) {
-                    Action.ALLOWED -> InfernoSettings.Notifications.NOTIFICATIONS_ALLOWED
-                    Action.BLOCKED -> InfernoSettings.Notifications.NOTIFICATIONS_BLOCKED
-                    Action.ASK_TO_ALLOW -> InfernoSettings.Notifications.NOTIFICATIONS_ASK_TO_ALLOW
-                }
-            }
-
-            PhoneFeature.AUTOPLAY -> {
-                autoPlaySetting = when (value) {
-                    Action.ALLOWED -> InfernoSettings.AutoPlay.ALLOW_AUDIO_AND_VIDEO
-                    Action.BLOCKED -> InfernoSettings.AutoPlay.BLOCK_AUDIO_AND_VIDEO
-                    Action.ASK_TO_ALLOW -> InfernoSettings.AutoPlay.BLOCK_AUDIO_ONLY
-                }
-            }
-
-            PhoneFeature.AUTOPLAY_AUDIBLE -> {
-                autoPlaySetting = when (value.toInt()) {
-                    AUTOPLAY_ALLOW_ALL -> InfernoSettings.AutoPlay.ALLOW_AUDIO_AND_VIDEO
-                    AUTOPLAY_ALLOW_ON_WIFI -> InfernoSettings.AutoPlay.BLOCK_AUDIO_AND_VIDEO_ON_CELLULAR_DATA_ONLY
-                    AUTOPLAY_BLOCK_AUDIBLE -> InfernoSettings.AutoPlay.BLOCK_AUDIO_ONLY
-                    AUTOPLAY_BLOCK_ALL -> InfernoSettings.AutoPlay.BLOCK_AUDIO_AND_VIDEO
-                    else -> InfernoSettings.AutoPlay.BLOCK_AUDIO_AND_VIDEO
-                }
-            }
-
-            PhoneFeature.AUTOPLAY_INAUDIBLE -> {
-                autoPlaySetting = when (value) {
-                    Action.ALLOWED -> InfernoSettings.AutoPlay.ALLOW_AUDIO_AND_VIDEO
-                    Action.BLOCKED -> InfernoSettings.AutoPlay.BLOCK_AUDIO_AND_VIDEO
-                    Action.ASK_TO_ALLOW -> InfernoSettings.AutoPlay.BLOCK_AUDIO_ONLY
-                }
-            }
-
-            PhoneFeature.PERSISTENT_STORAGE -> {
-                persistentStorageSetting = when (value) {
-                    Action.ALLOWED -> InfernoSettings.PersistentStorage.PERSISTENT_STORAGE_ALLOWED
-                    Action.BLOCKED -> InfernoSettings.PersistentStorage.PERSISTENT_STORAGE_BLOCKED
-                    Action.ASK_TO_ALLOW -> InfernoSettings.PersistentStorage.PERSISTENT_STORAGE_ASK_TO_ALLOW
-                }
-            }
-
-            PhoneFeature.MEDIA_KEY_SYSTEM_ACCESS -> {
-                drmControlledContentSetting = when (value) {
-                    Action.ALLOWED -> InfernoSettings.DrmControlledContent.DRM_CONTROLLED_CONTENT_ALLOWED
-                    Action.BLOCKED -> InfernoSettings.DrmControlledContent.DRM_CONTROLLED_CONTENT_BLOCKED
-                    Action.ASK_TO_ALLOW -> InfernoSettings.DrmControlledContent.DRM_CONTROLLED_CONTENT_ASK_TO_ALLOW
-                }
-            }
-
-            PhoneFeature.CROSS_ORIGIN_STORAGE_ACCESS -> {
-                crossSiteCookiesSetting = when (value) {
-                    Action.ALLOWED -> InfernoSettings.CrossSiteCookies.CROSS_SITE_COOKIES_ALLOWED
-                    Action.BLOCKED -> InfernoSettings.CrossSiteCookies.CROSS_SITE_COOKIES_BLOCKED
-                    Action.ASK_TO_ALLOW -> InfernoSettings.CrossSiteCookies.CROSS_SITE_COOKIES_ASK_TO_ALLOW
-                }
-            }
-        }
-//        preferences.edit().putInt(feature.getPreferenceKey(appContext), value.toInt()).apply()
-    }
-
-    fun getSitePermissionsCustomSettingsRules(): SitePermissionsRules {
-        return SitePermissionsRules(
-            notification = getSitePermissionsPhoneFeatureAction(PhoneFeature.NOTIFICATION),
-            microphone = getSitePermissionsPhoneFeatureAction(PhoneFeature.MICROPHONE),
-            location = getSitePermissionsPhoneFeatureAction(PhoneFeature.LOCATION),
-            camera = getSitePermissionsPhoneFeatureAction(PhoneFeature.CAMERA),
-            autoplayAudible = getSitePermissionsPhoneFeatureAutoplayAction(
-                feature = PhoneFeature.AUTOPLAY_AUDIBLE,
-                default = AutoplayAction.BLOCKED,
-            ),
-            autoplayInaudible = getSitePermissionsPhoneFeatureAutoplayAction(
-                feature = PhoneFeature.AUTOPLAY_INAUDIBLE,
-                default = AutoplayAction.ALLOWED,
-            ),
-            persistentStorage = getSitePermissionsPhoneFeatureAction(PhoneFeature.PERSISTENT_STORAGE),
-            crossOriginStorageAccess = getSitePermissionsPhoneFeatureAction(PhoneFeature.CROSS_ORIGIN_STORAGE_ACCESS),
-            mediaKeySystemAccess = getSitePermissionsPhoneFeatureAction(PhoneFeature.MEDIA_KEY_SYSTEM_ACCESS),
-        )
-    }
-
-    fun setSitePermissionSettingListener(lifecycleOwner: LifecycleOwner, listener: () -> Unit) {
-        // todo: check if works
-        MainScope().launch {
-            appContext.infernoSettingsDataStore.data.distinctUntilChanged(areEquivalent = { old, new ->
-                old.appLinksSetting == new.appLinksSetting && old.autoplaySetting == new.autoplaySetting && old.cameraSetting == new.cameraSetting && old.locationSetting == new.locationSetting && old.microphoneSetting == new.microphoneSetting && old.notificationsSetting == new.notificationsSetting && old.persistentStorageSetting == new.persistentStorageSetting && old.crossSiteCookiesSetting == new.crossSiteCookiesSetting && old.drmControlledContentSetting == new.drmControlledContentSetting
-            }).collect {
-                listener.invoke()
-            }
-        }
-
-//        val sitePermissionKeys = listOf(
-//            PhoneFeature.NOTIFICATION,
-//            PhoneFeature.MICROPHONE,
-//            PhoneFeature.LOCATION,
-//            PhoneFeature.CAMERA,
-//            PhoneFeature.AUTOPLAY_AUDIBLE,
-//            PhoneFeature.AUTOPLAY_INAUDIBLE,
-//            PhoneFeature.PERSISTENT_STORAGE,
-//            PhoneFeature.CROSS_ORIGIN_STORAGE_ACCESS,
-//            PhoneFeature.MEDIA_KEY_SYSTEM_ACCESS,
-//        ).map { it.getPreferenceKey(appContext) }
-//
-//        preferences.registerOnSharedPreferenceChangeListener(lifecycleOwner) { _, key ->
-//            if (key in sitePermissionKeys) listener.invoke()
-//        }
-    }
-
 
     /**
      * Used in [SearchDialogFragment.kt], [SearchFragment.kt] (deprecated), and [PairFragment.kt]
@@ -1994,29 +1949,6 @@ class Settings(private val appContext: Context) : PreferencesHolder {
         appContext.getPreferenceKey(R.string.pref_key_camera_permissions_needed),
         default = true,
     )
-
-    var shouldPromptToSaveLogins: Boolean
-        get() = getPref(default = true) { it?.saveLoginsSettings == InfernoSettings.LoginsStorage.ASK_TO_SAVE }
-        set(value) {
-            when (value) {
-                true -> setPref { it.setSaveLoginsSettings(InfernoSettings.LoginsStorage.ASK_TO_SAVE) }
-                false -> setPref { it.setSaveLoginsSettings(InfernoSettings.LoginsStorage.DONT_SAVE) }
-            }
-        }
-//    var shouldPromptToSaveLogins by booleanPreference(
-//        appContext.getPreferenceKey(R.string.pref_key_save_logins),
-//        default = true,
-//    )
-
-    var shouldAutofillLogins: Boolean
-        get() = getPref(default = true) { it?.shouldAutofillLogins }
-        set(value) {
-            setPref { it.setShouldAutofillLogins(value) }
-        }
-//    var shouldAutofillLogins by booleanPreference(
-//        appContext.getPreferenceKey(R.string.pref_key_autofill_logins),
-//        default = true,
-//    )
 
     /**
      * Used in [SearchWidgetProvider] to update when the search widget
@@ -2293,37 +2225,6 @@ class Settings(private val appContext: Context) : PreferencesHolder {
         default = false,
     )
 
-    /**
-     * Storing the user choice from the "Payment methods" settings for whether save and autofill cards
-     * should be enabled or not.
-     * If set to `true` when the user focuses on credit card fields in the webpage an Android prompt letting her
-     * select the card details to be automatically filled will appear.
-     */
-    var shouldAutofillCreditCardDetails: Boolean
-        get() = getPref(default = true) { it?.isCardSaveAndAutofillEnabled }
-        set(value) {
-            setPref { it.setIsCardSaveAndAutofillEnabled(value) }
-        }
-//    var shouldAutofillCreditCardDetails by booleanPreference(
-//        appContext.getPreferenceKey(R.string.pref_key_credit_cards_save_and_autofill_cards),
-//        default = true,
-//    )
-
-    /**
-     * Stores the user choice from the "Autofill Addresses" settings for whether
-     * save and autofill addresses should be enabled or not.
-     * If set to `true` when the user focuses on address fields in a webpage an Android prompt is shown,
-     * allowing the selection of an address details to be automatically filled in the webpage fields.
-     */
-    var shouldAutofillAddressDetails: Boolean
-        get() = getPref(default = true) { it?.isAddressSaveAndAutofillEnabled }
-        set(value) {
-            setPref { it.setIsAddressSaveAndAutofillEnabled(value) }
-        }
-//    var shouldAutofillAddressDetails by booleanPreference(
-//        appContext.getPreferenceKey(R.string.pref_key_addresses_save_and_autofill_addresses),
-//        default = true,
-//    )
 
     /**
      * Indicates if the Pocket recommended stories homescreen section should be shown.
@@ -2496,9 +2397,9 @@ class Settings(private val appContext: Context) : PreferencesHolder {
      * Get the current mode for how https-only is enabled.
      */
     fun getHttpsOnlyMode(): HttpsOnlyMode {
-        return if (!shouldUseHttpsOnly) {
+        return if (httpsOnlyMode == InfernoSettings.HttpsOnlyMode.HTTPS_ONLY_DISABLED) {
             HttpsOnlyMode.DISABLED
-        } else if (shouldUseHttpsOnlyInPrivateTabsOnly) {
+        } else if (httpsOnlyMode == InfernoSettings.HttpsOnlyMode.HTTPS_ONLY_ENABLED_PRIVATE_ONLY) {
             HttpsOnlyMode.ENABLED_PRIVATE_ONLY
         } else {
             HttpsOnlyMode.ENABLED

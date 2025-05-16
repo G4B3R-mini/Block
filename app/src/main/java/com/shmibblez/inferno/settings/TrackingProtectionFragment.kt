@@ -20,6 +20,7 @@ import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.nav
 import com.shmibblez.inferno.ext.settings
 import com.shmibblez.inferno.ext.showToolbar
+import com.shmibblez.inferno.proto.InfernoSettings
 import com.shmibblez.inferno.trackingprotection.TrackingProtectionMode
 import com.shmibblez.inferno.utils.view.addToRadioGroup
 
@@ -266,7 +267,7 @@ class TrackingProtectionFragment : PreferenceFragmentCompat() {
     }
 
     private fun updateCustomOptionsVisibility() {
-        val isCustomSelected = requireContext().settings().useCustomTrackingProtection
+        val isCustomSelected = requireContext().settings().selectedTrackingProtection  == InfernoSettings.TrackingProtectionDefault.CUSTOM
         customCookies.isVisible = isCustomSelected
         customCookiesSelect.isVisible = isCustomSelected && customCookies.isChecked
         customTracking.isVisible = isCustomSelected
@@ -279,9 +280,9 @@ class TrackingProtectionFragment : PreferenceFragmentCompat() {
     }
 
     private fun updateFingerprintingProtection() {
-        val isStandardSelected = requireContext().settings().useStandardTrackingProtection
-        val isStrictSelected = requireContext().settings().useStrictTrackingProtection
-        val isCustomSelected = requireContext().settings().useCustomTrackingProtection
+        val isStandardSelected = requireContext().settings().selectedTrackingProtection == InfernoSettings.TrackingProtectionDefault.STANDARD
+        val isStrictSelected = requireContext().settings().selectedTrackingProtection == InfernoSettings.TrackingProtectionDefault.STRICT
+        val isCustomSelected = requireContext().settings().selectedTrackingProtection == InfernoSettings.TrackingProtectionDefault.CUSTOM
 
         context?.components?.let {
             if (isCustomSelected) {

@@ -1,99 +1,58 @@
 package com.shmibblez.inferno.toolbar
 
 import androidx.compose.runtime.Composable
+import com.shmibblez.inferno.R
 import com.shmibblez.inferno.proto.InfernoSettings
-import com.shmibblez.inferno.toolbar.ToolbarOnlyOptions.Companion.ToolbarMenuIcon
-import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarBack
-import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarFindInPage
-import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarForward
-import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarHistory
-import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarOriginMini
-import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarPrivateModeToggle
-import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarReload
-import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarRequestDesktopSite
-import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarRequestReaderView
-import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarSettings
-import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarShare
-import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarShowTabsTray
 import mozilla.components.browser.state.state.TabSessionState
 
-internal class ToolbarItems {
-    companion object {
-        val defaultToolbarItems = listOf(
-            InfernoSettings.ToolbarItem.TOOLBAR_ITEM_BACK,
-            InfernoSettings.ToolbarItem.TOOLBAR_ITEM_FORWARD,
-            InfernoSettings.ToolbarItem.TOOLBAR_ITEM_ORIGIN,
-            InfernoSettings.ToolbarItem.TOOLBAR_ITEM_RELOAD,
-            InfernoSettings.ToolbarItem.TOOLBAR_ITEM_SHOW_TABS_TRAY,
-            InfernoSettings.ToolbarItem.TOOLBAR_ITEM_MENU,
-        )
+val InfernoSettings.ToolbarItem?.defaultToolbarItems
+    get() = listOf(
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_BACK,
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_FORWARD,
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_ORIGIN,
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_RELOAD,
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_SHOW_TABS_TRAY,
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_MENU,
+    )
 
-//        fun fromKeys(
-//            keys: List<InfernoSettings.ToolbarItem>,
-//            // item params
-//            type: ToolbarOptionType,
-//            tabSessionState: TabSessionState,
-//            loading: Boolean,
-//            tabCount: Int,
-//            onShowMenuBottomSheet: () -> Unit,
-//            onDismissMenuBottomSheet: () -> Unit,
-//            onRequestSearchBar: () -> Unit,
-//            onActivateFindInPage: () -> Unit,
-//            onActivateReaderView: () -> Unit,
-//            onNavToSettings: () -> Unit,
-//            onNavToHistory: () -> Unit,
-//            onNavToTabsTray: () -> Unit,
-////            // origin params
-////            searchEngine: SearchEngine,
-////            siteSecure: SiteSecurity,
-////            siteTrackingProtection: SiteTrackingProtection,
-////            setAwesomeSearchText: (String) -> Unit,
-////            setOnAutocomplete: ((TextFieldValue) -> Unit) -> Unit,
-////            originModifier: Modifier = Modifier,
-////            editMode: Boolean,
-////            onStartSearch: () -> Unit,
-////            onStopSearch: () -> Unit,
-////            animationValue: Float,
-//        ): List<@Composable () -> Unit> {
-//            return List(
-//                size = keys.size,
-//                init = {
-//                    {
-//                        ToolbarItem(
-//                            key = keys[it],
-//                            type = type,
-//                            tabSessionState = tabSessionState,
-//                            loading = loading,
-//                            tabCount = tabCount,
-//                            onShowMenuBottomSheet = onShowMenuBottomSheet,
-//                            onDismissMenuBottomSheet = onDismissMenuBottomSheet,
-//                            onRequestSearchBar = onRequestSearchBar,
-//                            onActivateFindInPage = onActivateFindInPage,
-//                            onActivateReaderView = onActivateReaderView,
-//                            onNavToSettings = onNavToSettings,
-//                            onNavToHistory = onNavToHistory,
-//                            onNavToTabsTray = onNavToTabsTray,
-////                            searchEngine = searchEngine,
-////                            siteSecure = siteSecure,
-////                            siteTrackingProtection = siteTrackingProtection,
-////                            setAwesomeSearchText = setAwesomeSearchText,
-////                            setOnAutocomplete = setOnAutocomplete,
-////                            originModifier = originModifier,
-////                            editMode = editMode,
-////                            onStartSearch = onStartSearch,
-////                            onStopSearch = onStopSearch,
-////                            animationValue = animationValue,
-//                        )
-//                    }
-//                },
-//            )
-//        }
-    }
-}
+val InfernoSettings.ToolbarItem?.allToolbarItemsNoMiniOrigin
+    get() = listOf(
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_SETTINGS,
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_ORIGIN,
+//            InfernoSettings.ToolbarItem.TOOLBAR_ITEM_ORIGIN_MINI,
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_BACK,
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_FORWARD,
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_RELOAD,
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_HISTORY,
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_REQUEST_DESKTOP,
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_FIND_IN_PAGE,
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_REQUEST_READER_VIEW,
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_PRIVATE_MODE,
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_SHOW_TABS_TRAY,
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_SHARE,
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_MENU,
+    )
+
+val InfernoSettings.ToolbarItem?.allToolbarItemsNoOrigin
+    get() = listOf(
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_SETTINGS,
+//            InfernoSettings.ToolbarItem.TOOLBAR_ITEM_ORIGIN,
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_ORIGIN_MINI,
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_BACK,
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_FORWARD,
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_RELOAD,
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_HISTORY,
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_REQUEST_DESKTOP,
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_FIND_IN_PAGE,
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_REQUEST_READER_VIEW,
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_PRIVATE_MODE,
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_SHOW_TABS_TRAY,
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_SHARE,
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_MENU,
+    )
 
 @Composable
-internal fun ToolbarItem(
-    key: InfernoSettings.ToolbarItem,
+fun InfernoSettings.ToolbarItem.ToToolbarOption(
     type: ToolbarOptionType,
     tabSessionState: TabSessionState,
     loading: Boolean,
@@ -106,21 +65,10 @@ internal fun ToolbarItem(
     onNavToSettings: () -> Unit,
     onNavToHistory: () -> Unit,
     onNavToTabsTray: () -> Unit,
-//    // origin params
-//    searchEngine: SearchEngine,
-//    siteSecure: SiteSecurity,
-//    siteTrackingProtection: SiteTrackingProtection,
-//    setAwesomeSearchText: (String) -> Unit,
-//    setOnAutocomplete: ((TextFieldValue) -> Unit) -> Unit,
-//    originModifier: Modifier = Modifier,
-//    editMode: Boolean,
-//    onStartSearch: () -> Unit,
-//    onStopSearch: () -> Unit,
-//    animationValue: Float,
 ) {
-    when (key) {
+    when (this) {
         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_SETTINGS -> {
-            ToolbarSettings(
+            ToolbarOptions.ToolbarSettings(
                 type = type,
                 onNavToSettings = onNavToSettings,
             )
@@ -149,28 +97,28 @@ internal fun ToolbarItem(
         }
 
         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_ORIGIN_MINI -> {
-            ToolbarOriginMini(
+            ToolbarOptions.ToolbarOriginMini(
                 type = type,
                 onRequestSearchBar = onRequestSearchBar,
             )
         }
 
         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_BACK -> {
-            ToolbarBack(
+            ToolbarOptions.ToolbarBack(
                 type = type,
                 enabled = tabSessionState.content.canGoBack,
             )
         }
 
         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_FORWARD -> {
-            ToolbarForward(
+            ToolbarOptions.ToolbarForward(
                 type = type,
                 enabled = tabSessionState.content.canGoForward,
             )
         }
 
         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_RELOAD -> {
-            ToolbarReload(
+            ToolbarOptions.ToolbarReload(
                 type = type,
                 enabled = true,
                 loading = loading,
@@ -179,7 +127,7 @@ internal fun ToolbarItem(
         }
 
         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_HISTORY -> {
-            ToolbarHistory(
+            ToolbarOptions.ToolbarHistory(
                 type = type,
                 onNavToHistory = onNavToHistory,
                 dismissMenuSheet = onDismissMenuBottomSheet,
@@ -187,7 +135,7 @@ internal fun ToolbarItem(
         }
 
         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_REQUEST_DESKTOP -> {
-            ToolbarRequestDesktopSite(
+            ToolbarOptions.ToolbarRequestDesktopSite(
                 type = type,
                 desktopMode = tabSessionState.content.desktopMode,
                 dismissMenuSheet = onDismissMenuBottomSheet,
@@ -195,7 +143,7 @@ internal fun ToolbarItem(
         }
 
         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_FIND_IN_PAGE -> {
-            ToolbarFindInPage(
+            ToolbarOptions.ToolbarFindInPage(
                 type = type,
                 onActivateFindInPage = onActivateFindInPage,
                 dismissMenuSheet = onDismissMenuBottomSheet,
@@ -203,7 +151,7 @@ internal fun ToolbarItem(
         }
 
         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_REQUEST_READER_VIEW -> {
-            ToolbarRequestReaderView(
+            ToolbarOptions.ToolbarRequestReaderView(
                 type = type,
                 enabled = tabSessionState.readerState.readerable,
                 dismissMenuSheet = onDismissMenuBottomSheet,
@@ -212,7 +160,7 @@ internal fun ToolbarItem(
         }
 
         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_PRIVATE_MODE -> {
-            ToolbarPrivateModeToggle(
+            ToolbarOptions.ToolbarPrivateModeToggle(
                 type = type,
                 isPrivateMode = tabSessionState.content.private,
                 dismissMenuSheet = onDismissMenuBottomSheet,
@@ -220,7 +168,7 @@ internal fun ToolbarItem(
         }
 
         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_SHOW_TABS_TRAY -> {
-            ToolbarShowTabsTray(
+            ToolbarOptions. ToolbarShowTabsTray(
                 type = type,
                 tabCount = tabCount,
                 dismissMenuSheet = onDismissMenuBottomSheet,
@@ -229,13 +177,13 @@ internal fun ToolbarItem(
         }
 
         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_SHARE -> {
-            ToolbarShare(type = ToolbarOptionType.EXPANDED)
+            ToolbarOptions.ToolbarShare(type = ToolbarOptionType.EXPANDED)
         }
 
         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_MENU -> {
             when (type) {
                 ToolbarOptionType.ICON -> {
-                    ToolbarMenuIcon(
+                    ToolbarOnlyOptions.ToolbarMenuIcon(
                         onShowMenuBottomSheet = onShowMenuBottomSheet,
                     )
                 }
@@ -246,5 +194,46 @@ internal fun ToolbarItem(
 
         InfernoSettings.ToolbarItem.UNRECOGNIZED -> {/* no-op */
         }
+    }
+}
+
+@Composable
+fun InfernoSettings.ToolbarItem.ToToolbarIcon() {
+    when (this) {
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_SETTINGS -> ToolbarOptionsIcons.ToolbarSettings()
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_ORIGIN -> {}
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_ORIGIN_MINI -> ToolbarOptionsIcons.ToolbarOriginMini()
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_BACK -> ToolbarOptionsIcons.ToolbarBack()
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_FORWARD -> ToolbarOptionsIcons.ToolbarForward()
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_RELOAD -> ToolbarOptionsIcons.ToolbarReload()
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_HISTORY -> ToolbarOptionsIcons.ToolbarHistory()
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_REQUEST_DESKTOP -> ToolbarOptionsIcons.ToolbarRequestDesktopSite()
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_FIND_IN_PAGE -> ToolbarOptionsIcons.ToolbarFindInPage()
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_REQUEST_READER_VIEW -> ToolbarOptionsIcons.ToolbarRequestReaderView()
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_PRIVATE_MODE -> ToolbarOptionsIcons.ToolbarPrivateModeToggle()
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_SHOW_TABS_TRAY -> ToolbarOptionsIcons.ToolbarShowTabsTray()
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_SHARE -> ToolbarOptionsIcons.ToolbarShare()
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_MENU -> ToolbarOptionsIcons.ToolbarMenuIcon()
+        InfernoSettings.ToolbarItem.UNRECOGNIZED -> {}
+    }
+}
+
+private fun InfernoSettings.ToolbarItem.toPrefIconRes(): Int? {
+    return when (this) {
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_SETTINGS -> R.drawable.ic_settings_24
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_ORIGIN -> null
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_ORIGIN_MINI -> null // todo: make svg for mini origin icon, also use in toolbar, or return icons here instead
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_BACK -> R.drawable.ic_chevron_left_24
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_FORWARD -> R.drawable.ic_chevron_right_24
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_RELOAD -> R.drawable.ic_refresh
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_HISTORY -> R.drawable.ic_history_24
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_REQUEST_DESKTOP -> R.drawable.ic_device_desktop_24
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_FIND_IN_PAGE -> R.drawable.ic_search_24
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_REQUEST_READER_VIEW -> R.drawable.ic_reader_view_24
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_PRIVATE_MODE -> R.drawable.ic_private_browsing
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_SHOW_TABS_TRAY -> R.drawable.ic_tabcounter_box_24
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_SHARE -> R.drawable.ic_share
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_MENU -> R.drawable.ic_app_menu_24
+        InfernoSettings.ToolbarItem.UNRECOGNIZED -> null
     }
 }

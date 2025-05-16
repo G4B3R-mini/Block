@@ -7,7 +7,7 @@ import androidx.compose.ui.res.stringResource
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.proto.InfernoSettings
 import com.shmibblez.inferno.proto.infernoSettingsDataStore
-import com.shmibblez.inferno.settings.compose.components.SwitchPreference
+import com.shmibblez.inferno.settings.compose.components.PreferenceSwitch
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.launch
@@ -26,7 +26,7 @@ fun GeneralPreferences() {
                 })
         }
     }
-    SwitchPreference(
+    PreferenceSwitch(
         text = stringResource(R.string.preferences_delete_browsing_data_on_quit),
         summary = stringResource(R.string.preference_summary_delete_browsing_data_on_quit_2),
         selected = TODO(),

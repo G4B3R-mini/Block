@@ -22,6 +22,7 @@ import com.shmibblez.inferno.R
 import com.shmibblez.inferno.databinding.SettingsHttpsOnlyBinding
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.settings
+import com.shmibblez.inferno.proto.InfernoSettings
 
 /**
  * Lets the user customize HTTPS-only mode.
@@ -45,11 +46,14 @@ class HttpsOnlyFragment : Fragment() {
         }
 
         binding.httpsOnlySwitch.run {
-            isChecked = context.settings().shouldUseHttpsOnly
+            isChecked = context.settings().httpsOnlyMode != InfernoSettings.HttpsOnlyMode.HTTPS_ONLY_DISABLED
             setHttpsModes(binding, isChecked)
 
             setOnCheckedChangeListener { _, isHttpsOnlyEnabled ->
-                context.settings().shouldUseHttpsOnly = isHttpsOnlyEnabled
+                context.settings().httpsOnlyMode = when (isHttpsOnlyEnabled) {
+                    true -> InfernoSettings.HttpsOnlyMode.HTTPS_ONLY_ENABLED
+                    false -> InfernoSettings.HttpsOnlyMode.HTTPS_ONLY_DISABLED
+                }
                 setHttpsModes(binding, isHttpsOnlyEnabled)
                 updateEngineHttpsOnlyMode()
             }

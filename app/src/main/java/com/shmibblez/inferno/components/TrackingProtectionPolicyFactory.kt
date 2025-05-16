@@ -35,9 +35,10 @@ class TrackingProtectionPolicyFactory(
         privateMode: Boolean = settings.shouldUseTrackingProtection,
     ): TrackingProtectionPolicy {
         val trackingProtectionPolicy =
-            when {
-                settings.useStrictTrackingProtection -> TrackingProtectionPolicy.strict()
-                settings.useCustomTrackingProtection -> return createCustomTrackingProtectionPolicy()
+            when (settings.selectedTrackingProtection) {
+                InfernoSettings.TrackingProtectionDefault.STRICT -> TrackingProtectionPolicy.strict()
+                InfernoSettings.TrackingProtectionDefault.STANDARD -> TrackingProtectionPolicy.recommended()
+                InfernoSettings.TrackingProtectionDefault.CUSTOM -> return createCustomTrackingProtectionPolicy()
                 else -> TrackingProtectionPolicy.recommended()
             }
 
@@ -54,10 +55,10 @@ class TrackingProtectionPolicyFactory(
             cookiePolicy = getCustomCookiePolicy(),
             trackingCategories = getCustomTrackingCategories(),
             cookiePurging = getCustomCookiePurgingPolicy(),
-            strictSocialTrackingProtection = settings.blockTrackingContentInCustomTrackingProtection,
+            strictSocialTrackingProtection = settings.blockTrackingContentInCustomTrackingProtectionInNormalTabs || settings.blockTrackingContentInCustomTrackingProtectionInPrivateTabs,
         ).let {
-            val blockInNormal = settings.blockTrackingContentSelectionInCustomTrackingProtectionInNormalTabs
-            val blockInPrivate = settings.blockTrackingContentSelectionInCustomTrackingProtectionInPrivateTabs
+            val blockInNormal = settings.blockTrackingContentInCustomTrackingProtectionInNormalTabs
+            val blockInPrivate = settings.blockTrackingContentInCustomTrackingProtectionInPrivateTabs
             if (!blockInNormal && blockInPrivate) {
                 it.forPrivateSessionsOnly()
             } else if(blockInNormal && !blockInPrivate) {

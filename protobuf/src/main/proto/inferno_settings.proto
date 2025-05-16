@@ -5,14 +5,15 @@ option java_multiple_files = true;
 
 message InfernoSettings {
 
-  // todo: reorder settings and renumber
+
+  // todo: add missing settings, renumber when complete
 
 
   /*** vars ***/
 
 
   uint64 numberOfAppLaunches = 1;
-  uint64 lastBrowseActivityMillis = 2;
+  uint64 lastBrowseActivityMs = 2;
 
 
   /*** toolbar settings ***/
@@ -43,21 +44,6 @@ message InfernoSettings {
   VerticalToolbarPosition toolbarVerticalPosition = 3;
   VerticalToolbarPosition inAppToolbarVerticalPosition = 4;
   repeated ToolbarItem toolbarItems = 5;
-  // address bar settings
-  // todo: make enum
-  string defaultSearchEngine = 6;
-  // todo: custom search engine
-  bool shouldAutocompleteUrls = 7;
-  bool shouldAutocompleteUrlsInPrivate = 8;
-  bool shouldShowSearchSuggestions = 9;
-  bool shouldShowSearchSuggestionsInPrivate = 10;
-  bool shouldShowHistorySuggestions = 11;
-  bool shouldShowBookmarkSuggestions = 12;
-  bool shouldShowSyncedTabsSuggestions = 13;
-  bool shouldShowClipboardSuggestions = 14;
-  bool shouldShowVoiceSearch = 15;
-  bool shouldShowSearchShortcuts = 16; // on awesomebar
-  // bool showSponsoredSuggestions = ?; // sponsored not enabled
 
 
   /*** tab settings ***/
@@ -75,32 +61,52 @@ message InfernoSettings {
     TAB_BAR_ABOVE_TOOLBAR = 0;
     TAB_BAR_BELOW_TOOLBAR = 1;
   }
+  enum CloseTabsMethod {
+    CLOSE_TABS_MANUALLY = 0;
+    CLOSE_TABS_AFTER_ONE_DAY = 1;
+    CLOSE_TABS_AFTER_ONE_WEEK = 2;
+    CLOSE_TABS_AFTER_ONE_MONTH = 3;
+  }
+  enum MiniTabShowClose {
+    MINI_TAB_SHOW_ON_ALL = 0;
+    MINI_TAB_SHOW_ONLY_ON_ACTIVE = 1;
+    MINI_TAB_SHOW_ON_NONE = 2;
+  }
 
   // general
-  bool closeTabsManually = 17;
-  bool closeTabsAfterOneDay = 18;
-  bool closeTabsAfterOneWeek = 19;
-  bool closeTabsAfterOneMonth = 20;
+  CloseTabsMethod closeTabsMethod = 17;
   //  uint32 closeTabsAfterDays = 5; // todo: test with custom time in MS first, replacing settings.getTabTimeout() in BrowserApplication
-  bool shouldSeparateInactiveTabs = 21;
+  bool shouldSeparateInactiveTabs = 18;
   //  uint32 makeTabsInactiveAfterDays = 22;
 
   // tab bar
-  bool isTabBarEnabled = 22;
-  VerticalTabBarPosition tabBarVerticalPosition = 23;
-  TabBarPosition tabBarPosition = 24;
+  bool isTabBarEnabled = 19;
+  MiniTabShowClose miniTabShowClose = 20;
+  VerticalTabBarPosition tabBarVerticalPosition = 21;
+  TabBarPosition tabBarPosition = 22;
 
   // tab tray
   TabTrayStyle tabTrayStyle = 25;
 
 
-  /*** gesture settings ***/
+  /*** search settings ***/
 
 
-  bool isPullToRefreshEnabled = 26;
-  bool isDynamicToolbarEnabled = 27;
-  bool isSwipeHorizontalToSwitchTabsEnabled = 28;
-  bool isSwipeUpToCloseTabEnabled = 29;
+  // address bar settings
+  // todo: make enum
+  string defaultSearchEngine = 6;
+  // todo: custom search engine map { [engine name]: [engine data] }
+  bool shouldAutocompleteUrls = 7;
+  bool shouldAutocompleteUrlsInPrivate = 8;
+  bool shouldShowSearchSuggestions = 9;
+  bool shouldShowSearchSuggestionsInPrivate = 10;
+  bool shouldShowHistorySuggestions = 11;
+  bool shouldShowBookmarkSuggestions = 12;
+  bool shouldShowSyncedTabsSuggestions = 13;
+  bool shouldShowClipboardSuggestions = 14;
+  bool shouldShowVoiceSearch = 15;
+  bool shouldShowSearchShortcuts = 16; // on awesomebar
+  // bool showSponsoredSuggestions = ?; // sponsored not enabled
 
 
   /*** theme settings ***/
@@ -122,6 +128,15 @@ message InfernoSettings {
   string selectedCustomTheme = 31;
   // { [theme name set by user]: [theme data] }
   map<string, InfernoTheme> customThemes = 32;
+
+
+  /*** gesture settings ***/
+
+
+  bool isPullToRefreshEnabled = 23;
+  bool isDynamicToolbarEnabled = 27;
+  bool isSwipeHorizontalToSwitchTabsEnabled = 28;
+  bool isSwipeUpToCloseTabEnabled = 29;
 
 
   /*** home screen settings ***/
@@ -276,10 +291,9 @@ message InfernoSettings {
 
 
   enum TrackingProtectionDefault {
-    NONE = 0;
-    STANDARD = 1;
-    STRICT = 2;
-    CUSTOM = 3;
+    STANDARD = 0;
+    STRICT = 1;
+    CUSTOM = 2;
   }
   message CustomTrackingProtection {
     enum CookiePolicy {
@@ -301,9 +315,9 @@ message InfernoSettings {
   }
 
   bool isEnhancedTrackingProtectionEnabled = 81;
-  TrackingProtectionDefault selectedTrackingProtection = 82;
-  CustomTrackingProtection customTrackingProtection = 83;
-  bool isGlobalPrivacyControlEnabled = 84; // tell websites not to share & sell data
+  bool isGlobalPrivacyControlEnabled = 82; // tell websites not to share & sell data
+  TrackingProtectionDefault selectedTrackingProtection = 83;
+  CustomTrackingProtection customTrackingProtection = 84;
   // exceptions managed through Core by LoginExceptionStorage
 
 

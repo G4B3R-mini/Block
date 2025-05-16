@@ -17,7 +17,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -26,7 +26,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
@@ -37,11 +36,7 @@ import com.shmibblez.inferno.browser.ComponentDimens
 import com.shmibblez.inferno.browser.InfernoAwesomeBar
 import com.shmibblez.inferno.ext.dpToPx
 import com.shmibblez.inferno.proto.InfernoSettings
-import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarBack
-import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarForward
-import com.shmibblez.inferno.toolbar.ToolbarOnlyOptions.Companion.ToolbarMenuIcon
-import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarReload
-import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarShowTabsTray
+import com.shmibblez.inferno.proto.infernoSettingsDataStore
 import com.shmibblez.inferno.toolbar.ToolbarOnlyOptions.Companion.ToolbarOrigin
 import mozilla.components.browser.state.search.SearchEngine
 import mozilla.components.browser.state.state.TabSessionState
@@ -95,6 +90,10 @@ internal fun OriginBrowserToolbar(
 
     var awesomeSearchText by remember { mutableStateOf("") }
     val loading = tabSessionState.content.loading
+    val context = LocalContext.current
+    val settings by context.infernoSettingsDataStore.data.collectAsState(initial = InfernoSettings.getDefaultInstance())
+    var onAutocomplete: (TextFieldValue) -> Unit by remember { mutableStateOf({}) }
+
 
     LaunchedEffect(editMode) {
         if (editMode) {
@@ -104,22 +103,41 @@ internal fun OriginBrowserToolbar(
         }
     }
 
-    var onAutocomplete: (TextFieldValue) -> Unit by remember { mutableStateOf({}) }
 
-    // todo: launchedeffect on config change, or better yet, pass from parent
+    fun getToolbarItems(): List<InfernoSettings.ToolbarItem> {
+        settings.toolbarItemsList.let {
+            return when (it.size) {
+                0 -> (null as InfernoSettings.ToolbarItem?).defaultToolbarItems
+                else -> it
+            }
+        }
+    }
 
-    val toolbarItemKeys by remember {mutableStateOf(ToolbarItems.defaultToolbarItems)}
-    val indexOrigin by remember { mutableIntStateOf(toolbarItemKeys.indexOf(InfernoSettings.ToolbarItem.TOOLBAR_ITEM_ORIGIN)) }
-    val leftKeys by remember { mutableStateOf(toolbarItemKeys.take(indexOrigin)) }
-    val rightKeys by remember { mutableStateOf(toolbarItemKeys.drop(indexOrigin + 1)) }
-    val context = LocalContext.current
-    val leftWidth = remember { iconsWidth(leftKeys.size) }
-    val leftWidthPx = remember { leftWidth.dpToPx(context) }
-    val rightWidth = remember { iconsWidth(rightKeys.size) }
-    val rightWidthPx = remember { rightWidth.dpToPx(context) }
+    var toolbarItems by remember { mutableStateOf(getToolbarItems()) }
+    fun getOriginIndex() = toolbarItems.indexOf(InfernoSettings.ToolbarItem.TOOLBAR_ITEM_ORIGIN)
+    var indexOrigin by remember { mutableIntStateOf(getOriginIndex()) }
+    fun getLeftKeys() = toolbarItems.take(indexOrigin)
+    fun getRightKeys() = toolbarItems.drop(indexOrigin + 1)
+    var leftKeys by remember { mutableStateOf(getLeftKeys()) }
+    var rightKeys by remember { mutableStateOf(getRightKeys()) }
+    var leftWidth = remember { iconsWidth(leftKeys.size) }
+    var leftWidthPx = remember { leftWidth.dpToPx(context) }
+    var rightWidth = remember { iconsWidth(rightKeys.size) }
+    var rightWidthPx = remember { rightWidth.dpToPx(context) }
 
-    // todo: might not need to reset keys on pref change, prefs are on different screen, will
-    //  reload when return to BrowserComponent
+
+    LaunchedEffect(settings.toolbarItemsList) {
+        // on settings change, recalc values
+        toolbarItems = getToolbarItems()
+        indexOrigin = getOriginIndex()
+        leftKeys = getLeftKeys()
+        rightKeys = getRightKeys()
+        leftWidth = iconsWidth(leftKeys.size)
+        leftWidthPx = leftWidth.dpToPx(context)
+        rightWidth = iconsWidth(rightKeys.size)
+        rightWidthPx = rightWidth.dpToPx(context)
+    }
+
 
     Column(
         modifier = Modifier
@@ -139,7 +157,6 @@ internal fun OriginBrowserToolbar(
                 colors = AwesomeBarDefaults.colors(),
 //                    providers = emptyList(),
                 orientation = AwesomeBarOrientation.BOTTOM,
-                // todo: move cursor to end on suggestion set
                 onSuggestionClicked = { providerGroup, suggestion ->
                     // todo: change action based on providerGroup
                     val t = suggestion.title
@@ -197,8 +214,7 @@ internal fun OriginBrowserToolbar(
                 )
             ) {
                 for (k in leftKeys) {
-                    ToolbarItem(
-                        key = k,
+                    k.ToToolbarOption(
                         type = ToolbarOptionType.ICON,
                         tabSessionState = tabSessionState,
                         loading = loading,
@@ -243,8 +259,7 @@ internal fun OriginBrowserToolbar(
                 )
             ) {
                 for (k in rightKeys) {
-                    ToolbarItem(
-                        key = k,
+                    k.ToToolbarOption(
                         type = ToolbarOptionType.ICON,
                         tabSessionState = tabSessionState,
                         loading = loading,

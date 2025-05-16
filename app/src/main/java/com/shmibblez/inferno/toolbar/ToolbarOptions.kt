@@ -249,7 +249,7 @@ internal class ToolbarOptions {
                             .clickable(enabled = enabled, onClick = onClick),
                         TOOLBAR_SWITCH_ICON_EXTRA / 2,
                         contentDescription,
-                        Color.White,
+                        Color.White, // todo: theme
                     )
                 }
 
@@ -268,7 +268,7 @@ internal class ToolbarOptions {
                             Modifier.size(TOOLBAR_MENU_ICON_SIZE + TOOLBAR_SWITCH_ICON_EXTRA),
                             TOOLBAR_SWITCH_ICON_EXTRA,
                             contentDescription,
-                            Color.White,
+                            Color.White, // todo: theme
                         )
                         InfernoText(
                             text = description,
@@ -277,7 +277,7 @@ internal class ToolbarOptions {
                             overflow = TextOverflow.Ellipsis,
                             maxLines = 3,
                             fontSize = 10.sp,
-                            fontColor = Color.White,
+                            fontColor = Color.White, // todo: theme
                         )
                     }
                 }
@@ -302,7 +302,7 @@ internal class ToolbarOptions {
                             .clickable(enabled = enabled, onClick = onClick),
                         painter = iconPainter,
                         contentDescription = contentDescription,
-                        tint = Color.White,
+                        tint = Color.White, // todo: theme
                     )
                 }
 
@@ -319,9 +319,9 @@ internal class ToolbarOptions {
                     ) {
                         Icon(
                             painter = iconPainter,
-                            tint = Color.White,
                             contentDescription = contentDescription,
-                            modifier = Modifier.size(TOOLBAR_MENU_ICON_SIZE)
+                            modifier = Modifier.size(TOOLBAR_MENU_ICON_SIZE),
+                            tint = Color.White, // todo: theme
                         )
                         InfernoText(
                             text = description,
@@ -330,7 +330,7 @@ internal class ToolbarOptions {
                             overflow = TextOverflow.Ellipsis,
                             maxLines = 3,
                             fontSize = 10.sp,
-                            fontColor = Color.White,
+                            fontColor = Color.White, // todo: theme
                         )
                     }
                 }
@@ -486,8 +486,8 @@ internal class ToolbarOptions {
                                 .fillMaxSize()
                                 .padding(extraPadding),
                             painter = when (isDesktopSite) {
-                                true -> painterResource(id = R.drawable.ic_device_mobile_24)
-                                false -> painterResource(id = R.drawable.ic_device_desktop_24)
+                                true -> painterResource(id = R.drawable.ic_device_desktop_24)
+                                false -> painterResource(id = R.drawable.ic_device_mobile_24)
                             },
                             contentDescription = contentDescription,
                             tint = tint,
@@ -506,8 +506,8 @@ internal class ToolbarOptions {
                                 )
                                 .align(Alignment.BottomEnd),
                             painter = when (isDesktopSite) {
-                                true -> painterResource(id = R.drawable.ic_device_desktop_24)
-                                false -> painterResource(id = R.drawable.ic_device_mobile_24)
+                                true -> painterResource(id = R.drawable.ic_device_mobile_24)
+                                false -> painterResource(id = R.drawable.ic_device_desktop_24)
                             },
                             contentDescription = contentDescription,
                             tint = tint,
@@ -723,15 +723,253 @@ internal class ToolbarOptions {
         @Composable
         internal fun ToolbarShare(type: ToolbarOptionType) {
             val context = LocalContext.current
-            val description = stringResource(R.string.share_header_2)
             ToolbarOptionTemplate(
                 iconPainter = painterResource(R.drawable.ic_share),
-                description = description,
+                description = stringResource(R.string.share_header_2),
                 onClick = {
                     val url = context.components.core.store.state.selectedTab?.getUrl().orEmpty()
                     context.share(url)
                 },
                 type = type,
+            )
+        }
+    }
+}
+
+internal class ToolbarOptionsIcons {
+    companion object {
+        /**
+         * @param icon icon composable, must use params provided to be displayed properly
+         */
+        @Composable
+        private fun ToolbarIconTemplate(
+            icon: @Composable (modifier: Modifier, extraPadding: Dp, contentDescription: String, tint: Color) -> Unit,
+            contentDescription: String,
+        ) {
+            icon.invoke(
+                Modifier.size(TOOLBAR_ICON_SIZE + TOOLBAR_SWITCH_ICON_EXTRA),
+                TOOLBAR_SWITCH_ICON_EXTRA / 2,
+                contentDescription,
+                Color.White, // todo: theme
+            )
+        }
+
+        @Composable
+        private fun ToolbarIconTemplate(
+            iconPainter: Painter,
+            contentDescription: String,
+        ) {
+            Icon(
+                modifier = Modifier.size(TOOLBAR_ICON_SIZE),
+                painter = iconPainter,
+                contentDescription = contentDescription,
+                tint = Color.White, // todo: theme
+            )
+        }
+
+        @Composable
+        internal fun ToolbarSettings() {
+            ToolbarIconTemplate(
+                iconPainter = painterResource(R.drawable.ic_settings_24),
+                contentDescription = stringResource(R.string.browser_menu_settings),
+            )
+        }
+
+        @Composable
+        internal fun ToolbarOriginMini() {
+            ToolbarIconTemplate(
+                icon = { modifier, extraPadding, contentDescription, tint ->
+                    Box(modifier = modifier) {
+                        // current mode, big icon
+                        Icon(
+                            modifier = Modifier
+                                .align(Alignment.Center)
+                                .fillMaxSize()
+                                .padding(extraPadding),
+                            painter = painterResource(id = R.drawable.ic_globe_24),
+                            contentDescription = contentDescription,
+                            tint = tint,
+                        )
+                        // switch to, smol icon
+                        Icon(
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .background(Color.Black)
+                                .padding(2.dp)
+                                .size(TOOLBAR_SWITCH_ICON_SIZE)
+                                .align(Alignment.BottomEnd),
+                            painter = painterResource(id = R.drawable.ic_search_24),
+                            contentDescription = contentDescription,
+                            tint = tint,
+                        )
+                    }
+                },
+                contentDescription = stringResource(R.string.search_hint),
+            )
+        }
+
+        @Composable
+        fun ToolbarBack() {
+            ToolbarIconTemplate(
+                iconPainter = painterResource(id = R.drawable.ic_chevron_left_24),
+                contentDescription = stringResource(R.string.browser_menu_back),
+            )
+        }
+
+        @Composable
+        fun ToolbarForward() {
+            ToolbarIconTemplate(
+                iconPainter = painterResource(id = R.drawable.ic_chevron_right_24),
+                contentDescription = stringResource(R.string.browser_menu_forward),
+            )
+        }
+
+        @Composable
+        fun ToolbarReload() {
+            ToolbarIconTemplate(
+                iconPainter = painterResource(id = R.drawable.ic_arrow_clockwise_24),
+                contentDescription = stringResource(R.string.browser_menu_refresh),
+            )
+        }
+
+        @Composable
+        fun ToolbarHistory() {
+            ToolbarIconTemplate(
+                iconPainter = painterResource(R.drawable.ic_history_24),
+                contentDescription = stringResource(R.string.library_history),
+            )
+        }
+
+        @Composable
+        internal fun ToolbarRequestDesktopSite() {
+            ToolbarIconTemplate(
+                icon = { modifier, extraPadding, contentDescription, tint ->
+                    Box(modifier = modifier) {
+                        // current mode, big icon
+                        Icon(
+                            modifier = Modifier
+                                .align(Alignment.Center)
+                                .fillMaxSize()
+                                .padding(extraPadding),
+                            painter = painterResource(id = R.drawable.ic_device_mobile_24),
+                            contentDescription = contentDescription,
+                            tint = tint,
+                        )
+                        // switch to, smol icon
+                        Icon(
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .background(Color.Black)
+                                .padding(2.dp)
+                                .size(TOOLBAR_SWITCH_ICON_SIZE)
+                                .align(Alignment.BottomEnd),
+                            painter = painterResource(id = R.drawable.ic_device_desktop_24),
+                            contentDescription = contentDescription,
+                            tint = tint,
+                        )
+                    }
+                },
+                contentDescription = stringResource(R.string.browser_menu_switch_to_desktop_site),
+            )
+        }
+
+        @Composable
+        internal fun ToolbarFindInPage() {
+            ToolbarIconTemplate(
+                iconPainter = painterResource(R.drawable.ic_search_24),
+                contentDescription = stringResource(R.string.browser_menu_find_in_page),
+            )
+        }
+
+        @Composable
+        internal fun ToolbarRequestReaderView() {
+            ToolbarIconTemplate(
+                iconPainter = painterResource(R.drawable.ic_reader_view_24),
+                contentDescription = stringResource(R.string.browser_menu_turn_on_reader_view),
+            )
+        }
+
+        @Composable
+        internal fun ToolbarPrivateModeToggle() {
+            ToolbarIconTemplate(
+                icon = { modifier, extraPadding, contentDescription, tint ->
+                    Box(
+                        modifier = modifier,
+                    ) {
+                        // current mode, big icon
+                        Icon(
+                            modifier = Modifier
+                                .align(Alignment.Center)
+                                .fillMaxSize()
+                                .padding(extraPadding),
+                            painter = painterResource(id = R.drawable.ic_globe_24),
+                            contentDescription = contentDescription,
+                            tint = tint,
+                        )
+                        // switch to, smol icon
+                        Icon(
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .background(Color.Black)
+                                .padding(2.dp)
+                                .size(TOOLBAR_SWITCH_ICON_SIZE)
+                                .align(Alignment.BottomEnd),
+                            painter = painterResource(id = R.drawable.ic_private_browsing),
+                            contentDescription = contentDescription,
+                            tint = tint,
+                        )
+                    }
+                },
+                contentDescription = stringResource(R.string.content_description_private_browsing_button),
+            )
+        }
+
+        @Composable
+        fun ToolbarShowTabsTray() {
+            ToolbarIconTemplate(
+                icon = { modifier, extraPadding, contentDescription, tint ->
+                    Box(
+                        modifier = modifier.wrapContentHeight(unbounded = true),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(
+                            modifier = Modifier
+                                .align(Alignment.Center)
+                                .fillMaxSize()
+                                .padding(extraPadding),
+                            painter = painterResource(id = R.drawable.ic_tabcounter_box_24),
+                            contentDescription = contentDescription,
+                            tint = tint,
+                        )
+                        InfernoText(
+                            modifier = Modifier.fillMaxSize(),
+                            text = "4",
+                            fontColor = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center,
+                            fontSize = 9.sp,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+                },
+                contentDescription = stringResource(R.string.mozac_tab_counter_open_tab_tray_single),
+            )
+        }
+
+        @Composable
+        internal fun ToolbarShare() {
+            ToolbarIconTemplate(
+                iconPainter = painterResource(R.drawable.ic_share),
+                contentDescription = stringResource(R.string.share_header_2),
+            )
+        }
+
+        @Composable
+        fun ToolbarMenuIcon() {
+            ToolbarIconTemplate(
+                iconPainter = painterResource(R.drawable.ic_app_menu_24),
+                contentDescription = stringResource(R.string.content_description_menu),
             )
         }
     }

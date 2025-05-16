@@ -65,6 +65,7 @@ import com.shmibblez.inferno.ext.settings
 import com.shmibblez.inferno.ext.showToolbar
 import com.shmibblez.inferno.nimbus.FxNimbus
 import com.shmibblez.inferno.perf.ProfilerViewModel
+import com.shmibblez.inferno.proto.InfernoSettings
 import com.shmibblez.inferno.settings.account.AccountUiView
 import com.shmibblez.inferno.snackbar.FenixSnackbarDelegate
 import com.shmibblez.inferno.snackbar.SnackbarBinding
@@ -725,9 +726,9 @@ class SettingsFragment : PreferenceFragmentCompat() {
         with(requirePreference<Preference>(R.string.pref_key_tracking_protection_settings)) {
             summary = when {
                 !context.settings().shouldUseTrackingProtection -> getString(R.string.tracking_protection_off)
-                context.settings().useStandardTrackingProtection -> getString(R.string.tracking_protection_standard)
-                context.settings().useStrictTrackingProtection -> getString(R.string.tracking_protection_strict)
-                context.settings().useCustomTrackingProtection -> getString(R.string.tracking_protection_custom)
+                context.settings().selectedTrackingProtection  == InfernoSettings.TrackingProtectionDefault.STANDARD -> getString(R.string.tracking_protection_standard)
+                context.settings().selectedTrackingProtection  == InfernoSettings.TrackingProtectionDefault.STRICT -> getString(R.string.tracking_protection_strict)
+                context.settings().selectedTrackingProtection  == InfernoSettings.TrackingProtectionDefault.CUSTOM -> getString(R.string.tracking_protection_custom)
                 else -> null
             }
         }
@@ -775,10 +776,10 @@ class SettingsFragment : PreferenceFragmentCompat() {
         val httpsOnlyPreference =
             requirePreference<Preference>(R.string.pref_key_https_only_settings)
         httpsOnlyPreference.summary = context?.let {
-            when {
-                !it.settings().shouldUseHttpsOnly -> getString(R.string.preferences_https_only_off)
-                it.settings().shouldUseHttpsOnlyInAllTabs -> getString(R.string.preferences_https_only_on_all)
-                it.settings().shouldUseHttpsOnlyInPrivateTabsOnly ->
+            when (it.settings().httpsOnlyMode) {
+                InfernoSettings.HttpsOnlyMode.HTTPS_ONLY_DISABLED -> getString(R.string.preferences_https_only_off)
+                InfernoSettings.HttpsOnlyMode.HTTPS_ONLY_ENABLED -> getString(R.string.preferences_https_only_on_all)
+                InfernoSettings.HttpsOnlyMode.HTTPS_ONLY_ENABLED_PRIVATE_ONLY ->
                     getString(R.string.preferences_https_only_on_private)
                 else -> null
             }

@@ -626,9 +626,9 @@ class DefaultTabsTrayController(
 
     override fun handleEnableInactiveTabsAutoCloseClicked() {
         markDialogAsShown()
-        settings.closeTabsAfterOneMonth = true
-        settings.closeTabsAfterOneWeek = false
-        settings.closeTabsAfterOneDay = false
+//        settings.closeTabsAfterOneMonth = true
+//        settings.closeTabsAfterOneWeek = false
+//        settings.closeTabsAfterOneDay = false
         settings.manuallyCloseTabs = false
 //        TabsTray.autoCloseTurnOnClicked.record(NoExtras())
     }
