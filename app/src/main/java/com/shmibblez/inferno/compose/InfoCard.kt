@@ -32,6 +32,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.annotation.LightDarkPreview
 import com.shmibblez.inferno.R
+import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.button.PrimaryButton
 import com.shmibblez.inferno.shopping.ui.ext.headingResource
 import com.shmibblez.inferno.theme.FirefoxTheme
@@ -153,10 +154,9 @@ private fun InfoCardIcon(
     iconId: Int,
     modifier: Modifier = Modifier,
 ) {
-    Icon(
+    InfernoIcon(
         painter = painterResource(id = iconId),
         contentDescription = null,
-        tint = FirefoxTheme.colors.iconPrimary,
         modifier = modifier,
     )
 }

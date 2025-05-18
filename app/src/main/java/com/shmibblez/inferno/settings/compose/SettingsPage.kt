@@ -15,6 +15,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.coroutineScope
 import com.shmibblez.inferno.R
+import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.nimbus.FxNimbus
@@ -83,11 +84,10 @@ fun SettingsPage(
         topBar = {
             TopAppBar(
                 navigationIcon = {
-                    Icon(
+                    InfernoIcon(
                         painter = painterResource(R.drawable.ic_back_button),
                         contentDescription = stringResource(R.string.browser_menu_back),
 //                        modifier = Modifier.clickable(onClick = goBack),
-                        tint = Color.White, // todo: theme
                     )
                 },
                 title = { InfernoText("Toolbar Settings") }, // todo: string res

@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.annotation.LightDarkPreview
 import com.shmibblez.inferno.theme.FirefoxTheme
 import com.shmibblez.inferno.R
+import com.shmibblez.inferno.compose.base.InfernoIcon
 
 /**
  * The background of an item that is being swiped horizontally.
@@ -49,7 +50,7 @@ fun DismissibleItemBackground(
                 elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
             ) {
                 Box(modifier = Modifier.fillMaxSize()) {
-                    Icon(
+                    InfernoIcon(
                         painter = painterResource(R.drawable.ic_delete),
                         contentDescription = null,
                         modifier = Modifier

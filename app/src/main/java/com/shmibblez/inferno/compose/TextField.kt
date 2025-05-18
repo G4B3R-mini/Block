@@ -48,6 +48,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.shmibblez.inferno.R
+import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.ext.thenConditional
 import com.shmibblez.inferno.theme.FirefoxTheme
 
@@ -196,7 +197,7 @@ fun TextField(
                         } else if (isError) {
                             Spacer(modifier = Modifier.width(12.dp))
 
-                            Icon(
+                            InfernoIcon(
                                 painter = painterResource(R.drawable.mozac_ic_warning_24),
                                 contentDescription = null,
                                 tint = colors.errorTrailingIconColor,
@@ -397,10 +398,9 @@ private class TextFieldParameterProvider : PreviewParameterProvider<TextFieldPre
                 isError = true,
                 trailingIcon = {
                     IconButton(onClick = {}) {
-                        Icon(
+                        InfernoIcon(
                             painter = painterResource(id = R.drawable.mozac_ic_cross_circle_fill_24),
                             contentDescription = null,
-                            tint = FirefoxTheme.colors.textPrimary,
                         )
                     }
                 },
@@ -411,10 +411,9 @@ private class TextFieldParameterProvider : PreviewParameterProvider<TextFieldPre
                 label = "Empty, No error, Trailing Icon",
                 trailingIcon = {
                     IconButton(onClick = {}) {
-                        Icon(
+                        InfernoIcon(
                             painter = painterResource(id = R.drawable.mozac_ic_cross_circle_fill_24),
                             contentDescription = null,
-                            tint = FirefoxTheme.colors.textPrimary,
                         )
                     }
                 },

@@ -86,7 +86,7 @@ message InfernoSettings {
   TabBarPosition tabBarPosition = 22;
 
   // tab tray
-  TabTrayStyle tabTrayStyle = 25;
+  TabTrayStyle tabTrayStyle = 23;
 
 
   /*** search settings ***/
@@ -112,30 +112,39 @@ message InfernoSettings {
   /*** theme settings ***/
 
 
+  // colors set in kotlin, in InfernoTheme object
   enum DefaultTheme {
-    // default themes set in kotlin as default objects
+    // default dark theme
     INFERNO_DARK = 0;
+    // default light theme
     INFERNO_LIGHT = 1;
+    // pays homage to our one true guardian and savior mozilla
+    MOZILLA_INCOGNITO_DARK = 2;
+    // also pays homage to the great moz
+    MOZILLA_INCOGNITO_LIGHT = 3;
   }
   message InfernoTheme {
     // todo: define and use colors, take a look at material for some naming ideas
     // in settings show description for where each color is shown
     string name = 1;
-    uint32 primaryTextColor = 2;
-    uint32 secondaryTextColor = 3;
-    uint32 primaryIconColor = 4;
-    uint32 secondaryIconColor = 5;
-    uint32 primaryOutlineColor = 6;
-    uint32 secondaryOutlineColor = 7;
-    uint32 primaryActionColor = 8;
-    uint32 secondaryActionColor = 9;
-    uint32 errorColor = 10;
-    uint32 primaryBackgroundColor = 11;
-    uint32 secondaryBackgroundColor = 12;
+    uint64 timeSet = 2;
+    uint32 primaryTextColor = 3;
+    uint32 secondaryTextColor = 4;
+    uint32 primaryIconColor = 5;
+    uint32 secondaryIconColor = 6;
+    uint32 primaryOutlineColor = 7;
+    uint32 secondaryOutlineColor = 8;
+    uint32 primaryActionColor = 9;
+    uint32 secondaryActionColor = 10;
+    uint32 errorColor = 11;
+    uint32 primaryBackgroundColor = 12;
+    uint32 secondaryBackgroundColor = 13;
   }
 
-  DefaultTheme selectedDefaultTheme = 30;
-  string selectedCustomTheme = 31;
+  DefaultTheme selectedDefaultTheme = 28;
+  string selectedCustomTheme = 29;
+  DefaultTheme selectedDefaultThemePrivate = 30;
+  string selectedCustomThemePrivate = 31;
   // { [theme name set by user]: [theme data] }
   map<string, InfernoTheme> customThemes = 32;
 
@@ -143,10 +152,10 @@ message InfernoSettings {
   /*** gesture settings ***/
 
 
-  bool isPullToRefreshEnabled = 23;
-  bool isDynamicToolbarEnabled = 27;
-  bool isSwipeHorizontalToSwitchTabsEnabled = 28;
-  bool isSwipeUpToCloseTabEnabled = 29;
+  bool isPullToRefreshEnabled = 24;
+  bool isDynamicToolbarEnabled = 25;
+  bool isSwipeHorizontalToSwitchTabsEnabled = 26;
+  bool isSwipeUpToCloseTabEnabled = 27;
 
 
   /*** home screen settings ***/

@@ -33,6 +33,7 @@ import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplate
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateAction
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateButtonPosition
 import com.shmibblez.inferno.browser.prompts.creditcard.CreditCardDialogController
+import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.base.InfernoText
 import mozilla.components.concept.engine.prompt.PromptRequest
 import mozilla.components.concept.storage.Address
@@ -77,11 +78,10 @@ fun SelectableListPrompt(
                 modifier = Modifier.weight(1F),
             )
             // expand addresses
-            Icon(
+            InfernoIcon(
                 painter = if (expanded) painterResource(R.drawable.mozac_ic_chevron_up_24) else painterResource(
                     R.drawable.mozac_ic_chevron_down_24
                 ),
-                tint = Color.White,
                 contentDescription = "",
                 modifier = Modifier
                     .size(36.dp)
@@ -169,9 +169,8 @@ fun ManageOptions(
             },
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Icon(
+        InfernoIcon(
             painter = painterResource(R.drawable.mozac_ic_settings_24),
-            tint = Color.White,
             contentDescription = "",
             modifier = Modifier.size(20.dp),
         )

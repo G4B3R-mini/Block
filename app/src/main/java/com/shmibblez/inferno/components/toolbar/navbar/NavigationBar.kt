@@ -50,6 +50,7 @@ import com.shmibblez.inferno.components.components
 import com.shmibblez.inferno.components.toolbar.NewTabMenu
 import com.shmibblez.inferno.compose.IconButton
 import com.shmibblez.inferno.compose.LongPressIconButton
+import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.utils.KeyboardState
 import com.shmibblez.inferno.compose.utils.keyboardAsState
 import com.shmibblez.inferno.perf.MarkersFragmentLifecycleCallbacks
@@ -413,10 +414,10 @@ private fun BackButton(
             .size(48.dp)
             .testTag(NavBarTestTags.backButton),
     ) {
-        Icon(
+        InfernoIcon(
             painter = painterResource(R.drawable.mozac_ic_back_24),
             stringResource(id = R.string.browser_menu_back),
-            tint = if (enabled) buttonEnabledTint else buttonDisabledTint,
+            enabled = enabled,
         )
     }
 }
@@ -437,10 +438,10 @@ private fun ForwardButton(
             .size(48.dp)
             .testTag(NavBarTestTags.forwardButton),
     ) {
-        Icon(
+        InfernoIcon(
             painter = painterResource(R.drawable.mozac_ic_forward_24),
             stringResource(id = R.string.browser_menu_forward),
-            tint = if (enabled) buttonEnabledTint else buttonDisabledTint,
+            enabled = enabled,
         )
     }
 }
@@ -454,10 +455,9 @@ private fun SearchWebButton(
         modifier = Modifier
             .testTag(NavBarTestTags.searchButton),
     ) {
-        Icon(
+        InfernoIcon(
             painter = painterResource(R.drawable.mozac_ic_search_24),
             stringResource(id = R.string.search_hint),
-            tint = FirefoxTheme.colors.iconPrimary,
         )
     }
 }
@@ -476,10 +476,9 @@ private fun MenuButton(
                 .size(48.dp)
                 .testTag(NavBarTestTags.menuButton),
         ) {
-            Icon(
+            InfernoIcon(
                 painter = painterResource(R.drawable.mozac_ic_ellipsis_vertical_24),
                 contentDescription = stringResource(id = R.string.content_description_menu),
-                tint = tint,
             )
         }
     } else {
@@ -516,10 +515,10 @@ private fun OpenInBrowserButton(
         modifier = Modifier
             .testTag(NavBarTestTags.openInBrowserButton),
     ) {
-        Icon(
+        InfernoIcon(
             painter = painterResource(R.drawable.mozac_ic_open_in),
             stringResource(R.string.browser_menu_open_in_fenix, stringResource(R.string.app_name)),
-            tint = if (enabled) buttonEnabledTint else buttonDisabledTint,
+            enabled = enabled,
         )
     }
 }

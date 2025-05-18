@@ -47,7 +47,6 @@ import com.shmibblez.inferno.theme.FirefoxTheme
  * @param onClick Invoked when the user clicks the button.
  */
 @Composable
-@OptIn(ExperimentalFoundationApi::class)
 fun TabStripTabCounterButton(
     tabCount: Int,
     size: Dp,

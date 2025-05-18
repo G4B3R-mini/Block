@@ -23,14 +23,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplate
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateAction
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateButtonPosition
+import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.base.InfernoText
 import mozilla.components.concept.engine.prompt.PromptRequest
 import mozilla.components.concept.storage.Login
@@ -108,11 +107,10 @@ private fun PasswordGeneratorPrompt() {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Start,
     ) {
-        Icon(
+        InfernoIcon(
             painter = painterResource(id = R.drawable.mozac_ic_login_24),
             contentDescription = null,
             modifier = Modifier.size(16.dp),
-            tint = Color.White,
         )
 
         Spacer(Modifier.width(24.dp))
@@ -161,41 +159,27 @@ fun PasswordGeneratorBottomSheet(
     ) {
         // title
         Row {
-            Icon(
+            InfernoIcon(
                 painter = painterResource(id = R.drawable.ic_login_24),
                 contentDescription = null,
-                tint = colors.title,
                 modifier = Modifier
                     .align(Alignment.CenterVertically)
                     .size(20.dp),
             )
             InfernoText(
-                modifier = Modifier.padding(start = 16.dp),
                 text = stringResource(id = R.string.mozac_feature_prompts_suggest_strong_password_title),
-                style = TextStyle(
-                    fontSize = FONT_SIZE,
-                    lineHeight = LINE_HEIGHT,
-                    color = colors.title,
-                    letterSpacing = LETTER_SPACING,
-                    fontWeight = FontWeight.Bold,
-                ),
+                modifier = Modifier.padding(start = 16.dp),
             )
         }
 
         // description
         InfernoText(
-            modifier = Modifier.padding(start = 40.dp, top = 6.dp, end = 12.dp),
             text = stringResource(id = R.string.mozac_feature_prompts_suggest_strong_password_description_3),
-            style = TextStyle(
-                fontSize = FONT_SIZE,
-                lineHeight = LINE_HEIGHT,
-                color = colors.description,
-                letterSpacing = LETTER_SPACING,
-            ),
+            modifier = Modifier.padding(start = 40.dp, top = 6.dp, end = 12.dp),
         )
 
         // password box
-        // todo:
+        // todo: password prompt
         //   - make text editable
         //     - for this password should be saved in state, add undo button if password edited
         //       to go back to original password
@@ -209,14 +193,8 @@ fun PasswordGeneratorBottomSheet(
                 .padding(4.dp),
         ) {
             InfernoText(
-                modifier = Modifier.padding(8.dp),
                 text = generatedStrongPassword,
-                style = TextStyle(
-                    fontSize = FONT_SIZE,
-                    lineHeight = LINE_HEIGHT,
-                    color = colors.title,
-                    letterSpacing = LETTER_SPACING,
-                ),
+                modifier = Modifier.padding(8.dp),
             )
         }
     }

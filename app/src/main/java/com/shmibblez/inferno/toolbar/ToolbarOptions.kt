@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.ComponentDimens
+import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.compose.sessionUseCases
 import com.shmibblez.inferno.ext.components
@@ -123,7 +124,7 @@ internal class ToolbarOnlyOptions {
     companion object {
         @Composable
         fun ToolbarMenuIcon(onShowMenuBottomSheet: () -> Unit) {
-            Icon(
+            InfernoIcon(
                 modifier = Modifier
                     .size(TOOLBAR_ICON_SIZE)
                     .clickable(onClick = onShowMenuBottomSheet),
@@ -295,7 +296,7 @@ internal class ToolbarOptions {
         ) {
             when (type) {
                 ToolbarOptionType.ICON -> {
-                    Icon(
+                    InfernoIcon(
                         modifier = Modifier
                             .size(TOOLBAR_ICON_SIZE)
                             .alpha(if (enabled) 1F else DISABLED_ALPHA)
@@ -317,7 +318,7 @@ internal class ToolbarOptions {
                         ),
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
-                        Icon(
+                        InfernoIcon(
                             painter = iconPainter,
                             contentDescription = contentDescription,
                             modifier = Modifier.size(TOOLBAR_MENU_ICON_SIZE),
@@ -361,7 +362,7 @@ internal class ToolbarOptions {
                         modifier = modifier,
                     ) {
                         // current mode, big icon
-                        Icon(
+                        InfernoIcon(
                             modifier = Modifier
                                 .align(Alignment.Center)
                                 .fillMaxSize()
@@ -371,7 +372,7 @@ internal class ToolbarOptions {
                             tint = tint,
                         )
                         // switch to, smol icon
-                        Icon(
+                        InfernoIcon(
                             modifier = Modifier
                                 .clip(CircleShape)
                                 .background(Color.Black)
@@ -480,7 +481,7 @@ internal class ToolbarOptions {
                         modifier = modifier,
                     ) {
                         // current mode, big icon
-                        Icon(
+                        InfernoIcon(
                             modifier = Modifier
                                 .align(Alignment.Center)
                                 .fillMaxSize()
@@ -493,7 +494,7 @@ internal class ToolbarOptions {
                             tint = tint,
                         )
                         // switch to, smol icon
-                        Icon(
+                        InfernoIcon(
                             modifier = Modifier
                                 .clip(CircleShape)
                                 .background(Color.Black)
@@ -619,7 +620,7 @@ internal class ToolbarOptions {
                         modifier = modifier,
                     ) {
                         // current mode, big icon
-                        Icon(
+                        InfernoIcon(
                             modifier = Modifier
                                 .align(Alignment.Center)
                                 .fillMaxSize()
@@ -632,7 +633,7 @@ internal class ToolbarOptions {
                             tint = tint,
                         )
                         // switch to, smol icon
-                        Icon(
+                        InfernoIcon(
                             modifier = Modifier
                                 .clip(CircleShape)
                                 .background(Color.Black)
@@ -685,7 +686,7 @@ internal class ToolbarOptions {
                         modifier = modifier.wrapContentHeight(unbounded = true),
                         contentAlignment = Alignment.Center,
                     ) {
-                        Icon(
+                        InfernoIcon(
                             modifier = Modifier
                                 .align(Alignment.Center)
                                 .fillMaxSize()
@@ -759,7 +760,7 @@ internal class ToolbarOptionsIcons {
             iconPainter: Painter,
             contentDescription: String,
         ) {
-            Icon(
+            InfernoIcon(
                 modifier = Modifier.size(TOOLBAR_ICON_SIZE),
                 painter = iconPainter,
                 contentDescription = contentDescription,
@@ -781,7 +782,7 @@ internal class ToolbarOptionsIcons {
                 icon = { modifier, extraPadding, contentDescription, tint ->
                     Box(modifier = modifier) {
                         // current mode, big icon
-                        Icon(
+                        InfernoIcon(
                             modifier = Modifier
                                 .align(Alignment.Center)
                                 .fillMaxSize()
@@ -791,7 +792,7 @@ internal class ToolbarOptionsIcons {
                             tint = tint,
                         )
                         // switch to, smol icon
-                        Icon(
+                        InfernoIcon(
                             modifier = Modifier
                                 .clip(CircleShape)
                                 .background(Color.Black)
@@ -846,7 +847,7 @@ internal class ToolbarOptionsIcons {
                 icon = { modifier, extraPadding, contentDescription, tint ->
                     Box(modifier = modifier) {
                         // current mode, big icon
-                        Icon(
+                        InfernoIcon(
                             modifier = Modifier
                                 .align(Alignment.Center)
                                 .fillMaxSize()
@@ -856,7 +857,7 @@ internal class ToolbarOptionsIcons {
                             tint = tint,
                         )
                         // switch to, smol icon
-                        Icon(
+                        InfernoIcon(
                             modifier = Modifier
                                 .clip(CircleShape)
                                 .background(Color.Black)
@@ -897,7 +898,7 @@ internal class ToolbarOptionsIcons {
                         modifier = modifier,
                     ) {
                         // current mode, big icon
-                        Icon(
+                        InfernoIcon(
                             modifier = Modifier
                                 .align(Alignment.Center)
                                 .fillMaxSize()
@@ -907,7 +908,7 @@ internal class ToolbarOptionsIcons {
                             tint = tint,
                         )
                         // switch to, smol icon
-                        Icon(
+                        InfernoIcon(
                             modifier = Modifier
                                 .clip(CircleShape)
                                 .background(Color.Black)
@@ -932,7 +933,7 @@ internal class ToolbarOptionsIcons {
                         modifier = modifier.wrapContentHeight(unbounded = true),
                         contentAlignment = Alignment.Center,
                     ) {
-                        Icon(
+                        InfernoIcon(
                             modifier = Modifier
                                 .align(Alignment.Center)
                                 .fillMaxSize()

@@ -39,6 +39,7 @@ import java.lang.ref.WeakReference
 import java.util.Locale
 import com.shmibblez.inferno.browser.readermode.InfernoReaderViewFeatureState.FontType
 import com.shmibblez.inferno.browser.readermode.InfernoReaderViewFeatureState.ColorScheme
+import com.shmibblez.inferno.compose.base.InfernoIcon
 
 private val logger = Logger("ReaderView")
 private val ICON_SIZE = 18.dp
@@ -135,13 +136,12 @@ fun InfernoReaderViewControls(
         horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
     ) {
         // exit reader view
-        Icon(
+        InfernoIcon(
             modifier = Modifier
                 .size(ICON_SIZE)
                 .clickable(onClick = {
                     state.hideReaderView()
                 }),
-            tint = Color.White,
             painter = painterResource(id = R.drawable.ic_cross_24),
             contentDescription = "exit"
         )
@@ -175,9 +175,8 @@ fun InfernoReaderViewControls(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.Start),
             ) {
-                Icon(
+                InfernoIcon(
                     modifier = Modifier.size(ICON_SIZE),
-                    tint = Color.White,
                     painter = painterResource(id = R.drawable.ic_font_24),
                     contentDescription = when (state.config.fontType) {
                         FontType.SANSSERIF -> stringResource(R.string.mozac_feature_readerview_sans_serif_font_desc)
@@ -226,9 +225,8 @@ fun InfernoReaderViewControls(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.Start),
             ) {
-                Icon(
+                InfernoIcon(
                     modifier = Modifier.size(ICON_SIZE),
-                    tint = Color.White,
                     painter = painterResource(id = R.drawable.ic_color_palette_24),
                     contentDescription = when (state.config.colorScheme) {
                         ColorScheme.LIGHT -> stringResource(R.string.mozac_feature_readerview_light_color_scheme_desc)
@@ -247,7 +245,7 @@ fun InfernoReaderViewControls(
         }
 
         // decrease font size
-        Icon(
+        InfernoIcon(
             modifier = Modifier
                 .size(ICON_SIZE)
                 .clickable(
@@ -257,13 +255,13 @@ fun InfernoReaderViewControls(
                         state.config.fontSize -= 1
                     },
                 ),
-            tint = if (state.config.fontSize > MIN_TEXT_SIZE) Color.White else Color.DarkGray,
+            enabled = state.config.fontSize > MIN_TEXT_SIZE,
             painter = painterResource(id = R.drawable.text_decrease_24),
             contentDescription = stringResource(R.string.mozac_feature_readerview_font_size_decrease_desc),
         )
 
         // increase font size
-        Icon(
+        InfernoIcon(
             modifier = Modifier
                 .size(ICON_SIZE)
                 .clickable(
@@ -273,7 +271,7 @@ fun InfernoReaderViewControls(
                         state.config.fontSize += 1
                     },
                 ),
-            tint = if (state.config.fontSize < MAX_TEXT_SIZE) Color.White else Color.DarkGray,
+            enabled = state.config.fontSize < MAX_TEXT_SIZE,
             painter = painterResource(id = R.drawable.text_increase_24),
             contentDescription = stringResource(R.string.mozac_feature_readerview_font_size_increase_desc),
         )

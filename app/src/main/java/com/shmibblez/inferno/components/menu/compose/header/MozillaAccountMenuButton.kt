@@ -36,6 +36,7 @@ import mozilla.components.service.fxa.manager.AccountState.NotAuthenticated
 import mozilla.components.service.fxa.store.Account
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.Image
+import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.theme.FirefoxTheme
 import com.shmibblez.inferno.theme.Theme
 
@@ -120,7 +121,7 @@ internal fun MozillaAccountMenuButton(
         }
 
         if (accountState == AuthenticationProblem) {
-            Icon(
+            InfernoIcon(
                 painter = painterResource(R.drawable.mozac_ic_warning_fill_24),
                 contentDescription = null,
                 tint = FirefoxTheme.colors.iconCritical,
@@ -133,7 +134,7 @@ internal fun MozillaAccountMenuButton(
 
 @Composable
 private fun FallbackAvatarIcon() {
-    Icon(
+    InfernoIcon(
         painter = painterResource(id = R.drawable.mozac_ic_avatar_circle_24),
         contentDescription = null,
         modifier = Modifier

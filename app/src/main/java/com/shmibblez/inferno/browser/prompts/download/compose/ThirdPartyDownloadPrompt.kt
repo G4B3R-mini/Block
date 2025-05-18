@@ -22,6 +22,7 @@ import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplate
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateAction
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateButtonPosition
 import com.shmibblez.inferno.browser.prompts.download.compose.sub.AppsGrid
+import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.base.InfernoText
 import mozilla.components.feature.downloads.ui.DownloaderApp
 
@@ -49,11 +50,10 @@ internal fun ThirdPartyDownloadPrompt(
             horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.Start),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Icon(
+            InfernoIcon(
                 painter = painterResource(R.drawable.ic_download_24),
                 contentDescription = "",
                 modifier = Modifier.size(ICON_SIZE),
-                tint = Color.White,
             )
             InfernoText(
                 text = stringResource(R.string.mozac_feature_downloads_third_party_app_chooser_dialog_title),

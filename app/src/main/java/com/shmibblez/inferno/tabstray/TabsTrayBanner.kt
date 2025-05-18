@@ -46,6 +46,7 @@ import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.Banner
 import com.shmibblez.inferno.compose.BottomSheetHandle
 import com.shmibblez.inferno.compose.TabCounter
+import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.menu.DropdownMenu
 import com.shmibblez.inferno.compose.menu.MenuItem
 import com.shmibblez.inferno.tabstray.ext.getMenuItems
@@ -335,7 +336,7 @@ private fun MultiSelectBanner(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         IconButton(onClick = onExitSelectModeClick) {
-            Icon(
+            InfernoIcon(
                 painter = painterResource(id = R.drawable.ic_close),
                 contentDescription = stringResource(id = R.string.tab_tray_close_multiselect_content_description),
                 tint = FirefoxTheme.colors.iconOnColor,

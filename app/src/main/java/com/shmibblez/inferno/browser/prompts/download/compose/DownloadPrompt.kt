@@ -6,8 +6,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,6 +19,7 @@ import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplate
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateAction
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateButtonPosition
+import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.base.InfernoText
 import mozilla.components.browser.state.state.content.DownloadState
 
@@ -52,11 +51,10 @@ fun DownloadPrompt(
             horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.Start),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Icon(
+            InfernoIcon(
                 painter = painterResource(R.drawable.ic_download_24),
-                contentDescription = "download complete icon",
+                contentDescription = "download complete icon", // todo: string res
                 modifier = Modifier.size(ICON_SIZE),
-                tint = Color.White,
             )
             InfernoText(
                 text = stringResource(R.string.mozac_feature_downloads_dialog_title2),
@@ -67,9 +65,8 @@ fun DownloadPrompt(
                 maxLines = 1,
             )
         }
-        Text(
+        InfernoText(
             text = download.fileName ?: "",
-            color = Color.White,
             textAlign = TextAlign.Start,
             modifier = Modifier
                 .padding(horizontal = 16.dp)

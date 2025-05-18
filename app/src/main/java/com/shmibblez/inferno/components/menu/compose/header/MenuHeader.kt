@@ -29,6 +29,7 @@ import mozilla.components.service.fxa.manager.AccountState
 import mozilla.components.service.fxa.manager.AccountState.NotAuthenticated
 import mozilla.components.service.fxa.store.Account
 import com.shmibblez.inferno.R
+import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.theme.FirefoxTheme
 import com.shmibblez.inferno.theme.Theme
 
@@ -63,7 +64,7 @@ internal fun MenuHeader(
         IconButton(
             onClick = onHelpButtonClick,
         ) {
-            Icon(
+            InfernoIcon(
                 painter = painterResource(id = R.drawable.mozac_ic_help_circle_24),
                 contentDescription = stringResource(
                     id = R.string.browser_main_menu_content_description_help_button,
@@ -75,7 +76,7 @@ internal fun MenuHeader(
         IconButton(
             onClick = onSettingsButtonClick,
         ) {
-            Icon(
+            InfernoIcon(
                 painter = painterResource(id = R.drawable.mozac_ic_settings_24),
                 contentDescription = stringResource(
                     id = R.string.browser_main_menu_content_description_settings_button,

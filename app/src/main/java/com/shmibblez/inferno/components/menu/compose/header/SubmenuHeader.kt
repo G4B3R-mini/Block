@@ -27,6 +27,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.annotation.LightDarkPreview
 import com.shmibblez.inferno.R
+import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.theme.FirefoxTheme
 import com.shmibblez.inferno.theme.Theme
 
@@ -49,7 +50,7 @@ internal fun SubmenuHeader(
                 backButtonContentDescription?.also { this.contentDescription = it }
             },
         ) {
-            Icon(
+            InfernoIcon(
                 painter = painterResource(id = R.drawable.mozac_ic_back_24),
                 contentDescription = null,
                 tint = FirefoxTheme.colors.iconSecondary,

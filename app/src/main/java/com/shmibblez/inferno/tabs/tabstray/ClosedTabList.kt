@@ -38,6 +38,7 @@ import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.DismissibleItemBackground
 import com.shmibblez.inferno.compose.SwipeToDismissBox
 import com.shmibblez.inferno.compose.base.InfernoCheckbox
+import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.compose.rememberSwipeToDismissState
 import com.shmibblez.inferno.ext.toShortUrl
@@ -121,11 +122,10 @@ private fun ViewFullHistoryItem(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.Start),
     ) {
-        Icon(
+        InfernoIcon(
             painter = painterResource(R.drawable.ic_history_24),
             contentDescription = stringResource(R.string.recently_closed_show_full_history),
             modifier = Modifier.size(24.dp),
-            tint = Color.White,
         )
         InfernoText(text = stringResource(R.string.recently_closed_show_full_history))
     }
@@ -235,13 +235,12 @@ private fun ClosedTabListItem(
                         .size(size = 48.dp)
                         .testTag(TabsTrayTestTag.tabItemClose),
                 ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.mozac_ic_cross_24),
+                    InfernoIcon(
+                        painter = painterResource(id = R.drawable.ic_cross_24),
                         contentDescription = stringResource(
                             id = R.string.close_tab_title,
                             tab.toDisplayTitle(),
                         ),
-                        tint = Color.White, // FirefoxTheme.colors.iconPrimary,
                     )
                 }
             } else {

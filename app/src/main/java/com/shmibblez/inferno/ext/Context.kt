@@ -19,24 +19,15 @@ import mozilla.components.support.locale.LocaleManager
 import com.shmibblez.inferno.BrowserApplication
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.components.Components
-import com.shmibblez.inferno.components.components
 //import com.shmibblez.inferno.components.metrics.MetricController
 import com.shmibblez.inferno.components.toolbar.ToolbarPosition
 import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.theme.AcornWindowSize
 import com.shmibblez.inferno.settings.advanced.getSelectedLocale
 import com.shmibblez.inferno.utils.isLargeScreenSize
-import mozilla.components.browser.state.action.ContentAction
-import mozilla.components.browser.state.action.EngineAction
-import mozilla.components.browser.state.action.TabListAction
-import mozilla.components.browser.state.selector.findTab
-import mozilla.components.browser.state.state.BrowserState
 import mozilla.components.browser.state.state.SessionState
-import mozilla.components.browser.state.state.TabSessionState
-import mozilla.components.browser.state.state.createTab
 import mozilla.components.concept.engine.EngineSession
 import mozilla.components.concept.engine.EngineSession.LoadUrlFlags
 import mozilla.components.concept.storage.HistoryMetadataKey
-import mozilla.components.feature.tabs.TabsUseCases
 import java.lang.String.format
 import java.util.Locale
 
@@ -81,7 +72,7 @@ fun Components.newTab(
     )
 
     if (nextTo != null)
-        // move new tab next to current
+    // move new tab next to current
         this.useCases.tabsUseCases.moveTabs(listOf(tabId), nextTo, true)
 
     return tabId
@@ -182,8 +173,7 @@ fun Components.newTab(
 fun Context.asActivity() =
     (this as? ContextThemeWrapper)?.baseContext as? Activity ?: this as? Activity
 
-fun Context.getPreferenceKey(@StringRes resourceId: Int): String =
-    resources.getString(resourceId)
+fun Context.getPreferenceKey(@StringRes resourceId: Int): String = resources.getString(resourceId)
 
 /**
  * Gets the Root View with an activity context
@@ -194,6 +184,8 @@ fun Context.getRootView(): View? =
     asActivity()?.window?.decorView?.findViewById<View>(android.R.id.content) as? ViewGroup
 
 fun Context.settings() = components.settings
+
+fun Context.infernoTheme() = components.infernoTheme
 
 /**
  * Used to catch IllegalArgumentException that is thrown when

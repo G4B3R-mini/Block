@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,6 +18,7 @@ import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateAction
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateButtonPosition
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.prompts.download.compose.sub.AppsGrid
+import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.base.InfernoText
 import mozilla.components.feature.downloads.ui.DownloaderApp
 
@@ -46,11 +46,10 @@ fun DownloadAppChooserPrompt(
             horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.Start),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Icon(
+            InfernoIcon(
                 painter = painterResource(R.drawable.ic_download_24),
                 contentDescription = "",
                 modifier = Modifier.size(ICON_SIZE),
-                tint = Color.White,
             )
             InfernoText(
                 text = stringResource(R.string.mozac_feature_downloads_third_party_app_chooser_dialog_title),

@@ -17,7 +17,6 @@ import mozilla.components.feature.addons.migration.DefaultSupportedAddonsChecker
 import mozilla.components.feature.addons.update.DefaultAddonUpdater
 import mozilla.components.feature.autofill.AutofillConfiguration
 import mozilla.components.lib.crash.store.CrashAction
-import mozilla.components.lib.crash.store.CrashMiddleware
 import mozilla.components.lib.publicsuffixlist.PublicSuffixList
 import mozilla.components.support.base.android.NotificationsDelegate
 import mozilla.components.support.base.worker.Frequency
@@ -49,11 +48,11 @@ import com.shmibblez.inferno.perf.StartupActivityLog
 import com.shmibblez.inferno.perf.StartupStateProvider
 import com.shmibblez.inferno.perf.StrictModeManager
 import com.shmibblez.inferno.perf.lazyMonitored
+import com.shmibblez.inferno.settings.theme.InfernoThemeProvider
 import com.shmibblez.inferno.utils.ClipboardHandler
 import com.shmibblez.inferno.utils.Settings
 import com.shmibblez.inferno.wifi.WifiConnectionMonitor
 import mozilla.components.lib.crash.CrashReporter
-import mozilla.components.lib.crash.service.CrashReporterService
 import mozilla.components.lib.crash.service.MozillaSocorroService
 //import mozilla.components.lib.crash.CrashReporter
 import java.util.concurrent.TimeUnit
@@ -191,6 +190,8 @@ class Components(private val context: Context) {
     val strictMode by lazyMonitored { StrictModeManager(Config, this) }
 
     val settings by lazyMonitored { Settings(context) }
+    val infernoTheme by lazyMonitored { InfernoThemeProvider(context) }
+
     val fenixOnboarding by lazyMonitored { FenixOnboarding(context) }
 
 //    val reviewPromptController by lazyMonitored {

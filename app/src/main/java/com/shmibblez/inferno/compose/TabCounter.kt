@@ -27,6 +27,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.annotation.LightDarkPreview
 import com.shmibblez.inferno.R
+import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.ext.toLocaleString
 import com.shmibblez.inferno.tabstray.TabsTrayTestTag
 import com.shmibblez.inferno.theme.FirefoxTheme
@@ -109,7 +110,7 @@ fun TabCounter(
             },
         contentAlignment = Alignment.Center,
     ) {
-        Icon(
+        InfernoIcon(
             painter = painterResource(
                 id = mozilla.components.ui.tabcounter.R.drawable.mozac_ui_tabcounter_box,
             ),

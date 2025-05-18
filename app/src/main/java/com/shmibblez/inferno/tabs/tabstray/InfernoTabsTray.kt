@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Tab
@@ -50,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.IconButton
+import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.compose.menu.DropdownMenu
 import com.shmibblez.inferno.compose.menu.MenuItem
@@ -518,14 +518,13 @@ private fun SelectBanner(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Icon(
+        InfernoIcon(
             painter = painterResource(R.drawable.ic_close),
             contentDescription = stringResource(android.R.string.cancel),
             modifier = Modifier
                 .clickable { setMode.invoke(InfernoTabsTrayMode.Normal) }
                 .padding(ICON_PADDING)
                 .size(MENU_ICON_SIZE),
-            tint = Color.White,
         )
 
         InfernoText(
@@ -569,13 +568,12 @@ private fun SelectBanner(
                     showMenu = false
                 },
             )
-            Icon(
+            InfernoIcon(
                 painter = painterResource(R.drawable.ic_menu),
                 contentDescription = stringResource(id = R.string.open_tabs_menu),
                 modifier = Modifier
                     .fillMaxSize()
                     .align(Alignment.CenterVertically),
-                tint = Color.White,
             )
         }
     }
@@ -686,13 +684,12 @@ private fun NormalBanner(
                     showMenu = false
                 },
             )
-            Icon(
+            InfernoIcon(
                 painter = painterResource(R.drawable.ic_menu),
                 contentDescription = stringResource(id = R.string.open_tabs_menu),
                 modifier = Modifier
                     .fillMaxSize()
                     .align(Alignment.CenterVertically),
-                tint = Color.White,
             )
         }
     }
@@ -755,10 +752,9 @@ private fun BoxScope.NewTabButton(
                         IntOffset(x = 0, y = offset)
                     },
                 icon = {
-                    Icon(
+                    InfernoIcon(
                         painter = painterResource(R.drawable.ic_new_24),
                         contentDescription = "add tab",
-                        tint = Color.White,
                         modifier = Modifier
 //                            .padding(ICON_PADDING)
                             .size(20.dp),
@@ -794,11 +790,10 @@ private fun NormalTabsIcon(selected: Boolean, onSelected: () -> Unit, count: Int
                     .wrapContentHeight(unbounded = true),
                 contentAlignment = Alignment.Center,
             ) {
-                Icon(
+                InfernoIcon(
                     painter = painterResource(R.drawable.ic_tabcounter_box_24),
                     contentDescription = "normal tabs",
                     modifier = Modifier.fillMaxSize(),
-                    tint = Color.White,
                 )
                 InfernoText(
                     text = "$count",
@@ -821,11 +816,10 @@ private fun PrivateTabsIcon(selected: Boolean, onSelected: () -> Unit) {
             .padding(ICON_PADDING)
             .size(ICON_SIZE),
         icon = {
-            Icon(
+            InfernoIcon(
                 painter = painterResource(R.drawable.ic_private_browsing),
                 contentDescription = "private tabs",
                 modifier = Modifier.fillMaxSize(),
-                tint = Color.White,
             )
         },
     )
@@ -840,11 +834,10 @@ private fun SyncedTabsIcon(selected: Boolean, onSelected: () -> Unit) {
             .padding(ICON_PADDING)
             .size(ICON_SIZE),
         icon = {
-            Icon(
+            InfernoIcon(
                 painter = painterResource(R.drawable.ic_synced_tabs),
-                contentDescription = "private tabs",
+                contentDescription = "private tabs", // todo: string res
                 modifier = Modifier.fillMaxSize(),
-                tint = Color.White,
             )
         },
     )
@@ -859,11 +852,10 @@ private fun RecentlyClosedTabsIcon(selected: Boolean, onSelected: () -> Unit) {
             .padding(ICON_PADDING)
             .size(ICON_SIZE),
         icon = {
-            Icon(
+            InfernoIcon(
                 painter = painterResource(R.drawable.ic_delete),
-                contentDescription = "private tabs",
+                contentDescription = "private tabs", // todo: string res
                 modifier = Modifier.fillMaxSize(),
-                tint = Color.White,
             )
         },
     )

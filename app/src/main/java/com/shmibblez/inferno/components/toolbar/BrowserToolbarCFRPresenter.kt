@@ -42,6 +42,7 @@ import mozilla.components.support.ktx.kotlinx.coroutines.flow.ifAnyChanged
 //import com.shmibblez.inferno.GleanMetrics.TrackingProtection
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.tabstrip.isTabStripEnabled
+import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.ext.settings
 import com.shmibblez.inferno.theme.FirefoxTheme
 import com.shmibblez.inferno.utils.Settings
@@ -237,10 +238,9 @@ class BrowserToolbarCFRPresenter(
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            Icon(
+                            InfernoIcon(
                                 painter = painterResource(id = R.drawable.ic_cookies_disabled),
                                 contentDescription = null,
-                                tint = FirefoxTheme.colors.iconPrimary,
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(

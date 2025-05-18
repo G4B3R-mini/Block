@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
 import com.shmibblez.inferno.R
+import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.Divider
 import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.annotation.FlexibleWindowLightDarkPreview
 import com.shmibblez.inferno.theme.FirefoxTheme
@@ -123,10 +124,9 @@ fun Dropdown(
 
                 Spacer(modifier = Modifier.width(10.dp))
 
-                Icon(
+                InfernoIcon(
                     painter = painterResource(id = R.drawable.mozac_ic_dropdown_arrow),
                     contentDescription = null,
-                    tint = FirefoxTheme.colors.iconPrimary,
                 )
             }
 

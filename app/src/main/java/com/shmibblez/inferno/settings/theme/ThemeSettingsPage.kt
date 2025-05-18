@@ -21,6 +21,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.base.InfernoText
+import com.shmibblez.inferno.ext.getSelectedTheme
 import com.shmibblez.inferno.proto.InfernoSettings
 import com.shmibblez.inferno.proto.infernoSettingsDataStore
 import kotlinx.coroutines.launch
@@ -35,28 +36,10 @@ fun ThemeSettingsPage(goBack: () -> Unit) {
     val defaultThemes = remember { listOf(InfernoTheme.dark(context), InfernoTheme.light(context)) }
     var showAddThemeDialog by remember { mutableStateOf(false) }
 
-    fun getDefaultTheme(): InfernoTheme {
-        return when (settings.selectedDefaultTheme) {
-            InfernoSettings.DefaultTheme.INFERNO_LIGHT -> InfernoTheme.light(context)
-            InfernoSettings.DefaultTheme.INFERNO_DARK,
-            InfernoSettings.DefaultTheme.UNRECOGNIZED,
-            null,
-                -> InfernoTheme.dark(context)
-        }
-    }
-
-    fun getSelectedTheme(): InfernoTheme {
-        val customName = settings.selectedCustomTheme
-        if (customName.isEmpty()) return getDefaultTheme()
-        val customObj = settings.customThemesMap.getOrElse(customName) { null }
-        if (customObj == null) return getDefaultTheme()
-        return InfernoTheme.fromSettingsObj(customObj)
-    }
-
-    var selectedTheme by remember { mutableStateOf(getSelectedTheme()) }
+    var selectedTheme by remember { mutableStateOf(settings.getSelectedTheme(context)) }
 
     LaunchedEffect(settings.selectedDefaultTheme, settings.selectedCustomTheme) {
-        selectedTheme = getSelectedTheme()
+        selectedTheme = settings.getSelectedTheme(context)
     }
 
     Scaffold(

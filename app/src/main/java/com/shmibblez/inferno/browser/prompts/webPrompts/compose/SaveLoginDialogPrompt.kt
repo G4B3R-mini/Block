@@ -34,6 +34,7 @@ import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplate
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateAction
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateButtonPosition
+import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.base.InfernoOutlinedTextField
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.ext.components
@@ -186,11 +187,10 @@ fun SaveLoginDialogPrompt(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             // globe icon
-            Icon(
+            InfernoIcon(
                 painter = if (icon != null) BitmapPainter(icon.asImageBitmap()) else painterResource(
                     R.drawable.mozac_ic_globe_24
                 ),
-                tint = Color.White,
                 contentDescription = "",
                 modifier = Modifier.size(24.dp),
             )
@@ -215,9 +215,8 @@ fun SaveLoginDialogPrompt(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             // globe icon
-            Icon(
+            InfernoIcon(
                 painter = painterResource(R.drawable.mozac_ic_login_24),
-                tint = Color.White,
                 contentDescription = "",
                 modifier = Modifier.size(24.dp),
             )

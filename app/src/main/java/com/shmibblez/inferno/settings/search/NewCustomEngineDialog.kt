@@ -32,7 +32,7 @@ import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.getActivity
 import com.shmibblez.inferno.compose.base.InfernoOutlinedTextField
 import com.shmibblez.inferno.compose.base.InfernoText
-import com.shmibblez.inferno.compose.base.InfernoTextStyles
+import com.shmibblez.inferno.compose.base.InfernoTextStyle
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.settings.SupportUtils
 import kotlinx.coroutines.Dispatchers.IO
@@ -244,14 +244,14 @@ fun NewCustomEngineDialog(
                     // engine url hint
                     InfernoText(
                         text = stringResource(R.string.search_add_custom_engine_search_string_example),
-                        infernoStyle = InfernoTextStyles.Subtitle,
+                        infernoStyle = InfernoTextStyle.Subtitle,
                         modifier = Modifier.fillMaxWidth(),
                     )
 
                     // learn more
                     InfernoText(
                         text = stringResource(R.string.exceptions_empty_message_learn_more_link),
-                        infernoStyle = InfernoTextStyles.Subtitle,
+                        infernoStyle = InfernoTextStyle.Subtitle,
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
@@ -293,14 +293,14 @@ fun NewCustomEngineDialog(
                     // api url hint
                     InfernoText(
                         text = stringResource(R.string.search_add_custom_engine_suggest_string_example_2),
-                        infernoStyle = InfernoTextStyles.Subtitle,
+                        infernoStyle = InfernoTextStyle.Subtitle,
                         modifier = Modifier.fillMaxWidth(),
                     )
 
                     // description learn more
                     InfernoText(
                         text = stringResource(R.string.exceptions_empty_message_learn_more_link),
-                        infernoStyle = InfernoTextStyles.Subtitle,
+                        infernoStyle = InfernoTextStyle.Subtitle,
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {

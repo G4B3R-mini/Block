@@ -1,12 +1,67 @@
 package com.shmibblez.inferno.settings.theme
 
 import android.content.Context
+import androidx.compose.runtime.MutableState
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import com.shmibblez.inferno.proto.InfernoSettings
 import com.shmibblez.inferno.R
+import com.shmibblez.inferno.ext.getSelectedTheme
+import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.theme.darkColorPalette
+import com.shmibblez.inferno.proto.infernoSettingsDataStore
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import mozilla.components.ui.colors.PhotonColors
 
-class InfernoTheme(
+// todo: if doesnt work might have to make each value of InfernoSettings mutable
+class InfernoThemeProvider(context: Context) : MutableState<InfernoTheme> {
+    override var value: InfernoTheme = runBlocking { context.infernoSettingsDataStore.data.first().getSelectedTheme(context) }
+
+    init {
+        // launch collector that updates settings
+        MainScope().launch {
+            context.infernoSettingsDataStore.data.distinctUntilChanged(areEquivalent = ::didThemeChange)
+                .collect({
+                    // if custom set and exists, set custom theme and end fun
+                    value = it.getSelectedTheme(context)
+                })
+        }
+    }
+
+
+    private fun didThemeChange(old: InfernoSettings, new: InfernoSettings): Boolean {
+        when {
+            // if default theme changed
+            old.selectedCustomTheme.isBlank() && new.selectedCustomTheme.isBlank() -> {
+                return old.selectedDefaultTheme == new.selectedDefaultTheme
+            }
+            // if from default to custom or vice versa
+            (old.selectedCustomTheme.isBlank() && new.selectedCustomTheme.isNotBlank()) || (old.selectedCustomTheme.isNotBlank() && new.selectedCustomTheme.isBlank()) -> {
+                return true
+            }
+            // if custom theme changed
+            else -> {
+                val oldTheme = old.customThemesMap.getOrElse(old.selectedCustomTheme) { null }
+                val newTheme = new.customThemesMap.getOrElse(new.selectedCustomTheme) { null }
+                if (oldTheme == null || newTheme == null) return false
+                return oldTheme.timeSet == newTheme.timeSet
+            }
+        }
+    }
+
+    override fun component1(): InfernoTheme {
+        return value
+    }
+
+    override fun component2(): (InfernoTheme) -> Unit {
+        return { value = it }
+    }
+}
+
+open class InfernoTheme(
     var name: String,
     val defaultType: InfernoSettings.DefaultTheme? = null,
     // text (primary: enabled, secondary: disabled / hint / subtitle)
@@ -31,6 +86,36 @@ class InfernoTheme(
         get() = defaultType != null
     val isCustom: Boolean
         get() = defaultType == null
+
+    fun copy(
+        name: String? = null,
+        primaryTextColor: Color? = null,
+        secondaryTextColor: Color? = null,
+        primaryIconColor: Color? = null,
+        secondaryIconColor: Color? = null,
+        primaryOutlineColor: Color? = null,
+        secondaryOutlineColor: Color? = null,
+        primaryActionColor: Color? = null,
+        secondaryActionColor: Color? = null,
+        errorColor: Color? = null,
+        primaryBackgroundColor: Color? = null,
+        secondaryBackgroundColor: Color? = null,
+    ) = InfernoTheme(
+        name = name ?: this.name,
+        defaultType = null,
+        primaryTextColor = primaryTextColor ?: this.primaryTextColor,
+        secondaryTextColor = secondaryTextColor ?: this.secondaryTextColor,
+        primaryIconColor = primaryIconColor ?: this.primaryIconColor,
+        secondaryIconColor = secondaryIconColor ?: this.secondaryIconColor,
+        primaryOutlineColor = primaryOutlineColor ?: this.primaryOutlineColor,
+        secondaryOutlineColor = secondaryOutlineColor ?: this.secondaryOutlineColor,
+        primaryActionColor = primaryActionColor ?: this.primaryActionColor,
+        secondaryActionColor = secondaryActionColor ?: this.secondaryActionColor,
+        errorColor = errorColor ?: this.errorColor,
+        primaryBackgroundColor = primaryBackgroundColor ?: this.primaryBackgroundColor,
+        secondaryBackgroundColor = secondaryBackgroundColor ?: this.secondaryBackgroundColor,
+    )
+
 
     fun toSettingsObj(): InfernoSettings.InfernoTheme {
         // todo: use builder to return InfernoSettings.InfernoTheme
@@ -58,7 +143,7 @@ class InfernoTheme(
             primaryIconColor = Color.White,
             secondaryIconColor = Color.White.copy(alpha = 0.75F),
             primaryOutlineColor = Color.White,
-            secondaryOutlineColor = Color.White.copy(alpha = 0.75F),
+            secondaryOutlineColor = Color.Red,
             primaryActionColor = Color.Red,
             secondaryActionColor = Color.Red.copy(alpha = 0.75F),
             errorColor = Color.Red,
@@ -80,6 +165,53 @@ class InfernoTheme(
             errorColor = Color.Red,
             primaryBackgroundColor = Color.Black,
             secondaryBackgroundColor = Color.DarkGray,
+        )
+
+        // todo: refine incog based on moz private theme
+//        val privateColorPalette = darkColorPalette.copy(
+//            layer1 = PhotonColors.Violet90,
+//            layer2 = PhotonColors.Violet90,
+//            layer3 = PhotonColors.Ink90,
+//            layerSearch = PhotonColors.Ink90,
+//            borderPrimary = PhotonColors.Ink05,
+//            borderSecondary = PhotonColors.Ink10,
+//            borderToolbarDivider = PhotonColors.Violet80,
+//            tabActive = PhotonColors.Purple60,
+//            tabInactive = PhotonColors.Ink90,
+//        )
+
+        // todo: refine
+        fun incognitoDark(context: Context) = InfernoTheme(
+            defaultType = InfernoSettings.DefaultTheme.INFERNO_LIGHT,
+            name = context.getString(R.string.preference_light_theme),
+            primaryTextColor = Color.White,
+            secondaryTextColor = Color.White.copy(alpha = 0.75F),
+            primaryIconColor = Color.White,
+            secondaryIconColor = Color.White.copy(alpha = 0.75F),
+            primaryOutlineColor = Color.White,
+            secondaryOutlineColor = PhotonColors.Purple60,
+            primaryActionColor = PhotonColors.Purple60,
+            secondaryActionColor = PhotonColors.Purple60.copy(alpha = 0.75F),
+            errorColor = Color.Red,
+            primaryBackgroundColor = Color.Black,
+            secondaryBackgroundColor = PhotonColors.Ink90,
+        )
+
+        // todo: refine
+        fun incognitoLight(context: Context) = InfernoTheme(
+            defaultType = InfernoSettings.DefaultTheme.INFERNO_LIGHT,
+            name = context.getString(R.string.preference_light_theme),
+            primaryTextColor = Color.White,
+            secondaryTextColor = Color.White.copy(alpha = 0.75F),
+            primaryIconColor = Color.White,
+            secondaryIconColor = Color.White.copy(alpha = 0.75F),
+            primaryOutlineColor = Color.White,
+            secondaryOutlineColor = PhotonColors.Purple60,
+            primaryActionColor = PhotonColors.Purple60,
+            secondaryActionColor = PhotonColors.Purple60.copy(alpha = 0.75F),
+            errorColor = Color.Red,
+            primaryBackgroundColor = PhotonColors.Violet90,
+            secondaryBackgroundColor = PhotonColors.Violet80,
         )
 
         fun fromSettingsObj(theme: InfernoSettings.InfernoTheme): InfernoTheme = InfernoTheme(

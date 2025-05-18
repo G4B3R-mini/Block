@@ -22,6 +22,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
+import com.shmibblez.inferno.compose.base.InfernoIcon
 import mozilla.components.feature.downloads.ui.DownloaderApp
 
 @Composable
@@ -64,7 +65,7 @@ private fun DownloaderAppItem(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Spacer(modifier = Modifier.height(8.dp))
-        Icon(
+        InfernoIcon(
             modifier = Modifier.size(40.dp),
             painter = rememberDrawablePainter(downloaderApp.resolver.loadIcon(context.packageManager)),
             tint = Color.Transparent,

@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.annotation.LightDarkPreview
 import com.shmibblez.inferno.R
+import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.button.PrimaryButton
 import com.shmibblez.inferno.theme.FirefoxTheme
 
@@ -145,7 +146,7 @@ private fun MessageCardIconButton(
         modifier = Modifier.size(20.dp),
         onClick = onCloseButtonClick,
     ) {
-        Icon(
+        InfernoIcon(
             painter = painterResource(R.drawable.mozac_ic_cross_20),
             contentDescription = stringResource(
                 R.string.content_description_close_button,

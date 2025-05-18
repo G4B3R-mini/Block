@@ -72,6 +72,7 @@ import com.shmibblez.inferno.compose.Favicon
 import com.shmibblez.inferno.compose.MenuItem
 import com.shmibblez.inferno.compose.TextField
 import com.shmibblez.inferno.compose.TextFieldColors
+import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.button.FloatingActionButton
 import com.shmibblez.inferno.compose.core.Action
 import com.shmibblez.inferno.compose.list.IconListItem
@@ -265,13 +266,12 @@ private fun BookmarksList(
                                     onClick = { showMenu = true },
                                     modifier = Modifier.size(24.dp),
                                 ) {
-                                    Icon(
+                                    InfernoIcon(
                                         painter = painterResource(R.drawable.mozac_ic_ellipsis_vertical_24),
                                         contentDescription = stringResource(
                                             R.string.bookmark_item_menu_button_content_description,
                                             item.title,
                                         ),
-                                        tint = FirefoxTheme.colors.iconPrimary,
                                     )
                                 }
 
@@ -307,13 +307,12 @@ private fun BookmarksList(
                                             onClick = { showMenu = true },
                                             modifier = Modifier.size(24.dp),
                                         ) {
-                                            Icon(
+                                            InfernoIcon(
                                                 painter = painterResource(R.drawable.mozac_ic_ellipsis_vertical_24),
                                                 contentDescription = stringResource(
                                                     R.string.bookmark_item_menu_button_content_description,
                                                     item.title,
                                                 ),
-                                                tint = FirefoxTheme.colors.iconPrimary,
                                             )
                                         }
 
@@ -386,7 +385,7 @@ private fun BookmarksListTopBar(
             },
             navigationIcon = {
                 IconButton(onClick = { store.dispatch(BackClicked) }) {
-                    Icon(
+                    InfernoIcon(
                         painter = painterResource(R.drawable.mozac_ic_back_24),
                         contentDescription = stringResource(R.string.bookmark_navigate_back_button_content_description),
                         tint = iconColor,
@@ -400,7 +399,7 @@ private fun BookmarksListTopBar(
                             Unit
                         } else {
                             IconButton(onClick = { store.dispatch(AddFolderClicked) }) {
-                                Icon(
+                                InfernoIcon(
                                     painter = painterResource(R.drawable.mozac_ic_folder_add_24),
                                     contentDescription = stringResource(
                                         R.string.bookmark_select_folder_new_folder_button_title,
@@ -412,19 +411,18 @@ private fun BookmarksListTopBar(
 
                         if (!isCurrentFolderMobileRoot) {
                             IconButton(onClick = { store.dispatch(CloseClicked) }) {
-                                Icon(
+                                InfernoIcon(
                                     painter = painterResource(R.drawable.mozac_ic_cross_24),
                                     contentDescription = stringResource(
                                         R.string.content_description_close_button,
                                     ),
-                                    tint = FirefoxTheme.colors.iconPrimary,
                                 )
                             }
                         }
                     }
                     selectedItems.any { it is BookmarkItem.Folder } -> {
                         IconButton(onClick = { store.dispatch(BookmarksListMenuAction.MultiSelect.MoveClicked) }) {
-                            Icon(
+                            InfernoIcon(
                                 painter = painterResource(R.drawable.mozac_ic_folder_arrow_right_24),
                                 contentDescription = stringResource(R.string.bookmark_menu_move_button),
                                 tint = iconColor,
@@ -434,7 +432,7 @@ private fun BookmarksListTopBar(
                         IconButton(onClick = {
                             store.dispatch(BookmarksListMenuAction.MultiSelect.DeleteClicked)
                         }) {
-                            Icon(
+                            InfernoIcon(
                                 painter = painterResource(R.drawable.mozac_ic_delete_24),
                                 contentDescription = stringResource(R.string.bookmark_menu_delete_button),
                                 tint = iconColor,
@@ -444,7 +442,7 @@ private fun BookmarksListTopBar(
                     else -> {
                         if (selectedItems.size == 1) {
                             IconButton(onClick = { store.dispatch(BookmarksListMenuAction.MultiSelect.EditClicked) }) {
-                                Icon(
+                                InfernoIcon(
                                     painter = painterResource(R.drawable.mozac_ic_edit_24),
                                     contentDescription = stringResource(R.string.bookmark_menu_edit_button),
                                     tint = iconColor,
@@ -452,7 +450,7 @@ private fun BookmarksListTopBar(
                             }
                         }
                         IconButton(onClick = { store.dispatch(BookmarksListMenuAction.MultiSelect.MoveClicked) }) {
-                            Icon(
+                            InfernoIcon(
                                 painter = painterResource(R.drawable.mozac_ic_folder_arrow_right_24),
                                 contentDescription = stringResource(R.string.bookmark_menu_move_button),
                                 tint = iconColor,
@@ -460,7 +458,7 @@ private fun BookmarksListTopBar(
                         }
                         Box {
                             IconButton(onClick = { showMenu = true }) {
-                                Icon(
+                                InfernoIcon(
                                     painter = painterResource(R.drawable.mozac_ic_ellipsis_vertical_24),
                                     contentDescription = stringResource(
                                         R.string.content_description_menu,
@@ -654,22 +652,20 @@ private fun SelectFolderTopBar(
         },
         navigationIcon = {
             IconButton(onClick = onBackClick) {
-                Icon(
+                InfernoIcon(
                     painter = painterResource(R.drawable.mozac_ic_back_24),
                     contentDescription = stringResource(R.string.bookmark_navigate_back_button_content_description),
-                    tint = FirefoxTheme.colors.iconPrimary,
                 )
             }
         },
         actions = {
             if (onNewFolderClick != null) {
                 IconButton(onClick = onNewFolderClick) {
-                    Icon(
+                    InfernoIcon(
                         painter = painterResource(R.drawable.mozac_ic_folder_add_24),
                         contentDescription = stringResource(
                             R.string.bookmark_add_new_folder_button_content_description,
                         ),
-                        tint = FirefoxTheme.colors.iconPrimary,
                     )
                 }
             }
@@ -942,19 +938,17 @@ private fun EditFolderTopBar(
         },
         navigationIcon = {
             IconButton(onClick = onBackClick) {
-                Icon(
+                InfernoIcon(
                     painter = painterResource(R.drawable.mozac_ic_back_24),
                     contentDescription = stringResource(R.string.bookmark_navigate_back_button_content_description),
-                    tint = FirefoxTheme.colors.iconPrimary,
                 )
             }
         },
         actions = {
             IconButton(onClick = onDeleteClick) {
-                Icon(
+                InfernoIcon(
                     painter = painterResource(R.drawable.mozac_ic_delete_24),
                     contentDescription = stringResource(R.string.bookmark_delete_folder_content_description),
-                    tint = FirefoxTheme.colors.iconPrimary,
                 )
             }
         },
@@ -1023,10 +1017,9 @@ private fun AddFolderTopBar(onBackClick: () -> Unit) {
         },
         navigationIcon = {
             IconButton(onClick = onBackClick) {
-                Icon(
+                InfernoIcon(
                     painter = painterResource(R.drawable.mozac_ic_back_24),
                     contentDescription = stringResource(R.string.bookmark_navigate_back_button_content_description),
-                    tint = FirefoxTheme.colors.iconPrimary,
                 )
             }
         },
@@ -1136,10 +1129,9 @@ private fun FolderInfo(
                 .fillMaxWidth()
                 .clickable { onFolderClicked() },
         ) {
-            Icon(
+            InfernoIcon(
                 painter = painterResource(id = iconsR.drawable.mozac_ic_folder_24),
                 contentDescription = "",
-                tint = FirefoxTheme.colors.textPrimary,
             )
             Text(
                 text = folderTitle,
@@ -1171,10 +1163,9 @@ private fun ClearableTextField(
         trailingIcon = {
             if (isFocused && value.isNotEmpty()) {
                 IconButton(onClick = { onValueChange("") }) {
-                    Icon(
+                    InfernoIcon(
                         painter = painterResource(id = iconsR.drawable.mozac_ic_cross_circle_fill_24),
                         contentDescription = null,
-                        tint = FirefoxTheme.colors.textPrimary,
                     )
                 }
             }
@@ -1203,19 +1194,17 @@ private fun EditBookmarkTopBar(
         },
         navigationIcon = {
             IconButton(onClick = onBackClick) {
-                Icon(
+                InfernoIcon(
                     painter = painterResource(R.drawable.mozac_ic_back_24),
                     contentDescription = stringResource(R.string.bookmark_navigate_back_button_content_description),
-                    tint = FirefoxTheme.colors.iconPrimary,
                 )
             }
         },
         actions = {
             IconButton(onClick = onDeleteClicked) {
-                Icon(
+                InfernoIcon(
                     painter = painterResource(R.drawable.mozac_ic_delete_24),
                     contentDescription = stringResource(R.string.bookmark_delete_bookmark_content_description),
-                    tint = FirefoxTheme.colors.iconPrimary,
                 )
             }
         },

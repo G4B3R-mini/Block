@@ -40,9 +40,11 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.infernoFeatureState.InfernoFeatureState
+import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.ext.bitmapForUrl
 import com.shmibblez.inferno.ext.components
+import com.shmibblez.inferno.ext.infernoTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -272,11 +274,11 @@ private fun ReauthComponent(state: AccountState, onClick: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         // account icon
-        Icon(
+        InfernoIcon(
             painter = painterResource(R.drawable.ic_account_warning),
             contentDescription = "",
             modifier = Modifier.size(72.dp),
-            tint = colorResource(R.color.sync_error_text_color)
+            tint = LocalContext.current.infernoTheme().value.errorColor,
         )
         Column(
             horizontalAlignment = Alignment.Start,

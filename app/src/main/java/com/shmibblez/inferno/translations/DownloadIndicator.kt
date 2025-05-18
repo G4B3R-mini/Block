@@ -37,6 +37,7 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.unit.dp
 import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.annotation.LightDarkPreview
 import com.shmibblez.inferno.R
+import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.button.PrimaryButton
 import com.shmibblez.inferno.theme.FirefoxTheme
 
@@ -61,14 +62,13 @@ fun DownloadIconIndicator(
     tint: Color = FirefoxTheme.colors.iconPrimary,
     contentDescription: String? = null,
 ) {
-    Icon(
+    InfernoIcon(
         painter = icon,
         modifier = modifier.then(
             Modifier
                 .rotate(rotationAnimation()),
         ),
         contentDescription = contentDescription,
-        tint = tint,
     )
 }
 
@@ -90,11 +90,10 @@ fun DownloadInProgressIndicator(
     Box(
         contentAlignment = Alignment.Center,
     ) {
-        Icon(
+        InfernoIcon(
             modifier = modifier.size(8.dp),
             painter = icon,
             contentDescription = contentDescription,
-            tint = tint,
         )
         CircularProgressIndicator(
             modifier = modifier.size(30.dp),

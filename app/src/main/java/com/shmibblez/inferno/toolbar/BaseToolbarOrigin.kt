@@ -63,8 +63,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.ComponentDimens
+import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.dpToPx
+import com.shmibblez.inferno.ext.infernoTheme
 import mozilla.components.browser.state.search.SearchEngine
 import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.browser.state.state.searchEngines
@@ -400,20 +402,18 @@ fun ToolbarEmptyIndicator(enabled: Boolean) {
 private fun ToolbarTrackingProtectionIndicator(trackingProtection: SiteTrackingProtection?) {
     when (trackingProtection) {
         SiteTrackingProtection.ON_TRACKERS_BLOCKED, SiteTrackingProtection.ON_NO_TRACKERS_BLOCKED -> {
-            Icon(
+            InfernoIcon(
                 modifier = Modifier.size(TOOLBAR_INDICATOR_ICON_SIZE),
                 painter = painterResource(id = R.drawable.ic_tracking_protection_on_trackers_blocked),
                 contentDescription = "tracking protection indicator",
-                tint = Color.White
             )
         }
 
         SiteTrackingProtection.OFF_FOR_A_SITE -> {
-            Icon(
+            InfernoIcon(
                 modifier = Modifier.size(TOOLBAR_INDICATOR_ICON_SIZE),
                 painter = painterResource(id = R.drawable.ic_tracking_protection_on_trackers_blocked),
                 contentDescription = "tracking protection indicator",
-                tint = Color.White
             )
         }
 
@@ -426,18 +426,16 @@ private fun ToolbarTrackingProtectionIndicator(trackingProtection: SiteTrackingP
 @Composable
 private fun ToolbarSecurityIndicator(siteSecurity: SiteSecurity) {
     if (siteSecurity == SiteSecurity.SECURE) {
-        Icon(
+        InfernoIcon(
             modifier = Modifier.size(TOOLBAR_INDICATOR_ICON_SIZE),
             painter = painterResource(id = R.drawable.ic_lock_20),
             contentDescription = "security indicator",
-            tint = Color.White
         )
     } else if (siteSecurity == SiteSecurity.INSECURE) {
-        Icon(
+        InfernoIcon(
             modifier = Modifier.size(TOOLBAR_INDICATOR_ICON_SIZE),
             painter = painterResource(id = R.drawable.ic_broken_lock),
             contentDescription = "security indicator",
-            tint = Color.White
         )
     }
 }
@@ -491,13 +489,12 @@ private fun ToolbarSearchEngineSelector(
                     )
                 }
             }
-            Icon(
+            InfernoIcon(
                 painter = painterResource(id = R.drawable.ic_chevron_down_24),
                 contentDescription = "open menu",
                 modifier = Modifier
                     .padding(horizontal = 4.dp)
                     .size(6.dp),
-                tint = Color.White,
             )
         }
     }
@@ -511,13 +508,13 @@ private fun ToolbarClearText(onClick: () -> Unit, modifier: Modifier) {
         modifier = modifier
             .size(TOOLBAR_INDICATOR_ICON_SIZE)
             .clickable(onClick = onClick),
-        tint = Color.LightGray,
+        tint = LocalContext.current.infernoTheme().value.secondaryIconColor,
     )
 }
 
 @Composable
 private fun ToolbarUndoClearText(onClick: () -> Unit, modifier: Modifier) {
-    Icon(
+    InfernoIcon(
         painter = painterResource(R.drawable.ic_undo_24),
         contentDescription = "",
         modifier = modifier

@@ -26,6 +26,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.PlaceholderCard
+import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.button.PrimaryButton
 import com.shmibblez.inferno.home.fake.FakeHomepagePreview
 import com.shmibblez.inferno.home.sessioncontrol.CollectionInteractor
@@ -55,7 +56,7 @@ internal fun CollectionsPlaceholder(
                     onClick = interactor::onRemoveCollectionsPlaceholder,
                     modifier = Modifier.size(20.dp),
                 ) {
-                    Icon(
+                    InfernoIcon(
                         painter = painterResource(R.drawable.mozac_ic_cross_20),
                         contentDescription = stringResource(
                             R.string.remove_home_collection_placeholder_content_description,

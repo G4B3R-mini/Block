@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.annotation.LightDarkPreview
 import com.shmibblez.inferno.R
+import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.button.PrimaryButton
 import com.shmibblez.inferno.theme.FirefoxTheme
 
@@ -116,11 +117,10 @@ private fun Menu(
                         if (hasCheckedItems || canShowCheckItems) {
                             if (item.isChecked) {
                                 selectedItemIndex = index
-                                Icon(
+                                InfernoIcon(
                                     painter = painterResource(id = R.drawable.mozac_ic_checkmark_24),
                                     modifier = Modifier.size(24.dp),
                                     contentDescription = null,
-                                    tint = FirefoxTheme.colors.iconPrimary,
                                 )
                             } else {
                                 Spacer(

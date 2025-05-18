@@ -36,6 +36,7 @@ import com.shmibblez.inferno.R.drawable
 import com.shmibblez.inferno.R.string
 import com.shmibblez.inferno.compose.ContextualMenu
 import com.shmibblez.inferno.compose.MenuItem
+import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.list.ExpandableListHeader
 import com.shmibblez.inferno.ext.getIconColor
 import com.shmibblez.inferno.home.fake.FakeHomepagePreview
@@ -94,7 +95,7 @@ fun Collection(
                 .fillMaxHeight(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Icon(
+            InfernoIcon(
                 painter = painterResource(drawable.ic_tab_collection),
                 contentDescription = null,
                 modifier = Modifier.padding(
@@ -117,10 +118,9 @@ fun Collection(
                         IconButton(
                             onClick = { onCollectionShareTabsClicked(collection) },
                         ) {
-                            Icon(
+                            InfernoIcon(
                                 painter = painterResource(drawable.ic_share),
                                 contentDescription = stringResource(string.share_button_content_description),
-                                tint = FirefoxTheme.colors.iconPrimary,
                             )
                         }
 
@@ -129,12 +129,11 @@ fun Collection(
                                 isMenuExpanded = !isMenuExpanded
                             },
                         ) {
-                            Icon(
+                            InfernoIcon(
                                 painter = painterResource(drawable.ic_menu),
                                 contentDescription = stringResource(
                                     string.collection_menu_button_content_description,
                                 ),
-                                tint = FirefoxTheme.colors.iconPrimary,
                             )
 
                             ContextualMenu(

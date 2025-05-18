@@ -32,7 +32,7 @@ import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.shmibblez.inferno.compose.base.InfernoText
-import com.shmibblez.inferno.compose.base.InfernoTextStyles
+import com.shmibblez.inferno.compose.base.InfernoTextStyle
 import com.shmibblez.inferno.settings.compose.components.PreferenceConstants
 
 @Composable
@@ -56,7 +56,7 @@ fun ThemeSelector(
         header {
             InfernoText(
                 text = "Default Themes", // todo: string res
-                infernoStyle = InfernoTextStyles.Title
+                infernoStyle = InfernoTextStyle.Title
             )
         }
         items(defaultThemes) {
@@ -65,7 +65,7 @@ fun ThemeSelector(
         header {
             InfernoText(
                 text = "Custom Themes", // todo: string res
-                infernoStyle = InfernoTextStyles.Title
+                infernoStyle = InfernoTextStyle.Title
             )
         }
         if (customThemes.isNotEmpty()) {
@@ -74,7 +74,10 @@ fun ThemeSelector(
             }
         }
         item {
-            AddCustomThemeButton(onAddTheme)
+            AddCustomThemeButton(
+                onAddTheme = onAddTheme,
+                theme = selectedDefault ?: selectedCustom!!,
+            )
         }
     }
 }
@@ -225,7 +228,7 @@ private fun AddCustomThemeButton(onAddTheme: () -> Unit, theme: InfernoTheme) {
                 width = 2.dp,
                 color = theme.primaryOutlineColor,
                 shape = MaterialTheme.shapes.small,
-            ),
+            ).clickable(onClick = onAddTheme),
     ) {
 
     }

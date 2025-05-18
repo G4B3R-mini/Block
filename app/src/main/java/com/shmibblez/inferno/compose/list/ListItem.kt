@@ -55,6 +55,7 @@ import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.annotation.Li
 import mozilla.components.ui.colors.PhotonColors
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.Favicon
+import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.button.RadioButton
 import com.shmibblez.inferno.compose.ext.thenConditional
 import com.shmibblez.inferno.theme.FirefoxTheme
@@ -156,7 +157,7 @@ fun TextListItem(
         Spacer(modifier = Modifier.width(16.dp))
 
         if (onIconClick == null) {
-            Icon(
+            InfernoIcon(
                 painter = iconPainter,
                 contentDescription = iconDescription,
                 tint = iconTint,
@@ -168,7 +169,7 @@ fun TextListItem(
                     .size(ICON_SIZE)
                     .clearAndSetSemantics {},
             ) {
-                Icon(
+                InfernoIcon(
                     painter = iconPainter,
                     contentDescription = iconDescription,
                     tint = iconTint,
@@ -262,10 +263,9 @@ fun FaviconListItem(
                         .size(ICON_SIZE),
                 ),
             ) {
-                Icon(
+                InfernoIcon(
                     painter = iconPainter,
                     contentDescription = iconDescription,
-                    tint = FirefoxTheme.colors.iconPrimary,
                 )
             }
         },
@@ -334,7 +334,7 @@ fun IconListItem(
         onClick = onClick,
         onLongClick = onLongClick,
         beforeListAction = {
-            Icon(
+            InfernoIcon(
                 painter = beforeIconPainter,
                 contentDescription = beforeIconDescription,
                 tint = if (enabled) beforeIconTint else FirefoxTheme.colors.iconDisabled,
@@ -364,7 +364,7 @@ fun IconListItem(
             Spacer(modifier = Modifier.width(16.dp))
 
             if (onAfterIconClick == null) {
-                Icon(
+                InfernoIcon(
                     painter = afterIconPainter,
                     contentDescription = afterIconDescription,
                     tint = tint,
@@ -379,7 +379,7 @@ fun IconListItem(
                         },
                     enabled = enabled,
                 ) {
-                    Icon(
+                    InfernoIcon(
                         painter = afterIconPainter,
                         contentDescription = afterIconDescription,
                         tint = tint,
@@ -524,10 +524,9 @@ fun SelectableFaviconListItem(
                         onClick = onIconClick,
                         modifier = Modifier.size(ICON_SIZE),
                     ) {
-                        Icon(
+                        InfernoIcon(
                             painter = iconPainter,
                             contentDescription = iconDescription,
-                            tint = FirefoxTheme.colors.iconPrimary,
                         )
                     }
                 }
@@ -604,7 +603,7 @@ fun SelectableIconListItem(
             SelectableItemIcon(
                 isSelected = isSelected,
                 icon = {
-                    Icon(
+                    InfernoIcon(
                         painter = beforeIconPainter,
                         contentDescription = beforeIconDescription,
                         tint = if (enabled) beforeIconTint else FirefoxTheme.colors.iconDisabled,
@@ -638,7 +637,7 @@ fun SelectableIconListItem(
             when {
                 afterIconPainter != null -> {
                     if (onAfterIconClick == null) {
-                        Icon(
+                        InfernoIcon(
                             painter = afterIconPainter,
                             contentDescription = afterIconDescription,
                             tint = tint,
@@ -649,7 +648,7 @@ fun SelectableIconListItem(
                             modifier = Modifier.size(ICON_SIZE),
                             enabled = enabled,
                         ) {
-                            Icon(
+                            InfernoIcon(
                                 painter = afterIconPainter,
                                 contentDescription = afterIconDescription,
                                 tint = tint,
@@ -690,10 +689,9 @@ fun SelectableListItem(
         beforeListAction = {
             SelectableItemIcon(
                 icon = {
-                    Icon(
+                    InfernoIcon(
                         painter = painterResource(id = icon),
                         contentDescription = null,
-                        tint = FirefoxTheme.colors.iconPrimary,
                     )
                 },
                 isSelected = isSelected,
@@ -726,11 +724,10 @@ private fun SelectableItemIcon(
                 .size(24.dp),
             contentAlignment = Alignment.Center,
         ) {
-            Icon(
+            InfernoIcon(
                 painter = painterResource(id = R.drawable.mozac_ic_checkmark_24),
                 contentDescription = null,
                 modifier = Modifier.size(12.dp),
-                tint = PhotonColors.White,
             )
         }
     } else {
@@ -1231,9 +1228,8 @@ private fun SelectableListItemPreview() {
                         onClick = {},
                         modifier = Modifier.size(ICON_SIZE),
                     ) {
-                        Icon(
+                        InfernoIcon(
                             painter = painterResource(R.drawable.mozac_ic_ellipsis_vertical_24),
-                            tint = FirefoxTheme.colors.iconPrimary,
                             contentDescription = null,
                         )
                     }

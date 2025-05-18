@@ -26,6 +26,7 @@ import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplate
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateAction
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateButtonPosition
+import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.ext.components
 import kotlinx.coroutines.launch
@@ -82,9 +83,8 @@ fun CreditCardSaveDialogPrompt(
         ) {
             // todo: tint should be text color primary
             // lock icon
-            Icon(
+            InfernoIcon(
                 painter = painterResource(R.drawable.mozac_ic_lock_24),
-                tint = Color.White,
                 contentDescription = "secure lock",
                 modifier = Modifier.size(24.dp)
             )

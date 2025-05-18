@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.annotation.LightDarkPreview
 import com.shmibblez.inferno.R
+import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.shopping.ui.ext.headingResource
 import com.shmibblez.inferno.theme.FirefoxTheme
 
@@ -99,14 +100,13 @@ fun ExpandableInfoCardContainer(
                 R.drawable.mozac_ic_chevron_down_20
             }
 
-            Icon(
+            InfernoIcon(
                 painter = painterResource(id = chevronDrawable),
                 contentDescription = if (isExpanded) {
                     stringResource(R.string.a11y_state_label_expanded)
                 } else {
                     stringResource(R.string.a11y_state_label_collapsed)
                 },
-                tint = FirefoxTheme.colors.iconPrimary,
             )
         }
 

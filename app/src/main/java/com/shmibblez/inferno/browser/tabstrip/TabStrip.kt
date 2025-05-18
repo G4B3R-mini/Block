@@ -71,6 +71,7 @@ import com.shmibblez.inferno.components.appstate.AppAction
 import com.shmibblez.inferno.components.components
 import com.shmibblez.inferno.compose.Favicon
 import com.shmibblez.inferno.compose.HorizontalFadingEdgeBox
+import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.ext.thenConditional
 import com.shmibblez.inferno.tabstray.browser.compose.DragItemContainer
 import com.shmibblez.inferno.tabstray.browser.compose.createListReorderState
@@ -193,9 +194,8 @@ private fun TabStripContent(
             IconButton(
                 onClick = onPrivateModeToggleClick,
             ) {
-                Icon(
+                InfernoIcon(
                     painter = painterResource(R.drawable.mozac_ic_private_mode_24),
-                    tint = FirefoxTheme.colors.iconPrimary,
                     contentDescription = if (state.isPrivateMode) {
                         stringResource(R.string.content_description_disable_private_browsing_button)
                     } else {
@@ -213,9 +213,8 @@ private fun TabStripContent(
             )
 
             IconButton(onClick = onAddTabClick) {
-                Icon(
+                InfernoIcon(
                     painter = painterResource(R.drawable.mozac_ic_plus_24),
-                    tint = FirefoxTheme.colors.iconPrimary,
                     contentDescription = stringResource(R.string.add_tab),
                 )
             }
@@ -420,13 +419,8 @@ private fun TabItem(
                         Modifier.clearAndSetSemantics {}
                     },
                 ) {
-                    Icon(
+                    InfernoIcon(
                         painter = painterResource(R.drawable.mozac_ic_cross_20),
-                        tint = if (state.isSelected) {
-                            FirefoxTheme.colors.iconPrimary
-                        } else {
-                            FirefoxTheme.colors.iconSecondary
-                        },
                         contentDescription = stringResource(
                             id = R.string.close_tab_title,
                             state.title,
