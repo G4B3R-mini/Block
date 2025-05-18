@@ -1,7 +1,6 @@
 package com.shmibblez.inferno.settings.compose
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.clickable
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -9,23 +8,18 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.coroutineScope
-import androidx.navigation.NavController
 import com.shmibblez.inferno.R
-import com.shmibblez.inferno.components.accounts.FenixFxAEntryPoint
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.ext.components
-import com.shmibblez.inferno.ext.nav
 import com.shmibblez.inferno.nimbus.FxNimbus
 import com.shmibblez.inferno.proto.InfernoSettings
 import com.shmibblez.inferno.proto.infernoSettingsDataStore
-import com.shmibblez.inferno.settings.SettingsFragmentDirections
 import com.shmibblez.inferno.settings.compose.components.PreferenceAction
 import com.shmibblez.inferno.settings.compose.components.PreferenceSpacer
 import com.shmibblez.inferno.settings.compose.components.PreferenceTitle
@@ -61,7 +55,9 @@ private const val AMO_COLLECTION_OVERRIDE_EXIT_DELAY = 3000L
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsPage(
-    nav: NavController,
+    onNavigateToAccountSettingsPage: () -> Unit,
+    onNavigateToAccountProblemSettingsPage: () -> Unit,
+    onNavigateToTurnOnSyncSettingsPage: () -> Unit,
     onNavigateToToolbarSettings: () -> Unit,
     onNavigateToTabBarSettings: () -> Unit,
     onNavigateToSearchSettings: () -> Unit,
@@ -100,27 +96,9 @@ fun SettingsPage(
     ) {
         AccountView(
             state = accountState,
-            onNavigateSignedIn = {
-                // todo: account settings pages, cannot have fragment nav inside compose
-                nav.nav(
-                    R.id.settingsFragment,
-                    SettingsFragmentDirections.actionSettingsFragmentToAccountSettingsFragment(),
-                )
-            },
-            onNavigateRequiresReauth = {
-                nav.nav(
-                    R.id.settingsFragment,
-                    SettingsFragmentDirections.actionSettingsFragmentToAccountProblemFragment(
-                        entrypoint = FenixFxAEntryPoint.SettingsMenu
-                    ),
-                )
-            },
-            onNavigateSignedOut = {
-                nav.nav(
-                    R.id.settingsFragment,
-                    SettingsFragmentDirections.actionSettingsFragmentToTurnOnSyncFragment(entrypoint = FenixFxAEntryPoint.SettingsMenu),
-                )
-            },
+            onNavigateSignedIn = onNavigateToAccountSettingsPage,
+            onNavigateRequiresReauth = onNavigateToAccountProblemSettingsPage,
+            onNavigateSignedOut = onNavigateToTurnOnSyncSettingsPage,
         )
 
         PreferenceSpacer()

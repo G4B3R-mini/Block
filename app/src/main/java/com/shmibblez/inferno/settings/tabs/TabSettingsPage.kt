@@ -65,9 +65,7 @@ fun TabSettingsPage(goBack: () -> Unit) {
                 text = stringResource(R.string.preferences_close_tabs),
                 description = "Whether to close tabs manually or automatically after a certain period of time", // todo: string res
                 enabled = true,
-                initiallySelectedMenuItem = settings.closeTabsMethod.toPrefString(
-                    context
-                ),
+                selectedMenuItem = settings.closeTabsMethod,
                 menuItems = listOf(
                     InfernoSettings.CloseTabsMethod.CLOSE_TABS_MANUALLY,
                     InfernoSettings.CloseTabsMethod.CLOSE_TABS_AFTER_ONE_DAY,
@@ -101,15 +99,18 @@ fun TabSettingsPage(goBack: () -> Unit) {
             PreferenceTitle("Tab Bar Settings") // todo: string res
 
             // enable tab bar
-            PreferenceSwitch(text = "Enable tab bar", // todo: string res
+            PreferenceSwitch(
+                text = "Enable tab bar", // todo: string res
                 summary = "Whether to show the tab bar in the browser.", // todo: string res
-                selected = settings.isTabBarEnabled, onSelectedChange = { isTabBarEnabled ->
+                selected = settings.isTabBarEnabled,
+                onSelectedChange = { isTabBarEnabled ->
                     coroutineScope.launch {
                         context.infernoSettingsDataStore.updateData {
                             it.toBuilder().setIsTabBarEnabled(isTabBarEnabled).build()
                         }
                     }
-                })
+                },
+            )
 
             // tab close where to show
             PreferenceSelect(
@@ -120,9 +121,7 @@ fun TabSettingsPage(goBack: () -> Unit) {
                 //  close tabs
                 description = "Which tabs to show close on. If not visible, a gesture to close tabs must be enabled.", // todo: string res
                 enabled = true,
-                initiallySelectedMenuItem = settings.miniTabShowClose.toPrefString(
-                    context
-                ),
+                selectedMenuItem = settings.miniTabShowClose,
                 menuItems = listOf(
                     InfernoSettings.MiniTabShowClose.MINI_TAB_SHOW_ON_ALL,
                     InfernoSettings.MiniTabShowClose.MINI_TAB_SHOW_ONLY_ON_ACTIVE,
@@ -144,9 +143,7 @@ fun TabSettingsPage(goBack: () -> Unit) {
                 text = "Tab bar location:", // todo: string res
                 description = "Where to place the tab bar in the browser.", // todo: string res
                 enabled = true,
-                initiallySelectedMenuItem = settings.tabBarVerticalPosition.toPrefString(
-                    context
-                ),
+                selectedMenuItem = settings.tabBarVerticalPosition,
                 menuItems = listOf(
                     InfernoSettings.VerticalTabBarPosition.TAB_BAR_BOTTOM,
                     InfernoSettings.VerticalTabBarPosition.TAB_BAR_TOP,
@@ -176,9 +173,7 @@ fun TabSettingsPage(goBack: () -> Unit) {
                     text = "Tab bar position:", // todo: string res
                     description = "Tab bar position relative to toolbar.", // todo: string res
                     enabled = true,
-                    initiallySelectedMenuItem = settings.tabBarPosition.toPrefString(
-                        context
-                    ),
+                    selectedMenuItem = settings.tabBarPosition,
                     menuItems = listOf(
                         InfernoSettings.TabBarPosition.TAB_BAR_ABOVE_TOOLBAR,
                         InfernoSettings.TabBarPosition.TAB_BAR_BELOW_TOOLBAR,
@@ -202,9 +197,7 @@ fun TabSettingsPage(goBack: () -> Unit) {
                 text = stringResource(R.string.preferences_tab_view),
                 description = "How to display tabs inside tab tray.", // todo: string res
                 enabled = true,
-                initiallySelectedMenuItem = settings.tabTrayStyle.toPrefString(
-                    context
-                ),
+                selectedMenuItem = settings.tabTrayStyle,
                 menuItems = listOf(
                     InfernoSettings.TabTrayStyle.TAB_TRAY_LIST,
                     InfernoSettings.TabTrayStyle.TAB_TRAY_GRID,

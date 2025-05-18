@@ -329,11 +329,8 @@ class Settings(private val appContext: Context) : PreferencesHolder {
 //        appContext.getPreferenceKey(R.string.pref_key_show_voice_search),
 //        default = true,
 //    )
-    var shouldShowSearchShortcuts: Boolean
-        get() = getPref(default = false) { it?.shouldShowSearchShortcuts }
-        set(value) {
-            setPref { it.setShouldShowSearchShortcuts(value) }
-        }
+
+    // not used
 //    val shouldShowSearchShortcuts by booleanPreference(
 //        appContext.getPreferenceKey(R.string.pref_key_show_search_engine_shortcuts),
 //        default = false,

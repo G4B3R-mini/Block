@@ -4,6 +4,10 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.shmibblez.inferno.settings.SettingsFragmentDirections
+import com.shmibblez.inferno.settings.account.AccountProblemSettingsPage
+import com.shmibblez.inferno.settings.account.AccountSettingsPage
+import com.shmibblez.inferno.settings.account.TurnOnSyncSettingsPage
 import com.shmibblez.inferno.settings.compose.SettingsPage
 import com.shmibblez.inferno.settings.gesture.GestureSettingsPage
 import com.shmibblez.inferno.settings.search.SearchSettingsPage
@@ -14,6 +18,25 @@ import kotlinx.serialization.Serializable
 
 
 private object SettingsRoutes {
+
+    /**
+     * todo: based on [SettingsFragmentDirections.actionSettingsFragmentToAccountSettingsFragment]
+     */
+    @Serializable
+    object AccountSettingsPage
+
+    /**
+     * todo: based on [SettingsFragmentDirections.actionSettingsFragmentToAccountProblemFragment]
+     */
+    @Serializable
+    object AccountProblemSettingsPage
+
+    /**
+     * todo: based on [SettingsFragmentDirections.actionSettingsFragmentToTurnOnSyncFragment]
+     */
+    @Serializable
+    object TurnOnSyncSettingsPage
+
     @Serializable
     object SettingsPage
 
@@ -44,7 +67,9 @@ fun SettingsNavHost() {
     ) {
         composable<SettingsRoutes.SettingsPage> {
             SettingsPage(
-                nav,
+                onNavigateToAccountSettingsPage = { nav.navigate(route = SettingsRoutes.AccountSettingsPage) },
+                onNavigateToAccountProblemSettingsPage = { nav.navigate(route = SettingsRoutes.AccountProblemSettingsPage) },
+                onNavigateToTurnOnSyncSettingsPage = { nav.navigate(route = SettingsRoutes.TurnOnSyncSettingsPage) },
                 onNavigateToToolbarSettings = { nav.navigate(route = SettingsRoutes.ToolbarSettingsPage) },
                 onNavigateToTabBarSettings = { nav.navigate(route = SettingsRoutes.TabSettingsPage) },
                 onNavigateToSearchSettings = { nav.navigate(route = SettingsRoutes.SearchSettingsPage) },
@@ -52,6 +77,9 @@ fun SettingsNavHost() {
                 onNavigateToGestureSettings = { nav.navigate(route = SettingsRoutes.GestureSettingsPage) },
             )
         }
+        composable<SettingsRoutes.AccountSettingsPage> { AccountSettingsPage(goBack = { nav.popBackStack() }) }
+        composable<SettingsRoutes.AccountProblemSettingsPage> { AccountProblemSettingsPage(goBack = { nav.popBackStack() }) }
+        composable<SettingsRoutes.TurnOnSyncSettingsPage> { TurnOnSyncSettingsPage(goBack = { nav.popBackStack() }) }
         composable<SettingsRoutes.ToolbarSettingsPage> { ToolbarSettingsPage(goBack = { nav.popBackStack() }) }
         composable<SettingsRoutes.TabSettingsPage> { TabSettingsPage(goBack = { nav.popBackStack() }) }
         composable<SettingsRoutes.SearchSettingsPage> { SearchSettingsPage(goBack = { nav.popBackStack() }) }

@@ -1,5 +1,6 @@
 package com.shmibblez.inferno.settings.compose.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -31,14 +32,16 @@ fun <T> PreferenceSelect(
     text: String,
     description: String? = null,
     enabled: Boolean = true,
-    initiallySelectedMenuItem: String,
+    selectedMenuItem: T,
     menuItems: List<T>,
     mapToTitle: (T) -> String,
+    selectedLeadingIcon: (@Composable (T) -> Unit) = {},
+    leadingIcon: (@Composable (T) -> Unit) = {},
+    trailingIcon: (@Composable (T) -> Unit) = { },
     onSelectMenuItem: (menuItem: T) -> Unit,
     additionalMenuItems: List<@Composable () -> Unit>? = null,
 ) {
     var expanded by remember { mutableStateOf(false) }
-    var selectedItem by remember { mutableStateOf(initiallySelectedMenuItem) }
 
     Row(
         modifier = Modifier
@@ -58,26 +61,24 @@ fun <T> PreferenceSelect(
             // title
             InfernoText(
                 text = text,
-                modifier = Modifier
-                    .alpha(
-                        when (enabled) {
-                            true -> 1F
-                            false -> 0.75F
-                        }
-                    ),
+                modifier = Modifier.alpha(
+                    when (enabled) {
+                        true -> 1F
+                        false -> 0.75F
+                    }
+                ),
                 fontColor = Color.White, // todo: theme
             )
             // description
             if (description != null) {
                 InfernoText(
                     text = description,
-                    modifier = Modifier
-                        .alpha(
-                            when (enabled) {
-                                true -> 0.75F
-                                false -> 0.5F
-                            }
-                        ),
+                    modifier = Modifier.alpha(
+                        when (enabled) {
+                            true -> 0.75F
+                            false -> 0.5F
+                        }
+                    ),
                     fontSize = 12.sp,
                     fontColor = Color.DarkGray, // todo: theme
                 )
@@ -86,16 +87,19 @@ fun <T> PreferenceSelect(
         ExposedDropdownMenuBox(
             expanded = expanded,
             onExpandedChange = { expanded = !expanded },
+            modifier = Modifier.background(Color.DarkGray),
         ) {
             OutlinedTextField(
-                value = initiallySelectedMenuItem,
-                onValueChange = { selectedItem = it },
+                value = mapToTitle.invoke(selectedMenuItem),
+                onValueChange = { },
                 modifier = Modifier.menuAnchor(
-                    type = MenuAnchorType.PrimaryNotEditable,
-                    enabled = enabled
+                    type = MenuAnchorType.PrimaryNotEditable, enabled = enabled
                 ),
                 readOnly = true,
                 label = null,
+                leadingIcon = {
+                    selectedLeadingIcon.invoke(selectedMenuItem)
+                },
                 trailingIcon = {
                     Icon(
                         painter = when (expanded) {
@@ -105,17 +109,16 @@ fun <T> PreferenceSelect(
                         contentDescription = "",
                         tint = Color.White, // todo: theme
                     )
-                }
+                },
             )
-            ExposedDropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false }
-            ) {
+            ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                 // show menu items
                 menuItems.map { it to mapToTitle.invoke(it) }.forEach { (item, name) ->
                     DropdownMenuItem(
                         text = { InfernoText(name) },
-                        onClick = { onSelectMenuItem.invoke(item) }
+                        onClick = { onSelectMenuItem.invoke(item) },
+                        leadingIcon = { leadingIcon.invoke(item) },
+                        trailingIcon = { trailingIcon.invoke(item) },
                     )
                 }
                 // show additional menu items

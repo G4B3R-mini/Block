@@ -105,7 +105,7 @@ message InfernoSettings {
   bool shouldShowSyncedTabsSuggestions = 13;
   bool shouldShowClipboardSuggestions = 14;
   bool shouldShowVoiceSearch = 15;
-  bool shouldShowSearchShortcuts = 16; // on awesomebar
+  //  bool shouldShowSearchShortcuts = 16; // on awesomebar, not used, might need to add later?
   // bool showSponsoredSuggestions = ?; // sponsored not enabled
 
 
@@ -121,7 +121,17 @@ message InfernoSettings {
     // todo: define and use colors, take a look at material for some naming ideas
     // in settings show description for where each color is shown
     string name = 1;
-    string textColor = 2;
+    uint32 primaryTextColor = 2;
+    uint32 secondaryTextColor = 3;
+    uint32 primaryIconColor = 4;
+    uint32 secondaryIconColor = 5;
+    uint32 primaryOutlineColor = 6;
+    uint32 secondaryOutlineColor = 7;
+    uint32 primaryActionColor = 8;
+    uint32 secondaryActionColor = 9;
+    uint32 errorColor = 10;
+    uint32 primaryBackgroundColor = 11;
+    uint32 secondaryBackgroundColor = 12;
   }
 
   DefaultTheme selectedDefaultTheme = 30;

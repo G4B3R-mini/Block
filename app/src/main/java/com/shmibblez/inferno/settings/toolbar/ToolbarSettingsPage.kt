@@ -8,7 +8,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -83,9 +82,7 @@ fun ToolbarSettingsPage(goBack: () -> Unit) {
                     text = "Toolbar location:", // todo: string res
                     description = null,
                     enabled = true,
-                    initiallySelectedMenuItem = settings.toolbarVerticalPosition.toPrefString(
-                        context
-                    ),
+                    selectedMenuItem = settings.toolbarVerticalPosition,
                     menuItems = listOf(
                         InfernoSettings.VerticalToolbarPosition.TOOLBAR_BOTTOM,
                         InfernoSettings.VerticalToolbarPosition.TOOLBAR_TOP,
@@ -106,9 +103,7 @@ fun ToolbarSettingsPage(goBack: () -> Unit) {
                     text = "In app toolbar location:", // todo: string res
                     description = "Position of toolbar if browser opened inside another app.", // todo: string res
                     enabled = true,
-                    initiallySelectedMenuItem = settings.inAppToolbarVerticalPosition.toPrefString(
-                        context
-                    ),
+                    selectedMenuItem = settings.inAppToolbarVerticalPosition,
                     menuItems = listOf(
                         InfernoSettings.VerticalToolbarPosition.TOOLBAR_BOTTOM,
                         InfernoSettings.VerticalToolbarPosition.TOOLBAR_TOP,

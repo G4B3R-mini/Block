@@ -172,7 +172,7 @@ fun createInitialSearchFragmentState(
         showSearchSuggestionsHint = false,
         showSearchShortcuts = false,
         areShortcutsAvailable = false,
-        showSearchShortcutsSetting = settings.shouldShowSearchShortcuts,
+        showSearchShortcutsSetting = false, // settings.shouldShowSearchShortcuts,
         showClipboardSuggestions = settings.shouldShowClipboardSuggestions,
         showSearchTermHistory = settings.showUnifiedSearchFeature && settings.shouldShowHistorySuggestions,
         showHistorySuggestionsForCurrentEngine = false,
@@ -267,8 +267,7 @@ private fun searchStateReducer(state: SearchFragmentState, action: SearchFragmen
             state.copy(
                 searchEngineSource = SearchEngineSource.Default(action.engine),
                 showSearchSuggestions = shouldShowSearchSuggestions(action.browsingMode, action.settings),
-                showSearchShortcuts = action.settings.shouldShowSearchShortcuts &&
-                    !action.settings.showUnifiedSearchFeature,
+                showSearchShortcuts = false, // action.settings.shouldShowSearchShortcuts && !action.settings.showUnifiedSearchFeature,
                 showClipboardSuggestions = action.settings.shouldShowClipboardSuggestions,
                 showSearchTermHistory = action.settings.showUnifiedSearchFeature &&
                     action.settings.shouldShowHistorySuggestions,
@@ -291,7 +290,7 @@ private fun searchStateReducer(state: SearchFragmentState, action: SearchFragmen
                 showSearchSuggestions = shouldShowSearchSuggestions(action.browsingMode, action.settings),
                 showSearchShortcuts = when (action.settings.showUnifiedSearchFeature) {
                     true -> false
-                    false -> action.settings.shouldShowSearchShortcuts
+                    false -> false
                 },
                 showClipboardSuggestions = action.settings.shouldShowClipboardSuggestions,
                 showSearchTermHistory = action.settings.showUnifiedSearchFeature &&

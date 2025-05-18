@@ -104,7 +104,7 @@ class RadioSearchEngineListPreference @JvmOverloads constructor(
         val wrapper = layoutInflater.inflate(itemResId, null) as LinearLayout
 
         val binding = SearchEngineRadioButtonBinding.bind(wrapper)
-
+engine
         if (!engine.isGeneral) {
             binding.radioButton.isEnabled = false
             wrapper.isEnabled = false
