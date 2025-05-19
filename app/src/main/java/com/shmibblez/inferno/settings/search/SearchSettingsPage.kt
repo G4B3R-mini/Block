@@ -160,7 +160,7 @@ fun SearchSettingsPage(
                 leadingIcon = {
                     if (it.type == SearchEngine.Type.CUSTOM) {
                         Icon(
-                            painter = painterResource(R.drawable.ic_delete),
+                            painter = painterResource(R.drawable.ic_delete_24),
                             contentDescription = stringResource(R.string.search_engine_delete),
                             modifier = Modifier.clickable {
                                 deleteSearchEngine(it)
@@ -172,7 +172,7 @@ fun SearchSettingsPage(
                 trailingIcon = {
                     if (it.type == SearchEngine.Type.CUSTOM) {
                         Icon(
-                            painter = painterResource(R.drawable.ic_edit),
+                            painter = painterResource(R.drawable.ic_edit_24),
                             contentDescription = stringResource(R.string.search_engine_delete),
                             modifier = Modifier.clickable {
                                 showEditEngineDialogFor = it

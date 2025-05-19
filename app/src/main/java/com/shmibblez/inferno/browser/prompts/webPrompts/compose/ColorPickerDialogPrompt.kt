@@ -33,12 +33,10 @@ import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplate
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateAction
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.compose.button.RadioButton
-import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.dialog.ColorItem
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.dialog.toColorItem
-import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.dialog.toHexColor
+import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.dialog.toHexColorRGB
 import com.shmibblez.inferno.theme.FirefoxTheme
-import mozilla.components.browser.state.action.ContentAction
 import mozilla.components.concept.engine.prompt.PromptRequest
 
 
@@ -71,7 +69,7 @@ fun ColorPickerDialogPrompt(
         positiveAction = PromptBottomSheetTemplateAction(
             text = stringResource(R.string.mozac_feature_prompts_set_date),
             action = {
-                onConfirm.invoke(selectedColor.toHexColor())
+                onConfirm.invoke(selectedColor.toHexColorRGB())
             },
         )
     ) {
@@ -129,7 +127,7 @@ private fun ColorListItem(colorItem: ColorItem, selected: Boolean, onColorChange
             RadioButton(selected = selected) { }
         }
         InfernoText(
-            text = colorItem.color.toHexColor(),
+            text = colorItem.color.toHexColorRGB(),
             modifier = Modifier.weight(1F),
             textAlign = TextAlign.Left,
         )

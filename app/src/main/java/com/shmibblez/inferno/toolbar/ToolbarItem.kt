@@ -1,7 +1,10 @@
 package com.shmibblez.inferno.toolbar
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import com.shmibblez.inferno.R
+import com.shmibblez.inferno.ext.infernoTheme
 import com.shmibblez.inferno.proto.InfernoSettings
 import mozilla.components.browser.state.state.TabSessionState
 
@@ -168,7 +171,7 @@ fun InfernoSettings.ToolbarItem.ToToolbarOption(
         }
 
         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_SHOW_TABS_TRAY -> {
-            ToolbarOptions. ToolbarShowTabsTray(
+            ToolbarOptions.ToolbarShowTabsTray(
                 type = type,
                 tabCount = tabCount,
                 dismissMenuSheet = onDismissMenuBottomSheet,
@@ -198,22 +201,62 @@ fun InfernoSettings.ToolbarItem.ToToolbarOption(
 }
 
 @Composable
-fun InfernoSettings.ToolbarItem.ToToolbarIcon() {
+fun InfernoSettings.ToolbarItem.ToToolbarIcon(tint: Color = LocalContext.current.infernoTheme().value.primaryIconColor) {
     when (this) {
-        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_SETTINGS -> ToolbarOptionsIcons.ToolbarSettings()
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_SETTINGS -> ToolbarOptionsIcons.ToolbarSettings(
+            tint = tint,
+        )
+
         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_ORIGIN -> {}
-        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_ORIGIN_MINI -> ToolbarOptionsIcons.ToolbarOriginMini()
-        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_BACK -> ToolbarOptionsIcons.ToolbarBack()
-        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_FORWARD -> ToolbarOptionsIcons.ToolbarForward()
-        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_RELOAD -> ToolbarOptionsIcons.ToolbarReload()
-        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_HISTORY -> ToolbarOptionsIcons.ToolbarHistory()
-        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_REQUEST_DESKTOP -> ToolbarOptionsIcons.ToolbarRequestDesktopSite()
-        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_FIND_IN_PAGE -> ToolbarOptionsIcons.ToolbarFindInPage()
-        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_REQUEST_READER_VIEW -> ToolbarOptionsIcons.ToolbarRequestReaderView()
-        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_PRIVATE_MODE -> ToolbarOptionsIcons.ToolbarPrivateModeToggle()
-        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_SHOW_TABS_TRAY -> ToolbarOptionsIcons.ToolbarShowTabsTray()
-        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_SHARE -> ToolbarOptionsIcons.ToolbarShare()
-        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_MENU -> ToolbarOptionsIcons.ToolbarMenuIcon()
+
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_ORIGIN_MINI -> ToolbarOptionsIcons.ToolbarOriginMini(
+            tint = tint,
+        )
+
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_BACK -> ToolbarOptionsIcons.ToolbarBack(
+            tint = tint,
+        )
+
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_FORWARD -> ToolbarOptionsIcons.ToolbarForward(
+            tint = tint,
+        )
+
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_RELOAD -> ToolbarOptionsIcons.ToolbarReload(
+            tint = tint,
+        )
+
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_HISTORY -> ToolbarOptionsIcons.ToolbarHistory(
+            tint = tint,
+        )
+
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_REQUEST_DESKTOP -> ToolbarOptionsIcons.ToolbarRequestDesktopSite(
+            tint = tint,
+        )
+
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_FIND_IN_PAGE -> ToolbarOptionsIcons.ToolbarFindInPage(
+            tint = tint,
+        )
+
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_REQUEST_READER_VIEW -> ToolbarOptionsIcons.ToolbarRequestReaderView(
+            tint = tint,
+        )
+
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_PRIVATE_MODE -> ToolbarOptionsIcons.ToolbarPrivateModeToggle(
+            tint = tint,
+        )
+
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_SHOW_TABS_TRAY -> ToolbarOptionsIcons.ToolbarShowTabsTray(
+            tint = tint,
+        )
+
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_SHARE -> ToolbarOptionsIcons.ToolbarShare(
+            tint = tint,
+        )
+
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_MENU -> ToolbarOptionsIcons.ToolbarMenuIcon(
+            tint = tint,
+        )
+
         InfernoSettings.ToolbarItem.UNRECOGNIZED -> {}
     }
 }

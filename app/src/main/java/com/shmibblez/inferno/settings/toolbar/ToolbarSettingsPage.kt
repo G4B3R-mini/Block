@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import androidx.compose.foundation.clickable
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -16,11 +15,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import com.shmibblez.inferno.R
+import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.proto.InfernoSettings
 import com.shmibblez.inferno.proto.infernoSettingsDataStore
@@ -63,18 +62,17 @@ fun ToolbarSettingsPage(goBack: () -> Unit) {
         topBar = {
             TopAppBar(
                 navigationIcon = {
-                    Icon(
+                    InfernoIcon(
                         painter = painterResource(R.drawable.ic_back_button),
                         contentDescription = stringResource(R.string.browser_menu_back),
                         modifier = Modifier.clickable(onClick = goBack),
-                        tint = Color.White, // todo: theme
                     )
                 },
                 title = { InfernoText("Toolbar Settings") }, // todo: string res
             )
         },
     ) {
-        val topContent = listOf<@Composable () -> Unit>(
+        val topPreferences = listOf<@Composable () -> Unit>(
             { PreferenceTitle(stringResource(R.string.preferences_category_general)) },
             {
                 // toolbar vertical position
@@ -125,7 +123,7 @@ fun ToolbarSettingsPage(goBack: () -> Unit) {
             )
         // selected toolbar items
         PreferenceToolbarItems(
-            topPreferences = topContent,
+            topPreferences = topPreferences,
             selectedItems = selectedToolbarItems,
             remainingItems = remainingToolbarItems,
             onSelectedItemsChanged = { newToolbarItems ->

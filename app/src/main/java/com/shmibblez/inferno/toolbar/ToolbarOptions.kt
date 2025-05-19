@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
@@ -40,6 +39,7 @@ import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.compose.sessionUseCases
 import com.shmibblez.inferno.ext.components
+import com.shmibblez.inferno.ext.infernoTheme
 import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarBack
 import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarForward
 import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarReload
@@ -746,12 +746,13 @@ internal class ToolbarOptionsIcons {
         private fun ToolbarIconTemplate(
             icon: @Composable (modifier: Modifier, extraPadding: Dp, contentDescription: String, tint: Color) -> Unit,
             contentDescription: String,
+            tint: Color = LocalContext.current.infernoTheme().value.primaryIconColor
         ) {
             icon.invoke(
                 Modifier.size(TOOLBAR_ICON_SIZE + TOOLBAR_SWITCH_ICON_EXTRA),
                 TOOLBAR_SWITCH_ICON_EXTRA / 2,
                 contentDescription,
-                Color.White, // todo: theme
+                tint,
             )
         }
 
@@ -759,27 +760,30 @@ internal class ToolbarOptionsIcons {
         private fun ToolbarIconTemplate(
             iconPainter: Painter,
             contentDescription: String,
+            tint: Color = LocalContext.current.infernoTheme().value.primaryIconColor,
         ) {
             InfernoIcon(
                 modifier = Modifier.size(TOOLBAR_ICON_SIZE),
                 painter = iconPainter,
                 contentDescription = contentDescription,
-                tint = Color.White, // todo: theme
+                tint = tint,
             )
         }
 
         @Composable
-        internal fun ToolbarSettings() {
+        internal fun ToolbarSettings(tint: Color = LocalContext.current.infernoTheme().value.primaryIconColor) {
             ToolbarIconTemplate(
                 iconPainter = painterResource(R.drawable.ic_settings_24),
                 contentDescription = stringResource(R.string.browser_menu_settings),
+                tint = tint,
             )
         }
 
         @Composable
-        internal fun ToolbarOriginMini() {
+        internal fun ToolbarOriginMini(tint: Color = LocalContext.current.infernoTheme().value.primaryIconColor) {
             ToolbarIconTemplate(
-                icon = { modifier, extraPadding, contentDescription, tint ->
+                tint = tint,
+                icon = { modifier, extraPadding, contentDescription, iconTint ->
                     Box(modifier = modifier) {
                         // current mode, big icon
                         InfernoIcon(
@@ -789,7 +793,7 @@ internal class ToolbarOptionsIcons {
                                 .padding(extraPadding),
                             painter = painterResource(id = R.drawable.ic_globe_24),
                             contentDescription = contentDescription,
-                            tint = tint,
+                            tint = iconTint,
                         )
                         // switch to, smol icon
                         InfernoIcon(
@@ -801,7 +805,7 @@ internal class ToolbarOptionsIcons {
                                 .align(Alignment.BottomEnd),
                             painter = painterResource(id = R.drawable.ic_search_24),
                             contentDescription = contentDescription,
-                            tint = tint,
+                            tint = iconTint,
                         )
                     }
                 },
@@ -810,41 +814,46 @@ internal class ToolbarOptionsIcons {
         }
 
         @Composable
-        fun ToolbarBack() {
+        fun ToolbarBack(tint: Color = LocalContext.current.infernoTheme().value.primaryIconColor) {
             ToolbarIconTemplate(
                 iconPainter = painterResource(id = R.drawable.ic_chevron_left_24),
                 contentDescription = stringResource(R.string.browser_menu_back),
+                tint = tint,
             )
         }
 
         @Composable
-        fun ToolbarForward() {
+        fun ToolbarForward(tint: Color = LocalContext.current.infernoTheme().value.primaryIconColor) {
             ToolbarIconTemplate(
                 iconPainter = painterResource(id = R.drawable.ic_chevron_right_24),
                 contentDescription = stringResource(R.string.browser_menu_forward),
+                tint = tint,
             )
         }
 
         @Composable
-        fun ToolbarReload() {
+        fun ToolbarReload(tint: Color = LocalContext.current.infernoTheme().value.primaryIconColor) {
             ToolbarIconTemplate(
                 iconPainter = painterResource(id = R.drawable.ic_arrow_clockwise_24),
                 contentDescription = stringResource(R.string.browser_menu_refresh),
+                tint = tint,
             )
         }
 
         @Composable
-        fun ToolbarHistory() {
+        fun ToolbarHistory(tint: Color = LocalContext.current.infernoTheme().value.primaryIconColor) {
             ToolbarIconTemplate(
                 iconPainter = painterResource(R.drawable.ic_history_24),
                 contentDescription = stringResource(R.string.library_history),
+                tint = tint,
             )
         }
 
         @Composable
-        internal fun ToolbarRequestDesktopSite() {
+        internal fun ToolbarRequestDesktopSite(tint: Color = LocalContext.current.infernoTheme().value.primaryIconColor) {
             ToolbarIconTemplate(
-                icon = { modifier, extraPadding, contentDescription, tint ->
+                tint = tint,
+                icon = { modifier, extraPadding, contentDescription, iconTint ->
                     Box(modifier = modifier) {
                         // current mode, big icon
                         InfernoIcon(
@@ -854,7 +863,7 @@ internal class ToolbarOptionsIcons {
                                 .padding(extraPadding),
                             painter = painterResource(id = R.drawable.ic_device_mobile_24),
                             contentDescription = contentDescription,
-                            tint = tint,
+                            tint = iconTint,
                         )
                         // switch to, smol icon
                         InfernoIcon(
@@ -866,7 +875,7 @@ internal class ToolbarOptionsIcons {
                                 .align(Alignment.BottomEnd),
                             painter = painterResource(id = R.drawable.ic_device_desktop_24),
                             contentDescription = contentDescription,
-                            tint = tint,
+                            tint = iconTint,
                         )
                     }
                 },
@@ -875,25 +884,28 @@ internal class ToolbarOptionsIcons {
         }
 
         @Composable
-        internal fun ToolbarFindInPage() {
+        internal fun ToolbarFindInPage(tint: Color = LocalContext.current.infernoTheme().value.primaryIconColor) {
             ToolbarIconTemplate(
                 iconPainter = painterResource(R.drawable.ic_search_24),
                 contentDescription = stringResource(R.string.browser_menu_find_in_page),
+                tint = tint,
             )
         }
 
         @Composable
-        internal fun ToolbarRequestReaderView() {
+        internal fun ToolbarRequestReaderView(tint: Color = LocalContext.current.infernoTheme().value.primaryIconColor) {
             ToolbarIconTemplate(
                 iconPainter = painterResource(R.drawable.ic_reader_view_24),
                 contentDescription = stringResource(R.string.browser_menu_turn_on_reader_view),
+                tint = tint,
             )
         }
 
         @Composable
-        internal fun ToolbarPrivateModeToggle() {
+        internal fun ToolbarPrivateModeToggle(tint: Color = LocalContext.current.infernoTheme().value.primaryIconColor) {
             ToolbarIconTemplate(
-                icon = { modifier, extraPadding, contentDescription, tint ->
+                tint = tint,
+                icon = { modifier, extraPadding, contentDescription, iconTint ->
                     Box(
                         modifier = modifier,
                     ) {
@@ -905,7 +917,7 @@ internal class ToolbarOptionsIcons {
                                 .padding(extraPadding),
                             painter = painterResource(id = R.drawable.ic_globe_24),
                             contentDescription = contentDescription,
-                            tint = tint,
+                            tint = iconTint,
                         )
                         // switch to, smol icon
                         InfernoIcon(
@@ -917,7 +929,7 @@ internal class ToolbarOptionsIcons {
                                 .align(Alignment.BottomEnd),
                             painter = painterResource(id = R.drawable.ic_private_browsing),
                             contentDescription = contentDescription,
-                            tint = tint,
+                            tint = iconTint,
                         )
                     }
                 },
@@ -926,9 +938,10 @@ internal class ToolbarOptionsIcons {
         }
 
         @Composable
-        fun ToolbarShowTabsTray() {
+        fun ToolbarShowTabsTray(tint: Color = LocalContext.current.infernoTheme().value.primaryIconColor) {
             ToolbarIconTemplate(
-                icon = { modifier, extraPadding, contentDescription, tint ->
+                tint = tint,
+                icon = { modifier, extraPadding, contentDescription, iconTint ->
                     Box(
                         modifier = modifier.wrapContentHeight(unbounded = true),
                         contentAlignment = Alignment.Center,
@@ -940,12 +953,12 @@ internal class ToolbarOptionsIcons {
                                 .padding(extraPadding),
                             painter = painterResource(id = R.drawable.ic_tabcounter_box_24),
                             contentDescription = contentDescription,
-                            tint = tint,
+                            tint = iconTint,
                         )
                         InfernoText(
                             modifier = Modifier.fillMaxSize(),
                             text = "4",
-                            fontColor = Color.White,
+                            fontColor = iconTint,
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center,
                             fontSize = 9.sp,
@@ -959,18 +972,20 @@ internal class ToolbarOptionsIcons {
         }
 
         @Composable
-        internal fun ToolbarShare() {
+        internal fun ToolbarShare(tint: Color = LocalContext.current.infernoTheme().value.primaryIconColor) {
             ToolbarIconTemplate(
                 iconPainter = painterResource(R.drawable.ic_share),
                 contentDescription = stringResource(R.string.share_header_2),
+                tint = tint,
             )
         }
 
         @Composable
-        fun ToolbarMenuIcon() {
+        fun ToolbarMenuIcon(tint: Color = LocalContext.current.infernoTheme().value.primaryIconColor) {
             ToolbarIconTemplate(
                 iconPainter = painterResource(R.drawable.ic_app_menu_24),
                 contentDescription = stringResource(R.string.content_description_menu),
+                tint = tint,
             )
         }
     }

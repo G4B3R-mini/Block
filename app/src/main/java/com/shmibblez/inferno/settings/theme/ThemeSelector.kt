@@ -4,6 +4,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,8 +18,14 @@ import androidx.compose.foundation.lazy.grid.LazyGridItemScope
 import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -29,8 +36,10 @@ import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawOutline
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.compose.base.InfernoTextStyle
 import com.shmibblez.inferno.settings.compose.components.PreferenceConstants
@@ -43,6 +52,8 @@ fun ThemeSelector(
     customThemes: List<InfernoTheme>,
     onSelectTheme: (InfernoTheme) -> Unit,
     onAddTheme: () -> Unit,
+    onEditTheme: (InfernoTheme) -> Unit,
+    onDeleteTheme: (InfernoTheme) -> Unit,
 ) {
     LazyVerticalGrid(
         columns = GridCells.Adaptive(minSize = 72.dp),
@@ -60,7 +71,13 @@ fun ThemeSelector(
             )
         }
         items(defaultThemes) {
-            ThemeItem(it, selectedDefault?.name == it.name, onSelectTheme)
+            ThemeItem(
+                theme = it,
+                selected = selectedDefault?.name == it.name,
+                onSelectTheme = onSelectTheme,
+                onEditTheme = onEditTheme,
+                onDeleteTheme = onDeleteTheme,
+            )
         }
         header {
             InfernoText(
@@ -70,7 +87,13 @@ fun ThemeSelector(
         }
         if (customThemes.isNotEmpty()) {
             items(customThemes) {
-                ThemeItem(it, selectedCustom?.name == it.name, onSelectTheme)
+                ThemeItem(
+                    theme = it,
+                    selected = selectedCustom?.name == it.name,
+                    onSelectTheme = onSelectTheme,
+                    onEditTheme = onEditTheme,
+                    onDeleteTheme = onDeleteTheme,
+                )
             }
         }
         item {
@@ -93,12 +116,19 @@ private fun ThemeItem(
     theme: InfernoTheme,
     selected: Boolean,
     onSelectTheme: (InfernoTheme) -> Unit,
+    onEditTheme: (InfernoTheme) -> Unit,
+    onDeleteTheme: (InfernoTheme) -> Unit,
 ) {
-    Column(
+    var expanded by remember { mutableStateOf(false) }
+
+    Box(
         modifier = Modifier
-            .clickable {
-                if (!selected) onSelectTheme.invoke(theme)
-            }
+            .combinedClickable(
+                onClick = {
+                    if (!selected) onSelectTheme.invoke(theme)
+                },
+                onLongClick = { expanded = true },
+            )
             .fillMaxWidth()
             .background(
                 color = when (selected) {
@@ -109,24 +139,64 @@ private fun ThemeItem(
             )
             .border(
                 width = 2.dp,
-                color = theme.primaryOutlineColor,
+                color = when (selected) {
+                    true -> theme.secondaryOutlineColor
+                    false -> theme.primaryOutlineColor
+                },
                 shape = MaterialTheme.shapes.medium,
-            )
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+            ),
     ) {
-        ColorSquare(
-            color1 = theme.primaryTextColor,
-            color2 = theme.primaryActionColor,
-            color3 = theme.primaryBackgroundColor,
-            color4 = theme.secondaryBackgroundColor,
-            outlineColor = theme.primaryOutlineColor,
-            selected = selected,
-        )
-        InfernoText(text = theme.name, fontColor = theme.primaryTextColor)
-        if (selected) {
-            InfernoText(text = "(${stringResource(R.string.tab_tray_multiselect_selected_content_description)})")
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            ColorSquare(
+                color1 = theme.primaryTextColor,
+                color2 = theme.primaryActionColor,
+                color3 = theme.primaryBackgroundColor,
+                color4 = theme.secondaryBackgroundColor,
+                outlineColor = theme.primaryOutlineColor,
+                selected = selected,
+            )
+            InfernoText(text = theme.name, fontColor = theme.primaryTextColor)
+            if (selected) {
+                InfernoText(text = "(${stringResource(R.string.tab_tray_multiselect_selected_content_description)})")
+            }
+        }
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            containerColor = theme.secondaryBackgroundColor,
+        ) {
+            // edit theme menu item
+            DropdownMenuItem(
+                text = {
+                    InfernoText("Edit theme") // todo: string resource
+                },
+                onClick = { onEditTheme.invoke(theme) },
+                trailingIcon = {
+                    InfernoIcon(
+                        painter = painterResource(R.drawable.ic_edit_24),
+                        contentDescription = "",
+                    )
+                },
+            )
+            // delete theme menu item
+            DropdownMenuItem(
+                text = {
+                    InfernoText("Delete theme") // todo: string resource
+                },
+                onClick = { onDeleteTheme.invoke(theme) },
+                trailingIcon = {
+                    InfernoIcon(
+                        painter = painterResource(R.drawable.ic_delete_24),
+                        contentDescription = "",
+                    )
+                },
+            )
         }
     }
 }
@@ -210,26 +280,35 @@ private fun ColorSquare(
 
 @Composable
 private fun AddCustomThemeButton(onAddTheme: () -> Unit, theme: InfernoTheme) {
-    // todo: left off here, make exact same layout as ThemeItem so same size,
-    //  and add callback that shows theme alert to add new theme, with currently selected
-    //  theme for color defaults (add .copy to inferno theme obj), with name editor,
-    //  color editors, and color previews below relevant items
-
-    // todo: show button to add theme, copy colors of selected default theme
-    // todo: open color selection in alertdialog, also show preview
-    //  for now colors will be inputted in hex format (# icon at start of textfield
-    //  only allow inputting 0-9, a-f, A-F), and color square is visible
-    Box(
+    Column(
         modifier = Modifier
-            .aspectRatio(1F)
+            .clickable(onClick = onAddTheme)
             .fillMaxWidth()
-            .background(theme.secondaryBackgroundColor, MaterialTheme.shapes.small)
+            .background(
+                color = theme.secondaryBackgroundColor,
+                shape = MaterialTheme.shapes.medium,
+            )
             .border(
                 width = 2.dp,
                 color = theme.primaryOutlineColor,
-                shape = MaterialTheme.shapes.small,
-            ).clickable(onClick = onAddTheme),
+                shape = MaterialTheme.shapes.medium,
+            )
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-
+        Box(
+            modifier = Modifier
+                .aspectRatio(1F)
+                .fillMaxWidth()
+                .background(theme.secondaryBackgroundColor, MaterialTheme.shapes.small)
+                .border(
+                    width = 2.dp,
+                    color = theme.primaryOutlineColor,
+                    shape = MaterialTheme.shapes.small,
+                ),
+        )
+        // todo: string res
+        InfernoText(text = "Add custom theme", fontColor = theme.primaryTextColor)
     }
 }

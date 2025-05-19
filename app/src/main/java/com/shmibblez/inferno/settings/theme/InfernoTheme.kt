@@ -18,7 +18,8 @@ import mozilla.components.ui.colors.PhotonColors
 
 // todo: if doesnt work might have to make each value of InfernoSettings mutable
 class InfernoThemeProvider(context: Context) : MutableState<InfernoTheme> {
-    override var value: InfernoTheme = runBlocking { context.infernoSettingsDataStore.data.first().getSelectedTheme(context) }
+    override var value: InfernoTheme =
+        runBlocking { context.infernoSettingsDataStore.data.first().getSelectedTheme(context) }
 
     init {
         // launch collector that updates settings

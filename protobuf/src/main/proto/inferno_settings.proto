@@ -151,11 +151,35 @@ message InfernoSettings {
 
   /*** gesture settings ***/
 
+  enum GestureAction {
+    GESTURE_ACTION_NONE = 0;
+    GESTURE_ACTION_TAB_LEFT = 1;
+    GESTURE_ACTION_TAB_RIGHT = 2;
+    GESTURE_ACTION_RELOAD_TAB = 3;
+    GESTURE_ACTION_PAGE_FORWARD = 4;
+    GESTURE_ACTION_PAGE_BACK = 5;
+    GESTURE_ACTION_CLOSE_TAB = 6;
+    GESTURE_ACTION_NEW_TAB_TO_RIGHT = 7;
+    GESTURE_ACTION_NEW_TAB_TO_LEFT = 8;
+    GESTURE_ACTION_NEW_TAB_START = 9;
+    GESTURE_ACTION_NEW_TAB_END = 10;
+    // GESTURE_ACTION_REOPEN_LAST_CLOSED_TAB = 11; // HOW TO DO THIS?
+  }
 
   bool isPullToRefreshEnabled = 24;
   bool isDynamicToolbarEnabled = 25;
-  bool isSwipeHorizontalToSwitchTabsEnabled = 26;
-  bool isSwipeUpToCloseTabEnabled = 27;
+  // sets if swipe up and down on toolbar and tab bar do the same thing
+  bool shouldUnifyToolbarAndTabBarGestures = 26;
+
+  // toolbar gestures
+  GestureAction toolbarGestureSwipeLeft = 73;
+  GestureAction toolbarGestureSwipeRight = 74;
+  GestureAction toolbarGestureSwipeUp = 75;
+  GestureAction toolbarGestureSwipeDown = 76;
+
+  // tab bar gestures
+  GestureAction tabBarGestureSwipeUp = 77;
+  GestureAction tabBarGestureSwipeDown = 78;
 
 
   /*** home screen settings ***/

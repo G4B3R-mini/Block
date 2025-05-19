@@ -433,14 +433,14 @@ class Settings(private val appContext: Context) : PreferencesHolder {
             setPref { it.setIsDynamicToolbarEnabled(value) }
         }
     var isSwipeToolbarToSwitchTabsEnabled: Boolean
-        get() = getPref(default = true) { it?.isSwipeHorizontalToSwitchTabsEnabled }
+        get() = false // getPref(default = true) { it?.isSwipeHorizontalToSwitchTabsEnabled }
         set(value) {
-            setPref { it.setIsSwipeHorizontalToSwitchTabsEnabled(value) }
+//            setPref { it.setIsSwipeHorizontalToSwitchTabsEnabled(value) }
         }
     var isSwipeUpToCloseTabEnabled: Boolean
-        get() = getPref(default = true) { it?.isSwipeUpToCloseTabEnabled }
+        get() = false // getPref(default = true) { it?.isSwipeUpToCloseTabEnabled }
         set(value) {
-            setPref { it.setIsSwipeUpToCloseTabEnabled(value) }
+//            setPref { it.setIsSwipeUpToCloseTabEnabled(value) }
         }
     var selectedDefaultTheme: InfernoSettings.DefaultTheme
         get() = getPref(default = InfernoSettings.DefaultTheme.INFERNO_DARK) { it?.selectedDefaultTheme }

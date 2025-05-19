@@ -133,7 +133,7 @@ private fun LoginsContent(
                 TextListItem(
                     label = login.username,
                     onIconClick = { onDeleteLogin(login) },
-                    iconPainter = painterResource(R.drawable.ic_delete),
+                    iconPainter = painterResource(R.drawable.ic_delete_24),
                     iconDescription = stringResource(
                         R.string.debug_drawer_logins_delete_login_button_content_description,
                         login.username,

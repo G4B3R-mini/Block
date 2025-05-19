@@ -853,7 +853,7 @@ private fun RecentlyClosedTabsIcon(selected: Boolean, onSelected: () -> Unit) {
             .size(ICON_SIZE),
         icon = {
             InfernoIcon(
-                painter = painterResource(R.drawable.ic_delete),
+                painter = painterResource(R.drawable.ic_delete_24),
                 contentDescription = "private tabs", // todo: string res
                 modifier = Modifier.fillMaxSize(),
             )

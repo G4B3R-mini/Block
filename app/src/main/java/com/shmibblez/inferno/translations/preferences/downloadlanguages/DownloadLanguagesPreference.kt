@@ -430,7 +430,7 @@ private fun IconDownloadLanguageItemPreference(
             ) {
                 Icon(
                     painter = painterResource(
-                        id = R.drawable.ic_delete,
+                        id = R.drawable.ic_delete_24,
                     ),
                     contentDescription = null,
                     tint = FirefoxTheme.colors.iconPrimary,

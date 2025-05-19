@@ -83,7 +83,8 @@ fun TabSettingsPage(goBack: () -> Unit) {
             )
 
             // separate inactive tabs
-            PreferenceSwitch(text = stringResource(R.string.preferences_inactive_tabs),
+            PreferenceSwitch(
+                text = stringResource(R.string.preferences_inactive_tabs),
                 summary = stringResource(R.string.preferences_inactive_tabs_title),
                 selected = settings.shouldSeparateInactiveTabs,
                 onSelectedChange = { shouldSeparateInactiveTabs ->
@@ -93,7 +94,8 @@ fun TabSettingsPage(goBack: () -> Unit) {
                                 .build()
                         }
                     }
-                })
+                },
+            )
 
             // tab bar title
             PreferenceTitle("Tab Bar Settings") // todo: string res

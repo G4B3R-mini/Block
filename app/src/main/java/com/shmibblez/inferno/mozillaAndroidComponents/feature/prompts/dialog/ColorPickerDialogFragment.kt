@@ -58,7 +58,7 @@ internal class ColorPickerDialogFragment : PromptDialogFragment(), DialogInterfa
     override fun onClick(dialog: DialogInterface?, which: Int) {
         when (which) {
             DialogInterface.BUTTON_POSITIVE ->
-                feature?.onConfirm(sessionId, promptRequestUID, selectedColor.toHexColor())
+                feature?.onConfirm(sessionId, promptRequestUID, selectedColor.toHexColorRGB())
             DialogInterface.BUTTON_NEGATIVE -> feature?.onCancel(sessionId, promptRequestUID)
         }
     }
@@ -146,7 +146,7 @@ internal class ColorPickerDialogFragment : PromptDialogFragment(), DialogInterfa
 internal fun Int.toColorItem(selected: Boolean = false): ColorItem {
     return ColorItem(
         color = this,
-        contentDescription = toHexColor(),
+        contentDescription = toHexColorRGB(),
         selected = selected,
     )
 }
@@ -159,6 +159,6 @@ internal fun String.toColor(): Int {
     }
 }
 
-internal fun Int.toHexColor(): String {
+internal fun Int.toHexColorRGB(): String {
     return String.format("#%06x", RGB_BIT_MASK and this)
 }
