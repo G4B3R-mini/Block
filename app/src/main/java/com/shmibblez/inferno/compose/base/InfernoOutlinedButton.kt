@@ -15,6 +15,38 @@ import com.shmibblez.inferno.ext.infernoTheme
 
 @Composable
 fun InfernoOutlinedButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+//    enabled: Boolean = true,
+    shape: Shape = ButtonDefaults.outlinedShape,
+    colors: ButtonColors = ButtonDefaults.outlinedButtonColors().copy(
+        containerColor = Color.Transparent,
+        contentColor = LocalContext.current.infernoTheme().value.primaryOutlineColor,
+        disabledContainerColor = Color.Transparent,
+    ),
+    border: BorderStroke? = BorderStroke(
+        width = 1.dp,
+        color = LocalContext.current.infernoTheme().value.primaryOutlineColor,
+    ),
+) {
+    OutlinedButton(
+        onClick = onClick,
+        modifier = modifier,
+//        enabled = enabled,
+        shape = shape,
+        colors = colors,
+        border = border,
+    ) {
+        InfernoText(
+            text = text,
+            fontColor = LocalContext.current.infernoTheme().value.primaryOutlineColor,
+        )
+    }
+}
+
+@Composable
+fun InfernoOutlinedButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 //    enabled: Boolean = true,

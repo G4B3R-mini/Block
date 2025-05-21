@@ -592,9 +592,9 @@ class Settings(private val appContext: Context) : PreferencesHolder {
             setPref { it.setShouldUseInfernoHome(value) }
         }
     var homeUrl: String
-        get() = getPref(default = "") { it?.homeUrl }
+        get() = getPref(default = "") { it?.customHomeUrl }
         set(value) {
-            setPref { it.setHomeUrl(value) }
+            setPref { it.setCustomHomeUrl(value) }
         }
 
 

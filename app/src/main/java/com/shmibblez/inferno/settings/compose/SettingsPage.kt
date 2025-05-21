@@ -64,6 +64,16 @@ fun SettingsPage(
     onNavigateToSearchSettings: () -> Unit,
     onNavigateToThemeSettings: () -> Unit,
     onNavigateToGestureSettings: () -> Unit,
+    onNavigateToHomePageSettings: () -> Unit,
+    onNavigateToOnQuitSettings: () -> Unit,
+    onNavigateToAutofillSettings: () -> Unit,
+    onNavigateToSitePermissionsSettings: () -> Unit,
+    onNavigateToAccessibilitySettings: () -> Unit,
+    onNavigateToLocaleSettings: () -> Unit,
+    onNavigateToTranslationSettings: () -> Unit,
+    onNavigateToPrivateModeSettings: () -> Unit,
+    onNavigateToTrackingProtectionSettings: () -> Unit,
+    onNavigateToHttpsOnlySettings: () -> Unit,
 ) {
     val context = LocalContext.current
     val lifecycleScope = LocalLifecycleOwner.current.lifecycle.coroutineScope
@@ -104,25 +114,65 @@ fun SettingsPage(
         PreferenceSpacer()
 
         PreferenceAction(
-            title = "Toolbar Settings",
-            action = onNavigateToToolbarSettings
-        ) // todo: string res for title
+            title = "Toolbar Settings", // todo: string res for title
+            action = onNavigateToToolbarSettings,
+        )
         PreferenceAction(
-            title = "Tab Settings",
-            action = onNavigateToTabBarSettings
-        ) // todo: string res for title
+            title = "Tab Settings", // todo: string res for title
+            action = onNavigateToTabBarSettings,
+        )
         PreferenceAction(
-            title = "Search Settings",
-            action = onNavigateToSearchSettings
-        ) // todo: string res for title
+            title = "Search Settings", // todo: string res for title
+            action = onNavigateToSearchSettings,
+        )
         PreferenceAction(
-            title = "Theme Settings",
-            action = onNavigateToThemeSettings
-        ) // todo: string res for title
+            title = "Theme Settings", // todo: string res for title
+            action = onNavigateToThemeSettings,
+        )
         PreferenceAction(
-            title = "Gesture Settings",
-            action = onNavigateToGestureSettings
-        ) // todo: string res for title
+            title = "Gesture Settings", // todo: string res for title
+            action = onNavigateToGestureSettings,
+        )
+        PreferenceAction(
+            title = "Home Page Settings", // todo: string res for title
+            action = onNavigateToHomePageSettings,
+        )
+        PreferenceAction(
+            title = "On Quit Settings", // todo: string res for title
+            action = onNavigateToOnQuitSettings,
+        )
+        PreferenceAction(
+            title = "Autofill Settings", // todo: string res for title
+            action = onNavigateToAutofillSettings,
+        )
+        PreferenceAction(
+            title = "On Quit Settings", // todo: string res for title
+            action = onNavigateToSitePermissionsSettings,
+        )
+        PreferenceAction(
+            title = "Accessibility Settings", // todo: string res for title
+            action = onNavigateToAccessibilitySettings,
+        )
+        PreferenceAction(
+            title = "Locale Settings", // todo: string res for title
+            action = onNavigateToLocaleSettings,
+        )
+        PreferenceAction(
+            title = "Translation Settings", // todo: string res for title
+            action = onNavigateToTranslationSettings,
+        )
+        PreferenceAction(
+            title = "Private Mode Settings", // todo: string res for title
+            action = onNavigateToPrivateModeSettings,
+        )
+        PreferenceAction(
+            title = "Tracking Protection Settings", // todo: string res for title
+            action = onNavigateToTrackingProtectionSettings,
+        )
+        PreferenceAction(
+            title = "Https Only Settings", // todo: string res for title
+            action = onNavigateToHttpsOnlySettings,
+        )
 
         PreferenceSpacer()
 

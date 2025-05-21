@@ -153,16 +153,16 @@ message InfernoSettings {
 
   enum GestureAction {
     GESTURE_ACTION_NONE = 0;
-    GESTURE_ACTION_TAB_LEFT = 1;
-    GESTURE_ACTION_TAB_RIGHT = 2;
+    GESTURE_ACTION_TAB_RIGHT = 1;
+    GESTURE_ACTION_TAB_LEFT = 2;
     GESTURE_ACTION_RELOAD_TAB = 3;
     GESTURE_ACTION_PAGE_FORWARD = 4;
     GESTURE_ACTION_PAGE_BACK = 5;
     GESTURE_ACTION_CLOSE_TAB = 6;
     GESTURE_ACTION_NEW_TAB_TO_RIGHT = 7;
     GESTURE_ACTION_NEW_TAB_TO_LEFT = 8;
-    GESTURE_ACTION_NEW_TAB_START = 9;
-    GESTURE_ACTION_NEW_TAB_END = 10;
+    GESTURE_ACTION_NEW_TAB_END = 9;
+    GESTURE_ACTION_NEW_TAB_START = 10;
     // GESTURE_ACTION_REOPEN_LAST_CLOSED_TAB = 11; // HOW TO DO THIS?
   }
 
@@ -191,6 +191,11 @@ message InfernoSettings {
     OPEN_ON_HOME_AFTER_FOUR_HOURS = 2;
   }
 
+  message CustomHomeSite {
+    string name = 1;
+    string url = 2;
+  }
+
   // general
   bool defaultTopSitesAdded = 33;
   bool shouldShowTopSites = 34;
@@ -205,10 +210,10 @@ message InfernoSettings {
   // navigation
   PageWhenBrowserReopened pageWhenBrowserReopened = 39;
   bool shouldUseInfernoHome = 40;
-  string homeUrl = 41;
+  string customHomeUrl = 41;
 
 
-  /*** general ***/
+  /*** on quit ***/
 
 
   // on quit
@@ -221,8 +226,8 @@ message InfernoSettings {
   bool deleteDownloadsOnQuit = 48;
 
   // other
-  bool shouldUseExternalDownloadManager = 49;
-  bool remoteDebuggingOverUsb = 50;
+  bool shouldUseExternalDownloadManager = 49; // todo: add to prefs
+  bool remoteDebuggingOverUsb = 50; // todo: add to prefs
 
 
   /*** autofill data ***/
@@ -234,11 +239,11 @@ message InfernoSettings {
   }
 
   // login storage
+  bool isAddressSaveAndAutofillEnabled = 55;
   LoginsStorage saveLoginsSettings = 51;
   bool shouldSyncLogins = 52;
   bool shouldAutofillLogins = 53;
   bool isAndroidAutofillEnabled = 54; // autofill in other apps
-  bool isAddressSaveAndAutofillEnabled = 55;
   bool isCardSaveAndAutofillEnabled = 56;
   bool shouldSyncCards = 57;
   // managed in Core by LoginExceptionStorage

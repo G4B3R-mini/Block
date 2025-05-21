@@ -10,21 +10,24 @@ import androidx.compose.material3.SwitchColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.sp
 import com.shmibblez.inferno.compose.base.InfernoText
+import com.shmibblez.inferno.ext.infernoTheme
 
 @Composable
 fun PreferenceSwitch(
+    modifier: Modifier = Modifier,
     text: String,
     summary: String? = null,
     selected: Boolean,
     onSelectedChange: (Boolean) -> Unit,
     enabled: Boolean = true,
 ) {
+    val context = LocalContext.current
+
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(
                 horizontal = PreferenceConstants.PREFERENCE_HORIZONTAL_PADDING,
@@ -41,28 +44,19 @@ fun PreferenceSwitch(
             // title
             InfernoText(
                 text = text,
-                modifier = Modifier
-                    .alpha(
-                        when (enabled) {
-                            true -> 1F
-                            false -> 0.75F
-                        }
-                    ),
-                fontColor = Color.White, // todo: theme
+                fontColor = context.infernoTheme().value.let {
+                    when (enabled) {
+                        true -> it.primaryTextColor
+                        false -> it.secondaryTextColor
+                    }
+                },
             )
             // description
-            if (summary != null) {
+            if (enabled && summary != null) {
                 InfernoText(
                     text = summary,
-                    modifier = Modifier
-                        .alpha(
-                            when (enabled) {
-                                true -> 0.75F
-                                false -> 0.5F
-                            }
-                        ),
                     fontSize = 12.sp,
-                    fontColor = Color.DarkGray, // todo: theme
+                    fontColor = context.infernoTheme().value.secondaryTextColor,
                 )
             }
         }
@@ -71,22 +65,22 @@ fun PreferenceSwitch(
             onCheckedChange = onSelectedChange,
             enabled = enabled,
             colors = SwitchColors(
-                checkedThumbColor = Color.Red,
-                checkedTrackColor = Color.Red.copy(alpha = 0.75F),
-                checkedBorderColor = Color.White,
-                checkedIconColor = Color.White,
-                uncheckedThumbColor = Color.Red,
-                uncheckedTrackColor = Color.Red.copy(alpha = 0.75F),
-                uncheckedBorderColor = Color.White,
-                uncheckedIconColor = Color.White,
-                disabledCheckedThumbColor = Color.Gray,
-                disabledCheckedTrackColor = Color.Gray.copy(alpha = 0.5F),
-                disabledCheckedBorderColor = Color.Gray,
-                disabledCheckedIconColor = Color.Gray,
-                disabledUncheckedThumbColor = Color.Gray,
-                disabledUncheckedTrackColor = Color.Gray.copy(alpha = 0.75F),
-                disabledUncheckedBorderColor = Color.Gray,
-                disabledUncheckedIconColor = Color.Gray,
+                checkedThumbColor = context.infernoTheme().value.primaryActionColor,
+                checkedTrackColor = context.infernoTheme().value.secondaryActionColor,
+                checkedBorderColor = context.infernoTheme().value.primaryActionColor,
+                checkedIconColor = context.infernoTheme().value.primaryIconColor,
+                uncheckedThumbColor = context.infernoTheme().value.primaryActionColor,
+                uncheckedTrackColor = context.infernoTheme().value.secondaryActionColor,
+                uncheckedBorderColor = context.infernoTheme().value.primaryActionColor,
+                uncheckedIconColor = context.infernoTheme().value.primaryIconColor,
+                disabledCheckedThumbColor = context.infernoTheme().value.secondaryTextColor,    // .secondaryBackgroundColor,
+                disabledCheckedTrackColor = context.infernoTheme().value.secondaryTextColor,    // .secondaryBackgroundColor,
+                disabledCheckedBorderColor = context.infernoTheme().value.secondaryTextColor,   // .secondaryBackgroundColor,
+                disabledCheckedIconColor = context.infernoTheme().value.secondaryTextColor,     // .secondaryIconColor,
+                disabledUncheckedThumbColor = context.infernoTheme().value.secondaryTextColor,  // .secondaryBackgroundColor,
+                disabledUncheckedTrackColor = context.infernoTheme().value.secondaryTextColor,  // .secondaryBackgroundColor,
+                disabledUncheckedBorderColor = context.infernoTheme().value.secondaryTextColor, // .secondaryBackgroundColor,
+                disabledUncheckedIconColor = context.infernoTheme().value.secondaryTextColor,   // .secondaryIconColor,
             )
         )
     }
