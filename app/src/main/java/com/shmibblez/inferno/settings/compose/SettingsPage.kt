@@ -1,6 +1,7 @@
 package com.shmibblez.inferno.settings.compose
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.clickable
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -8,6 +9,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -66,6 +68,7 @@ fun SettingsPage(
     onNavigateToGestureSettings: () -> Unit,
     onNavigateToHomePageSettings: () -> Unit,
     onNavigateToOnQuitSettings: () -> Unit,
+    onNavigateToPasswordSettings: () -> Unit,
     onNavigateToAutofillSettings: () -> Unit,
     onNavigateToSitePermissionsSettings: () -> Unit,
     onNavigateToAccessibilitySettings: () -> Unit,
@@ -79,9 +82,6 @@ fun SettingsPage(
     val lifecycleScope = LocalLifecycleOwner.current.lifecycle.coroutineScope
     val translationSupported =
         FxNimbus.features.translations.value().globalSettingsEnabled && context.components.core.store.state.translationEngine.isEngineSupported == true
-    val settings by context.infernoSettingsDataStore.data.collectAsState(
-        initial = InfernoSettings.getDefaultInstance(),
-    )
 
     val accountState = rememberAccountState(
         profile = context.components.backgroundServices.accountManager.accountProfile(),
@@ -90,6 +90,7 @@ fun SettingsPage(
         httpClient = context.components.core.client,
         updateFxAAllowDomesticChinaServerMenu = {},
     )
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -97,13 +98,14 @@ fun SettingsPage(
                     InfernoIcon(
                         painter = painterResource(R.drawable.ic_back_button),
                         contentDescription = stringResource(R.string.browser_menu_back),
-//                        modifier = Modifier.clickable(onClick = goBack),
+                        modifier = Modifier.clickable(onClick = {/* todo */ }),
                     )
                 },
-                title = { InfernoText("Toolbar Settings") }, // todo: string res
+                title = { InfernoText(stringResource(R.string.settings_title)) },
             )
         },
     ) {
+        // account auth component
         AccountView(
             state = accountState,
             onNavigateSignedIn = onNavigateToAccountSettingsPage,
@@ -113,73 +115,95 @@ fun SettingsPage(
 
         PreferenceSpacer()
 
+        // toolbar settings
         PreferenceAction(
             title = "Toolbar Settings", // todo: string res for title
             action = onNavigateToToolbarSettings,
         )
+        // tab settings
         PreferenceAction(
-            title = "Tab Settings", // todo: string res for title
+            title = stringResource(R.string.preferences_tabs),
             action = onNavigateToTabBarSettings,
         )
+        // search settings
         PreferenceAction(
-            title = "Search Settings", // todo: string res for title
+            title = stringResource(R.string.preferences_search),
             action = onNavigateToSearchSettings,
         )
+        // theme settings
         PreferenceAction(
-            title = "Theme Settings", // todo: string res for title
+            title = stringResource(R.string.preferences_theme),
             action = onNavigateToThemeSettings,
-        )
-        PreferenceAction(
-            title = "Gesture Settings", // todo: string res for title
-            action = onNavigateToGestureSettings,
-        )
-        PreferenceAction(
-            title = "Home Page Settings", // todo: string res for title
-            action = onNavigateToHomePageSettings,
-        )
-        PreferenceAction(
-            title = "On Quit Settings", // todo: string res for title
-            action = onNavigateToOnQuitSettings,
-        )
-        PreferenceAction(
-            title = "Autofill Settings", // todo: string res for title
-            action = onNavigateToAutofillSettings,
-        )
-        PreferenceAction(
-            title = "On Quit Settings", // todo: string res for title
-            action = onNavigateToSitePermissionsSettings,
-        )
-        PreferenceAction(
-            title = "Accessibility Settings", // todo: string res for title
-            action = onNavigateToAccessibilitySettings,
-        )
-        PreferenceAction(
-            title = "Locale Settings", // todo: string res for title
-            action = onNavigateToLocaleSettings,
-        )
-        PreferenceAction(
-            title = "Translation Settings", // todo: string res for title
-            action = onNavigateToTranslationSettings,
-        )
-        PreferenceAction(
-            title = "Private Mode Settings", // todo: string res for title
-            action = onNavigateToPrivateModeSettings,
-        )
-        PreferenceAction(
-            title = "Tracking Protection Settings", // todo: string res for title
-            action = onNavigateToTrackingProtectionSettings,
-        )
-        PreferenceAction(
-            title = "Https Only Settings", // todo: string res for title
-            action = onNavigateToHttpsOnlySettings,
         )
 
         PreferenceSpacer()
 
-        PreferenceTitle(text = "Browser Components") // todo: string res
+        // gesture settings
         PreferenceAction(
-            title = "",
-            action = { },
+            title = stringResource(R.string.preferences_gestures),
+            action = onNavigateToGestureSettings,
         )
+        // home page settings
+        PreferenceAction(
+            title = stringResource(R.string.preferences_home_2),
+            action = onNavigateToHomePageSettings,
+        )
+        // on quit settings
+        PreferenceAction(
+            title = "On Quit", // todo: string res for title
+            action = onNavigateToOnQuitSettings,
+        )
+        // password settings
+        PreferenceAction(
+            title = stringResource(R.string.preferences_passwords_logins_and_passwords_2),
+            action = onNavigateToPasswordSettings,
+        )
+        PreferenceAction(
+            title = stringResource(R.string.preferences_autofill),
+            action = onNavigateToAutofillSettings,
+        )
+
+        PreferenceSpacer()
+
+        // site permission settings
+        PreferenceAction(
+            title = stringResource(R.string.preferences_site_permissions),
+            action = onNavigateToSitePermissionsSettings,
+        )
+        // accessibility settings
+        PreferenceAction(
+            title = stringResource(R.string.preferences_accessibility),
+            action = onNavigateToAccessibilitySettings,
+        )
+        // locale settings
+        PreferenceAction(
+            title = stringResource(R.string.preferences_language),
+            action = onNavigateToLocaleSettings,
+        )
+        // translation settings
+        PreferenceAction(
+            title = stringResource(R.string.preferences_translations),
+            action = onNavigateToTranslationSettings,
+        )
+
+        PreferenceSpacer()
+
+        // private mode settings
+        PreferenceAction(
+            title = stringResource(R.string.preferences_private_browsing_options),
+            action = onNavigateToPrivateModeSettings,
+        )
+        // tracking protection settings
+        PreferenceAction(
+            title = stringResource(R.string.preference_enhanced_tracking_protection),
+            action = onNavigateToTrackingProtectionSettings,
+        )
+        // https only settings
+        PreferenceAction(
+            title = stringResource(R.string.preferences_https_only_title),
+            action = onNavigateToHttpsOnlySettings,
+        )
+
+        PreferenceSpacer()
     }
 }

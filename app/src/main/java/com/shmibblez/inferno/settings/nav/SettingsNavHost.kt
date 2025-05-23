@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.shmibblez.inferno.settings.passwords.PasswordSettingsPage
 import com.shmibblez.inferno.settings.SettingsFragmentDirections
 import com.shmibblez.inferno.settings.accessibility.AccessibilitySettingsPage
 import com.shmibblez.inferno.settings.account.AccountProblemSettingsPage
@@ -16,6 +17,7 @@ import com.shmibblez.inferno.settings.home.HomePageSettingsPage
 import com.shmibblez.inferno.settings.httpsonly.HttpsOnlySettingsPage
 import com.shmibblez.inferno.settings.locale.LocaleSettingsPage
 import com.shmibblez.inferno.settings.onQuit.OnQuitSettingsPage
+import com.shmibblez.inferno.settings.passwords.PasswordExceptionSettingsPage
 import com.shmibblez.inferno.settings.privatemode.PrivateModeSettingsPage
 import com.shmibblez.inferno.settings.search.SearchSettingsPage
 import com.shmibblez.inferno.settings.sitepermissions.SitePermissionsSettingsPage
@@ -72,6 +74,12 @@ private object SettingsRoutes {
     object OnQuitSettingsPage
 
     @Serializable
+    object PasswordSettingsPage {
+        @Serializable
+        object PasswordExceptionSettingsPage
+    }
+
+    @Serializable
     object AutofillSettingsPage
 
     @Serializable
@@ -118,6 +126,7 @@ fun SettingsNavHost() {
                 onNavigateToGestureSettings = { nav.navigate(route = SettingsRoutes.GestureSettingsPage) },
                 onNavigateToHomePageSettings = { nav.navigate(route = SettingsRoutes.HomePageSettingsPage) },
                 onNavigateToOnQuitSettings = { nav.navigate(route = SettingsRoutes.OnQuitSettingsPage) },
+                onNavigateToPasswordSettings = { nav.navigate(route = SettingsRoutes.PasswordSettingsPage) },
                 onNavigateToAutofillSettings = { nav.navigate(route = SettingsRoutes.AutofillSettingsPage) },
                 onNavigateToSitePermissionsSettings = { nav.navigate(route = SettingsRoutes.SitePermissionsSettingsPage) },
                 onNavigateToAccessibilitySettings = { nav.navigate(route = SettingsRoutes.AccessibilitySettingsPage) },
@@ -128,23 +137,68 @@ fun SettingsNavHost() {
                 onNavigateToHttpsOnlySettings = { nav.navigate(route = SettingsRoutes.HttpsOnlySettingsPage) },
             )
         }
-        composable<SettingsRoutes.AccountSettingsPage> { AccountSettingsPage(goBack = { nav.popBackStack() }) }
-        composable<SettingsRoutes.AccountProblemSettingsPage> { AccountProblemSettingsPage(goBack = { nav.popBackStack() }) }
-        composable<SettingsRoutes.TurnOnSyncSettingsPage> { TurnOnSyncSettingsPage(goBack = { nav.popBackStack() }) }
-        composable<SettingsRoutes.ToolbarSettingsPage> { ToolbarSettingsPage(goBack = { nav.popBackStack() }) }
-        composable<SettingsRoutes.TabSettingsPage> { TabSettingsPage(goBack = { nav.popBackStack() }) }
-        composable<SettingsRoutes.SearchSettingsPage> { SearchSettingsPage(goBack = { nav.popBackStack() }) }
-        composable<SettingsRoutes.ThemeSettingsPage> { ThemeSettingsPage(goBack = { nav.popBackStack() }) }
-        composable<SettingsRoutes.GestureSettingsPage> { GestureSettingsPage(goBack = { nav.popBackStack() }) }
-        composable<SettingsRoutes.HomePageSettingsPage> { HomePageSettingsPage(goBack = { nav.popBackStack() }) }
-        composable<SettingsRoutes.OnQuitSettingsPage> { OnQuitSettingsPage(goBack = { nav.popBackStack() }) }
-        composable<SettingsRoutes.AutofillSettingsPage> { AutofillSettingsPage(goBack = { nav.popBackStack() }) }
-        composable<SettingsRoutes.SitePermissionsSettingsPage> { SitePermissionsSettingsPage(goBack = { nav.popBackStack() }) }
-        composable<SettingsRoutes.AccessibilitySettingsPage> { AccessibilitySettingsPage(goBack = { nav.popBackStack() }) }
-        composable<SettingsRoutes.LocaleSettingsPage> { LocaleSettingsPage(goBack = { nav.popBackStack() }) }
-        composable<SettingsRoutes.TranslationSettingsPage> { TranslationSettingsPage(goBack = { nav.popBackStack() }) }
-        composable<SettingsRoutes.PrivateModeSettingsPage> { PrivateModeSettingsPage(goBack = { nav.popBackStack() }) }
-        composable<SettingsRoutes.TrackingProtectionSettingsPage> { TrackingProtectionSettingsPage(goBack = { nav.popBackStack() }) }
-        composable<SettingsRoutes.HttpsOnlySettingsPage> { HttpsOnlySettingsPage(goBack = { nav.popBackStack() }) }
+        composable<SettingsRoutes.AccountSettingsPage> {
+            AccountSettingsPage(goBack = { nav.popBackStack() })
+        }
+        composable<SettingsRoutes.AccountProblemSettingsPage> {
+            AccountProblemSettingsPage(goBack = { nav.popBackStack() })
+        }
+        composable<SettingsRoutes.TurnOnSyncSettingsPage> {
+            TurnOnSyncSettingsPage(goBack = { nav.popBackStack() })
+        }
+        composable<SettingsRoutes.ToolbarSettingsPage> {
+            ToolbarSettingsPage(goBack = { nav.popBackStack() })
+        }
+        composable<SettingsRoutes.TabSettingsPage> {
+            TabSettingsPage(goBack = { nav.popBackStack() })
+        }
+        composable<SettingsRoutes.SearchSettingsPage> {
+            SearchSettingsPage(goBack = { nav.popBackStack() })
+        }
+        composable<SettingsRoutes.ThemeSettingsPage> {
+            ThemeSettingsPage(goBack = { nav.popBackStack() })
+        }
+        composable<SettingsRoutes.GestureSettingsPage> {
+            GestureSettingsPage(goBack = { nav.popBackStack() })
+        }
+        composable<SettingsRoutes.HomePageSettingsPage> {
+            HomePageSettingsPage(goBack = { nav.popBackStack() })
+        }
+        composable<SettingsRoutes.OnQuitSettingsPage> {
+            OnQuitSettingsPage(goBack = { nav.popBackStack() })
+        }
+        composable<SettingsRoutes.AutofillSettingsPage> {
+            PasswordSettingsPage(
+                goBack = { nav.popBackStack() },
+                onNavToPasswordExceptionSettingsPage = { nav.navigate(route = SettingsRoutes.PasswordSettingsPage.PasswordExceptionSettingsPage) },
+            )
+        }
+        composable<SettingsRoutes.PasswordSettingsPage.PasswordExceptionSettingsPage> {
+            PasswordExceptionSettingsPage(goBack = { nav.popBackStack() })
+        }
+        composable<SettingsRoutes.AutofillSettingsPage> {
+            AutofillSettingsPage(goBack = { nav.popBackStack() })
+        }
+        composable<SettingsRoutes.SitePermissionsSettingsPage> {
+            SitePermissionsSettingsPage(goBack = { nav.popBackStack() })
+        }
+        composable<SettingsRoutes.AccessibilitySettingsPage> {
+            AccessibilitySettingsPage(goBack = { nav.popBackStack() })
+        }
+        composable<SettingsRoutes.LocaleSettingsPage> {
+            LocaleSettingsPage(goBack = { nav.popBackStack() })
+        }
+        composable<SettingsRoutes.TranslationSettingsPage> {
+            TranslationSettingsPage(goBack = { nav.popBackStack() })
+        }
+        composable<SettingsRoutes.PrivateModeSettingsPage> {
+            PrivateModeSettingsPage(goBack = { nav.popBackStack() })
+        }
+        composable<SettingsRoutes.TrackingProtectionSettingsPage> {
+            TrackingProtectionSettingsPage(goBack = { nav.popBackStack() })
+        }
+        composable<SettingsRoutes.HttpsOnlySettingsPage> {
+            HttpsOnlySettingsPage(goBack = { nav.popBackStack() })
+        }
     }
 }

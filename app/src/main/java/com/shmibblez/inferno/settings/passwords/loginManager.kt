@@ -1,5 +1,6 @@
-package com.shmibblez.inferno.settings.httpsonly
+package com.shmibblez.inferno.settings.passwords
 
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -30,28 +31,33 @@ import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.compose.base.InfernoTextStyle
 import com.shmibblez.inferno.ext.components
-import com.shmibblez.inferno.settings.address.ext.getAddressLabel
 import com.shmibblez.inferno.settings.compose.components.PreferenceConstants
+import com.shmibblez.inferno.settings.logins.SavedLogin
+import com.shmibblez.inferno.settings.logins.mapToSavedLogin
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import mozilla.components.concept.storage.Address
-import mozilla.components.concept.storage.UpdatableAddressFields
-import mozilla.components.service.sync.autofill.AutofillCreditCardsAddressesStorage
+import mozilla.appservices.logins.LoginsApiException
+import mozilla.components.concept.storage.LoginEntry
+import mozilla.components.service.sync.logins.SyncableLoginsStorage
 import mozilla.components.support.base.feature.LifecycleAwareFeature
-import java.util.Date
 
 private val ICON_SIZE = 18.dp
 
-internal class AddressManagerState(
-    val storage: AutofillCreditCardsAddressesStorage,
+// todo:
+//  - add biometric / pin auth
+//  - add sort logins in refreshLogins()
+//  - check duplicates not implemented
+//  - login search not implemented
+internal class LoginManagerState(
+    val storage: SyncableLoginsStorage,
     val coroutineScope: CoroutineScope,
-    initiallyExpanded: Boolean = false,
+    initiallyExpanded: Boolean = true,
 ) : LifecycleAwareFeature {
 
     private val jobs: MutableList<Job> = mutableListOf()
 
-    internal var addresses by mutableStateOf(emptyList<Address>())
+    internal var logins by mutableStateOf(emptyList<SavedLogin>())
 
     val isLoading: Boolean
         get() = jobs.isNotEmpty()
@@ -72,34 +78,58 @@ internal class AddressManagerState(
         jobs.add(job)
     }
 
-    // refreshes address list
-    private fun refreshAddresses() {
-        launchSuspend { addresses = storage.getAllAddresses() }
-    }
-
-    fun addAddress(addressFields: UpdatableAddressFields) {
+    // refreshes logins list
+    private fun refreshLogins() {
+        // just copying moz implementation, reasoning below
+        // Don't touch the store if we already have the logins loaded.
+        // This has a slight downside of possibly being out of date with the storage if, say, Sync
+        // ran in the meantime, but that's fairly unlikely and the speedy UI is worth it.
+//        if (logins.isNotEmpty()) return
+        // this runs anyway lol, might have to re-add above line if too slow
         launchSuspend {
-            storage.addAddress(addressFields)
-            refreshAddresses()
+            try {
+                logins = storage.list().map { it.mapToSavedLogin() }
+            } catch (e: LoginsApiException) {
+                Log.e("loginManager", "called from refreshLogins(): $e")
+            }
         }
     }
 
-    fun updateAddress(guid: String, address: UpdatableAddressFields) {
+    fun addLogin(login: LoginEntry) {
         launchSuspend {
-            storage.updateAddress(guid, address)
-            refreshAddresses()
+            try {
+                storage.add(login)
+                refreshLogins()
+            } catch (e: LoginsApiException) {
+                Log.e("loginManager", "called from addLogin(): $e")
+            }
         }
     }
 
-    fun deleteAddress(guid: String) {
+    fun updateLogin(guid: String, login: LoginEntry) {
         launchSuspend {
-            storage.deleteAddress(guid)
-            refreshAddresses()
+            try {
+                storage.update(guid, login)
+                refreshLogins()
+            } catch (e: LoginsApiException) {
+                Log.e("loginManager", "called from updateLogin(): $e")
+            }
+        }
+    }
+
+    fun deleteLogin(guid: String) {
+        launchSuspend {
+            try {
+                storage.delete(guid)
+                refreshLogins()
+            } catch (e: LoginsApiException) {
+                Log.e("loginManager", "called from deleteLogin(): $e")
+            }
         }
     }
 
     override fun start() {
-        refreshAddresses()
+        refreshLogins()
     }
 
     override fun stop() {
@@ -109,14 +139,14 @@ internal class AddressManagerState(
 }
 
 @Composable
-internal fun rememberAddressManagerState(): MutableState<AddressManagerState> {
+internal fun rememberLoginManagerState(): MutableState<LoginManagerState> {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
     val state = remember {
         mutableStateOf(
-            AddressManagerState(
-                storage = context.components.core.autofillStorage, coroutineScope = coroutineScope
+            LoginManagerState(
+                storage = context.components.core.passwordsStorage, coroutineScope = coroutineScope
             )
         )
     }
@@ -132,11 +162,11 @@ internal fun rememberAddressManagerState(): MutableState<AddressManagerState> {
     return state
 }
 
-internal fun LazyListScope.addressManager(
-    state: AddressManagerState,
-    onAddAddressClicked: () -> Unit,
-    onEditAddressClicked: (Address) -> Unit,
-    onDeleteAddressClicked: (Address) -> Unit,
+internal fun LazyListScope.loginManager(
+    state: LoginManagerState,
+    onAddLoginClicked: () -> Unit,
+    onEditLoginClicked: (SavedLogin) -> Unit,
+    onDeleteLoginClicked: (SavedLogin) -> Unit,
 ) {
     item {
         Row(
@@ -148,7 +178,7 @@ internal fun LazyListScope.addressManager(
                     bottom = if (state.expanded) 0.dp else PreferenceConstants.PREFERENCE_HALF_VERTICAL_PADDING,
                 ),
         ) {
-            InfernoText(text = stringResource(R.string.addresses_manage_addresses))
+            InfernoText(text = stringResource(R.string.mozac_feature_prompts_manage_logins_2))
             InfernoIcon(
                 painter = when (state.expanded) {
                     true -> painterResource(R.drawable.ic_chevron_up_24)
@@ -159,30 +189,28 @@ internal fun LazyListScope.addressManager(
             )
         }
     }
-    if (state.expanded) {
-        items(state.addresses) {
-            AddressItem(
-                address = it,
-                onEditAddress = onEditAddressClicked,
-                onDeleteAddress = onDeleteAddressClicked,
-            )
-        }
-        item {
-            AddAddressItem(onAddAddressClicked = onAddAddressClicked)
-        }
-        item {
-            Spacer(
-                modifier = Modifier.padding(bottom = PreferenceConstants.PREFERENCE_HALF_VERTICAL_PADDING),
-            )
-        }
+    items(state.logins) {
+        LoginItem(
+            login = it,
+            onEditLoginClicked = onEditLoginClicked,
+            onDeleteLoginClicked = onDeleteLoginClicked,
+        )
+    }
+    item {
+        AddLoginItem(onAddLoginClicked = onAddLoginClicked)
+    }
+    item {
+        Spacer(
+            modifier = Modifier.padding(bottom = PreferenceConstants.PREFERENCE_HALF_VERTICAL_PADDING),
+        )
     }
 }
 
 @Composable
-private fun AddressItem(
-    address: Address,
-    onEditAddress: (Address) -> Unit,
-    onDeleteAddress: (Address) -> Unit,
+private fun LoginItem(
+    login: SavedLogin,
+    onEditLoginClicked: (SavedLogin) -> Unit,
+    onDeleteLoginClicked: (SavedLogin) -> Unit,
 ) {
     Row(
         modifier = Modifier
@@ -198,17 +226,17 @@ private fun AddressItem(
             contentDescription = null,
             modifier = Modifier
                 .size(ICON_SIZE)
-                .clickable { onEditAddress.invoke(address) },
+                .clickable { onEditLoginClicked.invoke(login) },
         )
 
-        // address info
+        // login info
         Column(modifier = Modifier.weight(1F)) {
             InfernoText(
-                text = address.name,
+                text = login.username,
                 fontWeight = FontWeight.Bold,
             )
             InfernoText(
-                text = address.getAddressLabel(),
+                text = login.password,
                 infernoStyle = InfernoTextStyle.Subtitle,
                 maxLines = 2,
             )
@@ -220,16 +248,16 @@ private fun AddressItem(
             contentDescription = null,
             modifier = Modifier
                 .size(ICON_SIZE)
-                .clickable { onDeleteAddress.invoke(address) },
+                .clickable { onDeleteLoginClicked.invoke(login) },
         )
     }
 }
 
 @Composable
-private fun AddAddressItem(onAddAddressClicked: () -> Unit) {
+private fun AddLoginItem(onAddLoginClicked: () -> Unit) {
     Row(
         modifier = Modifier
-            .clickable { onAddAddressClicked.invoke() }
+            .clickable { onAddLoginClicked.invoke() }
             .padding(horizontal = PreferenceConstants.PREFERENCE_HORIZONTAL_PADDING)
             .padding(top = PreferenceConstants.PREFERENCE_INTERNAL_PADDING),
         horizontalArrangement = Arrangement.spacedBy(PreferenceConstants.PREFERENCE_INTERNAL_PADDING),
@@ -242,69 +270,7 @@ private fun AddAddressItem(onAddAddressClicked: () -> Unit) {
             modifier = Modifier.size(ICON_SIZE),
         )
 
-        // add address text
-        InfernoText(text = stringResource(R.string.addresses_add_address))
+        // add login text
+        InfernoText(text = stringResource(R.string.add_login_2))
     }
 }
-
-internal fun Address.Companion.empty(): Address {
-    val now = Date().time
-    return Address(
-        guid = "",
-        name = "",
-        organization = "",
-        streetAddress = "",
-        addressLevel3 = "",
-        addressLevel2 = "",
-        addressLevel1 = "",
-        postalCode = "",
-        country = "",
-        tel = "",
-        email = "",
-        timeCreated = now,
-        timeLastUsed = now,
-        timeLastModified = now,
-        timesUsed = 0,
-    )
-}
-
-internal fun Address.toUpdatableAddressFields(): UpdatableAddressFields {
-    return UpdatableAddressFields(
-        name = this.name,
-        organization = this.organization,
-        streetAddress = this.streetAddress,
-        addressLevel3 = this.addressLevel3,
-        addressLevel2 = this.addressLevel2,
-        addressLevel1 = this.addressLevel1,
-        postalCode = this.postalCode,
-        country = this.country,
-        tel = this.tel,
-        email = this.email
-    )
-}
-
-//internal fun UpdatableAddressFields.copy(
-//    name: String?,
-//    organization: String?,
-//    streetAddress: String?,
-//    addressLevel3: String?,
-//    addressLevel2: String?,
-//    addressLevel1: String?,
-//    postalCode: String?,
-//    country: String?,
-//    tel: String?,
-//    email: String?,
-//): UpdatableAddressFields {
-//    return UpdatableAddressFields(
-//        name = name ?: this.name,
-//        organization = organization ?: this.organization,
-//        streetAddress = streetAddress ?: this.streetAddress,
-//        addressLevel3 = addressLevel3 ?: this.addressLevel3,
-//        addressLevel2 = addressLevel2 ?: this.addressLevel2,
-//        addressLevel1 = addressLevel1 ?: this.addressLevel1,
-//        postalCode = postalCode ?: this.postalCode,
-//        country = country ?: this.country,
-//        tel = tel ?: this.tel,
-//        email = email ?: this.email,
-//    )
-//}

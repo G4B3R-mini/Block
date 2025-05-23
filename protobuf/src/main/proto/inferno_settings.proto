@@ -240,12 +240,11 @@ message InfernoSettings {
 
   // login storage
   bool isAddressSaveAndAutofillEnabled = 55;
-  LoginsStorage saveLoginsSettings = 51;
-  bool shouldSyncLogins = 52;
-  bool shouldAutofillLogins = 53;
-  bool isAndroidAutofillEnabled = 54; // autofill in other apps
   bool isCardSaveAndAutofillEnabled = 56;
   bool shouldSyncCards = 57;
+  bool isLoginSaveAndAutofillEnabled = 51;
+  bool shouldSyncLogins = 52;
+  bool isAndroidAutofillEnabled = 54; // autofill in other apps
   // managed in Core by LoginExceptionStorage
 
 

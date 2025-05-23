@@ -662,30 +662,29 @@ class Settings(private val appContext: Context) : PreferencesHolder {
 
 
     // login storage
-
+    // R.string.pref_key_save_logins
     var shouldPromptToSaveLogins: Boolean
-        get() = getPref(default = true) { it?.saveLoginsSettings == InfernoSettings.LoginsStorage.ASK_TO_SAVE }
+        get() = getPref(default = true) { it?.isLoginSaveAndAutofillEnabled }
         set(value) {
-            when (value) {
-                true -> setPref { it.setSaveLoginsSettings(InfernoSettings.LoginsStorage.ASK_TO_SAVE) }
-                false -> setPref { it.setSaveLoginsSettings(InfernoSettings.LoginsStorage.DONT_SAVE) }
-            }
+            setPref { it.setIsLoginSaveAndAutofillEnabled(value) }
         }
+    // R.string.pref_key_sync_logins
     var shouldSyncLogins: Boolean
         get() = getPref(default = true) { it?.shouldSyncLogins }
         set(value) {
             setPref { it.setShouldSyncLogins(value) }
         }
+    // R.string.pref_key_autofill_logins
     var shouldAutofillLogins: Boolean
-        get() = getPref(default = true) { it?.shouldAutofillLogins }
+        get() = getPref(default = true) { it?.isLoginSaveAndAutofillEnabled }
         set(value) {
-            setPref { it.setShouldAutofillLogins(value) }
+            setPref { it.setIsLoginSaveAndAutofillEnabled(value) }
         }
+    // R.string.pref_key_android_autofill
     var isAndroidAutofillEnabled: Boolean
         get() = getPref(default = true) { it?.isAndroidAutofillEnabled }
-        set(value) {
-            setPref { it.setIsAndroidAutofillEnabled(value) }
-        }
+        set(value) = setPref { it.setIsAndroidAutofillEnabled(value) }
+
 
     /**
      * Stores the user choice from the "Autofill Addresses" settings for whether

@@ -139,19 +139,25 @@ private fun pixelsToDp(pixels: Int) = with(LocalDensity.current) { pixels.toDp()
 
 @Composable
 fun NumberPicker(
-    state: NumberPickerState, values: List<String>, modifier: Modifier = Modifier, selected: String
+    state: NumberPickerState,
+    values: List<String>,
+    modifier: Modifier = Modifier,
+    initiallySelected: String? = null,
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
         modifier = modifier
     ) {
-        val selectedIndex = values.indexOf(selected).let { if (it < 0) 0 else it }
+        val startIndex = when (initiallySelected != null) {
+            true -> values.indexOf(initiallySelected).let { if (it < 0) 0 else it }
+            false -> 0
+        }
 
         Picker(
             state = state,
             items = values,
-            startIndex = selectedIndex,
+            startIndex = startIndex,
             visibleItemsCount = 3,
             modifier = Modifier.fillMaxWidth(0.5f),
             textModifier = Modifier.padding(8.dp),
@@ -162,7 +168,6 @@ fun NumberPicker(
             textAlign = TextAlign.Center,
             fontWeight = FontWeight(500),
             fontSize = 20.sp,
-            fontColor = Color.White,
             modifier = Modifier
                 .padding(bottom = 16.dp)
                 .fillMaxWidth(0.5f)
