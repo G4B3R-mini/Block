@@ -46,9 +46,8 @@ class SitePermissionsDetailsExceptionsFragment : PreferenceFragmentCompat() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        sitePermissions = SitePermissionsDetailsExceptionsFragmentArgs
-            .fromBundle(requireArguments())
-            .sitePermissions
+        sitePermissions =
+            SitePermissionsDetailsExceptionsFragmentArgs.fromBundle(requireArguments()).sitePermissions
     }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
@@ -59,13 +58,12 @@ class SitePermissionsDetailsExceptionsFragment : PreferenceFragmentCompat() {
         super.onResume()
         showToolbar(sitePermissions.origin.stripDefaultPort())
         viewLifecycleOwner.lifecycleScope.launch(Main) {
-            sitePermissions =
-                requireNotNull(
-                    requireComponents.core.permissionStorage.findSitePermissionsBy(
-                        sitePermissions.origin,
-                        private = false,
-                    ),
-                )
+            sitePermissions = requireNotNull(
+                requireComponents.core.permissionStorage.findSitePermissionsBy(
+                    sitePermissions.origin,
+                    private = false,
+                ),
+            )
             bindCategoryPhoneFeatures()
         }
     }
@@ -133,7 +131,8 @@ class SitePermissionsDetailsExceptionsFragment : PreferenceFragmentCompat() {
 
     @VisibleForTesting
     internal fun bindClearPermissionsButton() {
-        val button: Preference = requirePreference(R.string.pref_key_exceptions_clear_site_permissions)
+        val button: Preference =
+            requirePreference(R.string.pref_key_exceptions_clear_site_permissions)
 
         button.onPreferenceClickListener = Preference.OnPreferenceClickListener {
             AlertDialog.Builder(requireContext()).apply {

@@ -43,15 +43,16 @@ that's it for now, hopefully this project doesn't die
       require biometric here with callbacks for biometric/auth events. This removes the need to
       create deeply nested callbacks
     - [ ] so far components that depend on biometric/pin auth are:
-      - [ ] dialog feature in browser component
-      - [ ] creditCardManager in settings
-      - [ ] loginManager in settings
+        - [ ] dialog feature in browser component
+        - [ ] creditCardManager in settings
+        - [ ] loginManager in settings
 - [ ] autofill settings page
     - [ ] show some settings depending on login state (sync cards, sync logins, etc.)
     - [ ] use authentication when click on manage cards
     - [ ] use authentication when click on manage logins
 
 # Future Features
+
 - [ ] more toolbar items
     - [ ] go to passwords page (key with bottom right profile view) (requires auth, consider setting
       a timeout like bitwarden does)
@@ -62,7 +63,14 @@ that's it for now, hopefully this project doesn't die
     - [ ] for bug reporting show select in settings: (disabled, send report auto, or ask to send
       report)
 - [ ] login manager (settings)
-  - [ ] add search function to filter logins, implemented by moz in [SavedLoginsFragment]
-  - [ ] add login sorting and save selected in prefs
-  - [ ] find duplicates? not sure how necessary
-  - [ ] add exceptions page
+    - [ ] add search function to filter logins, implemented by moz in [SavedLoginsFragment]
+    - [ ] add login sorting and save selected in prefs
+    - [ ] find duplicates? not sure how necessary
+    - [ ] add exceptions page
+- [ ] site permissions settings page
+    - [ ] exceptions, reference moz implementation in `SitePermissionsExceptionsFragment` (
+      for clearing site permissions) and `SitePermissionsDetailsExceptionsFragment` (for
+      setting individual site permissions)
+    - [ ] in exceptions fragment show each site as expandable item, when expanded shows individual
+      settings and clear permissions on this site, clear permissions for all sites is at the bottom
+      and requires dialog to confirm

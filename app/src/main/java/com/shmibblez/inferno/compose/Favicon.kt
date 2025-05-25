@@ -111,7 +111,7 @@ fun Favicon(
  * @param modifier [Modifier] allowing to control among others the dimensions and shape of the image.
  */
 @Composable
-private fun FaviconPlaceholder(
+fun FaviconPlaceholder(
     size: Dp,
     modifier: Modifier = Modifier,
 ) {

@@ -17,6 +17,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.base.InfernoButton
+import com.shmibblez.inferno.compose.base.InfernoDialog
 import com.shmibblez.inferno.compose.base.InfernoOutlinedButton
 import com.shmibblez.inferno.compose.base.InfernoOutlinedTextField
 import com.shmibblez.inferno.compose.base.InfernoText
@@ -74,136 +75,128 @@ fun LoginEditorDialog(
         return allValid
     }
 
-    Dialog(
-        onDismissRequest = onDismiss,
-        properties = DialogProperties(
-            dismissOnBackPress = false,
-            dismissOnClickOutside = false,
-        ),
-    ) {
-        Card {
-            LazyColumn {
-                // hostname / site
-                item {
-                    InfernoOutlinedTextField(
-                        value = hostname,
-                        onValueChange = {
-                            hostname = it
-                            validateFields()
-                        },
-                        label = {
+    InfernoDialog(onDismiss = onDismiss) {
+        LazyColumn {
+            // hostname / site
+            item {
+                InfernoOutlinedTextField(
+                    value = hostname,
+                    onValueChange = {
+                        hostname = it
+                        validateFields()
+                    },
+                    label = {
+                        InfernoText(
+                            stringResource(R.string.preferences_passwords_saved_logins_site),
+                            fontColor = context.infernoTheme().value.primaryOutlineColor,
+                        )
+                    },
+                    placeholder = {
+                        InfernoText(
+                            text = stringResource(R.string.add_login_hostname_hint_text),
+                            fontColor = context.infernoTheme().value.secondaryTextColor,
+                        )
+                    },
+                    isError = hostnameError != null,
+                    supportingText = {
+                        if (hostnameError != null) {
                             InfernoText(
-                                stringResource(R.string.preferences_passwords_saved_logins_site),
-                                fontColor = context.infernoTheme().value.primaryOutlineColor,
+                                text = hostnameError!!,
+                                infernoStyle = InfernoTextStyle.Error,
+                                fontSize = 12.sp,
                             )
-                        },
-                        placeholder = {
+                        } else {
                             InfernoText(
-                                text = stringResource(R.string.add_login_hostname_hint_text),
+                                text = stringResource(R.string.add_login_hostname_invalid_text_3),
                                 fontColor = context.infernoTheme().value.secondaryTextColor,
+                                fontSize = 12.sp,
                             )
-                        },
-                        isError = hostnameError != null,
-                        supportingText = {
-                            if (hostnameError != null) {
-                                InfernoText(
-                                    text = hostnameError!!,
-                                    infernoStyle = InfernoTextStyle.Error,
-                                    fontSize = 12.sp,
-                                )
-                            } else {
-                                InfernoText(
-                                    text = stringResource(R.string.add_login_hostname_invalid_text_3),
-                                    fontColor = context.infernoTheme().value.secondaryTextColor,
-                                    fontSize = 12.sp,
-                                )
-                            }
-                        },
-                    )
-                }
-
-                // username
-                item {
-                    InfernoOutlinedTextField(
-                        value = username,
-                        onValueChange = { username = it },
-                        label = {
-                            InfernoText(
-                                stringResource(R.string.credit_cards_name_on_card),
-                                fontColor = context.infernoTheme().value.primaryOutlineColor,
-                            )
-                        },
-                    )
-                }
-
-                // password
-                item {
-                    InfernoOutlinedTextField(
-                        value = password,
-                        onValueChange = { password = it },
-                        label = {
-                            InfernoText(
-                                stringResource(R.string.preferences_passwords_saved_logins_password),
-                                fontColor = context.infernoTheme().value.primaryOutlineColor,
-                            )
-                        },
-                        isError = passwordError != null,
-                        supportingText = {
-                            if (passwordError != null) {
-                                InfernoText(
-                                    text = passwordError!!, infernoStyle = InfernoTextStyle.Error
-                                )
-                            }
-                        },
-                    )
-                }
-            }
-
-            // cancel / save buttons
-            Row {
-                InfernoOutlinedButton(
-                    modifier = Modifier.weight(1F),
-                    text = stringResource(android.R.string.cancel),
-                    onClick = onDismiss,
-                )
-                InfernoButton(
-                    modifier = Modifier.weight(1F),
-                    text = stringResource(R.string.save_changes_to_login),
-                    enabled = hostnameError == null && passwordError == null,
-                    onClick = {
-                        // if field invalid return (dont save)
-                        if (!validateFields()) return@InfernoButton
-
-                        // if all good create or update
-                        val hostnameStr = hostname.trim()
-                        val usernameStr = username.trim()
-                        val passwordStr = password
-
-                        when (create) {
-                            true -> {
-                                // create card
-                                val login = LoginEntry(
-                                    origin = hostnameStr,
-                                    username = usernameStr,
-                                    password = passwordStr,
-                                )
-                                onAddLogin.invoke(login)
-                            }
-
-                            false -> {
-                                // update card
-                                val login = LoginEntry(
-                                    origin = hostnameStr,
-                                    username = usernameStr,
-                                    password = passwordStr,
-                                )
-                                onSaveLogin(initialLogin!!.guid, login)
-                            }
                         }
-                        onDismiss.invoke()
                     },
                 )
             }
+
+            // username
+            item {
+                InfernoOutlinedTextField(
+                    value = username,
+                    onValueChange = { username = it },
+                    label = {
+                        InfernoText(
+                            stringResource(R.string.credit_cards_name_on_card),
+                            fontColor = context.infernoTheme().value.primaryOutlineColor,
+                        )
+                    },
+                )
+            }
+
+            // password
+            item {
+                InfernoOutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    label = {
+                        InfernoText(
+                            stringResource(R.string.preferences_passwords_saved_logins_password),
+                            fontColor = context.infernoTheme().value.primaryOutlineColor,
+                        )
+                    },
+                    isError = passwordError != null,
+                    supportingText = {
+                        if (passwordError != null) {
+                            InfernoText(
+                                text = passwordError!!, infernoStyle = InfernoTextStyle.Error
+                            )
+                        }
+                    },
+                )
+            }
+        }
+
+        // cancel / save buttons
+        Row {
+            InfernoOutlinedButton(
+                modifier = Modifier.weight(1F),
+                text = stringResource(android.R.string.cancel),
+                onClick = onDismiss,
+            )
+            InfernoButton(
+                modifier = Modifier.weight(1F),
+                text = stringResource(R.string.save_changes_to_login),
+                enabled = hostnameError == null && passwordError == null,
+                onClick = {
+                    // if field invalid return (dont save)
+                    if (!validateFields()) return@InfernoButton
+
+                    // if all good create or update
+                    val hostnameStr = hostname.trim()
+                    val usernameStr = username.trim()
+                    val passwordStr = password
+
+                    when (create) {
+                        true -> {
+                            // create card
+                            val login = LoginEntry(
+                                origin = hostnameStr,
+                                username = usernameStr,
+                                password = passwordStr,
+                            )
+                            onAddLogin.invoke(login)
+                        }
+
+                        false -> {
+                            // update card
+                            val login = LoginEntry(
+                                origin = hostnameStr,
+                                username = usernameStr,
+                                password = passwordStr,
+                            )
+                            onSaveLogin(initialLogin!!.guid, login)
+                        }
+                    }
+                    onDismiss.invoke()
+                },
+            )
         }
     }
 }

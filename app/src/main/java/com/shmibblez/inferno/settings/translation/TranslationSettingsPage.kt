@@ -50,7 +50,12 @@ fun TranslationSettingsPage(goBack: () -> Unit) {
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.Top,
         ) {
-
+            // todo: check moz implementation
+            //  - events / options managed through browser store with TranslationsAction,
+            //    may need to sub to state to keep page updated
+            //  - organize settings
+            //  - main screens
+            //    - sub screens
         }
     }
 }

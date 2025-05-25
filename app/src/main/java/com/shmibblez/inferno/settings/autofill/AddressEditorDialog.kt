@@ -2,7 +2,6 @@ package com.shmibblez.inferno.settings.autofill
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.Card
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -11,10 +10,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.base.InfernoButton
+import com.shmibblez.inferno.compose.base.InfernoDialog
 import com.shmibblez.inferno.compose.base.InfernoOutlinedButton
 import com.shmibblez.inferno.compose.base.InfernoOutlinedTextField
 import com.shmibblez.inferno.compose.base.InfernoText
@@ -41,159 +39,149 @@ fun AddressEditorDialog(
     var tel by remember { mutableStateOf(initialAddress.tel) }
     var email by remember { mutableStateOf(initialAddress.email) }
 
-    Dialog(
-        onDismissRequest = onDismiss,
-        properties = DialogProperties(
-            dismissOnBackPress = false,
-            dismissOnClickOutside = false,
-        ),
-    ) {
-        Card {
-            LazyColumn {
-                // name
-                item {
-                    InfernoOutlinedTextField(
-                        value = name,
-                        onValueChange = { name = it },
-                        label = {
-                            InfernoText(
-                                stringResource(R.string.addresses_name),
-                                fontColor = context.infernoTheme().value.primaryOutlineColor,
-                            )
-                        },
-                    )
-                }
-
-                // street address
-                item {
-                    InfernoOutlinedTextField(
-                        value = streetAddress,
-                        onValueChange = { streetAddress = it },
-                        label = {
-                            InfernoText(
-                                stringResource(R.string.addresses_street_address),
-                                fontColor = context.infernoTheme().value.primaryOutlineColor,
-                            )
-                        },
-                    )
-                }
-
-                // city
-                item {
-                    InfernoOutlinedTextField(
-                        value = addressLevel2,
-                        onValueChange = { addressLevel2 = it },
-                        label = {
-                            InfernoText(
-                                stringResource(R.string.addresses_city),
-                                fontColor = context.infernoTheme().value.primaryOutlineColor,
-                            )
-                        },
-                    )
-                }
-
-                // subregion dropdown (state)
-                item {
-                    InfernoOutlinedTextField(
-                        value = addressLevel1,
-                        onValueChange = { addressLevel1 = it },
-                        label = {
-                            InfernoText(
-                                stringResource(R.string.addresses_state),
-                                fontColor = context.infernoTheme().value.primaryOutlineColor,
-                            )
-                        },
-                    )
-                }
-
-                // zipcode
-                item {
-                    InfernoOutlinedTextField(
-                        value = postalCode,
-                        onValueChange = { postalCode = it },
-                        label = {
-                            InfernoText(
-                                stringResource(R.string.addresses_zip),
-                                fontColor = context.infernoTheme().value.primaryOutlineColor,
-                            )
-                        },
-                    )
-                }
-
-                // country or region
-                item {
-                    InfernoOutlinedTextField(
-                        value = country,
-                        onValueChange = { country = it },
-                        label = {
-                            InfernoText(
-                                stringResource(R.string.addresses_country),
-                                fontColor = context.infernoTheme().value.primaryOutlineColor,
-                            )
-                        },
-                    )
-                }
-
-                // phone
-                item {
-                    InfernoOutlinedTextField(
-                        value = tel,
-                        onValueChange = { tel = it },
-                        label = {
-                            InfernoText(
-                                stringResource(R.string.addresses_phone),
-                                fontColor = context.infernoTheme().value.primaryOutlineColor,
-                            )
-                        },
-                    )
-                }
-
-                // email
-                item {
-                    InfernoOutlinedTextField(
-                        value = email,
-                        onValueChange = { email = it },
-                        label = {
-                            InfernoText(
-                                stringResource(R.string.addresses_email),
-                                fontColor = context.infernoTheme().value.primaryOutlineColor,
-                            )
-                        },
-                    )
-                }
-            }
-            Row {
-                InfernoOutlinedButton(
-                    modifier = Modifier.weight(1F),
-                    text = stringResource(android.R.string.cancel),
-                    onClick = onDismiss,
-                )
-                InfernoButton(
-                    modifier = Modifier.weight(1F),
-                    text = stringResource(R.string.save_changes_to_login),
-                    onClick = {
-                        val updatedAddress = UpdatableAddressFields(
-                            name = name,
-                            organization = "",
-                            streetAddress = streetAddress,
-                            addressLevel3 = "",
-                            addressLevel2 = addressLevel2,
-                            addressLevel1 = addressLevel1,
-                            postalCode = postalCode,
-                            country = country,
-                            tel = tel,
-                            email = email,
+    InfernoDialog(onDismiss = onDismiss) {
+        LazyColumn {
+            // name
+            item {
+                InfernoOutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = {
+                        InfernoText(
+                            stringResource(R.string.addresses_name),
+                            fontColor = context.infernoTheme().value.primaryOutlineColor,
                         )
-                        onUpdateAddress(
-                            create,
-                            if (create) null else initialAddress.guid,
-                            updatedAddress
-                        )
-                        // dismiss
-                        onDismiss.invoke()
                     },
                 )
             }
+
+            // street address
+            item {
+                InfernoOutlinedTextField(
+                    value = streetAddress,
+                    onValueChange = { streetAddress = it },
+                    label = {
+                        InfernoText(
+                            stringResource(R.string.addresses_street_address),
+                            fontColor = context.infernoTheme().value.primaryOutlineColor,
+                        )
+                    },
+                )
+            }
+
+            // city
+            item {
+                InfernoOutlinedTextField(
+                    value = addressLevel2,
+                    onValueChange = { addressLevel2 = it },
+                    label = {
+                        InfernoText(
+                            stringResource(R.string.addresses_city),
+                            fontColor = context.infernoTheme().value.primaryOutlineColor,
+                        )
+                    },
+                )
+            }
+
+            // subregion dropdown (state)
+            item {
+                InfernoOutlinedTextField(
+                    value = addressLevel1,
+                    onValueChange = { addressLevel1 = it },
+                    label = {
+                        InfernoText(
+                            stringResource(R.string.addresses_state),
+                            fontColor = context.infernoTheme().value.primaryOutlineColor,
+                        )
+                    },
+                )
+            }
+
+            // zipcode
+            item {
+                InfernoOutlinedTextField(
+                    value = postalCode,
+                    onValueChange = { postalCode = it },
+                    label = {
+                        InfernoText(
+                            stringResource(R.string.addresses_zip),
+                            fontColor = context.infernoTheme().value.primaryOutlineColor,
+                        )
+                    },
+                )
+            }
+
+            // country or region
+            item {
+                InfernoOutlinedTextField(
+                    value = country,
+                    onValueChange = { country = it },
+                    label = {
+                        InfernoText(
+                            stringResource(R.string.addresses_country),
+                            fontColor = context.infernoTheme().value.primaryOutlineColor,
+                        )
+                    },
+                )
+            }
+
+            // phone
+            item {
+                InfernoOutlinedTextField(
+                    value = tel,
+                    onValueChange = { tel = it },
+                    label = {
+                        InfernoText(
+                            stringResource(R.string.addresses_phone),
+                            fontColor = context.infernoTheme().value.primaryOutlineColor,
+                        )
+                    },
+                )
+            }
+
+            // email
+            item {
+                InfernoOutlinedTextField(
+                    value = email,
+                    onValueChange = { email = it },
+                    label = {
+                        InfernoText(
+                            stringResource(R.string.addresses_email),
+                            fontColor = context.infernoTheme().value.primaryOutlineColor,
+                        )
+                    },
+                )
+            }
+        }
+        Row {
+            InfernoOutlinedButton(
+                modifier = Modifier.weight(1F),
+                text = stringResource(android.R.string.cancel),
+                onClick = onDismiss,
+            )
+            InfernoButton(
+                modifier = Modifier.weight(1F),
+                text = stringResource(R.string.save_changes_to_login),
+                onClick = {
+                    val updatedAddress = UpdatableAddressFields(
+                        name = name,
+                        organization = "",
+                        streetAddress = streetAddress,
+                        addressLevel3 = "",
+                        addressLevel2 = addressLevel2,
+                        addressLevel1 = addressLevel1,
+                        postalCode = postalCode,
+                        country = country,
+                        tel = tel,
+                        email = email,
+                    )
+                    onUpdateAddress(
+                        create, if (create) null else initialAddress.guid, updatedAddress
+                    )
+                    // dismiss
+                    onDismiss.invoke()
+                },
+            )
         }
     }
 }

@@ -11,7 +11,7 @@ import com.shmibblez.inferno.settings.account.AccountProblemSettingsPage
 import com.shmibblez.inferno.settings.account.AccountSettingsPage
 import com.shmibblez.inferno.settings.account.TurnOnSyncSettingsPage
 import com.shmibblez.inferno.settings.autofill.AutofillSettingsPage
-import com.shmibblez.inferno.settings.compose.SettingsPage
+import com.shmibblez.inferno.settings.SettingsPage
 import com.shmibblez.inferno.settings.gesture.GestureSettingsPage
 import com.shmibblez.inferno.settings.home.HomePageSettingsPage
 import com.shmibblez.inferno.settings.httpsonly.HttpsOnlySettingsPage
@@ -20,6 +20,7 @@ import com.shmibblez.inferno.settings.onQuit.OnQuitSettingsPage
 import com.shmibblez.inferno.settings.passwords.PasswordExceptionSettingsPage
 import com.shmibblez.inferno.settings.privatemode.PrivateModeSettingsPage
 import com.shmibblez.inferno.settings.search.SearchSettingsPage
+import com.shmibblez.inferno.settings.sitepermissions.SitePermissionsExceptionsSettingsPage
 import com.shmibblez.inferno.settings.sitepermissions.SitePermissionsSettingsPage
 import com.shmibblez.inferno.settings.tabs.TabSettingsPage
 import com.shmibblez.inferno.settings.theme.ThemeSettingsPage
@@ -83,7 +84,10 @@ private object SettingsRoutes {
     object AutofillSettingsPage
 
     @Serializable
-    object SitePermissionsSettingsPage
+    object SitePermissionsSettingsPage {
+        @Serializable
+        object SitePermissionsExceptionsSettingsPage
+    }
 
     @Serializable
     object AccessibilitySettingsPage
@@ -180,7 +184,15 @@ fun SettingsNavHost() {
             AutofillSettingsPage(goBack = { nav.popBackStack() })
         }
         composable<SettingsRoutes.SitePermissionsSettingsPage> {
-            SitePermissionsSettingsPage(goBack = { nav.popBackStack() })
+            SitePermissionsSettingsPage(
+                goBack = { nav.popBackStack() },
+                onNavToSitePermissionsExceptionsSettingsPage = {
+                    nav.navigate(route = SettingsRoutes.SitePermissionsSettingsPage.SitePermissionsExceptionsSettingsPage)
+                },
+            )
+        }
+        composable<SettingsRoutes.SitePermissionsSettingsPage.SitePermissionsExceptionsSettingsPage> {
+            SitePermissionsExceptionsSettingsPage(goBack = { nav.popBackStack() })
         }
         composable<SettingsRoutes.AccessibilitySettingsPage> {
             AccessibilitySettingsPage(goBack = { nav.popBackStack() })

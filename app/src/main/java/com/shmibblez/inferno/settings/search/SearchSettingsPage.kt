@@ -157,7 +157,7 @@ fun SearchSettingsPage(
                         modifier = Modifier.size(24.dp),
                     )
                 },
-                leadingIcon = {
+                menuItemLeadingIcon = {
                     if (it.type == SearchEngine.Type.CUSTOM) {
                         Icon(
                             painter = painterResource(R.drawable.ic_delete_24),
@@ -169,7 +169,7 @@ fun SearchSettingsPage(
                         )
                     }
                 },
-                trailingIcon = {
+                menuItemTrailingIcon = {
                     if (it.type == SearchEngine.Type.CUSTOM) {
                         Icon(
                             painter = painterResource(R.drawable.ic_edit_24),

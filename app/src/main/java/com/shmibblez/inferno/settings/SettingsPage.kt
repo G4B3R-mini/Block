@@ -1,16 +1,12 @@
-package com.shmibblez.inferno.settings.compose
+package com.shmibblez.inferno.settings
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.clickable
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -21,13 +17,10 @@ import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.nimbus.FxNimbus
-import com.shmibblez.inferno.proto.InfernoSettings
-import com.shmibblez.inferno.proto.infernoSettingsDataStore
 import com.shmibblez.inferno.settings.compose.components.PreferenceAction
 import com.shmibblez.inferno.settings.compose.components.PreferenceSpacer
-import com.shmibblez.inferno.settings.compose.components.PreferenceTitle
-import com.shmibblez.inferno.settings.compose.mainSettings.AccountView
-import com.shmibblez.inferno.settings.compose.mainSettings.rememberAccountState
+import com.shmibblez.inferno.settings.account.AccountView
+import com.shmibblez.inferno.settings.account.rememberAccountState
 
 private const val SCROLL_INDICATOR_DELAY = 10L
 private const val FXA_SYNC_OVERRIDE_EXIT_DELAY = 2000L

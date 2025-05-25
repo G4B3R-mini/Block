@@ -22,6 +22,9 @@ import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.proto.InfernoSettings
 import com.shmibblez.inferno.proto.infernoSettingsDataStore
+import com.shmibblez.inferno.settings.compose.components.PreferenceSlider
+import com.shmibblez.inferno.settings.compose.components.PreferenceSwitch
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -50,7 +53,75 @@ fun AccessibilitySettingsPage(goBack: () -> Unit) {
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.Top,
         ) {
+            // size font automatically
+            item {
+                PreferenceSwitch(
+                    text = stringResource(R.string.preference_accessibility_auto_size_2),
+                    summary = stringResource(R.string.preference_accessibility_auto_size_summary),
+                    selected = settings.shouldSizeFontAutomatically,
+                    onSelectedChange = { selected ->
+                        coroutineScope.launch {
+                            context.infernoSettingsDataStore.updateData {
+                                it.toBuilder().setShouldSizeFontAutomatically(selected).build()
+                            }
+                        }
 
+                    },
+                    enabled = true,
+                )
+            }
+
+            // font size factor
+            item {
+                PreferenceSlider(
+                    text = stringResource(R.string.preference_accessibility_font_size_title),
+                    summary = stringResource(R.string.preference_accessibility_text_size_summary),
+                    initialPosition = settings.fontSizeFactor,
+                    onSet = { newFactor ->
+                        coroutineScope.launch {
+                            context.infernoSettingsDataStore.updateData {
+                                it.toBuilder().setFontSizeFactor(newFactor).build()
+                            }
+                        }
+                    },
+                    enabled = !settings.shouldSizeFontAutomatically,
+                )
+            }
+
+            // force enable zoom
+            item {
+                PreferenceSwitch(
+                    text = stringResource(R.string.preference_accessibility_force_enable_zoom),
+                    summary = stringResource(R.string.preference_accessibility_force_enable_zoom_summary),
+                    selected = settings.shouldForceEnableZoomInWebsites,
+                    onSelectedChange = { selected ->
+                        coroutineScope.launch {
+                            context.infernoSettingsDataStore.updateData {
+                                it.toBuilder().setShouldForceEnableZoomInWebsites(selected).build()
+                            }
+                        }
+
+                    },
+                    enabled = true,
+                )
+            }
+
+            // always request desktop
+            item {
+                PreferenceSwitch(
+                    text = stringResource(R.string.preference_feature_desktop_mode_default),
+                    summary = null,
+                    selected = settings.alwaysRequestDesktopSite,
+                    onSelectedChange = { selected ->
+                        coroutineScope.launch {
+                            context.infernoSettingsDataStore.updateData {
+                                it.toBuilder().setAlwaysRequestDesktopSite(selected).build()
+                            }
+                        }
+                    },
+                    enabled = true,
+                )
+            }
         }
     }
 }

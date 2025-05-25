@@ -35,9 +35,10 @@ fun <T> PreferenceSelect(
     selectedMenuItem: T,
     menuItems: List<T>,
     mapToTitle: (T) -> String,
+    preferenceLeadingIcon: (@Composable () -> Unit) = {},
     selectedLeadingIcon: (@Composable (T) -> Unit) = {},
-    leadingIcon: (@Composable (T) -> Unit) = {},
-    trailingIcon: (@Composable (T) -> Unit) = { },
+    menuItemLeadingIcon: (@Composable (T) -> Unit) = {},
+    menuItemTrailingIcon: (@Composable (T) -> Unit) = { },
     onSelectMenuItem: (menuItem: T) -> Unit,
     additionalMenuItems: List<@Composable () -> Unit>? = null,
 ) {
@@ -53,6 +54,9 @@ fun <T> PreferenceSelect(
         horizontalArrangement = Arrangement.spacedBy(PreferenceConstants.PREFERENCE_INTERNAL_PADDING),
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        // leading icon (if set)
+        preferenceLeadingIcon.invoke()
+
         Column(
             modifier = Modifier.weight(1F),
             horizontalAlignment = Alignment.Start,
@@ -84,6 +88,8 @@ fun <T> PreferenceSelect(
                 )
             }
         }
+        
+        // dropdown menu
         ExposedDropdownMenuBox(
             expanded = expanded,
             onExpandedChange = { expanded = !expanded },
@@ -117,8 +123,8 @@ fun <T> PreferenceSelect(
                     DropdownMenuItem(
                         text = { InfernoText(name) },
                         onClick = { onSelectMenuItem.invoke(item) },
-                        leadingIcon = { leadingIcon.invoke(item) },
-                        trailingIcon = { trailingIcon.invoke(item) },
+                        leadingIcon = { menuItemLeadingIcon.invoke(item) },
+                        trailingIcon = { menuItemTrailingIcon.invoke(item) },
                     )
                 }
                 // show additional menu items

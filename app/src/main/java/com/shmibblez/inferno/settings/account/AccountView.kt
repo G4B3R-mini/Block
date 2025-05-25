@@ -1,4 +1,4 @@
-package com.shmibblez.inferno.settings.compose.mainSettings
+package com.shmibblez.inferno.settings.account
 
 import android.content.Context
 import android.graphics.BitmapFactory
@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
