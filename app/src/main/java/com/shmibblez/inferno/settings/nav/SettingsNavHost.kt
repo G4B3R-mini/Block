@@ -26,6 +26,9 @@ import com.shmibblez.inferno.settings.tabs.TabSettingsPage
 import com.shmibblez.inferno.settings.theme.ThemeSettingsPage
 import com.shmibblez.inferno.settings.toolbar.ToolbarSettingsPage
 import com.shmibblez.inferno.settings.trackingprotection.TrackingProtectionSettingsPage
+import com.shmibblez.inferno.settings.translation.AutomaticTranslationSettingsPage
+import com.shmibblez.inferno.settings.translation.DownloadTranslationLanguagesSettingsPage
+import com.shmibblez.inferno.settings.translation.TranslationExceptionsSettingsPage
 import com.shmibblez.inferno.settings.translation.TranslationSettingsPage
 import kotlinx.serialization.Serializable
 
@@ -96,7 +99,16 @@ private object SettingsRoutes {
     object LocaleSettingsPage
 
     @Serializable
-    object TranslationSettingsPage
+    object TranslationSettingsPage {
+        @Serializable
+        object AutomaticTranslationSettingsPage
+
+        @Serializable
+        object DownloadTranslationLanguagesSettingsPage
+
+        @Serializable
+        object TranslationExceptionsSettingsPage
+    }
 
     @Serializable
     object PrivateModeSettingsPage
@@ -121,8 +133,8 @@ fun SettingsNavHost() {
         composable<SettingsRoutes.SettingsPage> {
             SettingsPage(
                 onNavigateToAccountSettingsPage = { nav.navigate(route = SettingsRoutes.AccountSettingsPage) },
-                onNavigateToAccountProblemSettingsPage = { nav.navigate(route = SettingsRoutes.AccountProblemSettingsPage) },
-                onNavigateToTurnOnSyncSettingsPage = { nav.navigate(route = SettingsRoutes.TurnOnSyncSettingsPage) },
+                onNavigateToAccountProblemSettings = { nav.navigate(route = SettingsRoutes.AccountProblemSettingsPage) },
+                onNavigateToTurnOnSyncSettings = { nav.navigate(route = SettingsRoutes.TurnOnSyncSettingsPage) },
                 onNavigateToToolbarSettings = { nav.navigate(route = SettingsRoutes.ToolbarSettingsPage) },
                 onNavigateToTabBarSettings = { nav.navigate(route = SettingsRoutes.TabSettingsPage) },
                 onNavigateToSearchSettings = { nav.navigate(route = SettingsRoutes.SearchSettingsPage) },
@@ -186,7 +198,7 @@ fun SettingsNavHost() {
         composable<SettingsRoutes.SitePermissionsSettingsPage> {
             SitePermissionsSettingsPage(
                 goBack = { nav.popBackStack() },
-                onNavToSitePermissionsExceptionsSettingsPage = {
+                onNavToSitePermissionsExceptionsSettings = {
                     nav.navigate(route = SettingsRoutes.SitePermissionsSettingsPage.SitePermissionsExceptionsSettingsPage)
                 },
             )
@@ -201,7 +213,23 @@ fun SettingsNavHost() {
             LocaleSettingsPage(goBack = { nav.popBackStack() })
         }
         composable<SettingsRoutes.TranslationSettingsPage> {
-            TranslationSettingsPage(goBack = { nav.popBackStack() })
+            TranslationSettingsPage(
+                goBack = { nav.popBackStack() },
+                onNavigateToAutomaticTranslationSettings = { nav.navigate(route = SettingsRoutes.TranslationSettingsPage.AutomaticTranslationSettingsPage) },
+                onNavigateToDownloadTranslationLanguagesSettings = { nav.navigate(route = SettingsRoutes.TranslationSettingsPage.DownloadTranslationLanguagesSettingsPage) },
+                onNavigateToTranslationExceptionsSettings = { nav.navigate(route = SettingsRoutes.TranslationSettingsPage.TranslationExceptionsSettingsPage) },
+            )
+        }
+        // todo: possibly revise ui if too crowded (make items expandable instead, more room
+        //  for descriptions)
+        composable<SettingsRoutes.TranslationSettingsPage.AutomaticTranslationSettingsPage> {
+            AutomaticTranslationSettingsPage(goBack = { nav.popBackStack() })
+        }
+        composable<SettingsRoutes.TranslationSettingsPage.DownloadTranslationLanguagesSettingsPage> {
+            DownloadTranslationLanguagesSettingsPage(goBack = { nav.popBackStack() })
+        }
+        composable<SettingsRoutes.TranslationSettingsPage.TranslationExceptionsSettingsPage> {
+            TranslationExceptionsSettingsPage(goBack = { nav.popBackStack() })
         }
         composable<SettingsRoutes.PrivateModeSettingsPage> {
             PrivateModeSettingsPage(goBack = { nav.popBackStack() })

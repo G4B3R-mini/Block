@@ -40,7 +40,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun SitePermissionsSettingsPage(
     goBack: () -> Unit,
-    onNavToSitePermissionsExceptionsSettingsPage: () -> Unit,
+    onNavToSitePermissionsExceptionsSettings: () -> Unit,
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -178,7 +178,7 @@ fun SitePermissionsSettingsPage(
                              *  - will require listener for list items -> when site cleared, remove
                              *    from list
                              */
-                            onNavToSitePermissionsExceptionsSettingsPage.invoke()
+                            onNavToSitePermissionsExceptionsSettings.invoke()
                         },
                     horizontalArrangement = Arrangement.spacedBy(PreferenceConstants.PREFERENCE_INTERNAL_PADDING),
                 ) {

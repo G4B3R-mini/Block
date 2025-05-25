@@ -1,4 +1,4 @@
-package com.shmibblez.inferno.settings.locale
+package com.shmibblez.inferno.settings.translation
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.clickable
@@ -9,7 +9,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -21,8 +20,7 @@ import com.shmibblez.inferno.compose.base.InfernoText
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun LocaleSettingsPage(goBack: () -> Unit) {
-    val localeManagerState by rememberLocaleManagerState()
+fun TranslationExceptionsSettingsPage(goBack: () -> Unit) {
 
     Scaffold(
         topBar = {
@@ -34,7 +32,7 @@ fun LocaleSettingsPage(goBack: () -> Unit) {
                         modifier = Modifier.clickable(onClick = goBack),
                     )
                 },
-                title = { InfernoText(stringResource(R.string.preferences_language)) },
+                title = { InfernoText(stringResource(R.string.preference_exceptions)) },
             )
         },
     ) {
@@ -43,11 +41,9 @@ fun LocaleSettingsPage(goBack: () -> Unit) {
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.Top,
         ) {
-            localeManager(
-                state = localeManagerState,
-                onLocaleSelected = { localeManagerState.setLocale(it) },
-                onDefaultLocaleSelected = { localeManagerState.useDefaultLocale() },
-            )
+
+            // todo
+
         }
     }
 }

@@ -239,7 +239,7 @@ private fun SignedInComponent(
         // avatar
         Image(
             bitmap = avatar,
-            contentDescription = "",
+            contentDescription = null,
             modifier = Modifier.size(72.dp),
         )
         Column(
@@ -275,7 +275,7 @@ private fun ReauthComponent(state: AccountState, onClick: () -> Unit) {
         // account icon
         InfernoIcon(
             painter = painterResource(R.drawable.ic_account_warning),
-            contentDescription = "",
+            contentDescription = null,
             modifier = Modifier.size(72.dp),
             tint = LocalContext.current.infernoTheme().value.errorColor,
         )
@@ -318,7 +318,7 @@ private fun SignedOutComponent(onClick: () -> Unit) {
         // account icon
         Image(
             bitmap = ImageBitmap.imageResource(R.drawable.ic_fx_accounts_avatar),
-            contentDescription = "",
+            contentDescription = null,
             modifier = Modifier.size(72.dp),
         )
         Column(

@@ -52,8 +52,8 @@ private const val AMO_COLLECTION_OVERRIDE_EXIT_DELAY = 3000L
 @Composable
 fun SettingsPage(
     onNavigateToAccountSettingsPage: () -> Unit,
-    onNavigateToAccountProblemSettingsPage: () -> Unit,
-    onNavigateToTurnOnSyncSettingsPage: () -> Unit,
+    onNavigateToAccountProblemSettings: () -> Unit,
+    onNavigateToTurnOnSyncSettings: () -> Unit,
     onNavigateToToolbarSettings: () -> Unit,
     onNavigateToTabBarSettings: () -> Unit,
     onNavigateToSearchSettings: () -> Unit,
@@ -102,8 +102,8 @@ fun SettingsPage(
         AccountView(
             state = accountState,
             onNavigateSignedIn = onNavigateToAccountSettingsPage,
-            onNavigateRequiresReauth = onNavigateToAccountProblemSettingsPage,
-            onNavigateSignedOut = onNavigateToTurnOnSyncSettingsPage,
+            onNavigateRequiresReauth = onNavigateToAccountProblemSettings,
+            onNavigateSignedOut = onNavigateToTurnOnSyncSettings,
         )
 
         PreferenceSpacer()
