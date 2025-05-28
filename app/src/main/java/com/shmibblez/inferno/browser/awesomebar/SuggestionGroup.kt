@@ -9,9 +9,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.shmibblez.inferno.compose.base.InfernoText
+import com.shmibblez.inferno.ext.infernoTheme
 import mozilla.components.compose.browser.awesomebar.AwesomeBarColors
 
 /**
@@ -20,11 +22,10 @@ import mozilla.components.compose.browser.awesomebar.AwesomeBarColors
 @Composable
 internal fun SuggestionGroup(
     title: String,
-    colors: AwesomeBarColors,
 ) {
     InfernoText(
         title,
-        fontColor = colors.groupTitle,
+        fontColor = LocalContext.current.infernoTheme().value.primaryTextColor,
         modifier = Modifier
             .padding(
                 vertical = 12.dp,

@@ -79,7 +79,6 @@ class TrackingProtectionPolicyFactory(
                 InfernoSettings.CustomTrackingProtection.CookiePolicy.COOKIES_FROM_UNVISITED_SITES -> CookiePolicy.ACCEPT_VISITED
                 InfernoSettings.CustomTrackingProtection.CookiePolicy.ALL_THIRD_PARTY_COOKIES -> CookiePolicy.ACCEPT_ONLY_FIRST_PARTY
                 InfernoSettings.CustomTrackingProtection.CookiePolicy.ALL_COOKIES -> CookiePolicy.ACCEPT_NONE
-                InfernoSettings.CustomTrackingProtection.CookiePolicy.NONE -> CookiePolicy.ACCEPT_NONE
                 else -> CookiePolicy.ACCEPT_NONE
             }
         }

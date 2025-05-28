@@ -62,8 +62,9 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.shmibblez.inferno.R
-import com.shmibblez.inferno.browser.ComponentDimens
+import com.shmibblez.inferno.browser.UiConst
 import com.shmibblez.inferno.compose.base.InfernoIcon
+import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.dpToPx
 import com.shmibblez.inferno.ext.infernoTheme
@@ -79,7 +80,7 @@ import com.shmibblez.inferno.toolbar.ToolbarOnlyComponents.Companion.ToolbarSepa
 
 // start padding + (width - vertical padding since 1:1 aspect ratio) + expand icon start padding + expand icon size + expand icon end padding
 private val TOOLBAR_SEARCH_ENGINE_SELECTOR_WIDTH =
-    4.dp + (ComponentDimens.TOOLBAR_HEIGHT - 16.dp - 4.dp) + (4.dp + 6.dp + 4.dp) + 4.dp
+    4.dp + (UiConst.TOOLBAR_HEIGHT - 16.dp - 4.dp) + (4.dp + 6.dp + 4.dp) + 4.dp
 //private val TOOLBAR_SEARCH_ENGINE_SELECTOR_WIDTH_PX = TOOLBAR_SEARCH_ENGINE_SELECTOR_WIDTH.dpToPx(context)
 
 // start padding + indicator icon size + end padding
@@ -178,11 +179,16 @@ internal fun BaseToolbarOrigin(
             .fillMaxSize()
             .padding(vertical = 4.dp, horizontal = 8.dp * (1F - animationValue))
             .clip(MaterialTheme.shapes.small)
-            .background(Color.DarkGray),
+            .background(
+                LocalContext.current.infernoTheme().value.secondaryBackgroundColor.copy(
+                    alpha = UiConst.BAR_BG_ALPHA
+                )
+            ),
     ) {
         // origin editor
         val customTextSelectionColors = TextSelectionColors(
-            handleColor = Color.White, backgroundColor = Color.White.copy(alpha = 0.4F)
+            handleColor = LocalContext.current.infernoTheme().value.primaryTextColor,
+            backgroundColor = LocalContext.current.infernoTheme().value.primaryTextColor.copy(alpha = 0.4F),
         )
         // url editor
         Box(
@@ -220,7 +226,7 @@ internal fun BaseToolbarOrigin(
                     enabled = true,
                     singleLine = true,
                     textStyle = TextStyle(
-                        color = Color.White,
+                        color = LocalContext.current.infernoTheme().value.primaryTextColor,
 //                        when (animationValue < 0.5) {
 //                            true -> {
 //                                Color.White.copy(
@@ -247,7 +253,7 @@ internal fun BaseToolbarOrigin(
                             trim = LineHeightStyle.Trim.None,
                         ), fontSize = 16.sp
                     ),
-                    cursorBrush = SolidColor(Color.White),
+                    cursorBrush = SolidColor(LocalContext.current.infernoTheme().value.primaryTextColor),
                     keyboardActions = KeyboardActions(
                         onGo = {
                             with(searchText.text) {
@@ -272,22 +278,25 @@ internal fun BaseToolbarOrigin(
                     ),
                 )
             }
-            // end gradient, only show if not editing
-            if (!editMode) {
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.CenterEnd)
-                        .aspectRatio(1F)
-                        .fillMaxHeight()
-                        .background(
-                            brush = Brush.horizontalGradient(
-                                colors = listOf(
-                                    Color.Transparent, Color.DarkGray
-                                ),
-                            ),
-                        ),
-                )
-            }
+//            // end gradient, only show if not editing
+//            if (!editMode) {
+//                Box(
+//                    modifier = Modifier
+//                        .align(Alignment.CenterEnd)
+//                        .aspectRatio(1F)
+//                        .fillMaxHeight()
+//                        .background(
+//                            brush = Brush.horizontalGradient(
+//                                colors = listOf(
+//                                    Color.Transparent,
+//                                    LocalContext.current.infernoTheme().value.secondaryBackgroundColor.copy(
+//                                        alpha = UiConst.BAR_BG_ALPHA
+//                                    )
+//                                ),
+//                            ),
+//                        ),
+//                )
+//            }
         }
 
         // search engine selector
@@ -296,7 +305,7 @@ internal fun BaseToolbarOrigin(
             modifier = Modifier
                 .padding(start = 4.dp)
                 // toolbar height - other padding
-                .height(ComponentDimens.TOOLBAR_HEIGHT - 16.dp)
+                .height(UiConst.TOOLBAR_HEIGHT - 16.dp)
                 .align(Alignment.CenterStart)
                 .offset {
                     IntOffset(
@@ -310,7 +319,6 @@ internal fun BaseToolbarOrigin(
         Row(
             modifier = Modifier
                 .padding(start = 8.dp, top = 4.dp, bottom = 4.dp)
-                .background(Color.Transparent)
                 .align(Alignment.CenterStart)
                 .offset {
                     IntOffset(x = (-indicatorWidthPx * (1F - animationValue)).roundToInt(), y = 0)
@@ -337,7 +345,9 @@ internal fun BaseToolbarOrigin(
                 )
                 .size(TOOLBAR_INDICATOR_ICON_SIZE)
                 .offset {
-                    IntOffset(x = (TOOLBAR_ACTION_WIDTH.toPx() * animationValue).roundToInt(), y = 0)
+                    IntOffset(
+                        x = (TOOLBAR_ACTION_WIDTH.toPx() * animationValue).roundToInt(), y = 0
+                    )
                 },
         ) {
             if (editMode && undoClearText != null) {
@@ -390,11 +400,10 @@ enum class SiteSecurity {
 
 @Composable
 fun ToolbarEmptyIndicator(enabled: Boolean) {
-    if (enabled) Icon(
+    if (enabled) InfernoIcon(
         modifier = Modifier.size(TOOLBAR_INDICATOR_ICON_SIZE),
         painter = painterResource(id = R.drawable.ic_search_24),
         contentDescription = "empty indicator",
-        tint = Color.White
     )
 }
 
@@ -461,7 +470,8 @@ private fun ToolbarSearchEngineSelector(
         Row(
             modifier = Modifier
                 .background(
-                    color = Color.Black, shape = MaterialTheme.shapes.extraSmall
+                    color = LocalContext.current.infernoTheme().value.secondaryBackgroundColor,
+                    shape = MaterialTheme.shapes.extraSmall,
                 )
                 .fillMaxHeight()
                 .focusGroup(),
@@ -477,6 +487,7 @@ private fun ToolbarSearchEngineSelector(
                             .aspectRatio(1F),
                     )
                 }
+
                 else -> {
                     Image(
                         bitmap = currentSearchEngine.icon.asImageBitmap(),
@@ -520,7 +531,7 @@ private fun ToolbarUndoClearText(onClick: () -> Unit, modifier: Modifier) {
         modifier = modifier
             .size(TOOLBAR_INDICATOR_ICON_SIZE)
             .clickable(onClick = onClick),
-        tint = Color.LightGray,
+        tint = LocalContext.current.infernoTheme().value.secondaryBackgroundColor,
     )
 }
 
@@ -537,7 +548,7 @@ private fun ToolbarSearchEngineSelectorPopupMenu(
     DropdownMenu(
         modifier = Modifier.padding(horizontal = 8.dp, vertical = 0.dp),
         expanded = showPopupMenu,
-        containerColor = Color.Black,
+        containerColor = LocalContext.current.infernoTheme().value.secondaryBackgroundColor,
         onDismissRequest = { setShowPopupMenu(false) },
     ) {
         for (engine in searchEngines) {
@@ -560,9 +571,8 @@ private fun ToolbarSearchEngineSelectorPopupMenu(
                         .clip(MaterialTheme.shapes.extraSmall)
 
                 )
-                Text(
-                    engine.name,
-                    color = Color.White,
+                InfernoText(
+                    text = engine.name,
                     modifier = Modifier
                         .fillMaxWidth()
                         .wrapContentHeight(),
@@ -573,7 +583,7 @@ private fun ToolbarSearchEngineSelectorPopupMenu(
         HorizontalDivider(
             modifier = Modifier.padding(horizontal = 8.dp),
             thickness = 0.5.dp,
-            color = Color.White,
+            color = LocalContext.current.infernoTheme().value.primaryIconColor,
         )
         // TODO: search engine settings
     }

@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridItemScope
@@ -42,10 +43,11 @@ import androidx.compose.ui.unit.dp
 import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.compose.base.InfernoTextStyle
-import com.shmibblez.inferno.settings.compose.components.PreferenceConstants
+import com.shmibblez.inferno.settings.compose.components.PrefUiConst
 
 @Composable
 fun ThemeSelector(
+    modifier:Modifier = Modifier,
     selectedDefault: InfernoTheme?,
     selectedCustom: InfernoTheme?,
     defaultThemes: List<InfernoTheme>,
@@ -56,13 +58,14 @@ fun ThemeSelector(
     onDeleteTheme: (InfernoTheme) -> Unit,
 ) {
     LazyVerticalGrid(
-        columns = GridCells.Adaptive(minSize = 72.dp),
+        columns = GridCells.Adaptive(minSize = 100.dp),
         contentPadding = PaddingValues(
-            horizontal = PreferenceConstants.PREFERENCE_HORIZONTAL_PADDING,
-            vertical = PreferenceConstants.PREFERENCE_VERTICAL_PADDING,
+            horizontal = PrefUiConst.PREFERENCE_HORIZONTAL_PADDING,
+            vertical = PrefUiConst.PREFERENCE_VERTICAL_PADDING,
         ),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = modifier,
     ) {
         header {
             InfernoText(
@@ -153,18 +156,20 @@ private fun ThemeItem(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
+            if (selected) {
+                InfernoText(text = "(${stringResource(R.string.tab_tray_multiselect_selected_content_description)})")
+            } else {
+                InfernoText(" ")
+            }
             ColorSquare(
                 color1 = theme.primaryTextColor,
                 color2 = theme.primaryActionColor,
                 color3 = theme.primaryBackgroundColor,
-                color4 = theme.secondaryBackgroundColor,
+                color4 = theme.primaryIconColor,
                 outlineColor = theme.primaryOutlineColor,
                 selected = selected,
             )
-            InfernoText(text = theme.name, fontColor = theme.primaryTextColor)
-            if (selected) {
-                InfernoText(text = "(${stringResource(R.string.tab_tray_multiselect_selected_content_description)})")
-            }
+            InfernoText(text = theme.name, fontColor = theme.primaryTextColor, maxLines = 1)
         }
         DropdownMenu(
             expanded = expanded,
@@ -177,7 +182,7 @@ private fun ThemeItem(
                     InfernoText("Edit theme") // todo: string resource
                 },
                 onClick = { onEditTheme.invoke(theme) },
-                trailingIcon = {
+                leadingIcon = {
                     InfernoIcon(
                         painter = painterResource(R.drawable.ic_edit_24),
                         contentDescription = "",
@@ -190,7 +195,7 @@ private fun ThemeItem(
                     InfernoText("Delete theme") // todo: string resource
                 },
                 onClick = { onDeleteTheme.invoke(theme) },
-                trailingIcon = {
+                leadingIcon = {
                     InfernoIcon(
                         painter = painterResource(R.drawable.ic_delete_24),
                         contentDescription = "",
@@ -307,7 +312,15 @@ private fun AddCustomThemeButton(onAddTheme: () -> Unit, theme: InfernoTheme) {
                     color = theme.primaryOutlineColor,
                     shape = MaterialTheme.shapes.small,
                 ),
-        )
+            contentAlignment = Alignment.Center,
+        ) {
+            InfernoIcon(
+                painter = painterResource(R.drawable.ic_new_24),
+                contentDescription = "",
+                modifier = Modifier.size(40.dp),
+                tint = theme.primaryIconColor,
+            )
+        }
         // todo: string res
         InfernoText(text = "Add custom theme", fontColor = theme.primaryTextColor)
     }

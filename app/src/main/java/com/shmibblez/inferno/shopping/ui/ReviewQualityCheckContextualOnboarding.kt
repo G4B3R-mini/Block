@@ -104,9 +104,6 @@ fun ReviewQualityCheckContextualOnboarding(
                     },
                 ),
             ),
-            style = FirefoxTheme.typography.body2.copy(
-                color = FirefoxTheme.colors.textSecondary,
-            ),
             linkTextDecoration = TextDecoration.Underline,
         )
 
@@ -136,10 +133,6 @@ fun ReviewQualityCheckContextualOnboarding(
                     },
                 ),
             ),
-            style = FirefoxTheme.typography.caption
-                .copy(
-                    color = FirefoxTheme.colors.textSecondary,
-                ),
             linkTextDecoration = TextDecoration.Underline,
         )
 

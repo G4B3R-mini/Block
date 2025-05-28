@@ -63,7 +63,6 @@ fun MicrosurveyFooter(
                     onClick = { onPrivacyPolicyLinkClick() },
                 ),
             ),
-            style = FirefoxTheme.typography.caption,
             linkTextDecoration = TextDecoration.Underline,
         )
     }

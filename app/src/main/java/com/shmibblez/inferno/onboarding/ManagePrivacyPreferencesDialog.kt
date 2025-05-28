@@ -121,7 +121,6 @@ private fun CrashReportingPreference(
                 onClick = { onLinkClick() },
             ),
         ),
-        style = FirefoxTheme.typography.caption.copy(color = FirefoxTheme.colors.textPrimary),
     )
 }
 
@@ -157,7 +156,6 @@ private fun UsageDataPreference(
                 onClick = { onLinkClick() },
             ),
         ),
-        style = FirefoxTheme.typography.caption.copy(color = FirefoxTheme.colors.textPrimary),
     )
 }
 

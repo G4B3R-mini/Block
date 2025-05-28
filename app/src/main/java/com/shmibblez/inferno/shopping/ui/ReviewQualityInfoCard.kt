@@ -153,9 +153,6 @@ private fun ReviewQualityInfo(
                     },
                 ),
             ),
-            style = FirefoxTheme.typography.body2.copy(
-                color = FirefoxTheme.colors.textPrimary,
-            ),
             linkTextColor = FirefoxTheme.colors.textAccent,
             linkTextDecoration = TextDecoration.Underline,
         )

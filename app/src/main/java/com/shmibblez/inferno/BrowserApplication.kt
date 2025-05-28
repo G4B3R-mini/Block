@@ -106,12 +106,16 @@ import com.shmibblez.inferno.perf.StartupTimeline
 //import com.shmibblez.inferno.perf.StartupTimeline
 //import com.shmibblez.inferno.perf.StorageStatsMetrics
 import com.shmibblez.inferno.perf.runBlockingIncrement
+import com.shmibblez.inferno.proto.infernoSettingsDataStore
 //import com.shmibblez.inferno.push.PushFxaIntegration
 //import com.shmibblez.inferno.push.WebPushEngineIntegration
 import com.shmibblez.inferno.session.PerformanceActivityLifecycleCallbacks
 import com.shmibblez.inferno.session.VisibilityLifecycleCallback
 //import com.shmibblez.inferno.utils.Settings
 import com.shmibblez.inferno.utils.Settings.Companion.TOP_SITES_PROVIDER_MAX_THRESHOLD
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 //import com.shmibblez.inferno.wallpapers.Wallpaper
 //import java.util.UUID
 import java.util.concurrent.TimeUnit
@@ -145,6 +149,10 @@ open class BrowserApplication : LocaleAwareApplication(), Provider {
 
     override fun onCreate() {
         super.onCreate()
+        // preload prefs
+        Log.d("BrowserApplication", "preloading prefs")
+          runBlocking {  applicationContext.infernoSettingsDataStore.data.first()}
+        Log.d("BrowserApplication", "prefs loaded, continuing init")
         initialize()
     }
 

@@ -13,12 +13,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.shmibblez.inferno.ext.infernoTheme
 
+// todo: use enabled to determine colors
 @Composable
 fun InfernoOutlinedButton(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-//    enabled: Boolean = true,
+    enabled: Boolean = true,
     shape: Shape = ButtonDefaults.outlinedShape,
     colors: ButtonColors = ButtonDefaults.outlinedButtonColors().copy(
         containerColor = Color.Transparent,
@@ -27,29 +28,30 @@ fun InfernoOutlinedButton(
     ),
     border: BorderStroke? = BorderStroke(
         width = 1.dp,
-        color = LocalContext.current.infernoTheme().value.primaryOutlineColor,
+        color = colors.contentColor,
     ),
 ) {
     OutlinedButton(
         onClick = onClick,
         modifier = modifier,
-//        enabled = enabled,
+        enabled = enabled,
         shape = shape,
         colors = colors,
         border = border,
     ) {
         InfernoText(
             text = text,
-            fontColor = LocalContext.current.infernoTheme().value.primaryOutlineColor,
+            fontColor = colors.contentColor,
         )
     }
 }
 
+// todo: use enabled to determine colors
 @Composable
 fun InfernoOutlinedButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-//    enabled: Boolean = true,
+    enabled: Boolean = true,
     shape: Shape = ButtonDefaults.outlinedShape,
     colors: ButtonColors = ButtonDefaults.outlinedButtonColors().copy(
         containerColor = Color.Transparent,
@@ -58,14 +60,14 @@ fun InfernoOutlinedButton(
     ),
     border: BorderStroke? = BorderStroke(
         width = 1.dp,
-        color = LocalContext.current.infernoTheme().value.primaryOutlineColor,
+        color = colors.contentColor,
     ),
     content: @Composable RowScope.() -> Unit,
 ) {
     OutlinedButton(
         onClick = onClick,
         modifier = modifier,
-//        enabled = enabled,
+        enabled = enabled,
         shape = shape,
         colors = colors,
         border = border,

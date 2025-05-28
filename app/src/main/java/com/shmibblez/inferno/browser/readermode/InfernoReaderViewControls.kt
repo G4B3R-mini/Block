@@ -11,8 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MenuItemColors
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -22,11 +20,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.shmibblez.inferno.R
-import com.shmibblez.inferno.browser.ComponentDimens
+import com.shmibblez.inferno.browser.UiConst
 import com.shmibblez.inferno.compose.base.InfernoText
 import mozilla.components.browser.state.action.ReaderAction
 import mozilla.components.browser.state.selector.selectedTab
@@ -40,6 +39,7 @@ import java.util.Locale
 import com.shmibblez.inferno.browser.readermode.InfernoReaderViewFeatureState.FontType
 import com.shmibblez.inferno.browser.readermode.InfernoReaderViewFeatureState.ColorScheme
 import com.shmibblez.inferno.compose.base.InfernoIcon
+import com.shmibblez.inferno.ext.infernoTheme
 
 private val logger = Logger("ReaderView")
 private val ICON_SIZE = 18.dp
@@ -95,7 +95,7 @@ internal fun createCachePageMessage(id: String): JSONObject {
 }
 
 internal fun createShowReaderMessage(
-    config: InfernoReaderViewConfig?, scrollY: Int? = null
+    config: InfernoReaderViewConfig?, scrollY: Int? = null,
 ): JSONObject {
     if (config == null) {
         logger.warn("No config provided. Falling back to default values.")
@@ -128,9 +128,13 @@ fun InfernoReaderViewControls(
 
     Row(
         modifier = Modifier
-            .background(Color.Black)
+            .background(
+                LocalContext.current.infernoTheme().value.primaryBackgroundColor.copy(
+                    alpha = UiConst.BAR_BG_ALPHA
+                ),
+            )
             .fillMaxWidth()
-            .height(ComponentDimens.READER_VIEW_HEIGHT)
+            .height(UiConst.READER_VIEW_HEIGHT)
             .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
@@ -154,7 +158,7 @@ fun InfernoReaderViewControls(
             DropdownMenu(
                 expanded = fontExpanded,
                 onDismissRequest = { fontExpanded = false },
-                containerColor = Color.DarkGray,
+                containerColor = LocalContext.current.infernoTheme().value.secondaryBackgroundColor,
             ) {
                 DropdownMenuItem(
                     text = { InfernoText(text = stringResource(R.string.mozac_feature_readerview_serif_font)) },
@@ -197,7 +201,7 @@ fun InfernoReaderViewControls(
             DropdownMenu(
                 expanded = colorSchemeExpanded,
                 onDismissRequest = { colorSchemeExpanded = false },
-                containerColor = Color.DarkGray,
+                containerColor = LocalContext.current.infernoTheme().value.secondaryBackgroundColor,
             ) {
                 DropdownMenuItem(
                     text = { InfernoText(text = stringResource(R.string.mozac_feature_readerview_light)) },

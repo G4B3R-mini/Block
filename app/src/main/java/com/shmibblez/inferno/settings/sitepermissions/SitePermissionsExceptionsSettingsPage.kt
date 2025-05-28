@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -20,6 +21,7 @@ import androidx.compose.ui.res.stringResource
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.base.InfernoText
+import com.shmibblez.inferno.settings.compose.components.InfernoSettingsPage
 import mozilla.components.concept.engine.permission.SitePermissions
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -39,22 +41,14 @@ fun SitePermissionsExceptionsSettingsPage(goBack: () -> Unit) {
     var showClearAllSiteSettingsDialog by remember { mutableStateOf(false) }
 
     // todo: move all callbacks for setting permissions and showing dialogs here
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                navigationIcon = {
-                    InfernoIcon(
-                        painter = painterResource(R.drawable.ic_back_button),
-                        contentDescription = stringResource(R.string.browser_menu_back),
-                        modifier = Modifier.clickable(onClick = goBack),
-                    )
-                },
-                title = { InfernoText("Site Permission Exceptions") }, // todo: string res
-            )
-        },
-    ) {
+    InfernoSettingsPage(
+        title = "Site Permission Exceptions", // todo: string res
+        goBack = goBack,
+    ) { edgeInsets ->
         LazyColumn(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(edgeInsets),
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.Top,
         ) {

@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -28,9 +27,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.shmibblez.inferno.R
-import com.shmibblez.inferno.browser.ComponentDimens
+import com.shmibblez.inferno.browser.UiConst
+import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.ext.components
+import com.shmibblez.inferno.ext.infernoTheme
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.mapNotNull
@@ -47,7 +48,7 @@ fun BrowserFindInPageBar(
     onDismiss: () -> Unit,
     engineSession: EngineSession?,
     engineView: EngineView?,
-    session: TabSessionState?
+    session: TabSessionState?,
 ) {
     val context = LocalContext.current
     var input by remember { mutableStateOf(TextFieldValue("")) }
@@ -86,17 +87,16 @@ fun BrowserFindInPageBar(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(ComponentDimens.FIND_IN_PAGE_BAR_HEIGHT)
-            .background(Color.Black)
+            .height(UiConst.FIND_IN_PAGE_BAR_HEIGHT)
+            .background(LocalContext.current.infernoTheme().value.primaryBackgroundColor.copy(alpha = UiConst.BAR_BG_ALPHA))
             .padding(horizontal = 16.dp, vertical = 0.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        Icon(
+        InfernoIcon(
             modifier = Modifier
                 .size(ICON_SIZE)
                 .clickable(onClick = onDismiss),
-            tint = Color.White,
             painter = painterResource(id = R.drawable.mozac_ic_cross_20),
             contentDescription = "exit"
         )
@@ -118,27 +118,27 @@ fun BrowserFindInPageBar(
             modifier = Modifier.weight(1F),
             textStyle = LocalTextStyle.current.copy(
                 fontSize = 16.sp,
-//                color = Color.White,
+                color = LocalContext.current.infernoTheme().value.primaryTextColor,
                 letterSpacing = 0.15.sp,
                 textAlign = TextAlign.Start,
             ),
             isError = resultIsError,
 //            singleLine = true,
             colors = TextFieldDefaults.colors(
-                focusedTextColor = Color.White,
-                unfocusedTextColor = Color.LightGray,
-                errorTextColor = Color.Red,
-                focusedContainerColor = Color.Black,
-                unfocusedContainerColor = Color.Black,
-                errorContainerColor = Color.Black,
+                focusedTextColor = LocalContext.current.infernoTheme().value.primaryTextColor,
+                unfocusedTextColor = LocalContext.current.infernoTheme().value.secondaryTextColor,
+                errorTextColor = LocalContext.current.infernoTheme().value.errorColor,
+                focusedContainerColor = Color.Transparent,
+                unfocusedContainerColor = Color.Transparent,
+                errorContainerColor = Color.Transparent,
             ),
         )
         InfernoText(
             text = resultCount,
-            fontColor = if (resultIsError) Color.Red else Color.LightGray,
+            fontColor = if (resultIsError) LocalContext.current.infernoTheme().value.errorColor else LocalContext.current.infernoTheme().value.secondaryTextColor,
         )
         // prev
-        Icon(
+        InfernoIcon(
             modifier = Modifier
                 .size(ICON_SIZE)
                 .clickable {
@@ -151,12 +151,11 @@ fun BrowserFindInPageBar(
 //                    view.asView().hideKeyboard()
 //                    emitPreviousFact()
                 },
-            tint = Color.White,
-            painter = painterResource(id = R.drawable.mozac_ic_chevron_up_24),
+            painter = painterResource(id = R.drawable.ic_chevron_up_24),
             contentDescription = "prev. occurrence"
         )
         // next
-        Icon(
+        InfernoIcon(
             modifier = Modifier
                 .size(ICON_SIZE)
                 .clickable {
@@ -169,8 +168,7 @@ fun BrowserFindInPageBar(
 //                    view.asView().hideKeyboard()
 //                    emitNextFact()
                 },
-            tint = Color.White,
-            painter = painterResource(id = R.drawable.mozac_ic_chevron_down_24),
+            painter = painterResource(id = R.drawable.ic_chevron_down_24),
             contentDescription = "next occurrence"
         )
     }

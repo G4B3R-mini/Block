@@ -16,7 +16,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.shmibblez.inferno.ext.infernoTheme
 import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarFindInPage
 import mozilla.components.browser.state.state.TabSessionState
 import com.shmibblez.inferno.toolbar.MenuOnlyComponents.Companion.NavOptions
@@ -51,13 +53,13 @@ fun ToolbarMenuBottomSheet(
     ModalBottomSheet(
         onDismissRequest = onDismissMenuBottomSheet,
         modifier = Modifier.fillMaxWidth(),
-        containerColor = Color.Black.copy(alpha = 0.75F),
-        scrimColor = Color.Black.copy(alpha = 0.5F),
+        containerColor = LocalContext.current.infernoTheme().value.primaryBackgroundColor.copy(alpha = 0.75F),
+        scrimColor = LocalContext.current.infernoTheme().value.primaryBackgroundColor.copy(alpha = 0.5F),
         shape = RectangleShape,
         dragHandle = { /* no drag handle */
             // in case want to add one, make custom component centered in middle
 //            BottomSheetDefaults.DragHandle(
-//                color = Color.White,
+//                color = LocalContext.current.infernoTheme().value.primaryIconColor,
 //                height = SHEET_HANDLE_HEIGHT,
 ////            shape = RectangleShape,
 //            )

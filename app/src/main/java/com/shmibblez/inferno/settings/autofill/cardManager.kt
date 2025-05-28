@@ -33,7 +33,7 @@ import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.compose.base.InfernoTextStyle
 import com.shmibblez.inferno.ext.components
-import com.shmibblez.inferno.settings.compose.components.PreferenceConstants
+import com.shmibblez.inferno.settings.compose.components.PrefUiConst
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -151,9 +151,9 @@ internal fun LazyListScope.cardManager(
         Row(
             modifier = Modifier
                 .clickable { state.expanded = !state.expanded }
-                .padding(horizontal = PreferenceConstants.PREFERENCE_HORIZONTAL_PADDING)
+                .padding(horizontal = PrefUiConst.PREFERENCE_HORIZONTAL_PADDING)
                 .padding(
-                    top = PreferenceConstants.PREFERENCE_HALF_VERTICAL_PADDING,
+                    top = PrefUiConst.PREFERENCE_HALF_VERTICAL_PADDING,
                     // bottom padding set below
                 ),
         ) {
@@ -186,7 +186,7 @@ internal fun LazyListScope.cardManager(
     // bottom padding
     item {
         Spacer(
-            modifier = Modifier.padding(bottom = PreferenceConstants.PREFERENCE_HALF_VERTICAL_PADDING),
+            modifier = Modifier.padding(bottom = PrefUiConst.PREFERENCE_HALF_VERTICAL_PADDING),
         )
     }
 }
@@ -211,9 +211,9 @@ private fun LoginItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = PreferenceConstants.PREFERENCE_HORIZONTAL_PADDING)
-            .padding(top = PreferenceConstants.PREFERENCE_INTERNAL_PADDING),
-        horizontalArrangement = Arrangement.spacedBy(PreferenceConstants.PREFERENCE_INTERNAL_PADDING),
+            .padding(horizontal = PrefUiConst.PREFERENCE_HORIZONTAL_PADDING)
+            .padding(top = PrefUiConst.PREFERENCE_INTERNAL_PADDING),
+        horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         // edit icon
@@ -264,9 +264,9 @@ private fun AddLoginItem(onAddCreditCardClicked: () -> Unit) {
     Row(
         modifier = Modifier
             .clickable { onAddCreditCardClicked.invoke() }
-            .padding(horizontal = PreferenceConstants.PREFERENCE_HORIZONTAL_PADDING)
-            .padding(top = PreferenceConstants.PREFERENCE_INTERNAL_PADDING),
-        horizontalArrangement = Arrangement.spacedBy(PreferenceConstants.PREFERENCE_INTERNAL_PADDING),
+            .padding(horizontal = PrefUiConst.PREFERENCE_HORIZONTAL_PADDING)
+            .padding(top = PrefUiConst.PREFERENCE_INTERNAL_PADDING),
+        horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         // add icon

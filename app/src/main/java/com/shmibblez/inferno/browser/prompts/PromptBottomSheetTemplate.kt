@@ -1,6 +1,5 @@
 package com.shmibblez.inferno.browser.prompts
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -23,12 +22,14 @@ import androidx.compose.material3.SheetValue
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.shmibblez.inferno.compose.base.InfernoOutlinedButton
 import com.shmibblez.inferno.compose.base.InfernoText
+import com.shmibblez.inferno.ext.infernoTheme
 
 
 enum class PromptBottomSheetTemplateButtonPosition {
@@ -67,8 +68,8 @@ fun PromptBottomSheetTemplate(
         sheetState = sheetState,
         onDismissRequest = onDismissRequest ?: {},
         // todo: use acorn colors
-        containerColor = Color.Black,
-        scrimColor = Color.Black.copy(alpha = 0.5F),
+        containerColor = LocalContext.current.infernoTheme().value.primaryBackgroundColor,
+        scrimColor = LocalContext.current.infernoTheme().value.primaryBackgroundColor.copy(alpha = 0.5F),
         shape = RectangleShape,
         dragHandle = { /* no drag handle */ },
         content = {
@@ -104,7 +105,7 @@ fun PromptBottomSheetTemplate(
                                         enabled = negativeAction.enabled,
                                     ),
                                 fontWeight = FontWeight.Bold,
-                                fontColor = Color(143, 0, 255),
+                                fontColor = LocalContext.current.infernoTheme().value.primaryActionColor,
                             )
 //                            }
                         }
@@ -124,7 +125,7 @@ fun PromptBottomSheetTemplate(
                                         enabled = neutralAction.enabled,
                                     ),
                                 fontWeight = FontWeight.Bold,
-                                fontColor = Color(143, 0, 255),
+                                fontColor = LocalContext.current.infernoTheme().value.primaryActionColor,
                             )
 //                            }
                         }
@@ -144,13 +145,13 @@ fun PromptBottomSheetTemplate(
                                         enabled = positiveAction.enabled,
                                     ),
                                 fontWeight = FontWeight.Bold,
-                                fontColor = Color(143, 0, 255),
+                                fontColor = LocalContext.current.infernoTheme().value.primaryActionColor,
                             )
 //                            }
                         }
                     }
                     HorizontalDivider(
-                        color = Color.LightGray, modifier = Modifier.padding(horizontal = 8.dp)
+                        color = LocalContext.current.infernoTheme().value.secondaryBackgroundColor, modifier = Modifier.padding(horizontal = 8.dp)
                     )
                     Spacer(
                         modifier = Modifier
@@ -172,14 +173,13 @@ fun PromptBottomSheetTemplate(
                 ) {
                     // todo: button text color and colors if not enabled
                     if (negativeAction != null) {
-                        OutlinedButton(
+                        InfernoOutlinedButton(
                             onClick = negativeAction.action,
                             modifier = Modifier
                                 .weight(1F)
                                 .fillMaxHeight(),
                             enabled = negativeAction.enabled,
                             shape = MaterialTheme.shapes.small,
-                            border = BorderStroke(width = 1.dp, color = Color.White),
                         ) {
                             InfernoText(
                                 text = negativeAction.text,
@@ -199,7 +199,6 @@ fun PromptBottomSheetTemplate(
                                 .fillMaxHeight(),
                             enabled = neutralAction.enabled,
                             shape = MaterialTheme.shapes.small,
-                            border = BorderStroke(width = 1.dp, color = Color.White),
                         ) {
                             InfernoText(
                                 text = neutralAction.text,
@@ -220,7 +219,7 @@ fun PromptBottomSheetTemplate(
                             enabled = positiveAction.enabled,
                             shape = MaterialTheme.shapes.small,
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(143, 0, 255)
+                                containerColor = LocalContext.current.infernoTheme().value.primaryActionColor,
                             ),
                         ) {
                             InfernoText(

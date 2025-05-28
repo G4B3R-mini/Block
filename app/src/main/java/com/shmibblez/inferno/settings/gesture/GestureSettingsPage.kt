@@ -5,6 +5,7 @@ import android.content.Context
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -24,6 +25,7 @@ import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.proto.InfernoSettings
 import com.shmibblez.inferno.proto.infernoSettingsDataStore
+import com.shmibblez.inferno.settings.compose.components.InfernoSettingsPage
 import com.shmibblez.inferno.settings.compose.components.PreferenceSelect
 import com.shmibblez.inferno.settings.compose.components.PreferenceSwitch
 import com.shmibblez.inferno.settings.compose.components.PreferenceTitle
@@ -55,22 +57,14 @@ fun GestureSettingsPage(goBack: () -> Unit) {
         )
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                navigationIcon = {
-                    InfernoIcon(
-                        painter = painterResource(R.drawable.ic_back_button),
-                        contentDescription = stringResource(R.string.browser_menu_back),
-                        modifier = Modifier.clickable(onClick = goBack),
-                    )
-                },
-                title = { InfernoText("Gesture Settings") }, // todo: string res
-            )
-        },
-    ) {
+    InfernoSettingsPage(
+        title = stringResource(R.string.preferences_gestures),
+        goBack = goBack,
+    ) { edgeInsets ->
         LazyColumn(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(edgeInsets),
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.Top,
         ) {

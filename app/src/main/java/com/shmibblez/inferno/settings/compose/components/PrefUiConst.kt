@@ -2,7 +2,7 @@ package com.shmibblez.inferno.settings.compose.components
 
 import androidx.compose.ui.unit.dp
 
-internal object PreferenceConstants {
+internal object PrefUiConst {
     // ui
     val PREFERENCE_HORIZONTAL_PADDING = 16.dp
     val PREFERENCE_VERTICAL_PADDING = 8.dp

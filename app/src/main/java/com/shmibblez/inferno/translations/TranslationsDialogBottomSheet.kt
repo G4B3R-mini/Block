@@ -562,9 +562,6 @@ private fun TranslationsDialogInfoMessage(
                 learnMoreText,
             ),
             linkTextStates = listOf(learnMoreState),
-            style = FirefoxTheme.typography.body2.copy(
-                color = FirefoxTheme.colors.textPrimary,
-            ),
             linkTextDecoration = TextDecoration.Underline,
         )
     }

@@ -26,14 +26,13 @@ import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.shmibblez.inferno.R
+import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.theme.FirefoxTheme
 
 /**
@@ -60,18 +59,14 @@ data class LinkTextState(
  * @param text The complete text.
  * @param linkTextStates The clickable part of the text. The order of the states added in the list
  * should be the same as the links shown in the text.
- * @param style [TextStyle] applied to the text.
  * @param linkTextColor [Color] applied to the clickable part of the text.
  * @param linkTextDecoration [TextDecoration] applied to the clickable part of the text.
  */
 @Composable
 fun LinkText(
     text: String,
+    modifier: Modifier = Modifier,
     linkTextStates: List<LinkTextState>,
-    style: TextStyle = FirefoxTheme.typography.body2.copy(
-        textAlign = TextAlign.Center,
-        color = FirefoxTheme.colors.textSecondary,
-    ),
     linkTextColor: Color = FirefoxTheme.colors.textAccent,
     linkTextDecoration: TextDecoration = TextDecoration.None,
 ) {
@@ -89,23 +84,26 @@ fun LinkText(
         LinksDialog(linkTextStates) { showDialog.value = false }
     }
 
-    Text(
+    InfernoText(
         text = annotatedString,
-        style = style,
-        modifier = Modifier.clearAndSetSemantics {
-            onClick {
-                if (linkTextStates.size > 1) {
-                    showDialog.value = true
-                } else {
-                    linkTextStates.firstOrNull()?.let {
-                        it.onClick(it.url)
+        modifier = Modifier
+            .clearAndSetSemantics {
+                onClick {
+                    if (linkTextStates.size > 1) {
+                        showDialog.value = true
+                    } else {
+                        linkTextStates
+                            .firstOrNull()
+                            ?.let {
+                                it.onClick(it.url)
+                            }
                     }
-                }
 
-                return@onClick true
+                    return@onClick true
+                }
+                contentDescription = "$annotatedString $linksAvailable"
             }
-            contentDescription = "$annotatedString $linksAvailable"
-        },
+            .then(modifier),
     )
 }
 
@@ -221,7 +219,10 @@ private fun LinkTextMiddlePreview() {
     )
     FirefoxTheme {
         Box(modifier = Modifier.background(color = FirefoxTheme.colors.layer1)) {
-            LinkText(text = "This is clickable text, followed by normal text", linkTextStates = listOf(state))
+            LinkText(
+                text = "This is clickable text, followed by normal text",
+                linkTextStates = listOf(state)
+            )
         }
     }
 }
@@ -239,7 +240,6 @@ private fun LinkTextStyledPreview() {
             LinkText(
                 text = "This is clickable text, in a different style",
                 linkTextStates = listOf(state),
-                style = FirefoxTheme.typography.headline5,
             )
         }
     }
@@ -258,7 +258,6 @@ private fun LinkTextClickStyledPreview() {
             LinkText(
                 text = "This is clickable text, with underlined text",
                 linkTextStates = listOf(state),
-                style = FirefoxTheme.typography.headline5,
                 linkTextColor = FirefoxTheme.colors.textOnColorSecondary,
                 linkTextDecoration = TextDecoration.Underline,
             )

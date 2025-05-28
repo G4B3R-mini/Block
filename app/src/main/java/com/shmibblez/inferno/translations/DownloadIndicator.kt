@@ -28,6 +28,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -39,6 +40,7 @@ import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.annotation.Li
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.button.PrimaryButton
+import com.shmibblez.inferno.ext.infernoTheme
 import com.shmibblez.inferno.theme.FirefoxTheme
 
 /**
@@ -59,7 +61,7 @@ private const val ANIMATION_DURATION_MS = 2000
 fun DownloadIconIndicator(
     icon: Painter,
     modifier: Modifier = Modifier,
-    tint: Color = FirefoxTheme.colors.iconPrimary,
+    tint: Color = LocalContext.current.infernoTheme().value.primaryIconColor,
     contentDescription: String? = null,
 ) {
     InfernoIcon(
@@ -69,6 +71,7 @@ fun DownloadIconIndicator(
                 .rotate(rotationAnimation()),
         ),
         contentDescription = contentDescription,
+        tint = tint,
     )
 }
 
@@ -84,7 +87,7 @@ fun DownloadIconIndicator(
 fun DownloadInProgressIndicator(
     modifier: Modifier = Modifier,
     icon: Painter = painterResource(id = R.drawable.mozac_ic_stop_8),
-    tint: Color = FirefoxTheme.colors.iconPrimary,
+    tint: Color = LocalContext.current.infernoTheme().value.primaryIconColor,
     contentDescription: String? = null,
 ) {
     Box(
@@ -94,12 +97,13 @@ fun DownloadInProgressIndicator(
             modifier = modifier.size(8.dp),
             painter = icon,
             contentDescription = contentDescription,
+            tint = tint,
         )
         CircularProgressIndicator(
             modifier = modifier.size(30.dp),
-            color = FirefoxTheme.colors.layerAccent,
+            color = LocalContext.current.infernoTheme().value.primaryActionColor,
             // used to be backgroundColor
-            trackColor = FirefoxTheme.colors.actionTertiary,
+            trackColor = LocalContext.current.infernoTheme().value.secondaryActionColor,
             strokeWidth = 2.dp,
             strokeCap = StrokeCap.Butt,
         )
@@ -142,7 +146,7 @@ fun DownloadIndicator(
 
 @Composable
 internal fun rotationAnimation(): Float {
-    val infiniteTransition = rememberInfiniteTransition()
+    val infiniteTransition = rememberInfiniteTransition(label = "")
     val angle by infiniteTransition.animateFloat(
         initialValue = 0f,
         targetValue = 360f,
@@ -150,6 +154,7 @@ internal fun rotationAnimation(): Float {
             animation = tween(ANIMATION_DURATION_MS, easing = LinearEasing),
             repeatMode = RepeatMode.Restart,
         ),
+        label = "",
     )
     return angle
 }

@@ -28,6 +28,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -42,6 +43,7 @@ import mozilla.components.compose.browser.awesomebar.AwesomeBarOrientation
 import mozilla.components.concept.awesomebar.AwesomeBar
 //import mozilla.components.ui.icons.R as iconsR
 import com.shmibblez.inferno.R
+import com.shmibblez.inferno.ext.infernoTheme
 
 // We only show one row of text, covering at max screen width.
 // Limit bigger texts that could cause slowdowns or even crashes.
@@ -50,7 +52,6 @@ private const val SUGGESTION_TEXT_MAX_LENGTH = 100
 @Composable
 internal fun Suggestion(
     suggestion: AwesomeBar.Suggestion,
-    colors: AwesomeBarColors,
     orientation: AwesomeBarOrientation,
     onSuggestionClicked: () -> Unit,
     onAutoComplete: () -> Unit,
@@ -58,7 +59,7 @@ internal fun Suggestion(
     Row(
         modifier = Modifier
 //            .defaultMinSize(minHeight = 56.dp)
-            .background(Color.Black)
+//            .background(Color.Black)
 //            .testTag("mozac.awesomebar.suggestion")
             .padding(start = 16.dp, top = 4.dp, bottom = 4.dp, end = 8.dp)
             .clickable { onSuggestionClicked() },
@@ -73,7 +74,6 @@ internal fun Suggestion(
         SuggestionTitleAndDescription(
             title = suggestion.title?.take(SUGGESTION_TEXT_MAX_LENGTH),
             description = suggestion.description?.take(SUGGESTION_TEXT_MAX_LENGTH),
-            colors = colors,
             modifier = Modifier
                 .weight(1f)
                 .align(Alignment.CenterVertically),
@@ -82,7 +82,6 @@ internal fun Suggestion(
             AutocompleteButton(
                 onAutoComplete = onAutoComplete,
                 orientation = orientation,
-                colors = colors,
                 modifier = Modifier.align(Alignment.CenterVertically),
             )
         }
@@ -93,7 +92,6 @@ internal fun Suggestion(
 private fun SuggestionTitleAndDescription(
     title: String?,
     description: String?,
-    colors: AwesomeBarColors,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -105,7 +103,7 @@ private fun SuggestionTitleAndDescription(
             } else {
                 title
             },
-            fontColor = Color.White, // colors.title,
+            fontColor = LocalContext.current.infernoTheme().value.primaryTextColor,
             fontSize = 15.sp,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -116,7 +114,7 @@ private fun SuggestionTitleAndDescription(
         if (description?.isNotEmpty() == true) {
             InfernoText(
                 text = description,
-                fontColor = Color.LightGray, // colors.description,
+                fontColor =LocalContext.current.infernoTheme().value.secondaryTextColor,
                 fontSize = 12.sp,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -165,13 +163,12 @@ private fun SuggestionIcon(
 @Suppress("MagicNumber")
 private fun AutocompleteButton(
     onAutoComplete: () -> Unit,
-    colors: AwesomeBarColors,
     orientation: AwesomeBarOrientation,
     modifier: Modifier,
 ) {
     Image(
         painterResource(R.drawable.mozac_ic_append_up_left_24),
-        colorFilter = ColorFilter.tint(colors.autocompleteIcon),
+//        colorFilter = ColorFilter.tint(colors.autocompleteIcon),
         contentDescription = stringResource(R.string.mozac_browser_awesomebar_edit_suggestion),
         modifier = modifier
             .size(48.dp)

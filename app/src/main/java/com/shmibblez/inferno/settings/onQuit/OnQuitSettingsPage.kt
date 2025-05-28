@@ -24,12 +24,12 @@ import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.proto.InfernoSettings
 import com.shmibblez.inferno.proto.infernoSettingsDataStore
+import com.shmibblez.inferno.settings.compose.components.InfernoSettingsPage
 import com.shmibblez.inferno.settings.compose.components.PreferenceSwitch
 import kotlinx.coroutines.launch
 
 private val SUB_SETTING_START_PADDING = 16.dp
 
-@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun OnQuitSettingsPage(goBack: () -> Unit) {
@@ -37,22 +37,14 @@ fun OnQuitSettingsPage(goBack: () -> Unit) {
     val coroutineScope = rememberCoroutineScope()
     val settings by context.infernoSettingsDataStore.data.collectAsState(InfernoSettings.getDefaultInstance())
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                navigationIcon = {
-                    InfernoIcon(
-                        painter = painterResource(R.drawable.ic_back_button),
-                        contentDescription = stringResource(R.string.browser_menu_back),
-                        modifier = Modifier.clickable(onClick = goBack),
-                    )
-                },
-                title = { InfernoText("Gesture Settings") }, // todo: string res
-            )
-        },
-    ) {
+    InfernoSettingsPage(
+        title = "On Quit", // todo: string res
+        goBack = goBack,
+    ) { edgeInsets ->
         LazyColumn(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(edgeInsets),
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.Top,
         ) {

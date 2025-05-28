@@ -17,11 +17,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CardColors
+import androidx.compose.material3.CheckboxColors
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchColors
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.rememberTooltipState
@@ -40,16 +43,18 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.shmibblez.inferno.R
+import com.shmibblez.inferno.compose.base.InfernoButton
 import com.shmibblez.inferno.compose.base.InfernoCheckbox
 import com.shmibblez.inferno.compose.base.InfernoDialog
 import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.base.InfernoOutlinedButton
 import com.shmibblez.inferno.compose.base.InfernoOutlinedTextField
+import com.shmibblez.inferno.compose.base.InfernoSwitch
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.compose.base.InfernoTextStyle
 import com.shmibblez.inferno.ext.infernoTheme
 import com.shmibblez.inferno.proto.InfernoSettings
-import com.shmibblez.inferno.settings.compose.components.PreferenceConstants
+import com.shmibblez.inferno.settings.compose.components.PrefUiConst
 import com.shmibblez.inferno.toolbar.ToToolbarIcon
 import kotlinx.coroutines.launch
 import mozilla.components.support.ktx.kotlin.toHexString
@@ -63,7 +68,7 @@ private val RGB_STRING_REGEX = Regex("^[a-zA-Z0-9]{6}\$")
 // regex for argb strings
 private val ARGB_STRING_REGEX = Regex("^[a-zA-Z0-9]{8}\$")
 
-private val COLOR_BOX_SIZE = 24.dp
+private val COLOR_BOX_SIZE = 32.dp
 
 @Composable
 fun EditThemeDialog(
@@ -127,25 +132,46 @@ fun EditThemeDialog(
         errorSuffixColor = theme.errorColor,
     )
 
-    InfernoDialog(onDismiss = onDismiss) {
+    InfernoDialog(
+        onDismiss = onDismiss,
+        colors = CardColors(
+            containerColor = theme.primaryBackgroundColor,
+            contentColor = theme.primaryTextColor,
+            disabledContainerColor = theme.secondaryBackgroundColor,
+            disabledContentColor = theme.secondaryBackgroundColor,
+        ),
+        border = BorderStroke(1.dp, theme.primaryActionColor),
+    ) {
         Column(modifier = Modifier.fillMaxSize()) {
             LazyColumn(
-                modifier = Modifier.weight(1F)
+                modifier = Modifier.weight(1F),
+                verticalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING),
             ) {
                 /**
                  * name
                  */
                 item {
-                    InfernoOutlinedTextField(value = theme.name, onValueChange = {
-                        theme.name = it.substring(
-                            0, PreferenceConstants.CUSTOM_THEME_MAX_NAME_LENGTH
-                        )
-                    }, isError = themeNames.contains(theme.name), supportingText = {
-                        InfernoText(
-                            text = "Theme already exists, if not changed it will be overridden.", // todo: string res
-                            infernoStyle = InfernoTextStyle.Error,
-                        )
-                    })
+                    InfernoOutlinedTextField(
+                        value = theme.name,
+                        onValueChange = {
+                            theme.name = it.substring(
+                                0, PrefUiConst.CUSTOM_THEME_MAX_NAME_LENGTH
+                            )
+                        },
+                        label = {
+                            InfernoText(
+                                text = "Theme Name",
+                                fontColor = LocalContext.current.infernoTheme().value.primaryOutlineColor
+                            )
+                        }, // todo: string res
+                        isError = themeNames.contains(theme.name),
+                        supportingText = {
+                            InfernoText(
+                                text = "Theme name taken, it will be overridden.", // todo: string res
+                                infernoStyle = InfernoTextStyle.Error,
+                            )
+                        },
+                    )
                 }
                 /**
                  * text color
@@ -228,7 +254,15 @@ fun EditThemeDialog(
                 item {
                     val funFacts = remember { funFactSelector(2) }
                     ColorPreviewColumn {
-                        OutlinedButton(onClick = {}, modifier = Modifier.fillMaxWidth()) {
+                        InfernoOutlinedButton(
+                            onClick = {},
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.outlinedButtonColors().copy(
+                                containerColor = Color.Transparent,
+                                contentColor = theme.primaryOutlineColor,
+                                disabledContainerColor = Color.Transparent,
+                            )
+                        ) {
                             InfernoText(
                                 text = funFacts[0], fontColor = theme.primaryOutlineColor
                             )
@@ -262,10 +296,86 @@ fun EditThemeDialog(
                 }
                 item {
                     ColorPreviewRow {
-                        InfernoCheckbox(checked = true, onCheckedChange = {})
-                        InfernoCheckbox(checked = false, onCheckedChange = {})
-                        Switch(checked = true, onCheckedChange = {})
-                        Switch(checked = false, onCheckedChange = {})
+                        InfernoCheckbox(
+                            checked = true,
+                            onCheckedChange = {},
+                            colors = CheckboxColors(
+                                checkedCheckmarkColor = theme.primaryIconColor,
+                                uncheckedCheckmarkColor = Color.Transparent,
+                                checkedBoxColor = theme.primaryActionColor,
+                                uncheckedBoxColor = Color.Transparent,
+                                disabledCheckedBoxColor = theme.secondaryBackgroundColor,
+                                disabledUncheckedBoxColor = Color.Transparent,
+                                disabledIndeterminateBoxColor = theme.secondaryBackgroundColor,
+                                checkedBorderColor = theme.primaryActionColor,
+                                uncheckedBorderColor = theme.primaryIconColor,
+                                disabledBorderColor = theme.secondaryBackgroundColor,
+                                disabledUncheckedBorderColor = theme.secondaryBackgroundColor,
+                                disabledIndeterminateBorderColor = theme.secondaryBackgroundColor,
+                            ),
+                        )
+                        InfernoCheckbox(
+                            checked = false,
+                            onCheckedChange = {},
+                            colors = CheckboxColors(
+                                checkedCheckmarkColor = theme.primaryIconColor,
+                                uncheckedCheckmarkColor = Color.Transparent,
+                                checkedBoxColor = theme.primaryActionColor,
+                                uncheckedBoxColor = Color.Transparent,
+                                disabledCheckedBoxColor = theme.secondaryBackgroundColor,
+                                disabledUncheckedBoxColor = Color.Transparent,
+                                disabledIndeterminateBoxColor = theme.secondaryBackgroundColor,
+                                checkedBorderColor = theme.primaryActionColor,
+                                uncheckedBorderColor = theme.primaryIconColor,
+                                disabledBorderColor = theme.secondaryBackgroundColor,
+                                disabledUncheckedBorderColor = theme.secondaryBackgroundColor,
+                                disabledIndeterminateBorderColor = theme.secondaryBackgroundColor,
+                            ),
+                        )
+                        InfernoSwitch(
+                            checked = true,
+                            onCheckedChange = {},
+                            colors = SwitchColors(
+                                checkedThumbColor = theme.primaryActionColor,
+                                checkedTrackColor = Color.Transparent,
+                                checkedBorderColor = theme.primaryActionColor,
+                                checkedIconColor = theme.primaryIconColor,
+                                uncheckedThumbColor = theme.primaryActionColor,
+                                uncheckedTrackColor = Color.Transparent,
+                                uncheckedBorderColor = theme.primaryActionColor,
+                                uncheckedIconColor = theme.primaryIconColor,
+                                disabledCheckedThumbColor = theme.secondaryBackgroundColor,    // .secondaryBackgroundColor,
+                                disabledCheckedTrackColor = Color.Transparent,    // .secondaryBackgroundColor,
+                                disabledCheckedBorderColor = theme.secondaryBackgroundColor,   // .secondaryBackgroundColor,
+                                disabledCheckedIconColor = theme.secondaryIconColor,     // .secondaryIconColor,
+                                disabledUncheckedThumbColor = theme.secondaryBackgroundColor,  // .secondaryBackgroundColor,
+                                disabledUncheckedTrackColor = Color.Transparent,  // .secondaryBackgroundColor,
+                                disabledUncheckedBorderColor = theme.secondaryBackgroundColor, // .secondaryBackgroundColor,
+                                disabledUncheckedIconColor = theme.secondaryIconColor
+                            ),
+                        )
+                        InfernoSwitch(
+                            checked = false,
+                            onCheckedChange = {},
+                            colors = SwitchColors(
+                                checkedThumbColor = theme.primaryActionColor,
+                                checkedTrackColor = Color.Transparent,
+                                checkedBorderColor = theme.primaryActionColor,
+                                checkedIconColor = theme.primaryIconColor,
+                                uncheckedThumbColor = theme.primaryActionColor,
+                                uncheckedTrackColor = Color.Transparent,
+                                uncheckedBorderColor = theme.primaryActionColor,
+                                uncheckedIconColor = theme.primaryIconColor,
+                                disabledCheckedThumbColor = theme.secondaryBackgroundColor,    // .secondaryBackgroundColor,
+                                disabledCheckedTrackColor = Color.Transparent,    // .secondaryBackgroundColor,
+                                disabledCheckedBorderColor = theme.secondaryBackgroundColor,   // .secondaryBackgroundColor,
+                                disabledCheckedIconColor = theme.secondaryIconColor,     // .secondaryIconColor,
+                                disabledUncheckedThumbColor = theme.secondaryBackgroundColor,  // .secondaryBackgroundColor,
+                                disabledUncheckedTrackColor = Color.Transparent,  // .secondaryBackgroundColor,
+                                disabledUncheckedBorderColor = theme.secondaryBackgroundColor, // .secondaryBackgroundColor,
+                                disabledUncheckedIconColor = theme.secondaryIconColor
+                            ),
+                        )
                     }
                 }
                 /**
@@ -385,19 +495,20 @@ fun EditThemeDialog(
                     }
                 }
             }
-            Row(modifier = Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
                 InfernoOutlinedButton(
-                    modifier = Modifier.weight(1F), onClick = onDismiss, border = BorderStroke(
+                    text = stringResource(android.R.string.cancel),
+                    modifier = Modifier.weight(1F), onClick = onDismiss,
+                    border = BorderStroke(
                         width = 1.dp,
-                        color = LocalContext.current.infernoTheme().value.primaryOutlineColor,
-                    )
-                ) {
-                    InfernoText(
-                        text = stringResource(android.R.string.cancel),
-                        fontColor = theme.primaryOutlineColor,
-                    )
-                }
-                Button(
+                        color = theme.primaryOutlineColor,
+                    ),
+                )
+                InfernoButton(
+                    text = stringResource(R.string.browser_menu_save),
                     modifier = Modifier.weight(1F),
                     onClick = { onSaveTheme.invoke(theme, oldThemeName) },
                     colors = ButtonColors(
@@ -406,12 +517,7 @@ fun EditThemeDialog(
                         disabledContainerColor = theme.secondaryActionColor,
                         disabledContentColor = theme.secondaryTextColor,
                     )
-                ) {
-                    InfernoText(
-                        text = stringResource(R.string.save_changes_to_login),
-                        fontColor = theme.primaryTextColor,
-                    )
-                }
+                )
             }
         }
     }
@@ -429,56 +535,56 @@ private fun ColorEditor(
     var input by remember { mutableStateOf(color.toArgbHexString()) }
     val tooltipState = rememberTooltipState(isPersistent = true)
 
-    Row(
+    // true if color is badly formatted
+    var colorBad by remember { mutableStateOf(false) }
+
+    fun checkForErrors() {
+        colorBad = !RGB_STRING_REGEX.matches(input) && !ARGB_STRING_REGEX.matches(input)
+    }
+
+    // tooltip wrapper
+    TooltipBox(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(PreferenceConstants.PREFERENCE_INTERNAL_PADDING),
-        verticalAlignment = Alignment.CenterVertically,
+        positionProvider = TooltipDefaults.rememberRichTooltipPositionProvider(),
+        tooltip = {
+            InfernoText(
+                // todo: string res
+                text = "Hex colors must be in format #RRGGBB or #AARRGGBB." +
+                        // alpha
+                        "\n- AA is alpha component and takes values from 00 (transparent) to FF (fully opaque)" +
+                        // red
+                        "\n- RR is red component and takes values from 00 to FF" +
+                        // green
+                        "\n- GG is green component and takes values from 00 to FF" +
+                        // blue
+                        "\n- BB is blue component and takes values from 00 to FF" +
+                        // examples
+                        "\nSome examples:" +
+                        // red
+                        "\n- Solid red would be #FF0000 (#FFFF0000 with alpha)" +
+                        // green
+                        "\n- Solid green would be #00FF00 (#FF00FF00 with alpha)" +
+                        // blue
+                        "\n- Solid blue would be #0000FF (#FF0000FF with alpha)" +
+                        // purple
+                        "\n- You can also make colors transparent, in this case half transparent purple would be #889000FF",
+                infernoStyle = InfernoTextStyle.Subtitle,
+            )
+        },
+        state = tooltipState,
     ) {
-        // color name
-        InfernoText(text = name, modifier = Modifier.weight(1F))
-
-        // color preview box
-        Box(
-            modifier = Modifier
-                .background(color, MaterialTheme.shapes.small)
-                .border(1.dp, theme.primaryOutlineColor, MaterialTheme.shapes.small)
-                .size(COLOR_BOX_SIZE),
-        )
-
-        // hashtag
-        InfernoText("#")
-
-        // tooltip wrapper
-        TooltipBox(
-            positionProvider = TooltipDefaults.rememberRichTooltipPositionProvider(),
-            tooltip = {
-                InfernoText(
-                    // todo: string res
-                    text = "Hex colors must be in format #RRGGBB or #AARRGGBB." +
-                            // alpha
-                            "\n- AA is alpha component and takes values from 00 (transparent) to FF (fully opaque)" +
-                            // red
-                            "\n- RR is red component and takes values from 00 to FF" +
-                            // green
-                            "\n- GG is green component and takes values from 00 to FF" +
-                            // blue
-                            "\n- BB is blue component and takes values from 00 to FF" +
-                            // examples
-                            "\nSome examples:" +
-                            // red
-                            "\n- Solid red would be #FF0000 (#FFFF0000 with alpha)" +
-                            // green
-                            "\n- Solid green would be #00FF00 (#FF00FF00 with alpha)" +
-                            // blue
-                            "\n- Solid blue would be #0000FF (#FF0000FF with alpha)" +
-                            // purple
-                            "\n- You can also make colors transparent, in this case half transparent purple would be #889000FF",
-                    infernoStyle = InfernoTextStyle.Subtitle,
-                )
-            },
-            state = tooltipState,
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
+            // color name
+            InfernoText(text = name, modifier = Modifier.weight(3F))
+
+
+            // color hex editor
             InfernoOutlinedTextField(
+                modifier = Modifier.weight(1F),
                 value = input,
                 onValueChange = {
                     input = ARGB_STRING_FILTER.replace(it, "")
@@ -488,17 +594,31 @@ private fun ColorEditor(
                         ARGB_STRING_REGEX.matches(it) -> onChangeColor(Color(it.hexToInt()))
                     }
                 },
-                supportingText = {
-                    InfernoText(
-                        text = "Must have either 6 or 8 characters. Learn more.",
-                        modifier = Modifier.clickable {
-                            coroutineScope.launch {
-                                tooltipState.show()
-                            }
-                        },
-                    )
+                leadingIcon = {
+                    InfernoText("#")
                 },
-                isError = !RGB_STRING_REGEX.matches(input) && !ARGB_STRING_REGEX.matches(input),
+                supportingText = {
+                    if (colorBad) {
+                        InfernoText(
+                            text = "Must have either 6 or 8 characters. Learn more.", // todo: string res
+                            infernoStyle = InfernoTextStyle.Error,
+                            modifier = Modifier.clickable {
+                                coroutineScope.launch {
+                                    tooltipState.show()
+                                }
+                            },
+                        )
+                    }
+                },
+                isError = colorBad,
+            )
+
+            // color preview box
+            Box(
+                modifier = Modifier
+                    .background(color, MaterialTheme.shapes.small)
+                    .border(1.dp, theme.primaryOutlineColor, MaterialTheme.shapes.small)
+                    .size(COLOR_BOX_SIZE),
             )
         }
     }

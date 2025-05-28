@@ -37,8 +37,8 @@ fun PreferenceSlider(
 
     Column(
         modifier = Modifier.padding(
-            horizontal = PreferenceConstants.PREFERENCE_HORIZONTAL_PADDING,
-            vertical = PreferenceConstants.PREFERENCE_VERTICAL_PADDING,
+            horizontal = PrefUiConst.PREFERENCE_HORIZONTAL_PADDING,
+            vertical = PrefUiConst.PREFERENCE_VERTICAL_PADDING,
         ),
         horizontalAlignment = Alignment.Start,
     ) {
@@ -61,8 +61,8 @@ fun PreferenceSlider(
 
         // slider
         Row(
-            modifier = Modifier.padding(top = PreferenceConstants.PREFERENCE_VERTICAL_PADDING),
-            horizontalArrangement = Arrangement.spacedBy(PreferenceConstants.PREFERENCE_INTERNAL_PADDING),
+            modifier = Modifier.padding(top = PrefUiConst.PREFERENCE_VERTICAL_PADDING),
+            horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Slider(

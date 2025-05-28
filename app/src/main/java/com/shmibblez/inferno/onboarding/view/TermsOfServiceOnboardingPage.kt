@@ -120,10 +120,6 @@ private fun BodyText(
                 linkTextStates = listOf(
                     lineOneState,
                 ),
-                style = FirefoxTheme.typography.caption.copy(
-                    textAlign = TextAlign.Center,
-                    color = FirefoxTheme.colors.textSecondary,
-                ),
             )
             Spacer(Modifier.height(8.dp))
             LinkText(
@@ -131,20 +127,12 @@ private fun BodyText(
                 linkTextStates = listOf(
                     lineTwoState,
                 ),
-                style = FirefoxTheme.typography.caption.copy(
-                    textAlign = TextAlign.Center,
-                    color = FirefoxTheme.colors.textSecondary,
-                ),
             )
             Spacer(Modifier.height(8.dp))
             LinkText(
                 text = it.lineThreeText.updateFirstPlaceholder(it.lineThreeLinkText),
                 linkTextStates = listOf(
                     lineThreeState,
-                ),
-                style = FirefoxTheme.typography.caption.copy(
-                    textAlign = TextAlign.Center,
-                    color = FirefoxTheme.colors.textSecondary,
                 ),
             )
         }

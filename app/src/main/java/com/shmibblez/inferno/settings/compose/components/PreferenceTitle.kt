@@ -1,17 +1,19 @@
 package com.shmibblez.inferno.settings.compose.components
 
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.Modifier
 import com.shmibblez.inferno.compose.base.InfernoText
+import com.shmibblez.inferno.compose.base.InfernoTextStyle
 
 @Composable
 fun PreferenceTitle(text: String) {
     InfernoText(
         text = text,
-        fontSize = 24.sp,
-        fontColor = Color.White,
-        fontWeight = FontWeight.Bold,
+        infernoStyle = InfernoTextStyle.Title,
+        modifier = Modifier.padding(
+            horizontal = PrefUiConst.PREFERENCE_HORIZONTAL_PADDING,
+            vertical = PrefUiConst.PREFERENCE_VERTICAL_PADDING,
+        )
     )
 }

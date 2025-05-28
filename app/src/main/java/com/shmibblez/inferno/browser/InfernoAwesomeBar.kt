@@ -20,6 +20,7 @@ import androidx.compose.ui.platform.LocalContext
 import com.shmibblez.inferno.browser.awesomebar.SuggestionFetcher
 import com.shmibblez.inferno.browser.awesomebar.Suggestions
 import com.shmibblez.inferno.ext.components
+import com.shmibblez.inferno.ext.infernoTheme
 import mozilla.components.compose.browser.awesomebar.AwesomeBarColors
 import mozilla.components.compose.browser.awesomebar.AwesomeBarDefaults
 import mozilla.components.compose.browser.awesomebar.AwesomeBarOrientation
@@ -70,19 +71,15 @@ fun InfernoAwesomeBar(
                 filterExactMatch = filterExactMatch,
                 showDescription = showDescription,
             ),
-            SearchActionProvider(
-                store,
-                searchUseCase.defaultSearch,
-                null, //icon,
-                showDescription,
-            ),
+//            SearchActionProvider(
+//                store,
+//                searchUseCase.defaultSearch,
+//                null, //icon,
+//                showDescription,
+//            ),
             HistoryStorageSuggestionProvider(
-                historyStorage,
-                loadUrlUseCase,
-                icons,
-                engine,
-                maxNumberOfSuggestions
-            )
+                historyStorage, loadUrlUseCase, icons, engine, maxNumberOfSuggestions
+            ),
         )
     }
     val groups: List<AwesomeBar.SuggestionProviderGroup> = remember(providers) {
@@ -103,15 +100,15 @@ fun InfernoAwesomeBar(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .height(ComponentDimens.AWESOME_BAR_HEIGHT)
+            .height(UiConst.AWESOME_BAR_HEIGHT),
 //            .testTag("inferno.awesomebar")
 //            .background(colors.background)
-            .background(Color.Transparent),
+//            .background(LocalContext.current.infernoTheme().value.primaryBackgroundColor.copy(alpha = UiConst.BAR_BG_ALPHA)),
         verticalArrangement = Arrangement.Bottom,
     ) {
         val fetcher = remember(groups) { SuggestionFetcher(groups, profiler) }
 
-        // This state does not need to be remembered, because it can change if the providers list changes.
+        // This state does not need LocalContext.current.infernoTheme().valueto be remembered, because it can change if the providers list changes.
         @SuppressLint("UnrememberedMutableState") val suggestions =
             derivedStateOf { fetcher.state.value }.value.toList()
                 .sortedByDescending { it.first.priority }.toMap(LinkedHashMap())

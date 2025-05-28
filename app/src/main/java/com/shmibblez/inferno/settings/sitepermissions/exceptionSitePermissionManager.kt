@@ -29,7 +29,7 @@ import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.proto.InfernoSettings
-import com.shmibblez.inferno.settings.compose.components.PreferenceConstants
+import com.shmibblez.inferno.settings.compose.components.PrefUiConst
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -160,7 +160,7 @@ internal fun LazyListScope.exceptionSitePermissionManager(
     // top padding
     item {
         Spacer(
-            modifier = Modifier.padding(top = PreferenceConstants.PREFERENCE_VERTICAL_PADDING),
+            modifier = Modifier.padding(top = PrefUiConst.PREFERENCE_VERTICAL_PADDING),
         )
     }
 
@@ -252,7 +252,7 @@ internal fun LazyListScope.exceptionSitePermissionManager(
     // bottom padding
     item {
         Spacer(
-            modifier = Modifier.padding(bottom = PreferenceConstants.PREFERENCE_VERTICAL_PADDING),
+            modifier = Modifier.padding(bottom = PrefUiConst.PREFERENCE_VERTICAL_PADDING),
         )
     }
 }
@@ -288,7 +288,7 @@ private fun LazyListScope.sitePermissionsItem(
     item {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(PreferenceConstants.PREFERENCE_INTERNAL_PADDING),
+            horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             // favicon

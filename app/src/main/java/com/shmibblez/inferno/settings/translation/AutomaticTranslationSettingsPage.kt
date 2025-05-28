@@ -26,6 +26,7 @@ import com.shmibblez.inferno.compose.InfoType
 import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.ext.components
+import com.shmibblez.inferno.settings.compose.components.InfernoSettingsPage
 import com.shmibblez.inferno.settings.compose.components.PreferenceSelect
 import com.shmibblez.inferno.settings.compose.components.PreferenceTitle
 import com.shmibblez.inferno.translations.preferences.automatic.AutomaticTranslationItemPreference
@@ -72,22 +73,14 @@ fun AutomaticTranslationSettingsPage(goBack: () -> Unit) {
         translationSupport = translationSupport,
     )
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                navigationIcon = {
-                    InfernoIcon(
-                        painter = painterResource(R.drawable.ic_back_button),
-                        contentDescription = stringResource(R.string.browser_menu_back),
-                        modifier = Modifier.clickable(onClick = goBack),
-                    )
-                },
-                title = { InfernoText(stringResource(R.string.translation_settings_download_language)) },
-            )
-        },
-    ) {
+    InfernoSettingsPage(
+        title = stringResource(R.string.translation_settings_automatic_translation),
+        goBack = goBack,
+    ) { edgeInsets ->
         LazyColumn(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(edgeInsets),
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.Top,
         ) {
@@ -145,17 +138,15 @@ private fun LanguageSetting.toDescriptionString(context: Context): String {
     return when (this) {
         LanguageSetting.ALWAYS -> context.getString(
             R.string.automatic_translation_option_always_translate_summary_preference,
-            context.getString(R.string.firefox)
+            "Mozilla" // mozilla the legend
         )
 
         LanguageSetting.OFFER -> context.getString(
-            R.string.automatic_translation_option_offer_to_translate_summary_preference,
-            context.getString(R.string.firefox)
+            R.string.automatic_translation_option_offer_to_translate_summary_preference, "Mozilla"
         )
 
         LanguageSetting.NEVER -> context.getString(
-            R.string.automatic_translation_option_never_translate_summary_preference,
-            context.getString(R.string.firefox)
+            R.string.automatic_translation_option_never_translate_summary_preference, "Mozilla"
         )
     }
 }

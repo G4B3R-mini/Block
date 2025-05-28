@@ -367,9 +367,6 @@ private fun DownloadLanguagesHeaderPreference(
                 learnMoreText,
             ),
             linkTextStates = listOf(learnMoreState),
-            style = FirefoxTheme.typography.subtitle1.copy(
-                color = FirefoxTheme.colors.textPrimary,
-            ),
             linkTextDecoration = TextDecoration.Underline,
         )
     }

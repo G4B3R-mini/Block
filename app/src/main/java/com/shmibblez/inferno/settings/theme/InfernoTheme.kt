@@ -1,34 +1,40 @@
 package com.shmibblez.inferno.settings.theme
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import com.shmibblez.inferno.proto.InfernoSettings
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.ext.getSelectedTheme
-import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.theme.darkColorPalette
+import com.shmibblez.inferno.proto.InfernoSettings
 import com.shmibblez.inferno.proto.infernoSettingsDataStore
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import mozilla.components.ui.colors.PhotonColors
 
 // todo: if doesnt work might have to make each value of InfernoSettings mutable
 class InfernoThemeProvider(context: Context) : MutableState<InfernoTheme> {
-    override var value: InfernoTheme =
-        runBlocking { context.infernoSettingsDataStore.data.first().getSelectedTheme(context) }
+
+    override var value: InfernoTheme = InfernoTheme.dark(context)
+//        runBlocking {
+//            Log.d("InfernoThemeProvider", "theme accessed, getting latest theme")
+//            val theme = context.infernoSettingsDataStore.data.last().getSelectedTheme(context)
+//            Log.d("InfernoThemeProvider", "latest theme retrieved")
+//            theme
+//        }
 
     init {
+        Log.d("InfernoThemeProvider", "init")
         // launch collector that updates settings
         MainScope().launch {
             context.infernoSettingsDataStore.data.distinctUntilChanged(areEquivalent = ::didThemeChange)
-                .collect({
+                .collect {
+                    Log.d("InfernoThemeProvider", "theme changed, updating")
                     // if custom set and exists, set custom theme and end fun
                     value = it.getSelectedTheme(context)
-                })
+                }
         }
     }
 
@@ -155,17 +161,17 @@ open class InfernoTheme(
         fun light(context: Context) = InfernoTheme(
             defaultType = InfernoSettings.DefaultTheme.INFERNO_LIGHT,
             name = context.getString(R.string.preference_light_theme),
-            primaryTextColor = Color.White,
-            secondaryTextColor = Color.White.copy(alpha = 0.75F),
-            primaryIconColor = Color.White,
-            secondaryIconColor = Color.White.copy(alpha = 0.75F),
-            primaryOutlineColor = Color.White,
-            secondaryOutlineColor = Color.White.copy(alpha = 0.75F),
+            primaryTextColor = Color.Black,
+            secondaryTextColor = Color.Black.copy(alpha = 0.75F),
+            primaryIconColor = Color.Black,
+            secondaryIconColor = Color.Black.copy(alpha = 0.75F),
+            primaryOutlineColor = Color.Black,
+            secondaryOutlineColor = Color.Black.copy(alpha = 0.75F),
             primaryActionColor = Color.Red,
             secondaryActionColor = Color.Red.copy(alpha = 0.75F),
             errorColor = Color.Red,
-            primaryBackgroundColor = Color.Black,
-            secondaryBackgroundColor = Color.DarkGray,
+            primaryBackgroundColor = Color.White,
+            secondaryBackgroundColor = Color.LightGray,
         )
 
         // todo: refine incog based on moz private theme
@@ -182,9 +188,10 @@ open class InfernoTheme(
 //        )
 
         // todo: refine
+        // use color: Color(143, 0, 255) (very nice purple color)
         fun incognitoDark(context: Context) = InfernoTheme(
-            defaultType = InfernoSettings.DefaultTheme.INFERNO_LIGHT,
-            name = context.getString(R.string.preference_light_theme),
+            defaultType = InfernoSettings.DefaultTheme.MOZILLA_INCOGNITO_DARK,
+            name = "Incognito Dark", // todo: string res
             primaryTextColor = Color.White,
             secondaryTextColor = Color.White.copy(alpha = 0.75F),
             primaryIconColor = Color.White,
@@ -200,8 +207,8 @@ open class InfernoTheme(
 
         // todo: refine
         fun incognitoLight(context: Context) = InfernoTheme(
-            defaultType = InfernoSettings.DefaultTheme.INFERNO_LIGHT,
-            name = context.getString(R.string.preference_light_theme),
+            defaultType = InfernoSettings.DefaultTheme.MOZILLA_INCOGNITO_LIGHT,
+            name = "Incognito Light", // todo: string res
             primaryTextColor = Color.White,
             secondaryTextColor = Color.White.copy(alpha = 0.75F),
             primaryIconColor = Color.White,

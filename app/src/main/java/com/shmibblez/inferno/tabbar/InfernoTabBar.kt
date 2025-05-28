@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
@@ -37,7 +36,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -48,14 +46,16 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.shmibblez.inferno.R
-import com.shmibblez.inferno.browser.ComponentDimens
+import com.shmibblez.inferno.browser.UiConst
+import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.ext.components
+import com.shmibblez.inferno.ext.infernoTheme
 import com.shmibblez.inferno.ext.newTab
-import com.shmibblez.inferno.ext.pxToDp
 import com.shmibblez.inferno.toolbar.ToolbarOnlyComponents.Companion.ProgressBar
 import mozilla.components.browser.state.ext.getUrl
 import mozilla.components.browser.state.state.TabSessionState
+
 
 // todo:
 //   - add gesture detection for switching tabs (swipe left/right to go to tab on left/right)
@@ -76,10 +76,23 @@ val verticalDividerPadding = 6.dp
 
 @Composable
 fun InfernoTabBar(tabList: List<TabSessionState>, selectedTab: TabSessionState?) {
+    val configuration = LocalConfiguration.current
+    fun calculateTabWidth(): Dp {
+        val screenWidth = configuration.screenWidthDp.dp
+        // available space for tabs to occupy
+        // screen width - side padding - add square width
+        val availableTabSpace = screenWidth - 8.dp - 1.dp - UiConst.TAB_BAR_HEIGHT
+        val tabWidth = availableTabSpace / tabList.size.let { if (it <= 0) 1 else it }
+        return when (tabWidth > UiConst.TAB_WIDTH) {
+            true -> tabWidth
+            false -> UiConst.TAB_WIDTH
+        }
+    }
+
     val context = LocalContext.current
     context.components.core.store
     val listState = rememberLazyListState()
-    var tabAutoWidth by remember { mutableStateOf(0.dp) }
+    var tabAutoWidth by remember { mutableStateOf(calculateTabWidth()) }
     // if no tab selected return
     val isPrivateSession: Boolean = (if (tabList.isEmpty()) {
         Log.d("BrowserTabBar", "tab list empty")
@@ -89,12 +102,18 @@ fun InfernoTabBar(tabList: List<TabSessionState>, selectedTab: TabSessionState?)
     } else tabList.find { it.id == selectedTab.id }!!.content.private)
 
     // scroll to active tab
-    val i = tabList.findIndex { it.id == selectedTab?.id }
-    LaunchedEffect(i, LocalConfiguration.current.orientation) {
+    LaunchedEffect(selectedTab?.id, LocalConfiguration.current.orientation) {
         // scroll to selected tab, auto centers
+        val i = tabList.findIndex { it.id == selectedTab?.id }
         if (i != null) listState.animateScrollToItem(
             i, 0,
         )
+    }
+
+    // calculate tab width
+    LaunchedEffect(tabList.size, LocalConfiguration.current.orientation) {
+        tabAutoWidth = calculateTabWidth()
+        Log.d("BrowserTabBar", "tabAutoWidth changed")
     }
 
     // if tab list empty or no tab selected return empty tab list, return nothing
@@ -103,10 +122,14 @@ fun InfernoTabBar(tabList: List<TabSessionState>, selectedTab: TabSessionState?)
     return Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(ComponentDimens.TAB_BAR_HEIGHT)
-            .background(Color.Black),
+            .height(UiConst.TAB_BAR_HEIGHT)
+            .background(LocalContext.current.infernoTheme().value.primaryBackgroundColor.copy(alpha = UiConst.BAR_BG_ALPHA)),
     ) {
-        Row(modifier = Modifier.fillMaxSize().padding(top = 4.dp)) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 4.dp)
+        ) {
             // tabs
             Box(
                 modifier = Modifier
@@ -118,15 +141,7 @@ fun InfernoTabBar(tabList: List<TabSessionState>, selectedTab: TabSessionState?)
                     modifier = Modifier
                         // 8dp is material small
 //                .clip(RoundedCornerShape(0.dp, 8.dp, 8.dp, 0.dp))
-                        .fillMaxSize()
-                        .onGloballyPositioned {
-                            Log.d("BrowserTabBar", "onGloballyPositioned called")
-                            val w = (it.size.width.pxToDp(context) - 16.dp) / tabList.size
-                            tabAutoWidth = when (w > ComponentDimens.TAB_WIDTH) {
-                                true -> w
-                                false -> ComponentDimens.TAB_WIDTH
-                            }
-                        },
+                        .fillMaxSize(),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Start,
                 ) {
@@ -143,43 +158,51 @@ fun InfernoTabBar(tabList: List<TabSessionState>, selectedTab: TabSessionState?)
                             lastIndex = tabList.size - 1
                         )
                     }
-                    item { Spacer(Modifier.width(8.dp)) }
+//                    item { Spacer(Modifier.width(8.dp)) }
                 }
-                // start gradient
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.CenterStart)
-                        .fillMaxHeight()
-                        .width(8.dp)
-                        .background(
-                            brush = Brush.horizontalGradient(
-                                colors = listOf(
-                                    Color.Black, Color.Transparent
-                                ),
-                            ),
-                        ),
-                )
-                // end gradient
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.CenterEnd)
-                        .fillMaxHeight()
-                        .width(8.dp)
-                        .background(
-                            brush = Brush.horizontalGradient(
-                                colors = listOf(
-                                    Color.Transparent, Color.Black
-                                ),
-                            ),
-                        ),
-                )
+                // todo: make start and end of tabs fade, how to add alpha just to
+                //  edges when exiting?
+//                // start gradient
+//                Box(
+//                    modifier = Modifier
+//                        .align(Alignment.CenterStart)
+//                        .fillMaxHeight()
+//                        .width(8.dp)
+//                        .background(
+//                            brush = Brush.horizontalGradient(
+//                                colors = listOf(
+//                                    LocalContext.current.infernoTheme().value.primaryBackgroundColor.copy(
+//                                        alpha = UiConst.BAR_BG_ALPHA
+//                                    ),
+//                                    Color.Transparent,
+//                                ),
+//                            ),
+//                        ),
+//                )
+//                // end gradient
+//                Box(
+//                    modifier = Modifier
+//                        .align(Alignment.CenterEnd)
+//                        .fillMaxHeight()
+//                        .width(8.dp)
+//                        .background(
+//                            brush = Brush.horizontalGradient(
+//                                colors = listOf(
+//                                    Color.Transparent,
+//                                    LocalContext.current.infernoTheme().value.primaryBackgroundColor.copy(
+//                                        alpha = UiConst.BAR_BG_ALPHA
+//                                    ),
+//                                ),
+//                            ),
+//                        ),
+//                )
             }
 
             // divider
             VerticalDivider(
                 modifier = Modifier.padding(vertical = verticalDividerPadding),
                 thickness = 1.dp,
-                color = Color.White,
+                color = LocalContext.current.infernoTheme().value.primaryIconColor,
             )
 
             // add tab icon
@@ -189,7 +212,7 @@ fun InfernoTabBar(tabList: List<TabSessionState>, selectedTab: TabSessionState?)
                     .aspectRatio(1F),
                 contentAlignment = Alignment.Center,
             ) {
-                Icon(
+                InfernoIcon(
                     modifier = Modifier
                         .size(12.dp)
                         .clickable {
@@ -199,8 +222,7 @@ fun InfernoTabBar(tabList: List<TabSessionState>, selectedTab: TabSessionState?)
                             )
                         },
                     painter = painterResource(R.drawable.ic_new_24),
-                    tint = Color.White,
-                    contentDescription = "new tab"
+                    contentDescription = "new tab",
                 )
             }
         }
@@ -239,7 +261,6 @@ private fun MiniTab(
         modifier = Modifier
             .fillMaxHeight()
             .width(width.value.dp)
-//            .background(Color.Black)
     ) {
         Row(
             modifier = Modifier
@@ -247,56 +268,16 @@ private fun MiniTab(
                 .fillMaxSize()
                 .background(
                     color = when (selected) {
-                        true -> Color.DarkGray
+                        true -> LocalContext.current.infernoTheme().value.secondaryBackgroundColor.copy(
+                            alpha = UiConst.BAR_BG_ALPHA
+                        )
+
                         false -> Color.Transparent
                     }, shape = when (selected) {
                         true -> MaterialTheme.shapes.small
                         false -> RectangleShape
                     }
                 )
-//        .drawBehind {
-//            // draw borders
-//            val w = size.width
-//            val h = size.height
-//            val cap = StrokeCap.Square
-//            val sw = 1.dp.toPx()
-//            val hsw = sw / 2
-//            val color = if (selected) Color.Black else Color.Gray
-////            // left, only draw if first or to right of selected tab
-////            if (index == 0 || index - 1 == selectedIndex) drawLine(
-////                cap = cap,
-////                color = color,
-////                strokeWidth = sw,
-////                start = Offset(hsw, hsw),
-////                end = Offset(hsw, h - hsw)
-////            )
-////            // right, if to left of selected dont draw
-////            if (index + 1 != selectedIndex)
-////                drawLine(
-////                    cap = cap,
-////                    color = color,
-////                    // if last or to left of selected tab sw else hsw
-////                    strokeWidth = sw,
-////                    start = Offset(w - hsw, hsw),
-////                    end = Offset(w - hsw, h - hsw),
-////                )
-////            // top selected indicator
-////            if (selected) drawLine(
-////                cap = cap,
-////                color = Color.Red,
-////                strokeWidth = sw,
-////                start = Offset(hsw, hsw),
-////                end = Offset(w - hsw, hsw)
-////            )
-//            // bottom selected indicator
-//            if (selected) drawLine(
-//                cap = cap,
-//                color = Color.Red,
-//                strokeWidth = sw,
-//                start = Offset(hsw, h - hsw),
-//                end = Offset(w - hsw, h - hsw)
-//            )
-//        }
                 .clickable(enabled = !selected) {
                     context.components.useCases.tabsUseCases.selectTab(
                         tabSessionState.id
@@ -340,25 +321,9 @@ private fun MiniTab(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 fontSize = 14.sp,
-                fontColor = Color.White,
             )
-//            // gradient
-//            Box(
-//                modifier = Modifier
-//                    .align(Alignment.CenterEnd)
-//                    .aspectRatio(0.5F)
-//                    .padding(vertical = 1.dp)
-//                    .background(
-//                        brush = Brush.horizontalGradient(
-//                            colors = listOf(
-//                                Color.Transparent, Color.Black
-//                            )
-//                        )
-//                    )
-//            )
-//        }
             // close
-            Icon(
+            InfernoIcon(
                 modifier = Modifier
                     .padding(8.dp, 0.dp, 8.dp, 0.dp)
                     .size(10.dp)
@@ -366,7 +331,6 @@ private fun MiniTab(
                         context.components.useCases.tabsUseCases.removeTab(tabSessionState.id)
                     },
                 painter = painterResource(R.drawable.ic_close),
-                tint = Color.White,
                 contentDescription = stringResource(R.string.close_tab),
             )
             // separator
@@ -374,7 +338,7 @@ private fun MiniTab(
                 VerticalDivider(
                     modifier = Modifier.padding(vertical = verticalDividerPadding),
                     thickness = 1.dp,
-                    color = Color.White,
+                    color = LocalContext.current.infernoTheme().value.primaryIconColor,
                 )
             }
         }

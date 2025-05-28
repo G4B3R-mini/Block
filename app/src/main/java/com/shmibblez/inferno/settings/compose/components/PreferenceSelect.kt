@@ -1,6 +1,5 @@
 package com.shmibblez.inferno.settings.compose.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,9 +8,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MenuAnchorType
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.MenuItemColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -20,11 +18,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.sp
 import com.shmibblez.inferno.R
+import com.shmibblez.inferno.compose.base.InfernoIcon
+import com.shmibblez.inferno.compose.base.InfernoOutlinedTextField
 import com.shmibblez.inferno.compose.base.InfernoText
+import com.shmibblez.inferno.compose.base.InfernoTextStyle
+import com.shmibblez.inferno.ext.infernoTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,17 +50,17 @@ fun <T> PreferenceSelect(
         modifier = Modifier
             .fillMaxWidth()
             .padding(
-                horizontal = PreferenceConstants.PREFERENCE_HORIZONTAL_PADDING,
-                vertical = PreferenceConstants.PREFERENCE_VERTICAL_PADDING,
+                horizontal = PrefUiConst.PREFERENCE_HORIZONTAL_PADDING,
+                vertical = PrefUiConst.PREFERENCE_VERTICAL_PADDING,
             ),
-        horizontalArrangement = Arrangement.spacedBy(PreferenceConstants.PREFERENCE_INTERNAL_PADDING),
-        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING),
+        verticalAlignment = Alignment.Top,
     ) {
         // leading icon (if set)
         preferenceLeadingIcon.invoke()
 
         Column(
-            modifier = Modifier.weight(1F),
+            modifier = Modifier.weight(2F),
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.SpaceBetween,
         ) {
@@ -71,12 +73,12 @@ fun <T> PreferenceSelect(
                         false -> 0.75F
                     }
                 ),
-                fontColor = Color.White, // todo: theme
             )
             // description
             if (description != null) {
                 InfernoText(
                     text = description,
+                    infernoStyle = InfernoTextStyle.Subtitle,
                     modifier = Modifier.alpha(
                         when (enabled) {
                             true -> 0.75F
@@ -84,18 +86,17 @@ fun <T> PreferenceSelect(
                         }
                     ),
                     fontSize = 12.sp,
-                    fontColor = Color.DarkGray, // todo: theme
                 )
             }
         }
-        
+
         // dropdown menu
         ExposedDropdownMenuBox(
             expanded = expanded,
             onExpandedChange = { expanded = !expanded },
-            modifier = Modifier.background(Color.DarkGray),
+            modifier = Modifier.weight(1F)
         ) {
-            OutlinedTextField(
+            InfernoOutlinedTextField(
                 value = mapToTitle.invoke(selectedMenuItem),
                 onValueChange = { },
                 modifier = Modifier.menuAnchor(
@@ -107,17 +108,21 @@ fun <T> PreferenceSelect(
                     selectedLeadingIcon.invoke(selectedMenuItem)
                 },
                 trailingIcon = {
-                    Icon(
+                    InfernoIcon(
                         painter = when (expanded) {
                             true -> painterResource(R.drawable.ic_arrow_drop_up_24)
                             false -> painterResource(R.drawable.ic_arrow_drop_down_24)
                         },
                         contentDescription = "",
-                        tint = Color.White, // todo: theme
                     )
                 },
+                singleLine = true,
             )
-            ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            ExposedDropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+                containerColor = LocalContext.current.infernoTheme().value.secondaryBackgroundColor,
+            ) {
                 // show menu items
                 menuItems.map { it to mapToTitle.invoke(it) }.forEach { (item, name) ->
                     DropdownMenuItem(
@@ -125,6 +130,14 @@ fun <T> PreferenceSelect(
                         onClick = { onSelectMenuItem.invoke(item) },
                         leadingIcon = { menuItemLeadingIcon.invoke(item) },
                         trailingIcon = { menuItemTrailingIcon.invoke(item) },
+                        colors = MenuItemColors(
+                            textColor = LocalContext.current.infernoTheme().value.primaryTextColor,
+                            leadingIconColor = LocalContext.current.infernoTheme().value.primaryIconColor,
+                            trailingIconColor = LocalContext.current.infernoTheme().value.primaryIconColor,
+                            disabledTextColor = LocalContext.current.infernoTheme().value.secondaryTextColor,
+                            disabledLeadingIconColor = LocalContext.current.infernoTheme().value.secondaryIconColor,
+                            disabledTrailingIconColor = LocalContext.current.infernoTheme().value.secondaryIconColor,
+                        ),
                     )
                 }
                 // show additional menu items

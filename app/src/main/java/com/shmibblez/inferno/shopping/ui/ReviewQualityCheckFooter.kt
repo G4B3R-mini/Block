@@ -46,9 +46,6 @@ fun ReviewQualityCheckFooter(
                 },
             ),
         ),
-        style = FirefoxTheme.typography.body2.copy(
-            color = FirefoxTheme.colors.textSecondary,
-        ),
         linkTextColor = FirefoxTheme.colors.textAccent,
     )
 }

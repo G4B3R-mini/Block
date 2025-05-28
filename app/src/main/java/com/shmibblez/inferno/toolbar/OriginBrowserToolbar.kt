@@ -32,9 +32,10 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import com.shmibblez.inferno.browser.ComponentDimens
+import com.shmibblez.inferno.browser.UiConst
 import com.shmibblez.inferno.browser.InfernoAwesomeBar
 import com.shmibblez.inferno.ext.dpToPx
+import com.shmibblez.inferno.ext.infernoTheme
 import com.shmibblez.inferno.proto.InfernoSettings
 import com.shmibblez.inferno.proto.infernoSettingsDataStore
 import com.shmibblez.inferno.toolbar.ToolbarOnlyOptions.Companion.ToolbarOrigin
@@ -144,8 +145,8 @@ internal fun OriginBrowserToolbar(
             .fillMaxWidth()
             .height(
                 when (editMode) {
-                    true -> ComponentDimens.TOOLBAR_HEIGHT + ComponentDimens.AWESOME_BAR_HEIGHT
-                    false -> ComponentDimens.TOOLBAR_HEIGHT
+                    true -> UiConst.TOOLBAR_HEIGHT + UiConst.AWESOME_BAR_HEIGHT
+                    false -> UiConst.TOOLBAR_HEIGHT
                 }
             )
             .background(Color.Transparent),
@@ -177,8 +178,12 @@ internal fun OriginBrowserToolbar(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(ComponentDimens.TOOLBAR_HEIGHT)
-                .background(Color.Black),
+                .height(UiConst.TOOLBAR_HEIGHT)
+                .background(
+                    LocalContext.current.infernoTheme().value.primaryBackgroundColor.copy(
+                        alpha = UiConst.BAR_BG_ALPHA
+                    ),
+                ),
         ) {
             // origin
             ToolbarOrigin(

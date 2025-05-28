@@ -3,6 +3,7 @@ package com.shmibblez.inferno.settings.toolbar
 import android.annotation.SuppressLint
 import android.content.Context
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBar
@@ -23,8 +24,10 @@ import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.proto.InfernoSettings
 import com.shmibblez.inferno.proto.infernoSettingsDataStore
+import com.shmibblez.inferno.settings.compose.components.InfernoSettingsPage
 import com.shmibblez.inferno.settings.compose.components.PreferenceSelect
 import com.shmibblez.inferno.settings.compose.components.PreferenceTitle
+import com.shmibblez.inferno.settings.theme.InfernoTheme
 import com.shmibblez.inferno.toolbar.allToolbarItemsNoMiniOrigin
 import com.shmibblez.inferno.toolbar.allToolbarItemsNoOrigin
 import kotlinx.coroutines.MainScope
@@ -49,29 +52,20 @@ fun ToolbarSettingsPage(goBack: () -> Unit) {
     }
     var useMiniOrigin by remember { mutableStateOf<Boolean?>(null) }
 
-    LaunchedEffect (settings.toolbarItemsList) {
+    LaunchedEffect(settings.toolbarItemsList) {
         selectedToolbarItems = settings.toolbarItemsList
-        useMiniOrigin = selectedToolbarItems.contains(InfernoSettings.ToolbarItem.TOOLBAR_ITEM_ORIGIN_MINI)
+        useMiniOrigin =
+            selectedToolbarItems.contains(InfernoSettings.ToolbarItem.TOOLBAR_ITEM_ORIGIN_MINI)
         remainingToolbarItems = when (useMiniOrigin!!) {
             true -> (null as InfernoSettings.ToolbarItem?).allToolbarItemsNoOrigin
             false -> (null as InfernoSettings.ToolbarItem?).allToolbarItemsNoMiniOrigin
         }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                navigationIcon = {
-                    InfernoIcon(
-                        painter = painterResource(R.drawable.ic_back_button),
-                        contentDescription = stringResource(R.string.browser_menu_back),
-                        modifier = Modifier.clickable(onClick = goBack),
-                    )
-                },
-                title = { InfernoText("Toolbar Settings") }, // todo: string res
-            )
-        },
-    ) {
+    InfernoSettingsPage(
+        title = "Toolbar Settings", // todo: string res
+        goBack = goBack,
+    ) { edgeInsets ->
         val topPreferences = listOf<@Composable () -> Unit>(
             { PreferenceTitle(stringResource(R.string.preferences_category_general)) },
             {
@@ -120,9 +114,10 @@ fun ToolbarSettingsPage(goBack: () -> Unit) {
                 // todo: mini origin (enable / disable pref by adding mini origin or origin to toolbar item list)
             },
             { PreferenceTitle("Toolbar Items") }, // todo: string res
-            )
+        )
         // selected toolbar items
         PreferenceToolbarItems(
+            modifier = Modifier.padding(edgeInsets),
             topPreferences = topPreferences,
             selectedItems = selectedToolbarItems,
             remainingItems = remainingToolbarItems,

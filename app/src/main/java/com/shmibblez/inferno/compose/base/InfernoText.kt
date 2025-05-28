@@ -18,7 +18,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
 import com.shmibblez.inferno.ext.infernoTheme
-import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.identitycredential.DialogColors
 
 // Default InfernoText styles
 interface InfernoTextStyle {
@@ -32,7 +31,7 @@ interface InfernoTextStyle {
     val maxLines: Int
     val minLines: Int
     val fontSize: TextUnit
-    val fontColor: Color;
+    val fontColor: Color
 
     companion object {
         val Title: InfernoTextStyle
@@ -144,20 +143,24 @@ fun InfernoText(
 @Composable
 fun InfernoText(
     text: AnnotatedString,
+    infernoStyle: InfernoTextStyle = InfernoTextStyle.Normal,
     modifier: Modifier = Modifier,
-    fontStyle: FontStyle? = null,
-    fontWeight: FontWeight? = null,
-    textAlign: TextAlign? = null,
-    lineHeight: TextUnit = TextUnit.Unspecified,
-    overflow: TextOverflow = TextOverflow.Clip,
-    softWrap: Boolean = true,
-    maxLines: Int = Int.MAX_VALUE,
-    minLines: Int = 1,
+    fontStyle: FontStyle? = infernoStyle.fontStyle,
+    fontWeight: FontWeight? = infernoStyle.fontWeight,
+    textAlign: TextAlign? = infernoStyle.textAlign,
+    lineHeight: TextUnit = infernoStyle.lineHeight,
+    letterSpacing: TextUnit = infernoStyle.letterSpacing,
+    overflow: TextOverflow = infernoStyle.overflow,
+    softWrap: Boolean = infernoStyle.softWrap,
+    maxLines: Int = infernoStyle.maxLines,
+    minLines: Int = infernoStyle.minLines,
+    fontSize: TextUnit = infernoStyle.fontSize,
+    fontColor: Color = infernoStyle.fontColor,
     style: TextStyle = LocalTextStyle.current.copy(
-        fontSize = 16.sp,
-        lineHeight = 24.sp,
-        color = DialogColors.defaultProvider().provideColors().title,
-        letterSpacing = 0.15.sp,
+        fontSize = fontSize,
+        lineHeight = lineHeight,
+        color = fontColor,
+        letterSpacing = letterSpacing,
     ),
 ) {
     CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides Dp.Unspecified) {

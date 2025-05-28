@@ -10,6 +10,7 @@ import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
 import android.content.pm.ShortcutManager
 import android.os.Build
+import android.util.Log
 import android.view.accessibility.AccessibilityManager
 import androidx.annotation.VisibleForTesting
 import androidx.annotation.VisibleForTesting.Companion.PRIVATE
@@ -51,8 +52,12 @@ import com.shmibblez.inferno.settings.sitepermissions.AUTOPLAY_BLOCK_ALL
 import com.shmibblez.inferno.settings.sitepermissions.AUTOPLAY_BLOCK_AUDIBLE
 import com.shmibblez.inferno.toolbar.defaultToolbarItems
 import com.shmibblez.inferno.wallpapers.Wallpaper
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.flow.lastOrNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -143,18 +148,44 @@ class Settings(private val appContext: Context) : PreferencesHolder {
         }
     }
 
+    private var latestSettings: InfernoSettings? = null
+
+    init {
+        MainScope().launch {
+            appContext.infernoSettingsDataStore.data.collect {
+                latestSettings = it
+            }
+        }
+    }
+
 //    @VisibleForTesting
 //    internal val isCrashReportEnabledInBuild: Boolean =
 //        BuildConfig.CRASH_REPORTING && Config.channel.isReleased
 
     private fun <T> getPref(default: () -> T, getter: (InfernoSettings?) -> T?): T {
-        return getter.invoke(runBlocking { appContext.infernoSettingsDataStore.data.lastOrNull() })
-            ?: default.invoke()
+//        Log.d("Settings", "getPref() loading")
+//        val settings = runBlocking(MainScope().coroutineContext) { appContext.infernoSettingsDataStore.data.first() }
+//        val v = getter.invoke(settings)
+//            ?: default.invoke()
+//        Log.d("Settings", "getPref() retrieved, returning val")
+//        return v
+//        if (latestSettings == null) {
+//            runBlocking { appContext.infernoSettingsDataStore.data.last() }
+//        }
+        return getter.invoke(latestSettings) ?: default.invoke()
     }
 
     private fun <T> getPref(default: T, getter: (InfernoSettings?) -> T?): T {
-        return getter.invoke(runBlocking { appContext.infernoSettingsDataStore.data.lastOrNull() })
-            ?: default
+//        Log.d("Settings", "getPref() loading")
+//        val settings = runBlocking(MainScope().coroutineContext) { appContext.infernoSettingsDataStore.data.last() }
+//        val v = getter.invoke(settings)
+//            ?: default
+//        Log.d("Settings", "getPref() retrieved, returning val")
+//        return v
+//        if (latestSettings == null) {
+//            runBlocking { appContext.infernoSettingsDataStore.data.last() }
+//        }
+        return getter.invoke(latestSettings) ?: default
     }
 
     private fun setPref(setter: (InfernoSettings.Builder) -> Unit) {
@@ -668,18 +699,21 @@ class Settings(private val appContext: Context) : PreferencesHolder {
         set(value) {
             setPref { it.setIsLoginSaveAndAutofillEnabled(value) }
         }
+
     // R.string.pref_key_sync_logins
     var shouldSyncLogins: Boolean
         get() = getPref(default = true) { it?.shouldSyncLogins }
         set(value) {
             setPref { it.setShouldSyncLogins(value) }
         }
+
     // R.string.pref_key_autofill_logins
     var shouldAutofillLogins: Boolean
         get() = getPref(default = true) { it?.isLoginSaveAndAutofillEnabled }
         set(value) {
             setPref { it.setIsLoginSaveAndAutofillEnabled(value) }
         }
+
     // R.string.pref_key_android_autofill
     var isAndroidAutofillEnabled: Boolean
         get() = getPref(default = true) { it?.isAndroidAutofillEnabled }
@@ -1064,14 +1098,12 @@ class Settings(private val appContext: Context) : PreferencesHolder {
     val enabledTotalCookieProtection: Boolean
         get() = mr2022Sections[Mr2022Section.TCP_FEATURE] == true
     var blockCookiesInCustomTrackingProtection: Boolean
-        get() = getPref(default = true) { it?.customTrackingProtection?.blockCustomCookies != InfernoSettings.CustomTrackingProtection.CookiePolicy.NONE }
+        get() = getPref(default = true) { it?.customTrackingProtection?.blockCookies }
         set(value) {
             // todo: does this work?
-            if (!value) setPref {
+            setPref {
                 it.setCustomTrackingProtection(
-                    it.customTrackingProtection.toBuilder()
-                        .setBlockCustomCookies(InfernoSettings.CustomTrackingProtection.CookiePolicy.NONE)
-                        .build()
+                    it.customTrackingProtection.toBuilder().setBlockCookies(value).build()
                 )
             }
         }
@@ -1081,11 +1113,11 @@ class Settings(private val appContext: Context) : PreferencesHolder {
                 true -> InfernoSettings.CustomTrackingProtection.CookiePolicy.ALL_COOKIES
                 false -> InfernoSettings.CustomTrackingProtection.CookiePolicy.CROSS_SITE_AND_SOCIAL_MEDIA_TRACKERS
             }
-        ) { it?.customTrackingProtection?.blockCustomCookies }
+        ) { it?.customTrackingProtection?.blockCookiesPolicy }
         set(value) {
             setPref {
                 it.setCustomTrackingProtection(
-                    it.customTrackingProtection.toBuilder().setBlockCustomCookies(value)
+                    it.customTrackingProtection.toBuilder().setBlockCookiesPolicy(value)
                 )
             }
         }
@@ -1094,23 +1126,89 @@ class Settings(private val appContext: Context) : PreferencesHolder {
             return blockTrackingContentInCustomTrackingProtectionInNormalTabs || blockTrackingContentInCustomTrackingProtectionInPrivateTabs
         }
     var blockTrackingContentInCustomTrackingProtectionInNormalTabs: Boolean
-        get() = getPref(default = true) { it?.customTrackingProtection?.trackingContentBlockedInNormalMode }
-        set(value) {
+        get() = getPref(default = true) {
+            (it?.customTrackingProtection?.blockTrackingContent == true) && it?.customTrackingProtection?.blockTrackingContentSelection.let { pref ->
+                pref == InfernoSettings.CustomTrackingProtection.TrackingContentSelection.BLOCK_TRACKING_NORMAL_ONLY || pref == InfernoSettings.CustomTrackingProtection.TrackingContentSelection.BLOCK_TRACKING_NORMAL_AND_PRIVATE
+            }
+        }
+        set(blockInNormal) {
+            val blockInPrivate = blockTrackingContentInCustomTrackingProtectionInPrivateTabs
             setPref {
-                it.setCustomTrackingProtection(
-                    it.customTrackingProtection.toBuilder()
-                        .setTrackingContentBlockedInNormalMode(value)
-                )
+                when {
+                    blockInPrivate && blockInNormal -> {
+                        it.setCustomTrackingProtection(
+                            it.customTrackingProtection.toBuilder().setBlockTrackingContent(true)
+                                .setBlockTrackingContentSelection(InfernoSettings.CustomTrackingProtection.TrackingContentSelection.BLOCK_TRACKING_NORMAL_AND_PRIVATE)
+                                .build()
+                        )
+                    }
+
+                    blockInPrivate && !blockInNormal -> {
+                        it.setCustomTrackingProtection(
+                            it.customTrackingProtection.toBuilder().setBlockTrackingContent(true)
+                                .setBlockTrackingContentSelection(InfernoSettings.CustomTrackingProtection.TrackingContentSelection.BLOCK_TRACKING_PRIVATE_ONLY)
+                                .build()
+                        )
+                    }
+
+                    !blockInPrivate && blockInNormal -> {
+                        it.setCustomTrackingProtection(
+                            it.customTrackingProtection.toBuilder().setBlockTrackingContent(true)
+                                .setBlockTrackingContentSelection(InfernoSettings.CustomTrackingProtection.TrackingContentSelection.BLOCK_TRACKING_NORMAL_ONLY)
+                                .build()
+                        )
+                    }
+
+                    !blockInPrivate && !blockInNormal -> {
+                        it.setCustomTrackingProtection(
+                            it.customTrackingProtection.toBuilder().setBlockTrackingContent(false)
+                                .build()
+                        )
+                    }
+                }
             }
         }
     var blockTrackingContentInCustomTrackingProtectionInPrivateTabs: Boolean
-        get() = getPref(default = true) { it?.customTrackingProtection?.trackingContentBlockedInPrivateMode }
-        set(value) {
+        get() = getPref(default = true) {
+            (it?.customTrackingProtection?.blockTrackingContent == true) && it?.customTrackingProtection?.blockTrackingContentSelection.let { pref ->
+                pref == InfernoSettings.CustomTrackingProtection.TrackingContentSelection.BLOCK_TRACKING_PRIVATE_ONLY || pref == InfernoSettings.CustomTrackingProtection.TrackingContentSelection.BLOCK_TRACKING_NORMAL_AND_PRIVATE
+            }
+        }
+        set(blockInPrivate) {
+            val blockInNormal = blockTrackingContentInCustomTrackingProtectionInNormalTabs
             setPref {
-                it.setCustomTrackingProtection(
-                    it.customTrackingProtection.toBuilder()
-                        .setTrackingContentBlockedInPrivateMode(value)
-                )
+                when {
+                    blockInPrivate && blockInNormal -> {
+                        it.setCustomTrackingProtection(
+                            it.customTrackingProtection.toBuilder().setBlockTrackingContent(true)
+                                .setBlockTrackingContentSelection(InfernoSettings.CustomTrackingProtection.TrackingContentSelection.BLOCK_TRACKING_NORMAL_AND_PRIVATE)
+                                .build()
+                        )
+                    }
+
+                    blockInPrivate && !blockInNormal -> {
+                        it.setCustomTrackingProtection(
+                            it.customTrackingProtection.toBuilder().setBlockTrackingContent(true)
+                                .setBlockTrackingContentSelection(InfernoSettings.CustomTrackingProtection.TrackingContentSelection.BLOCK_TRACKING_PRIVATE_ONLY)
+                                .build()
+                        )
+                    }
+
+                    !blockInPrivate && blockInNormal -> {
+                        it.setCustomTrackingProtection(
+                            it.customTrackingProtection.toBuilder().setBlockTrackingContent(true)
+                                .setBlockTrackingContentSelection(InfernoSettings.CustomTrackingProtection.TrackingContentSelection.BLOCK_TRACKING_NORMAL_ONLY)
+                                .build()
+                        )
+                    }
+
+                    !blockInPrivate && !blockInNormal -> {
+                        it.setCustomTrackingProtection(
+                            it.customTrackingProtection.toBuilder().setBlockTrackingContent(false)
+                                .build()
+                        )
+                    }
+                }
             }
         }
     var blockCryptominersInCustomTrackingProtection: Boolean
@@ -1145,23 +1243,95 @@ class Settings(private val appContext: Context) : PreferencesHolder {
             return blockSuspectedFingerprintersInCustomTrackingProtectionInNormalTabs || blockSuspectedFingerprintersInCustomTrackingProtectionInPrivateTabs
         }
     var blockSuspectedFingerprintersInCustomTrackingProtectionInNormalTabs: Boolean
-        get() = getPref(default = true) { it?.customTrackingProtection?.blockSuspectedFingerPrintersInNormalMode }
-        set(value) {
+        get() = getPref(default = true) {
+            (it?.customTrackingProtection?.blockSuspectedFingerprinters == true) && it?.customTrackingProtection?.blockSuspectedFingerprintersSelection.let { pref ->
+                pref == InfernoSettings.CustomTrackingProtection.SuspectedFingerprintersSelection.BLOCK_SUSPECTED_FINGERPRINTERS_NORMAL_ONLY || pref == InfernoSettings.CustomTrackingProtection.SuspectedFingerprintersSelection.BLOCK_SUSPECTED_FINGERPRINTERS_NORMAL_AND_PRIVATE
+            }
+        }
+        set(blockInNormal) {
+            val blockInPrivate = blockSuspectedFingerprintersInCustomTrackingProtectionInPrivateTabs
             setPref {
-                it.setCustomTrackingProtection(
-                    it.customTrackingProtection.toBuilder()
-                        .setBlockSuspectedFingerPrintersInNormalMode(value)
-                )
+                when {
+                    blockInPrivate && blockInNormal -> {
+                        it.setCustomTrackingProtection(
+                            it.customTrackingProtection.toBuilder()
+                                .setBlockSuspectedFingerprinters(true)
+                                .setBlockSuspectedFingerprintersSelection(InfernoSettings.CustomTrackingProtection.SuspectedFingerprintersSelection.BLOCK_SUSPECTED_FINGERPRINTERS_NORMAL_AND_PRIVATE)
+                                .build()
+                        )
+                    }
+
+                    blockInPrivate && !blockInNormal -> {
+                        it.setCustomTrackingProtection(
+                            it.customTrackingProtection.toBuilder()
+                                .setBlockSuspectedFingerprinters(true)
+                                .setBlockSuspectedFingerprintersSelection(InfernoSettings.CustomTrackingProtection.SuspectedFingerprintersSelection.BLOCK_SUSPECTED_FINGERPRINTERS_PRIVATE_ONLY)
+                                .build()
+                        )
+                    }
+
+                    !blockInPrivate && blockInNormal -> {
+                        it.setCustomTrackingProtection(
+                            it.customTrackingProtection.toBuilder()
+                                .setBlockSuspectedFingerprinters(true)
+                                .setBlockSuspectedFingerprintersSelection(InfernoSettings.CustomTrackingProtection.SuspectedFingerprintersSelection.BLOCK_SUSPECTED_FINGERPRINTERS_NORMAL_ONLY)
+                                .build()
+                        )
+                    }
+
+                    !blockInPrivate && !blockInNormal -> {
+                        it.setCustomTrackingProtection(
+                            it.customTrackingProtection.toBuilder()
+                                .setBlockSuspectedFingerprinters(false).build()
+                        )
+                    }
+                }
             }
         }
     var blockSuspectedFingerprintersInCustomTrackingProtectionInPrivateTabs: Boolean
-        get() = getPref(default = true) { it?.customTrackingProtection?.blockSuspectedFingerPrintersInPrivateMode }
-        set(value) {
+        get() = getPref(default = true) {
+            (it?.customTrackingProtection?.blockSuspectedFingerprinters == true) && it?.customTrackingProtection?.blockSuspectedFingerprintersSelection.let { pref ->
+                pref == InfernoSettings.CustomTrackingProtection.SuspectedFingerprintersSelection.BLOCK_SUSPECTED_FINGERPRINTERS_PRIVATE_ONLY || pref == InfernoSettings.CustomTrackingProtection.SuspectedFingerprintersSelection.BLOCK_SUSPECTED_FINGERPRINTERS_NORMAL_AND_PRIVATE
+            }
+        }
+        set(blockInPrivate) {
+            val blockInNormal = blockSuspectedFingerprintersInCustomTrackingProtectionInNormalTabs
             setPref {
-                it.setCustomTrackingProtection(
-                    it.customTrackingProtection.toBuilder()
-                        .setBlockSuspectedFingerPrintersInPrivateMode(value)
-                )
+                when {
+                    blockInPrivate && blockInNormal -> {
+                        it.setCustomTrackingProtection(
+                            it.customTrackingProtection.toBuilder()
+                                .setBlockSuspectedFingerprinters(true)
+                                .setBlockSuspectedFingerprintersSelection(InfernoSettings.CustomTrackingProtection.SuspectedFingerprintersSelection.BLOCK_SUSPECTED_FINGERPRINTERS_NORMAL_AND_PRIVATE)
+                                .build()
+                        )
+                    }
+
+                    blockInPrivate && !blockInNormal -> {
+                        it.setCustomTrackingProtection(
+                            it.customTrackingProtection.toBuilder()
+                                .setBlockSuspectedFingerprinters(true)
+                                .setBlockSuspectedFingerprintersSelection(InfernoSettings.CustomTrackingProtection.SuspectedFingerprintersSelection.BLOCK_SUSPECTED_FINGERPRINTERS_PRIVATE_ONLY)
+                                .build()
+                        )
+                    }
+
+                    !blockInPrivate && blockInNormal -> {
+                        it.setCustomTrackingProtection(
+                            it.customTrackingProtection.toBuilder()
+                                .setBlockSuspectedFingerprinters(true)
+                                .setBlockSuspectedFingerprintersSelection(InfernoSettings.CustomTrackingProtection.SuspectedFingerprintersSelection.BLOCK_SUSPECTED_FINGERPRINTERS_NORMAL_ONLY)
+                                .build()
+                        )
+                    }
+
+                    !blockInPrivate && !blockInNormal -> {
+                        it.setCustomTrackingProtection(
+                            it.customTrackingProtection.toBuilder()
+                                .setBlockSuspectedFingerprinters(false).build()
+                        )
+                    }
+                }
             }
         }
 

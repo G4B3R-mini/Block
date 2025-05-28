@@ -9,8 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -29,7 +27,8 @@ import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.proto.InfernoSettings
 import com.shmibblez.inferno.proto.infernoSettingsDataStore
-import com.shmibblez.inferno.settings.compose.components.PreferenceConstants
+import com.shmibblez.inferno.settings.compose.components.InfernoSettingsPage
+import com.shmibblez.inferno.settings.compose.components.PrefUiConst
 import com.shmibblez.inferno.settings.compose.components.PreferenceTitle
 import kotlinx.coroutines.launch
 
@@ -56,22 +55,14 @@ fun SitePermissionsSettingsPage(
 
     // blocked prefs reset when leave and return to page, todo: test, just to make sure
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                navigationIcon = {
-                    InfernoIcon(
-                        painter = painterResource(R.drawable.ic_back_button),
-                        contentDescription = stringResource(R.string.browser_menu_back),
-                        modifier = Modifier.clickable(onClick = goBack),
-                    )
-                },
-                title = { InfernoText(stringResource(R.string.preferences_site_permissions)) },
-            )
-        },
-    ) {
+    InfernoSettingsPage(
+        title = stringResource(R.string.preferences_site_permissions),
+        goBack = goBack,
+    ) { edgeInsets ->
         LazyColumn(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(edgeInsets),
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.Top,
         ) {
@@ -163,8 +154,8 @@ fun SitePermissionsSettingsPage(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(
-                            horizontal = PreferenceConstants.PREFERENCE_HORIZONTAL_PADDING,
-                            vertical = PreferenceConstants.PREFERENCE_VERTICAL_PADDING,
+                            horizontal = PrefUiConst.PREFERENCE_HORIZONTAL_PADDING,
+                            vertical = PrefUiConst.PREFERENCE_VERTICAL_PADDING,
                         )
                         .clickable {
                             /**
@@ -180,7 +171,7 @@ fun SitePermissionsSettingsPage(
                              */
                             onNavToSitePermissionsExceptionsSettings.invoke()
                         },
-                    horizontalArrangement = Arrangement.spacedBy(PreferenceConstants.PREFERENCE_INTERNAL_PADDING),
+                    horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING),
                 ) {
                     InfernoIcon(
                         painter = painterResource(R.drawable.ic_globe_24),

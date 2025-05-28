@@ -34,7 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
 import com.shmibblez.inferno.R
-import com.shmibblez.inferno.browser.ComponentDimens
+import com.shmibblez.inferno.browser.UiConst
 import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.compose.sessionUseCases
@@ -130,7 +130,6 @@ internal class ToolbarOnlyOptions {
                     .clickable(onClick = onShowMenuBottomSheet),
                 painter = painterResource(id = R.drawable.ic_app_menu_24),
                 contentDescription = stringResource(R.string.content_description_menu),
-                tint = Color.White
             )
         }
 
@@ -175,10 +174,10 @@ internal class ToolbarOnlyComponents {
             LinearProgressIndicator(
                 progress = { progress },
                 modifier = modifier
-                    .height(ComponentDimens.PROGRESS_BAR_HEIGHT)
+                    .height(UiConst.PROGRESS_BAR_HEIGHT)
                     .fillMaxWidth(),
-                color = Color.Red,
-                trackColor = Color.Black
+                color = LocalContext.current.infernoTheme().value.primaryActionColor,
+                trackColor = Color.Transparent,
             )
         }
 
@@ -186,7 +185,7 @@ internal class ToolbarOnlyComponents {
         fun ToolbarSeparator() {
             VerticalDivider(
                 modifier = Modifier.height(TOOLBAR_ICON_SIZE),
-                color = Color.White,
+                color = LocalContext.current.infernoTheme().value.primaryIconColor,
                 thickness = 1.dp,
             )
         }
@@ -234,7 +233,7 @@ internal class ToolbarOptions {
          */
         @Composable
         private fun ToolbarOptionTemplate(
-            icon: @Composable (modifier: Modifier, extraPadding: Dp, contentDescription: String, tint: Color) -> Unit,
+            icon: @Composable (modifier: Modifier, extraPadding: Dp, contentDescription: String) -> Unit,
             description: String,
             contentDescription: String = description,
             onClick: () -> Unit,
@@ -250,7 +249,6 @@ internal class ToolbarOptions {
                             .clickable(enabled = enabled, onClick = onClick),
                         TOOLBAR_SWITCH_ICON_EXTRA / 2,
                         contentDescription,
-                        Color.White, // todo: theme
                     )
                 }
 
@@ -269,7 +267,6 @@ internal class ToolbarOptions {
                             Modifier.size(TOOLBAR_MENU_ICON_SIZE + TOOLBAR_SWITCH_ICON_EXTRA),
                             TOOLBAR_SWITCH_ICON_EXTRA,
                             contentDescription,
-                            Color.White, // todo: theme
                         )
                         InfernoText(
                             text = description,
@@ -278,7 +275,7 @@ internal class ToolbarOptions {
                             overflow = TextOverflow.Ellipsis,
                             maxLines = 3,
                             fontSize = 10.sp,
-                            fontColor = Color.White, // todo: theme
+                            fontColor = LocalContext.current.infernoTheme().value.primaryIconColor,
                         )
                     }
                 }
@@ -303,7 +300,6 @@ internal class ToolbarOptions {
                             .clickable(enabled = enabled, onClick = onClick),
                         painter = iconPainter,
                         contentDescription = contentDescription,
-                        tint = Color.White, // todo: theme
                     )
                 }
 
@@ -322,7 +318,6 @@ internal class ToolbarOptions {
                             painter = iconPainter,
                             contentDescription = contentDescription,
                             modifier = Modifier.size(TOOLBAR_MENU_ICON_SIZE),
-                            tint = Color.White, // todo: theme
                         )
                         InfernoText(
                             text = description,
@@ -331,7 +326,7 @@ internal class ToolbarOptions {
                             overflow = TextOverflow.Ellipsis,
                             maxLines = 3,
                             fontSize = 10.sp,
-                            fontColor = Color.White, // todo: theme
+                            fontColor = LocalContext.current.infernoTheme().value.primaryIconColor,
                         )
                     }
                 }
@@ -357,7 +352,7 @@ internal class ToolbarOptions {
             onRequestSearchBar: () -> Unit,
         ) {
             ToolbarOptionTemplate(
-                icon = { modifier, extraPadding, contentDescription, tint ->
+                icon = { modifier, extraPadding, contentDescription ->
                     Box(
                         modifier = modifier,
                     ) {
@@ -369,13 +364,12 @@ internal class ToolbarOptions {
                                 .padding(extraPadding),
                             painter = painterResource(id = R.drawable.ic_globe_24),
                             contentDescription = contentDescription,
-                            tint = tint,
                         )
                         // switch to, smol icon
                         InfernoIcon(
                             modifier = Modifier
                                 .clip(CircleShape)
-                                .background(Color.Black)
+                                .background(LocalContext.current.infernoTheme().value.primaryBackgroundColor)
                                 .padding(2.dp)
                                 .size(
                                     when (type) {
@@ -386,7 +380,6 @@ internal class ToolbarOptions {
                                 .align(Alignment.BottomEnd),
                             painter = painterResource(id = R.drawable.ic_search_24),
                             contentDescription = contentDescription,
-                            tint = tint,
                         )
                     }
                 },
@@ -476,7 +469,7 @@ internal class ToolbarOptions {
                 context.components.core.store.state.selectedTab?.content?.desktopMode
                     ?: context.components.core.store.state.desktopMode
             ToolbarOptionTemplate(
-                icon = { modifier, extraPadding, contentDescription, tint ->
+                icon = { modifier, extraPadding, contentDescription ->
                     Box(
                         modifier = modifier,
                     ) {
@@ -491,13 +484,12 @@ internal class ToolbarOptions {
                                 false -> painterResource(id = R.drawable.ic_device_mobile_24)
                             },
                             contentDescription = contentDescription,
-                            tint = tint,
                         )
                         // switch to, smol icon
                         InfernoIcon(
                             modifier = Modifier
                                 .clip(CircleShape)
-                                .background(Color.Black)
+                                .background(LocalContext.current.infernoTheme().value.primaryBackgroundColor)
                                 .padding(2.dp)
                                 .size(
                                     when (type) {
@@ -511,7 +503,6 @@ internal class ToolbarOptions {
                                 false -> painterResource(id = R.drawable.ic_device_desktop_24)
                             },
                             contentDescription = contentDescription,
-                            tint = tint,
                         )
                     }
                 },
@@ -615,7 +606,7 @@ internal class ToolbarOptions {
             }
 
             ToolbarOptionTemplate(
-                icon = { modifier, extraPadding, contentDescription, tint ->
+                icon = { modifier, extraPadding, contentDescription ->
                     Box(
                         modifier = modifier,
                     ) {
@@ -630,13 +621,12 @@ internal class ToolbarOptions {
                                 false -> painterResource(id = R.drawable.ic_globe_24)
                             },
                             contentDescription = contentDescription,
-                            tint = tint,
                         )
                         // switch to, smol icon
                         InfernoIcon(
                             modifier = Modifier
                                 .clip(CircleShape)
-                                .background(Color.Black)
+                                .background(LocalContext.current.infernoTheme().value.primaryBackgroundColor)
                                 .padding(2.dp)
                                 .size(
                                     when (type) {
@@ -650,7 +640,6 @@ internal class ToolbarOptions {
                                 false -> painterResource(id = R.drawable.ic_private_browsing)
                             },
                             contentDescription = contentDescription,
-                            tint = tint,
                         )
                     }
                 },
@@ -681,7 +670,7 @@ internal class ToolbarOptions {
             onNavToTabsTray: () -> Unit,
         ) {
             ToolbarOptionTemplate(
-                icon = { modifier, extraPadding, contentDescription, tint ->
+                icon = { modifier, extraPadding, contentDescription ->
                     Box(
                         modifier = modifier.wrapContentHeight(unbounded = true),
                         contentAlignment = Alignment.Center,
@@ -693,12 +682,11 @@ internal class ToolbarOptions {
                                 .padding(extraPadding),
                             painter = painterResource(id = R.drawable.ic_tabcounter_box_24),
                             contentDescription = contentDescription,
-                            tint = tint,
                         )
                         InfernoText(
                             modifier = Modifier.fillMaxSize(),
                             text = tabCount.toString(),
-                            fontColor = Color.White,
+                            fontColor = LocalContext.current.infernoTheme().value.primaryIconColor,
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center,
                             fontSize = 9.sp,
@@ -799,7 +787,7 @@ internal class ToolbarOptionsIcons {
                         InfernoIcon(
                             modifier = Modifier
                                 .clip(CircleShape)
-                                .background(Color.Black)
+                                .background(LocalContext.current.infernoTheme().value.primaryBackgroundColor)
                                 .padding(2.dp)
                                 .size(TOOLBAR_SWITCH_ICON_SIZE)
                                 .align(Alignment.BottomEnd),
@@ -869,7 +857,7 @@ internal class ToolbarOptionsIcons {
                         InfernoIcon(
                             modifier = Modifier
                                 .clip(CircleShape)
-                                .background(Color.Black)
+                                .background(LocalContext.current.infernoTheme().value.primaryBackgroundColor)
                                 .padding(2.dp)
                                 .size(TOOLBAR_SWITCH_ICON_SIZE)
                                 .align(Alignment.BottomEnd),
@@ -923,7 +911,7 @@ internal class ToolbarOptionsIcons {
                         InfernoIcon(
                             modifier = Modifier
                                 .clip(CircleShape)
-                                .background(Color.Black)
+                                .background(LocalContext.current.infernoTheme().value.primaryBackgroundColor)
                                 .padding(2.dp)
                                 .size(TOOLBAR_SWITCH_ICON_SIZE)
                                 .align(Alignment.BottomEnd),

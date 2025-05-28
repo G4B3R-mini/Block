@@ -6,7 +6,9 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.DropdownMenuItem
@@ -36,6 +38,7 @@ import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.getRootView
 import com.shmibblez.inferno.proto.InfernoSettings
 import com.shmibblez.inferno.proto.infernoSettingsDataStore
+import com.shmibblez.inferno.settings.compose.components.InfernoSettingsPage
 import com.shmibblez.inferno.settings.compose.components.PreferenceSelect
 import com.shmibblez.inferno.settings.compose.components.PreferenceSwitch
 import com.shmibblez.inferno.settings.compose.components.PreferenceTitle
@@ -112,120 +115,112 @@ fun SearchSettingsPage(
         }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                navigationIcon = {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_back_button),
-                        contentDescription = stringResource(R.string.browser_menu_back),
-                        modifier = Modifier.clickable(onClick = goBack),
-                        tint = Color.White, // todo: theme
-                    )
-                },
-                title = { InfernoText("Search Settings") }, // todo: string res
-            )
-        },
-    ) {
-        Column(
+    InfernoSettingsPage(
+        title = stringResource(R.string.preferences_search),
+        goBack = goBack,
+    ) { edgeInsets ->
+        LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
-                .verticalScroll(rememberScrollState())
+                .padding(edgeInsets),
         ) {
-
 
             /**
              * general search settings
              */
 
-
             // general title
-            PreferenceTitle(stringResource(R.string.preferences_category_general))
+            item { PreferenceTitle(stringResource(R.string.preferences_category_general)) }
 
             // select search engine
-            PreferenceSelect(
-                text = stringResource(R.string.preferences_default_search_engine),
-                description = null,
-                enabled = true,
-                selectedMenuItem = searchState.selectedOrDefaultSearchEngine!!,
-                menuItems = searchState.customSearchEngines,
-                mapToTitle = { it.name },
-                selectedLeadingIcon = {
-                    Image(
-                        bitmap = it.icon.asImageBitmap(),
-                        contentDescription = "",
-                        modifier = Modifier.size(24.dp),
-                    )
-                },
-                menuItemLeadingIcon = {
-                    if (it.type == SearchEngine.Type.CUSTOM) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_delete_24),
-                            contentDescription = stringResource(R.string.search_engine_delete),
-                            modifier = Modifier.clickable {
-                                deleteSearchEngine(it)
-                            },
-                            tint = Color.White, // todo: theme
-                        )
-                    }
-                },
-                menuItemTrailingIcon = {
-                    if (it.type == SearchEngine.Type.CUSTOM) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_edit_24),
-                            contentDescription = stringResource(R.string.search_engine_delete),
-                            modifier = Modifier.clickable {
-                                showEditEngineDialogFor = it
-                            },
-                            tint = Color.White, // todo: theme
-                        )
-                    }
-                },
-                onSelectMenuItem = ::selectSearchEngine,
-                additionalMenuItems = listOf(
-                    {
-                        HorizontalDivider(
-                            thickness = 1.dp, color = Color.White
-                        )
-                    }, // todo: theme for color
-                    {
-                        // add engine item
-                        DropdownMenuItem(
-                            text = {
-                                InfernoText(
-                                    text = stringResource(R.string.search_engine_add_custom_search_engine_title),
-                                    fontColor = Color.White, // todo: theme
-                                )
-                            },
-                            onClick = {
-
-                            },
-                            leadingIcon = {
-                                Icon(
-                                    painter = painterResource(R.drawable.ic_new_24),
-                                    contentDescription = "",
-                                    modifier = Modifier.size(24.dp),
-                                    tint = Color.White, // todo: theme
-                                )
-                            },
+            item {
+                PreferenceSelect(
+                    text = stringResource(R.string.preferences_default_search_engine),
+                    description = null,
+                    enabled = true,
+                    selectedMenuItem = searchState.selectedOrDefaultSearchEngine!!,
+                    menuItems = searchState.customSearchEngines,
+                    mapToTitle = { it.name },
+                    selectedLeadingIcon = {
+                        Image(
+                            bitmap = it.icon.asImageBitmap(),
+                            contentDescription = "",
+                            modifier = Modifier.size(24.dp),
                         )
                     },
-                ),
-            )
+                    menuItemLeadingIcon = {
+                        if (it.type == SearchEngine.Type.CUSTOM) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_delete_24),
+                                contentDescription = stringResource(R.string.search_engine_delete),
+                                modifier = Modifier.clickable {
+                                    deleteSearchEngine(it)
+                                },
+                                tint = Color.White, // todo: theme
+                            )
+                        }
+                    },
+                    menuItemTrailingIcon = {
+                        if (it.type == SearchEngine.Type.CUSTOM) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_edit_24),
+                                contentDescription = stringResource(R.string.search_engine_delete),
+                                modifier = Modifier.clickable {
+                                    showEditEngineDialogFor = it
+                                },
+                                tint = Color.White, // todo: theme
+                            )
+                        }
+                    },
+                    onSelectMenuItem = ::selectSearchEngine,
+                    additionalMenuItems = listOf(
+                        {
+                            HorizontalDivider(
+                                thickness = 1.dp, color = Color.White
+                            )
+                        }, // todo: theme for color
+                        {
+                            // add engine item
+                            DropdownMenuItem(
+                                text = {
+                                    InfernoText(
+                                        text = stringResource(R.string.search_engine_add_custom_search_engine_title),
+                                        fontColor = Color.White, // todo: theme
+                                    )
+                                },
+                                onClick = {
+
+                                },
+                                leadingIcon = {
+                                    Icon(
+                                        painter = painterResource(R.drawable.ic_new_24),
+                                        contentDescription = "",
+                                        modifier = Modifier.size(24.dp),
+                                        tint = Color.White, // todo: theme
+                                    )
+                                },
+                            )
+                        },
+                    ),
+                )
+            }
 
             // show voice search
-            PreferenceSwitch(
-                text = stringResource(R.string.preferences_show_voice_search),
-                summary = null,
-                selected = settings.shouldShowVoiceSearch,
-                onSelectedChange = { shouldShowVoiceSearch ->
-                    coroutineScope.launch {
-                        context.infernoSettingsDataStore.updateData {
-                            it.toBuilder().setShouldShowVoiceSearch(shouldShowVoiceSearch).build()
+            item {
+                PreferenceSwitch(
+                    text = stringResource(R.string.preferences_show_voice_search),
+                    summary = null,
+                    selected = settings.shouldShowVoiceSearch,
+                    onSelectedChange = { shouldShowVoiceSearch ->
+                        coroutineScope.launch {
+                            context.infernoSettingsDataStore.updateData {
+                                it.toBuilder().setShouldShowVoiceSearch(shouldShowVoiceSearch)
+                                    .build()
+                            }
                         }
-                    }
-                },
-            )
+                    },
+                )
+            }
 
 
             /**
@@ -234,133 +229,162 @@ fun SearchSettingsPage(
 
 
             // address bar title
-            PreferenceTitle(stringResource(R.string.preferences_settings_address_bar))
+            item { PreferenceTitle(stringResource(R.string.preferences_settings_address_bar)) }
 
             // autocomplete urls
-            PreferenceSwitch(
-                text = stringResource(R.string.preferences_enable_autocomplete_urls),
-                summary = null,
-                selected = settings.shouldAutocompleteUrls,
-                onSelectedChange = { shouldAutocompleteUrls ->
-                    coroutineScope.launch {
-                        context.infernoSettingsDataStore.updateData {
-                            it.toBuilder().setShouldAutocompleteUrls(shouldAutocompleteUrls).build()
+            item {
+                PreferenceSwitch(
+                    text = stringResource(R.string.preferences_enable_autocomplete_urls),
+                    summary = null,
+                    selected = settings.shouldAutocompleteUrls,
+                    onSelectedChange = { shouldAutocompleteUrls ->
+                        coroutineScope.launch {
+                            context.infernoSettingsDataStore.updateData {
+                                it.toBuilder().setShouldAutocompleteUrls(shouldAutocompleteUrls)
+                                    .build()
+                            }
                         }
-                    }
-                },
-            )
+                    },
+                )
+            }
 
             // autocomplete urls in private mode
-            PreferenceSwitch(
-                text = "Autocomplete URLs in private mode", // todo: string res
-                summary = null,
-                selected = settings.shouldAutocompleteUrlsInPrivate,
-                onSelectedChange = { shouldAutocompleteUrlsInPrivate ->
-                    coroutineScope.launch {
-                        context.infernoSettingsDataStore.updateData {
-                            it.toBuilder()
-                                .setShouldAutocompleteUrlsInPrivate(shouldAutocompleteUrlsInPrivate)
-                                .build()
+            item {
+                PreferenceSwitch(
+                    text = "Autocomplete URLs in private mode", // todo: string res
+                    summary = null,
+                    selected = settings.shouldAutocompleteUrlsInPrivate,
+                    onSelectedChange = { shouldAutocompleteUrlsInPrivate ->
+                        coroutineScope.launch {
+                            context.infernoSettingsDataStore.updateData {
+                                it.toBuilder()
+                                    .setShouldAutocompleteUrlsInPrivate(
+                                        shouldAutocompleteUrlsInPrivate
+                                    )
+                                    .build()
+                            }
                         }
-                    }
-                },
-            )
+                    },
+                )
+            }
 
             // search suggestions
-            PreferenceSwitch(
-                text = stringResource(R.string.preferences_show_search_suggestions),
-                summary = null,
-                selected = settings.shouldShowSearchSuggestions,
-                onSelectedChange = { shouldShowSearchSuggestions ->
-                    coroutineScope.launch {
-                        context.infernoSettingsDataStore.updateData {
-                            it.toBuilder()
-                                .setShouldShowSearchSuggestions(shouldShowSearchSuggestions).build()
+            item {
+                PreferenceSwitch(
+                    text = stringResource(R.string.preferences_show_search_suggestions),
+                    summary = null,
+                    selected = settings.shouldShowSearchSuggestions,
+                    onSelectedChange = { shouldShowSearchSuggestions ->
+                        coroutineScope.launch {
+                            context.infernoSettingsDataStore.updateData {
+                                it.toBuilder()
+                                    .setShouldShowSearchSuggestions(shouldShowSearchSuggestions)
+                                    .build()
+                            }
                         }
-                    }
-                },
-            )
+                    },
+                )
+            }
 
             // search suggestions in private mode
-            PreferenceSwitch(
-                text = "Show search suggestions in private mode", // todo: string res
-                summary = null,
-                selected = settings.shouldShowSearchSuggestionsInPrivate,
-                onSelectedChange = { shouldShowSearchSuggestionsInPrivate ->
-                    coroutineScope.launch {
-                        context.infernoSettingsDataStore.updateData {
-                            it.toBuilder().setShouldShowSearchSuggestionsInPrivate(
-                                shouldShowSearchSuggestionsInPrivate
-                            ).build()
+            item {
+                PreferenceSwitch(
+                    text = "Show search suggestions in private mode", // todo: string res
+                    summary = null,
+                    selected = settings.shouldShowSearchSuggestionsInPrivate,
+                    onSelectedChange = { shouldShowSearchSuggestionsInPrivate ->
+                        coroutineScope.launch {
+                            context.infernoSettingsDataStore.updateData {
+                                it.toBuilder().setShouldShowSearchSuggestionsInPrivate(
+                                    shouldShowSearchSuggestionsInPrivate
+                                ).build()
+                            }
                         }
-                    }
-                },
-            )
+                    },
+                )
+            }
 
             // history search suggestions
-            PreferenceSwitch(
-                text = stringResource(R.string.preferences_search_browsing_history),
-                summary = null,
-                selected = settings.shouldShowHistorySuggestions,
-                onSelectedChange = { shouldShowHistorySuggestions ->
-                    coroutineScope.launch {
-                        context.infernoSettingsDataStore.updateData {
-                            it.toBuilder()
-                                .setShouldShowHistorySuggestions(shouldShowHistorySuggestions)
-                                .build()
+            item {
+                PreferenceSwitch(
+                    text = stringResource(R.string.preferences_search_browsing_history),
+                    summary = null,
+                    selected = settings.shouldShowHistorySuggestions,
+                    onSelectedChange = { shouldShowHistorySuggestions ->
+                        coroutineScope.launch {
+                            context.infernoSettingsDataStore.updateData {
+                                it.toBuilder()
+                                    .setShouldShowHistorySuggestions(shouldShowHistorySuggestions)
+                                    .build()
+                            }
                         }
-                    }
-                },
-            )
+                    },
+                )
+            }
 
             // bookmarks search suggestions
-            PreferenceSwitch(
-                text = stringResource(R.string.preferences_search_bookmarks),
-                summary = null,
-                selected = settings.shouldShowBookmarkSuggestions,
-                onSelectedChange = { shouldShowBookmarkSuggestions ->
-                    coroutineScope.launch {
-                        context.infernoSettingsDataStore.updateData {
-                            it.toBuilder()
-                                .setShouldShowBookmarkSuggestions(shouldShowBookmarkSuggestions)
-                                .build()
+            item {
+                PreferenceSwitch(
+                    text = stringResource(R.string.preferences_search_bookmarks),
+                    summary = null,
+                    selected = settings.shouldShowBookmarkSuggestions,
+                    onSelectedChange = { shouldShowBookmarkSuggestions ->
+                        coroutineScope.launch {
+                            context.infernoSettingsDataStore.updateData {
+                                it.toBuilder()
+                                    .setShouldShowBookmarkSuggestions(shouldShowBookmarkSuggestions)
+                                    .build()
+                            }
                         }
-                    }
-                },
-            )
+                    },
+                )
+            }
 
             // synced tabs search suggestions
-            PreferenceSwitch(
-                text = stringResource(R.string.preferences_search_synced_tabs),
-                summary = null,
-                selected = settings.shouldShowSyncedTabsSuggestions,
-                onSelectedChange = { shouldShowSyncedTabsSuggestions ->
-                    coroutineScope.launch {
-                        context.infernoSettingsDataStore.updateData {
-                            it.toBuilder()
-                                .setShouldShowSyncedTabsSuggestions(shouldShowSyncedTabsSuggestions)
-                                .build()
+            item {
+                PreferenceSwitch(
+                    text = stringResource(R.string.preferences_search_synced_tabs),
+                    summary = null,
+                    selected = settings.shouldShowSyncedTabsSuggestions,
+                    onSelectedChange = { shouldShowSyncedTabsSuggestions ->
+                        coroutineScope.launch {
+                            context.infernoSettingsDataStore.updateData {
+                                it.toBuilder()
+                                    .setShouldShowSyncedTabsSuggestions(
+                                        shouldShowSyncedTabsSuggestions
+                                    )
+                                    .build()
+                            }
                         }
-                    }
-                },
-            )
+                    },
+                )
+            }
 
             // synced tabs search suggestions
-            PreferenceSwitch(
-                text = stringResource(R.string.preferences_show_clipboard_suggestions),
-                summary = null,
-                selected = settings.shouldShowClipboardSuggestions,
-                onSelectedChange = { shouldShowClipboardSuggestions ->
-                    coroutineScope.launch {
-                        context.infernoSettingsDataStore.updateData {
-                            it.toBuilder()
-                                .setShouldShowClipboardSuggestions(shouldShowClipboardSuggestions)
-                                .build()
+            item {
+                PreferenceSwitch(
+                    text = stringResource(R.string.preferences_show_clipboard_suggestions),
+                    summary = null,
+                    selected = settings.shouldShowClipboardSuggestions,
+                    onSelectedChange = { shouldShowClipboardSuggestions ->
+                        coroutineScope.launch {
+                            context.infernoSettingsDataStore.updateData {
+                                it.toBuilder()
+                                    .setShouldShowClipboardSuggestions(
+                                        shouldShowClipboardSuggestions
+                                    )
+                                    .build()
+                            }
                         }
-                    }
-                },
-            )
+                    },
+                )
+            }
         }
+
+
+        /**
+         * dialogs
+         */
 
 
         // new/edit engine dialogs

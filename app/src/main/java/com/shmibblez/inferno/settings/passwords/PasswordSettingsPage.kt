@@ -8,9 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -29,14 +26,14 @@ import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.proto.InfernoSettings
 import com.shmibblez.inferno.proto.infernoSettingsDataStore
-import com.shmibblez.inferno.settings.compose.components.PreferenceConstants
+import com.shmibblez.inferno.settings.compose.components.InfernoSettingsPage
+import com.shmibblez.inferno.settings.compose.components.PrefUiConst
 import com.shmibblez.inferno.settings.compose.components.PreferenceSwitch
 import com.shmibblez.inferno.settings.compose.components.PreferenceTitle
 import com.shmibblez.inferno.settings.logins.SavedLogin
 import com.shmibblez.inferno.settings.sitepermissions.SitePermissionsSettingsPage
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun PasswordSettingsPage(goBack: () -> Unit, onNavToPasswordExceptionSettingsPage: () -> Unit) {
@@ -48,28 +45,23 @@ fun PasswordSettingsPage(goBack: () -> Unit, onNavToPasswordExceptionSettingsPag
     // pair of whether to create and login to copy in case of edit
     var editLoginFor by remember { mutableStateOf<Pair<Boolean, SavedLogin?>?>(null) }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                navigationIcon = {
-                    InfernoIcon(
-                        painter = painterResource(R.drawable.ic_back_button),
-                        contentDescription = stringResource(R.string.browser_menu_back),
-                        modifier = Modifier.clickable(onClick = goBack),
-                    )
-                },
-                title = { InfernoText("Autofill Settings") }, // todo: string res
-            )
-        },
-    ) {
+    InfernoSettingsPage(
+        title = stringResource(R.string.preferences_sync_logins),
+        goBack = goBack,
+    ) { edgeInsets ->
         LazyColumn(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().padding(edgeInsets),
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.Top,
         ) {
             /**
              * logins settings
              */
+            /**
+             * logins settings
+             */
+
+
 
             // saved logins
             item { PreferenceTitle(stringResource(R.string.preferences_passwords_saved_logins_2)) }
@@ -126,16 +118,20 @@ fun PasswordSettingsPage(goBack: () -> Unit, onNavToPasswordExceptionSettingsPag
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(
-                            horizontal = PreferenceConstants.PREFERENCE_HORIZONTAL_PADDING,
-                            vertical = PreferenceConstants.PREFERENCE_VERTICAL_PADDING,
+                            horizontal = PrefUiConst.PREFERENCE_HORIZONTAL_PADDING,
+                            vertical = PrefUiConst.PREFERENCE_VERTICAL_PADDING,
                         ).clickable {
+                            /**
+                             * todo: implement exceptions page
+                             *  check: [SitePermissionsSettingsPage]
+                             */
                             /**
                              * todo: implement exceptions page
                              *  check: [SitePermissionsSettingsPage]
                              */
                             onNavToPasswordExceptionSettingsPage.invoke()
                         },
-                    horizontalArrangement = Arrangement.spacedBy(PreferenceConstants.PREFERENCE_INTERNAL_PADDING),
+                    horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING),
                 ) {
                     InfernoIcon(
                         painter = painterResource(R.drawable.ic_globe_24),

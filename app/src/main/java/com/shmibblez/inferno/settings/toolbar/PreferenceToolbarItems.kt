@@ -14,10 +14,6 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -28,7 +24,7 @@ import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.base.InfernoCheckbox
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.proto.InfernoSettings
-import com.shmibblez.inferno.settings.compose.components.PreferenceConstants
+import com.shmibblez.inferno.settings.compose.components.PrefUiConst
 import com.shmibblez.inferno.tabs.tabstray.TabList
 import com.shmibblez.inferno.tabstray.browser.compose.DragItemContainer
 import com.shmibblez.inferno.tabstray.browser.compose.createListReorderState
@@ -42,6 +38,7 @@ private const val MAX_TOOLBAR_ITEMS = 7;
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun PreferenceToolbarItems(
+    modifier:Modifier = Modifier,
     topPreferences: List<@Composable () -> Unit>,
     selectedItems: List<InfernoSettings.ToolbarItem>,
     remainingItems: List<InfernoSettings.ToolbarItem>,
@@ -98,7 +95,7 @@ fun PreferenceToolbarItems(
     }
 
     LazyColumn(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
     ) {
         itemsIndexed(topPreferences, key = { index, _ -> index }) { _, item ->
             item.invoke()
@@ -143,11 +140,11 @@ private fun ToolbarItem(
         modifier = Modifier
             .fillMaxWidth()
             .padding(
-                horizontal = PreferenceConstants.PREFERENCE_HORIZONTAL_PADDING,
-                vertical = PreferenceConstants.PREFERENCE_VERTICAL_PADDING,
+                horizontal = PrefUiConst.PREFERENCE_HORIZONTAL_PADDING,
+                vertical = PrefUiConst.PREFERENCE_VERTICAL_PADDING,
             ),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(PreferenceConstants.PREFERENCE_INTERNAL_PADDING),
+        horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING),
     ) {
         // drag handle, only show if selected
         if (selected) {

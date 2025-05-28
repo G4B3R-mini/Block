@@ -346,21 +346,31 @@ message InfernoSettings {
   }
   message CustomTrackingProtection {
     enum CookiePolicy {
-      NONE = 0;
-      ISOLATE_CROSS_SITE_COOKIES = 1;
-      CROSS_SITE_AND_SOCIAL_MEDIA_TRACKERS = 2;
-      COOKIES_FROM_UNVISITED_SITES = 3;
-      ALL_THIRD_PARTY_COOKIES = 4;
-      ALL_COOKIES = 5;
+      ISOLATE_CROSS_SITE_COOKIES = 0;
+      CROSS_SITE_AND_SOCIAL_MEDIA_TRACKERS = 1;
+      COOKIES_FROM_UNVISITED_SITES = 2;
+      ALL_THIRD_PARTY_COOKIES = 3;
+      ALL_COOKIES = 4;
     }
-    CookiePolicy blockCustomCookies = 73;
-    bool trackingContentBlockedInNormalMode = 74; // in normal mode
-    bool trackingContentBlockedInPrivateMode = 75; // in private mode
+    enum TrackingContentSelection {
+      BLOCK_TRACKING_NORMAL_ONLY = 0;
+      BLOCK_TRACKING_PRIVATE_ONLY = 1;
+      BLOCK_TRACKING_NORMAL_AND_PRIVATE = 2;
+    }
+    enum SuspectedFingerprintersSelection {
+      BLOCK_SUSPECTED_FINGERPRINTERS_NORMAL_ONLY = 0;
+      BLOCK_SUSPECTED_FINGERPRINTERS_PRIVATE_ONLY = 1;
+      BLOCK_SUSPECTED_FINGERPRINTERS_NORMAL_AND_PRIVATE = 2;
+    }
+    bool blockCookies = 81;
+    CookiePolicy blockCookiesPolicy = 73;
+    bool blockTrackingContent = 74;
+    TrackingContentSelection blockTrackingContentSelection = 82;
     bool blockCryptominers = 76;
     bool blockKnownFingerprinters = 77;
     bool blockRedirectTrackers = 78;
-    bool blockSuspectedFingerPrintersInNormalMode = 79; // in normal mode
-    bool blockSuspectedFingerPrintersInPrivateMode = 80; // in private mode
+    bool blockSuspectedFingerprinters = 79;
+    SuspectedFingerprintersSelection blockSuspectedFingerprintersSelection = 80;
   }
 
   bool isEnhancedTrackingProtectionEnabled = 81;

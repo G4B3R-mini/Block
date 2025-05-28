@@ -33,7 +33,7 @@ import com.shmibblez.inferno.compose.base.InfernoTextStyle
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.settings.advanced.getSupportedLocales
 import com.shmibblez.inferno.settings.advanced.isDefaultLocaleSelected
-import com.shmibblez.inferno.settings.compose.components.PreferenceConstants
+import com.shmibblez.inferno.settings.compose.components.PrefUiConst
 import kotlinx.coroutines.CoroutineScope
 import mozilla.components.support.base.feature.LifecycleAwareFeature
 import mozilla.components.support.locale.LocaleManager
@@ -162,7 +162,7 @@ internal fun LazyListScope.localeManager(
     }
     item {
         Spacer(
-            modifier = Modifier.padding(bottom = PreferenceConstants.PREFERENCE_VERTICAL_PADDING),
+            modifier = Modifier.padding(bottom = PrefUiConst.PREFERENCE_VERTICAL_PADDING),
         )
     }
 }
@@ -177,9 +177,9 @@ private fun DefaultLocaleItem(
         modifier = Modifier
             .clickable { onDefaultLocaleSelected.invoke() }
             .fillMaxWidth()
-            .padding(horizontal = PreferenceConstants.PREFERENCE_HORIZONTAL_PADDING)
-            .padding(top = PreferenceConstants.PREFERENCE_INTERNAL_PADDING),
-        horizontalArrangement = Arrangement.spacedBy(PreferenceConstants.PREFERENCE_INTERNAL_PADDING),
+            .padding(horizontal = PrefUiConst.PREFERENCE_HORIZONTAL_PADDING)
+            .padding(top = PrefUiConst.PREFERENCE_INTERNAL_PADDING),
+        horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         // locale info
@@ -222,9 +222,9 @@ private fun LocaleItem(
         modifier = Modifier
             .clickable { onLocaleSelected.invoke(locale) }
             .fillMaxWidth()
-            .padding(horizontal = PreferenceConstants.PREFERENCE_HORIZONTAL_PADDING)
-            .padding(top = PreferenceConstants.PREFERENCE_INTERNAL_PADDING),
-        horizontalArrangement = Arrangement.spacedBy(PreferenceConstants.PREFERENCE_INTERNAL_PADDING),
+            .padding(horizontal = PrefUiConst.PREFERENCE_HORIZONTAL_PADDING)
+            .padding(top = PrefUiConst.PREFERENCE_INTERNAL_PADDING),
+        horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         // locale info

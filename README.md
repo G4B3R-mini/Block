@@ -22,6 +22,22 @@ firefox for Android, which is nice.
 
 that's it for now, hopefully this project doesn't die
 
+# Massiv Bugs
+
+- [ ] settings
+    - [ ] settings managers wrong spacing for expandable items (addressManager, passwordManager,
+      etc)
+    - [ ] outlined edit text taking up waaay too much space
+        - [ ] probably source of weird looking ui in EditThemeDialog and PreferenceSwitch
+        - [ ] for PreferenceSwitch source of error may be setting leadingIcon = {}, try setting to
+          null, also try removing anchor. Setting leadingIcon = {} happens in a lot of places, try
+          removing where useful if it works
+    - [ ] a couple of settings pages just crash, namely passwords, among others
+    - [ ] dialog buttons have no padding
+    - [ ] Language settings
+        - [ ] default item looks weird, looks like 2 items (replace language name with use system
+          default (recommended) title)
+
 # Under Construction
 
 - [ ] color customization
@@ -74,3 +90,5 @@ that's it for now, hopefully this project doesn't die
     - [ ] in exceptions fragment show each site as expandable item, when expanded shows individual
       settings and clear permissions on this site, clear permissions for all sites is at the bottom
       and requires dialog to confirm
+- [ ] enhanced tracking protection
+    - [ ] exceptions

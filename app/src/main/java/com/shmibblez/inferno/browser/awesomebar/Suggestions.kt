@@ -53,7 +53,7 @@ internal fun Suggestions(
             val title = group.title
             if (suggestions.isNotEmpty() && !title.isNullOrEmpty()) {
                 item(ItemKey.SuggestionGroup(group.id)) {
-                    SuggestionGroup(title, colors)
+                    SuggestionGroup(title)
                 }
             }
 
@@ -69,7 +69,6 @@ internal fun Suggestions(
             ) { suggestion ->
                 Suggestion(
                     suggestion,
-                    colors,
                     orientation,
                     onSuggestionClicked = { onSuggestionClicked(group, suggestion) },
                     onAutoComplete = { onAutoComplete(group, suggestion) },

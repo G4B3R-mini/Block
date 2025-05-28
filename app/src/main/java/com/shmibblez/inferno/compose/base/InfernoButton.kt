@@ -46,8 +46,8 @@ fun InfernoButton(
             text = text,
             fontColor = LocalContext.current.infernoTheme().value.let {
                 when (enabled) {
-                    true -> it.primaryTextColor
-                    false -> it.secondaryTextColor
+                    true -> colors.contentColor
+                    false -> colors.disabledContentColor
                 }
             },
         )

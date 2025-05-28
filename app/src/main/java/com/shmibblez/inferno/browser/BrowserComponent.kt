@@ -55,7 +55,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
@@ -84,7 +83,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavDirections
 import androidx.navigation.NavOptions
-import androidx.preference.PreferenceManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.shmibblez.inferno.BrowserDirection
 import com.shmibblez.inferno.HomeActivity
@@ -120,12 +118,12 @@ import com.shmibblez.inferno.ext.DEFAULT_ACTIVE_DAYS
 import com.shmibblez.inferno.ext.accessibilityManager
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.consumeFlow
-import com.shmibblez.inferno.ext.getPreferenceKey
 import com.shmibblez.inferno.ext.isLargeWindow
 import com.shmibblez.inferno.ext.nav
 import com.shmibblez.inferno.ext.navigateWithBreadcrumb
 import com.shmibblez.inferno.ext.settings
 import com.shmibblez.inferno.ext.dpToPx
+import com.shmibblez.inferno.ext.infernoTheme
 import com.shmibblez.inferno.findInPageBar.BrowserFindInPageBar
 import com.shmibblez.inferno.home.CrashComponent
 import com.shmibblez.inferno.home.InfernoHomeComponent
@@ -346,7 +344,9 @@ enum class BrowserComponentPageType {
     CRASH, ENGINE, HOME, HOME_PRIVATE
 }
 
-object ComponentDimens {
+object UiConst {
+    const val BAR_BG_ALPHA = 0.75F
+
     val TOOLBAR_HEIGHT = 44.dp
     val TAB_BAR_HEIGHT = 36.dp
     val AWESOME_BAR_HEIGHT = 200.dp
@@ -533,7 +533,7 @@ fun BrowserComponent(
     // connection to the nested scroll system and listen to the scroll
     var bottomBarHeightDp by remember {
         mutableStateOf(
-            ComponentDimens.calcBottomBarHeight(
+            UiConst.calcBottomBarHeight(
                 BrowserComponentMode.TOOLBAR
             )
         )
@@ -549,7 +549,7 @@ fun BrowserComponent(
                     get() = state.value
                     set(value) {
                         state.value = value
-                        bottomBarHeightDp = ComponentDimens.calcBottomBarHeight(value)
+                        bottomBarHeightDp = UiConst.calcBottomBarHeight(value)
                         // reset bottom bar offset
                         coroutineScope.launch {
                             bottomBarOffsetPx.snapTo(0F)
@@ -1181,6 +1181,12 @@ fun BrowserComponent(
 
     }
 
+    // currently set to 0 always, todo: only do this if dynamic toolbar enabled
+    fun setEngineDynamicToolbarMaxHeight(h: Int) {
+//        engineView?.setDynamicToolbarMaxHeight(h)
+        engineView?.setDynamicToolbarMaxHeight(0)
+    }
+
     // on back pressed handlers
     BackHandler {
         onBackPressed(backHandler)
@@ -1189,7 +1195,8 @@ fun BrowserComponent(
     // moz components setup and shared preferences
     LaunchedEffect(engineView == null) {
         if (engineView == null) return@LaunchedEffect
-        engineView!!.setDynamicToolbarMaxHeight(bottomBarHeightDp.dpToPx(context) - bottomBarOffsetPx.value.toInt())
+//        setEngineDynamicToolbarMaxHeight(bottomBarHeightDp.dpToPx(context) - bottomBarOffsetPx.value.toInt())
+        setEngineDynamicToolbarMaxHeight(0)
 
         /* BaseBrowserFragment onViewCreated */
         // DO NOT ADD ANYTHING ABOVE THIS getProfilerTime CALL!
@@ -1768,7 +1775,7 @@ fun BrowserComponent(
         modifier = Modifier.fillMaxSize(),
         snackbarHost = { SnackbarHost(snackbarHostState = snackbarHostState) },
         contentWindowInsets = ScaffoldDefaults.contentWindowInsets,
-        containerColor = Color.Transparent,
+        containerColor = LocalContext.current.infernoTheme().value.primaryBackgroundColor,
         content = {
             //    var startX by remember {mutableFloatStateOf(0F)}
             var startY by remember { mutableFloatStateOf(0F) }
@@ -1888,9 +1895,9 @@ fun BrowserComponent(
                             )
                             coroutineScope.launch {
                                 bottomBarOffsetPx.snapTo(newOffset)
-                                engineView!!.setDynamicToolbarMaxHeight(
-                                    bottomBarHeightDp.dpToPx(context) - newOffset.toInt()
-                                )
+//                                setEngineDynamicToolbarMaxHeight(
+//                                    bottomBarHeightDp.dpToPx(context) - newOffset.toInt()
+//                                )
                             }
 //                                }
                         }
@@ -1908,9 +1915,9 @@ fun BrowserComponent(
                                             .toFloat()
                                     )
                                 }
-                                engineView!!.setDynamicToolbarMaxHeight(
-                                    bottomBarHeightDp.dpToPx(context) - bottomBarOffsetPx.value.toInt()
-                                )
+//                                setEngineDynamicToolbarMaxHeight(
+//                                    bottomBarHeightDp.dpToPx(context) - bottomBarOffsetPx.value.toInt()
+//                                )
                             }
                         }
 //                        else if (it.action == MotionEvent.ACTION_SCROLL) {
@@ -1972,7 +1979,6 @@ fun BrowserComponent(
                 Column(
                     Modifier
                         .fillMaxSize()
-                        .background(Color.Transparent)
                 ) {
                     if (browserMode == BrowserComponentMode.TOOLBAR || browserMode == BrowserComponentMode.TOOLBAR_SEARCH) {
                         if (browserMode == BrowserComponentMode.TOOLBAR) {
@@ -2184,14 +2190,13 @@ internal fun showCancelledDownloadWarning(
                         stringResource(R.string.mozac_feature_downloads_cancel_active_downloads_warning_content_title),
                         downloadCount
                     ),
-                    fontColor = Color.White,
+                    fontColor =LocalContext.current.infernoTheme().value.primaryTextColor,
                     fontWeight = FontWeight.Bold,
                 )
             },
             text = {
                 InfernoText(
                     text = stringResource(R.string.mozac_feature_downloads_cancel_active_private_downloads_warning_content_body),
-                    fontColor = Color.White,
                 )
             },
             confirmButton = {
@@ -2636,14 +2641,12 @@ private fun showPinDialogWarning(
             title = {
                 InfernoText(
                     text = stringResource(R.string.credit_cards_warning_dialog_title_2),
-                    fontColor = Color.White,
                     fontWeight = FontWeight.Bold,
                 )
             },
             text = {
                 InfernoText(
                     text = stringResource(R.string.credit_cards_warning_dialog_message_3),
-                    fontColor = Color.White,
                 )
             },
             confirmButton = {

@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -25,6 +26,7 @@ import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.proto.InfernoSettings
 import com.shmibblez.inferno.proto.infernoSettingsDataStore
+import com.shmibblez.inferno.settings.compose.components.InfernoSettingsPage
 import com.shmibblez.inferno.settings.compose.components.PreferenceSwitch
 import com.shmibblez.inferno.settings.compose.components.PreferenceTitle
 import kotlinx.coroutines.launch
@@ -33,7 +35,6 @@ import mozilla.components.concept.storage.CreditCard
 
 // todo: add account state, if logged in show sync options, or show in account signed in
 //  options, check that first
-@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun AutofillSettingsPage(goBack: () -> Unit) {
@@ -46,28 +47,24 @@ fun AutofillSettingsPage(goBack: () -> Unit) {
     val creditCardManagerState by rememberCardManagerState()
     var showCreditCardEditorFor by remember { mutableStateOf<Pair<Boolean, CreditCard?>?>(null) }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                navigationIcon = {
-                    InfernoIcon(
-                        painter = painterResource(R.drawable.ic_back_button),
-                        contentDescription = stringResource(R.string.browser_menu_back),
-                        modifier = Modifier.clickable(onClick = goBack),
-                    )
-                },
-                title = { InfernoText("Autofill Settings") }, // todo: string res
-            )
-        },
-    ) {
+    InfernoSettingsPage(
+        title = stringResource(R.string.preferences_autofill),
+        goBack = goBack,
+    ) { edgeInsets ->
         LazyColumn(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(edgeInsets),
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.Top,
         ) {
             /**
              * address settings
              */
+            /**
+             * address settings
+             */
+
 
             // addresses settings title
             item { PreferenceTitle(stringResource(R.string.preferences_addresses)) }
@@ -97,6 +94,10 @@ fun AutofillSettingsPage(goBack: () -> Unit) {
                 onEditAddressClicked = { showAddressEditorFor = false to it },
                 onDeleteAddressClicked = { addressManagerState.deleteAddress(it.guid) },
             )
+
+            /**
+             * payment methods settings
+             */
 
             /**
              * payment methods settings

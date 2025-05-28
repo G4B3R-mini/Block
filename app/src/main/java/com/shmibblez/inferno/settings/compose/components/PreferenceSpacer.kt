@@ -1,17 +1,12 @@
 package com.shmibblez.inferno.settings.compose.components
 
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.shmibblez.inferno.compose.base.InfernoText
+import androidx.compose.ui.unit.dp
 
 @Composable
 fun PreferenceSpacer() {
-    InfernoText(
-        text = "   ",
-        modifier = Modifier.padding(
-            horizontal = PreferenceConstants.PREFERENCE_HORIZONTAL_PADDING,
-            vertical = PreferenceConstants.PREFERENCE_VERTICAL_PADDING,
-        ),
-    )
+    Spacer(modifier = Modifier.height(24.dp))
 }
