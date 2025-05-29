@@ -26,9 +26,6 @@ import com.shmibblez.inferno.settings.compose.components.PrefUiConst
 import com.shmibblez.inferno.settings.logins.SavedLogin
 import mozilla.components.concept.storage.LoginEntry
 
-// Number of years to show in the expiry year dropdown.
-private const val NUMBER_OF_YEARS_TO_SHOW = 10
-
 @Composable
 fun LoginEditorDialog(
     create: Boolean,

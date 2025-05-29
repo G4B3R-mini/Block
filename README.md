@@ -35,6 +35,21 @@ that's it for now, hopefully this project doesn't die
 - [ ] Homepage (Buggy)
 - [ ] OnQuit (Buggy)
 - [ ] Passwords (Buggy)
+  - [ ] side note: ui good, passwords not saving though when added
+  - [ ] side note: exceptions not tested
+  - [ ] side note: getting this error message:
+```
+Autofill popup isn't shown because autofill is not available.
+                                                                                                    
+Did you set up autofill?
+1. Go to Settings > System > Languages&input > Advanced > Autofill Service
+2. Pick a service
+
+Did you add an account?
+1. Go to Settings > System > Languages&input > Advanced
+2. Click on the settings icon next to the Autofill Service
+3. Add your account
+```
 - [x] Autofill (Working)
 
 - [x] Site Permissions (Working)
