@@ -89,7 +89,7 @@ Did you add an account?
 ## Under Construction
 
 - [ ] more customization settings
-    - [ ] enable / disable tabs
+    - [ ] enable / disable tab bar
     - [ ] customize toolbar items
     - [ ] toolbar and tabs position (top / bottom for each, which is above and below in case both on
       same side)
@@ -110,14 +110,27 @@ Did you add an account?
     - [ ] use authentication when click on manage cards
     - [ ] use authentication when click on manage logins
 
-# Future Features
+
+## Pending addition
+
+`Features that will be added eventually, but are currently not a priority`
 
 - [ ] more toolbar items
     - [ ] go to passwords page (key with bottom right profile view) (requires auth, consider setting
       a timeout like bitwarden does)
     - [ ] extensions settings direct access
-- [ ] more customization settings
-    - [ ] if horizontal, add option to show tabs on right or left, make resizable by sliding
+
+
+# Future Features
+
+`Features that will probably eventually be added`
+
+- [ ] workspaces
+    - Requires storing multiple engines probably, one for each workspace. Should check zen browser implementation for ideas.
+- [ ] synced workspaces
+    - [ ] will require a workaround, since vanilla Firefox doesn't even support workspaces currently
+        - [ ] Could store / encode in bookmarks folder, there is a max of 5000 however. If implemented this way, bookmarks shown would have to hide special storage folders, and they would be visible if accessed from a Firefox browser. This would be VERY hacky, but there are a lot of fields to store different types of data, and it could be done as cleanly as possible, maybe storing everything in a base folder called "_". It would also need to be implemented in a way that if edited externally, it doesn't just completely break.
+        - [ ] if implemented this way, it would also allow just pinned tabs to be synced, etc
 - [ ] bug reporting system / feedback page
     - [ ] for bug reporting show select in settings: (disabled, send report auto, or ask to send
       report)
