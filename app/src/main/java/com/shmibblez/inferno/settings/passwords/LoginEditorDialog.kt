@@ -68,7 +68,7 @@ fun LoginEditorDialog(
             }
 
             else -> {
-                hostnameError = null
+                passwordError = null
             }
         }
 
