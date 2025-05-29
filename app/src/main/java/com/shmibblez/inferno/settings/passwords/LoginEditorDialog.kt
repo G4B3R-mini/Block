@@ -136,7 +136,10 @@ fun LoginEditorDialog(
             item {
                 InfernoOutlinedTextField(
                     value = password,
-                    onValueChange = { password = it },
+                    onValueChange = {
+                        password = it
+                        validateFields()
+                    },
                     label = {
                         InfernoText(
                             stringResource(R.string.preferences_passwords_saved_logins_password),
