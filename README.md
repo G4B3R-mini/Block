@@ -10,7 +10,7 @@ firefox for Android, which is nice.
 # Features
 
 - tabs (finally for firefox-mobile based apps)
-- color customization / themes!
+- color customization / themes
     - preset themes and custom themes
 - enhanced privacy (mozilla telemetry has been removed)
 
