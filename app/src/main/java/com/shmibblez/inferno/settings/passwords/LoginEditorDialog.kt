@@ -43,7 +43,7 @@ fun LoginEditorDialog(
     var hostname by remember { mutableStateOf(initialLogin?.origin ?: "") }
     var hostnameError by remember { mutableStateOf<String?>(null) }
     var username by remember { mutableStateOf(initialLogin?.username ?: "") }
-    var password by remember { mutableStateOf(initialLogin?.password ?: "password") }
+    var password by remember { mutableStateOf(initialLogin?.password ?: "") }
     var passwordError by remember { mutableStateOf<String?>(null) }
 
 
@@ -76,7 +76,9 @@ fun LoginEditorDialog(
     }
 
     InfernoDialog(onDismiss = onDismiss) {
-        LazyColumn {
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING),
+        ) {
             // hostname / site
             item {
                 InfernoOutlinedTextField(
@@ -123,7 +125,7 @@ fun LoginEditorDialog(
                     onValueChange = { username = it },
                     label = {
                         InfernoText(
-                            stringResource(R.string.credit_cards_name_on_card),
+                            stringResource(R.string.preferences_passwords_saved_logins_username),
                             fontColor = context.infernoTheme().value.primaryOutlineColor,
                         )
                     },
@@ -165,7 +167,7 @@ fun LoginEditorDialog(
             )
             InfernoButton(
                 modifier = Modifier.weight(1F),
-                text = stringResource(R.string.save_changes_to_login),
+                text = stringResource(R.string.browser_menu_save),
                 enabled = hostnameError == null && passwordError == null,
                 onClick = {
                     // if field invalid return (dont save)

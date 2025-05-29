@@ -171,6 +171,7 @@ internal fun LazyListScope.loginManager(
     item {
         Row(
             modifier = Modifier
+                .fillMaxWidth()
                 .clickable { state.expanded = !state.expanded }
                 .padding(horizontal = PrefUiConst.PREFERENCE_HORIZONTAL_PADDING)
                 .padding(
@@ -191,15 +192,17 @@ internal fun LazyListScope.loginManager(
             )
         }
     }
-    items(state.logins) {
-        LoginItem(
-            login = it,
-            onEditLoginClicked = onEditLoginClicked,
-            onDeleteLoginClicked = onDeleteLoginClicked,
-        )
-    }
-    item {
-        AddLoginItem(onAddLoginClicked = onAddLoginClicked)
+    if (state.expanded) {
+        items(state.logins) {
+            LoginItem(
+                login = it,
+                onEditLoginClicked = onEditLoginClicked,
+                onDeleteLoginClicked = onDeleteLoginClicked,
+            )
+        }
+        item {
+            AddLoginItem(onAddLoginClicked = onAddLoginClicked)
+        }
     }
     item {
         Spacer(
