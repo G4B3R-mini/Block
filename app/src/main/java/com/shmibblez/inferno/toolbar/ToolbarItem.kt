@@ -194,9 +194,6 @@ fun InfernoSettings.ToolbarItem.ToToolbarOption(
                 ToolbarOptionType.EXPANDED -> {} // no-op, menu can only be shown in toolbar
             }
         }
-
-        InfernoSettings.ToolbarItem.UNRECOGNIZED -> {/* no-op */
-        }
     }
 }
 
@@ -256,27 +253,5 @@ fun InfernoSettings.ToolbarItem.ToToolbarIcon(tint: Color = LocalContext.current
         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_MENU -> ToolbarOptionsIcons.ToolbarMenuIcon(
             tint = tint,
         )
-
-        InfernoSettings.ToolbarItem.UNRECOGNIZED -> {}
-    }
-}
-
-private fun InfernoSettings.ToolbarItem.toPrefIconRes(): Int? {
-    return when (this) {
-        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_SETTINGS -> R.drawable.ic_settings_24
-        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_ORIGIN -> null
-        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_ORIGIN_MINI -> null // todo: make svg for mini origin icon, also use in toolbar, or return icons here instead
-        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_BACK -> R.drawable.ic_chevron_left_24
-        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_FORWARD -> R.drawable.ic_chevron_right_24
-        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_RELOAD -> R.drawable.ic_refresh
-        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_HISTORY -> R.drawable.ic_history_24
-        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_REQUEST_DESKTOP -> R.drawable.ic_device_desktop_24
-        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_FIND_IN_PAGE -> R.drawable.ic_search_24
-        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_REQUEST_READER_VIEW -> R.drawable.ic_reader_view_24
-        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_PRIVATE_MODE -> R.drawable.ic_private_browsing
-        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_SHOW_TABS_TRAY -> R.drawable.ic_tabcounter_box_24
-        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_SHARE -> R.drawable.ic_share
-        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_MENU -> R.drawable.ic_app_menu_24
-        InfernoSettings.ToolbarItem.UNRECOGNIZED -> null
     }
 }

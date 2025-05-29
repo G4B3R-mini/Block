@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
@@ -200,7 +201,10 @@ private fun DeleteLanguageFileOptions(
         InfernoText(text = message)
 
         // cancel/delete buttons
-        Row {
+        Row(
+            modifier = Modifier.padding(vertical = PrefUiConst.PREFERENCE_VERTICAL_PADDING),
+            horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING),
+        ) {
             // cancel
             InfernoOutlinedButton(
                 text = stringResource(id = R.string.delete_language_file_dialog_negative_button_text),
@@ -281,7 +285,10 @@ private fun DownloadLanguageFileOptions(
         }
 
         // cancel/confirm buttons
-        Row {
+        Row(
+            modifier = Modifier.padding(vertical = PrefUiConst.PREFERENCE_VERTICAL_PADDING),
+            horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING),
+        ) {
             // cancel
             InfernoOutlinedButton(
                 text = stringResource(id = R.string.download_language_file_dialog_negative_button_text),

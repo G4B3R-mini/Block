@@ -262,6 +262,7 @@ internal class DownloadTranslationMangerState(
         deleteInProgressItems = downloadLanguageItemPreferences.filter {
             it.languageModel.status == ModelState.DELETION_IN_PROGRESS && it.type != DownloadLanguageItemTypePreference.AllLanguages
         }
+        allLanguagesItemDownloaded = null
         if (downloadLanguageItemPreferences.any {
                 it.type == DownloadLanguageItemTypePreference.AllLanguages && it.languageModel.status == ModelState.DOWNLOADED
             }) {

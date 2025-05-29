@@ -1,9 +1,12 @@
 package com.shmibblez.inferno.settings.compose.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderColors
 import androidx.compose.runtime.Composable
@@ -19,6 +22,7 @@ import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.compose.base.InfernoTextStyle
 import com.shmibblez.inferno.ext.infernoTheme
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PreferenceSlider(
     text: String,
@@ -60,10 +64,10 @@ fun PreferenceSlider(
         }
 
         // slider
-        Row(
+        Column(
             modifier = Modifier.padding(top = PrefUiConst.PREFERENCE_VERTICAL_PADDING),
-            horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING),
-            verticalAlignment = Alignment.CenterVertically,
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING),
         ) {
             Slider(
                 value = sliderPosition,
@@ -72,20 +76,28 @@ fun PreferenceSlider(
                 enabled = enabled,
                 valueRange = 50F..200F,
                 // 5% intervals
-                steps = 30,
+                steps = 29,
                 onValueChangeFinished = { onSet.invoke(sliderPosition) },
                 colors = SliderColors(
                     thumbColor = context.infernoTheme().value.primaryActionColor,
                     activeTrackColor = context.infernoTheme().value.primaryActionColor,
                     activeTickColor = context.infernoTheme().value.primaryActionColor,
-                    inactiveTrackColor = context.infernoTheme().value.secondaryActionColor,
-                    inactiveTickColor = context.infernoTheme().value.secondaryActionColor,
-                    disabledThumbColor = context.infernoTheme().value.secondaryTextColor,
-                    disabledActiveTrackColor = context.infernoTheme().value.secondaryTextColor,
-                    disabledActiveTickColor = context.infernoTheme().value.secondaryTextColor,
-                    disabledInactiveTrackColor = context.infernoTheme().value.secondaryTextColor,
-                    disabledInactiveTickColor = context.infernoTheme().value.secondaryTextColor,
+                    inactiveTrackColor = context.infernoTheme().value.secondaryBackgroundColor,
+                    inactiveTickColor = context.infernoTheme().value.secondaryBackgroundColor,
+                    disabledThumbColor = context.infernoTheme().value.secondaryBackgroundColor,
+                    disabledActiveTrackColor = context.infernoTheme().value.secondaryBackgroundColor,
+                    disabledActiveTickColor = context.infernoTheme().value.secondaryBackgroundColor,
+                    disabledInactiveTrackColor = context.infernoTheme().value.secondaryBackgroundColor,
+                    disabledInactiveTickColor = context.infernoTheme().value.secondaryBackgroundColor,
                 ),
+                thumb = {
+                    Box(
+                        modifier = Modifier.background(
+                            color = context.infernoTheme().value.primaryActionColor,
+                            shape = CircleShape,
+                        )
+                    )
+                },
             )
             InfernoText(text = "$sliderPosition%")
         }

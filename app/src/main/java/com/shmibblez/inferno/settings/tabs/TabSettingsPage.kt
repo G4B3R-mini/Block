@@ -2,27 +2,19 @@ package com.shmibblez.inferno.settings.tabs
 
 import android.annotation.SuppressLint
 import android.content.Context
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import com.shmibblez.inferno.R
-import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.proto.InfernoSettings
 import com.shmibblez.inferno.proto.infernoSettingsDataStore
 import com.shmibblez.inferno.settings.compose.components.InfernoSettingsPage
@@ -32,7 +24,6 @@ import com.shmibblez.inferno.settings.compose.components.PreferenceTitle
 import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TabSettingsPage(goBack: () -> Unit) {
     val context = LocalContext.current
@@ -214,7 +205,6 @@ private fun InfernoSettings.CloseTabsMethod.toPrefString(context: Context): Stri
         InfernoSettings.CloseTabsMethod.CLOSE_TABS_AFTER_ONE_DAY -> context.getString(R.string.close_tabs_after_one_day)
         InfernoSettings.CloseTabsMethod.CLOSE_TABS_AFTER_ONE_WEEK -> context.getString(R.string.close_tabs_after_one_week)
         InfernoSettings.CloseTabsMethod.CLOSE_TABS_AFTER_ONE_MONTH -> context.getString(R.string.close_tabs_after_one_month)
-        InfernoSettings.CloseTabsMethod.UNRECOGNIZED -> ""
     }
 }
 
@@ -223,7 +213,6 @@ private fun InfernoSettings.MiniTabShowClose.toPrefString(context: Context): Str
         InfernoSettings.MiniTabShowClose.MINI_TAB_SHOW_ON_ALL -> "Show close on all tabs." // todo: string res
         InfernoSettings.MiniTabShowClose.MINI_TAB_SHOW_ONLY_ON_ACTIVE -> "Show close only on active tabs." // todo: string res
         InfernoSettings.MiniTabShowClose.MINI_TAB_SHOW_ON_NONE -> "Do not show close icon on any tab." // todo: string res
-        InfernoSettings.MiniTabShowClose.UNRECOGNIZED -> ""
     }
 }
 
@@ -231,7 +220,6 @@ private fun InfernoSettings.VerticalTabBarPosition.toPrefString(context: Context
     return when (this) {
         InfernoSettings.VerticalTabBarPosition.TAB_BAR_BOTTOM -> context.getString(R.string.preference_bottom_toolbar)
         InfernoSettings.VerticalTabBarPosition.TAB_BAR_TOP -> context.getString(R.string.preference_top_toolbar)
-        InfernoSettings.VerticalTabBarPosition.UNRECOGNIZED -> ""
     }
 }
 
@@ -239,7 +227,6 @@ private fun InfernoSettings.TabBarPosition.toPrefString(context: Context): Strin
     return when (this) {
         InfernoSettings.TabBarPosition.TAB_BAR_ABOVE_TOOLBAR -> "Above toolbar" // todo: string res
         InfernoSettings.TabBarPosition.TAB_BAR_BELOW_TOOLBAR -> "Below toolbar" // todo: string res
-        InfernoSettings.TabBarPosition.UNRECOGNIZED -> ""
     }
 }
 
@@ -247,6 +234,5 @@ private fun InfernoSettings.TabTrayStyle.toPrefString(context: Context): String 
     return when (this) {
         InfernoSettings.TabTrayStyle.TAB_TRAY_GRID -> context.getString(R.string.tab_view_grid)
         InfernoSettings.TabTrayStyle.TAB_TRAY_LIST -> context.getString(R.string.tab_view_list)
-        InfernoSettings.TabTrayStyle.UNRECOGNIZED -> ""
     }
 }

@@ -184,9 +184,9 @@ private fun DefaultLocaleItem(
     ) {
         // locale info
         Column(modifier = Modifier.weight(1F)) {
-            // display name
+            // default locale (recommended)
             InfernoText(
-                text = locale.displayName,
+                text = stringResource(R.string.default_locale_text) + " (${stringResource(R.string.phone_feature_recommended)})",
                 fontWeight = FontWeight.Bold,
             )
             // language info
@@ -194,10 +194,6 @@ private fun DefaultLocaleItem(
                 text = locale.toLanguageTag(),
                 infernoStyle = InfernoTextStyle.Subtitle,
                 maxLines = 2,
-            )
-            // default locale (recommended)
-            InfernoText(
-                text = stringResource(R.string.default_locale_text) + " (${stringResource(R.string.phone_feature_recommended)})"
             )
         }
 

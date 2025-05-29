@@ -3,7 +3,7 @@ apply plugin: 'com.google.protobuf'
 
 protobuf {
     protoc {
-        artifact = "com.google.protobuf:protoc:3.8.0"
+        artifact = "com.google.protobuf:protoc:4.28.3"
     }
     generateProtoTasks {
         all().each { task ->

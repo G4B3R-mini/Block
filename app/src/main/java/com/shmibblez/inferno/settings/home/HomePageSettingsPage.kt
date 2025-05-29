@@ -239,6 +239,5 @@ fun InfernoSettings.PageWhenBrowserReopened.toPrefString(context: Context): Stri
         InfernoSettings.PageWhenBrowserReopened.OPEN_ON_LAST_TAB -> "Open on last tab" // todo: string res
         InfernoSettings.PageWhenBrowserReopened.OPEN_ON_HOME_ALWAYS -> "Always open on home" // todo: string res
         InfernoSettings.PageWhenBrowserReopened.OPEN_ON_HOME_AFTER_FOUR_HOURS -> "Open on home after 4 hours" // todo: string res
-        InfernoSettings.PageWhenBrowserReopened.UNRECOGNIZED -> context.getString(R.string.empty_string)
     }
 }

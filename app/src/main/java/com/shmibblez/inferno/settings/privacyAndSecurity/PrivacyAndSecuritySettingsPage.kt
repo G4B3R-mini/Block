@@ -37,10 +37,13 @@ import androidx.compose.ui.res.stringResource
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.base.InfernoCheckbox
 import com.shmibblez.inferno.compose.base.InfernoIcon
+import com.shmibblez.inferno.compose.base.InfernoOutlinedTextField
 import com.shmibblez.inferno.compose.base.InfernoText
+import com.shmibblez.inferno.ext.infernoTheme
 import com.shmibblez.inferno.proto.InfernoSettings
 import com.shmibblez.inferno.proto.infernoSettingsDataStore
 import com.shmibblez.inferno.settings.compose.components.InfernoSettingsPage
+import com.shmibblez.inferno.settings.compose.components.PrefUiConst
 import com.shmibblez.inferno.settings.compose.components.PreferenceSelect
 import com.shmibblez.inferno.settings.compose.components.PreferenceSwitch
 import com.shmibblez.inferno.settings.compose.components.PreferenceTitle
@@ -129,12 +132,10 @@ fun PrivacyAndSecuritySettingsPage(goBack: () -> Unit) {
             item {
                 PreferenceSelect(
                     text = stringResource(R.string.preference_enhanced_tracking_protection),
-                    description = when (settings.selectedTrackingProtection) {
+                    description = when (settings.selectedTrackingProtection!!) {
                         InfernoSettings.TrackingProtectionDefault.STANDARD -> context.getString(R.string.preference_enhanced_tracking_protection_standard_description_5)
                         InfernoSettings.TrackingProtectionDefault.STRICT -> context.getString(R.string.preference_enhanced_tracking_protection_strict_description_4)
                         InfernoSettings.TrackingProtectionDefault.CUSTOM -> context.getString(R.string.preference_enhanced_tracking_protection_custom_description_2)
-                        InfernoSettings.TrackingProtectionDefault.UNRECOGNIZED, null -> ""
-
                     },
                     enabled = true,
                     selectedMenuItem = settings.selectedTrackingProtection,
@@ -306,17 +307,17 @@ fun PrivacyAndSecuritySettingsPage(goBack: () -> Unit) {
                     )
                 }
 
-                // redirect trackers
+                // suspected fingerprinters
                 item {
                     CustomTrackingProtectionPreferenceCheckbox(
-                        name = stringResource(R.string.etp_redirect_trackers_title),
-                        checked = settings.customTrackingProtection.blockRedirectTrackers,
+                        name = stringResource(R.string.etp_suspected_fingerprinters_title),
+                        checked = settings.customTrackingProtection.blockSuspectedFingerprinters,
                         onCheckedChanged = { selected ->
                             coroutineScope.launch {
                                 context.infernoSettingsDataStore.updateData {
                                     it.toBuilder().setCustomTrackingProtection(
                                         it.customTrackingProtection.toBuilder()
-                                            .setBlockRedirectTrackers(selected).build()
+                                            .setBlockSuspectedFingerprinters(selected).build()
                                     ).build()
                                 }
                             }
@@ -324,7 +325,33 @@ fun PrivacyAndSecuritySettingsPage(goBack: () -> Unit) {
                     )
                 }
 
-                // todo: suspected fingerprinters
+                // selected tracking protection
+                if (settings.customTrackingProtection.blockSuspectedFingerprinters) {
+                    item {
+                        CustomTrackingProtectionPreferenceSelect(
+                            selected = settings.customTrackingProtection.blockSuspectedFingerprintersSelection,
+                            items = remember {
+                                listOf(
+                                    InfernoSettings.CustomTrackingProtection.SuspectedFingerprintersSelection.BLOCK_SUSPECTED_FINGERPRINTERS_NORMAL_ONLY,
+                                    InfernoSettings.CustomTrackingProtection.SuspectedFingerprintersSelection.BLOCK_SUSPECTED_FINGERPRINTERS_PRIVATE_ONLY,
+                                    InfernoSettings.CustomTrackingProtection.SuspectedFingerprintersSelection.BLOCK_SUSPECTED_FINGERPRINTERS_NORMAL_AND_PRIVATE,
+                                )
+                            },
+                            mapToTitle = { it.toPrefString(context) },
+                            onSelectMenuItem = { selected ->
+                                coroutineScope.launch {
+                                    context.infernoSettingsDataStore.updateData {
+                                        it.toBuilder().setCustomTrackingProtection(
+                                            it.customTrackingProtection.toBuilder()
+                                                .setBlockSuspectedFingerprintersSelection(selected).build()
+                                        ).build()
+                                    }
+                                }
+                            },
+                            enabled = true,
+                        )
+                    }
+                }
             }
 
             // global privacy control (Tell websites not to share & sell data)
@@ -390,21 +417,29 @@ private fun CustomTrackingProtectionPreferenceCheckbox(
     val interactionSource = remember { MutableInteractionSource() }
 
     Row(
-        modifier = Modifier.toggleable(
-            value = checked,
-            interactionSource = interactionSource,
-            indication = LocalIndication.current,
-            onValueChange = onCheckedChanged,
+        modifier = Modifier
+            .toggleable(
+                value = checked,
+                interactionSource = interactionSource,
+                indication = LocalIndication.current,
+                onValueChange = onCheckedChanged,
+            )
+            .padding(
+                horizontal = PrefUiConst.PREFERENCE_HORIZONTAL_PADDING,
+                vertical = PrefUiConst.PREFERENCE_INTERNAL_PADDING,
+            ),
+        horizontalArrangement = Arrangement.spacedBy(
+            PrefUiConst.PREFERENCE_INTERNAL_PADDING,
+            Alignment.Start
         ),
-        horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically,
     ) {
         InfernoCheckbox(
             checked = checked,
-            onCheckedChange = {},
+            onCheckedChange = onCheckedChanged,
             interactionSource = interactionSource,
         )
-        InfernoText(text = name)
+        InfernoText(text = name, modifier = Modifier.weight(1F))
     }
 }
 
@@ -422,9 +457,15 @@ private fun <T> CustomTrackingProtectionPreferenceSelect(
     ExposedDropdownMenuBox(
         expanded = expanded,
         onExpandedChange = { expanded = !expanded },
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(
+                start = PrefUiConst.PREFERENCE_HORIZONTAL_PADDING,
+                end = PrefUiConst.PREFERENCE_HORIZONTAL_PADDING,
+                bottom = PrefUiConst.PREFERENCE_INTERNAL_PADDING,
+            ),
     ) {
-        OutlinedTextField(
+        InfernoOutlinedTextField(
             value = mapToTitle.invoke(selected),
             onValueChange = { },
             modifier = Modifier
@@ -435,22 +476,28 @@ private fun <T> CustomTrackingProtectionPreferenceSelect(
             readOnly = true,
             label = null,
             trailingIcon = {
-                Icon(
+                InfernoIcon(
                     painter = when (expanded) {
                         true -> painterResource(R.drawable.ic_arrow_drop_up_24)
                         false -> painterResource(R.drawable.ic_arrow_drop_down_24)
                     },
                     contentDescription = "",
-                    tint = Color.White, // todo: theme
                 )
             },
         )
-        ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            containerColor = LocalContext.current.infernoTheme().value.secondaryBackgroundColor,
+        ) {
             // show menu items
             items.map { it to mapToTitle.invoke(it) }.forEach { (item, name) ->
                 DropdownMenuItem(
                     text = { InfernoText(name) },
-                    onClick = { onSelectMenuItem.invoke(item) },
+                    onClick = {
+                        onSelectMenuItem.invoke(item)
+                        expanded = false
+                    },
                 )
             }
         }
@@ -462,7 +509,6 @@ private fun InfernoSettings.TrackingProtectionDefault.toPrefString(context: Cont
         InfernoSettings.TrackingProtectionDefault.STANDARD -> context.getString(R.string.preference_enhanced_tracking_protection_standard_default_1)
         InfernoSettings.TrackingProtectionDefault.STRICT -> context.getString(R.string.preference_enhanced_tracking_protection_strict)
         InfernoSettings.TrackingProtectionDefault.CUSTOM -> context.getString(R.string.preference_enhanced_tracking_protection_custom)
-        InfernoSettings.TrackingProtectionDefault.UNRECOGNIZED -> ""
     }
 }
 
@@ -471,7 +517,6 @@ private fun InfernoSettings.HttpsOnlyMode.toPrefString(context: Context): String
         InfernoSettings.HttpsOnlyMode.HTTPS_ONLY_DISABLED -> context.getString(R.string.preferences_https_only_off)
         InfernoSettings.HttpsOnlyMode.HTTPS_ONLY_ENABLED -> context.getString(R.string.preferences_https_only_in_all_tabs)
         InfernoSettings.HttpsOnlyMode.HTTPS_ONLY_ENABLED_PRIVATE_ONLY -> context.getString(R.string.preferences_https_only_in_private_tabs)
-        InfernoSettings.HttpsOnlyMode.UNRECOGNIZED -> ""
     }
 }
 
@@ -496,8 +541,6 @@ private fun InfernoSettings.CustomTrackingProtection.CookiePolicy.toPrefString(c
         InfernoSettings.CustomTrackingProtection.CookiePolicy.ALL_COOKIES -> context.getString(
             R.string.preference_enhanced_tracking_protection_custom_cookies_4,
         )
-
-        InfernoSettings.CustomTrackingProtection.CookiePolicy.UNRECOGNIZED -> ""
     }
 }
 
@@ -512,7 +555,20 @@ private fun InfernoSettings.CustomTrackingProtection.TrackingContentSelection.to
         InfernoSettings.CustomTrackingProtection.TrackingContentSelection.BLOCK_TRACKING_NORMAL_AND_PRIVATE -> context.getString(
             R.string.preference_enhanced_tracking_protection_custom_tracking_content_1
         )
+    }
+}
 
-        InfernoSettings.CustomTrackingProtection.TrackingContentSelection.UNRECOGNIZED -> ""
+private fun InfernoSettings.CustomTrackingProtection.SuspectedFingerprintersSelection.toPrefString(
+    context: Context,
+): String {
+    return when (this) {
+        InfernoSettings.CustomTrackingProtection.SuspectedFingerprintersSelection.BLOCK_SUSPECTED_FINGERPRINTERS_NORMAL_ONLY -> "Only in Normal tabs" // todo: string res
+        InfernoSettings.CustomTrackingProtection.SuspectedFingerprintersSelection.BLOCK_SUSPECTED_FINGERPRINTERS_PRIVATE_ONLY -> context.getString(
+            R.string.preference_enhanced_tracking_protection_custom_tracking_content_2
+        )
+
+        InfernoSettings.CustomTrackingProtection.SuspectedFingerprintersSelection.BLOCK_SUSPECTED_FINGERPRINTERS_NORMAL_AND_PRIVATE -> context.getString(
+            R.string.preference_enhanced_tracking_protection_custom_tracking_content_1
+        )
     }
 }

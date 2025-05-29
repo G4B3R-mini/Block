@@ -22,7 +22,39 @@ firefox for Android, which is nice.
 
 that's it for now, hopefully this project doesn't die
 
-# Massiv Bugs
+# Currently Under Development
+
+## Settings Pages Status
+
+- [ ] Toolbar (Buggy)
+- [ ] Tabs (Buggy)
+- [ ] Search (Buggy)
+- [ ] Theme (Buggy)
+
+- [ ] Gestures (Buggy)
+- [ ] Homepage (Buggy)
+- [ ] OnQuit (Buggy)
+- [ ] Passwords (Buggy)
+- [x] Autofill (Working)
+
+- [x] Site Permissions (Working)
+  - [ ] side note: exceptions not tested
+  - [ ] side note: prefs not tested (access/set in engine)
+- [x] Accessibility (Working)
+    - [ ] side note: some settings not applied
+    - [ ] side note: slide bar looks weird (no thumb) and factor may be wrong (try 0.5-2 instead of
+      50-200)
+- [x] Language (Working)
+- [x] Translations (Working)
+    - [ ] side note: exceptions page (never translate) not tested yet
+
+- [x] Privacy and Security (Working)
+
+- [ ] Other stuff
+    - [ ] make sure to check setting usage, still have not completed migration from android prefs to
+      datastore
+
+## Massiv Bugs
 
 - [ ] settings
     - [ ] settings managers wrong spacing for expandable items (addressManager, passwordManager,
@@ -38,7 +70,7 @@ that's it for now, hopefully this project doesn't die
         - [ ] default item looks weird, looks like 2 items (replace language name with use system
           default (recommended) title)
 
-# Under Construction
+## Under Construction
 
 - [ ] color customization
     - [ ] preset themes and custom themes

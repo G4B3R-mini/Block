@@ -13,7 +13,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.shmibblez.inferno.ext.infernoTheme
 
-// todo: use enabled to determine colors
 @Composable
 fun InfernoOutlinedButton(
     text: String,
@@ -22,13 +21,17 @@ fun InfernoOutlinedButton(
     enabled: Boolean = true,
     shape: Shape = ButtonDefaults.outlinedShape,
     colors: ButtonColors = ButtonDefaults.outlinedButtonColors().copy(
-        containerColor = Color.Transparent,
+        containerColor = LocalContext.current.infernoTheme().value.primaryBackgroundColor,
         contentColor = LocalContext.current.infernoTheme().value.primaryOutlineColor,
-        disabledContainerColor = Color.Transparent,
+        disabledContainerColor = LocalContext.current.infernoTheme().value.secondaryBackgroundColor,
+        disabledContentColor = LocalContext.current.infernoTheme().value.secondaryOutlineColor,
     ),
     border: BorderStroke? = BorderStroke(
         width = 1.dp,
-        color = colors.contentColor,
+        color = when (enabled) {
+            true -> colors.contentColor
+            false ->colors.disabledContentColor
+        },
     ),
 ) {
     OutlinedButton(
@@ -41,7 +44,10 @@ fun InfernoOutlinedButton(
     ) {
         InfernoText(
             text = text,
-            fontColor = colors.contentColor,
+            fontColor = when (enabled) {
+                true -> colors.contentColor
+                false ->colors.disabledContentColor
+            },
         )
     }
 }

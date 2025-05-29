@@ -1,6 +1,8 @@
 package com.shmibblez.inferno.settings.autofill
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -17,6 +19,7 @@ import com.shmibblez.inferno.compose.base.InfernoOutlinedButton
 import com.shmibblez.inferno.compose.base.InfernoOutlinedTextField
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.ext.infernoTheme
+import com.shmibblez.inferno.settings.compose.components.PrefUiConst
 import mozilla.components.concept.storage.Address
 import mozilla.components.concept.storage.UpdatableAddressFields
 
@@ -40,7 +43,9 @@ fun AddressEditorDialog(
     var email by remember { mutableStateOf(initialAddress.email) }
 
     InfernoDialog(onDismiss = onDismiss) {
-        LazyColumn {
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING)
+        ) {
             // name
             item {
                 InfernoOutlinedTextField(
@@ -153,7 +158,10 @@ fun AddressEditorDialog(
                 )
             }
         }
-        Row {
+        Row(
+            modifier = Modifier.padding(vertical = PrefUiConst.PREFERENCE_VERTICAL_PADDING),
+            horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING),
+        ) {
             InfernoOutlinedButton(
                 modifier = Modifier.weight(1F),
                 text = stringResource(android.R.string.cancel),
@@ -161,7 +169,7 @@ fun AddressEditorDialog(
             )
             InfernoButton(
                 modifier = Modifier.weight(1F),
-                text = stringResource(R.string.save_changes_to_login),
+                text = stringResource(R.string.browser_menu_save),
                 onClick = {
                     val updatedAddress = UpdatableAddressFields(
                         name = name,

@@ -150,12 +150,15 @@ internal fun LazyListScope.cardManager(
         // manage cards title
         Row(
             modifier = Modifier
+                .fillMaxWidth()
                 .clickable { state.expanded = !state.expanded }
                 .padding(horizontal = PrefUiConst.PREFERENCE_HORIZONTAL_PADDING)
                 .padding(
                     top = PrefUiConst.PREFERENCE_HALF_VERTICAL_PADDING,
                     // bottom padding set below
                 ),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             InfernoText(text = stringResource(R.string.preferences_credit_cards_manage_saved_cards_2))
             InfernoIcon(

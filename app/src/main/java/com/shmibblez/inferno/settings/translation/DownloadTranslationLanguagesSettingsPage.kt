@@ -107,7 +107,7 @@ fun DownloadTranslationLanguagesSettingsPage(goBack: () -> Unit) {
 
                         context.getActivity()?.let { activity ->
                             // todo: currently breaks / does nothing
-                            moveFocusToBackNavButton(activity)
+//                            moveFocusToBackNavButton(activity)
                         }
                     }
                 },

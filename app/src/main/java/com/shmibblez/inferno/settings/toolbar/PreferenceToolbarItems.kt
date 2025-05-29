@@ -31,7 +31,7 @@ import com.shmibblez.inferno.tabstray.browser.compose.createListReorderState
 import com.shmibblez.inferno.toolbar.ToToolbarIcon
 
 
-private const val MAX_TOOLBAR_ITEMS = 7;
+private const val MAX_TOOLBAR_ITEMS = 7
 
 /** todo: for debugging, reference implementation in [TabList] */
 
@@ -205,6 +205,5 @@ private fun InfernoSettings.ToolbarItem.toPrefString(context: Context): String {
         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_SHOW_TABS_TRAY -> "Show tab tray" // todo: string res - context.getString(R.string.)
         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_SHARE -> context.getString(R.string.share_header_2)
         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_MENU -> context.getString(R.string.content_description_menu)
-        InfernoSettings.ToolbarItem.UNRECOGNIZED -> ""
     }
 }

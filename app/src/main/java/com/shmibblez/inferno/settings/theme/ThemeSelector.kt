@@ -143,7 +143,7 @@ private fun ThemeItem(
             .border(
                 width = 2.dp,
                 color = when (selected) {
-                    true -> theme.secondaryOutlineColor
+                    true -> theme.primaryActionColor
                     false -> theme.primaryOutlineColor
                 },
                 shape = MaterialTheme.shapes.medium,

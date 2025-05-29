@@ -2,14 +2,10 @@ package com.shmibblez.inferno.settings.gesture
 
 import android.annotation.SuppressLint
 import android.content.Context
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -18,11 +14,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import com.shmibblez.inferno.R
-import com.shmibblez.inferno.compose.base.InfernoIcon
-import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.proto.InfernoSettings
 import com.shmibblez.inferno.proto.infernoSettingsDataStore
 import com.shmibblez.inferno.settings.compose.components.InfernoSettingsPage
@@ -33,7 +26,6 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GestureSettingsPage(goBack: () -> Unit) {
     val context = LocalContext.current
@@ -53,7 +45,6 @@ fun GestureSettingsPage(goBack: () -> Unit) {
             InfernoSettings.GestureAction.GESTURE_ACTION_NEW_TAB_TO_LEFT,
             InfernoSettings.GestureAction.GESTURE_ACTION_NEW_TAB_END,
             InfernoSettings.GestureAction.GESTURE_ACTION_NEW_TAB_START,
-            InfernoSettings.GestureAction.UNRECOGNIZED,
         )
     }
 
@@ -242,6 +233,5 @@ fun InfernoSettings.GestureAction.toPrefString(context: Context): String {
         InfernoSettings.GestureAction.GESTURE_ACTION_NEW_TAB_TO_LEFT -> "Open new tab to the left" // todo: string res
         InfernoSettings.GestureAction.GESTURE_ACTION_NEW_TAB_END -> "Open new tab at end of tab list" // todo: string res
         InfernoSettings.GestureAction.GESTURE_ACTION_NEW_TAB_START -> "Open new tab at start of tab list" // todo: string res
-        InfernoSettings.GestureAction.UNRECOGNIZED -> context.getString(R.string.empty_string)
     }
 }

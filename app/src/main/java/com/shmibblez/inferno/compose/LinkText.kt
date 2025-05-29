@@ -19,6 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
@@ -33,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.base.InfernoText
+import com.shmibblez.inferno.ext.infernoTheme
 import com.shmibblez.inferno.theme.FirefoxTheme
 
 /**
@@ -67,7 +69,7 @@ fun LinkText(
     text: String,
     modifier: Modifier = Modifier,
     linkTextStates: List<LinkTextState>,
-    linkTextColor: Color = FirefoxTheme.colors.textAccent,
+    linkTextColor: Color = LocalContext.current.infernoTheme().value.primaryActionColor,//FirefoxTheme.colors.textAccent,
     linkTextDecoration: TextDecoration = TextDecoration.None,
 ) {
     val annotatedString = buildUrlAnnotatedString(

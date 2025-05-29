@@ -8,26 +8,30 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.selection.TextSelectionColors
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.CheckboxColors
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.SwitchColors
-import androidx.compose.material3.TooltipBox
-import androidx.compose.material3.TooltipDefaults
-import androidx.compose.material3.rememberTooltipState
+import androidx.compose.material3.TextFieldColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -58,6 +62,7 @@ import com.shmibblez.inferno.settings.compose.components.PrefUiConst
 import com.shmibblez.inferno.toolbar.ToToolbarIcon
 import kotlinx.coroutines.launch
 import mozilla.components.support.ktx.kotlin.toHexString
+import java.util.Locale
 
 // for removing invalid characters
 private val ARGB_STRING_FILTER = Regex("[^a-zA-Z0-9]")
@@ -70,6 +75,9 @@ private val ARGB_STRING_REGEX = Regex("^[a-zA-Z0-9]{8}\$")
 
 private val COLOR_BOX_SIZE = 32.dp
 
+private val LIST_TOP_PADDING = 16.dp
+private val LIST_BOTTOM_PADDING = 36.dp
+
 @Composable
 fun EditThemeDialog(
     baseTheme: InfernoTheme,
@@ -80,57 +88,113 @@ fun EditThemeDialog(
     // theme being edited, copy of current theme
     var theme by remember { mutableStateOf(baseTheme) }
     val oldThemeName by remember { mutableStateOf(baseTheme.name) }
+    var aboutExpanded by remember { mutableStateOf(false) }
+    val lazyListState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
 
-    val textFieldColors = OutlinedTextFieldDefaults.colors(
-        focusedTextColor = theme.primaryTextColor,
-        unfocusedTextColor = theme.secondaryTextColor,
-        disabledTextColor = theme.secondaryTextColor,
-        errorTextColor = theme.errorColor,
-        focusedContainerColor = Color.Transparent,
-        unfocusedContainerColor = Color.Transparent,
-        disabledContainerColor = Color.Transparent,
-        errorContainerColor = Color.Transparent,
-        cursorColor = theme.primaryOutlineColor,
-        errorCursorColor = theme.errorColor,
-        selectionColors = TextSelectionColors(
-            handleColor = theme.primaryOutlineColor,
-            backgroundColor = theme.primaryOutlineColor.copy(
-                alpha = 0.4F,
+    // component colors
+    val outlinedButtonColors = remember {
+        ButtonColors(
+            containerColor = theme.primaryBackgroundColor,
+            contentColor = theme.primaryOutlineColor,
+            disabledContainerColor = theme.secondaryBackgroundColor,
+            disabledContentColor = theme.secondaryOutlineColor,
+        )
+    }
+    val checkboxColors = remember {
+        CheckboxColors(
+            checkedCheckmarkColor = theme.primaryIconColor,
+            uncheckedCheckmarkColor = Color.Transparent,
+            checkedBoxColor = theme.primaryActionColor,
+            uncheckedBoxColor = Color.Transparent,
+            disabledCheckedBoxColor = theme.secondaryBackgroundColor,
+            disabledUncheckedBoxColor = Color.Transparent,
+            disabledIndeterminateBoxColor = theme.secondaryBackgroundColor,
+            checkedBorderColor = theme.primaryActionColor,
+            uncheckedBorderColor = theme.primaryIconColor,
+            disabledBorderColor = theme.secondaryBackgroundColor,
+            disabledUncheckedBorderColor = theme.secondaryBackgroundColor,
+            disabledIndeterminateBorderColor = theme.secondaryBackgroundColor,
+        )
+    }
+    val switchColors = remember {
+        SwitchColors(
+            checkedThumbColor = theme.primaryActionColor,
+            checkedTrackColor = Color.Transparent,
+            checkedBorderColor = theme.primaryActionColor,
+            checkedIconColor = theme.primaryIconColor,
+            uncheckedThumbColor = theme.primaryActionColor,
+            uncheckedTrackColor = Color.Transparent,
+            uncheckedBorderColor = theme.primaryActionColor,
+            uncheckedIconColor = theme.primaryIconColor,
+            disabledCheckedThumbColor = theme.secondaryBackgroundColor,    // .secondaryBackgroundColor,
+            disabledCheckedTrackColor = Color.Transparent,    // .secondaryBackgroundColor,
+            disabledCheckedBorderColor = theme.secondaryBackgroundColor,   // .secondaryBackgroundColor,
+            disabledCheckedIconColor = theme.secondaryIconColor,     // .secondaryIconColor,
+            disabledUncheckedThumbColor = theme.secondaryBackgroundColor,  // .secondaryBackgroundColor,
+            disabledUncheckedTrackColor = Color.Transparent,  // .secondaryBackgroundColor,
+            disabledUncheckedBorderColor = theme.secondaryBackgroundColor, // .secondaryBackgroundColor,
+            disabledUncheckedIconColor = theme.secondaryIconColor
+        )
+    }
+    val textFieldColors =
+        OutlinedTextFieldDefaults.colors(
+            focusedTextColor = theme.primaryTextColor,
+            unfocusedTextColor = theme.secondaryTextColor,
+            disabledTextColor = theme.secondaryTextColor,
+            errorTextColor = theme.errorColor,
+            focusedContainerColor = Color.Transparent,
+            unfocusedContainerColor = Color.Transparent,
+            disabledContainerColor = Color.Transparent,
+            errorContainerColor = Color.Transparent,
+            cursorColor = theme.primaryOutlineColor,
+            errorCursorColor = theme.errorColor,
+            selectionColors = TextSelectionColors(
+                handleColor = theme.primaryOutlineColor,
+                backgroundColor = theme.primaryOutlineColor.copy(
+                    alpha = 0.4F,
+                ),
             ),
-        ),
-        focusedBorderColor = theme.secondaryOutlineColor,
-        unfocusedBorderColor = theme.primaryOutlineColor,
-        disabledBorderColor = theme.secondaryTextColor,
-        errorBorderColor = theme.errorColor,
-        focusedLeadingIconColor = theme.primaryTextColor,
-        unfocusedLeadingIconColor = theme.secondaryTextColor,
-        disabledLeadingIconColor = theme.secondaryTextColor,
-        errorLeadingIconColor = theme.errorColor,
-        focusedTrailingIconColor = theme.primaryTextColor,
-        unfocusedTrailingIconColor = theme.secondaryTextColor,
-        disabledTrailingIconColor = theme.secondaryTextColor,
-        errorTrailingIconColor = theme.errorColor,
-        focusedLabelColor = theme.secondaryOutlineColor,
-        unfocusedLabelColor = theme.primaryOutlineColor,
-        disabledLabelColor = theme.secondaryTextColor,
-        errorLabelColor = theme.errorColor,
-        focusedPlaceholderColor = theme.secondaryTextColor,
-        unfocusedPlaceholderColor = theme.secondaryTextColor,
-        disabledPlaceholderColor = theme.secondaryTextColor,
-        errorPlaceholderColor = theme.errorColor,
-        focusedSupportingTextColor = theme.primaryTextColor,
-        unfocusedSupportingTextColor = theme.secondaryTextColor,
-        disabledSupportingTextColor = theme.secondaryTextColor,
-        errorSupportingTextColor = theme.errorColor,
-        focusedPrefixColor = theme.primaryTextColor,
-        unfocusedPrefixColor = theme.secondaryTextColor,
-        disabledPrefixColor = theme.secondaryTextColor,
-        errorPrefixColor = theme.errorColor,
-        focusedSuffixColor = theme.primaryTextColor,
-        unfocusedSuffixColor = theme.secondaryTextColor,
-        disabledSuffixColor = theme.secondaryTextColor,
-        errorSuffixColor = theme.errorColor,
-    )
+            focusedBorderColor = theme.primaryActionColor,
+            unfocusedBorderColor = theme.primaryOutlineColor,
+            disabledBorderColor = theme.secondaryTextColor,
+            errorBorderColor = theme.errorColor,
+            focusedLeadingIconColor = theme.primaryTextColor,
+            unfocusedLeadingIconColor = theme.secondaryTextColor,
+            disabledLeadingIconColor = theme.secondaryTextColor,
+            errorLeadingIconColor = theme.errorColor,
+            focusedTrailingIconColor = theme.primaryTextColor,
+            unfocusedTrailingIconColor = theme.secondaryTextColor,
+            disabledTrailingIconColor = theme.secondaryTextColor,
+            errorTrailingIconColor = theme.errorColor,
+            focusedLabelColor = theme.primaryActionColor,
+            unfocusedLabelColor = theme.primaryOutlineColor,
+            disabledLabelColor = theme.secondaryTextColor,
+            errorLabelColor = theme.errorColor,
+            focusedPlaceholderColor = theme.secondaryTextColor,
+            unfocusedPlaceholderColor = theme.secondaryTextColor,
+            disabledPlaceholderColor = theme.secondaryTextColor,
+            errorPlaceholderColor = theme.errorColor,
+            focusedSupportingTextColor = theme.primaryTextColor,
+            unfocusedSupportingTextColor = theme.secondaryTextColor,
+            disabledSupportingTextColor = theme.secondaryTextColor,
+            errorSupportingTextColor = theme.errorColor,
+            focusedPrefixColor = theme.primaryTextColor,
+            unfocusedPrefixColor = theme.secondaryTextColor,
+            disabledPrefixColor = theme.secondaryTextColor,
+            errorPrefixColor = theme.errorColor,
+            focusedSuffixColor = theme.primaryTextColor,
+            unfocusedSuffixColor = theme.secondaryTextColor,
+            disabledSuffixColor = theme.secondaryTextColor,
+            errorSuffixColor = theme.errorColor,
+        )
+
+    fun seeAbout() {
+        coroutineScope.launch {
+            lazyListState.scrollToItem(2)
+        }
+        aboutExpanded = true
+    }
 
     InfernoDialog(
         onDismiss = onDismiss,
@@ -141,15 +205,35 @@ fun EditThemeDialog(
             disabledContentColor = theme.secondaryBackgroundColor,
         ),
         border = BorderStroke(1.dp, theme.primaryActionColor),
+        contentPadding = PaddingValues(horizontal = 16.dp)
     ) {
-        Column(modifier = Modifier.fillMaxSize()) {
+        Box(modifier = Modifier.fillMaxSize()) {
             LazyColumn(
-                modifier = Modifier.weight(1F),
-                verticalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING),
+                state = lazyListState,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .align(Alignment.Center),
+                verticalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING * 2),
             ) {
+                // top spacer
+                item { Spacer(modifier = Modifier.padding(LIST_TOP_PADDING)) }
+
+                /**
+                 * about
+                 */
+
+                item {
+                    AboutItem(
+                        expanded = aboutExpanded,
+                        onExpandedChanged = { aboutExpanded = it },
+                        theme = theme,
+                    )
+                }
+
                 /**
                  * name
                  */
+
                 item {
                     InfernoOutlinedTextField(
                         value = theme.name,
@@ -171,17 +255,21 @@ fun EditThemeDialog(
                                 infernoStyle = InfernoTextStyle.Error,
                             )
                         },
+                        colors = textFieldColors,
                     )
                 }
+
                 /**
                  * text color
                  */
+
                 item {
                     ColorEditor(
                         name = "primary text color:", // todo: string res
                         color = theme.primaryTextColor,
                         onChangeColor = { theme = theme.copy(primaryTextColor = it) },
                         theme = theme,
+                        seeAbout = ::seeAbout,
                     )
                 }
                 item {
@@ -190,11 +278,12 @@ fun EditThemeDialog(
                         color = theme.secondaryTextColor,
                         onChangeColor = { theme = theme.copy(secondaryTextColor = it) },
                         theme = theme,
+                        seeAbout = ::seeAbout,
                     )
                 }
                 item {
                     val funFacts = remember { funFactSelector(2) }
-                    ColorPreviewColumn {
+                    ColorPreviewColumn(theme = theme) {
                         InfernoText(
                             text = funFacts[0], infernoStyle = InfernoTextStyle.Normal,
                             fontColor = theme.primaryTextColor,
@@ -205,15 +294,18 @@ fun EditThemeDialog(
                         )
                     }
                 }
+
                 /**
                  * icon color
                  */
+
                 item {
                     ColorEditor(
                         name = "primary icon color:", // todo: string res
                         color = theme.primaryIconColor,
                         onChangeColor = { theme = theme.copy(primaryIconColor = it) },
                         theme = theme,
+                        seeAbout = ::seeAbout,
                     )
                 }
                 item {
@@ -222,68 +314,75 @@ fun EditThemeDialog(
                         color = theme.secondaryIconColor,
                         onChangeColor = { theme = theme.copy(secondaryIconColor = it) },
                         theme = theme,
+                        seeAbout = ::seeAbout,
                     )
                 }
                 item {
-                    ColorPreviewRow {
+                    ColorPreviewRow(theme = theme) {
                         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_BACK.ToToolbarIcon(tint = theme.secondaryIconColor)
                         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_FORWARD.ToToolbarIcon(tint = theme.secondaryIconColor)
                         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_RELOAD.ToToolbarIcon(tint = theme.primaryIconColor)
                         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_ORIGIN_MINI.ToToolbarIcon(tint = theme.primaryIconColor)
                     }
                 }
+
                 /**
                  * outline color
                  */
+
                 item {
                     ColorEditor(
                         name = "primary outline color:", // todo: string res
                         color = theme.primaryOutlineColor,
                         onChangeColor = { theme = theme.copy(primaryOutlineColor = it) },
                         theme = theme,
+                        seeAbout = ::seeAbout,
                     )
                 }
                 item {
                     ColorEditor(
-                        name = "primary outline color:", // todo: string res
+                        name = "secondary outline color:", // todo: string res
                         color = theme.secondaryOutlineColor,
                         onChangeColor = { theme = theme.copy(secondaryOutlineColor = it) },
                         theme = theme,
+                        seeAbout = ::seeAbout,
                     )
                 }
                 item {
                     val funFacts = remember { funFactSelector(2) }
-                    ColorPreviewColumn {
+                    ColorPreviewColumn(theme = theme) {
                         InfernoOutlinedButton(
                             onClick = {},
                             modifier = Modifier.fillMaxWidth(),
-                            colors = ButtonDefaults.outlinedButtonColors().copy(
-                                containerColor = Color.Transparent,
-                                contentColor = theme.primaryOutlineColor,
-                                disabledContainerColor = Color.Transparent,
-                            )
+                            colors = outlinedButtonColors,
                         ) {
                             InfernoText(
-                                text = funFacts[0], fontColor = theme.primaryOutlineColor
+                                text = funFacts[0],
+                                fontColor = theme.primaryOutlineColor,
+                                maxLines = 1,
                             )
                         }
                         InfernoOutlinedTextField(
                             value = funFacts[1],
                             onValueChange = {},
                             readOnly = true,
+                            maxLines = 1,
                             colors = textFieldColors,
                         )
                     }
                 }
+
                 /**
                  * action color
                  */
+
                 item {
                     ColorEditor(
                         name = "primary action color:", // todo: string res
                         color = theme.primaryActionColor,
                         onChangeColor = { theme = theme.copy(primaryActionColor = it) },
                         theme = theme,
+                        seeAbout = ::seeAbout,
                     )
                 }
                 item {
@@ -292,109 +391,55 @@ fun EditThemeDialog(
                         color = theme.secondaryActionColor,
                         onChangeColor = { theme = theme.copy(secondaryActionColor = it) },
                         theme = theme,
+                        seeAbout = ::seeAbout,
                     )
                 }
                 item {
-                    ColorPreviewRow {
+                    ColorPreviewRow(theme = theme) {
                         InfernoCheckbox(
                             checked = true,
                             onCheckedChange = {},
-                            colors = CheckboxColors(
-                                checkedCheckmarkColor = theme.primaryIconColor,
-                                uncheckedCheckmarkColor = Color.Transparent,
-                                checkedBoxColor = theme.primaryActionColor,
-                                uncheckedBoxColor = Color.Transparent,
-                                disabledCheckedBoxColor = theme.secondaryBackgroundColor,
-                                disabledUncheckedBoxColor = Color.Transparent,
-                                disabledIndeterminateBoxColor = theme.secondaryBackgroundColor,
-                                checkedBorderColor = theme.primaryActionColor,
-                                uncheckedBorderColor = theme.primaryIconColor,
-                                disabledBorderColor = theme.secondaryBackgroundColor,
-                                disabledUncheckedBorderColor = theme.secondaryBackgroundColor,
-                                disabledIndeterminateBorderColor = theme.secondaryBackgroundColor,
-                            ),
+                            colors = checkboxColors,
                         )
                         InfernoCheckbox(
                             checked = false,
                             onCheckedChange = {},
-                            colors = CheckboxColors(
-                                checkedCheckmarkColor = theme.primaryIconColor,
-                                uncheckedCheckmarkColor = Color.Transparent,
-                                checkedBoxColor = theme.primaryActionColor,
-                                uncheckedBoxColor = Color.Transparent,
-                                disabledCheckedBoxColor = theme.secondaryBackgroundColor,
-                                disabledUncheckedBoxColor = Color.Transparent,
-                                disabledIndeterminateBoxColor = theme.secondaryBackgroundColor,
-                                checkedBorderColor = theme.primaryActionColor,
-                                uncheckedBorderColor = theme.primaryIconColor,
-                                disabledBorderColor = theme.secondaryBackgroundColor,
-                                disabledUncheckedBorderColor = theme.secondaryBackgroundColor,
-                                disabledIndeterminateBorderColor = theme.secondaryBackgroundColor,
-                            ),
-                        )
-                        InfernoSwitch(
-                            checked = true,
-                            onCheckedChange = {},
-                            colors = SwitchColors(
-                                checkedThumbColor = theme.primaryActionColor,
-                                checkedTrackColor = Color.Transparent,
-                                checkedBorderColor = theme.primaryActionColor,
-                                checkedIconColor = theme.primaryIconColor,
-                                uncheckedThumbColor = theme.primaryActionColor,
-                                uncheckedTrackColor = Color.Transparent,
-                                uncheckedBorderColor = theme.primaryActionColor,
-                                uncheckedIconColor = theme.primaryIconColor,
-                                disabledCheckedThumbColor = theme.secondaryBackgroundColor,    // .secondaryBackgroundColor,
-                                disabledCheckedTrackColor = Color.Transparent,    // .secondaryBackgroundColor,
-                                disabledCheckedBorderColor = theme.secondaryBackgroundColor,   // .secondaryBackgroundColor,
-                                disabledCheckedIconColor = theme.secondaryIconColor,     // .secondaryIconColor,
-                                disabledUncheckedThumbColor = theme.secondaryBackgroundColor,  // .secondaryBackgroundColor,
-                                disabledUncheckedTrackColor = Color.Transparent,  // .secondaryBackgroundColor,
-                                disabledUncheckedBorderColor = theme.secondaryBackgroundColor, // .secondaryBackgroundColor,
-                                disabledUncheckedIconColor = theme.secondaryIconColor
-                            ),
+                            colors = checkboxColors,
                         )
                         InfernoSwitch(
                             checked = false,
                             onCheckedChange = {},
-                            colors = SwitchColors(
-                                checkedThumbColor = theme.primaryActionColor,
-                                checkedTrackColor = Color.Transparent,
-                                checkedBorderColor = theme.primaryActionColor,
-                                checkedIconColor = theme.primaryIconColor,
-                                uncheckedThumbColor = theme.primaryActionColor,
-                                uncheckedTrackColor = Color.Transparent,
-                                uncheckedBorderColor = theme.primaryActionColor,
-                                uncheckedIconColor = theme.primaryIconColor,
-                                disabledCheckedThumbColor = theme.secondaryBackgroundColor,    // .secondaryBackgroundColor,
-                                disabledCheckedTrackColor = Color.Transparent,    // .secondaryBackgroundColor,
-                                disabledCheckedBorderColor = theme.secondaryBackgroundColor,   // .secondaryBackgroundColor,
-                                disabledCheckedIconColor = theme.secondaryIconColor,     // .secondaryIconColor,
-                                disabledUncheckedThumbColor = theme.secondaryBackgroundColor,  // .secondaryBackgroundColor,
-                                disabledUncheckedTrackColor = Color.Transparent,  // .secondaryBackgroundColor,
-                                disabledUncheckedBorderColor = theme.secondaryBackgroundColor, // .secondaryBackgroundColor,
-                                disabledUncheckedIconColor = theme.secondaryIconColor
-                            ),
+                            colors = switchColors,
+                        )
+                        InfernoSwitch(
+                            checked = true,
+                            onCheckedChange = {},
+                            colors = switchColors,
                         )
                     }
                 }
+
                 /**
                  * error color
                  */
+
                 item {
                     ColorEditor(
                         name = "error color:", // todo: string res
                         color = theme.errorColor,
                         onChangeColor = { theme = theme.copy(errorColor = it) },
                         theme = theme,
+                        seeAbout = ::seeAbout,
                     )
                 }
                 item {
                     val funFacts = remember { funFactSelector(2) }
-                    ColorPreviewColumn(theme.secondaryBackgroundColor) {
+                    ColorPreviewColumn(theme = theme) {
                         OutlinedButton(onClick = {}, modifier = Modifier.fillMaxWidth()) {
                             InfernoText(
-                                text = funFacts[0], fontColor = theme.primaryOutlineColor
+                                text = funFacts[0],
+                                fontColor = theme.primaryOutlineColor,
+                                maxLines = 1,
                             )
                         }
                         InfernoOutlinedTextField(
@@ -415,68 +460,23 @@ fun EditThemeDialog(
                                     infernoStyle = InfernoTextStyle.Error,
                                 )
                             },
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedTextColor = theme.primaryTextColor,
-                                unfocusedTextColor = theme.secondaryTextColor,
-                                disabledTextColor = theme.secondaryTextColor,
-                                errorTextColor = theme.errorColor,
-                                focusedContainerColor = Color.Transparent,
-                                unfocusedContainerColor = Color.Transparent,
-                                disabledContainerColor = Color.Transparent,
-                                errorContainerColor = Color.Transparent,
-                                cursorColor = theme.primaryOutlineColor,
-                                errorCursorColor = theme.errorColor,
-                                selectionColors = TextSelectionColors(
-                                    handleColor = theme.primaryOutlineColor,
-                                    backgroundColor = theme.primaryOutlineColor.copy(
-                                        alpha = 0.4F,
-                                    ),
-                                ),
-                                focusedBorderColor = theme.secondaryOutlineColor,
-                                unfocusedBorderColor = theme.primaryOutlineColor,
-                                disabledBorderColor = theme.secondaryTextColor,
-                                errorBorderColor = theme.errorColor,
-                                focusedLeadingIconColor = theme.primaryTextColor,
-                                unfocusedLeadingIconColor = theme.secondaryTextColor,
-                                disabledLeadingIconColor = theme.secondaryTextColor,
-                                errorLeadingIconColor = theme.errorColor,
-                                focusedTrailingIconColor = theme.primaryTextColor,
-                                unfocusedTrailingIconColor = theme.secondaryTextColor,
-                                disabledTrailingIconColor = theme.secondaryTextColor,
-                                errorTrailingIconColor = theme.errorColor,
-                                focusedLabelColor = theme.secondaryOutlineColor,
-                                unfocusedLabelColor = theme.primaryOutlineColor,
-                                disabledLabelColor = theme.secondaryTextColor,
-                                errorLabelColor = theme.errorColor,
-                                focusedPlaceholderColor = theme.secondaryTextColor,
-                                unfocusedPlaceholderColor = theme.secondaryTextColor,
-                                disabledPlaceholderColor = theme.secondaryTextColor,
-                                errorPlaceholderColor = theme.errorColor,
-                                focusedSupportingTextColor = theme.primaryTextColor,
-                                unfocusedSupportingTextColor = theme.secondaryTextColor,
-                                disabledSupportingTextColor = theme.secondaryTextColor,
-                                errorSupportingTextColor = theme.errorColor,
-                                focusedPrefixColor = theme.primaryTextColor,
-                                unfocusedPrefixColor = theme.secondaryTextColor,
-                                disabledPrefixColor = theme.secondaryTextColor,
-                                errorPrefixColor = theme.errorColor,
-                                focusedSuffixColor = theme.primaryTextColor,
-                                unfocusedSuffixColor = theme.secondaryTextColor,
-                                disabledSuffixColor = theme.secondaryTextColor,
-                                errorSuffixColor = theme.errorColor,
-                            ),
+                            maxLines = 1,
+                            colors = textFieldColors,
                         )
                     }
                 }
+
                 /**
                  * background color
                  */
+
                 item {
                     ColorEditor(
                         name = "primary background color:", // todo: string res
                         color = theme.primaryBackgroundColor,
                         onChangeColor = { theme = theme.copy(primaryBackgroundColor = it) },
                         theme = theme,
+                        seeAbout = ::seeAbout,
                     )
                 }
                 item {
@@ -485,27 +485,42 @@ fun EditThemeDialog(
                         color = theme.secondaryBackgroundColor,
                         onChangeColor = { theme = theme.copy(secondaryBackgroundColor = it) },
                         theme = theme,
+                        seeAbout = ::seeAbout,
                     )
                 }
                 item {
-                    ColorPreviewColumn {
+                    ColorPreviewColumn(previewText = "Preview (Background)", theme = theme) {
                         Box(
-                            modifier = Modifier.fillMaxWidth()
-                        )
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(theme.secondaryBackgroundColor)
+                                .padding(16.dp),
+                        ) {
+                            InfernoText("AAAAAAAA", fontColor = theme.primaryTextColor)
+                        }
                     }
+                }
+
+                // bottom spacer
+                item {
+                    Spacer(modifier = Modifier.heightIn(LIST_BOTTOM_PADDING))
                 }
             }
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.BottomCenter),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 InfernoOutlinedButton(
                     text = stringResource(android.R.string.cancel),
-                    modifier = Modifier.weight(1F), onClick = onDismiss,
+                    modifier = Modifier.weight(1F),
+                    onClick = onDismiss,
                     border = BorderStroke(
                         width = 1.dp,
                         color = theme.primaryOutlineColor,
                     ),
+                    colors = outlinedButtonColors,
                 )
                 InfernoButton(
                     text = stringResource(R.string.browser_menu_save),
@@ -523,17 +538,16 @@ fun EditThemeDialog(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalStdlibApi::class)
+@OptIn(ExperimentalStdlibApi::class)
 @Composable
 private fun ColorEditor(
     name: String,
     color: Color,
     onChangeColor: (Color) -> Unit,
     theme: InfernoTheme,
+    seeAbout: () -> Unit,
 ) {
-    val coroutineScope = rememberCoroutineScope()
     var input by remember { mutableStateOf(color.toArgbHexString()) }
-    val tooltipState = rememberTooltipState(isPersistent = true)
 
     // true if color is badly formatted
     var colorBad by remember { mutableStateOf(false) }
@@ -541,13 +555,167 @@ private fun ColorEditor(
     fun checkForErrors() {
         colorBad = !RGB_STRING_REGEX.matches(input) && !ARGB_STRING_REGEX.matches(input)
     }
-
-    // tooltip wrapper
-    TooltipBox(
+    Column(
         modifier = Modifier.fillMaxWidth(),
-        positionProvider = TooltipDefaults.rememberRichTooltipPositionProvider(),
-        tooltip = {
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING),
+    ) {
+        // color name
+        InfernoText(text = name)
+
+        // color preview & editor
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(
+                PrefUiConst.PREFERENCE_INTERNAL_PADDING, Alignment.Start
+            ),
+            verticalAlignment = Alignment.Top,
+        ) {
+            // color preview box
+            Box(
+                modifier = Modifier
+                    .padding(top = 12.dp)
+                    .background(color, MaterialTheme.shapes.small)
+                    .border(1.dp, theme.primaryOutlineColor, MaterialTheme.shapes.small)
+                    .size(COLOR_BOX_SIZE),
+            )
+
+            // color hex editor
+            InfernoOutlinedTextField(
+                modifier = Modifier
+                    .heightIn(min = 0.dp)
+                    .width(IntrinsicSize.Min),
+                value = input,
+                onValueChange = {
+                    input = ARGB_STRING_FILTER.replace(it, "")
+                    // if string is valid hex, update color
+                    when {
+                        RGB_STRING_REGEX.matches(it) -> onChangeColor(Color(("FF$it").hexToInt()))
+                        ARGB_STRING_REGEX.matches(it) -> onChangeColor(Color(it.hexToInt()))
+                    }
+                    checkForErrors()
+                },
+                leadingIcon = {
+                    InfernoText("#")
+                },
+                supportingText = {
+                    if (colorBad) {
+                        InfernoText(
+                            text = "6 or 8 characters long, 0-9, A-Z. Click here to learn more", // todo: string res
+                            infernoStyle = InfernoTextStyle.Error,
+                            modifier = Modifier.clickable(onClick = seeAbout),
+                        )
+                    }
+                },
+                isError = colorBad,
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = theme.primaryTextColor,
+                    unfocusedTextColor = theme.secondaryTextColor,
+                    disabledTextColor = theme.secondaryTextColor,
+                    errorTextColor = theme.errorColor,
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent,
+                    disabledContainerColor = Color.Transparent,
+                    errorContainerColor = Color.Transparent,
+                    cursorColor = theme.primaryOutlineColor,
+                    errorCursorColor = theme.errorColor,
+                    selectionColors = TextSelectionColors(
+                        handleColor = theme.primaryOutlineColor,
+                        backgroundColor = theme.primaryOutlineColor.copy(
+                            alpha = 0.4F,
+                        ),
+                    ),
+                    focusedBorderColor = theme.primaryActionColor,
+                    unfocusedBorderColor = theme.primaryOutlineColor,
+                    disabledBorderColor = theme.secondaryTextColor,
+                    errorBorderColor = theme.errorColor,
+                    focusedLeadingIconColor = theme.primaryTextColor,
+                    unfocusedLeadingIconColor = theme.secondaryTextColor,
+                    disabledLeadingIconColor = theme.secondaryTextColor,
+                    errorLeadingIconColor = theme.errorColor,
+                    focusedTrailingIconColor = theme.primaryTextColor,
+                    unfocusedTrailingIconColor = theme.secondaryTextColor,
+                    disabledTrailingIconColor = theme.secondaryTextColor,
+                    errorTrailingIconColor = theme.errorColor,
+                    focusedLabelColor = theme.primaryActionColor,
+                    unfocusedLabelColor = theme.primaryOutlineColor,
+                    disabledLabelColor = theme.secondaryTextColor,
+                    errorLabelColor = theme.errorColor,
+                    focusedPlaceholderColor = theme.secondaryTextColor,
+                    unfocusedPlaceholderColor = theme.secondaryTextColor,
+                    disabledPlaceholderColor = theme.secondaryTextColor,
+                    errorPlaceholderColor = theme.errorColor,
+                    focusedSupportingTextColor = theme.primaryTextColor,
+                    unfocusedSupportingTextColor = theme.secondaryTextColor,
+                    disabledSupportingTextColor = theme.secondaryTextColor,
+                    errorSupportingTextColor = theme.errorColor,
+                    focusedPrefixColor = theme.primaryTextColor,
+                    unfocusedPrefixColor = theme.secondaryTextColor,
+                    disabledPrefixColor = theme.secondaryTextColor,
+                    errorPrefixColor = theme.errorColor,
+                    focusedSuffixColor = theme.primaryTextColor,
+                    unfocusedSuffixColor = theme.secondaryTextColor,
+                    disabledSuffixColor = theme.secondaryTextColor,
+                    errorSuffixColor = theme.errorColor,
+                ),
+            )
+        }
+    }
+}
+
+fun Color.toArgbHexString(): String {
+    return this.toArgb().argbIntToHexString().uppercase(Locale.getDefault())
+}
+
+fun Int.argbIntToHexString(): String {
+    val a = (this shr 24).toByte()
+    val r = (this shr 16).toByte()
+    val g = (this shr 8).toByte()
+    val b = (this).toByte()
+    return byteArrayOf(a, r, g, b).toHexString()
+}
+
+@Composable
+private fun AboutItem(
+    expanded: Boolean,
+    onExpandedChanged: (Boolean) -> Unit,
+    theme: InfernoTheme,
+) {
+    Column(
+        modifier = Modifier.padding(
+            horizontal = PrefUiConst.PREFERENCE_HORIZONTAL_PADDING,
+            vertical = PrefUiConst.PREFERENCE_VERTICAL_PADDING,
+        ),
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING),
+    ) {
+        // about expand title
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING),
+            modifier = Modifier.clickable { onExpandedChanged.invoke(!expanded) },
+        ) {
             InfernoText(
+                text = stringResource(R.string.preferences_category_about),
+                infernoStyle = InfernoTextStyle.Title,
+                fontColor = theme.primaryTextColor,
+            )
+            InfernoIcon(
+                painter = painterResource(
+                    when (expanded) {
+                        true -> R.drawable.ic_chevron_up_24
+                        false -> R.drawable.ic_chevron_down_24
+                    },
+                ),
+                contentDescription = null,
+                modifier = Modifier.size(18.dp),
+                tint = theme.primaryIconColor
+            )
+        }
+
+        // description
+        if (expanded) {
+            InfernoText(
+                // todo: move to about section (expandable) R.string.preferences_category_about
                 // todo: string res
                 text = "Hex colors must be in format #RRGGBB or #AARRGGBB." +
                         // alpha
@@ -569,102 +737,58 @@ private fun ColorEditor(
                         // purple
                         "\n- You can also make colors transparent, in this case half transparent purple would be #889000FF",
                 infernoStyle = InfernoTextStyle.Subtitle,
-            )
-        },
-        state = tooltipState,
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            // color name
-            InfernoText(text = name, modifier = Modifier.weight(3F))
-
-
-            // color hex editor
-            InfernoOutlinedTextField(
-                modifier = Modifier.weight(1F),
-                value = input,
-                onValueChange = {
-                    input = ARGB_STRING_FILTER.replace(it, "")
-                    // if string is valid hex, update color
-                    when {
-                        RGB_STRING_REGEX.matches(it) -> onChangeColor(Color(("FF$it").hexToInt()))
-                        ARGB_STRING_REGEX.matches(it) -> onChangeColor(Color(it.hexToInt()))
-                    }
-                },
-                leadingIcon = {
-                    InfernoText("#")
-                },
-                supportingText = {
-                    if (colorBad) {
-                        InfernoText(
-                            text = "Must have either 6 or 8 characters. Learn more.", // todo: string res
-                            infernoStyle = InfernoTextStyle.Error,
-                            modifier = Modifier.clickable {
-                                coroutineScope.launch {
-                                    tooltipState.show()
-                                }
-                            },
-                        )
-                    }
-                },
-                isError = colorBad,
-            )
-
-            // color preview box
-            Box(
-                modifier = Modifier
-                    .background(color, MaterialTheme.shapes.small)
-                    .border(1.dp, theme.primaryOutlineColor, MaterialTheme.shapes.small)
-                    .size(COLOR_BOX_SIZE),
+                fontColor = theme.secondaryTextColor,
             )
         }
     }
 }
 
-fun Color.toArgbHexString(): String {
-    return this.toArgb().argbIntToHexString()
-}
-
-fun Int.argbIntToHexString(): String {
-    val a = (this shr 24).toByte()
-    val r = (this shr 16).toByte()
-    val g = (this shr 8).toByte()
-    val b = (this).toByte()
-    return byteArrayOf(a, r, g, b).toHexString()
-}
-
 @Composable
 private fun ColorPreviewRow(
-    background: Color = Color.Transparent,
+    previewText: String = "Preview", // todo: string res
+    theme: InfernoTheme,
     content: @Composable RowScope.() -> Unit,
 ) {
-    Row(
+    Column(
         modifier = Modifier
-            .fillMaxWidth()
-            .background(background),
-        horizontalArrangement = Arrangement.SpaceAround,
-        verticalAlignment = Alignment.CenterVertically,
+            .fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalAlignment = Alignment.Start,
     ) {
-        content.invoke(this)
+        PreviewHorizontalDivider(theme)
+        InfernoText(previewText, fontColor = theme.primaryTextColor)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceAround,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            content.invoke(this)
+        }
+        PreviewHorizontalDivider(theme)
     }
 }
 
 @Composable
+private fun PreviewHorizontalDivider(theme: InfernoTheme) {
+    HorizontalDivider(thickness = 1.dp, color = theme.primaryIconColor)
+}
+
+@Composable
 private fun ColorPreviewColumn(
-    background: Color = Color.Transparent,
+    previewText: String = "Preview", // todo: string res
+    theme: InfernoTheme,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     Column(
         modifier = Modifier
-            .fillMaxWidth()
-            .background(background),
+            .fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+        PreviewHorizontalDivider(theme)
+        InfernoText(previewText, fontColor = theme.primaryTextColor)
         content.invoke(this)
+        PreviewHorizontalDivider(theme)
     }
 }
 

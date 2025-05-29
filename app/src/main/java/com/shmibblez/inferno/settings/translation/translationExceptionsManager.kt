@@ -121,6 +121,10 @@ internal fun LazyListScope.translationExceptionsManager(
     item {
         InfernoText(
             text = stringResource(R.string.never_translate_site_header_preference),
+            modifier = Modifier.padding(
+                horizontal = PrefUiConst.PREFERENCE_HORIZONTAL_PADDING,
+                vertical = PrefUiConst.PREFERENCE_VERTICAL_PADDING,
+            ),
         )
     }
 

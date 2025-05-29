@@ -1,4 +1,4 @@
-syntax = "proto3";
+syntax = "proto2";
 
 option java_package = "com.shmibblez.inferno.proto";
 option java_multiple_files = true;
@@ -12,8 +12,8 @@ message InfernoSettings {
   /*** vars ***/
 
 
-  uint64 numberOfAppLaunches = 1;
-  uint64 lastBrowseActivityMs = 2;
+  optional uint64 numberOfAppLaunches = 1;
+  optional uint64 lastBrowseActivityMs = 2;
 
 
   /*** toolbar settings ***/
@@ -41,8 +41,8 @@ message InfernoSettings {
   }
 
   // general
-  VerticalToolbarPosition toolbarVerticalPosition = 3;
-  VerticalToolbarPosition inAppToolbarVerticalPosition = 4;
+  optional VerticalToolbarPosition toolbarVerticalPosition = 3 [default = TOOLBAR_BOTTOM];
+  optional VerticalToolbarPosition inAppToolbarVerticalPosition = 4 [default = TOOLBAR_BOTTOM];
   repeated ToolbarItem toolbarItems = 5;
 
 
@@ -74,19 +74,19 @@ message InfernoSettings {
   }
 
   // general
-  CloseTabsMethod closeTabsMethod = 17;
+  optional CloseTabsMethod closeTabsMethod = 17 [default = CLOSE_TABS_MANUALLY];
   //  uint32 closeTabsAfterDays = 5; // todo: test with custom time in MS first, replacing settings.getTabTimeout() in BrowserApplication
-  bool shouldSeparateInactiveTabs = 18;
+  optional bool shouldSeparateInactiveTabs = 18 [default = false];
   //  uint32 makeTabsInactiveAfterDays = 22;
 
   // tab bar
-  bool isTabBarEnabled = 19;
-  MiniTabShowClose miniTabShowClose = 20;
-  VerticalTabBarPosition tabBarVerticalPosition = 21;
-  TabBarPosition tabBarPosition = 22;
+  optional bool isTabBarEnabled = 19 [default = true];
+  optional MiniTabShowClose miniTabShowClose = 20 [default = MINI_TAB_SHOW_ON_ALL];
+  optional VerticalTabBarPosition tabBarVerticalPosition = 21 [default = TAB_BAR_BOTTOM];
+  optional TabBarPosition tabBarPosition = 22 [default = TAB_BAR_ABOVE_TOOLBAR];
 
   // tab tray
-  TabTrayStyle tabTrayStyle = 23;
+  optional TabTrayStyle tabTrayStyle = 23 [default = TAB_TRAY_LIST];
 
 
   /*** search settings ***/
@@ -94,17 +94,17 @@ message InfernoSettings {
 
   // address bar settings
   // todo: make enum
-  string defaultSearchEngine = 6;
+  optional string defaultSearchEngine = 6;
   // todo: custom search engine map { [engine name]: [engine data] }
-  bool shouldAutocompleteUrls = 7;
-  bool shouldAutocompleteUrlsInPrivate = 8;
-  bool shouldShowSearchSuggestions = 9;
-  bool shouldShowSearchSuggestionsInPrivate = 10;
-  bool shouldShowHistorySuggestions = 11;
-  bool shouldShowBookmarkSuggestions = 12;
-  bool shouldShowSyncedTabsSuggestions = 13;
-  bool shouldShowClipboardSuggestions = 14;
-  bool shouldShowVoiceSearch = 15;
+  optional bool shouldAutocompleteUrls = 7 [default = true];
+  optional bool shouldAutocompleteUrlsInPrivate = 8 [default = true];
+  optional bool shouldShowSearchSuggestions = 9 [default = true];
+  optional bool shouldShowSearchSuggestionsInPrivate = 10 [default = true];
+  optional bool shouldShowHistorySuggestions = 11 [default = true];
+  optional bool shouldShowBookmarkSuggestions = 12 [default = true];
+  optional bool shouldShowSyncedTabsSuggestions = 13 [default = true];
+  optional bool shouldShowClipboardSuggestions = 14 [default = true];
+  optional bool shouldShowVoiceSearch = 15 [default = true];
   //  bool shouldShowSearchShortcuts = 16; // on awesomebar, not used, might need to add later?
   // bool showSponsoredSuggestions = ?; // sponsored not enabled
 
@@ -126,25 +126,25 @@ message InfernoSettings {
   message InfernoTheme {
     // todo: define and use colors, take a look at material for some naming ideas
     // in settings show description for where each color is shown
-    string name = 1;
-    uint64 timeSet = 2;
-    uint32 primaryTextColor = 3;
-    uint32 secondaryTextColor = 4;
-    uint32 primaryIconColor = 5;
-    uint32 secondaryIconColor = 6;
-    uint32 primaryOutlineColor = 7;
-    uint32 secondaryOutlineColor = 8;
-    uint32 primaryActionColor = 9;
-    uint32 secondaryActionColor = 10;
-    uint32 errorColor = 11;
-    uint32 primaryBackgroundColor = 12;
-    uint32 secondaryBackgroundColor = 13;
+    required string name = 1;
+    required uint64 timeSet = 2;
+    required uint32 primaryTextColor = 3;
+    required uint32 secondaryTextColor = 4;
+    required uint32 primaryIconColor = 5;
+    required uint32 secondaryIconColor = 6;
+    required uint32 primaryOutlineColor = 7;
+    required uint32 secondaryOutlineColor = 8;
+    required uint32 primaryActionColor = 9;
+    required uint32 secondaryActionColor = 10;
+    required uint32 errorColor = 11;
+    required uint32 primaryBackgroundColor = 12;
+    required uint32 secondaryBackgroundColor = 13;
   }
 
-  DefaultTheme selectedDefaultTheme = 28;
-  string selectedCustomTheme = 29;
-  DefaultTheme selectedDefaultThemePrivate = 30;
-  string selectedCustomThemePrivate = 31;
+  optional DefaultTheme selectedDefaultTheme = 28 [default = INFERNO_DARK];
+  optional string selectedCustomTheme = 29 [default = ""];
+  optional DefaultTheme selectedDefaultThemePrivate = 30 [default = MOZILLA_INCOGNITO_DARK];
+  optional string selectedCustomThemePrivate = 31 [default = ""];
   // { [theme name set by user]: [theme data] }
   map<string, InfernoTheme> customThemes = 32;
 
@@ -166,20 +166,20 @@ message InfernoSettings {
     // GESTURE_ACTION_REOPEN_LAST_CLOSED_TAB = 11; // HOW TO DO THIS?
   }
 
-  bool isPullToRefreshEnabled = 24;
-  bool isDynamicToolbarEnabled = 25;
+  optional bool isPullToRefreshEnabled = 24 [default = true];
+  optional bool isDynamicToolbarEnabled = 25 [default = true];
   // sets if swipe up and down on toolbar and tab bar do the same thing
-  bool shouldUnifyToolbarAndTabBarGestures = 26;
+  optional bool shouldUnifyToolbarAndTabBarGestures = 26 [default = true];
 
   // toolbar gestures
-  GestureAction toolbarGestureSwipeLeft = 73;
-  GestureAction toolbarGestureSwipeRight = 74;
-  GestureAction toolbarGestureSwipeUp = 75;
-  GestureAction toolbarGestureSwipeDown = 76;
+  optional GestureAction toolbarGestureSwipeLeft = 73 [default = GESTURE_ACTION_NONE];
+  optional GestureAction toolbarGestureSwipeRight = 74 [default = GESTURE_ACTION_NONE];
+  optional GestureAction toolbarGestureSwipeUp = 75 [default = GESTURE_ACTION_NONE];
+  optional GestureAction toolbarGestureSwipeDown = 76 [default = GESTURE_ACTION_NONE];
 
   // tab bar gestures
-  GestureAction tabBarGestureSwipeUp = 77;
-  GestureAction tabBarGestureSwipeDown = 78;
+  optional GestureAction tabBarGestureSwipeUp = 77 [default = GESTURE_ACTION_NONE];
+  optional GestureAction tabBarGestureSwipeDown = 78 [default = GESTURE_ACTION_NONE];
 
 
   /*** home screen settings ***/
@@ -192,59 +192,54 @@ message InfernoSettings {
   }
 
   message CustomHomeSite {
-    string name = 1;
-    string url = 2;
+    required string name = 1;
+    required string url = 2;
   }
 
   // general
-  bool defaultTopSitesAdded = 33;
-  bool shouldShowTopSites = 34;
+  optional bool defaultTopSitesAdded = 33 [default = true];
+  optional bool shouldShowTopSites = 34 [default = true];
   // bool contile = ? // sponsored suggestions not shown
-  bool shouldShowRecentTabs = 35;
-  bool shouldShowBookmarks = 36;
+  optional bool shouldShowRecentTabs = 35 [default = true];
+  optional bool shouldShowBookmarks = 36 [default = true];
   // bool showPocketRecommendations = ? // pocket recommendations not implemented
   // bool showPocketSponsoredStories = ? // pocket recommendations not implemented
-  bool shouldShowHistory = 37;
-  bool shouldShowSearchWidget = 38;
+  optional bool shouldShowHistory = 37 [default = true];
+  optional bool shouldShowSearchWidget = 38 [default = true];
 
   // navigation
-  PageWhenBrowserReopened pageWhenBrowserReopened = 39;
-  bool shouldUseInfernoHome = 40;
-  string customHomeUrl = 41;
+  optional PageWhenBrowserReopened pageWhenBrowserReopened = 39 [default = OPEN_ON_LAST_TAB];
+  optional bool shouldUseInfernoHome = 40 [default = true];
+  optional string customHomeUrl = 41 [default = "https://web.tabliss.io"];
 
 
   /*** on quit ***/
 
 
   // on quit
-  bool deleteBrowsingDataOnQuit = 42;
-  bool deleteOpenTabsOnQuit = 43;
-  bool deleteBrowsingHistoryOnQuit = 44;
-  bool deleteCookiesAndSiteDataOnQuit = 45;
-  bool deleteCachesOnQuit = 46;
-  bool deletePermissionsOnQuit = 47;
-  bool deleteDownloadsOnQuit = 48;
+  optional bool deleteBrowsingDataOnQuit = 42 [default = false];
+  optional bool deleteOpenTabsOnQuit = 43 [default = false];
+  optional bool deleteBrowsingHistoryOnQuit = 44 [default = false];
+  optional bool deleteCookiesAndSiteDataOnQuit = 45 [default = false];
+  optional bool deleteCachesOnQuit = 46 [default = false];
+  optional bool deletePermissionsOnQuit = 47 [default = false];
+  optional bool deleteDownloadsOnQuit = 48 [default = false];
 
   // other
-  bool shouldUseExternalDownloadManager = 49; // todo: add to prefs
-  bool remoteDebuggingOverUsb = 50; // todo: add to prefs
+  optional bool shouldUseExternalDownloadManager = 49 [default = false]; // todo: add to prefs
+  optional bool remoteDebuggingOverUsb = 50 [default = false]; // todo: add to prefs
 
 
   /*** autofill data ***/
 
 
-  enum LoginsStorage {
-    ASK_TO_SAVE = 0;
-    DONT_SAVE = 1;
-  }
-
   // login storage
-  bool isAddressSaveAndAutofillEnabled = 55;
-  bool isCardSaveAndAutofillEnabled = 56;
-  bool shouldSyncCards = 57;
-  bool isLoginSaveAndAutofillEnabled = 51;
-  bool shouldSyncLogins = 52;
-  bool isAndroidAutofillEnabled = 54; // autofill in other apps
+  optional bool isAddressSaveAndAutofillEnabled = 55 [default = true];
+  optional bool isCardSaveAndAutofillEnabled = 56 [default = true];
+  optional bool shouldSyncCards = 57 [default = true];
+  optional bool isLoginSaveAndAutofillEnabled = 51 [default = true];
+  optional bool shouldSyncLogins = 52 [default = true];
+  optional bool isAndroidAutofillEnabled = 54 [default = true]; // autofill in other apps
   // managed in Core by LoginExceptionStorage
 
 
@@ -300,25 +295,25 @@ message InfernoSettings {
   }
 
   // site permissions
-  AppLinks appLinksSetting = 58;
-  AutoPlay autoplaySetting = 59;
-  Camera cameraSetting = 60;
-  Location locationSetting = 61;
-  Microphone microphoneSetting = 62;
-  Notifications notificationsSetting = 63;
-  PersistentStorage persistentStorageSetting = 64;
-  CrossSiteCookies crossSiteCookiesSetting = 65;
-  DrmControlledContent drmControlledContentSetting = 66;
+  optional AppLinks appLinksSetting = 58 [default = APP_LINKS_ASK_TO_OPEN];
+  optional AutoPlay autoplaySetting = 59 [default = BLOCK_AUDIO_ONLY];
+  optional Camera cameraSetting = 60 [default = CAMERA_ASK_TO_ALLOW];
+  optional Location locationSetting = 61 [default = LOCATION_ASK_TO_ALLOW];
+  optional Microphone microphoneSetting = 62 [default = MICROPHONE_ASK_TO_ALLOW];
+  optional Notifications notificationsSetting = 63 [default = NOTIFICATIONS_ASK_TO_ALLOW];
+  optional PersistentStorage persistentStorageSetting = 64 [default = PERSISTENT_STORAGE_ASK_TO_ALLOW];
+  optional CrossSiteCookies crossSiteCookiesSetting = 65 [default = CROSS_SITE_COOKIES_ASK_TO_ALLOW];
+  optional DrmControlledContent drmControlledContentSetting = 66 [default = DRM_CONTROLLED_CONTENT_ASK_TO_ALLOW];
   // exceptions managed through Core by PermissionStorage
 
 
   /*** accessibility ***/
 
 
-  bool shouldSizeFontAutomatically = 67;
-  float fontSizeFactor = 68;
-  bool shouldForceEnableZoomInWebsites = 69;
-  bool alwaysRequestDesktopSite = 70;
+  optional bool shouldSizeFontAutomatically = 67 [default = true];
+  optional float fontSizeFactor = 68 [default = 1];
+  optional bool shouldForceEnableZoomInWebsites = 69 [default = false];
+  optional bool alwaysRequestDesktopSite = 70 [default = false];
 
 
   /*** locale/language is set through Storage with LocaleManager ***/
@@ -327,15 +322,15 @@ message InfernoSettings {
   /*** translation is managed through browserStore with TranslationsAction ***/
 
 
-  bool downloadLanguagesInDataSavingMode = 86;
+  optional bool downloadLanguagesInDataSavingMode = 86 [default = false];
 
 
   /*** privacy & security ***/
 
 
   // private mode
-  bool openLinksInPrivateTab = 71;
-  bool allowScreenshotsInPrivateMode = 72;
+  optional bool openLinksInPrivateTab = 71 [default = false];
+  optional bool allowScreenshotsInPrivateMode = 72 [default = false];
 
 
   // enhanced tracking protection settings
@@ -362,21 +357,21 @@ message InfernoSettings {
       BLOCK_SUSPECTED_FINGERPRINTERS_PRIVATE_ONLY = 1;
       BLOCK_SUSPECTED_FINGERPRINTERS_NORMAL_AND_PRIVATE = 2;
     }
-    bool blockCookies = 81;
-    CookiePolicy blockCookiesPolicy = 73;
-    bool blockTrackingContent = 74;
-    TrackingContentSelection blockTrackingContentSelection = 82;
-    bool blockCryptominers = 76;
-    bool blockKnownFingerprinters = 77;
-    bool blockRedirectTrackers = 78;
-    bool blockSuspectedFingerprinters = 79;
-    SuspectedFingerprintersSelection blockSuspectedFingerprintersSelection = 80;
+    optional bool blockCookies = 81 [default = true];
+    optional CookiePolicy blockCookiesPolicy = 73 [default = ISOLATE_CROSS_SITE_COOKIES];
+    optional bool blockTrackingContent = 74 [default = true];
+    optional TrackingContentSelection blockTrackingContentSelection = 82 [default = BLOCK_TRACKING_PRIVATE_ONLY];
+    optional bool blockCryptominers = 76 [default = true];
+    optional bool blockKnownFingerprinters = 77 [default = true];
+    optional bool blockRedirectTrackers = 78 [default = true];
+    optional bool blockSuspectedFingerprinters = 79 [default = true];
+    optional SuspectedFingerprintersSelection blockSuspectedFingerprintersSelection = 80 [default = BLOCK_SUSPECTED_FINGERPRINTERS_PRIVATE_ONLY];
   }
 
-  bool isEnhancedTrackingProtectionEnabled = 81;
-  bool isGlobalPrivacyControlEnabled = 82; // tell websites not to share & sell data
-  TrackingProtectionDefault selectedTrackingProtection = 83;
-  CustomTrackingProtection customTrackingProtection = 84;
+  optional bool isEnhancedTrackingProtectionEnabled = 81 [default = false];
+  optional bool isGlobalPrivacyControlEnabled = 82 [default = false]; // tell websites not to share & sell data
+  optional TrackingProtectionDefault selectedTrackingProtection = 83 [default = STANDARD];
+  optional CustomTrackingProtection customTrackingProtection = 84;
   // exceptions managed through Core by LoginExceptionStorage
 
 
@@ -387,7 +382,7 @@ message InfernoSettings {
     HTTPS_ONLY_ENABLED_PRIVATE_ONLY = 3;
   }
 
-  HttpsOnlyMode httpsOnlyMode = 85;
+  optional HttpsOnlyMode httpsOnlyMode = 85 [default = HTTPS_ONLY_DISABLED];
 
 
 }

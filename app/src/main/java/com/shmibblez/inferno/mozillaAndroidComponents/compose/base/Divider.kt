@@ -16,7 +16,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.shmibblez.inferno.ext.infernoTheme
 import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.annotation.LightDarkPreview
 import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.theme.AcornTheme
 
@@ -29,7 +31,7 @@ import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.theme.AcornTh
 @Composable
 fun Divider(
     modifier: Modifier = Modifier,
-    color: Color = AcornTheme.colors.borderPrimary,
+    color: Color = LocalContext.current.infernoTheme().value.primaryIconColor, // AcornTheme.colors.borderPrimary,
 ) {
     androidx.compose.material3.VerticalDivider(
         modifier = modifier,

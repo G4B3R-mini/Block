@@ -1,44 +1,29 @@
 package com.shmibblez.inferno.settings
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.rememberScrollableState
-import androidx.compose.foundation.gestures.scrollable
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.coroutineScope
 import com.shmibblez.inferno.R
-import com.shmibblez.inferno.compose.base.InfernoIcon
-import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.ext.components
-import com.shmibblez.inferno.ext.infernoTheme
 import com.shmibblez.inferno.nimbus.FxNimbus
-import com.shmibblez.inferno.settings.compose.components.PreferenceAction
-import com.shmibblez.inferno.settings.compose.components.PreferenceSpacer
 import com.shmibblez.inferno.settings.account.AccountView
 import com.shmibblez.inferno.settings.account.rememberAccountState
 import com.shmibblez.inferno.settings.compose.components.InfernoSettingsPage
+import com.shmibblez.inferno.settings.compose.components.PreferenceAction
+import com.shmibblez.inferno.settings.compose.components.PreferenceSpacer
 
 //private const val SCROLL_INDICATOR_DELAY = 10L
 //private const val FXA_SYNC_OVERRIDE_EXIT_DELAY = 2000L
 //private const val AMO_COLLECTION_OVERRIDE_EXIT_DELAY = 3000L
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsPage(
     goBackLegacy: () -> Unit,

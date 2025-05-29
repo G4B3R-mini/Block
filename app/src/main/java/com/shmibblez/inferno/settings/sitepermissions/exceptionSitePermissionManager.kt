@@ -376,7 +376,6 @@ fun InfernoSettings.AutoPlay.toAutoplayValue(): Pair<SitePermissions.AutoplaySta
         InfernoSettings.AutoPlay.BLOCK_AUDIO_AND_VIDEO -> blocked to blocked
         InfernoSettings.AutoPlay.ALLOW_AUDIO_AND_VIDEO -> allowed to allowed
         InfernoSettings.AutoPlay.BLOCK_AUDIO_AND_VIDEO_ON_CELLULAR_DATA_ONLY -> allowed to allowed
-        InfernoSettings.AutoPlay.UNRECOGNIZED -> blocked to blocked
     }
 }
 
@@ -393,7 +392,6 @@ fun InfernoSettings.Camera.toCameraValue(): SitePermissions.Status {
         InfernoSettings.Camera.CAMERA_BLOCKED -> SitePermissions.Status.BLOCKED
         InfernoSettings.Camera.CAMERA_ASK_TO_ALLOW -> SitePermissions.Status.NO_DECISION
         InfernoSettings.Camera.CAMERA_ALLOWED -> SitePermissions.Status.ALLOWED
-        InfernoSettings.Camera.UNRECOGNIZED -> SitePermissions.Status.BLOCKED
     }
 }
 
@@ -410,7 +408,6 @@ fun InfernoSettings.Location.toLocationValue(): SitePermissions.Status {
         InfernoSettings.Location.LOCATION_BLOCKED -> SitePermissions.Status.BLOCKED
         InfernoSettings.Location.LOCATION_ASK_TO_ALLOW -> SitePermissions.Status.NO_DECISION
         InfernoSettings.Location.LOCATION_ALLOWED -> SitePermissions.Status.ALLOWED
-        InfernoSettings.Location.UNRECOGNIZED -> SitePermissions.Status.BLOCKED
     }
 }
 
@@ -427,7 +424,6 @@ fun InfernoSettings.Microphone.toMicrophoneValue(): SitePermissions.Status {
         InfernoSettings.Microphone.MICROPHONE_BLOCKED -> SitePermissions.Status.BLOCKED
         InfernoSettings.Microphone.MICROPHONE_ASK_TO_ALLOW -> SitePermissions.Status.NO_DECISION
         InfernoSettings.Microphone.MICROPHONE_ALLOWED -> SitePermissions.Status.ALLOWED
-        InfernoSettings.Microphone.UNRECOGNIZED -> SitePermissions.Status.BLOCKED
     }
 }
 
@@ -444,7 +440,6 @@ fun InfernoSettings.Notifications.toNotificationValue(): SitePermissions.Status 
         InfernoSettings.Notifications.NOTIFICATIONS_BLOCKED -> SitePermissions.Status.BLOCKED
         InfernoSettings.Notifications.NOTIFICATIONS_ASK_TO_ALLOW -> SitePermissions.Status.NO_DECISION
         InfernoSettings.Notifications.NOTIFICATIONS_ALLOWED -> SitePermissions.Status.ALLOWED
-        InfernoSettings.Notifications.UNRECOGNIZED -> SitePermissions.Status.BLOCKED
     }
 }
 
@@ -461,7 +456,6 @@ fun InfernoSettings.PersistentStorage.toLocalStorageValue(): SitePermissions.Sta
         InfernoSettings.PersistentStorage.PERSISTENT_STORAGE_BLOCKED -> SitePermissions.Status.BLOCKED
         InfernoSettings.PersistentStorage.PERSISTENT_STORAGE_ASK_TO_ALLOW -> SitePermissions.Status.NO_DECISION
         InfernoSettings.PersistentStorage.PERSISTENT_STORAGE_ALLOWED -> SitePermissions.Status.ALLOWED
-        InfernoSettings.PersistentStorage.UNRECOGNIZED -> SitePermissions.Status.BLOCKED
     }
 }
 
@@ -478,7 +472,6 @@ fun InfernoSettings.CrossSiteCookies.toCrossOriginStorageValue(): SitePermission
         InfernoSettings.CrossSiteCookies.CROSS_SITE_COOKIES_BLOCKED -> SitePermissions.Status.BLOCKED
         InfernoSettings.CrossSiteCookies.CROSS_SITE_COOKIES_ASK_TO_ALLOW -> SitePermissions.Status.NO_DECISION
         InfernoSettings.CrossSiteCookies.CROSS_SITE_COOKIES_ALLOWED -> SitePermissions.Status.ALLOWED
-        InfernoSettings.CrossSiteCookies.UNRECOGNIZED -> SitePermissions.Status.BLOCKED
     }
 }
 
@@ -495,6 +488,5 @@ fun InfernoSettings.DrmControlledContent.toMediaKeysSystemAccessValues(): SitePe
         InfernoSettings.DrmControlledContent.DRM_CONTROLLED_CONTENT_BLOCKED -> SitePermissions.Status.BLOCKED
         InfernoSettings.DrmControlledContent.DRM_CONTROLLED_CONTENT_ASK_TO_ALLOW -> SitePermissions.Status.NO_DECISION
         InfernoSettings.DrmControlledContent.DRM_CONTROLLED_CONTENT_ALLOWED -> SitePermissions.Status.ALLOWED
-        InfernoSettings.DrmControlledContent.UNRECOGNIZED -> SitePermissions.Status.BLOCKED
     }
 }

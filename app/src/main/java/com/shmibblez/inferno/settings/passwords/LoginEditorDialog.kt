@@ -1,9 +1,10 @@
 package com.shmibblez.inferno.settings.passwords
 
 import android.util.Patterns
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.Card
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -13,8 +14,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.base.InfernoButton
 import com.shmibblez.inferno.compose.base.InfernoDialog
@@ -23,6 +22,7 @@ import com.shmibblez.inferno.compose.base.InfernoOutlinedTextField
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.compose.base.InfernoTextStyle
 import com.shmibblez.inferno.ext.infernoTheme
+import com.shmibblez.inferno.settings.compose.components.PrefUiConst
 import com.shmibblez.inferno.settings.logins.SavedLogin
 import mozilla.components.concept.storage.LoginEntry
 
@@ -154,7 +154,10 @@ fun LoginEditorDialog(
         }
 
         // cancel / save buttons
-        Row {
+        Row(
+            modifier = Modifier.padding(vertical = PrefUiConst.PREFERENCE_VERTICAL_PADDING),
+            horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING),
+        ) {
             InfernoOutlinedButton(
                 modifier = Modifier.weight(1F),
                 text = stringResource(android.R.string.cancel),

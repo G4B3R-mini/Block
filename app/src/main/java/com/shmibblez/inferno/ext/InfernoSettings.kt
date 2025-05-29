@@ -11,7 +11,6 @@ fun InfernoSettings.getSelectedTheme(context: Context): InfernoTheme {
             InfernoSettings.DefaultTheme.MOZILLA_INCOGNITO_DARK -> InfernoTheme.incognitoDark(context)
             InfernoSettings.DefaultTheme.MOZILLA_INCOGNITO_LIGHT -> InfernoTheme.incognitoLight(context)
             InfernoSettings.DefaultTheme.INFERNO_DARK,
-            InfernoSettings.DefaultTheme.UNRECOGNIZED,
             null,
                 -> InfernoTheme.dark(context)
         }

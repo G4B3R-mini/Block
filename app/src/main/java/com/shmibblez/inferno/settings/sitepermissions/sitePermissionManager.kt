@@ -396,7 +396,6 @@ fun InfernoSettings.AppLinks.toPrefString(context: Context): String {
         InfernoSettings.AppLinks.APP_LINKS_ASK_TO_OPEN -> context.getString(R.string.preferences_open_links_in_apps_ask)
         InfernoSettings.AppLinks.APP_LINKS_ALLOWED -> context.getString(R.string.preferences_open_links_in_apps_always)
         InfernoSettings.AppLinks.APP_LINKS_BLOCKED -> context.getString(R.string.preferences_open_links_in_apps_never)
-        InfernoSettings.AppLinks.UNRECOGNIZED -> ""
     }
 }
 
@@ -406,7 +405,6 @@ fun InfernoSettings.AutoPlay.toPrefString(context: Context): String {
         InfernoSettings.AutoPlay.BLOCK_AUDIO_AND_VIDEO -> context.getString(R.string.preference_option_autoplay_blocked3)
         InfernoSettings.AutoPlay.ALLOW_AUDIO_AND_VIDEO -> context.getString(R.string.preference_option_autoplay_allowed2)
         InfernoSettings.AutoPlay.BLOCK_AUDIO_AND_VIDEO_ON_CELLULAR_DATA_ONLY -> context.getString(R.string.preference_option_autoplay_allowed_wifi_only2)
-        InfernoSettings.AutoPlay.UNRECOGNIZED -> ""
     }
 }
 
@@ -416,7 +414,6 @@ fun InfernoSettings.Camera.toPrefString(context: Context, blockedByAndroid: Bool
         InfernoSettings.Camera.CAMERA_ASK_TO_ALLOW -> context.getString(R.string.preference_option_phone_feature_ask_to_allow)
         InfernoSettings.Camera.CAMERA_ALLOWED -> context.getString(R.string.preference_option_phone_feature_allowed)
         InfernoSettings.Camera.CAMERA_BLOCKED -> context.getString(R.string.preference_option_phone_feature_blocked)
-        InfernoSettings.Camera.UNRECOGNIZED -> ""
     }
 }
 
@@ -426,7 +423,6 @@ fun InfernoSettings.Location.toPrefString(context: Context, blockedByAndroid: Bo
         InfernoSettings.Location.LOCATION_ASK_TO_ALLOW -> context.getString(R.string.preference_option_phone_feature_ask_to_allow)
         InfernoSettings.Location.LOCATION_ALLOWED -> context.getString(R.string.preference_option_phone_feature_allowed)
         InfernoSettings.Location.LOCATION_BLOCKED -> context.getString(R.string.preference_option_phone_feature_blocked)
-        InfernoSettings.Location.UNRECOGNIZED -> ""
     }
 }
 
@@ -436,7 +432,6 @@ fun InfernoSettings.Microphone.toPrefString(context: Context, blockedByAndroid: 
         InfernoSettings.Microphone.MICROPHONE_ASK_TO_ALLOW -> context.getString(R.string.preference_option_phone_feature_ask_to_allow)
         InfernoSettings.Microphone.MICROPHONE_ALLOWED -> context.getString(R.string.preference_option_phone_feature_allowed)
         InfernoSettings.Microphone.MICROPHONE_BLOCKED -> context.getString(R.string.preference_option_phone_feature_blocked)
-        InfernoSettings.Microphone.UNRECOGNIZED -> ""
     }
 }
 
@@ -445,7 +440,6 @@ fun InfernoSettings.Notifications.toPrefString(context: Context): String {
         InfernoSettings.Notifications.NOTIFICATIONS_ASK_TO_ALLOW -> context.getString(R.string.preference_option_phone_feature_ask_to_allow)
         InfernoSettings.Notifications.NOTIFICATIONS_ALLOWED -> context.getString(R.string.preference_option_phone_feature_allowed)
         InfernoSettings.Notifications.NOTIFICATIONS_BLOCKED -> context.getString(R.string.preference_option_phone_feature_blocked)
-        InfernoSettings.Notifications.UNRECOGNIZED -> ""
     }
 }
 
@@ -454,7 +448,6 @@ fun InfernoSettings.PersistentStorage.toPrefString(context: Context): String {
         InfernoSettings.PersistentStorage.PERSISTENT_STORAGE_ASK_TO_ALLOW -> context.getString(R.string.preference_option_phone_feature_ask_to_allow)
         InfernoSettings.PersistentStorage.PERSISTENT_STORAGE_ALLOWED -> context.getString(R.string.preference_option_phone_feature_allowed)
         InfernoSettings.PersistentStorage.PERSISTENT_STORAGE_BLOCKED -> context.getString(R.string.preference_option_phone_feature_blocked)
-        InfernoSettings.PersistentStorage.UNRECOGNIZED -> ""
     }
 }
 
@@ -463,7 +456,6 @@ fun InfernoSettings.CrossSiteCookies.toPrefString(context: Context): String {
         InfernoSettings.CrossSiteCookies.CROSS_SITE_COOKIES_ASK_TO_ALLOW -> context.getString(R.string.preference_option_phone_feature_ask_to_allow)
         InfernoSettings.CrossSiteCookies.CROSS_SITE_COOKIES_ALLOWED -> context.getString(R.string.preference_option_phone_feature_allowed)
         InfernoSettings.CrossSiteCookies.CROSS_SITE_COOKIES_BLOCKED -> context.getString(R.string.preference_option_phone_feature_blocked)
-        InfernoSettings.CrossSiteCookies.UNRECOGNIZED -> ""
     }
 }
 
@@ -475,6 +467,5 @@ fun InfernoSettings.DrmControlledContent.toPrefString(context: Context): String 
 
         InfernoSettings.DrmControlledContent.DRM_CONTROLLED_CONTENT_ALLOWED -> context.getString(R.string.preference_option_phone_feature_allowed)
         InfernoSettings.DrmControlledContent.DRM_CONTROLLED_CONTENT_BLOCKED -> context.getString(R.string.preference_option_phone_feature_blocked)
-        InfernoSettings.DrmControlledContent.UNRECOGNIZED -> ""
     }
 }

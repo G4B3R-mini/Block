@@ -177,6 +177,8 @@ internal fun LazyListScope.loginManager(
                     top = PrefUiConst.PREFERENCE_HALF_VERTICAL_PADDING,
                     bottom = if (state.expanded) 0.dp else PrefUiConst.PREFERENCE_HALF_VERTICAL_PADDING,
                 ),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             InfernoText(text = stringResource(R.string.mozac_feature_prompts_manage_logins_2))
             InfernoIcon(

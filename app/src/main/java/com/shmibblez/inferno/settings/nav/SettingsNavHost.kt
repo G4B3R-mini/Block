@@ -183,7 +183,7 @@ fun SettingsNavHost(
         composable<SettingsRoute.OnQuitSettingsPage> {
             OnQuitSettingsPage(goBack = { nav.popBackStack() })
         }
-        composable<SettingsRoute.AutofillSettingsPage> {
+        composable<SettingsRoute.PasswordSettingsPage> {
             PasswordSettingsPage(
                 goBack = { nav.popBackStack() },
                 onNavToPasswordExceptionSettingsPage = { nav.navigate(route = SettingsRoute.PasswordSettingsPage.PasswordExceptionSettingsPage) },

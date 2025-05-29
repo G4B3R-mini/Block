@@ -31,7 +31,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.asImageBitmap
@@ -81,7 +80,7 @@ fun InfernoTabBar(tabList: List<TabSessionState>, selectedTab: TabSessionState?)
         val screenWidth = configuration.screenWidthDp.dp
         // available space for tabs to occupy
         // screen width - side padding - add square width
-        val availableTabSpace = screenWidth - 8.dp - 1.dp - UiConst.TAB_BAR_HEIGHT
+        val availableTabSpace = screenWidth - 16.dp - 1.dp - UiConst.TAB_BAR_HEIGHT
         val tabWidth = availableTabSpace / tabList.size.let { if (it <= 0) 1 else it }
         return when (tabWidth > UiConst.TAB_WIDTH) {
             true -> tabWidth
@@ -158,7 +157,7 @@ fun InfernoTabBar(tabList: List<TabSessionState>, selectedTab: TabSessionState?)
                             lastIndex = tabList.size - 1
                         )
                     }
-//                    item { Spacer(Modifier.width(8.dp)) }
+                    item { Spacer(Modifier.width(8.dp)) }
                 }
                 // todo: make start and end of tabs fade, how to add alpha just to
                 //  edges when exiting?

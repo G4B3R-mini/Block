@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.MenuItemColors
 import androidx.compose.runtime.Composable
@@ -20,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.base.InfernoIcon
@@ -37,10 +39,10 @@ fun <T> PreferenceSelect(
     selectedMenuItem: T,
     menuItems: List<T>,
     mapToTitle: (T) -> String,
-    preferenceLeadingIcon: (@Composable () -> Unit) = {},
-    selectedLeadingIcon: (@Composable (T) -> Unit) = {},
-    menuItemLeadingIcon: (@Composable (T) -> Unit) = {},
-    menuItemTrailingIcon: (@Composable (T) -> Unit) = { },
+    preferenceLeadingIcon: (@Composable () -> Unit)? = null,
+    selectedLeadingIcon: (@Composable (T) -> Unit)? = null,
+    menuItemLeadingIcon: (@Composable (T) -> Unit)? = null,
+    menuItemTrailingIcon: (@Composable (T) -> Unit)? = null,
     onSelectMenuItem: (menuItem: T) -> Unit,
     additionalMenuItems: List<@Composable () -> Unit>? = null,
 ) {
@@ -54,10 +56,10 @@ fun <T> PreferenceSelect(
                 vertical = PrefUiConst.PREFERENCE_VERTICAL_PADDING,
             ),
         horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING),
-        verticalAlignment = Alignment.Top,
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         // leading icon (if set)
-        preferenceLeadingIcon.invoke()
+        preferenceLeadingIcon?.invoke()
 
         Column(
             modifier = Modifier.weight(2F),
@@ -94,7 +96,7 @@ fun <T> PreferenceSelect(
         ExposedDropdownMenuBox(
             expanded = expanded,
             onExpandedChange = { expanded = !expanded },
-            modifier = Modifier.weight(1F)
+            modifier = Modifier.weight(1F),
         ) {
             InfernoOutlinedTextField(
                 value = mapToTitle.invoke(selectedMenuItem),
@@ -104,8 +106,12 @@ fun <T> PreferenceSelect(
                 ),
                 readOnly = true,
                 label = null,
-                leadingIcon = {
-                    selectedLeadingIcon.invoke(selectedMenuItem)
+                leadingIcon = when (selectedLeadingIcon != null) {
+                    true -> {
+                        { selectedLeadingIcon.invoke(selectedMenuItem) }
+                    }
+
+                    false -> null
                 },
                 trailingIcon = {
                     InfernoIcon(
@@ -125,21 +131,36 @@ fun <T> PreferenceSelect(
             ) {
                 // show menu items
                 menuItems.map { it to mapToTitle.invoke(it) }.forEach { (item, name) ->
-                    DropdownMenuItem(
-                        text = { InfernoText(name) },
-                        onClick = { onSelectMenuItem.invoke(item) },
-                        leadingIcon = { menuItemLeadingIcon.invoke(item) },
-                        trailingIcon = { menuItemTrailingIcon.invoke(item) },
-                        colors = MenuItemColors(
-                            textColor = LocalContext.current.infernoTheme().value.primaryTextColor,
-                            leadingIconColor = LocalContext.current.infernoTheme().value.primaryIconColor,
-                            trailingIconColor = LocalContext.current.infernoTheme().value.primaryIconColor,
-                            disabledTextColor = LocalContext.current.infernoTheme().value.secondaryTextColor,
-                            disabledLeadingIconColor = LocalContext.current.infernoTheme().value.secondaryIconColor,
-                            disabledTrailingIconColor = LocalContext.current.infernoTheme().value.secondaryIconColor,
-                        ),
-                    )
-                }
+                        DropdownMenuItem(
+                            text = { InfernoText(name) },
+                            onClick = {
+                                onSelectMenuItem.invoke(item)
+                                expanded = false
+                            },
+                            leadingIcon = when (menuItemLeadingIcon != null) {
+                                true -> {
+                                    { menuItemLeadingIcon.invoke(item) }
+                                }
+
+                                false -> null
+                            },
+                            trailingIcon = when (menuItemTrailingIcon != null) {
+                                true -> {
+                                    { menuItemTrailingIcon.invoke(item) }
+                                }
+
+                                false -> null
+                            },
+                            colors = MenuItemColors(
+                                textColor = LocalContext.current.infernoTheme().value.primaryTextColor,
+                                leadingIconColor = LocalContext.current.infernoTheme().value.primaryIconColor,
+                                trailingIconColor = LocalContext.current.infernoTheme().value.primaryIconColor,
+                                disabledTextColor = LocalContext.current.infernoTheme().value.secondaryTextColor,
+                                disabledLeadingIconColor = LocalContext.current.infernoTheme().value.secondaryIconColor,
+                                disabledTrailingIconColor = LocalContext.current.infernoTheme().value.secondaryIconColor,
+                            ),
+                        )
+                    }
                 // show additional menu items
                 additionalMenuItems?.forEach { it.invoke() }
             }

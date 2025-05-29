@@ -93,17 +93,17 @@ fun DownloadInProgressIndicator(
     Box(
         contentAlignment = Alignment.Center,
     ) {
-        InfernoIcon(
-            modifier = modifier.size(8.dp),
-            painter = icon,
-            contentDescription = contentDescription,
-            tint = tint,
-        )
+//        InfernoIcon(
+//            modifier = modifier.size(8.dp),
+//            painter = icon,
+//            contentDescription = contentDescription,
+//            tint = tint,
+//        )
         CircularProgressIndicator(
             modifier = modifier.size(30.dp),
             color = LocalContext.current.infernoTheme().value.primaryActionColor,
             // used to be backgroundColor
-            trackColor = LocalContext.current.infernoTheme().value.secondaryActionColor,
+            trackColor = Color.Transparent, // LocalContext.current.infernoTheme().value.secondaryActionColor,
             strokeWidth = 2.dp,
             strokeCap = StrokeCap.Butt,
         )

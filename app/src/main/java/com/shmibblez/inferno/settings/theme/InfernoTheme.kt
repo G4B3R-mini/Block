@@ -13,6 +13,7 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import mozilla.components.ui.colors.PhotonColors
+import java.util.Date
 
 // todo: if doesnt work might have to make each value of InfernoSettings mutable
 class InfernoThemeProvider(context: Context) : MutableState<InfernoTheme> {
@@ -127,6 +128,7 @@ open class InfernoTheme(
     fun toSettingsObj(): InfernoSettings.InfernoTheme {
         // todo: use builder to return InfernoSettings.InfernoTheme
         return InfernoSettings.InfernoTheme.newBuilder().setName(this.name)
+            .setTimeSet(Date().time)
             .setPrimaryTextColor(this.primaryTextColor.toArgb())
             .setSecondaryTextColor(this.secondaryTextColor.toArgb())
             .setPrimaryIconColor(this.primaryIconColor.toArgb())
@@ -150,7 +152,7 @@ open class InfernoTheme(
             primaryIconColor = Color.White,
             secondaryIconColor = Color.White.copy(alpha = 0.75F),
             primaryOutlineColor = Color.White,
-            secondaryOutlineColor = Color.Red,
+            secondaryOutlineColor = Color.White.copy(alpha = 0.75F),
             primaryActionColor = Color.Red,
             secondaryActionColor = Color.Red.copy(alpha = 0.75F),
             errorColor = Color.Red,
@@ -197,7 +199,7 @@ open class InfernoTheme(
             primaryIconColor = Color.White,
             secondaryIconColor = Color.White.copy(alpha = 0.75F),
             primaryOutlineColor = Color.White,
-            secondaryOutlineColor = PhotonColors.Purple60,
+            secondaryOutlineColor = Color.White.copy(alpha = 0.75F),
             primaryActionColor = PhotonColors.Purple60,
             secondaryActionColor = PhotonColors.Purple60.copy(alpha = 0.75F),
             errorColor = Color.Red,
@@ -214,7 +216,7 @@ open class InfernoTheme(
             primaryIconColor = Color.White,
             secondaryIconColor = Color.White.copy(alpha = 0.75F),
             primaryOutlineColor = Color.White,
-            secondaryOutlineColor = PhotonColors.Purple60,
+            secondaryOutlineColor = Color.White.copy(alpha = 0.75F),
             primaryActionColor = PhotonColors.Purple60,
             secondaryActionColor = PhotonColors.Purple60.copy(alpha = 0.75F),
             errorColor = Color.Red,

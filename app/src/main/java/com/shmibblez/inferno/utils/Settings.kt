@@ -10,7 +10,6 @@ import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
 import android.content.pm.ShortcutManager
 import android.os.Build
-import android.util.Log
 import android.view.accessibility.AccessibilityManager
 import androidx.annotation.VisibleForTesting
 import androidx.annotation.VisibleForTesting.Companion.PRIVATE
@@ -52,15 +51,9 @@ import com.shmibblez.inferno.settings.sitepermissions.AUTOPLAY_BLOCK_ALL
 import com.shmibblez.inferno.settings.sitepermissions.AUTOPLAY_BLOCK_AUDIBLE
 import com.shmibblez.inferno.toolbar.defaultToolbarItems
 import com.shmibblez.inferno.wallpapers.Wallpaper
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.last
-import kotlinx.coroutines.flow.lastOrNull
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import mozilla.components.concept.engine.Engine.HttpsOnlyMode
 import mozilla.components.concept.engine.EngineSession.CookieBannerHandlingMode
 import mozilla.components.feature.sitepermissions.SitePermissionsRules
@@ -823,7 +816,6 @@ class Settings(private val appContext: Context) : PreferencesHolder {
         InfernoSettings.AutoPlay.BLOCK_AUDIO_AND_VIDEO -> AUTOPLAY_BLOCK_ALL
         InfernoSettings.AutoPlay.ALLOW_AUDIO_AND_VIDEO -> AUTOPLAY_ALLOW_ALL
         InfernoSettings.AutoPlay.BLOCK_AUDIO_AND_VIDEO_ON_CELLULAR_DATA_ONLY -> AUTOPLAY_ALLOW_ON_WIFI
-        InfernoSettings.AutoPlay.UNRECOGNIZED -> AUTOPLAY_BLOCK_AUDIBLE
     }
 //    fun getAutoplayUserSetting() = preferences.getInt(AUTOPLAY_USER_SETTING, AUTOPLAY_BLOCK_AUDIBLE)
 

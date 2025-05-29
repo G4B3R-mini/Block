@@ -1,8 +1,10 @@
 package com.shmibblez.inferno.settings.autofill
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -24,6 +26,7 @@ import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.compose.base.InfernoTextStyle
 import com.shmibblez.inferno.ext.infernoTheme
 import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.ext.year
+import com.shmibblez.inferno.settings.compose.components.PrefUiConst
 import com.shmibblez.inferno.settings.creditcards.validateCreditCardNumber
 import mozilla.components.concept.storage.CreditCard
 import mozilla.components.concept.storage.CreditCardNumber
@@ -98,7 +101,9 @@ fun CreditCardEditorDialog(
     }
 
     InfernoDialog(onDismiss = onDismiss) {
-        LazyColumn {
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING)
+        ) {
             // number
             item {
                 InfernoOutlinedTextField(
@@ -172,7 +177,10 @@ fun CreditCardEditorDialog(
                 }
             }
         }
-        Row {
+        Row(
+            modifier = Modifier.padding(vertical = PrefUiConst.PREFERENCE_VERTICAL_PADDING),
+            horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING),
+        ) {
             InfernoOutlinedButton(
                 modifier = Modifier.weight(1F),
                 text = stringResource(android.R.string.cancel),
@@ -180,7 +188,7 @@ fun CreditCardEditorDialog(
             )
             InfernoButton(
                 modifier = Modifier.weight(1F),
-                text = stringResource(R.string.save_changes_to_login),
+                text = stringResource(R.string.browser_menu_save),
                 enabled = nameError == null && numberError == null,
                 onClick = {
                     // if field invalid return (dont save)

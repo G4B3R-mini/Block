@@ -140,12 +140,15 @@ internal fun LazyListScope.addressManager(
     item {
         Row(
             modifier = Modifier
+                .fillMaxWidth()
                 .clickable { state.expanded = !state.expanded }
                 .padding(horizontal = PrefUiConst.PREFERENCE_HORIZONTAL_PADDING)
                 .padding(
                     top = PrefUiConst.PREFERENCE_HALF_VERTICAL_PADDING,
                     bottom = if (state.expanded) 0.dp else PrefUiConst.PREFERENCE_HALF_VERTICAL_PADDING,
                 ),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             InfernoText(text = stringResource(R.string.addresses_manage_addresses))
             InfernoIcon(
@@ -160,14 +163,14 @@ internal fun LazyListScope.addressManager(
     }
     if (state.expanded) {
         items(state.addresses) {
-            LoginItem(
+            AddressItem(
                 address = it,
                 onEditAddress = onEditAddressClicked,
                 onDeleteAddress = onDeleteAddressClicked,
             )
         }
         item {
-            AddLoginItem(onAddAddressClicked = onAddAddressClicked)
+            AddAddressItem(onAddAddressClicked = onAddAddressClicked)
         }
         item {
             Spacer(
@@ -178,7 +181,7 @@ internal fun LazyListScope.addressManager(
 }
 
 @Composable
-private fun LoginItem(
+private fun AddressItem(
     address: Address,
     onEditAddress: (Address) -> Unit,
     onDeleteAddress: (Address) -> Unit,
@@ -225,7 +228,7 @@ private fun LoginItem(
 }
 
 @Composable
-private fun AddLoginItem(onAddAddressClicked: () -> Unit) {
+private fun AddAddressItem(onAddAddressClicked: () -> Unit) {
     Row(
         modifier = Modifier
             .clickable { onAddAddressClicked.invoke() }

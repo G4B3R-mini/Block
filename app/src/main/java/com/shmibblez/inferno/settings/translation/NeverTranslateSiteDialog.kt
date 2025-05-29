@@ -1,6 +1,8 @@
 package com.shmibblez.inferno.settings.translation
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -10,6 +12,7 @@ import com.shmibblez.inferno.compose.base.InfernoDialog
 import com.shmibblez.inferno.compose.base.InfernoOutlinedButton
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.compose.base.InfernoTextStyle
+import com.shmibblez.inferno.settings.compose.components.PrefUiConst
 
 @Composable
 fun NeverTranslateSiteDialog(
@@ -28,7 +31,10 @@ fun NeverTranslateSiteDialog(
         )
 
         // cancel/confirm buttons
-        Row {
+        Row(
+            modifier = Modifier.padding(vertical = PrefUiConst.PREFERENCE_VERTICAL_PADDING),
+            horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING),
+        ) {
             // cancel
             InfernoOutlinedButton(
                 text = stringResource(id = R.string.never_translate_site_dialog_cancel_preference),
