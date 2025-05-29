@@ -11,7 +11,7 @@ firefox for Android, which is nice.
 
 - tabs (finally for firefox-mobile based apps)
 - color customization / themes!
-    - [ ] preset themes and custom themes
+    - preset themes and custom themes
 - enhanced privacy (mozilla telemetry has been removed)
 
 # Upcoming features:
