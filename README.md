@@ -10,7 +10,8 @@ firefox for Android, which is nice.
 # Features
 
 - tabs (finally for firefox-mobile based apps)
-- color customization (may be buggy)
+- color customization / themes!
+    - [ ] preset themes and custom themes
 - enhanced privacy (mozilla telemetry has been removed)
 
 # Upcoming features:
@@ -87,17 +88,12 @@ Did you add an account?
 
 ## Under Construction
 
-- [ ] color customization
-    - [ ] preset themes and custom themes
 - [ ] more customization settings
     - [ ] enable / disable tabs
     - [ ] customize toolbar items
     - [ ] toolbar and tabs position (top / bottom for each, which is above and below in case both on
       same side)
 - [ ] tabs
-    - [ ] set bottom bar and top bar height to 0 always (makes sites slow when variable)
-    - [ ] make bottom bar semi transparent (apply 0.5 alpha to background color for all bottom
-      components, eg: toolbar, tabs, readerview controls, fip bar, etc.)
     - [ ] use icons storage for favicon square (persisted)
 - [ ] biometric
     - [ ] for components that depend on biometric/auth, you could create a fragment in
@@ -119,7 +115,7 @@ Did you add an account?
 - [ ] more toolbar items
     - [ ] go to passwords page (key with bottom right profile view) (requires auth, consider setting
       a timeout like bitwarden does)
-    - [ ] 
+    - [ ] extensions settings direct access
 - [ ] more customization settings
     - [ ] if horizontal, add option to show tabs on right or left, make resizable by sliding
 - [ ] bug reporting system / feedback page
