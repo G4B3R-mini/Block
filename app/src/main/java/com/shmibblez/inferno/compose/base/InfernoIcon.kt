@@ -8,9 +8,6 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import com.shmibblez.inferno.ext.infernoTheme
 
-// todo: replace all usages of Icon with Inferno Icon
-//  and remove all instances of tint = Color.White or iconPrimary
-
 @Composable
 fun InfernoIcon(
     painter: Painter,

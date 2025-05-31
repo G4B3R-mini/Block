@@ -39,7 +39,7 @@ fun InfernoToolbar(
     val isMiniOrigin = true
     // for now just show OriginBrowserToolbar
     if (isOrigin) {
-        OriginBrowserToolbar(
+        InfernoOriginToolbar(
             tabSessionState = tabSessionState,
             tabCount = tabCount,
             onShowMenuBottomSheet = onShowMenuBottomSheet,
@@ -56,7 +56,7 @@ fun InfernoToolbar(
             onStopSearch = onStopSearch,
         )
     } else if (isMiniOrigin) {
-        MiniOriginBrowserToolbar(
+        InfernoMiniOriginToolbar(
             tabSessionState = tabSessionState,
             tabCount = tabCount,
             onShowMenuBottomSheet = onShowMenuBottomSheet,

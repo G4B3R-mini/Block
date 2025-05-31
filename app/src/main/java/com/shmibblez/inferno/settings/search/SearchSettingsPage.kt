@@ -33,6 +33,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.getActivity
+import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.getRootView
@@ -150,25 +151,23 @@ fun SearchSettingsPage(
                     },
                     menuItemLeadingIcon = {
                         if (it.type == SearchEngine.Type.CUSTOM) {
-                            Icon(
+                            InfernoIcon(
                                 painter = painterResource(R.drawable.ic_delete_24),
                                 contentDescription = stringResource(R.string.search_engine_delete),
                                 modifier = Modifier.clickable {
                                     deleteSearchEngine(it)
                                 },
-                                tint = Color.White, // todo: theme
                             )
                         }
                     },
                     menuItemTrailingIcon = {
                         if (it.type == SearchEngine.Type.CUSTOM) {
-                            Icon(
+                            InfernoIcon(
                                 painter = painterResource(R.drawable.ic_edit_24),
                                 contentDescription = stringResource(R.string.search_engine_delete),
                                 modifier = Modifier.clickable {
                                     showEditEngineDialogFor = it
                                 },
-                                tint = Color.White, // todo: theme
                             )
                         }
                     },
@@ -192,11 +191,11 @@ fun SearchSettingsPage(
 
                                 },
                                 leadingIcon = {
-                                    Icon(
+                                    InfernoIcon(
                                         painter = painterResource(R.drawable.ic_new_24),
                                         contentDescription = "",
                                         modifier = Modifier.size(24.dp),
-                                        tint = Color.White, // todo: theme
+//                                        tint = Color.White, // todo: theme
                                     )
                                 },
                             )

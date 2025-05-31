@@ -57,6 +57,7 @@ import com.shmibblez.inferno.compose.DismissibleItemBackground
 import com.shmibblez.inferno.compose.SwipeToDismissBox
 import com.shmibblez.inferno.compose.SwipeToDismissState
 import com.shmibblez.inferno.compose.TabThumbnail
+import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.compose.rememberSwipeToDismissState
 import com.shmibblez.inferno.ext.toShortUrl
@@ -312,13 +313,12 @@ private fun ListTab(
                         .size(size = 48.dp)
                         .testTag(TabsTrayTestTag.tabItemClose),
                 ) {
-                    Icon(
+                    InfernoIcon(
                         painter = painterResource(id = R.drawable.mozac_ic_cross_24),
                         contentDescription = stringResource(
                             id = R.string.close_tab_title,
                             tab.toDisplayTitle(),
                         ),
-                        tint = Color.White, // FirefoxTheme.colors.iconPrimary,
                     )
                 }
             } else {
@@ -377,13 +377,13 @@ private fun Thumbnail(
                     )
                 ), // FirefoxTheme.colors.layerAccent ),
             ) {
-                Icon(
+                InfernoIcon(
                     painter = painterResource(id = R.drawable.mozac_ic_checkmark_24),
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(all = 8.dp),
                     contentDescription = null,
-                    tint = colorResource(id = R.color.mozac_ui_icons_fill),
+//                    tint = colorResource(id = R.color.mozac_ui_icons_fill),
                 )
             }
         }

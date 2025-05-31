@@ -4,6 +4,7 @@
 
 package com.shmibblez.inferno.toolbar
 
+import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -68,8 +69,17 @@ private fun iconsWidth(nOptions: Int): Dp {
 //    return iconsWidth(nOptions).dpToPx()
 //}
 
+fun InfernoSettings.getToolbarItems(): List<InfernoSettings.ToolbarItem> {
+    return this.toolbarItemsList.let {
+        when (it.size) {
+            0 -> (null as InfernoSettings.ToolbarItem?).defaultToolbarItems
+            else -> it
+        }
+    }
+}
+
 @Composable
-internal fun OriginBrowserToolbar(
+internal fun InfernoOriginToolbar(
     // item params
     tabSessionState: TabSessionState,
     tabCount: Int,
@@ -104,32 +114,21 @@ internal fun OriginBrowserToolbar(
         }
     }
 
-
-    fun getToolbarItems(): List<InfernoSettings.ToolbarItem> {
-        settings.toolbarItemsList.let {
-            return when (it.size) {
-                0 -> (null as InfernoSettings.ToolbarItem?).defaultToolbarItems
-                else -> it
-            }
-        }
-    }
-
-    var toolbarItems by remember { mutableStateOf(getToolbarItems()) }
+    var toolbarItems by remember { mutableStateOf(settings.getToolbarItems()) }
     fun getOriginIndex() = toolbarItems.indexOf(InfernoSettings.ToolbarItem.TOOLBAR_ITEM_ORIGIN)
     var indexOrigin by remember { mutableIntStateOf(getOriginIndex()) }
     fun getLeftKeys() = toolbarItems.take(indexOrigin)
     fun getRightKeys() = toolbarItems.drop(indexOrigin + 1)
     var leftKeys by remember { mutableStateOf(getLeftKeys()) }
     var rightKeys by remember { mutableStateOf(getRightKeys()) }
-    var leftWidth = remember { iconsWidth(leftKeys.size) }
-    var leftWidthPx = remember { leftWidth.dpToPx(context) }
-    var rightWidth = remember { iconsWidth(rightKeys.size) }
-    var rightWidthPx = remember { rightWidth.dpToPx(context) }
-
+    var leftWidth by remember { mutableStateOf(iconsWidth(leftKeys.size)) }
+    var leftWidthPx by remember { mutableIntStateOf(leftWidth.dpToPx(context)) }
+    var rightWidth by remember { mutableStateOf(iconsWidth(rightKeys.size)) }
+    var rightWidthPx by remember { mutableIntStateOf(rightWidth.dpToPx(context)) }
 
     LaunchedEffect(settings.toolbarItemsList) {
         // on settings change, recalc values
-        toolbarItems = getToolbarItems()
+        toolbarItems = settings.getToolbarItems()
         indexOrigin = getOriginIndex()
         leftKeys = getLeftKeys()
         rightKeys = getRightKeys()

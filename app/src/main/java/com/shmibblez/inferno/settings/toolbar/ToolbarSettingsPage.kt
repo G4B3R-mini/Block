@@ -119,7 +119,8 @@ fun ToolbarSettingsPage(goBack: () -> Unit) {
             { PreferenceTitle("Toolbar Items") }, // todo: string res
         )
         // selected toolbar items
-        PreferenceToolbarItems(modifier = Modifier.padding(edgeInsets),
+        PreferenceToolbarItems(
+            modifier = Modifier.padding(edgeInsets),
             topPreferences = topPreferences,
             selectedItems = selectedToolbarItems,
             remainingItems = remainingToolbarItems,
@@ -132,7 +133,8 @@ fun ToolbarSettingsPage(goBack: () -> Unit) {
                         }.build()
                     }
                 }
-            })
+            },
+        )
     }
 }
 

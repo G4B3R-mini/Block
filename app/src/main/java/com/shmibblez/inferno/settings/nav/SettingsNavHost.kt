@@ -1,5 +1,12 @@
 package com.shmibblez.inferno.settings.nav
 
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.EaseIn
+import androidx.compose.animation.core.EaseOut
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -39,79 +46,79 @@ private interface SettingsRoute {
      * todo: based on [SettingsFragmentDirections.actionSettingsFragmentToAccountSettingsFragment]
      */
     @Serializable
-    object AccountSettingsPage: SettingsRoute
+    object AccountSettingsPage : SettingsRoute
 
     /**
      * todo: based on [SettingsFragmentDirections.actionSettingsFragmentToAccountProblemFragment]
      */
     @Serializable
-    object AccountProblemSettingsPage: SettingsRoute
+    object AccountProblemSettingsPage : SettingsRoute
 
     /**
      * todo: based on [SettingsFragmentDirections.actionSettingsFragmentToTurnOnSyncFragment]
      */
     @Serializable
-    object TurnOnSyncSettingsPage: SettingsRoute
+    object TurnOnSyncSettingsPage : SettingsRoute
 
     @Serializable
-    object SettingsPage: SettingsRoute
+    object SettingsPage : SettingsRoute
 
     @Serializable
-    object ToolbarSettingsPage: SettingsRoute
+    object ToolbarSettingsPage : SettingsRoute
 
     @Serializable
-    object TabSettingsPage: SettingsRoute
+    object TabSettingsPage : SettingsRoute
 
     @Serializable
-    object SearchSettingsPage: SettingsRoute
+    object SearchSettingsPage : SettingsRoute
 
     @Serializable
-    object ThemeSettingsPage: SettingsRoute
+    object ThemeSettingsPage : SettingsRoute
 
     @Serializable
-    object GestureSettingsPage: SettingsRoute
+    object GestureSettingsPage : SettingsRoute
 
     @Serializable
-    object HomePageSettingsPage: SettingsRoute
+    object HomePageSettingsPage : SettingsRoute
 
     @Serializable
-    object OnQuitSettingsPage: SettingsRoute
+    object OnQuitSettingsPage : SettingsRoute
 
     @Serializable
-    object PasswordSettingsPage: SettingsRoute {
+    object PasswordSettingsPage : SettingsRoute {
         @Serializable
-        object PasswordExceptionSettingsPage: SettingsRoute
+        object PasswordExceptionSettingsPage : SettingsRoute
     }
 
     @Serializable
-    object AutofillSettingsPage: SettingsRoute
+    object AutofillSettingsPage : SettingsRoute
 
     @Serializable
-    object SitePermissionsSettingsPage: SettingsRoute {
+    object SitePermissionsSettingsPage : SettingsRoute {
         @Serializable
-        object SitePermissionsExceptionsSettingsPage: SettingsRoute
+        object SitePermissionsExceptionsSettingsPage : SettingsRoute
     }
 
     @Serializable
-    object AccessibilitySettingsPage: SettingsRoute
+    object AccessibilitySettingsPage : SettingsRoute
 
     @Serializable
-    object LocaleSettingsPage: SettingsRoute
+    object LocaleSettingsPage : SettingsRoute
 
     @Serializable
-    object TranslationSettingsPage: SettingsRoute {
+    object TranslationSettingsPage : SettingsRoute {
         @Serializable
-        object AutomaticTranslationSettingsPage: SettingsRoute
+        object AutomaticTranslationSettingsPage : SettingsRoute
 
         @Serializable
-        object DownloadTranslationLanguagesSettingsPage: SettingsRoute
+        object DownloadTranslationLanguagesSettingsPage : SettingsRoute
 
         @Serializable
-        object TranslationExceptionsSettingsPage: SettingsRoute
+        object TranslationExceptionsSettingsPage : SettingsRoute
     }
 
     @Serializable
-    object PrivacyAndSecuritySettingsPage: SettingsRoute
+    object PrivacyAndSecuritySettingsPage : SettingsRoute
 
 }
 
@@ -127,6 +134,33 @@ fun SettingsNavHost(
         navController = nav,
         startDestination = SettingsRoute.SettingsPage,
         modifier = Modifier.fillMaxSize(),
+        popEnterTransition = {
+            fadeIn(
+                animationSpec = tween(
+                    300,
+                    easing = LinearEasing,
+                )
+            ) + slideIntoContainer(
+                animationSpec = tween(
+                    300,
+                    easing = EaseIn,
+                ),
+                towards = AnimatedContentTransitionScope.SlideDirection.End
+            )
+        },
+        popExitTransition = {
+            fadeOut(
+                animationSpec = tween(
+                    300,
+                    easing = LinearEasing,
+                )
+            ) + slideOutOfContainer(
+                animationSpec = tween(300,
+                    easing = EaseOut,
+                    ),
+                towards = AnimatedContentTransitionScope.SlideDirection.Start
+            )
+        }
     ) {
         composable<SettingsRoute.SettingsPage> {
             SettingsPage(

@@ -28,6 +28,7 @@ that's it for now, hopefully this project doesn't die
 ## Settings Pages Status
 
 - [ ] Toolbar (Buggy)
+  - [ ] reorder not working
 - [ ] Tabs (Buggy)
 - [ ] Search (Buggy)
 - [ ] Theme (Buggy)

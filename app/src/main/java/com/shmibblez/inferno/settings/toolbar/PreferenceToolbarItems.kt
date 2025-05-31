@@ -12,7 +12,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,6 +21,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.base.InfernoCheckbox
+import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.proto.InfernoSettings
 import com.shmibblez.inferno.settings.compose.components.PrefUiConst
@@ -47,6 +47,8 @@ fun PreferenceToolbarItems(
     val context = LocalContext.current
 
     val state = rememberLazyListState()
+
+    // todo: reorder not working
     val reorderState = createListReorderState(
         listState = state,
         onMove = { from, to ->
@@ -97,10 +99,12 @@ fun PreferenceToolbarItems(
     LazyColumn(
         modifier = modifier.fillMaxWidth(),
     ) {
+        // top preferences
         itemsIndexed(topPreferences, key = { index, _ -> index }) { _, item ->
             item.invoke()
         }
 
+        // selected items
         itemsIndexed(selectedItems, key = { _, item -> item }) { index, item ->
             DragItemContainer(
                 state = reorderState,
@@ -115,6 +119,7 @@ fun PreferenceToolbarItems(
                 )
             }
         }
+        // unselected items
         items(remainingItems, key = { it }) {
             ToolbarItem(
                 item = it,
@@ -148,11 +153,11 @@ private fun ToolbarItem(
     ) {
         // drag handle, only show if selected
         if (selected) {
-            Icon(
+            InfernoIcon(
                 painter = painterResource(R.drawable.ic_drag_handle_24),
                 contentDescription = "",
                 modifier = Modifier.size(12.dp),
-                tint = Color.White, // todo: theme
+//                tint = Color.White, // todo: theme
             )
         }
 
@@ -169,7 +174,7 @@ private fun ToolbarItem(
         // selected checkbox
         InfernoCheckbox(
             checked = selected,
-            enabled = item.isRequired(),
+            enabled = item.isNotRequired(),
             onCheckedChange = {
                 when (selected) {
                     true -> onUnselected.invoke(item)
@@ -187,6 +192,10 @@ private fun InfernoSettings.ToolbarItem.isRequired(): Boolean {
         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_ORIGIN_MINI -> true
         else -> false
     }
+}
+
+private fun InfernoSettings.ToolbarItem.isNotRequired(): Boolean {
+    return this.isRequired().not()
 }
 
 private fun InfernoSettings.ToolbarItem.toPrefString(context: Context): String {

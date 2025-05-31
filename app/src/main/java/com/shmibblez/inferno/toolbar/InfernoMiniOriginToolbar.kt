@@ -5,7 +5,7 @@ import mozilla.components.browser.state.search.SearchEngine
 import mozilla.components.browser.state.state.TabSessionState
 
 @Composable
-internal fun MiniOriginBrowserToolbar(
+internal fun InfernoMiniOriginToolbar(
     // item params
     tabSessionState: TabSessionState?,
     tabCount: Int,

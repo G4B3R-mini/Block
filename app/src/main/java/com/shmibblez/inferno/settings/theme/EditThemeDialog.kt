@@ -8,22 +8,16 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material3.ButtonColors
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.CheckboxColors
 import androidx.compose.material3.HorizontalDivider
@@ -31,17 +25,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.SwitchColors
-import androidx.compose.material3.TextFieldColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -60,23 +51,10 @@ import com.shmibblez.inferno.ext.infernoTheme
 import com.shmibblez.inferno.proto.InfernoSettings
 import com.shmibblez.inferno.settings.compose.components.PrefUiConst
 import com.shmibblez.inferno.toolbar.ToToolbarIcon
-import kotlinx.coroutines.launch
-import mozilla.components.support.ktx.kotlin.toHexString
-import java.util.Locale
 
-// for removing invalid characters
-private val ARGB_STRING_FILTER = Regex("[^a-zA-Z0-9]")
+internal val COLOR_BOX_SIZE = 32.dp
 
-// regex for rgb strings
-private val RGB_STRING_REGEX = Regex("^[a-zA-Z0-9]{6}\$")
-
-// regex for argb strings
-private val ARGB_STRING_REGEX = Regex("^[a-zA-Z0-9]{8}\$")
-
-private val COLOR_BOX_SIZE = 32.dp
-
-private val LIST_TOP_PADDING = 16.dp
-private val LIST_BOTTOM_PADDING = 36.dp
+private val LIST_BOTTOM_PADDING = 54.dp
 
 @Composable
 fun EditThemeDialog(
@@ -88,20 +66,19 @@ fun EditThemeDialog(
     // theme being edited, copy of current theme
     var theme by remember { mutableStateOf(baseTheme) }
     val oldThemeName by remember { mutableStateOf(baseTheme.name) }
-    var aboutExpanded by remember { mutableStateOf(false) }
     val lazyListState = rememberLazyListState()
-    val coroutineScope = rememberCoroutineScope()
+
+    var showColorEditorDialogFor by remember { mutableStateOf<ColorEditorDialogData?>(null) }
 
     // component colors
-    val outlinedButtonColors = remember {
+    val outlinedButtonColors =
         ButtonColors(
             containerColor = theme.primaryBackgroundColor,
             contentColor = theme.primaryOutlineColor,
             disabledContainerColor = theme.secondaryBackgroundColor,
             disabledContentColor = theme.secondaryOutlineColor,
         )
-    }
-    val checkboxColors = remember {
+    val checkboxColors =
         CheckboxColors(
             checkedCheckmarkColor = theme.primaryIconColor,
             uncheckedCheckmarkColor = Color.Transparent,
@@ -116,8 +93,7 @@ fun EditThemeDialog(
             disabledUncheckedBorderColor = theme.secondaryBackgroundColor,
             disabledIndeterminateBorderColor = theme.secondaryBackgroundColor,
         )
-    }
-    val switchColors = remember {
+    val switchColors =
         SwitchColors(
             checkedThumbColor = theme.primaryActionColor,
             checkedTrackColor = Color.Transparent,
@@ -136,65 +112,56 @@ fun EditThemeDialog(
             disabledUncheckedBorderColor = theme.secondaryBackgroundColor, // .secondaryBackgroundColor,
             disabledUncheckedIconColor = theme.secondaryIconColor
         )
-    }
-    val textFieldColors =
-        OutlinedTextFieldDefaults.colors(
-            focusedTextColor = theme.primaryTextColor,
-            unfocusedTextColor = theme.secondaryTextColor,
-            disabledTextColor = theme.secondaryTextColor,
-            errorTextColor = theme.errorColor,
-            focusedContainerColor = Color.Transparent,
-            unfocusedContainerColor = Color.Transparent,
-            disabledContainerColor = Color.Transparent,
-            errorContainerColor = Color.Transparent,
-            cursorColor = theme.primaryOutlineColor,
-            errorCursorColor = theme.errorColor,
-            selectionColors = TextSelectionColors(
-                handleColor = theme.primaryOutlineColor,
-                backgroundColor = theme.primaryOutlineColor.copy(
-                    alpha = 0.4F,
-                ),
+    val textFieldColors = OutlinedTextFieldDefaults.colors(
+        focusedTextColor = theme.primaryTextColor,
+        unfocusedTextColor = theme.secondaryTextColor,
+        disabledTextColor = theme.secondaryTextColor,
+        errorTextColor = theme.errorColor,
+        focusedContainerColor = Color.Transparent,
+        unfocusedContainerColor = Color.Transparent,
+        disabledContainerColor = Color.Transparent,
+        errorContainerColor = Color.Transparent,
+        cursorColor = theme.primaryOutlineColor,
+        errorCursorColor = theme.errorColor,
+        selectionColors = TextSelectionColors(
+            handleColor = theme.primaryOutlineColor,
+            backgroundColor = theme.primaryOutlineColor.copy(
+                alpha = 0.4F,
             ),
-            focusedBorderColor = theme.primaryActionColor,
-            unfocusedBorderColor = theme.primaryOutlineColor,
-            disabledBorderColor = theme.secondaryTextColor,
-            errorBorderColor = theme.errorColor,
-            focusedLeadingIconColor = theme.primaryTextColor,
-            unfocusedLeadingIconColor = theme.secondaryTextColor,
-            disabledLeadingIconColor = theme.secondaryTextColor,
-            errorLeadingIconColor = theme.errorColor,
-            focusedTrailingIconColor = theme.primaryTextColor,
-            unfocusedTrailingIconColor = theme.secondaryTextColor,
-            disabledTrailingIconColor = theme.secondaryTextColor,
-            errorTrailingIconColor = theme.errorColor,
-            focusedLabelColor = theme.primaryActionColor,
-            unfocusedLabelColor = theme.primaryOutlineColor,
-            disabledLabelColor = theme.secondaryTextColor,
-            errorLabelColor = theme.errorColor,
-            focusedPlaceholderColor = theme.secondaryTextColor,
-            unfocusedPlaceholderColor = theme.secondaryTextColor,
-            disabledPlaceholderColor = theme.secondaryTextColor,
-            errorPlaceholderColor = theme.errorColor,
-            focusedSupportingTextColor = theme.primaryTextColor,
-            unfocusedSupportingTextColor = theme.secondaryTextColor,
-            disabledSupportingTextColor = theme.secondaryTextColor,
-            errorSupportingTextColor = theme.errorColor,
-            focusedPrefixColor = theme.primaryTextColor,
-            unfocusedPrefixColor = theme.secondaryTextColor,
-            disabledPrefixColor = theme.secondaryTextColor,
-            errorPrefixColor = theme.errorColor,
-            focusedSuffixColor = theme.primaryTextColor,
-            unfocusedSuffixColor = theme.secondaryTextColor,
-            disabledSuffixColor = theme.secondaryTextColor,
-            errorSuffixColor = theme.errorColor,
-        )
-
-    fun seeAbout() {
-        coroutineScope.launch {
-            lazyListState.scrollToItem(2)
-        }
-        aboutExpanded = true
-    }
+        ),
+        focusedBorderColor = theme.primaryActionColor,
+        unfocusedBorderColor = theme.primaryOutlineColor,
+        disabledBorderColor = theme.secondaryTextColor,
+        errorBorderColor = theme.errorColor,
+        focusedLeadingIconColor = theme.primaryTextColor,
+        unfocusedLeadingIconColor = theme.secondaryTextColor,
+        disabledLeadingIconColor = theme.secondaryTextColor,
+        errorLeadingIconColor = theme.errorColor,
+        focusedTrailingIconColor = theme.primaryTextColor,
+        unfocusedTrailingIconColor = theme.secondaryTextColor,
+        disabledTrailingIconColor = theme.secondaryTextColor,
+        errorTrailingIconColor = theme.errorColor,
+        focusedLabelColor = theme.primaryActionColor,
+        unfocusedLabelColor = theme.primaryOutlineColor,
+        disabledLabelColor = theme.secondaryTextColor,
+        errorLabelColor = theme.errorColor,
+        focusedPlaceholderColor = theme.secondaryTextColor,
+        unfocusedPlaceholderColor = theme.secondaryTextColor,
+        disabledPlaceholderColor = theme.secondaryTextColor,
+        errorPlaceholderColor = theme.errorColor,
+        focusedSupportingTextColor = theme.primaryTextColor,
+        unfocusedSupportingTextColor = theme.secondaryTextColor,
+        disabledSupportingTextColor = theme.secondaryTextColor,
+        errorSupportingTextColor = theme.errorColor,
+        focusedPrefixColor = theme.primaryTextColor,
+        unfocusedPrefixColor = theme.secondaryTextColor,
+        disabledPrefixColor = theme.secondaryTextColor,
+        errorPrefixColor = theme.errorColor,
+        focusedSuffixColor = theme.primaryTextColor,
+        unfocusedSuffixColor = theme.secondaryTextColor,
+        disabledSuffixColor = theme.secondaryTextColor,
+        errorSuffixColor = theme.errorColor,
+    )
 
     InfernoDialog(
         onDismiss = onDismiss,
@@ -207,29 +174,18 @@ fun EditThemeDialog(
         border = BorderStroke(1.dp, theme.primaryActionColor),
         contentPadding = PaddingValues(horizontal = 16.dp)
     ) {
-        Box(modifier = Modifier.fillMaxSize()) {
+        Box(modifier = Modifier.fillMaxWidth()) {
             LazyColumn(
                 state = lazyListState,
                 modifier = Modifier
-                    .fillMaxSize()
-                    .align(Alignment.Center),
+                    .fillMaxWidth()
+                    .align(Alignment.TopCenter)
+                    .padding(
+                        top = PrefUiConst.PREFERENCE_INTERNAL_PADDING,
+                        bottom = LIST_BOTTOM_PADDING,
+                    ),
                 verticalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING * 2),
             ) {
-                // top spacer
-                item { Spacer(modifier = Modifier.padding(LIST_TOP_PADDING)) }
-
-                /**
-                 * about
-                 */
-
-                item {
-                    AboutItem(
-                        expanded = aboutExpanded,
-                        onExpandedChanged = { aboutExpanded = it },
-                        theme = theme,
-                    )
-                }
-
                 /**
                  * name
                  */
@@ -265,20 +221,40 @@ fun EditThemeDialog(
 
                 item {
                     ColorEditor(
-                        name = "primary text color:", // todo: string res
-                        color = theme.primaryTextColor,
-                        onChangeColor = { theme = theme.copy(primaryTextColor = it) },
-                        theme = theme,
-                        seeAbout = ::seeAbout,
+                        data = ColorEditorDialogData(
+                            name = "primary text color:", // todo: string res
+                            color = theme.primaryTextColor,
+                            theme = theme,
+                            onDismiss = {
+                                theme = theme.copy(primaryTextColor = it)
+                                showColorEditorDialogFor = null
+                            },
+                            onConfirm = {
+                                theme = theme.copy(primaryTextColor = it)
+                                showColorEditorDialogFor = null
+                            },
+                            onChange = { theme = theme.copy(primaryTextColor = it) },
+                        ),
+                        setShowColorEditorDialogFor = { showColorEditorDialogFor = it },
                     )
                 }
                 item {
                     ColorEditor(
-                        name = "secondary text color:", // todo: string res
-                        color = theme.secondaryTextColor,
-                        onChangeColor = { theme = theme.copy(secondaryTextColor = it) },
-                        theme = theme,
-                        seeAbout = ::seeAbout,
+                        data = ColorEditorDialogData(
+                            name = "secondary text color:", // todo: string res
+                            color = theme.secondaryTextColor,
+                            theme = theme,
+                            onDismiss = {
+                                theme = theme.copy(secondaryTextColor = it)
+                                showColorEditorDialogFor = null
+                            },
+                            onConfirm = {
+                                theme = theme.copy(secondaryTextColor = it)
+                                showColorEditorDialogFor = null
+                            },
+                            onChange = { theme = theme.copy(secondaryTextColor = it) },
+                        ),
+                        setShowColorEditorDialogFor = { showColorEditorDialogFor = it },
                     )
                 }
                 item {
@@ -289,7 +265,7 @@ fun EditThemeDialog(
                             fontColor = theme.primaryTextColor,
                         )
                         InfernoText(
-                            text = funFacts[0], infernoStyle = InfernoTextStyle.Subtitle,
+                            text = funFacts[1], infernoStyle = InfernoTextStyle.Subtitle,
                             fontColor = theme.secondaryTextColor,
                         )
                     }
@@ -301,20 +277,40 @@ fun EditThemeDialog(
 
                 item {
                     ColorEditor(
-                        name = "primary icon color:", // todo: string res
-                        color = theme.primaryIconColor,
-                        onChangeColor = { theme = theme.copy(primaryIconColor = it) },
-                        theme = theme,
-                        seeAbout = ::seeAbout,
+                        data = ColorEditorDialogData(
+                            name = "primary icon color:", // todo: string res
+                            color = theme.primaryIconColor,
+                            theme = theme,
+                            onDismiss = {
+                                theme = theme.copy(primaryIconColor = it)
+                                showColorEditorDialogFor = null
+                            },
+                            onConfirm = {
+                                theme = theme.copy(primaryIconColor = it)
+                                showColorEditorDialogFor = null
+                            },
+                            onChange = { theme = theme.copy(primaryIconColor = it) },
+                        ),
+                        setShowColorEditorDialogFor = { showColorEditorDialogFor = it },
                     )
                 }
                 item {
                     ColorEditor(
-                        name = "secondary icon color:", // todo: string res
-                        color = theme.secondaryIconColor,
-                        onChangeColor = { theme = theme.copy(secondaryIconColor = it) },
-                        theme = theme,
-                        seeAbout = ::seeAbout,
+                        data = ColorEditorDialogData(
+                            name = "secondary icon color:", // todo: string res
+                            color = theme.secondaryIconColor,
+                            theme = theme,
+                            onDismiss = {
+                                theme = theme.copy(secondaryIconColor = it)
+                                showColorEditorDialogFor = null
+                            },
+                            onConfirm = {
+                                theme = theme.copy(secondaryIconColor = it)
+                                showColorEditorDialogFor = null
+                            },
+                            onChange = { theme = theme.copy(secondaryIconColor = it) },
+                        ),
+                        setShowColorEditorDialogFor = { showColorEditorDialogFor = it },
                     )
                 }
                 item {
@@ -332,20 +328,40 @@ fun EditThemeDialog(
 
                 item {
                     ColorEditor(
-                        name = "primary outline color:", // todo: string res
-                        color = theme.primaryOutlineColor,
-                        onChangeColor = { theme = theme.copy(primaryOutlineColor = it) },
-                        theme = theme,
-                        seeAbout = ::seeAbout,
+                        data = ColorEditorDialogData(
+                            name = "primary outline color:", // todo: string res
+                            color = theme.primaryOutlineColor,
+                            theme = theme,
+                            onDismiss = {
+                                theme = theme.copy(primaryOutlineColor = it)
+                                showColorEditorDialogFor = null
+                            },
+                            onConfirm = {
+                                theme = theme.copy(primaryOutlineColor = it)
+                                showColorEditorDialogFor = null
+                            },
+                            onChange = { theme = theme.copy(primaryOutlineColor = it) },
+                        ),
+                        setShowColorEditorDialogFor = { showColorEditorDialogFor = it },
                     )
                 }
                 item {
                     ColorEditor(
-                        name = "secondary outline color:", // todo: string res
-                        color = theme.secondaryOutlineColor,
-                        onChangeColor = { theme = theme.copy(secondaryOutlineColor = it) },
-                        theme = theme,
-                        seeAbout = ::seeAbout,
+                        data = ColorEditorDialogData(
+                            name = "secondary outline color:", // todo: string res
+                            color = theme.secondaryOutlineColor,
+                            theme = theme,
+                            onDismiss = {
+                                theme = theme.copy(secondaryOutlineColor = it)
+                                showColorEditorDialogFor = null
+                            },
+                            onConfirm = {
+                                theme = theme.copy(secondaryOutlineColor = it)
+                                showColorEditorDialogFor = null
+                            },
+                            onChange = { theme = theme.copy(secondaryOutlineColor = it) },
+                        ),
+                        setShowColorEditorDialogFor = { showColorEditorDialogFor = it },
                     )
                 }
                 item {
@@ -378,20 +394,40 @@ fun EditThemeDialog(
 
                 item {
                     ColorEditor(
-                        name = "primary action color:", // todo: string res
-                        color = theme.primaryActionColor,
-                        onChangeColor = { theme = theme.copy(primaryActionColor = it) },
-                        theme = theme,
-                        seeAbout = ::seeAbout,
+                        data = ColorEditorDialogData(
+                            name = "primary action color:", // todo: string res
+                            color = theme.primaryActionColor,
+                            theme = theme,
+                            onDismiss = {
+                                theme = theme.copy(primaryActionColor = it)
+                                showColorEditorDialogFor = null
+                            },
+                            onConfirm = {
+                                theme = theme.copy(primaryActionColor = it)
+                                showColorEditorDialogFor = null
+                            },
+                            onChange = { theme = theme.copy(primaryActionColor = it) },
+                        ),
+                        setShowColorEditorDialogFor = { showColorEditorDialogFor = it },
                     )
                 }
                 item {
                     ColorEditor(
-                        name = "secondary action color:", // todo: string res
-                        color = theme.secondaryActionColor,
-                        onChangeColor = { theme = theme.copy(secondaryActionColor = it) },
-                        theme = theme,
-                        seeAbout = ::seeAbout,
+                        data = ColorEditorDialogData(
+                            name = "secondary action color:", // todo: string res
+                            color = theme.secondaryActionColor,
+                            theme = theme,
+                            onDismiss = {
+                                theme = theme.copy(secondaryActionColor = it)
+                                showColorEditorDialogFor = null
+                            },
+                            onConfirm = {
+                                theme = theme.copy(secondaryActionColor = it)
+                                showColorEditorDialogFor = null
+                            },
+                            onChange = { theme = theme.copy(secondaryActionColor = it) },
+                        ),
+                        setShowColorEditorDialogFor = { showColorEditorDialogFor = it },
                     )
                 }
                 item {
@@ -425,11 +461,21 @@ fun EditThemeDialog(
 
                 item {
                     ColorEditor(
-                        name = "error color:", // todo: string res
-                        color = theme.errorColor,
-                        onChangeColor = { theme = theme.copy(errorColor = it) },
-                        theme = theme,
-                        seeAbout = ::seeAbout,
+                        data = ColorEditorDialogData(
+                            name = "error color:", // todo: string res
+                            color = theme.errorColor,
+                            theme = theme,
+                            onDismiss = {
+                                theme = theme.copy(errorColor = it)
+                                showColorEditorDialogFor = null
+                            },
+                            onConfirm = {
+                                theme = theme.copy(errorColor = it)
+                                showColorEditorDialogFor = null
+                            },
+                            onChange = { theme = theme.copy(errorColor = it) },
+                        ),
+                        setShowColorEditorDialogFor = { showColorEditorDialogFor = it },
                     )
                 }
                 item {
@@ -472,43 +518,60 @@ fun EditThemeDialog(
 
                 item {
                     ColorEditor(
-                        name = "primary background color:", // todo: string res
-                        color = theme.primaryBackgroundColor,
-                        onChangeColor = { theme = theme.copy(primaryBackgroundColor = it) },
-                        theme = theme,
-                        seeAbout = ::seeAbout,
+                        data = ColorEditorDialogData(
+                            name = "primary background color:", // todo: string res
+                            color = theme.primaryBackgroundColor,
+                            theme = theme,
+                            onDismiss = {
+                                theme = theme.copy(primaryBackgroundColor = it)
+                                showColorEditorDialogFor = null
+                            },
+                            onConfirm = {
+                                theme = theme.copy(primaryBackgroundColor = it)
+                                showColorEditorDialogFor = null
+                            },
+                            onChange = { theme = theme.copy(primaryBackgroundColor = it) },
+                        ),
+                        setShowColorEditorDialogFor = { showColorEditorDialogFor = it },
                     )
                 }
                 item {
                     ColorEditor(
-                        name = "secondary background color:", // todo: string res
-                        color = theme.secondaryBackgroundColor,
-                        onChangeColor = { theme = theme.copy(secondaryBackgroundColor = it) },
-                        theme = theme,
-                        seeAbout = ::seeAbout,
+                        data = ColorEditorDialogData(
+                            name = "secondary background color:", // todo: string res
+                            color = theme.secondaryBackgroundColor,
+                            theme = theme,
+                            onDismiss = {
+                                theme = theme.copy(secondaryBackgroundColor = it)
+                                showColorEditorDialogFor = null
+                            },
+                            onConfirm = {
+                                theme = theme.copy(secondaryBackgroundColor = it)
+                                showColorEditorDialogFor = null
+                            },
+                            onChange = { theme = theme.copy(secondaryBackgroundColor = it) },
+                        ),
+                        setShowColorEditorDialogFor = { showColorEditorDialogFor = it },
                     )
                 }
                 item {
                     ColorPreviewColumn(previewText = "Preview (Background)", theme = theme) {
+                        val funFact = funFactSelector(1)
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .background(theme.secondaryBackgroundColor)
                                 .padding(16.dp),
                         ) {
-                            InfernoText("AAAAAAAA", fontColor = theme.primaryTextColor)
+                            InfernoText(funFact[0], fontColor = theme.primaryTextColor)
                         }
                     }
-                }
-
-                // bottom spacer
-                item {
-                    Spacer(modifier = Modifier.heightIn(LIST_BOTTOM_PADDING))
                 }
             }
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .padding(bottom = PrefUiConst.PREFERENCE_INTERNAL_PADDING)
                     .align(Alignment.BottomCenter),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
             ) {
@@ -535,211 +598,44 @@ fun EditThemeDialog(
                 )
             }
         }
+        if (showColorEditorDialogFor != null) {
+            ColorEditorDialog(data = showColorEditorDialogFor!!)
+        }
     }
 }
 
-@OptIn(ExperimentalStdlibApi::class)
 @Composable
 private fun ColorEditor(
-    name: String,
-    color: Color,
-    onChangeColor: (Color) -> Unit,
-    theme: InfernoTheme,
-    seeAbout: () -> Unit,
+    data: ColorEditorDialogData,
+    setShowColorEditorDialogFor: (ColorEditorDialogData) -> Unit,
 ) {
-    var input by remember { mutableStateOf(color.toArgbHexString()) }
-
-    // true if color is badly formatted
-    var colorBad by remember { mutableStateOf(false) }
-
-    fun checkForErrors() {
-        colorBad = !RGB_STRING_REGEX.matches(input) && !ARGB_STRING_REGEX.matches(input)
-    }
-    Column(
+    // color box, name, and edit button
+    Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.Start,
-        verticalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING),
+        horizontalArrangement = Arrangement.spacedBy(
+            PrefUiConst.PREFERENCE_INTERNAL_PADDING, Alignment.Start
+        ),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         // color name
-        InfernoText(text = name)
+        InfernoText(text = data.name, modifier = Modifier.weight(1F))
 
-        // color preview & editor
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(
-                PrefUiConst.PREFERENCE_INTERNAL_PADDING, Alignment.Start
-            ),
-            verticalAlignment = Alignment.Top,
-        ) {
-            // color preview box
-            Box(
-                modifier = Modifier
-                    .padding(top = 12.dp)
-                    .background(color, MaterialTheme.shapes.small)
-                    .border(1.dp, theme.primaryOutlineColor, MaterialTheme.shapes.small)
-                    .size(COLOR_BOX_SIZE),
-            )
+        // color preview box
+        Box(
+            modifier = Modifier
+                .background(data.color, MaterialTheme.shapes.small)
+                .border(1.dp, data.theme.primaryOutlineColor, MaterialTheme.shapes.small)
+                .size(COLOR_BOX_SIZE),
+        )
 
-            // color hex editor
-            InfernoOutlinedTextField(
-                modifier = Modifier
-                    .heightIn(min = 0.dp)
-                    .width(IntrinsicSize.Min),
-                value = input,
-                onValueChange = {
-                    input = ARGB_STRING_FILTER.replace(it, "")
-                    // if string is valid hex, update color
-                    when {
-                        RGB_STRING_REGEX.matches(it) -> onChangeColor(Color(("FF$it").hexToInt()))
-                        ARGB_STRING_REGEX.matches(it) -> onChangeColor(Color(it.hexToInt()))
-                    }
-                    checkForErrors()
-                },
-                leadingIcon = {
-                    InfernoText("#")
-                },
-                supportingText = {
-                    if (colorBad) {
-                        InfernoText(
-                            text = "6 or 8 characters long, 0-9, A-Z. Click here to learn more", // todo: string res
-                            infernoStyle = InfernoTextStyle.Error,
-                            modifier = Modifier.clickable(onClick = seeAbout),
-                        )
-                    }
-                },
-                isError = colorBad,
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = theme.primaryTextColor,
-                    unfocusedTextColor = theme.secondaryTextColor,
-                    disabledTextColor = theme.secondaryTextColor,
-                    errorTextColor = theme.errorColor,
-                    focusedContainerColor = Color.Transparent,
-                    unfocusedContainerColor = Color.Transparent,
-                    disabledContainerColor = Color.Transparent,
-                    errorContainerColor = Color.Transparent,
-                    cursorColor = theme.primaryOutlineColor,
-                    errorCursorColor = theme.errorColor,
-                    selectionColors = TextSelectionColors(
-                        handleColor = theme.primaryOutlineColor,
-                        backgroundColor = theme.primaryOutlineColor.copy(
-                            alpha = 0.4F,
-                        ),
-                    ),
-                    focusedBorderColor = theme.primaryActionColor,
-                    unfocusedBorderColor = theme.primaryOutlineColor,
-                    disabledBorderColor = theme.secondaryTextColor,
-                    errorBorderColor = theme.errorColor,
-                    focusedLeadingIconColor = theme.primaryTextColor,
-                    unfocusedLeadingIconColor = theme.secondaryTextColor,
-                    disabledLeadingIconColor = theme.secondaryTextColor,
-                    errorLeadingIconColor = theme.errorColor,
-                    focusedTrailingIconColor = theme.primaryTextColor,
-                    unfocusedTrailingIconColor = theme.secondaryTextColor,
-                    disabledTrailingIconColor = theme.secondaryTextColor,
-                    errorTrailingIconColor = theme.errorColor,
-                    focusedLabelColor = theme.primaryActionColor,
-                    unfocusedLabelColor = theme.primaryOutlineColor,
-                    disabledLabelColor = theme.secondaryTextColor,
-                    errorLabelColor = theme.errorColor,
-                    focusedPlaceholderColor = theme.secondaryTextColor,
-                    unfocusedPlaceholderColor = theme.secondaryTextColor,
-                    disabledPlaceholderColor = theme.secondaryTextColor,
-                    errorPlaceholderColor = theme.errorColor,
-                    focusedSupportingTextColor = theme.primaryTextColor,
-                    unfocusedSupportingTextColor = theme.secondaryTextColor,
-                    disabledSupportingTextColor = theme.secondaryTextColor,
-                    errorSupportingTextColor = theme.errorColor,
-                    focusedPrefixColor = theme.primaryTextColor,
-                    unfocusedPrefixColor = theme.secondaryTextColor,
-                    disabledPrefixColor = theme.secondaryTextColor,
-                    errorPrefixColor = theme.errorColor,
-                    focusedSuffixColor = theme.primaryTextColor,
-                    unfocusedSuffixColor = theme.secondaryTextColor,
-                    disabledSuffixColor = theme.secondaryTextColor,
-                    errorSuffixColor = theme.errorColor,
-                ),
-            )
-        }
-    }
-}
-
-fun Color.toArgbHexString(): String {
-    return this.toArgb().argbIntToHexString().uppercase(Locale.getDefault())
-}
-
-fun Int.argbIntToHexString(): String {
-    val a = (this shr 24).toByte()
-    val r = (this shr 16).toByte()
-    val g = (this shr 8).toByte()
-    val b = (this).toByte()
-    return byteArrayOf(a, r, g, b).toHexString()
-}
-
-@Composable
-private fun AboutItem(
-    expanded: Boolean,
-    onExpandedChanged: (Boolean) -> Unit,
-    theme: InfernoTheme,
-) {
-    Column(
-        modifier = Modifier.padding(
-            horizontal = PrefUiConst.PREFERENCE_HORIZONTAL_PADDING,
-            vertical = PrefUiConst.PREFERENCE_VERTICAL_PADDING,
-        ),
-        horizontalAlignment = Alignment.Start,
-        verticalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING),
-    ) {
-        // about expand title
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING),
-            modifier = Modifier.clickable { onExpandedChanged.invoke(!expanded) },
-        ) {
-            InfernoText(
-                text = stringResource(R.string.preferences_category_about),
-                infernoStyle = InfernoTextStyle.Title,
-                fontColor = theme.primaryTextColor,
-            )
-            InfernoIcon(
-                painter = painterResource(
-                    when (expanded) {
-                        true -> R.drawable.ic_chevron_up_24
-                        false -> R.drawable.ic_chevron_down_24
-                    },
-                ),
-                contentDescription = null,
-                modifier = Modifier.size(18.dp),
-                tint = theme.primaryIconColor
-            )
-        }
-
-        // description
-        if (expanded) {
-            InfernoText(
-                // todo: move to about section (expandable) R.string.preferences_category_about
-                // todo: string res
-                text = "Hex colors must be in format #RRGGBB or #AARRGGBB." +
-                        // alpha
-                        "\n- AA is alpha component and takes values from 00 (transparent) to FF (fully opaque)" +
-                        // red
-                        "\n- RR is red component and takes values from 00 to FF" +
-                        // green
-                        "\n- GG is green component and takes values from 00 to FF" +
-                        // blue
-                        "\n- BB is blue component and takes values from 00 to FF" +
-                        // examples
-                        "\nSome examples:" +
-                        // red
-                        "\n- Solid red would be #FF0000 (#FFFF0000 with alpha)" +
-                        // green
-                        "\n- Solid green would be #00FF00 (#FF00FF00 with alpha)" +
-                        // blue
-                        "\n- Solid blue would be #0000FF (#FF0000FF with alpha)" +
-                        // purple
-                        "\n- You can also make colors transparent, in this case half transparent purple would be #889000FF",
-                infernoStyle = InfernoTextStyle.Subtitle,
-                fontColor = theme.secondaryTextColor,
-            )
-        }
+        // edit button
+        InfernoText(
+            text = stringResource(R.string.browser_menu_edit),
+            fontColor = data.theme.primaryActionColor,
+            modifier = Modifier.clickable {
+                setShowColorEditorDialogFor(data)
+            },
+        )
     }
 }
 
@@ -750,8 +646,7 @@ private fun ColorPreviewRow(
     content: @Composable RowScope.() -> Unit,
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalAlignment = Alignment.Start,
     ) {
@@ -780,8 +675,7 @@ private fun ColorPreviewColumn(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
