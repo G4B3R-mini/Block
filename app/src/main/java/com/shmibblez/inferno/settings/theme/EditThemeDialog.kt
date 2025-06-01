@@ -68,6 +68,11 @@ fun EditThemeDialog(
     val oldThemeName by remember { mutableStateOf(baseTheme.name) }
     val lazyListState = rememberLazyListState()
 
+    var nameError by remember { mutableStateOf(false) }
+    fun checkNameError() {
+        nameError = themeNames.contains(theme.name)
+    }
+
     var showColorEditorDialogFor by remember { mutableStateOf<ColorEditorDialogData?>(null) }
 
     // component colors
@@ -194,22 +199,32 @@ fun EditThemeDialog(
                     InfernoOutlinedTextField(
                         value = theme.name,
                         onValueChange = {
-                            theme.name = it.substring(
-                                0, PrefUiConst.CUSTOM_THEME_MAX_NAME_LENGTH
-                            )
+                            val name = it.let { s ->
+                                when {
+                                    s.length > PrefUiConst.CUSTOM_THEME_MAX_NAME_LENGTH -> s.substring(
+                                        0, PrefUiConst.CUSTOM_THEME_MAX_NAME_LENGTH
+                                    )
+
+                                    else -> s
+                                }
+                            }
+                            theme = theme.copy(name = name)
+                            checkNameError()
                         },
                         label = {
                             InfernoText(
-                                text = "Theme Name",
+                                text = "Theme Name", // todo: string res
                                 fontColor = LocalContext.current.infernoTheme().value.primaryOutlineColor
                             )
                         }, // todo: string res
-                        isError = themeNames.contains(theme.name),
+                        isError = nameError,
                         supportingText = {
-                            InfernoText(
-                                text = "Theme name taken, it will be overridden.", // todo: string res
-                                infernoStyle = InfernoTextStyle.Error,
-                            )
+                            if (nameError) {
+                                InfernoText(
+                                    text = "Theme name taken, it will be overridden.", // todo: string res
+                                    infernoStyle = InfernoTextStyle.Error,
+                                )
+                            }
                         },
                         colors = textFieldColors,
                     )

@@ -2,6 +2,7 @@ package com.shmibblez.inferno.settings.toolbar
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -21,7 +22,6 @@ import com.shmibblez.inferno.settings.compose.components.InfernoSettingsPage
 import com.shmibblez.inferno.settings.compose.components.PreferenceSelect
 import com.shmibblez.inferno.settings.compose.components.PreferenceTitle
 import com.shmibblez.inferno.toolbar.allToolbarItemsNoMiniOrigin
-import com.shmibblez.inferno.toolbar.allToolbarItemsNoOrigin
 import com.shmibblez.inferno.toolbar.defaultToolbarItems
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
@@ -34,26 +34,26 @@ fun ToolbarSettingsPage(goBack: () -> Unit) {
     val settings by context.infernoSettingsDataStore.data.collectAsState(InfernoSettings.getDefaultInstance())
 
     fun getSelectedToolbarItems(): List<InfernoSettings.ToolbarItem> {
-        val items = settings.toolbarItemsList
+        val items = settings.toolbarItemsList.distinct()
         // if list is empty it means items have not been set yet, use default
-        if (items.size <= 0) return (null as InfernoSettings.ToolbarItem?).defaultToolbarItems
+        if (items.isEmpty()) return (null as InfernoSettings.ToolbarItem?).defaultToolbarItems
         return items
     }
 
     var selectedToolbarItems by remember { mutableStateOf(getSelectedToolbarItems()) }
 
-    fun shouldUseMiniOrigin(): Boolean {
-        return selectedToolbarItems.contains(InfernoSettings.ToolbarItem.TOOLBAR_ITEM_ORIGIN_MINI)
-    }
-
-    var useMiniOrigin by remember { mutableStateOf(shouldUseMiniOrigin()) }
+//    fun shouldUseMiniOrigin(): Boolean {
+//        return selectedToolbarItems.contains(InfernoSettings.ToolbarItem.TOOLBAR_ITEM_ORIGIN_MINI)
+//    }
+//
+//    var useMiniOrigin by remember { mutableStateOf(shouldUseMiniOrigin()) }
 
     fun getRemainingToolbarItems(): List<InfernoSettings.ToolbarItem> {
-        val items = when (useMiniOrigin) {
-            true -> (null as InfernoSettings.ToolbarItem?).allToolbarItemsNoOrigin
-            false -> (null as InfernoSettings.ToolbarItem?).allToolbarItemsNoMiniOrigin
-        }
-        return items - selectedToolbarItems.toSet()
+//        val items = when (useMiniOrigin) {
+//            true -> (null as InfernoSettings.ToolbarItem?).allToolbarItemsNoOrigin
+//            false -> (null as InfernoSettings.ToolbarItem?).allToolbarItemsNoMiniOrigin
+//        }
+        return (null as InfernoSettings.ToolbarItem?).allToolbarItemsNoMiniOrigin - selectedToolbarItems.toSet()
     }
 
     var remainingToolbarItems by remember { mutableStateOf(getRemainingToolbarItems()) }
@@ -61,17 +61,21 @@ fun ToolbarSettingsPage(goBack: () -> Unit) {
     LaunchedEffect(settings.toolbarItemsList) {
         // called in this order specifically
         selectedToolbarItems = getSelectedToolbarItems()
-        useMiniOrigin = shouldUseMiniOrigin()
+//        useMiniOrigin = shouldUseMiniOrigin()
         remainingToolbarItems = getRemainingToolbarItems()
+        Log.d(
+            "PreferenceToolbarItems",
+            "selectedItems changed\nselectedItems: $selectedToolbarItems\nremainingItems: $remainingToolbarItems"
+        )
     }
 
     InfernoSettingsPage(
         title = "Toolbar Settings", // todo: string res
         goBack = goBack,
     ) { edgeInsets ->
-        val topPreferences = listOf<@Composable () -> Unit>(
-            { PreferenceTitle(stringResource(R.string.preferences_category_general)) },
-            {
+        val topPreferences = listOf<Pair<Any,@Composable () -> Unit>>(
+            "General" to { PreferenceTitle(stringResource(R.string.preferences_category_general)) },
+            "Toolbar Position" to {
                 // toolbar vertical position
                 PreferenceSelect(
                     text = "Toolbar location:", // todo: string res
@@ -92,7 +96,7 @@ fun ToolbarSettingsPage(goBack: () -> Unit) {
                     },
                 )
             },
-            {
+            "Toolbar Location" to {
                 // in app toolbar vertical position
                 PreferenceSelect(
                     text = "In app toolbar location:", // todo: string res
@@ -113,23 +117,34 @@ fun ToolbarSettingsPage(goBack: () -> Unit) {
                     },
                 )
             },
-            {
+            "Mini Origin Enabled" to {
                 // todo: mini origin (enable / disable pref by adding mini origin or origin to toolbar item list)
             },
-            { PreferenceTitle("Toolbar Items") }, // todo: string res
+            "Toolbar Items Title" to { PreferenceTitle("Toolbar Items") }, // todo: string res
         )
         // selected toolbar items
         PreferenceToolbarItems(
             modifier = Modifier.padding(edgeInsets),
             topPreferences = topPreferences,
-            selectedItems = selectedToolbarItems,
-            remainingItems = remainingToolbarItems,
+            initiallySelectedItems = selectedToolbarItems,
+            initiallyRemainingItems = remainingToolbarItems,
             onSelectedItemsChanged = { newToolbarItems ->
+                Log.d("ToolbarSettingsPage", "onSelectedItemsChanged: new items: $newToolbarItems")
                 coroutineScope.launch {
                     context.infernoSettingsDataStore.updateData {
+                        // remove duplicates
+                        val verifiedList = newToolbarItems.distinct().toMutableList()
+                        // if doesnt contain origin, add
+                        if (!verifiedList.contains(InfernoSettings.ToolbarItem.TOOLBAR_ITEM_ORIGIN)) {
+                            verifiedList.add(InfernoSettings.ToolbarItem.TOOLBAR_ITEM_ORIGIN)
+                        }
+                        // if doesnt contain menu, add
+                        if (!verifiedList.contains(InfernoSettings.ToolbarItem.TOOLBAR_ITEM_MENU)) {
+                            verifiedList.add(InfernoSettings.ToolbarItem.TOOLBAR_ITEM_MENU)
+                        }
                         it.toBuilder().apply {
                             this.clearToolbarItems()
-                            this.addAllToolbarItems(newToolbarItems)
+                            this.addAllToolbarItems(verifiedList)
                         }.build()
                     }
                 }

@@ -55,6 +55,7 @@ import com.shmibblez.inferno.compose.menu.DropdownMenu
 import com.shmibblez.inferno.compose.menu.MenuItem
 import com.shmibblez.inferno.compose.text.Text
 import com.shmibblez.inferno.ext.components
+import com.shmibblez.inferno.ext.infernoTheme
 import com.shmibblez.inferno.ext.newTab
 import com.shmibblez.inferno.tabstray.TabsTrayState.Mode
 import com.shmibblez.inferno.tabstray.TabsTrayTestTag
@@ -355,8 +356,8 @@ fun InfernoTabsTray(
             .padding(WindowInsets.statusBars.asPaddingValues(LocalDensity.current)),
         sheetState = sheetState,
         shape = RectangleShape,
-        containerColor = Color.Black, // todo: set color from theme
-        scrimColor = Color.Black.copy(alpha = 0.25F),
+        containerColor = context.infernoTheme().value.primaryBackgroundColor,
+        scrimColor = context.infernoTheme().value.primaryBackgroundColor.copy(alpha = 0.5F),
         dragHandle = {
             // todo: drag handle as small as possible, box with centered rounded horizontal bar
         },
@@ -513,7 +514,7 @@ private fun SelectBanner(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color.Red)
+            .background(LocalContext.current.infernoTheme().value.primaryActionColor)
             .height(BANNER_HEIGHT),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -648,7 +649,7 @@ private fun NormalBanner(
         )
         VerticalDivider(
             thickness = 1.dp,
-            color = Color.White,
+            color = LocalContext.current.infernoTheme().value.primaryIconColor,
             modifier = Modifier.height(24.dp),
         )
         IconButton(
@@ -761,9 +762,7 @@ private fun BoxScope.NewTabButton(
                     )
                 },
                 text = { InfernoText(text = text) },
-                containerColor = Color(
-                    143, 0, 255
-                ), // todo: purple color, add to FirefoxTheme as iconActive
+                containerColor = LocalContext.current.infernoTheme().value.primaryActionColor,
             )
         }
 

@@ -4,6 +4,7 @@
 
 package com.shmibblez.inferno.tabstray.browser.compose
 
+import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -70,6 +71,10 @@ fun createListReorderState(
     return state
 }
 
+enum class ListReorderDragState {
+    DRAGGING, NEVER_DRAGGED, FINISHED_DRAGGING,
+}
+
 /**
  * Class containing details about the current state of dragging in list.
  *
@@ -96,6 +101,13 @@ class ListReorderState internal constructor(
     var draggingItemKey by mutableStateOf<Any?>(null)
         private set
 
+    init {
+        Log.d("ListReorderState", "init, ignoredItems: $ignoredItems")
+    }
+
+    var dragState by mutableStateOf(ListReorderDragState.NEVER_DRAGGED)
+        private set
+
     private var draggingItemCumulatedOffset by mutableFloatStateOf(0f)
     private var draggingItemInitialOffset by mutableFloatStateOf(0f)
     internal var moved by mutableStateOf(false)
@@ -105,8 +117,9 @@ class ListReorderState internal constructor(
         } ?: 0f
 
     internal fun computeItemOffset(index: Int): Float {
-        val itemAtIndex = listState.layoutInfo.visibleItemsInfo.firstOrNull { info -> info.index == index }
-            ?: return draggingItemOffset
+        val itemAtIndex =
+            listState.layoutInfo.visibleItemsInfo.firstOrNull { info -> info.index == index }
+                ?: return draggingItemOffset
         return draggingItemInitialOffset + draggingItemCumulatedOffset - itemAtIndex.offset
     }
 
@@ -121,19 +134,33 @@ class ListReorderState internal constructor(
     internal val orientation: Orientation
         get() = listState.layoutInfo.orientation
 
+    /**
+     * called when drag starts
+     */
     internal fun onTouchSlopPassed(offset: Float, shouldLongPress: Boolean) {
+        Log.d(
+            "ListReorderState",
+            "onTouchSlopPassed invoked, offset: $offset, shouldLongPress: $shouldLongPress"
+        )
+        dragState = ListReorderDragState.DRAGGING
         listState.findItem(offset)?.also {
             draggingItemKey = it.key
             if (shouldLongPress) {
                 hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
                 onLongPress(it)
+                Log.d("ListReorderState", "onLongPress invoked, item: $it")
             }
             draggingItemInitialOffset = it.offset.toFloat()
             moved = !shouldLongPress
         }
     }
 
+    /**
+     * called when drag finished / stopped
+     */
     internal fun onDragInterrupted() {
+        dragState = ListReorderDragState.FINISHED_DRAGGING
+        Log.d("ListReorderState", "onDragInterrupted invoked")
         if (draggingItemKey != null) {
             previousKeyOfDraggedItem = draggingItemKey
             val startOffset = draggingItemOffset
@@ -155,6 +182,7 @@ class ListReorderState internal constructor(
     }
 
     internal fun onDrag(offset: Float) {
+        Log.d("ListReorderState", "onDrag invoked, offset: $offset")
         draggingItemCumulatedOffset += offset
 
         if (draggingItemLayoutInfo == null) {
@@ -163,7 +191,8 @@ class ListReorderState internal constructor(
         val draggingItem = draggingItemLayoutInfo ?: return
 
         if (!moved && abs(draggingItemCumulatedOffset) > touchSlop) {
-            onExitLongPress()
+            onExitLongPress.invoke()
+            Log.d("ListReorderState", "onExitLongPress invoked")
         }
         val startOffset = draggingItem.offset + draggingItemOffset
         val endOffset = startOffset + draggingItem.size
@@ -179,10 +208,15 @@ class ListReorderState internal constructor(
             ) {
                 scope.launch {
                     onMove.invoke(draggingItem, targetItem)
+                    Log.d(
+                        "ListReorderState",
+                        "onMove invoked, from: $draggingItem, to: $targetItem"
+                    )
                     listState.scrollBy(draggingItem.size.toFloat())
                 }
             } else {
                 onMove.invoke(draggingItem, targetItem)
+                Log.d("ListReorderState", "onMove invoked, from: $draggingItem, to: $targetItem")
             }
         } else {
             val overscroll = when {

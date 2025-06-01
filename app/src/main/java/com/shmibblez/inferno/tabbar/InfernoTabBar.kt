@@ -44,8 +44,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.times
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.UiConst
+import com.shmibblez.inferno.compose.Favicon
 import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.ext.components
@@ -71,7 +73,8 @@ inline fun <T> Iterable<T>.findIndex(predicate: (T) -> Boolean): Int? {
     return null
 }
 
-val verticalDividerPadding = 6.dp
+private val verticalDividerPadding = 6.dp
+private val TAB_END_PADDING = 2.dp
 
 @Composable
 fun InfernoTabBar(tabList: List<TabSessionState>, selectedTab: TabSessionState?) {
@@ -80,7 +83,7 @@ fun InfernoTabBar(tabList: List<TabSessionState>, selectedTab: TabSessionState?)
         val screenWidth = configuration.screenWidthDp.dp
         // available space for tabs to occupy
         // screen width - side padding - add square width
-        val availableTabSpace = screenWidth - 16.dp - 1.dp - UiConst.TAB_BAR_HEIGHT
+        val availableTabSpace = screenWidth - (2F * TAB_END_PADDING) - 1.dp - UiConst.TAB_BAR_HEIGHT
         val tabWidth = availableTabSpace / tabList.size.let { if (it <= 0) 1 else it }
         return when (tabWidth > UiConst.TAB_WIDTH) {
             true -> tabWidth
@@ -145,7 +148,7 @@ fun InfernoTabBar(tabList: List<TabSessionState>, selectedTab: TabSessionState?)
                     horizontalArrangement = Arrangement.Start,
                 ) {
                     val selectedIndex = tabList.findIndex { it.id == selectedTab.id }
-                    item { Spacer(Modifier.width(8.dp)) }
+                    item { Spacer(Modifier.width(TAB_END_PADDING)) }
                     items(tabList.size) {
                         MiniTab(
                             context = context,
@@ -157,7 +160,7 @@ fun InfernoTabBar(tabList: List<TabSessionState>, selectedTab: TabSessionState?)
                             lastIndex = tabList.size - 1
                         )
                     }
-                    item { Spacer(Modifier.width(8.dp)) }
+                    item { Spacer(Modifier.width(TAB_END_PADDING)) }
                 }
                 // todo: make start and end of tabs fade, how to add alpha just to
                 //  edges when exiting?
@@ -296,14 +299,43 @@ private fun MiniTab(
             } else {
                 if (icon != null) BitmapPainter(icon.asImageBitmap()) else painterResource(R.drawable.mozac_ic_globe_24)
             }
+//            context.components.core.icons.loadIcon(IconRequest(
+//                url = TODO(),
+//                resources = TODO(),
+//            ))
+
             // favicon
-            Image(
-                painter = favicon,
-                contentDescription = "favicon",
-                modifier = Modifier
-                    .aspectRatio(1F)
-                    .padding(6.dp),
-            )
+            when {
+                isHomePage -> {
+                    Image(
+                        painter = painterResource(R.drawable.inferno),
+                        contentDescription = "favicon",
+                        modifier = Modifier
+                            .padding(6.dp)
+                            .size(18.dp),
+                    )
+                }
+
+                isPrivateHomePage -> {
+                    Image(
+                        painter = painterResource(R.drawable.ic_private_browsing),
+                        contentDescription = "favicon",
+                        modifier = Modifier
+                            .padding(6.dp)
+                            .size(18.dp),
+                    )
+                }
+
+                else -> {
+                    Favicon(
+                        url = url ?: "",
+                        size = 18.dp,
+                        modifier = Modifier
+                            .aspectRatio(1F)
+                            .padding(6.dp),
+                    )
+                }
+            }
 //        // site name with gradient
 //        Box(
 //            modifier = Modifier

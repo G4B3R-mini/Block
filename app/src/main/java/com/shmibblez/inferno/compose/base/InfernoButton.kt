@@ -33,7 +33,7 @@ fun InfernoButton(
 ) {
     Button(
         onClick = onClick,
-        modifier = modifier,
+        modifier = modifier, // .clip(shape),
         enabled = enabled,
         shape = shape,
         colors = colors,

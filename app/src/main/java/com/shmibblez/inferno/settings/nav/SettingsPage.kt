@@ -1,4 +1,4 @@
-package com.shmibblez.inferno.settings
+package com.shmibblez.inferno.settings.nav
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.fillMaxSize

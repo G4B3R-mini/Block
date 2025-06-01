@@ -8,45 +8,37 @@ import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuDefaults
-import androidx.compose.material3.Text
+import androidx.compose.material3.MenuItemColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.Divider
 import com.shmibblez.inferno.R
-import com.shmibblez.inferno.compose.button.PrimaryButton
+import com.shmibblez.inferno.compose.base.InfernoIcon
+import com.shmibblez.inferno.compose.base.InfernoText
+import com.shmibblez.inferno.compose.base.InfernoTextStyle
 import com.shmibblez.inferno.compose.menu.MenuItem.FixedItem.Level
 import com.shmibblez.inferno.compose.text.Text
 import com.shmibblez.inferno.compose.text.value
-import com.shmibblez.inferno.theme.FirefoxTheme
+import com.shmibblez.inferno.ext.infernoTheme
+import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.Divider
 import androidx.compose.material3.DropdownMenu as MaterialDropdownMenu
 import androidx.compose.material3.DropdownMenuItem as MaterialDropdownMenuItem
 
@@ -74,20 +66,18 @@ fun DropdownMenu(
     scrollState: ScrollState = rememberScrollState(),
     onDismissRequest: () -> Unit,
 ) {
-    FirefoxTheme {
-        MaterialTheme(shapes = MaterialTheme.shapes.copy(medium = defaultMenuShape)) {
-            MaterialDropdownMenu(
-                expanded = expanded,
+    MaterialTheme(shapes = MaterialTheme.shapes.copy(medium = defaultMenuShape)) {
+        MaterialDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = onDismissRequest,
+            offset = offset,
+            scrollState = scrollState,
+            modifier = modifier.background(LocalContext.current.infernoTheme().value.secondaryBackgroundColor),
+        ) {
+            DropdownMenuContent(
+                menuItems = menuItems,
                 onDismissRequest = onDismissRequest,
-                offset = offset,
-                scrollState = scrollState,
-                modifier = modifier.background(FirefoxTheme.colors.layer2),
-            ) {
-                DropdownMenuContent(
-                    menuItems = menuItems,
-                    onDismissRequest = onDismissRequest,
-                )
-            }
+            )
         }
     }
 }
@@ -107,8 +97,7 @@ private fun DropdownMenuContent(
                                 onDismissRequest()
                                 it.onClick()
                             },
-                            modifier = Modifier
-                                .testTag(it.testTag),
+                            modifier = Modifier.testTag(it.testTag),
                             content = {
                                 TextMenuItemContent(item = it)
                             },
@@ -119,8 +108,7 @@ private fun DropdownMenuContent(
                                 onDismissRequest()
                                 it.onClick()
                             },
-                            modifier = Modifier
-                                .testTag(it.testTag),
+                            modifier = Modifier.testTag(it.testTag),
                             content = {
                                 IconMenuItemContent(item = it)
                             },
@@ -173,9 +161,8 @@ private fun CheckableMenuItemContent(
     item: MenuItem.CheckableItem,
 ) {
     if (item.isChecked) {
-        Icon(
+        InfernoIcon(
             painter = painterResource(R.drawable.mozac_ic_checkmark_24),
-            tint = FirefoxTheme.levelColors.iconPrimary,
             contentDescription = null,
         )
     } else {
@@ -189,9 +176,8 @@ private fun CheckableMenuItemContent(
 private fun IconMenuItemContent(
     item: MenuItem.IconItem,
 ) {
-    Icon(
+    InfernoIcon(
         painter = painterResource(item.drawableRes),
-        tint = FirefoxTheme.levelColors.iconPrimary,
         contentDescription = null,
     )
 
@@ -213,6 +199,14 @@ private fun FlexibleDropdownMenuItem(
         enabled = enabled,
         contentPadding = contentPadding,
         interactionSource = interactionSource,
+        colors = MenuItemColors(
+            textColor = LocalContext.current.infernoTheme().value.primaryTextColor,
+            leadingIconColor = LocalContext.current.infernoTheme().value.primaryIconColor,
+            trailingIconColor = LocalContext.current.infernoTheme().value.primaryIconColor,
+            disabledTextColor = LocalContext.current.infernoTheme().value.secondaryTextColor,
+            disabledLeadingIconColor = LocalContext.current.infernoTheme().value.secondaryIconColor,
+            disabledTrailingIconColor = LocalContext.current.infernoTheme().value.secondaryIconColor,
+        ),
         text = {
             Row(
                 horizontalArrangement = Arrangement.spacedBy(ItemHorizontalSpaceBetween),
@@ -226,202 +220,14 @@ private fun FlexibleDropdownMenuItem(
 
 @Composable
 private fun MenuItemText(text: Text) {
-    Text(
+    InfernoText(
         text = text.value,
-        color = FirefoxTheme.levelColors.textPrimary,
-        style = FirefoxTheme.typography.subtitle1,
+        fontColor = LocalContext.current.infernoTheme().value.primaryTextColor,
+        infernoStyle = InfernoTextStyle.Subtitle,
     )
 }
-
-/**
- * A subset of the color palette that is used to style a UI element based on their level.
- *
- * @property textPrimary The primary text color.
- * @property iconPrimary The primary icon color.
- */
-private data class LevelColors(
-    val textPrimary: Color,
-    val iconPrimary: Color,
-)
 
 /**
  * CompositionLocal that provides the current level of importance.
  */
 private val LocalLevelColor = compositionLocalOf { Level.Default }
-
-/**
- * Returns the [LevelColors] based on the current level of importance.
- */
-private val FirefoxTheme.levelColors: LevelColors
-    @Composable
-    get() {
-        val current = LocalLevelColor.current
-        return when (current) {
-            Level.Default -> {
-                LevelColors(
-                    textPrimary = colors.textPrimary,
-                    iconPrimary = colors.iconPrimary,
-                )
-            }
-
-            Level.Critical -> {
-                LevelColors(
-                    textPrimary = colors.textCritical,
-                    iconPrimary = colors.iconCritical,
-                )
-            }
-        }
-    }
-
-private data class MenuPreviewParameter(
-    val itemType: ItemType,
-    val menuItems: List<MenuItem>,
-) {
-    enum class ItemType {
-        TEXT_ITEMS,
-        CHECKABLE_ITEMS,
-        ICON_ITEMS,
-    }
-}
-
-private val menuPreviewParameters by lazy {
-    listOf(
-        MenuPreviewParameter(
-            itemType = MenuPreviewParameter.ItemType.TEXT_ITEMS,
-            menuItems = listOf(
-                MenuItem.TextItem(
-                    text = Text.String("Text Item 1"),
-                    onClick = {},
-                ),
-                MenuItem.TextItem(
-                    text = Text.String("Text Item 1"),
-                    onClick = {},
-                ),
-            ),
-        ),
-        MenuPreviewParameter(
-            itemType = MenuPreviewParameter.ItemType.CHECKABLE_ITEMS,
-            menuItems = listOf(
-                MenuItem.CheckableItem(
-                    text = Text.String("Checkable Item 1"),
-                    isChecked = true,
-                    onClick = {},
-                ),
-                MenuItem.CheckableItem(
-                    text = Text.String("Checkable Item 2"),
-                    isChecked = false,
-                    onClick = {},
-                ),
-            ),
-        ),
-        MenuPreviewParameter(
-            itemType = MenuPreviewParameter.ItemType.ICON_ITEMS,
-            menuItems = listOf(
-                MenuItem.IconItem(
-                    text = Text.String("Delete"),
-                    drawableRes = R.drawable.mozac_ic_delete_24,
-                    level = Level.Critical,
-                    onClick = {},
-                ),
-                MenuItem.IconItem(
-                    text = Text.String("Have a cookie!"),
-                    drawableRes = R.drawable.mozac_ic_cookies_24,
-                    onClick = {},
-                ),
-                MenuItem.Divider,
-                MenuItem.IconItem(
-                    text = Text.String("What's new"),
-                    drawableRes = R.drawable.mozac_ic_whats_new_24,
-                    onClick = {},
-                ),
-            ),
-        ),
-    )
-}
-
-@PreviewLightDark
-@Composable
-private fun DropdownMenuPreview() {
-    FirefoxTheme {
-        Column(
-            modifier = Modifier
-                .background(color = FirefoxTheme.colors.layer1)
-                .fillMaxSize()
-                .padding(FirefoxTheme.space.baseContentEqualPadding),
-            verticalArrangement = Arrangement.spacedBy(FirefoxTheme.space.baseContentEqualPadding),
-        ) {
-            Text(
-                text = "Click buttons to expand dropdown menu",
-                style = FirefoxTheme.typography.body1,
-                color = FirefoxTheme.colors.textPrimary,
-            )
-
-            Text(
-                text = """
-                    The menu items along with checkable state should be hoisted in feature logic and simply passed to the DropdownMenu composable. The mapping is done here in the composable as an example, try to do that outside the composables.
-                """.trimIndent(),
-                style = FirefoxTheme.typography.caption,
-                color = FirefoxTheme.colors.textPrimary,
-            )
-
-            menuPreviewParameters.forEach {
-                Box {
-                    var expanded by remember { mutableStateOf(false) }
-                    val text by remember { mutableStateOf(it.itemType.name.replace("_", " ")) }
-
-                    PrimaryButton(text = text) {
-                        expanded = true
-                    }
-                    DropdownMenu(
-                        menuItems = it.menuItems,
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false },
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.size(FirefoxTheme.space.baseContentEqualPadding))
-
-            Text(
-                text = "Dropdown menu items",
-                style = FirefoxTheme.typography.body1,
-                color = FirefoxTheme.colors.textPrimary,
-            )
-
-            Column(
-                modifier = Modifier.background(color = FirefoxTheme.colors.layer2),
-            ) {
-                val menuItems: List<MenuItem> by remember {
-                    mutableStateOf(menuPreviewParameters.map { it.menuItems.first() })
-                }
-
-                DropdownMenuContent(menuItems) { }
-            }
-
-            Spacer(modifier = Modifier.size(FirefoxTheme.space.baseContentEqualPadding))
-
-            Text(
-                text = "Checkable menu item usage",
-                style = FirefoxTheme.typography.body1,
-                color = FirefoxTheme.colors.textPrimary,
-            )
-
-            Column(
-                modifier = Modifier.background(color = FirefoxTheme.colors.layer2),
-            ) {
-                var isChecked by remember { mutableStateOf(true) }
-
-                DropdownMenuContent(
-                    menuItems = listOf(
-                        MenuItem.CheckableItem(
-                            text = Text.String(value = "Click me!"),
-                            isChecked = isChecked,
-                            onClick = { isChecked = !isChecked },
-                        ),
-                    ),
-                    onDismissRequest = {},
-                )
-            }
-        }
-    }
-}

@@ -1,6 +1,7 @@
 package com.shmibblez.inferno.settings.toolbar
 
 import android.content.Context
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
@@ -13,9 +14,13 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -23,11 +28,14 @@ import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.base.InfernoCheckbox
 import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.base.InfernoText
+import com.shmibblez.inferno.ext.infernoTheme
 import com.shmibblez.inferno.proto.InfernoSettings
 import com.shmibblez.inferno.settings.compose.components.PrefUiConst
 import com.shmibblez.inferno.tabs.tabstray.TabList
 import com.shmibblez.inferno.tabstray.browser.compose.DragItemContainer
+import com.shmibblez.inferno.tabstray.browser.compose.ListReorderDragState
 import com.shmibblez.inferno.tabstray.browser.compose.createListReorderState
+import com.shmibblez.inferno.tabstray.browser.compose.detectListPressAndDrag
 import com.shmibblez.inferno.toolbar.ToToolbarIcon
 
 
@@ -38,47 +46,69 @@ private const val MAX_TOOLBAR_ITEMS = 7
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun PreferenceToolbarItems(
-    modifier:Modifier = Modifier,
-    topPreferences: List<@Composable () -> Unit>,
-    selectedItems: List<InfernoSettings.ToolbarItem>,
-    remainingItems: List<InfernoSettings.ToolbarItem>,
+    modifier: Modifier = Modifier,
+    topPreferences: List<Pair<Any, @Composable () -> Unit>>,
+    initiallySelectedItems: List<InfernoSettings.ToolbarItem>,
+    initiallyRemainingItems: List<InfernoSettings.ToolbarItem>,
     onSelectedItemsChanged: (List<InfernoSettings.ToolbarItem>) -> Unit,
 ) {
     val context = LocalContext.current
 
     val state = rememberLazyListState()
 
-    // todo: reorder not working
+    // local selected items list
+    // updates a ton with onMove invocations
+    // when drag finish updates settings
+    var selectedItems by remember { mutableStateOf(initiallySelectedItems) }
+    var remainingItems by remember { mutableStateOf(initiallyRemainingItems) }
+
+    // update dataset on settings change
+    LaunchedEffect(initiallySelectedItems, initiallyRemainingItems) {
+        selectedItems = initiallySelectedItems
+        remainingItems = initiallyRemainingItems
+    }
+
     val reorderState = createListReorderState(
         listState = state,
         onMove = { from, to ->
+            // if item is not toolbar item ignore
+            if (from.key !is InfernoSettings.ToolbarItem || to.key !is InfernoSettings.ToolbarItem) return@createListReorderState
+
+            var logStr = "onMove:\nlist before changes: $selectedItems"
             val steps = to.index - from.index
             val key = from.key as InfernoSettings.ToolbarItem
             val fromIndex = from.index - topPreferences.size
             val toIndex = fromIndex + steps
+            val maxIndex = selectedItems.size - 1
+            // do not move if outside bounds
+            if (fromIndex < 0 || toIndex < 0 || fromIndex > maxIndex || toIndex > maxIndex) return@createListReorderState
             when {
-                steps > 0 -> {
+                steps != 0 -> {
+                    logStr += "moving item\nfrom.key: ${from.key}\nsteps: $steps\nfromIndex: $fromIndex\ntoIndex: $toIndex\nmaxIndex: $maxIndex\nselectedItems.size: ${selectedItems.size}"
                     val newList = selectedItems.toMutableList()
                     newList.removeAt(fromIndex)
                     newList.add(toIndex, key)
-                    onSelectedItemsChanged(newList.toList())
-                }
-
-                steps < 0 -> {
-                    val newList = selectedItems.toMutableList()
-                    newList.removeAt(fromIndex)
-                    newList.add(toIndex, key)
-                    onSelectedItemsChanged(newList.toList())
+                    selectedItems = newList
+                    logStr += "\nlist after changes: $newList"
                 }
 
                 else -> {/* steps is 0, nothing */
+                    logStr += "\nsteps == 0"
                 }
             }
+            Log.d("PreferenceToolbarItems", logStr)
         },
         onLongPress = { },
         onExitLongPress = {},
-        ignoredItems = remainingItems + (0..topPreferences.lastIndex).toList(),
+        ignoredItems = (0..topPreferences.lastIndex).toList(),
     )
+
+    LaunchedEffect(reorderState.dragState) {
+        // when finished dragging, save in settings
+        if (reorderState.dragState == ListReorderDragState.FINISHED_DRAGGING) {
+            onSelectedItemsChanged(selectedItems)
+        }
+    }
 
     fun onSelected(item: InfernoSettings.ToolbarItem) {
         if (selectedItems.size <= MAX_TOOLBAR_ITEMS) {
@@ -97,11 +127,18 @@ fun PreferenceToolbarItems(
     }
 
     LazyColumn(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .detectListPressAndDrag(
+                listState = state,
+                reorderState = reorderState,
+                shouldLongPressToDrag = true,
+            ),
+        state = state,
     ) {
         // top preferences
-        itemsIndexed(topPreferences, key = { index, _ -> index }) { _, item ->
-            item.invoke()
+        items(topPreferences, key = { it.first }) {
+            it.second.invoke()
         }
 
         // selected items
@@ -156,8 +193,8 @@ private fun ToolbarItem(
             InfernoIcon(
                 painter = painterResource(R.drawable.ic_drag_handle_24),
                 contentDescription = "",
-                modifier = Modifier.size(12.dp),
-//                tint = Color.White, // todo: theme
+                modifier = Modifier.size(18.dp),
+                tint = LocalContext.current.infernoTheme().value.primaryActionColor,
             )
         }
 
@@ -168,7 +205,6 @@ private fun ToolbarItem(
         InfernoText(
             text = item.toPrefString(context),
             modifier = Modifier.weight(1F),
-            fontColor = Color.White, // todo: theme
         )
 
         // selected checkbox
@@ -189,7 +225,9 @@ private fun InfernoSettings.ToolbarItem.isRequired(): Boolean {
     return when (this) {
         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_MENU,
         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_ORIGIN,
-        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_ORIGIN_MINI -> true
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_ORIGIN_MINI,
+            -> true
+
         else -> false
     }
 }

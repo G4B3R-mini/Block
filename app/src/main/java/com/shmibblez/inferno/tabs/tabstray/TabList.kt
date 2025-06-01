@@ -25,7 +25,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
@@ -37,29 +36,26 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.DismissibleItemBackground
 import com.shmibblez.inferno.compose.SwipeToDismissBox
-import com.shmibblez.inferno.compose.SwipeToDismissState
 import com.shmibblez.inferno.compose.TabThumbnail
 import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.base.InfernoText
+import com.shmibblez.inferno.compose.base.InfernoTextStyle
 import com.shmibblez.inferno.compose.rememberSwipeToDismissState
+import com.shmibblez.inferno.ext.infernoTheme
 import com.shmibblez.inferno.ext.toShortUrl
 import com.shmibblez.inferno.tabstray.HEADER_ITEM_KEY
 import com.shmibblez.inferno.tabstray.SPAN_ITEM_KEY
@@ -167,7 +163,7 @@ fun TabList(
 //                    onMediaClick = onTabMediaClick,
 //                    onClick = onTabClick,
 //                )
-                ListTab(
+                TabItem(
                     tab = tab,
                     thumbnailSize = tabThumbnailSize,
                     isSelected = tab.id == activeTabId,
@@ -184,9 +180,8 @@ fun TabList(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun ListTab(
+private fun TabItem(
     tab: TabSessionState,
     thumbnailSize: Int,
     isSelected: Boolean = false,
@@ -249,12 +244,10 @@ private fun ListTab(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-//                .background(FirefoxTheme.colors.layer3)
-//                .background(contentBackgroundColor)
                 .background(
                     when (multiSelectionEnabled) {
-                        true -> if (multiSelectionSelected) Color.Red else Color.Black
-                        false -> if (isSelected) Color.DarkGray else Color.Black
+                        true -> if (multiSelectionSelected) LocalContext.current.infernoTheme().value.primaryActionColor else LocalContext.current.infernoTheme().value.primaryBackgroundColor
+                        false -> if (isSelected) LocalContext.current.infernoTheme().value.secondaryBackgroundColor else LocalContext.current.infernoTheme().value.primaryBackgroundColor
                     }
                 )
                 .then(clickableModifier)
@@ -281,26 +274,15 @@ private fun ListTab(
             ) {
                 InfernoText(
                     text = tab.toDisplayTitle().take(MAX_URI_LENGTH),
-                    fontColor = Color.White, // FirefoxTheme.colors.textPrimary,
-                    style = TextStyle(
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.W400,
-                        letterSpacing = 0.5.sp,
-                        lineHeight = 24.sp,
-                    ), // FirefoxTheme.typography.body1,
+                    infernoStyle = InfernoTextStyle.Normal,
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 2,
                 )
 
+                // tab url
                 InfernoText(
                     text = tab.content.url.toShortUrl(),
-                    fontColor = Color.White, // FirefoxTheme.colors.textSecondary,
-                    style = TextStyle(
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.W400,
-                        letterSpacing = 0.25.sp,
-                        lineHeight = 20.sp,
-                    ), // FirefoxTheme.typography.body2,
+                    infernoStyle = InfernoTextStyle.Subtitle,
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 1,
                 )
@@ -358,32 +340,21 @@ private fun Thumbnail(
         )
 
         if (isSelected) {
-            Box(
-                modifier = Modifier
-                    .size(width = 92.dp, height = 72.dp)
-                    .clip(RoundedCornerShape(4.dp))
-                    .background(Color(143, 0, 255)), // FirefoxTheme.colors.layerAccentNonOpaque),
-//                contentAlignment = Alignment.Center,
-            )
-
             Card(
                 modifier = Modifier
                     .size(size = 40.dp)
                     .align(alignment = Alignment.Center),
                 shape = CircleShape,
                 colors = CardDefaults.cardColors(
-                    containerColor = Color(
-                        143, 0, 255
-                    )
+                    containerColor = LocalContext.current.infernoTheme().value.primaryActionColor
                 ), // FirefoxTheme.colors.layerAccent ),
             ) {
                 InfernoIcon(
-                    painter = painterResource(id = R.drawable.mozac_ic_checkmark_24),
+                    painter = painterResource(id = R.drawable.ic_checkmark_24),
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(all = 8.dp),
                     contentDescription = null,
-//                    tint = colorResource(id = R.color.mozac_ui_icons_fill),
                 )
             }
         }
@@ -392,7 +363,7 @@ private fun Thumbnail(
             MediaImage(
                 tab = tab,
                 onMediaIconClicked = onMediaIconClicked,
-                modifier = Modifier.align(Alignment.TopEnd),
+                modifier = Modifier.fillMaxSize(), // align(Alignment.TopEnd),
                 interactionSource = interactionSource,
             )
         }
@@ -430,9 +401,11 @@ fun MediaImage(
     Image(
         painter = rememberDrawablePainter(drawable = drawable),
         contentDescription = stringResource(contentDescription),
-        modifier = modifier.clickable(
+        modifier = modifier.fillMaxSize().clickable(
             interactionSource = interactionSource,
             indication = null,
         ) { onMediaIconClicked(tab) },
+        contentScale = ContentScale.FillWidth,
+        alignment = Alignment.TopCenter,
     )
 }

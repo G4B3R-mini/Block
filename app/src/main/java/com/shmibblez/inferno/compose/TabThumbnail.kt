@@ -4,31 +4,25 @@
 
 package com.shmibblez.inferno.compose
 
-import android.graphics.BitmapFactory
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.shmibblez.inferno.settings.SupportUtils
+import com.shmibblez.inferno.theme.FirefoxTheme
 import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.browser.state.state.createTab
 import mozilla.components.concept.base.images.ImageLoadRequest
-import com.shmibblez.inferno.theme.FirefoxTheme
-import com.shmibblez.inferno.R
 
 private const val FALLBACK_ICON_SIZE = 36
 
@@ -53,7 +47,7 @@ fun TabThumbnail(
     backgroundColor: Color = Color.Black, // FirefoxTheme.colors.layer2,
     contentDescription: String? = null,
     contentScale: ContentScale = ContentScale.FillWidth,
-    alignment: Alignment = Alignment.Center,
+    alignment: Alignment = Alignment.TopCenter,
 ) {
     Box(
 //        colors = CardDefaults.cardColors(containerColor = backgroundColor),
@@ -61,16 +55,17 @@ fun TabThumbnail(
         contentAlignment = Alignment.Center,
     ) {
         ThumbnailImage(
+            modifier = Modifier.fillMaxSize(),
             request = ImageLoadRequest(
                 id = tab.id,
                 size = size,
                 isPrivate = tab.content.private,
             ),
-            contentScale = ContentScale.FillWidth,
+            contentScale = contentScale,
             alignment = alignment,
         ) {
             Box(
-                modifier = Modifier.size(FALLBACK_ICON_SIZE.dp),
+                modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center,
             ) {
                 val icon = tab.content.icon

@@ -2,30 +2,28 @@ package com.shmibblez.inferno.settings.nav
 
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.EaseIn
-import androidx.compose.animation.core.EaseOut
-import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.shmibblez.inferno.settings.passwords.PasswordSettingsPage
+import com.shmibblez.inferno.ext.infernoTheme
 import com.shmibblez.inferno.settings.SettingsFragmentDirections
 import com.shmibblez.inferno.settings.accessibility.AccessibilitySettingsPage
 import com.shmibblez.inferno.settings.account.AccountProblemSettingsPage
 import com.shmibblez.inferno.settings.account.AccountSettingsPage
 import com.shmibblez.inferno.settings.account.TurnOnSyncSettingsPage
 import com.shmibblez.inferno.settings.autofill.AutofillSettingsPage
-import com.shmibblez.inferno.settings.SettingsPage
 import com.shmibblez.inferno.settings.gesture.GestureSettingsPage
 import com.shmibblez.inferno.settings.home.HomePageSettingsPage
 import com.shmibblez.inferno.settings.locale.LocaleSettingsPage
 import com.shmibblez.inferno.settings.onQuit.OnQuitSettingsPage
 import com.shmibblez.inferno.settings.passwords.PasswordExceptionSettingsPage
+import com.shmibblez.inferno.settings.passwords.PasswordSettingsPage
 import com.shmibblez.inferno.settings.privacyAndSecurity.PrivacyAndSecuritySettingsPage
 import com.shmibblez.inferno.settings.search.SearchSettingsPage
 import com.shmibblez.inferno.settings.sitepermissions.SitePermissionsExceptionsSettingsPage
@@ -130,38 +128,47 @@ fun SettingsNavHost(
 ) {
     val nav = rememberNavController()
 
-    NavHost(
-        navController = nav,
+    NavHost(navController = nav,
         startDestination = SettingsRoute.SettingsPage,
-        modifier = Modifier.fillMaxSize(),
-        popEnterTransition = {
-            fadeIn(
-                animationSpec = tween(
-                    300,
-                    easing = LinearEasing,
-                )
-            ) + slideIntoContainer(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(LocalContext.current.infernoTheme().value.primaryBackgroundColor),
+        enterTransition = {
+            slideIntoContainer(
                 animationSpec = tween(
                     300,
                     easing = EaseIn,
                 ),
-                towards = AnimatedContentTransitionScope.SlideDirection.End
+                towards = AnimatedContentTransitionScope.SlideDirection.Start,
+            )
+        },
+        exitTransition = {
+            slideOutOfContainer(
+                animationSpec = tween(
+                    300,
+                    easing = EaseIn,
+                ),
+                towards = AnimatedContentTransitionScope.SlideDirection.Start,
+            )
+        },
+        popEnterTransition = {
+            slideIntoContainer(
+                animationSpec = tween(
+                    300,
+                    easing = EaseIn,
+                ),
+                towards = AnimatedContentTransitionScope.SlideDirection.End,
             )
         },
         popExitTransition = {
-            fadeOut(
+            slideOutOfContainer(
                 animationSpec = tween(
                     300,
-                    easing = LinearEasing,
-                )
-            ) + slideOutOfContainer(
-                animationSpec = tween(300,
-                    easing = EaseOut,
-                    ),
-                towards = AnimatedContentTransitionScope.SlideDirection.Start
+                    easing = EaseIn,
+                ),
+                towards = AnimatedContentTransitionScope.SlideDirection.End,
             )
-        }
-    ) {
+        }) {
         composable<SettingsRoute.SettingsPage> {
             SettingsPage(
                 goBackLegacy = goBackLegacy,
