@@ -1,25 +1,25 @@
 # About
 
-Inferno is a browser for Android based off of Mozilla's geckoView for Android, Mozilla's Android
-Components, and built from Mozilla's Android Fenix browser. We're not a firefox fork like most other
-browsers, but instead a firefox-based browser using Mozilla's Android Components. Although this
-means more code to write initially, it allows for more customizability while maintaining similarity
-to firefox, and less maintenance in the long term since we don't have to merge with changes made to
-firefox for Android, which is nice.
+Inferno Browser is a mobile browser for Android which mainly focuses on usability, privacy, and relevant features. It's built mainly off of Mozilla's Fenix browser, also making use of the android gecko engine. It is almost ready for beta launch on the Google play store
 
-# Features
+# Next Steps
 
-- tabs (finally for firefox-mobile based apps)
+Before launching however, there are 4 main things that have to be fixed, these are:
+
+- access from external apps (external app browser)
+- extension access (settings)
+- some websites crashing unexpectedly (does not happen on Firefox)
+- crash reporting system
+
+In order for this app to be launched for actual use, these problems must be fixed. Not to shadow the fact that there are some other things that are a bit hacky or clunky, but they are functional and can be progressively improved; the 4 points above are crucial and currently lacking. With this in mind, the app IS currently in a functional state, and is actually very usable this is my main browser lol, collaboration is welcome you can email me ideas or if you want some pointers on what needs work right now.
+
+# Nice Features
+
+- tab bar
 - color customization / themes
     - preset themes and custom themes
 - enhanced privacy (mozilla telemetry has been removed)
-
-# Upcoming features:
-
-- privacy
-    - mozilla telemetry disabled
-- theme (slick ui with lots of preference options)
-- lots of customizability in general
+- toolbar customization (modify items in toolbar)
 
 that's it for now, hopefully this project doesn't die
 
@@ -27,17 +27,21 @@ that's it for now, hopefully this project doesn't die
 
 ## Settings Pages Status
 
-- [ ] Toolbar (Buggy)
-  - [ ] reorder not working
+- [x] Toolbar (Working)
 - [ ] Tabs (Buggy)
+    - [ ] enable / disable tabbar not implemented 
+    - [ ] top / bottom position not implemented (only bottom)
+    - [ ] tab tray grid not implemented 
 - [ ] Search (Buggy)
 - [ ] Theme (Buggy)
 
-- [ ] Gestures (Buggy)
-- [ ] Homepage (Buggy)
-- [ ] OnQuit (Buggy)
+- [x] Gestures (Working)
+  - [ ] side note: not implemented in respective components
+- [x] Homepage (Working)
+- [x] OnQuit (Working)
+  - [ ] side note: not reflected when quit, need to add to callback when app closed 
 - [ ] Passwords (Buggy)
-  - [ ] side note: ui good, passwords not saving though when added
+  - [ ] side note: ui good, passwords not saving when added though
   - [ ] side note: exceptions not tested
   - [ ] side note: getting this error message:
 ```
@@ -73,29 +77,11 @@ Did you add an account?
 
 ## Massiv Bugs
 
-- [ ] settings
-    - [ ] settings managers wrong spacing for expandable items (addressManager, passwordManager,
-      etc)
-    - [ ] outlined edit text taking up waaay too much space
-        - [ ] probably source of weird looking ui in EditThemeDialog and PreferenceSwitch
-        - [ ] for PreferenceSwitch source of error may be setting leadingIcon = {}, try setting to
-          null, also try removing anchor. Setting leadingIcon = {} happens in a lot of places, try
-          removing where useful if it works
-    - [ ] a couple of settings pages just crash, namely passwords, among others
-    - [ ] dialog buttons have no padding
-    - [ ] Language settings
-        - [ ] default item looks weird, looks like 2 items (replace language name with use system
-          default (recommended) title)
+- [ ] theme settings
+    - [ ] sometimes current theme selected when edit custom theme
 
 ## Under Construction
 
-- [ ] more customization settings
-    - [ ] enable / disable tab bar
-    - [ ] customize toolbar items
-    - [ ] toolbar and tabs position (top / bottom for each, which is above and below in case both on
-      same side)
-- [ ] tabs
-    - [ ] use icons storage for favicon square (persisted)
 - [ ] biometric
     - [ ] for components that depend on biometric/auth, you could create a fragment in
       compose (as shown [here](https://stackoverflow.com/a/71480760/14642303)), that listens for
