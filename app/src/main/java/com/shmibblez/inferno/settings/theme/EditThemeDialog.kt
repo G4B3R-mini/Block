@@ -609,7 +609,7 @@ fun EditThemeDialog(
                         contentColor = theme.primaryTextColor,
                         disabledContainerColor = theme.secondaryActionColor,
                         disabledContentColor = theme.secondaryTextColor,
-                    )
+                    ),
                 )
             }
         }

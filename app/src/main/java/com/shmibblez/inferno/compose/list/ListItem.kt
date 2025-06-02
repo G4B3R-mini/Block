@@ -4,10 +4,7 @@
 
 package com.shmibblez.inferno.compose.list
 
-import android.content.res.Configuration
-import android.widget.Toast
 import androidx.annotation.DrawableRes
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -26,10 +23,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -44,27 +38,24 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.PlatformTextStyle
-import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.Divider
-import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.annotation.LightDarkPreview
-import mozilla.components.ui.colors.PhotonColors
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.Favicon
 import com.shmibblez.inferno.compose.base.InfernoIcon
+import com.shmibblez.inferno.compose.base.InfernoText
+import com.shmibblez.inferno.compose.base.InfernoTextStyle
 import com.shmibblez.inferno.compose.button.RadioButton
 import com.shmibblez.inferno.compose.ext.thenConditional
-import com.shmibblez.inferno.theme.FirefoxTheme
+import com.shmibblez.inferno.ext.infernoTheme
+import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.Divider
 
 private val LIST_ITEM_HEIGHT = 56.dp
 private val ICON_SIZE = 24.dp
 private val DIVIDER_VERTICAL_PADDING = 6.dp
 
-private const val TOAST_LENGTH = Toast.LENGTH_SHORT
+//private const val TOAST_LENGTH = Toast.LENGTH_SHORT
 
 /**
  * List item used to display a image with optional Composable for adding UI to the end of the list item.
@@ -137,7 +128,7 @@ fun TextListItem(
     onLongClick: (() -> Unit)? = null,
     iconPainter: Painter? = null,
     iconDescription: String? = null,
-    iconTint: Color = FirefoxTheme.colors.iconPrimary,
+    iconTint: Color = LocalContext.current.infernoTheme().value.primaryIconColor,
     onIconClick: (() -> Unit)? = null,
 ) {
     ListItem(
@@ -250,7 +241,7 @@ fun FaviconListItem(
                         .padding(vertical = DIVIDER_VERTICAL_PADDING)
                         .fillMaxHeight()
                         .width(1.dp),
-                    color = FirefoxTheme.colors.borderSecondary,
+                    color = LocalContext.current.infernoTheme().value.secondaryIconColor,
                 )
             }
 
@@ -304,8 +295,8 @@ fun IconListItem(
     label: String,
     modifier: Modifier = Modifier,
     labelModifier: Modifier = Modifier,
-    labelTextColor: Color = FirefoxTheme.colors.textPrimary,
-    descriptionTextColor: Color = FirefoxTheme.colors.textSecondary,
+    labelTextColor: Color = LocalContext.current.infernoTheme().value.primaryTextColor,
+    descriptionTextColor: Color = LocalContext.current.infernoTheme().value.secondaryTextColor,
     maxLabelLines: Int = 1,
     description: String? = null,
     enabled: Boolean = true,
@@ -314,11 +305,11 @@ fun IconListItem(
     onLongClick: (() -> Unit)? = null,
     beforeIconPainter: Painter,
     beforeIconDescription: String? = null,
-    beforeIconTint: Color = FirefoxTheme.colors.iconPrimary,
+    beforeIconTint: Color = LocalContext.current.infernoTheme().value.primaryIconColor,
     showDivider: Boolean = false,
     afterIconPainter: Painter? = null,
     afterIconDescription: String? = null,
-    afterIconTint: Color = FirefoxTheme.colors.iconPrimary,
+    afterIconTint: Color = LocalContext.current.infernoTheme().value.primaryIconColor,
     onAfterIconClick: (() -> Unit)? = null,
 ) {
     ListItem(
@@ -337,7 +328,7 @@ fun IconListItem(
             InfernoIcon(
                 painter = beforeIconPainter,
                 contentDescription = beforeIconDescription,
-                tint = if (enabled) beforeIconTint else FirefoxTheme.colors.iconDisabled,
+                tint = if (enabled) beforeIconTint else LocalContext.current.infernoTheme().value.secondaryIconColor,
             )
 
             Spacer(modifier = Modifier.width(16.dp))
@@ -347,7 +338,7 @@ fun IconListItem(
                 return@ListItem
             }
 
-            val tint = if (enabled) afterIconTint else FirefoxTheme.colors.iconDisabled
+            val tint = if (enabled) afterIconTint else LocalContext.current.infernoTheme().value.secondaryIconColor
 
             if (showDivider) {
                 Spacer(modifier = Modifier.width(8.dp))
@@ -357,7 +348,7 @@ fun IconListItem(
                         .padding(vertical = DIVIDER_VERTICAL_PADDING)
                         .fillMaxHeight()
                         .width(1.dp),
-                    color = FirefoxTheme.colors.borderSecondary,
+                    color = LocalContext.current.infernoTheme().value.secondaryIconColor,
                 )
             }
 
@@ -512,7 +503,7 @@ fun SelectableFaviconListItem(
                         .padding(vertical = DIVIDER_VERTICAL_PADDING)
                         .fillMaxHeight()
                         .width(1.dp),
-                    color = FirefoxTheme.colors.borderSecondary,
+                    color = LocalContext.current.infernoTheme().value.secondaryIconColor,
                 )
             }
 
@@ -570,8 +561,8 @@ fun SelectableIconListItem(
     label: String,
     isSelected: Boolean,
     modifier: Modifier = Modifier,
-    labelTextColor: Color = FirefoxTheme.colors.textPrimary,
-    descriptionTextColor: Color = FirefoxTheme.colors.textSecondary,
+    labelTextColor: Color = LocalContext.current.infernoTheme().value.primaryTextColor,
+    descriptionTextColor: Color = LocalContext.current.infernoTheme().value.secondaryTextColor,
     maxLabelLines: Int = 1,
     description: String? = null,
     enabled: Boolean = true,
@@ -580,11 +571,11 @@ fun SelectableIconListItem(
     onLongClick: (() -> Unit)? = null,
     beforeIconPainter: Painter,
     beforeIconDescription: String? = null,
-    beforeIconTint: Color = FirefoxTheme.colors.iconPrimary,
+    beforeIconTint: Color = LocalContext.current.infernoTheme().value.primaryIconColor,
     showDivider: Boolean = false,
     afterIconPainter: Painter? = null,
     afterIconDescription: String? = null,
-    afterIconTint: Color = FirefoxTheme.colors.iconPrimary,
+    afterIconTint: Color = LocalContext.current.infernoTheme().value.primaryIconColor,
     onAfterIconClick: (() -> Unit)? = null,
     iconSlot: (@Composable () -> Unit)? = null,
 ) {
@@ -606,7 +597,7 @@ fun SelectableIconListItem(
                     InfernoIcon(
                         painter = beforeIconPainter,
                         contentDescription = beforeIconDescription,
-                        tint = if (enabled) beforeIconTint else FirefoxTheme.colors.iconDisabled,
+                        tint = if (enabled) beforeIconTint else LocalContext.current.infernoTheme().value.secondaryIconColor,
                     )
                 },
             )
@@ -618,7 +609,7 @@ fun SelectableIconListItem(
                 return@ListItem
             }
 
-            val tint = if (enabled) afterIconTint else FirefoxTheme.colors.iconDisabled
+            val tint = if (enabled) afterIconTint else LocalContext.current.infernoTheme().value.secondaryIconColor
 
             if (showDivider) {
                 Spacer(modifier = Modifier.width(8.dp))
@@ -628,7 +619,7 @@ fun SelectableIconListItem(
                         .padding(vertical = DIVIDER_VERTICAL_PADDING)
                         .fillMaxHeight()
                         .width(1.dp),
-                    color = FirefoxTheme.colors.borderSecondary,
+                    color = LocalContext.current.infernoTheme().value.secondaryIconColor,
                 )
             }
 
@@ -718,7 +709,7 @@ private fun SelectableItemIcon(
         Box(
             modifier = Modifier
                 .background(
-                    color = FirefoxTheme.colors.layerAccent,
+                    color = LocalContext.current.infernoTheme().value.primaryActionColor,
                     shape = CircleShape,
                 )
                 .size(24.dp),
@@ -755,14 +746,13 @@ private fun SelectableItemIcon(
  * @param beforeListAction Optional Composable for adding UI before the list item.
  * @param afterListAction Optional Composable for adding UI to the end of the list item.
  */
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun ListItem(
     label: String,
     modifier: Modifier = Modifier,
     labelModifier: Modifier = Modifier,
-    labelTextColor: Color = FirefoxTheme.colors.textPrimary,
-    descriptionTextColor: Color = FirefoxTheme.colors.textSecondary,
+    labelTextColor: Color = LocalContext.current.infernoTheme().value.primaryTextColor,
+    descriptionTextColor: Color = LocalContext.current.infernoTheme().value.secondaryTextColor,
     maxLabelLines: Int = 1,
     description: String? = null,
     maxDescriptionLines: Int = 1,
@@ -798,33 +788,35 @@ private fun ListItem(
         Column(
             modifier = Modifier.weight(1f),
         ) {
-            Text(
+            InfernoText(
                 text = label,
                 modifier = labelModifier,
-                color = if (enabled) labelTextColor else FirefoxTheme.colors.textDisabled,
+                fontColor = if (enabled) labelTextColor else LocalContext.current.infernoTheme().value.secondaryTextColor,
                 overflow = TextOverflow.Ellipsis,
-                style = FirefoxTheme.typography.subtitle1.merge(
-                    platformStyle = PlatformTextStyle(includeFontPadding = true),
-                ),
+                infernoStyle = InfernoTextStyle.Small,
+//                style = FirefoxTheme.typography.subtitle1.merge(
+//                    platformStyle = PlatformTextStyle(includeFontPadding = true),
+//                ),
                 maxLines = maxLabelLines,
             )
 
             description?.let {
-                Text(
+                InfernoText(
                     text = description,
-                    color = if (enabled) descriptionTextColor else FirefoxTheme.colors.textDisabled,
+                    fontColor = if (enabled) descriptionTextColor else LocalContext.current.infernoTheme().value.secondaryTextColor,
                     overflow = TextOverflow.Ellipsis,
                     maxLines = maxDescriptionLines,
-                    style = FirefoxTheme.typography.body2
-                        .merge(
-                            // Bug 1915867 - We must force the text direction to correctly truncate a LTR
-                            // description that is too long when the app in RTL mode - at least until this
-                            // bug gets fixed in Compose.
-                            // This isn't the most optional solution but it should have less side-effects
-                            // than forcing no letter spacing (which would be the best approach here).
-                            textDirection = TextDirection.Content,
-                            platformStyle = PlatformTextStyle(includeFontPadding = true),
-                        ),
+                    infernoStyle = InfernoTextStyle.Small,
+//                    style = FirefoxTheme.typography.body2
+//                        .merge(
+//                            // Bug 1915867 - We must force the text direction to correctly truncate a LTR
+//                            // description that is too long when the app in RTL mode - at least until this
+//                            // bug gets fixed in Compose.
+//                            // This isn't the most optional solution but it should have less side-effects
+//                            // than forcing no letter spacing (which would be the best approach here).
+//                            textDirection = TextDirection.Content,
+//                            platformStyle = PlatformTextStyle(includeFontPadding = true),
+//                        ),
                 )
             }
         }
@@ -832,409 +824,409 @@ private fun ListItem(
         afterListAction()
     }
 }
-
-@Composable
-@Preview(name = "TextListItem", uiMode = Configuration.UI_MODE_NIGHT_YES)
-private fun TextListItemPreview() {
-    FirefoxTheme {
-        Box(Modifier.background(FirefoxTheme.colors.layer1)) {
-            TextListItem(label = "Label only")
-        }
-    }
-}
-
-@Composable
-@Preview(name = "TextListItem with a description", uiMode = Configuration.UI_MODE_NIGHT_YES)
-private fun TextListItemWithDescriptionPreview() {
-    FirefoxTheme {
-        Box(Modifier.background(FirefoxTheme.colors.layer1)) {
-            TextListItem(
-                label = "Label + description",
-                description = "Description text",
-            )
-        }
-    }
-}
-
-@Composable
-@Preview(name = "TextListItem with a right icon", uiMode = Configuration.UI_MODE_NIGHT_YES)
-private fun TextListItemWithIconPreview() {
-    FirefoxTheme {
-        Column(Modifier.background(FirefoxTheme.colors.layer1)) {
-            val context = LocalContext.current
-            TextListItem(
-                label = "Label + right icon button",
-                onClick = {},
-                iconPainter = painterResource(R.drawable.mozac_ic_folder_24),
-                iconDescription = "click me",
-                onIconClick = { Toast.makeText(context, "icon click", TOAST_LENGTH).show() },
-            )
-
-            TextListItem(
-                label = "Label + right icon",
-                onClick = {},
-                iconPainter = painterResource(R.drawable.mozac_ic_folder_24),
-                iconDescription = "click me",
-            )
-        }
-    }
-}
-
-@Composable
-@Preview(name = "IconListItem", uiMode = Configuration.UI_MODE_NIGHT_YES)
-private fun IconListItemPreview() {
-    FirefoxTheme {
-        Column(Modifier.background(FirefoxTheme.colors.layer1)) {
-            IconListItem(
-                label = "Left icon list item",
-                onClick = {},
-                beforeIconPainter = painterResource(R.drawable.mozac_ic_folder_24),
-                beforeIconDescription = "click me",
-            )
-
-            IconListItem(
-                label = "Left icon list item",
-                labelTextColor = FirefoxTheme.colors.textAccent,
-                onClick = {},
-                beforeIconPainter = painterResource(R.drawable.mozac_ic_folder_24),
-                beforeIconDescription = "click me",
-                beforeIconTint = FirefoxTheme.colors.iconAccentViolet,
-            )
-
-            IconListItem(
-                label = "Left icon list item + right icon",
-                onClick = {},
-                beforeIconPainter = painterResource(R.drawable.mozac_ic_folder_24),
-                beforeIconDescription = "click me",
-                afterIconPainter = painterResource(R.drawable.mozac_ic_chevron_right_24),
-                afterIconDescription = null,
-            )
-
-            IconListItem(
-                label = "Left icon list item + right icon (disabled)",
-                enabled = false,
-                onClick = {},
-                beforeIconPainter = painterResource(R.drawable.mozac_ic_folder_24),
-                beforeIconDescription = "click me",
-                afterIconPainter = painterResource(R.drawable.mozac_ic_chevron_right_24),
-                afterIconDescription = null,
-            )
-        }
-    }
-}
-
-@Composable
-@Preview(
-    name = "IconListItem with after list action",
-    uiMode = Configuration.UI_MODE_NIGHT_YES,
-)
-private fun IconListItemWithAfterListActionPreview() {
-    FirefoxTheme {
-        Column(Modifier.background(FirefoxTheme.colors.layer1)) {
-            val context = LocalContext.current
-            IconListItem(
-                label = "IconListItem + right icon + clicks",
-                beforeIconPainter = painterResource(R.drawable.mozac_ic_folder_24),
-                beforeIconDescription = null,
-                afterIconPainter = painterResource(R.drawable.mozac_ic_ellipsis_vertical_24),
-                afterIconDescription = "click me",
-                onAfterIconClick = { Toast.makeText(context, "icon click", TOAST_LENGTH).show() },
-            )
-
-            IconListItem(
-                label = "IconListItem + right icon + divider + clicks",
-                beforeIconPainter = painterResource(R.drawable.mozac_ic_folder_24),
-                beforeIconDescription = null,
-                showDivider = true,
-                afterIconPainter = painterResource(R.drawable.mozac_ic_ellipsis_vertical_24),
-                afterIconDescription = "click me",
-                onAfterIconClick = { Toast.makeText(context, "icon click", TOAST_LENGTH).show() },
-            )
-        }
-    }
-}
-
-@Composable
-@Preview(
-    name = "FaviconListItem with a right icon and onClicks",
-    uiMode = Configuration.UI_MODE_NIGHT_YES,
-)
-private fun FaviconListItemPreview() {
-    FirefoxTheme {
-        Column(Modifier.background(FirefoxTheme.colors.layer1)) {
-            val context = LocalContext.current
-            FaviconListItem(
-                label = "Favicon + right icon + clicks",
-                url = "",
-                description = "Description text",
-                onClick = { Toast.makeText(context, "list item click", TOAST_LENGTH).show() },
-                iconPainter = painterResource(R.drawable.mozac_ic_ellipsis_vertical_24),
-                onIconClick = { Toast.makeText(context, "icon click", TOAST_LENGTH).show() },
-            )
-
-            FaviconListItem(
-                label = "Favicon + right icon + show divider + clicks",
-                url = "",
-                description = "Description text",
-                onClick = { Toast.makeText(context, "list item click", TOAST_LENGTH).show() },
-                showDivider = true,
-                iconPainter = painterResource(R.drawable.mozac_ic_ellipsis_vertical_24),
-                onIconClick = { Toast.makeText(context, "icon click", TOAST_LENGTH).show() },
-            )
-
-            FaviconListItem(
-                label = "Favicon + painter",
-                url = "",
-                description = "Description text",
-                faviconPainter = painterResource(id = R.drawable.mozac_ic_collection_24),
-                onClick = { Toast.makeText(context, "list item click", TOAST_LENGTH).show() },
-            )
-        }
-    }
-}
-
-@Composable
-@LightDarkPreview
-private fun ImageListItemPreview() {
-    FirefoxTheme {
-        Column(Modifier.background(FirefoxTheme.colors.layer1)) {
-            ImageListItem(
-                label = "label",
-                iconPainter = painterResource(R.drawable.mozac_ic_web_extension_default_icon),
-                enabled = true,
-                onClick = {},
-                afterListAction = {
-                    Text(
-                        text = "afterListItemText",
-                        color = Color.White,
-                        style = FirefoxTheme.typography.subtitle1,
-                        maxLines = 1,
-                    )
-                },
-            )
-        }
-    }
-}
-
-@Composable
-@LightDarkPreview
-private fun RadioButtonListItemPreview() {
-    val radioOptions =
-        listOf("Radio button first item", "Radio button second item", "Radio button third item")
-    val (selectedOption, onOptionSelected) = remember { mutableStateOf(radioOptions[1]) }
-    FirefoxTheme {
-        Column(Modifier.background(FirefoxTheme.colors.layer1)) {
-            radioOptions.forEach { text ->
-                RadioButtonListItem(
-                    label = text,
-                    description = "$text description",
-                    onClick = { onOptionSelected(text) },
-                    selected = (text == selectedOption),
-                )
-            }
-        }
-    }
-}
-
-@Composable
-@LightDarkPreview
-private fun SelectableFaviconListItemPreview() {
-    FirefoxTheme {
-        Column(Modifier.background(FirefoxTheme.colors.layer1)) {
-            SelectableFaviconListItem(
-                label = "Favicon + right icon",
-                url = "",
-                isSelected = false,
-                description = "Description text",
-                onClick = { },
-                onLongClick = { },
-                iconPainter = painterResource(R.drawable.mozac_ic_ellipsis_vertical_24),
-                onIconClick = { },
-            )
-
-            SelectableFaviconListItem(
-                label = "Selected favicon + right icon",
-                url = "",
-                isSelected = true,
-                description = "Description text",
-                onClick = { },
-                onLongClick = { },
-                iconPainter = painterResource(R.drawable.mozac_ic_ellipsis_vertical_24),
-                onIconClick = { },
-            )
-
-            SelectableFaviconListItem(
-                label = "Favicon + right icon + show divider",
-                url = "",
-                isSelected = false,
-                description = "Description text",
-                onClick = { },
-                onLongClick = { },
-                showDivider = true,
-                iconPainter = painterResource(R.drawable.mozac_ic_ellipsis_vertical_24),
-                onIconClick = { },
-            )
-
-            SelectableFaviconListItem(
-                label = "Selected favicon + right icon + show divider",
-                url = "",
-                isSelected = true,
-                description = "Description text",
-                onClick = { },
-                onLongClick = { },
-                showDivider = true,
-                iconPainter = painterResource(R.drawable.mozac_ic_ellipsis_vertical_24),
-                onIconClick = { },
-            )
-
-            SelectableFaviconListItem(
-                label = "Favicon + painter",
-                url = "",
-                isSelected = false,
-                description = "Description text",
-                faviconPainter = painterResource(id = R.drawable.mozac_ic_collection_24),
-                onClick = { },
-                onLongClick = { },
-            )
-
-            SelectableFaviconListItem(
-                label = "Selected favicon + painter",
-                url = "",
-                isSelected = true,
-                description = "Description text",
-                faviconPainter = painterResource(id = R.drawable.mozac_ic_collection_24),
-                onClick = { },
-                onLongClick = { },
-            )
-        }
-    }
-}
-
-@Composable
-@Preview(name = "SelectableIconListItem", uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Suppress("LongMethod")
-private fun SelectableIconListItemPreview() {
-    FirefoxTheme {
-        Column(Modifier.background(FirefoxTheme.colors.layer1)) {
-            SelectableIconListItem(
-                label = "Left icon list item",
-                isSelected = false,
-                onClick = {},
-                beforeIconPainter = painterResource(R.drawable.mozac_ic_folder_24),
-                beforeIconDescription = "click me",
-            )
-
-            SelectableIconListItem(
-                label = "Selected left icon list item",
-                isSelected = true,
-                onClick = {},
-                beforeIconPainter = painterResource(R.drawable.mozac_ic_folder_24),
-                beforeIconDescription = "click me",
-            )
-
-            SelectableIconListItem(
-                label = "Left icon list item",
-                isSelected = false,
-                labelTextColor = FirefoxTheme.colors.textAccent,
-                onClick = {},
-                beforeIconPainter = painterResource(R.drawable.mozac_ic_folder_24),
-                beforeIconDescription = "click me",
-                beforeIconTint = FirefoxTheme.colors.iconAccentViolet,
-            )
-
-            SelectableIconListItem(
-                label = "Selected left icon list item",
-                isSelected = true,
-                labelTextColor = FirefoxTheme.colors.textAccent,
-                onClick = {},
-                beforeIconPainter = painterResource(R.drawable.mozac_ic_folder_24),
-                beforeIconDescription = "click me",
-                beforeIconTint = FirefoxTheme.colors.iconAccentViolet,
-            )
-
-            SelectableIconListItem(
-                label = "Left icon list item + right icon",
-                isSelected = false,
-                onClick = {},
-                beforeIconPainter = painterResource(R.drawable.mozac_ic_folder_24),
-                beforeIconDescription = "click me",
-                afterIconPainter = painterResource(R.drawable.mozac_ic_chevron_right_24),
-                afterIconDescription = null,
-            )
-
-            SelectableIconListItem(
-                label = "Selected left icon list item + right icon",
-                isSelected = true,
-                onClick = {},
-                beforeIconPainter = painterResource(R.drawable.mozac_ic_folder_24),
-                beforeIconDescription = "click me",
-                afterIconPainter = painterResource(R.drawable.mozac_ic_chevron_right_24),
-                afterIconDescription = null,
-            )
-
-            SelectableIconListItem(
-                label = "Left icon list item + right icon (disabled)",
-                isSelected = false,
-                enabled = false,
-                onClick = {},
-                beforeIconPainter = painterResource(R.drawable.mozac_ic_folder_24),
-                beforeIconDescription = "click me",
-                afterIconPainter = painterResource(R.drawable.mozac_ic_chevron_right_24),
-                afterIconDescription = null,
-            )
-
-            SelectableIconListItem(
-                label = "Selected left icon list item + right icon (disabled)",
-                isSelected = true,
-                enabled = false,
-                onClick = {},
-                beforeIconPainter = painterResource(R.drawable.mozac_ic_folder_24),
-                beforeIconDescription = "click me",
-                afterIconPainter = painterResource(R.drawable.mozac_ic_chevron_right_24),
-                afterIconDescription = null,
-            )
-        }
-    }
-}
-
-@Composable
-@LightDarkPreview
-private fun SelectableListItemPreview() {
-    FirefoxTheme {
-        Column(Modifier.background(FirefoxTheme.colors.layer1)) {
-            SelectableListItem(
-                label = "Selected item",
-                description = "Description text",
-                icon = R.drawable.mozac_ic_folder_24,
-                isSelected = true,
-                afterListAction = {},
-            )
-
-            SelectableListItem(
-                label = "Non selectable item",
-                description = "without after action",
-                icon = R.drawable.mozac_ic_folder_24,
-                isSelected = false,
-                afterListAction = {},
-            )
-
-            SelectableListItem(
-                label = "Non selectable item",
-                description = "with after action",
-                icon = R.drawable.mozac_ic_folder_24,
-                isSelected = false,
-                afterListAction = {
-                    IconButton(
-                        onClick = {},
-                        modifier = Modifier.size(ICON_SIZE),
-                    ) {
-                        InfernoIcon(
-                            painter = painterResource(R.drawable.mozac_ic_ellipsis_vertical_24),
-                            contentDescription = null,
-                        )
-                    }
-                },
-            )
-        }
-    }
-}
+//
+//@Composable
+//@Preview(name = "TextListItem", uiMode = Configuration.UI_MODE_NIGHT_YES)
+//private fun TextListItemPreview() {
+//    FirefoxTheme {
+//        Box(Modifier.background(FirefoxTheme.colors.layer1)) {
+//            TextListItem(label = "Label only")
+//        }
+//    }
+//}
+//
+//@Composable
+//@Preview(name = "TextListItem with a description", uiMode = Configuration.UI_MODE_NIGHT_YES)
+//private fun TextListItemWithDescriptionPreview() {
+//    FirefoxTheme {
+//        Box(Modifier.background(FirefoxTheme.colors.layer1)) {
+//            TextListItem(
+//                label = "Label + description",
+//                description = "Description text",
+//            )
+//        }
+//    }
+//}
+//
+//@Composable
+//@Preview(name = "TextListItem with a right icon", uiMode = Configuration.UI_MODE_NIGHT_YES)
+//private fun TextListItemWithIconPreview() {
+//    FirefoxTheme {
+//        Column(Modifier.background(FirefoxTheme.colors.layer1)) {
+//            val context = LocalContext.current
+//            TextListItem(
+//                label = "Label + right icon button",
+//                onClick = {},
+//                iconPainter = painterResource(R.drawable.mozac_ic_folder_24),
+//                iconDescription = "click me",
+//                onIconClick = { Toast.makeText(context, "icon click", TOAST_LENGTH).show() },
+//            )
+//
+//            TextListItem(
+//                label = "Label + right icon",
+//                onClick = {},
+//                iconPainter = painterResource(R.drawable.mozac_ic_folder_24),
+//                iconDescription = "click me",
+//            )
+//        }
+//    }
+//}
+//
+//@Composable
+//@Preview(name = "IconListItem", uiMode = Configuration.UI_MODE_NIGHT_YES)
+//private fun IconListItemPreview() {
+//    FirefoxTheme {
+//        Column(Modifier.background(FirefoxTheme.colors.layer1)) {
+//            IconListItem(
+//                label = "Left icon list item",
+//                onClick = {},
+//                beforeIconPainter = painterResource(R.drawable.mozac_ic_folder_24),
+//                beforeIconDescription = "click me",
+//            )
+//
+//            IconListItem(
+//                label = "Left icon list item",
+//                labelTextColor = FirefoxTheme.colors.textAccent,
+//                onClick = {},
+//                beforeIconPainter = painterResource(R.drawable.mozac_ic_folder_24),
+//                beforeIconDescription = "click me",
+//                beforeIconTint = FirefoxTheme.colors.iconAccentViolet,
+//            )
+//
+//            IconListItem(
+//                label = "Left icon list item + right icon",
+//                onClick = {},
+//                beforeIconPainter = painterResource(R.drawable.mozac_ic_folder_24),
+//                beforeIconDescription = "click me",
+//                afterIconPainter = painterResource(R.drawable.mozac_ic_chevron_right_24),
+//                afterIconDescription = null,
+//            )
+//
+//            IconListItem(
+//                label = "Left icon list item + right icon (disabled)",
+//                enabled = false,
+//                onClick = {},
+//                beforeIconPainter = painterResource(R.drawable.mozac_ic_folder_24),
+//                beforeIconDescription = "click me",
+//                afterIconPainter = painterResource(R.drawable.mozac_ic_chevron_right_24),
+//                afterIconDescription = null,
+//            )
+//        }
+//    }
+//}
+//
+//@Composable
+//@Preview(
+//    name = "IconListItem with after list action",
+//    uiMode = Configuration.UI_MODE_NIGHT_YES,
+//)
+//private fun IconListItemWithAfterListActionPreview() {
+//    FirefoxTheme {
+//        Column(Modifier.background(FirefoxTheme.colors.layer1)) {
+//            val context = LocalContext.current
+//            IconListItem(
+//                label = "IconListItem + right icon + clicks",
+//                beforeIconPainter = painterResource(R.drawable.mozac_ic_folder_24),
+//                beforeIconDescription = null,
+//                afterIconPainter = painterResource(R.drawable.mozac_ic_ellipsis_vertical_24),
+//                afterIconDescription = "click me",
+//                onAfterIconClick = { Toast.makeText(context, "icon click", TOAST_LENGTH).show() },
+//            )
+//
+//            IconListItem(
+//                label = "IconListItem + right icon + divider + clicks",
+//                beforeIconPainter = painterResource(R.drawable.mozac_ic_folder_24),
+//                beforeIconDescription = null,
+//                showDivider = true,
+//                afterIconPainter = painterResource(R.drawable.mozac_ic_ellipsis_vertical_24),
+//                afterIconDescription = "click me",
+//                onAfterIconClick = { Toast.makeText(context, "icon click", TOAST_LENGTH).show() },
+//            )
+//        }
+//    }
+//}
+//
+//@Composable
+//@Preview(
+//    name = "FaviconListItem with a right icon and onClicks",
+//    uiMode = Configuration.UI_MODE_NIGHT_YES,
+//)
+//private fun FaviconListItemPreview() {
+//    FirefoxTheme {
+//        Column(Modifier.background(FirefoxTheme.colors.layer1)) {
+//            val context = LocalContext.current
+//            FaviconListItem(
+//                label = "Favicon + right icon + clicks",
+//                url = "",
+//                description = "Description text",
+//                onClick = { Toast.makeText(context, "list item click", TOAST_LENGTH).show() },
+//                iconPainter = painterResource(R.drawable.mozac_ic_ellipsis_vertical_24),
+//                onIconClick = { Toast.makeText(context, "icon click", TOAST_LENGTH).show() },
+//            )
+//
+//            FaviconListItem(
+//                label = "Favicon + right icon + show divider + clicks",
+//                url = "",
+//                description = "Description text",
+//                onClick = { Toast.makeText(context, "list item click", TOAST_LENGTH).show() },
+//                showDivider = true,
+//                iconPainter = painterResource(R.drawable.mozac_ic_ellipsis_vertical_24),
+//                onIconClick = { Toast.makeText(context, "icon click", TOAST_LENGTH).show() },
+//            )
+//
+//            FaviconListItem(
+//                label = "Favicon + painter",
+//                url = "",
+//                description = "Description text",
+//                faviconPainter = painterResource(id = R.drawable.mozac_ic_collection_24),
+//                onClick = { Toast.makeText(context, "list item click", TOAST_LENGTH).show() },
+//            )
+//        }
+//    }
+//}
+//
+//@Composable
+//@LightDarkPreview
+//private fun ImageListItemPreview() {
+//    FirefoxTheme {
+//        Column(Modifier.background(FirefoxTheme.colors.layer1)) {
+//            ImageListItem(
+//                label = "label",
+//                iconPainter = painterResource(R.drawable.mozac_ic_web_extension_default_icon),
+//                enabled = true,
+//                onClick = {},
+//                afterListAction = {
+//                    Text(
+//                        text = "afterListItemText",
+//                        color = Color.White,
+//                        style = FirefoxTheme.typography.subtitle1,
+//                        maxLines = 1,
+//                    )
+//                },
+//            )
+//        }
+//    }
+//}
+//
+//@Composable
+//@LightDarkPreview
+//private fun RadioButtonListItemPreview() {
+//    val radioOptions =
+//        listOf("Radio button first item", "Radio button second item", "Radio button third item")
+//    val (selectedOption, onOptionSelected) = remember { mutableStateOf(radioOptions[1]) }
+//    FirefoxTheme {
+//        Column(Modifier.background(FirefoxTheme.colors.layer1)) {
+//            radioOptions.forEach { text ->
+//                RadioButtonListItem(
+//                    label = text,
+//                    description = "$text description",
+//                    onClick = { onOptionSelected(text) },
+//                    selected = (text == selectedOption),
+//                )
+//            }
+//        }
+//    }
+//}
+//
+//@Composable
+//@LightDarkPreview
+//private fun SelectableFaviconListItemPreview() {
+//    FirefoxTheme {
+//        Column(Modifier.background(FirefoxTheme.colors.layer1)) {
+//            SelectableFaviconListItem(
+//                label = "Favicon + right icon",
+//                url = "",
+//                isSelected = false,
+//                description = "Description text",
+//                onClick = { },
+//                onLongClick = { },
+//                iconPainter = painterResource(R.drawable.mozac_ic_ellipsis_vertical_24),
+//                onIconClick = { },
+//            )
+//
+//            SelectableFaviconListItem(
+//                label = "Selected favicon + right icon",
+//                url = "",
+//                isSelected = true,
+//                description = "Description text",
+//                onClick = { },
+//                onLongClick = { },
+//                iconPainter = painterResource(R.drawable.mozac_ic_ellipsis_vertical_24),
+//                onIconClick = { },
+//            )
+//
+//            SelectableFaviconListItem(
+//                label = "Favicon + right icon + show divider",
+//                url = "",
+//                isSelected = false,
+//                description = "Description text",
+//                onClick = { },
+//                onLongClick = { },
+//                showDivider = true,
+//                iconPainter = painterResource(R.drawable.mozac_ic_ellipsis_vertical_24),
+//                onIconClick = { },
+//            )
+//
+//            SelectableFaviconListItem(
+//                label = "Selected favicon + right icon + show divider",
+//                url = "",
+//                isSelected = true,
+//                description = "Description text",
+//                onClick = { },
+//                onLongClick = { },
+//                showDivider = true,
+//                iconPainter = painterResource(R.drawable.mozac_ic_ellipsis_vertical_24),
+//                onIconClick = { },
+//            )
+//
+//            SelectableFaviconListItem(
+//                label = "Favicon + painter",
+//                url = "",
+//                isSelected = false,
+//                description = "Description text",
+//                faviconPainter = painterResource(id = R.drawable.mozac_ic_collection_24),
+//                onClick = { },
+//                onLongClick = { },
+//            )
+//
+//            SelectableFaviconListItem(
+//                label = "Selected favicon + painter",
+//                url = "",
+//                isSelected = true,
+//                description = "Description text",
+//                faviconPainter = painterResource(id = R.drawable.mozac_ic_collection_24),
+//                onClick = { },
+//                onLongClick = { },
+//            )
+//        }
+//    }
+//}
+//
+//@Composable
+//@Preview(name = "SelectableIconListItem", uiMode = Configuration.UI_MODE_NIGHT_YES)
+//@Suppress("LongMethod")
+//private fun SelectableIconListItemPreview() {
+//    FirefoxTheme {
+//        Column(Modifier.background(FirefoxTheme.colors.layer1)) {
+//            SelectableIconListItem(
+//                label = "Left icon list item",
+//                isSelected = false,
+//                onClick = {},
+//                beforeIconPainter = painterResource(R.drawable.mozac_ic_folder_24),
+//                beforeIconDescription = "click me",
+//            )
+//
+//            SelectableIconListItem(
+//                label = "Selected left icon list item",
+//                isSelected = true,
+//                onClick = {},
+//                beforeIconPainter = painterResource(R.drawable.mozac_ic_folder_24),
+//                beforeIconDescription = "click me",
+//            )
+//
+//            SelectableIconListItem(
+//                label = "Left icon list item",
+//                isSelected = false,
+//                labelTextColor = FirefoxTheme.colors.textAccent,
+//                onClick = {},
+//                beforeIconPainter = painterResource(R.drawable.mozac_ic_folder_24),
+//                beforeIconDescription = "click me",
+//                beforeIconTint = FirefoxTheme.colors.iconAccentViolet,
+//            )
+//
+//            SelectableIconListItem(
+//                label = "Selected left icon list item",
+//                isSelected = true,
+//                labelTextColor = FirefoxTheme.colors.textAccent,
+//                onClick = {},
+//                beforeIconPainter = painterResource(R.drawable.mozac_ic_folder_24),
+//                beforeIconDescription = "click me",
+//                beforeIconTint = FirefoxTheme.colors.iconAccentViolet,
+//            )
+//
+//            SelectableIconListItem(
+//                label = "Left icon list item + right icon",
+//                isSelected = false,
+//                onClick = {},
+//                beforeIconPainter = painterResource(R.drawable.mozac_ic_folder_24),
+//                beforeIconDescription = "click me",
+//                afterIconPainter = painterResource(R.drawable.mozac_ic_chevron_right_24),
+//                afterIconDescription = null,
+//            )
+//
+//            SelectableIconListItem(
+//                label = "Selected left icon list item + right icon",
+//                isSelected = true,
+//                onClick = {},
+//                beforeIconPainter = painterResource(R.drawable.mozac_ic_folder_24),
+//                beforeIconDescription = "click me",
+//                afterIconPainter = painterResource(R.drawable.mozac_ic_chevron_right_24),
+//                afterIconDescription = null,
+//            )
+//
+//            SelectableIconListItem(
+//                label = "Left icon list item + right icon (disabled)",
+//                isSelected = false,
+//                enabled = false,
+//                onClick = {},
+//                beforeIconPainter = painterResource(R.drawable.mozac_ic_folder_24),
+//                beforeIconDescription = "click me",
+//                afterIconPainter = painterResource(R.drawable.mozac_ic_chevron_right_24),
+//                afterIconDescription = null,
+//            )
+//
+//            SelectableIconListItem(
+//                label = "Selected left icon list item + right icon (disabled)",
+//                isSelected = true,
+//                enabled = false,
+//                onClick = {},
+//                beforeIconPainter = painterResource(R.drawable.mozac_ic_folder_24),
+//                beforeIconDescription = "click me",
+//                afterIconPainter = painterResource(R.drawable.mozac_ic_chevron_right_24),
+//                afterIconDescription = null,
+//            )
+//        }
+//    }
+//}
+//
+//@Composable
+//@LightDarkPreview
+//private fun SelectableListItemPreview() {
+//    FirefoxTheme {
+//        Column(Modifier.background(FirefoxTheme.colors.layer1)) {
+//            SelectableListItem(
+//                label = "Selected item",
+//                description = "Description text",
+//                icon = R.drawable.mozac_ic_folder_24,
+//                isSelected = true,
+//                afterListAction = {},
+//            )
+//
+//            SelectableListItem(
+//                label = "Non selectable item",
+//                description = "without after action",
+//                icon = R.drawable.mozac_ic_folder_24,
+//                isSelected = false,
+//                afterListAction = {},
+//            )
+//
+//            SelectableListItem(
+//                label = "Non selectable item",
+//                description = "with after action",
+//                icon = R.drawable.mozac_ic_folder_24,
+//                isSelected = false,
+//                afterListAction = {
+//                    IconButton(
+//                        onClick = {},
+//                        modifier = Modifier.size(ICON_SIZE),
+//                    ) {
+//                        InfernoIcon(
+//                            painter = painterResource(R.drawable.mozac_ic_ellipsis_vertical_24),
+//                            contentDescription = null,
+//                        )
+//                    }
+//                },
+//            )
+//        }
+//    }
+//}

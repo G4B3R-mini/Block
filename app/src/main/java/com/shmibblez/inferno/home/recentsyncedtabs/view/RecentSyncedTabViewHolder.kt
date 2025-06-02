@@ -63,9 +63,9 @@ class RecentSyncedTabViewHolder(
 
             RecentSyncedTab(
                 tab = syncedTab,
-                backgroundColor = wallpaperState.cardBackgroundColor,
-                buttonBackgroundColor = buttonBackgroundColor,
-                buttonTextColor = wallpaperState.buttonTextColor,
+//                backgroundColor = wallpaperState.cardBackgroundColor,
+//                buttonBackgroundColor = buttonBackgroundColor,
+//                buttonTextColor = wallpaperState.buttonTextColor,
                 onRecentSyncedTabClick = recentSyncedTabInteractor::onRecentSyncedTabClicked,
                 onSeeAllSyncedTabsButtonClick = recentSyncedTabInteractor::onSyncedTabShowAllClicked,
                 onRemoveSyncedTab = recentSyncedTabInteractor::onRemovedRecentSyncedTab,

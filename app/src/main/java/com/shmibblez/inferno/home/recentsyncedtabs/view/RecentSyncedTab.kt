@@ -4,7 +4,6 @@
 
 package com.shmibblez.inferno.home.recentsyncedtabs.view
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -22,7 +21,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -31,27 +29,29 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import mozilla.components.concept.base.images.ImageLoadRequest
-import mozilla.components.concept.sync.DeviceType
-import mozilla.components.support.ktx.kotlin.trimmed
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.Image
 import com.shmibblez.inferno.compose.ThumbnailCard
+import com.shmibblez.inferno.compose.base.InfernoText
+import com.shmibblez.inferno.compose.base.InfernoTextStyle
 import com.shmibblez.inferno.compose.button.SecondaryButton
 import com.shmibblez.inferno.compose.menu.DropdownMenu
 import com.shmibblez.inferno.compose.menu.MenuItem
 import com.shmibblez.inferno.compose.text.Text
+import com.shmibblez.inferno.ext.infernoTheme
 import com.shmibblez.inferno.home.recentsyncedtabs.RecentSyncedTab
 import com.shmibblez.inferno.theme.FirefoxTheme
+import mozilla.components.concept.base.images.ImageLoadRequest
+import mozilla.components.concept.sync.DeviceType
+import mozilla.components.support.ktx.kotlin.trimmed
 
 private const val THUMBNAIL_SIZE = 108
 
@@ -59,21 +59,14 @@ private const val THUMBNAIL_SIZE = 108
  * A recent synced tab card.
  *
  * @param tab The [RecentSyncedTab] to display.
- * @param backgroundColor The background [Color] of the item.
- * @param buttonBackgroundColor The background [Color] of the item's button.
- * @param buttonTextColor The [Color] of the button's text.
  * @param onRecentSyncedTabClick Invoked when the user clicks on the recent synced tab.
  * @param onSeeAllSyncedTabsButtonClick Invoked when user clicks on the "See all" button in the synced tab card.
  * @param onRemoveSyncedTab Invoked when user clicks on the "Remove" dropdown menu option.
  */
-@OptIn(ExperimentalFoundationApi::class)
 @Suppress("LongMethod")
 @Composable
 fun RecentSyncedTab(
     tab: RecentSyncedTab?,
-    backgroundColor: Color = FirefoxTheme.colors.layer2,
-    buttonBackgroundColor: Color = FirefoxTheme.colors.actionSecondary,
-    buttonTextColor: Color = FirefoxTheme.colors.textActionSecondary,
     onRecentSyncedTabClick: (RecentSyncedTab) -> Unit,
     onSeeAllSyncedTabsButtonClick: () -> Unit,
     onRemoveSyncedTab: (RecentSyncedTab) -> Unit,
@@ -87,14 +80,14 @@ fun RecentSyncedTab(
 
     Card(
         modifier = Modifier
-            .background(Color.Black)
+            .background(LocalContext.current.infernoTheme().value.primaryBackgroundColor)
             .fillMaxWidth()
             .combinedClickable(
                 onClick = { tab?.let { onRecentSyncedTabClick(tab) } },
                 onLongClick = { isDropdownExpanded = true },
             ),
         shape = RoundedCornerShape(8.dp),
-        colors = CardDefaults.cardColors(containerColor = backgroundColor),
+        colors = CardDefaults.cardColors(containerColor = LocalContext.current.infernoTheme().value.secondaryBackgroundColor),
         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
     ) {
         Column {
@@ -136,10 +129,10 @@ fun RecentSyncedTab(
                     if (tab == null) {
                         RecentTabTitlePlaceholder()
                     } else {
-                        Text(
+                        InfernoText(
                             text = tab.title.trimmed(),
-                            color = FirefoxTheme.colors.textPrimary,
-                            fontSize = 14.sp,
+                            infernoStyle = InfernoTextStyle.Small,
+//                            fontSize = 14.sp,
                             overflow = TextOverflow.Ellipsis,
                             maxLines = 2,
                         )
@@ -149,7 +142,8 @@ fun RecentSyncedTab(
                         if (tab == null) {
                             Box(
                                 modifier = Modifier
-                                    .background(FirefoxTheme.colors.layer3)
+//                                    .background(FirefoxTheme.colors.layer3)
+                                    .background(LocalContext.current.infernoTheme().value.secondaryBackgroundColor)
                                     .size(18.dp),
                             )
                         } else {
@@ -167,10 +161,9 @@ fun RecentSyncedTab(
                         if (tab == null) {
                             TextLinePlaceHolder()
                         } else {
-                            Text(
+                            InfernoText(
                                 text = tab.deviceDisplayName,
-                                color = FirefoxTheme.colors.textSecondary,
-                                fontSize = 12.sp,
+                                infernoStyle = InfernoTextStyle.Subtitle,
                                 overflow = TextOverflow.Ellipsis,
                                 maxLines = 1,
                             )
@@ -184,8 +177,6 @@ fun RecentSyncedTab(
             if (tab != null)
                 SecondaryButton(
                     text = stringResource(R.string.recent_tabs_see_all_synced_tabs_button_text),
-                    textColor = buttonTextColor,
-                    backgroundColor = buttonBackgroundColor,
                     onClick = onSeeAllSyncedTabsButtonClick,
                 )
         }
@@ -211,7 +202,7 @@ private fun RecentTabImagePlaceholder() {
         modifier = Modifier
             .size(108.dp, 80.dp)
             .clip(RoundedCornerShape(8.dp))
-            .background(color = FirefoxTheme.colors.layer3),
+            .background(color = LocalContext.current.infernoTheme().value.secondaryBackgroundColor),
     )
 }
 
@@ -268,7 +259,7 @@ private fun LoadingRecentSyncedTab() {
     FirefoxTheme {
         RecentSyncedTab(
             tab = null,
-            buttonBackgroundColor = FirefoxTheme.colors.layer3,
+//            buttonBackgroundColor = FirefoxTheme.colors.layer3,
             onRecentSyncedTabClick = {},
             onSeeAllSyncedTabsButtonClick = {},
             onRemoveSyncedTab = {},

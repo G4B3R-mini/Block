@@ -4,7 +4,7 @@
 
 package com.shmibblez.inferno.home.topsites
 
-import androidx.compose.foundation.ExperimentalFoundationApi
+//import com.shmibblez.inferno.GleanMetrics.Pings
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -24,10 +24,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -35,13 +32,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -50,20 +47,21 @@ import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.annotation.LightDarkPreview
-import mozilla.components.feature.top.sites.TopSite
-//import com.shmibblez.inferno.GleanMetrics.Pings
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.ContextualMenu
 import com.shmibblez.inferno.compose.Favicon
 import com.shmibblez.inferno.compose.MenuItem
 import com.shmibblez.inferno.compose.PagerIndicator
+import com.shmibblez.inferno.compose.base.InfernoText
+import com.shmibblez.inferno.compose.base.InfernoTextStyle
+import com.shmibblez.inferno.ext.infernoTheme
 import com.shmibblez.inferno.home.fake.FakeHomepagePreview
 import com.shmibblez.inferno.home.sessioncontrol.TopSiteInteractor
+import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.annotation.LightDarkPreview
 import com.shmibblez.inferno.settings.SupportUtils
 import com.shmibblez.inferno.theme.FirefoxTheme
 import com.shmibblez.inferno.wallpapers.WallpaperState
+import mozilla.components.feature.top.sites.TopSite
 import kotlin.math.ceil
 
 //import com.shmibblez.inferno.GleanMetrics.TopSites as TopSitesMetrics
@@ -79,20 +77,17 @@ private const val TOP_SITES_FAVICON_SIZE = 36
  * A list of top sites.
  *
  * @param topSites List of [TopSite] to display.
- * @param topSiteColors The color set defined by [TopSiteColors] used to style a top site.
  * @param interactor The interactor which handles user actions with the widget.
  * @param onTopSitesItemBound Invoked during the composition of a top site item.
  */
 @Composable
 fun TopSites(
     topSites: List<TopSite>,
-    topSiteColors: TopSiteColors = TopSiteColors.colors(),
     interactor: TopSiteInteractor,
     onTopSitesItemBound: () -> Unit,
 ) {
     TopSites(
         topSites = topSites,
-        topSiteColors = topSiteColors,
         onTopSiteClick = { topSite ->
             interactor.onSelectTopSite(
                 topSite = topSite,
@@ -113,7 +108,6 @@ fun TopSites(
  * A list of top sites.
  *
  * @param topSites List of [TopSite] to display.
- * @param topSiteColors The color set defined by [TopSiteColors] used to style a top site.
  * @param onTopSiteClick Invoked when the user clicks on a top site.
  * @param onTopSiteLongClick Invoked when the user long clicks on a top site.
  * @param onOpenInPrivateTabClicked Invoked when the user clicks on the "Open in private tab"
@@ -125,12 +119,10 @@ fun TopSites(
  * menu item.
  * @param onTopSitesItemBound Invoked during the composition of a top site item.
  */
-@OptIn(ExperimentalFoundationApi::class, ExperimentalComposeUiApi::class)
 @Composable
 @Suppress("LongParameterList", "LongMethod")
 fun TopSites(
     topSites: List<TopSite>,
-    topSiteColors: TopSiteColors = TopSiteColors.colors(),
     onTopSiteClick: (TopSite) -> Unit,
     onTopSiteLongClick: (TopSite) -> Unit,
     onOpenInPrivateTabClicked: (topSite: TopSite) -> Unit,
@@ -186,7 +178,6 @@ fun TopSites(
                                         onSponsorPrivacyClicked = onSponsorPrivacyClicked,
                                     ),
                                     position = position,
-                                    topSiteColors = topSiteColors,
                                     onTopSiteClick = { item -> onTopSiteClick(item) },
                                     onTopSiteLongClick = onTopSiteLongClick,
                                     onTopSitesItemBound = onTopSitesItemBound,
@@ -273,19 +264,16 @@ data class TopSiteColors(
  * @param topSite The [TopSite] to display.
  * @param menuItems List of [MenuItem]s to display in a top site dropdown menu.
  * @param position The position of the top site.
- * @param topSiteColors The color set defined by [TopSiteColors] used to style a top site.
  * @param onTopSiteClick Invoked when the user clicks on a top site.
  * @param onTopSiteLongClick Invoked when the user long clicks on a top site.
  * @param onTopSitesItemBound Invoked during the composition of a top site item.
  */
 @Suppress("LongMethod", "Deprecation") // https://bugzilla.mozilla.org/show_bug.cgi?id=1927713
-@OptIn(ExperimentalFoundationApi::class, ExperimentalComposeUiApi::class)
 @Composable
 private fun TopSiteItem(
     topSite: TopSite,
     menuItems: List<MenuItem>,
     position: Int,
-    topSiteColors: TopSiteColors,
     onTopSiteClick: (TopSite) -> Unit,
     onTopSiteLongClick: (TopSite) -> Unit,
     onTopSitesItemBound: () -> Unit,
@@ -316,10 +304,7 @@ private fun TopSiteItem(
         ) {
             Spacer(modifier = Modifier.height(4.dp))
 
-            TopSiteFaviconCard(
-                topSite = topSite,
-                backgroundColor = topSiteColors.faviconCardBackgroundColor,
-            )
+            TopSiteFaviconCard(topSite = topSite)
 
             Spacer(modifier = Modifier.height(6.dp))
 
@@ -337,27 +322,26 @@ private fun TopSiteItem(
                     Spacer(modifier = Modifier.width(2.dp))
                 }
 
-                Text(
-                    modifier = Modifier
-                        .semantics {
-                            testTagsAsResourceId = true
-                        }
-                        .testTag(TopSitesTestTag.topSiteTitle),
+                InfernoText(
+//                    modifier = Modifier
+//                        .semantics {
+//                            testTagsAsResourceId = true
+//                        }
+//                        .testTag(TopSitesTestTag.topSiteTitle),
                     text = topSite.title ?: topSite.url,
-                    color = topSiteColors.titleTextColor,
+                    infernoStyle = InfernoTextStyle.Small,
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 1,
-                    style = FirefoxTheme.typography.caption,
                 )
             }
 
-            Text(
+            InfernoText(
                 text = stringResource(id = R.string.top_sites_sponsored_label),
                 modifier = Modifier
                     .width(TOP_SITES_ITEM_SIZE.dp)
                     .alpha(alpha = if (topSite is TopSite.Provided) 1f else 0f),
-                color = topSiteColors.sponsoredTextColor,
-                fontSize = 10.sp,
+                infernoStyle = InfernoTextStyle.Small,
+                fontColor = LocalContext.current.infernoTheme().value.primaryActionColor,
                 textAlign = TextAlign.Center,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1,
@@ -387,18 +371,14 @@ private fun TopSiteItem(
  * The top site favicon card.
  *
  * @param topSite The [TopSite] to display.
- * @param backgroundColor The background [Color] of the card.
  */
 @Composable
-private fun TopSiteFaviconCard(
-    topSite: TopSite,
-    backgroundColor: Color,
-) {
+private fun TopSiteFaviconCard(topSite: TopSite) {
     Box(
         modifier = Modifier
             .size(TOP_SITES_FAVICON_CARD_SIZE.dp)
             .clip(RoundedCornerShape(8.dp))
-            .background(Color.DarkGray),
+            .background(LocalContext.current.infernoTheme().value.secondaryBackgroundColor),
         contentAlignment = Alignment.Center,
 //        colors = CardDefaults.cardColors(containerColor = backgroundColor),
 //        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
@@ -460,7 +440,7 @@ private fun getMenuItems(
 ): List<MenuItem> {
     val isPinnedSite = topSite is TopSite.Pinned || topSite is TopSite.Default
     val isProvidedSite = topSite is TopSite.Provided
-    val isFrecentSite = topSite is TopSite.Frecent
+    val isRecentSite = topSite is TopSite.Frecent
     val result = mutableListOf<MenuItem>()
 
     result.add(
@@ -471,7 +451,7 @@ private fun getMenuItems(
         ),
     )
 
-    if (isPinnedSite || isFrecentSite) {
+    if (isPinnedSite || isRecentSite) {
         result.add(
             MenuItem(
                 title = stringResource(id = R.string.top_sites_edit_top_site),
@@ -520,7 +500,7 @@ private fun getMenuItems(
     return result
 }
 
-private fun submitTopSitesImpressionPing(topSite: TopSite.Provided, position: Int) {
+//private fun submitTopSitesImpressionPing(topSite: TopSite.Provided, position: Int) {
 //    TopSitesMetrics.contileImpression.record(
 //        TopSitesMetrics.ContileImpressionExtra(
 //            position = position + 1,
@@ -532,7 +512,7 @@ private fun submitTopSitesImpressionPing(topSite: TopSite.Provided, position: In
 //    topSite.title?.let { TopSitesMetrics.contileAdvertiser.set(it.lowercase()) }
 //    TopSitesMetrics.contileReportingUrl.set(topSite.impressionUrl)
 //    Pings.topsitesImpression.submit()
-}
+//}
 
 @Composable
 @LightDarkPreview

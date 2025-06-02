@@ -35,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.semantics.testTagsAsResourceId
@@ -50,6 +51,9 @@ import com.shmibblez.inferno.compose.ContextualMenu
 import com.shmibblez.inferno.compose.Favicon
 import com.shmibblez.inferno.compose.Image
 import com.shmibblez.inferno.compose.MenuItem
+import com.shmibblez.inferno.compose.base.InfernoText
+import com.shmibblez.inferno.compose.base.InfernoTextStyle
+import com.shmibblez.inferno.ext.infernoTheme
 import com.shmibblez.inferno.home.bookmarks.Bookmark
 import com.shmibblez.inferno.theme.FirefoxTheme
 
@@ -69,7 +73,6 @@ private val imageModifier = Modifier
  * @param backgroundColor The background [Color] of each bookmark.
  * @param onBookmarkClick Invoked when the user clicks on a bookmark.
  */
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun Bookmarks(
     bookmarks: List<Bookmark>,
@@ -104,10 +107,6 @@ fun Bookmarks(
  * @param backgroundColor The background [Color] of the bookmark item.
  * @param onBookmarkClick Invoked when the user clicks on the bookmark item.
  */
-@OptIn(
-    ExperimentalFoundationApi::class,
-    ExperimentalComposeUiApi::class,
-)
 @Composable
 @Suppress("Deprecation") // https://bugzilla.mozilla.org/show_bug.cgi?id=1927718
 private fun BookmarkItem(
@@ -139,16 +138,16 @@ private fun BookmarkItem(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            Text(
+            InfernoText(
                 text = bookmark.title ?: bookmark.url ?: "",
+                infernoStyle = InfernoTextStyle.Small,
                 modifier = Modifier.semantics {
                     testTagsAsResourceId = true
                     testTag = "bookmark.title"
                 },
-                color = FirefoxTheme.colors.textPrimary,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1,
-                style = FirefoxTheme.typography.caption,
+//                style = FirefoxTheme.typography.caption,
             )
 
             ContextualMenu(
@@ -199,10 +198,11 @@ private fun BookmarkImage(bookmark: Bookmark) {
 private fun PlaceholderBookmarkImage() {
     Box(
         modifier = imageModifier.background(
-            color = when (isSystemInDarkTheme()) {
-                true -> PhotonColors.DarkGrey60
-                false -> PhotonColors.LightGrey30
-            },
+            color = LocalContext.current.infernoTheme().value.secondaryBackgroundColor,
+//            when (isSystemInDarkTheme()) {
+//                true -> PhotonColors.DarkGrey60
+//                false -> PhotonColors.LightGrey30
+//            },
         ),
     )
 }
@@ -213,7 +213,7 @@ private fun FallbackBookmarkFaviconImage(
 ) {
     Box(
         modifier = imageModifier.background(
-            color = FirefoxTheme.colors.layer2,
+            color = LocalContext.current.infernoTheme().value.secondaryBackgroundColor, // FirefoxTheme.colors.layer2,
         ),
         contentAlignment = Alignment.Center,
     ) {
@@ -224,7 +224,6 @@ private fun FallbackBookmarkFaviconImage(
 @Composable
 @LightDarkPreview
 private fun BookmarksPreview() {
-    FirefoxTheme {
         Bookmarks(
             bookmarks = listOf(
                 Bookmark(
@@ -249,7 +248,6 @@ private fun BookmarksPreview() {
                 ),
             ),
             menuItems = listOf(),
-            backgroundColor = FirefoxTheme.colors.layer2,
+            backgroundColor = LocalContext.current.infernoTheme().value.secondaryBackgroundColor, // FirefoxTheme.colors.layer2,
         )
-    }
 }

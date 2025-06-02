@@ -5,7 +5,6 @@
 package com.shmibblez.inferno.compose.menu
 
 import androidx.compose.foundation.ScrollState
-import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
@@ -72,7 +71,8 @@ fun DropdownMenu(
             onDismissRequest = onDismissRequest,
             offset = offset,
             scrollState = scrollState,
-            modifier = modifier.background(LocalContext.current.infernoTheme().value.secondaryBackgroundColor),
+            containerColor = LocalContext.current.infernoTheme().value.secondaryBackgroundColor,
+            modifier = modifier, // .background(LocalContext.current.infernoTheme().value.secondaryBackgroundColor),
         ) {
             DropdownMenuContent(
                 menuItems = menuItems,

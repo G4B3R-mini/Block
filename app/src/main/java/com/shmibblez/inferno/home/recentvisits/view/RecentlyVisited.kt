@@ -4,13 +4,11 @@
 
 package com.shmibblez.inferno.home.recentvisits.view
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowColumn
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,8 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -27,20 +23,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.semantics.testTagsAsResourceId
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.Divider
-import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.annotation.LightDarkPreview
-import mozilla.components.support.ktx.kotlin.trimmed
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.ext.thenConditional
 import com.shmibblez.inferno.compose.list.FaviconListItem
@@ -48,10 +40,13 @@ import com.shmibblez.inferno.compose.list.IconListItem
 import com.shmibblez.inferno.compose.menu.DropdownMenu
 import com.shmibblez.inferno.compose.menu.MenuItem
 import com.shmibblez.inferno.compose.text.Text
+import com.shmibblez.inferno.ext.infernoTheme
 import com.shmibblez.inferno.home.recentvisits.RecentlyVisitedItem
 import com.shmibblez.inferno.home.recentvisits.RecentlyVisitedItem.RecentHistoryGroup
 import com.shmibblez.inferno.home.recentvisits.RecentlyVisitedItem.RecentHistoryHighlight
+import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.Divider
 import com.shmibblez.inferno.theme.FirefoxTheme
+import mozilla.components.support.ktx.kotlin.trimmed
 
 // Number of recently visited items per column.
 private const val VISITS_PER_COLUMN = 3
@@ -71,7 +66,6 @@ private val contentPadding = 16.dp
  * the [RecentlyVisitedItem] that was clicked and the second parameter is the "page" or column number
  * the item resides in.
  */
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun RecentlyVisited(
     recentVisits: List<RecentlyVisitedItem>,
@@ -88,17 +82,15 @@ fun RecentlyVisited(
                 modifier = Modifier.horizontalScroll(state = rememberScrollState()),
                 predicate = { !isSingleColumn },
             )
-            .background(Color.DarkGray)
+            .background(LocalContext.current.infernoTheme().value.secondaryBackgroundColor)
             .padding(
-//                horizontal = contentPadding,
                 vertical = 8.dp,
             ),
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(8.dp))
-                .background(Color.DarkGray),
+                .clip(RoundedCornerShape(8.dp)),
 //            colors = CardDefaults.cardColors(containerColor = backgroundColor),
 //            elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
         ) {
@@ -110,8 +102,8 @@ fun RecentlyVisited(
                 recentVisits.forEachIndexed { index, recentVisit ->
                     // Don't display the divider when its the last item in a column or the last item
                     // in the table.
-                    val showDivider = (index + 1) % VISITS_PER_COLUMN != 0 &&
-                            index != recentVisits.lastIndex
+                    val showDivider =
+                        (index + 1) % VISITS_PER_COLUMN != 0 && index != recentVisits.lastIndex
                     val pageIndex = index / VISITS_PER_COLUMN
                     val pageNumber = pageIndex + 1
 
@@ -145,6 +137,7 @@ fun RecentlyVisited(
                                 modifier = Modifier
                                     .align(Alignment.BottomCenter)
                                     .padding(horizontal = contentPadding),
+                                color = LocalContext.current.infernoTheme().value.primaryIconColor
                             )
                         }
                     }
@@ -161,10 +154,6 @@ fun RecentlyVisited(
  * @param menuItems List of [RecentVisitMenuItem] to display in a recent visit dropdown menu.
  * @param onRecentVisitClick Invoked when the user clicks on a recent visit.
  */
-@OptIn(
-    ExperimentalFoundationApi::class,
-    ExperimentalComposeUiApi::class,
-)
 @Composable
 private fun RecentlyVisitedHistoryGroup(
     recentVisit: RecentHistoryGroup,
@@ -181,8 +170,7 @@ private fun RecentlyVisitedHistoryGroup(
     Box {
         IconListItem(
             label = recentVisit.title.trimmed(),
-            modifier = Modifier
-                .combinedClickable(
+            modifier = Modifier.combinedClickable(
                     onClick = { onRecentVisitClick(recentVisit) },
                     onLongClick = { isMenuExpanded = true },
                 ),
@@ -211,10 +199,6 @@ private fun RecentlyVisitedHistoryGroup(
  * @param menuItems List of [RecentVisitMenuItem] to display in a recent visit dropdown menu.
  * @param onRecentVisitClick Invoked when the user clicks on a recent visit.
  */
-@OptIn(
-    ExperimentalFoundationApi::class,
-    ExperimentalComposeUiApi::class,
-)
 @Composable
 private fun RecentlyVisitedHistoryHighlight(
     recentVisit: RecentHistoryHighlight,
@@ -227,8 +211,7 @@ private fun RecentlyVisitedHistoryHighlight(
         FaviconListItem(
             label = recentVisit.title.trimmed(),
             url = recentVisit.url,
-            modifier = Modifier
-                .combinedClickable(
+            modifier = Modifier.combinedClickable(
                     onClick = { onRecentVisitClick(recentVisit) },
                     onLongClick = { isMenuExpanded = true },
                 ),
@@ -246,53 +229,4 @@ private fun RecentlyVisitedHistoryHighlight(
             onDismissRequest = { isMenuExpanded = false },
         )
     }
-}
-
-@Composable
-@LightDarkPreview
-private fun RecentlyVisitedMultipleColumnsPreview() {
-    FirefoxTheme {
-        Box(
-            modifier = Modifier
-                .background(color = FirefoxTheme.colors.layer1)
-                .padding(vertical = contentPadding),
-        ) {
-            RecentlyVisited(
-                recentVisits = listOf(
-                    RecentHistoryGroup(title = "running shoes"),
-                    RecentHistoryGroup(title = "mozilla"),
-                    RecentHistoryGroup(title = "firefox"),
-                    RecentHistoryGroup(title = "pocket"),
-                    RecentHistoryHighlight(title = "Mozilla", url = "www.mozilla.com"),
-                ),
-                menuItems = emptyList(),
-            )
-        }
-    }
-}
-
-@Composable
-@LightDarkPreview
-private fun RecentlyVisitedSingleColumnPreview() {
-    FirefoxTheme {
-        Box(
-            modifier = Modifier
-                .background(color = FirefoxTheme.colors.layer1)
-                .padding(vertical = contentPadding),
-        ) {
-            RecentlyVisited(
-                recentVisits = listOf(
-                    RecentHistoryGroup(title = "running shoes"),
-                    RecentHistoryHighlight(title = "Mozilla", url = "www.mozilla.com"),
-                ),
-                menuItems = emptyList(),
-            )
-        }
-    }
-}
-
-@Composable
-@Preview(widthDp = 250)
-private fun RecentlyVisitedSingleColumnSmallPreview() {
-    RecentlyVisitedSingleColumnPreview()
 }

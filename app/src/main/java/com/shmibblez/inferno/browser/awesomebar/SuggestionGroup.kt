@@ -5,6 +5,7 @@ package com.shmibblez.inferno.browser.awesomebar
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -12,9 +13,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.shmibblez.inferno.browser.UiConst
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.ext.infernoTheme
-import mozilla.components.compose.browser.awesomebar.AwesomeBarColors
 
 /**
  * Renders a header for a group of suggestions.
@@ -27,6 +28,7 @@ internal fun SuggestionGroup(
         title,
         fontColor = LocalContext.current.infernoTheme().value.primaryTextColor,
         modifier = Modifier
+            .background(LocalContext.current.infernoTheme().value.primaryBackgroundColor.copy(alpha = UiConst.BAR_BG_ALPHA))
             .padding(
                 vertical = 12.dp,
                 horizontal = 16.dp,

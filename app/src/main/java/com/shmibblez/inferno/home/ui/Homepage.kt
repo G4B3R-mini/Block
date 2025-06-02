@@ -4,8 +4,11 @@
 
 package com.shmibblez.inferno.home.ui
 
+//import mozilla.telemetry.glean.private.NoExtras
+//import com.shmibblez.inferno.GleanMetrics.History
+//import com.shmibblez.inferno.GleanMetrics.RecentlyVisitedHomepage
+//import com.shmibblez.inferno.home.pocket.ui.PocketSection
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,17 +21,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-//import mozilla.telemetry.glean.private.NoExtras
-//import com.shmibblez.inferno.GleanMetrics.History
-//import com.shmibblez.inferno.GleanMetrics.RecentlyVisitedHomepage
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.components.components
 import com.shmibblez.inferno.compose.button.TertiaryButton
 import com.shmibblez.inferno.compose.home.HomeSectionHeader
 import com.shmibblez.inferno.ext.components
+import com.shmibblez.inferno.ext.infernoTheme
 import com.shmibblez.inferno.ext.settings
 import com.shmibblez.inferno.ext.shouldShowRecentSyncedTabs
 import com.shmibblez.inferno.ext.shouldShowRecentTabs
@@ -38,10 +37,8 @@ import com.shmibblez.inferno.home.bookmarks.view.Bookmarks
 import com.shmibblez.inferno.home.bookmarks.view.BookmarksMenuItem
 import com.shmibblez.inferno.home.collections.Collections
 import com.shmibblez.inferno.home.collections.CollectionsState
-import com.shmibblez.inferno.home.fake.FakeHomepagePreview
 import com.shmibblez.inferno.home.interactor.HomepageInteractor
 import com.shmibblez.inferno.home.recentsyncedtabs.RecentSyncedTabState
-//import com.shmibblez.inferno.home.pocket.ui.PocketSection
 import com.shmibblez.inferno.home.recentsyncedtabs.view.RecentSyncedTab
 import com.shmibblez.inferno.home.recenttabs.RecentTab
 import com.shmibblez.inferno.home.recenttabs.interactor.RecentTabInteractor
@@ -58,15 +55,12 @@ import com.shmibblez.inferno.home.sessioncontrol.CustomizeHomeIteractor
 import com.shmibblez.inferno.home.sessioncontrol.viewholders.FeltPrivacyModeInfoCard
 import com.shmibblez.inferno.home.sessioncontrol.viewholders.PrivateBrowsingDescription
 import com.shmibblez.inferno.home.store.HomepageState
-import com.shmibblez.inferno.home.topsites.TopSiteColors
 import com.shmibblez.inferno.home.topsites.TopSites
-import com.shmibblez.inferno.theme.FirefoxTheme
-import com.shmibblez.inferno.theme.Theme
-import com.shmibblez.inferno.wallpapers.WallpaperState
 
 private val ITEM_PADDING = 24.dp
 private val HEADER_BOTTOM_PADDING = 16.dp
 
+// todo: use wallpaper state for text color, if set
 /**
  * Top level composable for the homepage.
  *
@@ -85,7 +79,7 @@ internal fun Homepage(
 ) {
     Column(
         modifier = modifier
-            .background(Color.Black)
+            .background(LocalContext.current.infernoTheme().value.primaryBackgroundColor)
             .padding(horizontal = 16.dp)
             .fillMaxSize()
             .verticalScroll(rememberScrollState()),
@@ -111,7 +105,6 @@ internal fun Homepage(
                 val settings = LocalContext.current.settings()
                 val topSites = appState.topSites
                 val showTopSites = settings.showTopSitesFeature && topSites.isNotEmpty()
-                if (state is HomepageState.Normal) state.showRecentTabs else false
                 val recentTabs = appState.recentTabs
                 val showRecentTabs = appState.shouldShowRecentTabs(settings)
                 val cardBackgroundColor = Color.Black // wallpaperState.cardBackgroundColor,
@@ -124,13 +117,12 @@ internal fun Homepage(
                 }
                 val showRecentSyncedTab = appState.shouldShowRecentSyncedTabs()
 
-                val buttonBackgroundColor = appState.wallpaperState.buttonBackgroundColor
-                val buttonTextColor = appState.wallpaperState.buttonTextColor
+//                val buttonBackgroundColor = appState.wallpaperState.buttonBackgroundColor
+//                val buttonTextColor = appState.wallpaperState.buttonTextColor
                 val bookmarks = appState.bookmarks
                 val showBookmarks = settings.showBookmarksHomeFeature && bookmarks.isNotEmpty()
                 val recentlyVisited = appState.recentHistory
-                val showRecentlyVisited =
-                    settings.shouldShowHistory && recentlyVisited.isNotEmpty()
+                val showRecentlyVisited = settings.shouldShowHistory && recentlyVisited.isNotEmpty()
                 val collectionsState = CollectionsState.build(
                     appState = appState,
                     browserState = components.core.store.state,
@@ -142,7 +134,6 @@ internal fun Homepage(
                 if (showTopSites) {
                     TopSites(
                         topSites = topSites,
-                        topSiteColors = TopSiteColors.colors(),
                         interactor = interactor,
                         onTopSitesItemBound = onTopSitesItemBound,
                     )
@@ -160,9 +151,6 @@ internal fun Homepage(
 
                         RecentSyncedTab(
                             tab = syncedTab,
-                            backgroundColor = cardBackgroundColor,
-                            buttonBackgroundColor = buttonBackgroundColor,
-                            buttonTextColor = buttonTextColor,
                             onRecentSyncedTabClick = interactor::onRecentSyncedTabClicked,
                             onSeeAllSyncedTabsButtonClick = interactor::onSyncedTabShowAllClicked,
                             onRemoveSyncedTab = interactor::onRemovedRecentSyncedTab,
@@ -173,7 +161,7 @@ internal fun Homepage(
                 if (showBookmarks) {
                     BookmarksSection(
                         bookmarks = bookmarks,
-                        cardBackgroundColor = cardBackgroundColor,
+//                        cardBackgroundColor = cardBackgroundColor,
                         interactor = interactor,
                     )
                 }
@@ -199,10 +187,7 @@ internal fun Homepage(
 //                    }
 
                 if (showCustomizeHome) {
-                    CustomizeHomeButton(
-                        buttonBackgroundColor = buttonBackgroundColor,
-                        interactor = interactor,
-                    )
+                    CustomizeHomeButton(interactor = interactor)
                 }
 
                 // This is a temporary value until I can fix layout issues
@@ -243,7 +228,7 @@ private fun RecentTabsSection(
 @Composable
 private fun BookmarksSection(
     bookmarks: List<Bookmark>,
-    cardBackgroundColor: Color,
+    cardBackgroundColor: Color = LocalContext.current.infernoTheme().value.secondaryBackgroundColor,
     interactor: BookmarksInteractor,
 ) {
     Spacer(modifier = Modifier.height(ITEM_PADDING))
@@ -301,7 +286,7 @@ private fun RecentlyVisitedSection(
             ),
         ),
         backgroundColor = cardBackgroundColor,
-        onRecentVisitClick = { recentlyVisitedItem, pageNumber ->
+        onRecentVisitClick = { recentlyVisitedItem, _ -> // pageNumber ->
             when (recentlyVisitedItem) {
                 is RecentHistoryHighlight -> {
 //                    RecentlyVisitedHomepage.historyHighlightOpened.record(NoExtras())
@@ -360,64 +345,64 @@ private fun CollectionsSection(
 }
 
 @Composable
-private fun CustomizeHomeButton(buttonBackgroundColor: Color, interactor: CustomizeHomeIteractor) {
+private fun CustomizeHomeButton(interactor: CustomizeHomeIteractor) {
     Spacer(modifier = Modifier.height(ITEM_PADDING))
 
     TertiaryButton(
         text = stringResource(R.string.browser_menu_customize_home_1),
-        backgroundColor = buttonBackgroundColor,
+        backgroundColor = LocalContext.current.infernoTheme().value.secondaryBackgroundColor,
         onClick = interactor::openCustomizeHomePage,
     )
 }
 
-@Composable
-@PreviewLightDark
-private fun HomepagePreview() {
-    FirefoxTheme {
-        Homepage(
-            HomepageState.Normal(
-                topSites = FakeHomepagePreview.topSites(),
-                recentTabs = FakeHomepagePreview.recentTabs(),
-                syncedTab = FakeHomepagePreview.recentSyncedTab(),
-                bookmarks = FakeHomepagePreview.bookmarks(),
-                recentlyVisited = FakeHomepagePreview.recentHistory(),
-                collectionsState = CollectionsState.Placeholder(true),
-//                pocketState = FakeHomepagePreview.pocketState(),
-                showTopSites = true,
-                showRecentTabs = true,
-                showRecentSyncedTab = true,
-                showBookmarks = true,
-                showRecentlyVisited = true,
-//                showPocketStories = true,
-                topSiteColors = TopSiteColors.colors(),
-                cardBackgroundColor = Color.Black, // WallpaperState.default.cardBackgroundColor,
-                buttonTextColor = WallpaperState.default.buttonTextColor,
-                buttonBackgroundColor = WallpaperState.default.buttonBackgroundColor,
-            ),
-            isPrivate = false,
-            interactor = FakeHomepagePreview.homepageInteractor,
-            onTopSitesItemBound = {},
-        )
-    }
-}
-
-@Composable
-@Preview
-private fun PrivateHomepagePreview() {
-    FirefoxTheme(theme = Theme.Private) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(color = FirefoxTheme.colors.layer1),
-        ) {
-            Homepage(
-                HomepageState.Private(
-                    feltPrivateBrowsingEnabled = false,
-                ),
-                isPrivate = true,
-                interactor = FakeHomepagePreview.homepageInteractor,
-                onTopSitesItemBound = {},
-            )
-        }
-    }
-}
+//@Composable
+//@PreviewLightDark
+//private fun HomepagePreview() {
+//    FirefoxTheme {
+//        Homepage(
+//            HomepageState.Normal(
+//                topSites = FakeHomepagePreview.topSites(),
+//                recentTabs = FakeHomepagePreview.recentTabs(),
+//                syncedTab = FakeHomepagePreview.recentSyncedTab(),
+//                bookmarks = FakeHomepagePreview.bookmarks(),
+//                recentlyVisited = FakeHomepagePreview.recentHistory(),
+//                collectionsState = CollectionsState.Placeholder(true),
+////                pocketState = FakeHomepagePreview.pocketState(),
+//                showTopSites = true,
+//                showRecentTabs = true,
+//                showRecentSyncedTab = true,
+//                showBookmarks = true,
+//                showRecentlyVisited = true,
+////                showPocketStories = true,
+//                topSiteColors = TopSiteColors.colors(),
+//                cardBackgroundColor = Color.Black, // WallpaperState.default.cardBackgroundColor,
+//                buttonTextColor = WallpaperState.default.buttonTextColor,
+//                buttonBackgroundColor = WallpaperState.default.buttonBackgroundColor,
+//            ),
+//            isPrivate = false,
+//            interactor = FakeHomepagePreview.homepageInteractor,
+//            onTopSitesItemBound = {},
+//        )
+//    }
+//}
+//
+//@Composable
+//@Preview
+//private fun PrivateHomepagePreview() {
+//    FirefoxTheme(theme = Theme.Private) {
+//        Box(
+//            modifier = Modifier
+//                .fillMaxSize()
+//                .background(color = FirefoxTheme.colors.layer1),
+//        ) {
+//            Homepage(
+//                HomepageState.Private(
+//                    feltPrivateBrowsingEnabled = false,
+//                ),
+//                isPrivate = true,
+//                interactor = FakeHomepagePreview.homepageInteractor,
+//                onTopSitesItemBound = {},
+//            )
+//        }
+//    }
+//}

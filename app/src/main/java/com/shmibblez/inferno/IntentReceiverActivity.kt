@@ -63,7 +63,7 @@ class IntentReceiverActivity : Activity() {
         StartupTimeline.onActivityCreateEndIntentReceiver() // DO NOT MOVE ANYTHING BELOW HERE.
     }
 
-    fun processIntent(intent: Intent) {
+    private fun processIntent(intent: Intent) {
         // Call process for side effects, short on the first that returns true
 
         var private = settings().openLinksInAPrivateTab

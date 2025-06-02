@@ -4,10 +4,7 @@
 
 package com.shmibblez.inferno.home.collections
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -22,20 +19,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.drawscope.clipRect
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
-import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.annotation.LightDarkPreview
-import mozilla.components.feature.tab.collections.Tab
 import com.shmibblez.inferno.R.drawable
 import com.shmibblez.inferno.R.string
 import com.shmibblez.inferno.compose.list.FaviconListItem
 import com.shmibblez.inferno.compose.tabstray.DismissedTabBackground
+import com.shmibblez.inferno.ext.infernoTheme
 import com.shmibblez.inferno.ext.isDismissed
 import com.shmibblez.inferno.ext.toShortUrl
-import com.shmibblez.inferno.home.fake.FakeHomepagePreview
-import com.shmibblez.inferno.theme.FirefoxTheme
+import mozilla.components.feature.tab.collections.Tab
 
 /**
  * Rectangular shape with only right angles used to display a middle tab.
@@ -94,7 +90,7 @@ fun CollectionItem(
         }
 
         Card(
-            colors = CardDefaults.cardColors(containerColor = FirefoxTheme.colors.layer2),
+            colors = CardDefaults.cardColors(containerColor = LocalContext.current.infernoTheme().value.secondaryBackgroundColor),
             modifier = clippingModifier
                 .fillMaxWidth(),
             shape = if (isLastInCollection) BOTTOM_TAB_SHAPE else MIDDLE_TAB_SHAPE,
@@ -130,26 +126,26 @@ private fun Modifier.clipTop() = this.then(
     },
 )
 
-@Composable
-@LightDarkPreview
-private fun TabInCollectionPreview() {
-    FirefoxTheme {
-        Column {
-            CollectionItem(
-                tab = FakeHomepagePreview.tab(),
-                isLastInCollection = false,
-                onClick = {},
-                onRemove = {},
-            )
-
-            Spacer(Modifier.height(10.dp))
-
-            CollectionItem(
-                tab = FakeHomepagePreview.tab(),
-                isLastInCollection = true,
-                onClick = {},
-                onRemove = {},
-            )
-        }
-    }
-}
+//@Composable
+//@LightDarkPreview
+//private fun TabInCollectionPreview() {
+//    FirefoxTheme {
+//        Column {
+//            CollectionItem(
+//                tab = FakeHomepagePreview.tab(),
+//                isLastInCollection = false,
+//                onClick = {},
+//                onRemove = {},
+//            )
+//
+//            Spacer(Modifier.height(10.dp))
+//
+//            CollectionItem(
+//                tab = FakeHomepagePreview.tab(),
+//                isLastInCollection = true,
+//                onClick = {},
+//                onRemove = {},
+//            )
+//        }
+//    }
+//}

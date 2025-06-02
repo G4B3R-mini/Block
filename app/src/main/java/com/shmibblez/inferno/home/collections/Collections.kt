@@ -7,23 +7,16 @@ package com.shmibblez.inferno.home.collections
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.annotation.LightDarkPreview
-import mozilla.components.feature.tab.collections.Tab
-import mozilla.components.feature.tab.collections.TabCollection
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.MenuItem
-import com.shmibblez.inferno.home.fake.FakeHomepagePreview
+import com.shmibblez.inferno.ext.infernoTheme
 import com.shmibblez.inferno.home.sessioncontrol.CollectionInteractor
-import com.shmibblez.inferno.theme.FirefoxTheme
+import mozilla.components.feature.tab.collections.TabCollection
 
 /**
  * List of expandable collections.
@@ -105,13 +98,13 @@ private fun getMenuItems(
     return listOfNotNull(
         MenuItem(
             title = stringResource(R.string.collection_open_tabs),
-            color = FirefoxTheme.colors.textPrimary,
+            color = LocalContext.current.infernoTheme().value.primaryTextColor,
         ) {
             onOpenTabsTapped(collection)
         },
         MenuItem(
             title = stringResource(R.string.collection_rename),
-            color = FirefoxTheme.colors.textPrimary,
+            color = LocalContext.current.infernoTheme().value.primaryTextColor,
         ) {
             onRenameCollectionTapped(collection)
         },
@@ -119,7 +112,7 @@ private fun getMenuItems(
         if (showAddTabs) {
             MenuItem(
                 title = stringResource(R.string.add_tab),
-                color = FirefoxTheme.colors.textPrimary,
+                color = LocalContext.current.infernoTheme().value.primaryTextColor,
             ) {
                 onAddTabTapped(collection)
             }
@@ -129,73 +122,73 @@ private fun getMenuItems(
 
         MenuItem(
             title = stringResource(R.string.collection_delete),
-            color = FirefoxTheme.colors.textCritical,
+            color = LocalContext.current.infernoTheme().value.errorColor,
         ) {
             onDeleteCollectionTapped(collection)
         },
     )
 }
 
-@LightDarkPreview
-@Composable
-private fun CollectionsPreview() {
-    val expandedCollections: MutableState<Set<Long>> = remember { mutableStateOf(setOf(1L)) }
-
-    FirefoxTheme {
-        Surface(color = FirefoxTheme.colors.layer1) {
-            Collections(
-                modifier = Modifier.padding(8.dp),
-                collections = listOf(
-                    FakeHomepagePreview.collection(
-                        tabs = listOf(
-                            FakeHomepagePreview.tab(),
-                            FakeHomepagePreview.tab(),
-                            FakeHomepagePreview.tab(),
-                        ),
-                    ),
-                    FakeHomepagePreview.collection(
-                        tabs = listOf(
-                            FakeHomepagePreview.tab(),
-                            FakeHomepagePreview.tab(),
-                        ),
-                    ),
-                ),
-                showAddTabToCollection = true,
-                expandedCollections = expandedCollections.value,
-                interactor = object : CollectionInteractor {
-                    override fun onCollectionAddTabTapped(collection: TabCollection) { /* no op */ }
-
-                    override fun onCollectionOpenTabClicked(tab: Tab) { /* no op */ }
-
-                    override fun onCollectionOpenTabsTapped(collection: TabCollection) { /* no op */ }
-
-                    override fun onCollectionRemoveTab(
-                        collection: TabCollection,
-                        tab: Tab,
-                    ) { /* no op */ }
-
-                    override fun onCollectionShareTabsClicked(collection: TabCollection) { /* no op */ }
-
-                    override fun onDeleteCollectionTapped(collection: TabCollection) { /* no op */ }
-
-                    override fun onRenameCollectionTapped(collection: TabCollection) { /* no op */ }
-
-                    override fun onToggleCollectionExpanded(
-                        collection: TabCollection,
-                        expand: Boolean,
-                    ) {
-                        expandedCollections.value = if (expand) {
-                            setOf(1L)
-                        } else {
-                            setOf()
-                        }
-                    }
-
-                    override fun onAddTabsToCollectionTapped() { /* no op */ }
-
-                    override fun onRemoveCollectionsPlaceholder() { /* no op */ }
-                },
-            )
-        }
-    }
-}
+//@LightDarkPreview
+//@Composable
+//private fun CollectionsPreview() {
+//    val expandedCollections: MutableState<Set<Long>> = remember { mutableStateOf(setOf(1L)) }
+//
+//    FirefoxTheme {
+//        Surface(color = FirefoxTheme.colors.layer1) {
+//            Collections(
+//                modifier = Modifier.padding(8.dp),
+//                collections = listOf(
+//                    FakeHomepagePreview.collection(
+//                        tabs = listOf(
+//                            FakeHomepagePreview.tab(),
+//                            FakeHomepagePreview.tab(),
+//                            FakeHomepagePreview.tab(),
+//                        ),
+//                    ),
+//                    FakeHomepagePreview.collection(
+//                        tabs = listOf(
+//                            FakeHomepagePreview.tab(),
+//                            FakeHomepagePreview.tab(),
+//                        ),
+//                    ),
+//                ),
+//                showAddTabToCollection = true,
+//                expandedCollections = expandedCollections.value,
+//                interactor = object : CollectionInteractor {
+//                    override fun onCollectionAddTabTapped(collection: TabCollection) { /* no op */ }
+//
+//                    override fun onCollectionOpenTabClicked(tab: Tab) { /* no op */ }
+//
+//                    override fun onCollectionOpenTabsTapped(collection: TabCollection) { /* no op */ }
+//
+//                    override fun onCollectionRemoveTab(
+//                        collection: TabCollection,
+//                        tab: Tab,
+//                    ) { /* no op */ }
+//
+//                    override fun onCollectionShareTabsClicked(collection: TabCollection) { /* no op */ }
+//
+//                    override fun onDeleteCollectionTapped(collection: TabCollection) { /* no op */ }
+//
+//                    override fun onRenameCollectionTapped(collection: TabCollection) { /* no op */ }
+//
+//                    override fun onToggleCollectionExpanded(
+//                        collection: TabCollection,
+//                        expand: Boolean,
+//                    ) {
+//                        expandedCollections.value = if (expand) {
+//                            setOf(1L)
+//                        } else {
+//                            setOf()
+//                        }
+//                    }
+//
+//                    override fun onAddTabsToCollectionTapped() { /* no op */ }
+//
+//                    override fun onRemoveCollectionsPlaceholder() { /* no op */ }
+//                },
+//            )
+//        }
+//    }
+//}

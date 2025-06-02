@@ -4,7 +4,6 @@
 
 package com.shmibblez.inferno.toolbar
 
-import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -33,8 +32,8 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import com.shmibblez.inferno.browser.UiConst
 import com.shmibblez.inferno.browser.InfernoAwesomeBar
+import com.shmibblez.inferno.browser.UiConst
 import com.shmibblez.inferno.ext.dpToPx
 import com.shmibblez.inferno.ext.infernoTheme
 import com.shmibblez.inferno.proto.InfernoSettings

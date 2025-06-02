@@ -47,6 +47,7 @@ import mozilla.components.compose.cfr.CFRPopup
 import mozilla.components.compose.cfr.CFRPopupLayout
 import mozilla.components.compose.cfr.CFRPopupProperties
 import com.shmibblez.inferno.R
+import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.list.ExpandableListHeader
 import com.shmibblez.inferno.compose.list.FaviconListItem
 import com.shmibblez.inferno.ext.toShortUrl
@@ -209,7 +210,6 @@ private fun InactiveTabsHeader(
     ) {
         ExpandableListHeader(
             headerText = stringResource(R.string.inactive_tabs_title),
-            headerTextStyle = FirefoxTheme.typography.headline7,
             expanded = expanded,
             expandActionContentDescription = stringResource(R.string.inactive_tabs_expand_content_description),
             collapseActionContentDescription = stringResource(R.string.inactive_tabs_collapse_content_description),
@@ -219,10 +219,9 @@ private fun InactiveTabsHeader(
                 onClick = onDeleteAllClick,
                 modifier = Modifier.padding(horizontal = 4.dp),
             ) {
-                Icon(
+                InfernoIcon(
                     painter = painterResource(R.drawable.ic_delete_24),
                     contentDescription = stringResource(R.string.inactive_tabs_delete_all),
-                    tint = FirefoxTheme.colors.iconPrimary,
                 )
             }
         }

@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -29,18 +28,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.annotation.LightDarkPreview
-import mozilla.components.feature.tab.collections.TabCollection
 import com.shmibblez.inferno.R
-import com.shmibblez.inferno.R.drawable
-import com.shmibblez.inferno.R.string
 import com.shmibblez.inferno.compose.ContextualMenu
 import com.shmibblez.inferno.compose.MenuItem
 import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.list.ExpandableListHeader
 import com.shmibblez.inferno.ext.getIconColor
-import com.shmibblez.inferno.home.fake.FakeHomepagePreview
-import com.shmibblez.inferno.theme.FirefoxTheme
+import com.shmibblez.inferno.ext.infernoTheme
+import mozilla.components.feature.tab.collections.TabCollection
 
 /**
  * Rectangular shape with all corners rounded used to display a collapsed collection.
@@ -87,16 +82,15 @@ fun Collection(
             )
             .height(48.dp),
         shape = if (isExpanded) expandedCollectionShape else collapsedCollectionShape,
-        colors = CardDefaults.cardColors(containerColor = FirefoxTheme.colors.layer2),
+        colors = CardDefaults.cardColors(containerColor = LocalContext.current.infernoTheme().value.secondaryBackgroundColor),
         elevation = CardDefaults.cardElevation(defaultElevation = 5.dp),
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxHeight(),
+            modifier = Modifier.fillMaxHeight(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             InfernoIcon(
-                painter = painterResource(drawable.ic_tab_collection),
+                painter = painterResource(R.drawable.ic_tab_collection),
                 contentDescription = null,
                 modifier = Modifier.padding(
                     start = 16.dp,
@@ -110,7 +104,6 @@ fun Collection(
 
             ExpandableListHeader(
                 headerText = collection.title,
-                headerTextStyle = FirefoxTheme.typography.headline7,
                 expanded = isExpanded,
             ) {
                 if (isExpanded) {
@@ -119,8 +112,8 @@ fun Collection(
                             onClick = { onCollectionShareTabsClicked(collection) },
                         ) {
                             InfernoIcon(
-                                painter = painterResource(drawable.ic_share),
-                                contentDescription = stringResource(string.share_button_content_description),
+                                painter = painterResource(R.drawable.ic_share),
+                                contentDescription = stringResource(R.string.share_button_content_description),
                             )
                         }
 
@@ -130,9 +123,9 @@ fun Collection(
                             },
                         ) {
                             InfernoIcon(
-                                painter = painterResource(drawable.ic_menu),
+                                painter = painterResource(R.drawable.ic_menu),
                                 contentDescription = stringResource(
-                                    string.collection_menu_button_content_description,
+                                    R.string.collection_menu_button_content_description,
                                 ),
                             )
 
@@ -149,38 +142,38 @@ fun Collection(
     }
 }
 
-@Composable
-@LightDarkPreview
-private fun CollectionExpandedPreview() {
-    FirefoxTheme {
-        var expanded by remember { mutableStateOf(true) }
-
-        Collection(
-            collection = FakeHomepagePreview.collection(),
-            expanded = expanded,
-            menuItems = emptyList(),
-            onToggleCollectionExpanded = { _, expand ->
-                expanded = expand
-            },
-            onCollectionShareTabsClicked = {},
-        )
-    }
-}
-
-@Composable
-@LightDarkPreview
-private fun CollectionPreview() {
-    FirefoxTheme {
-        var expanded by remember { mutableStateOf(false) }
-
-        Collection(
-            collection = FakeHomepagePreview.collection(),
-            expanded = expanded,
-            menuItems = emptyList(),
-            onToggleCollectionExpanded = { _, expand ->
-                expanded = expand
-            },
-            onCollectionShareTabsClicked = {},
-        )
-    }
-}
+//@Composable
+//@LightDarkPreview
+//private fun CollectionExpandedPreview() {
+//    FirefoxTheme {
+//        var expanded by remember { mutableStateOf(true) }
+//
+//        Collection(
+//            collection = FakeHomepagePreview.collection(),
+//            expanded = expanded,
+//            menuItems = emptyList(),
+//            onToggleCollectionExpanded = { _, expand ->
+//                expanded = expand
+//            },
+//            onCollectionShareTabsClicked = {},
+//        )
+//    }
+//}
+//
+//@Composable
+//@LightDarkPreview
+//private fun CollectionPreview() {
+//    FirefoxTheme {
+//        var expanded by remember { mutableStateOf(false) }
+//
+//        Collection(
+//            collection = FakeHomepagePreview.collection(),
+//            expanded = expanded,
+//            menuItems = emptyList(),
+//            onToggleCollectionExpanded = { _, expand ->
+//                expanded = expand
+//            },
+//            onCollectionShareTabsClicked = {},
+//        )
+//    }
+//}

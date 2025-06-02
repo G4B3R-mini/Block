@@ -20,11 +20,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 //import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.annotation.LightDarkPreview
 import com.shmibblez.inferno.R
+import com.shmibblez.inferno.ext.infernoTheme
 import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.annotation.LightDarkPreview
 import com.shmibblez.inferno.theme.FirefoxTheme
 
@@ -159,8 +161,8 @@ fun SecondaryButton(
     text: String,
     modifier: Modifier = Modifier.fillMaxWidth(),
     enabled: Boolean = true,
-    textColor: Color = FirefoxTheme.colors.textActionSecondary,
-    backgroundColor: Color = FirefoxTheme.colors.actionSecondary,
+    textColor: Color = LocalContext.current.infernoTheme().value.primaryTextColor,// FirefoxTheme.colors.textActionSecondary,
+    backgroundColor: Color = LocalContext.current.infernoTheme().value.primaryActionColor, // FirefoxTheme.colors.actionSecondary,
     icon: Painter? = null,
     iconModifier: Modifier = Modifier,
     onClick: () -> Unit,
@@ -173,7 +175,7 @@ fun SecondaryButton(
         enabled = enabled,
         icon = icon,
         iconModifier = iconModifier,
-        tint = FirefoxTheme.colors.iconActionSecondary,
+        tint = LocalContext.current.infernoTheme().value.primaryIconColor,// FirefoxTheme.colors.iconActionSecondary,
         onClick = onClick,
     )
 }

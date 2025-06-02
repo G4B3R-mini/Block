@@ -15,9 +15,7 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -30,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -38,10 +37,13 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.annotation.LightDarkPreview
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.base.InfernoIcon
+import com.shmibblez.inferno.compose.base.InfernoText
+import com.shmibblez.inferno.compose.base.InfernoTextStyle
 import com.shmibblez.inferno.compose.button.PrimaryButton
+import com.shmibblez.inferno.ext.infernoTheme
+import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.annotation.LightDarkPreview
 import com.shmibblez.inferno.theme.FirefoxTheme
 
 /**
@@ -88,6 +90,7 @@ private fun Menu(
             modifier = Modifier
                 .background(color = FirefoxTheme.colors.layer2)
                 .then(modifier),
+            containerColor = LocalContext.current.infernoTheme().value.secondaryBackgroundColor,
         ) {
             val hasCheckedItems = menuItems.any { it.isChecked }
             menuItems.forEachIndexed { index, item ->
@@ -129,11 +132,10 @@ private fun Menu(
                             }
                             Spacer(modifier = Modifier.width(12.dp))
                         }
-                        Text(
+                        InfernoText(
                             text = item.title,
-                            color = item.color ?: FirefoxTheme.colors.textPrimary,
+                            infernoStyle = InfernoTextStyle.Small,
                             maxLines = 1,
-                            style = FirefoxTheme.typography.subtitle1,
                             modifier = Modifier
                                 .wrapContentHeight()
                                 .align(Alignment.CenterHorizontally),

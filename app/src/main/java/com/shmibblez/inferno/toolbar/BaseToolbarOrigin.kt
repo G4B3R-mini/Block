@@ -27,7 +27,6 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -43,8 +42,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
@@ -68,6 +65,7 @@ import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.dpToPx
 import com.shmibblez.inferno.ext.infernoTheme
+import com.shmibblez.inferno.toolbar.ToolbarOnlyComponents.Companion.ToolbarSeparator
 import mozilla.components.browser.state.search.SearchEngine
 import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.browser.state.state.searchEngines
@@ -75,7 +73,6 @@ import mozilla.components.browser.state.state.selectedOrDefaultSearchEngine
 import mozilla.components.support.ktx.kotlin.isUrl
 import mozilla.components.support.ktx.kotlin.toNormalizedUrl
 import kotlin.math.roundToInt
-import com.shmibblez.inferno.toolbar.ToolbarOnlyComponents.Companion.ToolbarSeparator
 
 
 // start padding + (width - vertical padding since 1:1 aspect ratio) + expand icon start padding + expand icon size + expand icon end padding
@@ -103,7 +100,6 @@ private fun toolbarIndicatorWidth(siteTrackingProtection: SiteTrackingProtection
  * @param setAwesomeSearchText callback used to set AwesomeBar in parent search text
  * @param setOnAutocomplete callback used to set callback to set autocomplete text from parent
  * @param originModifier
- * @param indicatorModifier
  * @param editMode whether in edit mode
  * @param onStartSearch
  * @param onStopSearch

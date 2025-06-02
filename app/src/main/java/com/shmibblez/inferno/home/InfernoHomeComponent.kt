@@ -337,9 +337,7 @@ fun InfernoHomeComponent(isPrivate: Boolean, navController: NavController, modif
             navController = navController,
         ),
     )
-    FirefoxTheme {
-        // todo: copy homepage and customize
-        // todo: remove / fix home page state component (some stuff may have broken since change)
+
         Homepage(
             modifier = modifier.focusable(),
             state = HomepageState.build(
@@ -351,7 +349,6 @@ fun InfernoHomeComponent(isPrivate: Boolean, navController: NavController, modif
             interactor = sessionControlInteractor,
             onTopSitesItemBound = { },
         )
-    }
 }
 
 /**

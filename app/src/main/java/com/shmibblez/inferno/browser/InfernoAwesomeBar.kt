@@ -2,7 +2,6 @@ package com.shmibblez.inferno.browser
 
 import android.annotation.SuppressLint
 import android.util.Log
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,12 +14,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import com.shmibblez.inferno.browser.awesomebar.SuggestionFetcher
 import com.shmibblez.inferno.browser.awesomebar.Suggestions
 import com.shmibblez.inferno.ext.components
-import com.shmibblez.inferno.ext.infernoTheme
 import mozilla.components.compose.browser.awesomebar.AwesomeBarColors
 import mozilla.components.compose.browser.awesomebar.AwesomeBarDefaults
 import mozilla.components.compose.browser.awesomebar.AwesomeBarOrientation
@@ -49,13 +46,13 @@ fun InfernoAwesomeBar(
     val searchUseCase = remember { context.components.useCases.searchUseCases }
     val fetchClient = remember { context.components.core.client }
     val limit = remember { 4 }
-    val mode = remember { SearchSuggestionProvider.Mode.SINGLE_SUGGESTION }
+    val mode = remember { SearchSuggestionProvider.Mode.MULTIPLE_SUGGESTIONS }
     val engine = remember { context.components.core.engine }
     val filterExactMatch = remember { false }
     val showDescription = remember { false }
     val historyStorage = remember { context.components.core.historyStorage }
     val loadUrlUseCase = remember { context.components.useCases.sessionUseCases.loadUrl }
-    val icons = remember { null }
+    val icons = remember { context.components.core.icons }
     val maxNumberOfSuggestions = remember { 5 }
 
     val providers: List<AwesomeBar.SuggestionProvider> = remember {
@@ -71,12 +68,12 @@ fun InfernoAwesomeBar(
                 filterExactMatch = filterExactMatch,
                 showDescription = showDescription,
             ),
-//            SearchActionProvider(
-//                store,
-//                searchUseCase.defaultSearch,
-//                null, //icon,
-//                showDescription,
-//            ),
+            SearchActionProvider(
+                store,
+                searchUseCase.defaultSearch,
+                null, //icon,
+                showDescription,
+            ),
             HistoryStorageSuggestionProvider(
                 historyStorage, loadUrlUseCase, icons, engine, maxNumberOfSuggestions
             ),
@@ -102,8 +99,6 @@ fun InfernoAwesomeBar(
             .fillMaxWidth()
             .height(UiConst.AWESOME_BAR_HEIGHT),
 //            .testTag("inferno.awesomebar")
-//            .background(colors.background)
-//            .background(LocalContext.current.infernoTheme().value.primaryBackgroundColor.copy(alpha = UiConst.BAR_BG_ALPHA)),
         verticalArrangement = Arrangement.Bottom,
     ) {
         val fetcher = remember(groups) { SuggestionFetcher(groups, profiler) }
@@ -121,7 +116,6 @@ fun InfernoAwesomeBar(
 
         Suggestions(
             suggestions,
-            colors,
             orientation,
             onSuggestionClicked,
             onAutoComplete,

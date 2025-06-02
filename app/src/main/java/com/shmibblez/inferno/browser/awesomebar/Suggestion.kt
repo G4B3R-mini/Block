@@ -4,6 +4,8 @@ package com.shmibblez.inferno.browser.awesomebar
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+//import mozilla.components.compose.browser.awesomebar.R
+//import mozilla.components.ui.icons.R as iconsR
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import androidx.compose.foundation.Image
@@ -13,7 +15,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -24,26 +25,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
-import com.shmibblez.inferno.compose.base.InfernoText
-import mozilla.components.compose.browser.awesomebar.AwesomeBarColors
-import mozilla.components.compose.browser.awesomebar.AwesomeBarOrientation
-//import mozilla.components.compose.browser.awesomebar.R
-import mozilla.components.concept.awesomebar.AwesomeBar
-//import mozilla.components.ui.icons.R as iconsR
 import com.shmibblez.inferno.R
+import com.shmibblez.inferno.browser.UiConst
+import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.ext.infernoTheme
+import mozilla.components.compose.browser.awesomebar.AwesomeBarOrientation
+import mozilla.components.concept.awesomebar.AwesomeBar
 
 // We only show one row of text, covering at max screen width.
 // Limit bigger texts that could cause slowdowns or even crashes.
@@ -58,8 +54,8 @@ internal fun Suggestion(
 ) {
     Row(
         modifier = Modifier
+            .background(LocalContext.current.infernoTheme().value.primaryBackgroundColor.copy(alpha = UiConst.BAR_BG_ALPHA))
 //            .defaultMinSize(minHeight = 56.dp)
-//            .background(Color.Black)
 //            .testTag("mozac.awesomebar.suggestion")
             .padding(start = 16.dp, top = 4.dp, bottom = 4.dp, end = 8.dp)
             .clickable { onSuggestionClicked() },

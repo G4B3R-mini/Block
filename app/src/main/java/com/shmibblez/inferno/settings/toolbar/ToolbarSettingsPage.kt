@@ -26,6 +26,7 @@ import com.shmibblez.inferno.toolbar.defaultToolbarItems
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 
+// todo: mini origin support
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun ToolbarSettingsPage(goBack: () -> Unit) {

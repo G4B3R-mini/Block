@@ -1,6 +1,8 @@
 # About
 
-Inferno Browser is a mobile browser for Android which mainly focuses on usability, privacy, and relevant features. It's built mainly off of Mozilla's Fenix browser, also making use of the android gecko engine. It is almost ready for beta launch on the Google play store
+Inferno Browser is a mobile browser for Android which mainly focuses on usability, privacy, and
+relevant features. It's built mainly off of Mozilla's Fenix browser, also making use of the android
+gecko engine. It is almost ready for beta launch on the Google play store
 
 # Next Steps
 
@@ -11,7 +13,12 @@ Before launching however, there are 4 main things that have to be fixed, these a
 - some websites crashing unexpectedly (does not happen on Firefox)
 - crash reporting system
 
-In order for this app to be launched for actual use, these problems must be fixed. Not to shadow the fact that there are some other things that are a bit hacky or clunky, but they are functional and can be progressively improved; the 4 points above are crucial and currently lacking. With this in mind, the app IS currently in a functional state, and is actually very usable this is my main browser lol, collaboration is welcome you can email me ideas or if you want some pointers on what needs work right now.
+In order for this app to be launched for actual use, these problems must be fixed. Not to shadow the
+fact that there are some other things that are a bit hacky or clunky, but they are functional and
+can be progressively improved; the 4 points above are crucial and currently lacking. With this in
+mind, the app IS currently in a functional state, and is actually very usable this is my main
+browser lol, collaboration is welcome you can email me ideas or if you want some pointers on what
+needs work right now.
 
 # Nice Features
 
@@ -25,25 +32,42 @@ that's it for now, hopefully this project doesn't die
 
 # Currently Under Development
 
+## IntentProcessor and ExtralAppBrowser
+
+other activities exist, the best way to handle intent handling is to forward to different activities
+since each has a different behaviour (external vs browser).
+
+### Steps:
+
+- [ ] check activities that are opened from intent processors
+- [ ] start with migrating and adding some stuff to ExternalAppBrowserActivity in Compose
+    - [ ] can open directly to browser, maybe some other pages (would require creating nav graph)
+- [ ] check if can use BrowserComponent directly in HomeActivity (rename to BrowserActivity)
+    - [ ] requires checking if other fragments exist, other than settings frag
+
 ## Settings Pages Status
 
 - [x] Toolbar (Working)
-- [ ] Tabs (Buggy)
-    - [ ] enable / disable tabbar not implemented 
-    - [ ] top / bottom position not implemented (only bottom)
-    - [ ] tab tray grid not implemented 
+- [x] Tabs (Working)
+    - [ ] side note: enable / disable tabbar not implemented
+    - [ ] side note: top / bottom position not implemented (only bottom)
+    - [ ] side note: tab tray grid not implemented
 - [ ] Search (Buggy)
-- [ ] Theme (Buggy)
+    - [ ] add browser not working (probably problem with dialog)
+- [x] Theme (Working)
+    - [ ] side note: sometimes not applied, requires app restart
+    - [ ] side note: sometimes current theme is used when edit theme selected
 
 - [x] Gestures (Working)
-  - [ ] side note: not implemented in respective components
+    - [ ] side note: not implemented in respective components
 - [x] Homepage (Working)
 - [x] OnQuit (Working)
-  - [ ] side note: not reflected when quit, need to add to callback when app closed 
+    - [ ] side note: not reflected when quit, need to add to callback when app closed
 - [ ] Passwords (Buggy)
-  - [ ] side note: ui good, passwords not saving when added though
-  - [ ] side note: exceptions not tested
-  - [ ] side note: getting this error message:
+    - [ ] side note: ui good, passwords not saving when added though
+    - [ ] side note: exceptions not tested
+    - [ ] side note: getting this error message:
+
 ```
 Autofill popup isn't shown because autofill is not available.
                                                                                                     
@@ -56,11 +80,12 @@ Did you add an account?
 2. Click on the settings icon next to the Autofill Service
 3. Add your account
 ```
+
 - [x] Autofill (Working)
 
 - [x] Site Permissions (Working)
-  - [ ] side note: exceptions not tested
-  - [ ] side note: prefs not tested (access/set in engine)
+    - [ ] side note: exceptions not tested
+    - [ ] side note: prefs not tested (access/set in engine)
 - [x] Accessibility (Working)
     - [ ] side note: some settings not applied
     - [ ] side note: slide bar looks weird (no thumb) and factor may be wrong (try 0.5-2 instead of
@@ -97,7 +122,6 @@ Did you add an account?
     - [ ] use authentication when click on manage cards
     - [ ] use authentication when click on manage logins
 
-
 ## Pending addition
 
 `Features that will be added eventually, but are currently not a priority`
@@ -107,16 +131,21 @@ Did you add an account?
       a timeout like bitwarden does)
     - [ ] extensions settings direct access
 
-
 # Future Features
 
 `Features that will probably eventually be added`
 
 - [ ] workspaces
-    - Requires storing multiple engines probably, one for each workspace. Should check zen browser implementation for ideas.
+    - Requires storing multiple engines probably, one for each workspace. Should check zen browser
+      implementation for ideas.
 - [ ] synced workspaces
     - [ ] will require a workaround, since vanilla Firefox doesn't even support workspaces currently
-        - [ ] Could store / encode in bookmarks folder, there is a max of 5000 however. If implemented this way, bookmarks shown would have to hide special storage folders, and they would be visible if accessed from a Firefox browser. This would be VERY hacky, but there are a lot of fields to store different types of data, and it could be done as cleanly as possible, maybe storing everything in a base folder called "_". It would also need to be implemented in a way that if edited externally, it doesn't just completely break.
+        - [ ] Could store / encode in bookmarks folder, there is a max of 5000 however. If
+          implemented this way, bookmarks shown would have to hide special storage folders, and they
+          would be visible if accessed from a Firefox browser. This would be VERY hacky, but there
+          are a lot of fields to store different types of data, and it could be done as cleanly as
+          possible, maybe storing everything in a base folder called "_". It would also need to be
+          implemented in a way that if edited externally, it doesn't just completely break.
         - [ ] if implemented this way, it would also allow just pinned tabs to be synced, etc
 - [ ] bug reporting system / feedback page
     - [ ] for bug reporting show select in settings: (disabled, send report auto, or ask to send

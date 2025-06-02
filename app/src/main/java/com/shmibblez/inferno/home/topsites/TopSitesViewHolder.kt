@@ -41,7 +41,7 @@ class TopSitesViewHolder(
         topSites?.let {
             TopSites(
                 topSites = it,
-                topSiteColors = TopSiteColors.colors(wallpaperState = wallpaperState),
+//                topSiteColors = TopSiteColors.colors(wallpaperState = wallpaperState),
                 onTopSiteClick = { topSite ->
                     interactor.onSelectTopSite(topSite, it.indexOf(topSite))
                 },

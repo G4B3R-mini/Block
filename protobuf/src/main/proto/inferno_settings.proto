@@ -143,6 +143,7 @@ message InfernoSettings {
 
   optional DefaultTheme selectedDefaultTheme = 28 [default = INFERNO_DARK];
   optional string selectedCustomTheme = 29 [default = ""];
+  optional bool useSameThemeForNormalAndPrivate = 87 [default = true];
   optional DefaultTheme selectedDefaultThemePrivate = 30 [default = MOZILLA_INCOGNITO_DARK];
   optional string selectedCustomThemePrivate = 31 [default = ""];
   // { [theme name set by user]: [theme data] }

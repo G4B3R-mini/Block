@@ -5,7 +5,6 @@
 package com.shmibblez.inferno.compose
 
 import android.content.res.Configuration
-import android.graphics.BitmapFactory
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -27,10 +26,9 @@ import com.shmibblez.inferno.R
 import mozilla.components.browser.icons.IconRequest
 import mozilla.components.browser.icons.compose.Placeholder
 import mozilla.components.browser.icons.compose.WithIcon
-//import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.utils.inComposePreview
 import com.shmibblez.inferno.components.components
+import com.shmibblez.inferno.ext.infernoTheme
 import com.shmibblez.inferno.settings.SupportUtils
-import com.shmibblez.inferno.theme.FirefoxTheme
 
 /**
  * Load and display the favicon of a particular website.
@@ -115,28 +113,24 @@ fun FaviconPlaceholder(
     size: Dp,
     modifier: Modifier = Modifier,
 ) {
-    FirefoxTheme {
-        Box(
-            modifier = modifier
-                .size(size)
-                .clip(RoundedCornerShape(2.dp))
-                .background(
-                    color = FirefoxTheme.colors.layer2,
-                ),
-        )
-    }
+    Box(
+        modifier = modifier
+            .size(size)
+            .clip(RoundedCornerShape(2.dp))
+            .background(
+                color = LocalContext.current.infernoTheme().value.secondaryBackgroundColor, // FirefoxTheme.colors.layer2,
+            ),
+    )
 }
 
 @Composable
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 private fun FaviconPreview() {
-    FirefoxTheme {
-        Box(Modifier.background(FirefoxTheme.colors.layer1)) {
-            Favicon(
-                url = "www.mozilla.com",
-                size = 64.dp,
-            )
-        }
+    Box(Modifier.background(LocalContext.current.infernoTheme().value.primaryBackgroundColor)) {
+        Favicon(
+            url = "www.mozilla.com",
+            size = 64.dp,
+        )
     }
 }
 

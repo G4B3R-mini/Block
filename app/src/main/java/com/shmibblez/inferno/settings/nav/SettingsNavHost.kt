@@ -2,6 +2,7 @@ package com.shmibblez.inferno.settings.nav
 
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.EaseIn
+import androidx.compose.animation.core.EaseOut
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
@@ -137,7 +138,7 @@ fun SettingsNavHost(
             slideIntoContainer(
                 animationSpec = tween(
                     300,
-                    easing = EaseIn,
+                    easing = EaseOut,
                 ),
                 towards = AnimatedContentTransitionScope.SlideDirection.Start,
             )
@@ -146,7 +147,7 @@ fun SettingsNavHost(
             slideOutOfContainer(
                 animationSpec = tween(
                     300,
-                    easing = EaseIn,
+                    easing = EaseOut,
                 ),
                 towards = AnimatedContentTransitionScope.SlideDirection.Start,
             )
