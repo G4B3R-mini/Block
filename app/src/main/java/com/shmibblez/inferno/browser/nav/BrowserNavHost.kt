@@ -9,6 +9,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.shmibblez.inferno.browser.BrowserComponent
+import com.shmibblez.inferno.browser.ExternalBrowserComponent
 import com.shmibblez.inferno.browser.rememberBrowserComponentState
 import com.shmibblez.inferno.library.history.HistoryFragment
 import com.shmibblez.inferno.settings.nav.SettingsNavHost
@@ -161,7 +162,13 @@ fun BrowserNavHost(
     ) {
 
         composable<BrowserRoute.ExternalBrowser> {
-            // todo: create ExternalBrowserComponent
+            // todo: create ExternalBrowserComponent, or modify BrowserComponent and add state to
+            //  reflect mode (externalMode boolean in state to decide which toolbar to show)
+            //  - when open in browser selected, move tab to normal/private tabs and switch
+            //  externalMode to false, do through accompanying functions (eg deactivateExternalMode(),
+            //  which also moves tab to normal or private tabs)
+            //  - this is why customTabSessionId exists
+            ExternalBrowserComponent()
         }
 
         composable<BrowserRoute.InfernoBrowser> {
