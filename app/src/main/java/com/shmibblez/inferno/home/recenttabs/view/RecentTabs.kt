@@ -7,9 +7,6 @@
 package com.shmibblez.inferno.home.recenttabs.view
 
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.Paint.Align
-import android.util.Log
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -28,9 +25,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -47,27 +41,24 @@ import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.toBitmap
+import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.Image
 import com.shmibblez.inferno.compose.TabThumbnail
 import com.shmibblez.inferno.compose.menu.DropdownMenu
 import com.shmibblez.inferno.compose.menu.MenuItem
 import com.shmibblez.inferno.compose.text.Text
-import com.shmibblez.inferno.home.fake.FakeHomepagePreview
+import com.shmibblez.inferno.ext.infernoTheme
 import com.shmibblez.inferno.home.recenttabs.RecentTab
 import com.shmibblez.inferno.settings.SupportUtils
-import com.shmibblez.inferno.theme.FirefoxTheme
 import mozilla.components.support.ktx.kotlin.trimmed
 import mozilla.components.ui.colors.PhotonColors
-import com.shmibblez.inferno.R
 
 private const val THUMBNAIL_SIZE = 108
 
@@ -79,12 +70,11 @@ private const val THUMBNAIL_SIZE = 108
  * @param backgroundColor The background [Color] of each item.
  * @param onRecentTabClick Invoked when the user clicks on a recent tab.
  */
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun RecentTabs(
     recentTabs: List<RecentTab>,
     menuItems: List<RecentTabMenuItem>,
-    backgroundColor: Color = FirefoxTheme.colors.layer2,
+    backgroundColor: Color = LocalContext.current.infernoTheme().value.secondaryBackgroundColor,
     onRecentTabClick: (String) -> Unit = {},
 ) {
     Column(
@@ -93,8 +83,7 @@ fun RecentTabs(
             .semantics {
                 testTagsAsResourceId = true
                 testTag = "recent.tabs"
-            }
-            .background(Color.Black),
+            },
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         recentTabs.forEach { tab ->
@@ -143,7 +132,7 @@ private fun RecentTabItem(
                 onClick = { onRecentTabClick(tab.state.id) },
                 onLongClick = { isMenuExpanded = true },
             )
-            .background(Color.DarkGray)
+            .background(backgroundColor)
             .clip(RoundedCornerShape(8.dp)),
 //        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
     ) {
@@ -171,7 +160,7 @@ private fun RecentTabItem(
                         testTagsAsResourceId = true
                         testTag = "recent.tab.title"
                     },
-                    color = FirefoxTheme.colors.textPrimary,
+                    color = LocalContext.current.infernoTheme().value.primaryTextColor,
                     fontSize = 14.sp,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
@@ -195,7 +184,7 @@ private fun RecentTabItem(
                             testTagsAsResourceId = true
                             testTag = "recent.tab.url"
                         },
-                        color = FirefoxTheme.colors.textSecondary,
+                        color = LocalContext.current.infernoTheme().value.secondaryTextColor,
                         fontSize = 12.sp,
                         overflow = TextOverflow.Ellipsis,
                         maxLines = 1,
@@ -320,7 +309,7 @@ private fun RecentTabIcon(
 
     when {
         homeIcon != null -> Image(
-            bitmap = homeIcon!!, contentDescription = "", modifier = modifier,
+            bitmap = homeIcon, contentDescription = "", modifier = modifier,
         )
 
         icon != null -> {
@@ -372,18 +361,18 @@ private fun PlaceHolderTabIcon(modifier: Modifier) {
 }
 
 //@LightDarkPreview
-@Composable
-private fun RecentTabsPreview() {
-    FirefoxTheme {
-        RecentTabs(
-            recentTabs = FakeHomepagePreview.recentTabs(),
-            menuItems = listOf(
-                RecentTabMenuItem(
-                    title = "Menu item",
-                    onClick = {},
-                ),
-            ),
-            onRecentTabClick = {},
-        )
-    }
-}
+//@Composable
+//private fun RecentTabsPreview() {
+//    FirefoxTheme {
+//        RecentTabs(
+//            recentTabs = FakeHomepagePreview.recentTabs(),
+//            menuItems = listOf(
+//                RecentTabMenuItem(
+//                    title = "Menu item",
+//                    onClick = {},
+//                ),
+//            ),
+//            onRecentTabClick = {},
+//        )
+//    }
+//}

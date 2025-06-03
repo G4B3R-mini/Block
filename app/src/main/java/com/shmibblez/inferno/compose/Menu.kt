@@ -6,7 +6,6 @@ package com.shmibblez.inferno.compose
 
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -41,10 +40,7 @@ import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.compose.base.InfernoTextStyle
-import com.shmibblez.inferno.compose.button.PrimaryButton
 import com.shmibblez.inferno.ext.infernoTheme
-import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.annotation.LightDarkPreview
-import com.shmibblez.inferno.theme.FirefoxTheme
 
 /**
  * Root popup action dropdown menu.
@@ -88,7 +84,7 @@ private fun Menu(
             offset = offset,
             scrollState = ScrollState(with(localDensity) { columnHeightDp.toPx() * selectedItemIndex }.toInt()),
             modifier = Modifier
-                .background(color = FirefoxTheme.colors.layer2)
+                .background(color = LocalContext.current.infernoTheme().value.secondaryBackgroundColor)
                 .then(modifier),
             containerColor = LocalContext.current.infernoTheme().value.secondaryBackgroundColor,
         ) {
@@ -206,26 +202,26 @@ data class MenuItem(
     val onClick: () -> Unit,
 )
 
-@LightDarkPreview
-@Composable
-@Suppress("Deprecation")
-private fun ContextualMenuPreview() {
-    var showMenu by remember { mutableStateOf(false) }
-    FirefoxTheme {
-        Box(modifier = Modifier.size(400.dp)) {
-            PrimaryButton(text = "Show menu") {
-                showMenu = true
-            }
-
-            ContextualMenu(
-                menuItems = listOf(
-                    MenuItem("Rename") {},
-                    MenuItem("Share") {},
-                    MenuItem("Remove") {},
-                ),
-                showMenu = showMenu,
-                onDismissRequest = { showMenu = false },
-            )
-        }
-    }
-}
+//@LightDarkPreview
+//@Composable
+//@Suppress("Deprecation")
+//private fun ContextualMenuPreview() {
+//    var showMenu by remember { mutableStateOf(false) }
+//    FirefoxTheme {
+//        Box(modifier = Modifier.size(400.dp)) {
+//            PrimaryButton(text = "Show menu") {
+//                showMenu = true
+//            }
+//
+//            ContextualMenu(
+//                menuItems = listOf(
+//                    MenuItem("Rename") {},
+//                    MenuItem("Share") {},
+//                    MenuItem("Remove") {},
+//                ),
+//                showMenu = showMenu,
+//                onDismissRequest = { showMenu = false },
+//            )
+//        }
+//    }
+//}

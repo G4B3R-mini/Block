@@ -2,33 +2,24 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-@file:OptIn(ExperimentalFoundationApi::class)
-
 package com.shmibblez.inferno.compose
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.annotation.LightDarkPreview
-import com.shmibblez.inferno.theme.FirefoxTheme
+import com.shmibblez.inferno.ext.infernoTheme
 
 /**
  * An horizontally laid out indicator for a [HorizontalPager] with the ability to leave the trail of
@@ -47,8 +38,8 @@ import com.shmibblez.inferno.theme.FirefoxTheme
 fun PagerIndicator(
     pagerState: PagerState,
     modifier: Modifier = Modifier,
-    activeColor: Color = FirefoxTheme.colors.indicatorActive,
-    inactiveColor: Color = FirefoxTheme.colors.indicatorInactive,
+    activeColor: Color = LocalContext.current.infernoTheme().value.secondaryBackgroundColor, // FirefoxTheme.colors.indicatorActive,
+    inactiveColor: Color = LocalContext.current.infernoTheme().value.secondaryBackgroundColor, // FirefoxTheme.colors.indicatorInactive,
     leaveTrail: Boolean = false,
     spacing: Dp = 8.dp,
 ) {
@@ -81,63 +72,63 @@ fun PagerIndicator(
     }
 }
 
-@LightDarkPreview
-@Composable
-private fun PagerIndicatorPreview() {
-    FirefoxTheme {
-        Column(
-            modifier = Modifier
-                .background(FirefoxTheme.colors.layer1)
-                .padding(32.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Text(
-                text = "Without trail",
-                style = FirefoxTheme.typography.caption,
-                color = FirefoxTheme.colors.textPrimary,
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            PagerIndicator(
-                pagerState = rememberPagerState(1, pageCount = { 3 }),
-                activeColor = FirefoxTheme.colors.actionPrimary,
-                inactiveColor = FirefoxTheme.colors.actionSecondary,
-                modifier = Modifier.align(Alignment.CenterHorizontally),
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                text = "With trail",
-                style = FirefoxTheme.typography.caption,
-                color = FirefoxTheme.colors.textPrimary,
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            PagerIndicator(
-                pagerState = rememberPagerState(1, pageCount = { 3 }),
-                activeColor = FirefoxTheme.colors.actionPrimary,
-                inactiveColor = FirefoxTheme.colors.actionSecondary,
-                leaveTrail = true,
-                modifier = Modifier.align(Alignment.CenterHorizontally),
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = "Default colors",
-                style = FirefoxTheme.typography.caption,
-                color = FirefoxTheme.colors.textPrimary,
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            PagerIndicator(
-                pagerState = rememberPagerState(1, pageCount = { 3 }),
-                modifier = Modifier.align(Alignment.CenterHorizontally),
-            )
-        }
-    }
-}
+//@LightDarkPreview
+//@Composable
+//private fun PagerIndicatorPreview() {
+//    FirefoxTheme {
+//        Column(
+//            modifier = Modifier
+//                .background(FirefoxTheme.colors.layer1)
+//                .padding(32.dp),
+//            horizontalAlignment = Alignment.CenterHorizontally,
+//        ) {
+//            Text(
+//                text = "Without trail",
+//                style = FirefoxTheme.typography.caption,
+//                color = FirefoxTheme.colors.textPrimary,
+//            )
+//
+//            Spacer(modifier = Modifier.height(8.dp))
+//
+//            PagerIndicator(
+//                pagerState = rememberPagerState(1, pageCount = { 3 }),
+//                activeColor = FirefoxTheme.colors.actionPrimary,
+//                inactiveColor = FirefoxTheme.colors.actionSecondary,
+//                modifier = Modifier.align(Alignment.CenterHorizontally),
+//            )
+//
+//            Spacer(modifier = Modifier.height(16.dp))
+//
+//            Text(
+//                text = "With trail",
+//                style = FirefoxTheme.typography.caption,
+//                color = FirefoxTheme.colors.textPrimary,
+//            )
+//
+//            Spacer(modifier = Modifier.height(8.dp))
+//
+//            PagerIndicator(
+//                pagerState = rememberPagerState(1, pageCount = { 3 }),
+//                activeColor = FirefoxTheme.colors.actionPrimary,
+//                inactiveColor = FirefoxTheme.colors.actionSecondary,
+//                leaveTrail = true,
+//                modifier = Modifier.align(Alignment.CenterHorizontally),
+//            )
+//
+//            Spacer(modifier = Modifier.height(8.dp))
+//
+//            Text(
+//                text = "Default colors",
+//                style = FirefoxTheme.typography.caption,
+//                color = FirefoxTheme.colors.textPrimary,
+//            )
+//
+//            Spacer(modifier = Modifier.height(8.dp))
+//
+//            PagerIndicator(
+//                pagerState = rememberPagerState(1, pageCount = { 3 }),
+//                modifier = Modifier.align(Alignment.CenterHorizontally),
+//            )
+//        }
+//    }
+//}

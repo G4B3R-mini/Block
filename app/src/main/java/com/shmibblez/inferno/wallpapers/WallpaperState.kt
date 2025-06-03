@@ -4,10 +4,12 @@
 
 package com.shmibblez.inferno.wallpapers
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import com.shmibblez.inferno.theme.FirefoxTheme
+import androidx.compose.ui.platform.LocalContext
+import com.shmibblez.inferno.ext.infernoTheme
 
 /**
  * Represents all state related to the Wallpapers feature.
@@ -40,7 +42,7 @@ data class WallpaperState(
                     Color(currentWallpaper.cardColorLight)
                 }
             }
-            else -> FirefoxTheme.colors.layer2
+            else -> LocalContext.current.infernoTheme().value.secondaryBackgroundColor
         }
 
     /**
@@ -48,9 +50,9 @@ data class WallpaperState(
      */
     val buttonBackgroundColor: Color
         @Composable get() = if (isCurrentWallpaperDefault()) {
-            FirefoxTheme.colors.actionSecondary
+            LocalContext.current.infernoTheme().value.primaryActionColor
         } else {
-            FirefoxTheme.colors.layer1
+            LocalContext.current.infernoTheme().value.secondaryBackgroundColor
         }
 
     /**
@@ -59,8 +61,8 @@ data class WallpaperState(
     val buttonTextColor: Color
         @Composable get() = when {
             currentWallpaper.cardColorDark != null &&
-                isSystemInDarkTheme() -> FirefoxTheme.colors.textPrimary
-            else -> FirefoxTheme.colors.textActionSecondary
+                isSystemInDarkTheme() -> LocalContext.current.infernoTheme().value.primaryActionColor
+            else -> LocalContext.current.infernoTheme().value.primaryActionColor
         }
 
     private fun isCurrentWallpaperDefault(): Boolean = Wallpaper.nameIsDefault(currentWallpaper.name)
@@ -68,6 +70,7 @@ data class WallpaperState(
     /**
      * Run the Composable [run] block only if the current wallpaper's card colors are available.
      */
+    @SuppressLint("ComposableNaming")
     @Composable
     fun composeRunIfWallpaperCardColorsAreAvailable(
         run: @Composable (cardColorLight: Color, cardColorDark: Color) -> Unit,

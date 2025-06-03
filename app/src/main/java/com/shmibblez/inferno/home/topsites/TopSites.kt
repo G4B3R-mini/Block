@@ -59,7 +59,6 @@ import com.shmibblez.inferno.home.fake.FakeHomepagePreview
 import com.shmibblez.inferno.home.sessioncontrol.TopSiteInteractor
 import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.annotation.LightDarkPreview
 import com.shmibblez.inferno.settings.SupportUtils
-import com.shmibblez.inferno.theme.FirefoxTheme
 import com.shmibblez.inferno.wallpapers.WallpaperState
 import mozilla.components.feature.top.sites.TopSite
 import kotlin.math.ceil
@@ -217,9 +216,9 @@ data class TopSiteColors(
          */
         @Composable
         fun colors(
-            titleTextColor: Color = FirefoxTheme.colors.textPrimary,
-            sponsoredTextColor: Color = FirefoxTheme.colors.textSecondary,
-            faviconCardBackgroundColor: Color = FirefoxTheme.colors.layer2,
+            titleTextColor: Color = LocalContext.current.infernoTheme().value.primaryTextColor,
+            sponsoredTextColor: Color = LocalContext.current.infernoTheme().value.secondaryTextColor,
+            faviconCardBackgroundColor: Color = LocalContext.current.infernoTheme().value.secondaryBackgroundColor,
         ) = TopSiteColors(
             titleTextColor = titleTextColor,
             sponsoredTextColor = sponsoredTextColor,
@@ -234,12 +233,13 @@ data class TopSiteColors(
         fun colors(wallpaperState: WallpaperState): TopSiteColors {
             val textColor: Long? = wallpaperState.currentWallpaper.textColor
             val (titleTextColor, sponsoredTextColor) = if (textColor == null) {
-                FirefoxTheme.colors.textPrimary to FirefoxTheme.colors.textSecondary
+                LocalContext.current.infernoTheme().value.primaryTextColor to LocalContext.current.infernoTheme().value.secondaryTextColor
             } else {
                 Color(textColor) to Color(textColor)
             }
 
-            var faviconCardBackgroundColor = FirefoxTheme.colors.layer2
+            var faviconCardBackgroundColor =
+                LocalContext.current.infernoTheme().value.secondaryBackgroundColor
 
             wallpaperState.composeRunIfWallpaperCardColorsAreAvailable { cardColorLight, cardColorDark ->
                 faviconCardBackgroundColor = if (isSystemInDarkTheme()) {
@@ -517,19 +517,17 @@ private fun getMenuItems(
 @Composable
 @LightDarkPreview
 private fun TopSitesPreview() {
-    FirefoxTheme {
-        Box(modifier = Modifier.background(color = FirefoxTheme.colors.layer1)) {
-            TopSites(
-                topSites = FakeHomepagePreview.topSites(),
-                onTopSiteClick = {},
-                onTopSiteLongClick = {},
-                onOpenInPrivateTabClicked = {},
-                onEditTopSiteClicked = {},
-                onRemoveTopSiteClicked = {},
-                onSettingsClicked = {},
-                onSponsorPrivacyClicked = {},
-                onTopSitesItemBound = {},
-            )
-        }
+    Box(modifier = Modifier.background(color = LocalContext.current.infernoTheme().value.primaryBackgroundColor)) {
+        TopSites(
+            topSites = FakeHomepagePreview.topSites(),
+            onTopSiteClick = {},
+            onTopSiteLongClick = {},
+            onOpenInPrivateTabClicked = {},
+            onEditTopSiteClicked = {},
+            onRemoveTopSiteClicked = {},
+            onSettingsClicked = {},
+            onSponsorPrivacyClicked = {},
+            onTopSitesItemBound = {},
+        )
     }
 }

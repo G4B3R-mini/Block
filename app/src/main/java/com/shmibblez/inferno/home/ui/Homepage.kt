@@ -214,7 +214,7 @@ private fun RecentTabsSection(
 
     RecentTabs(
         recentTabs = recentTabs,
-        backgroundColor = Color.Black, // cardBackgroundColor,
+        backgroundColor = LocalContext.current.infernoTheme().value.secondaryBackgroundColor, // cardBackgroundColor,
         onRecentTabClick = { interactor.onRecentTabClicked(it) },
         menuItems = listOf(
             RecentTabMenuItem(
