@@ -11,7 +11,6 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
-import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup.LayoutParams
@@ -27,7 +26,6 @@ import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.animation.core.Animatable
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -43,21 +41,18 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarResult
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
@@ -105,8 +100,6 @@ import com.shmibblez.inferno.components.accounts.FenixFxAEntryPoint
 import com.shmibblez.inferno.components.accounts.FxaWebChannelIntegration
 import com.shmibblez.inferno.components.appstate.AppAction.MessagingAction
 import com.shmibblez.inferno.components.appstate.AppAction.ShoppingAction
-import com.shmibblez.inferno.components.toolbar.FenixTabCounterMenu
-import com.shmibblez.inferno.components.toolbar.interactor.BrowserToolbarInteractor
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.compose.snackbar.AcornSnackbarHostState
 import com.shmibblez.inferno.compose.snackbar.Snackbar
@@ -118,16 +111,16 @@ import com.shmibblez.inferno.ext.DEFAULT_ACTIVE_DAYS
 import com.shmibblez.inferno.ext.accessibilityManager
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.consumeFlow
+import com.shmibblez.inferno.ext.dpToPx
+import com.shmibblez.inferno.ext.infernoTheme
 import com.shmibblez.inferno.ext.isLargeWindow
 import com.shmibblez.inferno.ext.nav
 import com.shmibblez.inferno.ext.navigateWithBreadcrumb
 import com.shmibblez.inferno.ext.settings
-import com.shmibblez.inferno.ext.dpToPx
-import com.shmibblez.inferno.ext.infernoTheme
 import com.shmibblez.inferno.findInPageBar.BrowserFindInPageBar
 import com.shmibblez.inferno.home.CrashComponent
-import com.shmibblez.inferno.home.InfernoHomeComponent
 import com.shmibblez.inferno.home.HomeFragment
+import com.shmibblez.inferno.home.InfernoHomeComponent
 import com.shmibblez.inferno.library.bookmarks.friendlyRootTitle
 import com.shmibblez.inferno.loading.InfernoLoadingComponent
 import com.shmibblez.inferno.messaging.FenixMessageSurfaceId
@@ -148,7 +141,6 @@ import com.shmibblez.inferno.tabstray.Page
 import com.shmibblez.inferno.tabstray.TabsTrayFragmentDirections
 import com.shmibblez.inferno.tabstray.ext.isActiveDownload
 import com.shmibblez.inferno.tabstray.ext.isNormalTab
-import com.shmibblez.inferno.theme.FirefoxTheme
 import com.shmibblez.inferno.theme.ThemeManager
 import com.shmibblez.inferno.toolbar.InfernoToolbar
 import com.shmibblez.inferno.toolbar.ToolbarMenuBottomSheet
@@ -171,7 +163,6 @@ import mozilla.components.browser.engine.gecko.GeckoEngineView
 import mozilla.components.browser.state.action.DebugAction
 import mozilla.components.browser.state.action.LastAccessAction
 import mozilla.components.browser.state.action.RecentlyClosedAction
-import mozilla.components.browser.state.search.SearchEngine
 import mozilla.components.browser.state.selector.findCustomTabOrSelectedTab
 import mozilla.components.browser.state.selector.findTab
 import mozilla.components.browser.state.selector.findTabOrCustomTab
@@ -183,13 +174,9 @@ import mozilla.components.browser.state.state.SessionState
 import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.browser.state.state.content.DownloadState
 import mozilla.components.browser.state.state.content.DownloadState.Status
-import mozilla.components.browser.state.state.recover.TabState
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.browser.thumbnails.BrowserThumbnails
 import mozilla.components.browser.toolbar.BrowserToolbar
-import mozilla.components.compose.cfr.CFRPopup
-import mozilla.components.compose.cfr.CFRPopupLayout
-import mozilla.components.compose.cfr.CFRPopupProperties
 import mozilla.components.concept.engine.EngineView
 import mozilla.components.concept.engine.mediasession.MediaSession
 import mozilla.components.concept.engine.permission.SitePermissions
@@ -317,8 +304,8 @@ const val SHARE_WEIGHT = 4
 const val OPEN_IN_ACTION_WEIGHT = 6
 //}
 
-private const val NAVIGATION_CFR_VERTICAL_OFFSET = 10
-private const val NAVIGATION_CFR_ARROW_OFFSET = 24
+//private const val NAVIGATION_CFR_VERTICAL_OFFSET = 10
+//private const val NAVIGATION_CFR_ARROW_OFFSET = 24
 //private const val NAVIGATION_CFR_MAX_MS_BETWEEN_CLICKS = 5000
 
 fun Context.getActivity(): AppCompatActivity? = when (this) {
@@ -345,7 +332,7 @@ enum class BrowserComponentPageType {
 }
 
 object UiConst {
-    const val BAR_BG_ALPHA = 0.77F
+    const val BAR_BG_ALPHA = 0.74F
 
     val TOOLBAR_HEIGHT = 44.dp
     val TAB_BAR_HEIGHT = 36.dp
@@ -368,6 +355,7 @@ object UiConst {
     }
 }
 
+
 @OptIn(ExperimentalCoroutinesApi::class, DelicateAction::class)
 @Composable
 @SuppressLint(
@@ -375,20 +363,12 @@ object UiConst {
     "VisibleForTests",
     "UnusedMaterial3ScaffoldPaddingParameter"
 )
+
+// todo: home nav args, do stuff like new tab, new tab specific url, deeplink url, etc
 fun BrowserComponent(
     navController: NavController,
-    setOnActivityResultHandler: ((OnActivityResultModel) -> Boolean) -> Unit,
-    // browser state vars
-    setSelectedTabsTrayTab: (InfernoTabsTraySelectedTab) -> Unit,
-    tabList: List<TabSessionState>,
-    normalTabs: List<TabSessionState>,
-    privateTabs: List<TabSessionState>,
-    closedTabs: List<TabState>,
-    currentTab: TabSessionState?,
-    searchEngine: SearchEngine?,
-    pageType: BrowserComponentPageType,
-    selectedTabsTrayTab: InfernoTabsTraySelectedTab,
-//    args: HomeFragmentArgs
+    state: BrowserComponentState,
+    onNavToSettings: () -> Unit,
 ) {
     Log.d("BrowserComponent", "rebuilt")
     val coroutineScope = rememberCoroutineScope()
@@ -420,11 +400,7 @@ fun BrowserComponent(
             false
         )
     }
-    var translationsAvailable = remember { mutableStateOf(false) }
-
     var pwaOnboardingObserver: PwaOnboardingObserver? = null
-
-    var isTablet = false
 
     /* BrowserFragment  vars */
 
@@ -543,12 +519,12 @@ fun BrowserComponent(
     // browser display mode, also sets bottomBarHeightDp
     var browserMode by remember {
         run {
-            val state = mutableStateOf(BrowserComponentMode.TOOLBAR)
-            object : MutableState<BrowserComponentMode> by state {
+            val toolbarState = mutableStateOf(BrowserComponentMode.TOOLBAR)
+            object : MutableState<BrowserComponentMode> by toolbarState {
                 override var value
-                    get() = state.value
+                    get() = toolbarState.value
                     set(value) {
-                        state.value = value
+                        toolbarState.value = value
                         bottomBarHeightDp = UiConst.calcBottomBarHeight(value)
                         // reset bottom bar offset
                         coroutineScope.launch {
@@ -717,9 +693,9 @@ fun BrowserComponent(
     // bottom sheet menu setup
     var showToolbarMenuBottomSheet by remember { mutableStateOf(false) }
     if (showToolbarMenuBottomSheet) {
-        ToolbarMenuBottomSheet(tabSessionState = currentTab,
-            loading = currentTab?.content?.loading ?: false,
-            tabCount = tabList.size,
+        ToolbarMenuBottomSheet(tabSessionState = state.currentTab,
+            loading = state.currentTab?.content?.loading ?: false,
+            tabCount = state.tabList.size,
             onDismissMenuBottomSheet = { showToolbarMenuBottomSheet = false },
             onActivateFindInPage = { browserMode = BrowserComponentMode.FIND_IN_PAGE },
             onActivateReaderView = {
@@ -729,7 +705,7 @@ fun BrowserComponent(
                 }
             },
             onRequestSearchBar = { /* todo */ },
-            onNavToSettings = { navToSettings(navController) },
+            onNavToSettings = onNavToSettings,
             onNavToTabsTray = { showTabsTray = true },
             onNavToHistory = { navToHistory(navController) })
     }
@@ -740,12 +716,12 @@ fun BrowserComponent(
             dismiss = ::dismissTabsTray,
             mode = tabsTrayMode,
             setMode = { mode -> tabsTrayMode = mode },
-            activeTabId = currentTab?.id,
-            normalTabs = normalTabs,
-            privateTabs = privateTabs,
-            recentlyClosedTabs = closedTabs,
+            activeTabId = state.currentTab?.id,
+            normalTabs =state.normalTabs,
+            privateTabs = state.privateTabs,
+            recentlyClosedTabs = state.closedTabs,
             tabDisplayType = InfernoTabsTrayDisplayType.List,
-            selectedTabsTrayTab = selectedTabsTrayTab,
+            selectedTabsTrayTab = state.selectedTabsTrayTab,
             onBookmarkSelectedTabsClick = {
                 CoroutineScope(IO).launch {
                     Result.runCatching {
@@ -852,7 +828,7 @@ fun BrowserComponent(
             },
             onDeleteAllTabsClick = {
 
-                when (selectedTabsTrayTab) {
+                when (state.selectedTabsTrayTab) {
                     InfernoTabsTraySelectedTab.NormalTabs -> {
                         context.components.useCases.tabsUseCases.removeNormalTabs.invoke()
                         showUndoSnackbarForTab(
@@ -905,13 +881,13 @@ fun BrowserComponent(
                 run outer@{
                     if (!context.settings().hasShownTabSwipeCFR && !context.isTabStripEnabled() && context.settings().isSwipeToolbarToSwitchTabsEnabled) {
 //                        val normalTabs = context.components.core.store.state.normalTabs
-                        val currentTabId = currentTab?.id
+                        val currentTabId = state.currentTab?.id
 
-                        if (normalTabs.size >= 2) {
+                        if (state.normalTabs.size >= 2) {
                             val currentTabPosition =
-                                currentTabId?.let { getTabPositionFromId(normalTabs, it) }
+                                currentTabId?.let { getTabPositionFromId(state.normalTabs, it) }
                                     ?: return@outer
-                            val newTabPosition = getTabPositionFromId(normalTabs, tab.id)
+                            val newTabPosition = getTabPositionFromId(state.normalTabs, tab.id)
 
                             if (abs(currentTabPosition - newTabPosition) == 1) {
                                 context.settings().shouldShowTabSwipeCFR = true
@@ -955,7 +931,7 @@ fun BrowserComponent(
                                 coroutineScope = coroutineScope,
                                 snackbarHostState = snackbarHostState,
                                 setInitiallySelectedTabTray = { selectedTab ->
-                                    setSelectedTabsTrayTab(
+                                    state.setSelectedTabsTrayTab(
                                         selectedTab
                                     )
                                 },
@@ -973,13 +949,12 @@ fun BrowserComponent(
                                     coroutineScope = coroutineScope,
                                     setAlertDialog = { activeAlertDialog = it },
                                     snackbarHostState = snackbarHostState,
-                                    setInitiallySelectedTabTray = {
+                                    setInitiallySelectedTabTray =
                                         { selectedTab: InfernoTabsTraySelectedTab ->
-                                            setSelectedTabsTrayTab(
+                                            state.setSelectedTabsTrayTab(
                                                 selectedTab
                                             )
-                                        }
-                                    },
+                                        },
                                     dismissTabsTray = { dismissTabsTray() })
                                 return
                             } else {
@@ -1020,7 +995,7 @@ fun BrowserComponent(
             onTabLongClick = { tab ->
                 // set mode select and add pressed tab
                 if (tabsTrayMode.isNormal()) {
-                    when (selectedTabsTrayTab) {
+                    when (state.selectedTabsTrayTab) {
                         InfernoTabsTraySelectedTab.NormalTabs -> {
                             tabsTrayMode = InfernoTabsTrayMode.Select(setOf(tab))
                         }
@@ -1154,7 +1129,7 @@ fun BrowserComponent(
 
     InfernoWebPrompter(
         state = webPrompterState,
-        currentTab = currentTab,
+        currentTab = state.currentTab,
     )
 
     /// views
@@ -1167,7 +1142,7 @@ fun BrowserComponent(
 //        promptsFeature,
     )
     // sets parent fragment handler for onActivityResult
-    setOnActivityResultHandler { result: OnActivityResultModel ->
+    state.setOnActivityResultHandler { result: OnActivityResultModel ->
         Logger.info(
             "Fragment onActivityResult received with " + "requestCode: ${result.requestCode}, resultCode: ${result.resultCode}, data: ${result.data}",
         )
@@ -1182,9 +1157,9 @@ fun BrowserComponent(
     }
 
     // currently set to 0 always, todo: only do this if dynamic toolbar enabled
-    fun setEngineDynamicToolbarMaxHeight(h: Int) {
+    fun setEngineDynamicToolbarMaxHeight(h: Int = 0) {
 //        engineView?.setDynamicToolbarMaxHeight(h)
-        engineView?.setDynamicToolbarMaxHeight(0)
+        engineView?.setDynamicToolbarMaxHeight(h)
     }
 
     // on back pressed handlers
@@ -1653,7 +1628,6 @@ fun BrowserComponent(
 //                    _binding = null
 
 
-                    isTablet = false
 //                    leadingAction = null
 //                    forwardAction = null
 //                    backAction = null
@@ -1735,7 +1709,7 @@ fun BrowserComponent(
                         fragmentManager = parentFragmentManager,
                     )
                     context.settings().shouldOpenLinksInApp(customTabSessionId != null)
-                        ?.let { openLinksInExternalApp ->
+                        .let { openLinksInExternalApp ->
                             components.services.appLinksInterceptor.updateLaunchInApp {
                                 openLinksInExternalApp
                             }
@@ -1782,7 +1756,7 @@ fun BrowserComponent(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-//                    .pointerInput(pageType) {
+//                    .pointerInput(state.currentTab) {
 //                        awaitEachGesture {
 //                            Log.d("BrowserComponent", "new gesture: ${this.currentEvent}")
 //                            val down = awaitFirstDown()
@@ -1936,10 +1910,10 @@ fun BrowserComponent(
                     setSwipeView = { sr -> swipeRefresh = sr },
                 )
 
-                if (currentTab == null) {
+                if (state.currentTab == null) {
                     InfernoLoadingComponent()
                 } else {
-                    when (pageType) {
+                    when (state.pageType) {
                         BrowserComponentPageType.HOME_PRIVATE -> {
                             InfernoHomeComponent(isPrivate = true, navController)
                         }
@@ -1982,11 +1956,11 @@ fun BrowserComponent(
                 ) {
                     if (browserMode == BrowserComponentMode.TOOLBAR || browserMode == BrowserComponentMode.TOOLBAR_SEARCH) {
                         if (browserMode == BrowserComponentMode.TOOLBAR) {
-                            InfernoTabBar(tabList, currentTab)
+                            InfernoTabBar(state.tabList, state.currentTab)
                         }
                         InfernoToolbar(
-                            tabSessionState = currentTab,
-                            tabCount = tabList.size,
+                            tabSessionState = state.currentTab,
+                            tabCount = state.tabList.size,
                             onShowMenuBottomSheet = { showToolbarMenuBottomSheet = true },
                             onDismissMenuBottomSheet = { showToolbarMenuBottomSheet = false },
                             onRequestSearchBar = { /* todo: search bar */ },
@@ -1999,10 +1973,10 @@ fun BrowserComponent(
                                     browserMode = BrowserComponentMode.READER_VIEW
                                 }
                             },
-                            onNavToSettings = { navToSettings(navController) },
+                            onNavToSettings = onNavToSettings,
                             onNavToHistory = { navToHistory(navController) },
                             onNavToTabsTray = { showTabsTray = true },
-                            searchEngine = searchEngine,
+                            searchEngine = state.searchEngine,
                             editMode = browserMode == BrowserComponentMode.TOOLBAR_SEARCH,
                             onStartSearch = { browserMode = BrowserComponentMode.TOOLBAR_SEARCH },
                             onStopSearch = { browserMode = BrowserComponentMode.TOOLBAR },
@@ -2013,9 +1987,9 @@ fun BrowserComponent(
                             onDismiss = {
                                 browserMode = BrowserComponentMode.TOOLBAR
                             },
-                            engineSession = currentTab?.engineState?.engineSession,
+                            engineSession = state.currentTab?.engineState?.engineSession,
                             engineView = engineView,
-                            session = currentTab,
+                            session = state.currentTab,
                         )
                     }
                     if (browserMode == BrowserComponentMode.READER_VIEW) {
@@ -2033,11 +2007,11 @@ fun hideToolbar(context: Context) {
     context.getActivity()?.supportActionBar?.hide()
 }
 
-private fun viewportFitChanged(viewportFit: Int, context: Context) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-        context.getActivity()!!.window.attributes.layoutInDisplayCutoutMode = viewportFit
-    }
-}
+//private fun viewportFitChanged(viewportFit: Int, context: Context) {
+//    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+//        context.getActivity()!!.window.attributes.layoutInDisplayCutoutMode = viewportFit
+//    }
+//}
 
 //private fun fullScreenChanged(
 //    enabled: Boolean,
@@ -2058,16 +2032,6 @@ private fun viewportFitChanged(viewportFit: Int, context: Context) {
 //}
 
 /*** navigation ***/
-
-/**
- * navigate to settings fragment
- */
-private fun navToSettings(nav: NavController) {
-    nav.nav(
-        R.id.browserComponentWrapperFragment,
-        BrowserComponentWrapperFragmentDirections.actionGlobalSettingsFragment(),
-    )
-}
 
 private fun navToHistory(nav: NavController) {
     nav.nav(
@@ -2233,35 +2197,35 @@ internal fun showCancelledDownloadWarning(
             ),
         )
     }
-    val dialog = DownloadCancelDialogFragment.newInstance(downloadCount = downloadCount,
-        tabId = tabId,
-        source = source,
-        promptStyling = DownloadCancelDialogFragment.PromptStyling(
-            gravity = Gravity.BOTTOM,
-            shouldWidthMatchParent = true,
-            positiveButtonBackgroundColor = ThemeManager.resolveAttribute(
-                R.attr.accent,
-                context,
-            ),
-            positiveButtonTextColor = ThemeManager.resolveAttribute(
-                R.attr.textOnColorPrimary,
-                context,
-            ),
-            positiveButtonRadius = (context.resources.getDimensionPixelSize(R.dimen.tab_corner_radius)).toFloat(),
-        ),
-
-        onPositiveButtonClicked = { tabId, source ->
-            onCancelDownloadWarningAccepted(
-                tabId = tabId,
-                source = source,
-                context = context,
-                coroutineScope = coroutineScope,
-                setAlertDialog = setAlertDialog,
-                snackbarHostState = snackbarHostState,
-                setInitiallySelectedTabTray = setInitiallySelectedTabTray,
-                dismissTabsTray = dismissTabsTray
-            )
-        })
+//    val dialog = DownloadCancelDialogFragment.newInstance(downloadCount = downloadCount,
+//        tabId = tabId,
+//        source = source,
+//        promptStyling = DownloadCancelDialogFragment.PromptStyling(
+//            gravity = Gravity.BOTTOM,
+//            shouldWidthMatchParent = true,
+//            positiveButtonBackgroundColor = ThemeManager.resolveAttribute(
+//                R.attr.accent,
+//                context,
+//            ),
+//            positiveButtonTextColor = ThemeManager.resolveAttribute(
+//                R.attr.textOnColorPrimary,
+//                context,
+//            ),
+//            positiveButtonRadius = (context.resources.getDimensionPixelSize(R.dimen.tab_corner_radius)).toFloat(),
+//        ),
+//
+//        onPositiveButtonClicked = { tabId, source ->
+//            onCancelDownloadWarningAccepted(
+//                tabId = tabId,
+//                source = source,
+//                context = context,
+//                coroutineScope = coroutineScope,
+//                setAlertDialog = setAlertDialog,
+//                snackbarHostState = snackbarHostState,
+//                setInitiallySelectedTabTray = setInitiallySelectedTabTray,
+//                dismissTabsTray = dismissTabsTray
+//            )
+//        })
 //    dialog.show(parentFragmentManager, DOWNLOAD_CANCEL_DIALOG_FRAGMENT_TAG)
 }
 
@@ -2585,7 +2549,7 @@ private fun showBiometricPrompt(
     // Fallback to prompting for password with the KeyguardManager
     val manager = context.getSystemService<KeyguardManager>()
     if (manager?.isKeyguardSecure == true) {
-        showPinVerification(context, manager!!, startForResult)
+        showPinVerification(context, manager, startForResult)
     } else {
         // Warn that the device has not been secured
         if (context.settings().shouldShowSecurityPinWarning) {
@@ -2788,87 +2752,65 @@ internal fun shouldPullToRefreshBeEnabled(inFullScreen: Boolean, context: Contex
 ////        NavigationBar.browserInitializeTimespan.stop()
 //}
 
-@Suppress("LongMethod")
-@Composable
-internal fun NavigationButtonsCFR(
-    context: Context,
-    navController: NavController,
-    activity: HomeActivity,
-    showDivider: Boolean,
-    browserToolbarInteractor: BrowserToolbarInteractor,
-) {
-    var showCFR by remember { mutableStateOf(false) }
-    val lastTimeNavigationButtonsClicked = remember { mutableLongStateOf(0L) }
-
-    // todo: menu button
-    // We need a second menu button, but we could reuse the existing builder.
-//    val menuButton = MenuButton(context).apply {
-//        menuBuilder = browserToolbarView.menuToolbar.menuBuilder
-//        // We have to set colorFilter manually as the button isn't being managed by a [BrowserToolbarView].
-//        setColorFilter(
-//            getColor(
-//                context,
-//                ThemeManager.resolveAttribute(R.attr.textPrimary, context),
+//@Suppress("LongMethod")
+//@Composable
+//internal fun NavigationButtonsCFR(
+//    context: Context,
+//    navController: NavController,
+//    activity: HomeActivity,
+//    showDivider: Boolean,
+//    browserToolbarInteractor: BrowserToolbarInteractor,
+//) {
+//    var showCFR by remember { mutableStateOf(false) }
+//    val lastTimeNavigationButtonsClicked = remember { mutableLongStateOf(0L) }
+//
+//    // todo: menu button
+//    // We need a second menu button, but we could reuse the existing builder.
+////    val menuButton = MenuButton(context).apply {
+////        menuBuilder = browserToolbarView.menuToolbar.menuBuilder
+////        // We have to set colorFilter manually as the button isn't being managed by a [BrowserToolbarView].
+////        setColorFilter(
+////            getColor(
+////                context,
+////                ThemeManager.resolveAttribute(R.attr.textPrimary, context),
+////            ),
+////        )
+////        recordClickEvent = { }
+////    }
+////    menuButton.setHighlightStatus()
+////    _menuButtonView = menuButton
+//
+//    CFRPopupLayout(
+//        showCFR = showCFR && context.settings().shouldShowNavigationButtonsCFR,
+//        properties = CFRPopupProperties(
+//            popupBodyColors = listOf(
+//                FirefoxTheme.colors.layerGradientEnd.toArgb(),
+//                FirefoxTheme.colors.layerGradientStart.toArgb(),
 //            ),
-//        )
-//        recordClickEvent = { }
-//    }
-//    menuButton.setHighlightStatus()
-//    _menuButtonView = menuButton
-
-    CFRPopupLayout(
-        showCFR = showCFR && context.settings().shouldShowNavigationButtonsCFR,
-        properties = CFRPopupProperties(
-            popupBodyColors = listOf(
-                FirefoxTheme.colors.layerGradientEnd.toArgb(),
-                FirefoxTheme.colors.layerGradientStart.toArgb(),
-            ),
-            dismissButtonColor = FirefoxTheme.colors.iconOnColor.toArgb(),
-            indicatorDirection = CFRPopup.IndicatorDirection.DOWN,
-            popupVerticalOffset = NAVIGATION_CFR_VERTICAL_OFFSET.dp,
-            indicatorArrowStartOffset = NAVIGATION_CFR_ARROW_OFFSET.dp,
-            popupAlignment = CFRPopup.PopupAlignment.BODY_TO_ANCHOR_START_WITH_OFFSET,
-        ),
-        onCFRShown = {
-            context.settings().shouldShowNavigationButtonsCFR = false
-            context.settings().lastCfrShownTimeInMillis = System.currentTimeMillis()
-        },
-        onDismiss = {},
-        text = {
-            FirefoxTheme {
-                Text(
-                    text = stringResource(R.string.navbar_navigation_buttons_cfr_message),
-                    color = FirefoxTheme.colors.textOnColorPrimary,
-                    style = FirefoxTheme.typography.body2,
-                )
-            }
-        },
-    ) {
-        val tabCounterMenu = lazy {
-            // todo: tab counter
-            FenixTabCounterMenu(
-                context = context,
-                onItemTapped = { item ->
-                    browserToolbarInteractor.onTabCounterMenuItemTapped(item)
-                },
-                iconColor = when (activity.browsingModeManager.mode.isPrivate) {
-                    true -> getColor(context, R.color.fx_mobile_private_icon_color_primary)
-                    else -> null
-                },
-            ).also {
-                it.updateMenu(
-                    toolbarPosition = context.settings().toolbarPosition,
-                )
-            }
-        }
-
-        // todo: navbar
-//        BrowserNavBar(
-//            isPrivateMode = activity.browsingModeManager.mode.isPrivate,
-//            showDivider = showDivider,
-//            browserStore = context.components.core.store,
-//            menuButton = menuButton,
-//            newTabMenu = NewTabMenu(
+//            dismissButtonColor = FirefoxTheme.colors.iconOnColor.toArgb(),
+//            indicatorDirection = CFRPopup.IndicatorDirection.DOWN,
+//            popupVerticalOffset = NAVIGATION_CFR_VERTICAL_OFFSET.dp,
+//            indicatorArrowStartOffset = NAVIGATION_CFR_ARROW_OFFSET.dp,
+//            popupAlignment = CFRPopup.PopupAlignment.BODY_TO_ANCHOR_START_WITH_OFFSET,
+//        ),
+//        onCFRShown = {
+//            context.settings().shouldShowNavigationButtonsCFR = false
+//            context.settings().lastCfrShownTimeInMillis = System.currentTimeMillis()
+//        },
+//        onDismiss = {},
+//        text = {
+//            FirefoxTheme {
+//                Text(
+//                    text = stringResource(R.string.navbar_navigation_buttons_cfr_message),
+//                    color = FirefoxTheme.colors.textOnColorPrimary,
+//                    style = FirefoxTheme.typography.body2,
+//                )
+//            }
+//        },
+//    ) {
+//        val tabCounterMenu = lazy {
+//            // todo: tab counter
+//            FenixTabCounterMenu(
 //                context = context,
 //                onItemTapped = { item ->
 //                    browserToolbarInteractor.onTabCounterMenuItemTapped(item)
@@ -2877,68 +2819,90 @@ internal fun NavigationButtonsCFR(
 //                    true -> getColor(context, R.color.fx_mobile_private_icon_color_primary)
 //                    else -> null
 //                },
-//            ),
-//            tabsCounterMenu = tabCounterMenu,
-//            onBackButtonClick = {
-//                if (context.settings().shouldShowNavigationButtonsCFR) {
-//                    val currentTime = System.currentTimeMillis()
-//                    if (currentTime - lastTimeNavigationButtonsClicked.longValue <= NAVIGATION_CFR_MAX_MS_BETWEEN_CLICKS) {
-//                        showCFR = true
-//                    }
-//                    lastTimeNavigationButtonsClicked.longValue = currentTime
-//                }
-//                browserToolbarInteractor.onBrowserToolbarMenuItemTapped(
-//                    ToolbarMenu.Item.Back(viewHistory = false),
+//            ).also {
+//                it.updateMenu(
+//                    toolbarPosition = context.settings().toolbarPosition,
 //                )
-//            },
-//            onBackButtonLongPress = {
-//                browserToolbarInteractor.onBrowserToolbarMenuItemTapped(
-//                    ToolbarMenu.Item.Back(viewHistory = true),
-//                )
-//            },
-//            onForwardButtonClick = {
-//                if (context.settings().shouldShowNavigationButtonsCFR) {
-//                    val currentTime = System.currentTimeMillis()
-//                    if (currentTime - lastTimeNavigationButtonsClicked.longValue <= NAVIGATION_CFR_MAX_MS_BETWEEN_CLICKS) {
-//                        showCFR = true
-//                    }
-//                    lastTimeNavigationButtonsClicked.longValue = currentTime
-//                }
-//                browserToolbarInteractor.onBrowserToolbarMenuItemTapped(
-//                    ToolbarMenu.Item.Forward(viewHistory = false),
-//                )
-//            },
-//            onForwardButtonLongPress = {
-//                browserToolbarInteractor.onBrowserToolbarMenuItemTapped(
-//                    ToolbarMenu.Item.Forward(viewHistory = true),
-//                )
-//            },
-//            onNewTabButtonClick = {
-//                browserToolbarInteractor.onNewTabButtonClicked()
-//            },
-//            onNewTabButtonLongPress = {
-//                browserToolbarInteractor.onNewTabButtonLongClicked()
-//            },
-//            onTabsButtonClick = {
-//                onTabCounterClicked(activity.browsingModeManager.mode, navController, thumbnailsFeature)
-//            },
-//            onTabsButtonLongPress = {},
-//            onMenuButtonClick = {
-//                navController.nav(
-//                    R.id.browserFragment,
-//                    BrowserComponentWrapperFragmentDirections.actionGlobalMenuDialogFragment(
-//                        accesspoint = MenuAccessPoint.Browser,
-//                    ),
-//                )
-//            },
-//            onVisibilityUpdated = {
-//                configureEngineViewWithDynamicToolbarsMaxHeight(
-//                    context, customTabSessionId, findInPageIntegration
-//                )
-//            },
-//        )
-    }
-}
+//            }
+//        }
+//
+//        // todo: navbar
+////        BrowserNavBar(
+////            isPrivateMode = activity.browsingModeManager.mode.isPrivate,
+////            showDivider = showDivider,
+////            browserStore = context.components.core.store,
+////            menuButton = menuButton,
+////            newTabMenu = NewTabMenu(
+////                context = context,
+////                onItemTapped = { item ->
+////                    browserToolbarInteractor.onTabCounterMenuItemTapped(item)
+////                },
+////                iconColor = when (activity.browsingModeManager.mode.isPrivate) {
+////                    true -> getColor(context, R.color.fx_mobile_private_icon_color_primary)
+////                    else -> null
+////                },
+////            ),
+////            tabsCounterMenu = tabCounterMenu,
+////            onBackButtonClick = {
+////                if (context.settings().shouldShowNavigationButtonsCFR) {
+////                    val currentTime = System.currentTimeMillis()
+////                    if (currentTime - lastTimeNavigationButtonsClicked.longValue <= NAVIGATION_CFR_MAX_MS_BETWEEN_CLICKS) {
+////                        showCFR = true
+////                    }
+////                    lastTimeNavigationButtonsClicked.longValue = currentTime
+////                }
+////                browserToolbarInteractor.onBrowserToolbarMenuItemTapped(
+////                    ToolbarMenu.Item.Back(viewHistory = false),
+////                )
+////            },
+////            onBackButtonLongPress = {
+////                browserToolbarInteractor.onBrowserToolbarMenuItemTapped(
+////                    ToolbarMenu.Item.Back(viewHistory = true),
+////                )
+////            },
+////            onForwardButtonClick = {
+////                if (context.settings().shouldShowNavigationButtonsCFR) {
+////                    val currentTime = System.currentTimeMillis()
+////                    if (currentTime - lastTimeNavigationButtonsClicked.longValue <= NAVIGATION_CFR_MAX_MS_BETWEEN_CLICKS) {
+////                        showCFR = true
+////                    }
+////                    lastTimeNavigationButtonsClicked.longValue = currentTime
+////                }
+////                browserToolbarInteractor.onBrowserToolbarMenuItemTapped(
+////                    ToolbarMenu.Item.Forward(viewHistory = false),
+////                )
+////            },
+////            onForwardButtonLongPress = {
+////                browserToolbarInteractor.onBrowserToolbarMenuItemTapped(
+////                    ToolbarMenu.Item.Forward(viewHistory = true),
+////                )
+////            },
+////            onNewTabButtonClick = {
+////                browserToolbarInteractor.onNewTabButtonClicked()
+////            },
+////            onNewTabButtonLongPress = {
+////                browserToolbarInteractor.onNewTabButtonLongClicked()
+////            },
+////            onTabsButtonClick = {
+////                onTabCounterClicked(activity.browsingModeManager.mode, navController, thumbnailsFeature)
+////            },
+////            onTabsButtonLongPress = {},
+////            onMenuButtonClick = {
+////                navController.nav(
+////                    R.id.browserFragment,
+////                    BrowserComponentWrapperFragmentDirections.actionGlobalMenuDialogFragment(
+////                        accesspoint = MenuAccessPoint.Browser,
+////                    ),
+////                )
+////            },
+////            onVisibilityUpdated = {
+////                configureEngineViewWithDynamicToolbarsMaxHeight(
+////                    context, customTabSessionId, findInPageIntegration
+////                )
+////            },
+////        )
+//    }
+//}
 
 private fun onTabCounterClicked(
     browsingMode: BrowsingMode,
@@ -3152,11 +3116,11 @@ private fun listenForMicrosurveyMessage(context: Context, lifecycleOwner: Lifecy
 //    }
 }
 
-private fun shouldShowMicrosurveyPrompt(context: Context) =
-    context.components.settings.shouldShowMicrosurveyPrompt
+//private fun shouldShowMicrosurveyPrompt(context: Context) =
+//    context.components.settings.shouldShowMicrosurveyPrompt
 
-private fun isToolbarDynamic(context: Context) =
-    !context.settings().shouldUseFixedTopToolbar && context.settings().isDynamicToolbarEnabled
+//private fun isToolbarDynamic(context: Context) =
+//    !context.settings().shouldUseFixedTopToolbar && context.settings().isDynamicToolbarEnabled
 
 ///**
 // * Returns a list of context menu items [ContextMenuCandidate] for the context menu
@@ -4293,48 +4257,48 @@ internal fun addNavigationActions(context: Context) {
 //    }
 }
 
-@VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-internal fun addTabletActions(context: Context) {
-    addNavigationActions(context)
-
-    val enableTint = ThemeManager.resolveAttribute(R.attr.textPrimary, context)
-    // todo: refresh action
-//    if (refreshAction == null) {
-//        refreshAction = BrowserToolbar.TwoStateButton(
-//            primaryImage = AppCompatResources.getDrawable(
-//                context,
-//                R.drawable.mozac_ic_arrow_clockwise_24,
-//            )!!,
-//            primaryContentDescription = context.getString(R.string.browser_menu_refresh),
-//            primaryImageTintResource = enableTint,
-//            isInPrimaryState = {
-//                getSafeCurrentTab()?.content?.loading == false
-//            },
-//            secondaryImage = AppCompatResources.getDrawable(
-//                context,
-//                R.drawable.mozac_ic_stop,
-//            )!!,
-//            secondaryContentDescription = context.getString(R.string.browser_menu_stop),
-//            disableInSecondaryState = false,
-//            longClickListener = {
-//                browserToolbarInteractor.onBrowserToolbarMenuItemTapped(
-//                    ToolbarMenu.Item.Reload(bypassCache = true),
-//                )
-//            },
-//            listener = {
-//                if (getCurrentTab()?.content?.loading == true) {
-//                    browserToolbarInteractor.onBrowserToolbarMenuItemTapped(ToolbarMenu.Item.Stop)
-//                } else {
-//                    browserToolbarInteractor.onBrowserToolbarMenuItemTapped(
-//                        ToolbarMenu.Item.Reload(bypassCache = false),
-//                    )
-//                }
-//            },
-//        ).also {
-//            browserToolbarView.view.addNavigationAction(it)
-//        }
-//    }
-}
+//@VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+//internal fun addTabletActions(context: Context) {
+//    addNavigationActions(context)
+//
+//    val enableTint = ThemeManager.resolveAttribute(R.attr.textPrimary, context)
+//    // todo: refresh action
+////    if (refreshAction == null) {
+////        refreshAction = BrowserToolbar.TwoStateButton(
+////            primaryImage = AppCompatResources.getDrawable(
+////                context,
+////                R.drawable.mozac_ic_arrow_clockwise_24,
+////            )!!,
+////            primaryContentDescription = context.getString(R.string.browser_menu_refresh),
+////            primaryImageTintResource = enableTint,
+////            isInPrimaryState = {
+////                getSafeCurrentTab()?.content?.loading == false
+////            },
+////            secondaryImage = AppCompatResources.getDrawable(
+////                context,
+////                R.drawable.mozac_ic_stop,
+////            )!!,
+////            secondaryContentDescription = context.getString(R.string.browser_menu_stop),
+////            disableInSecondaryState = false,
+////            longClickListener = {
+////                browserToolbarInteractor.onBrowserToolbarMenuItemTapped(
+////                    ToolbarMenu.Item.Reload(bypassCache = true),
+////                )
+////            },
+////            listener = {
+////                if (getCurrentTab()?.content?.loading == true) {
+////                    browserToolbarInteractor.onBrowserToolbarMenuItemTapped(ToolbarMenu.Item.Stop)
+////                } else {
+////                    browserToolbarInteractor.onBrowserToolbarMenuItemTapped(
+////                        ToolbarMenu.Item.Reload(bypassCache = false),
+////                    )
+////                }
+////            },
+////        ).also {
+////            browserToolbarView.view.addNavigationAction(it)
+////        }
+////    }
+//}
 
 @VisibleForTesting
 internal fun removeNavigationActions() {
@@ -4350,15 +4314,15 @@ internal fun removeNavigationActions() {
 //    backAction = null
 }
 
-@VisibleForTesting
-internal fun removeTabletActions() {
-    removeNavigationActions()
-
-    // todo: refresh action
-//    refreshAction?.let {
-//        browserToolbarView.view.removeNavigationAction(it)
-//    }
-}
+//@VisibleForTesting
+//internal fun removeTabletActions() {
+//    removeNavigationActions()
+//
+//    // todo: refresh action
+////    refreshAction?.let {
+////        browserToolbarView.view.removeNavigationAction(it)
+////    }
+//}
 
 @SuppressLint("VisibleForTests")
 private fun updateHistoryMetadata(context: Context) {

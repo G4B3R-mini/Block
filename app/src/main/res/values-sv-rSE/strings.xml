@@ -190,7 +190,7 @@
     <!-- Content description for the button which navigates the user to show all of their history. -->
     <string name="past_explorations_show_all_content_description_2">Visa alla tidigare utforskningar</string>
 
-    <!-- Browser Fragment -->
+    <!-- InfernoBrowser Fragment -->
     <!-- Content description (not visible, for screen readers etc.): Navigate backward (browsing history) -->
     <string name="browser_menu_back">Tillbaka</string>
     <!-- Content description (not visible, for screen readers etc.): Navigate forward (browsing history) -->
@@ -199,128 +199,128 @@
     <string name="browser_menu_refresh">Uppdatera</string>
     <!-- Content description (not visible, for screen readers etc.): Stop loading current website -->
     <string name="browser_menu_stop">Stopp</string>
-    <!-- Browser menu button that opens the extensions manager -->
+    <!-- InfernoBrowser menu button that opens the extensions manager -->
     <string name="browser_menu_extensions">Tillägg</string>
-    <!-- Browser menu banner header text for extensions onboarding.
+    <!-- InfernoBrowser menu banner header text for extensions onboarding.
         The first parameter is the name of the app defined in app_name (for example: Fenix). -->
     <string name="browser_menu_extensions_banner_onboarding_header">Gör %s till din egen</string>
-    <!-- Browser menu banner header text for extensions onboarding when all installed extensions have been disabled. -->
+    <!-- InfernoBrowser menu banner header text for extensions onboarding when all installed extensions have been disabled. -->
     <string name="browser_menu_disabled_extensions_banner_onboarding_header">Du har tillägg installerade, men inte aktiverade</string>
-    <!-- Browser menu banner body text for extensions onboarding.
+    <!-- InfernoBrowser menu banner body text for extensions onboarding.
         The first parameter is the name of the app defined in app_name (for example: Fenix). -->
     <string name="browser_menu_extensions_banner_onboarding_body">Tillägg förbättrar din surfning, från att ändra hur %s ser ut och fungerar till att öka sekretess och säkerhet.</string>
-    <!-- Browser menu banner body text for extensions onboarding when all installed extensions have been disabled.
+    <!-- InfernoBrowser menu banner body text for extensions onboarding when all installed extensions have been disabled.
      The first parameter is the name of the button that opens extension manager (for example "Manage extensions"). -->
     <string name="browser_menu_disabled_extensions_banner_onboarding_body">För att använda tillägg, aktivera dem i inställningar eller genom att välja “%s” nedan.</string>
-    <!-- Browser menu banner link text for learning more about extensions -->
+    <!-- InfernoBrowser menu banner link text for learning more about extensions -->
     <string name="browser_menu_extensions_banner_learn_more">Läs mer</string>
-    <!-- Browser menu button that opens the extensions manager -->
+    <!-- InfernoBrowser menu button that opens the extensions manager -->
     <string name="browser_menu_manage_extensions">Hantera tillägg</string>
     <!-- Content description (not visible, for screen readers etc.): Section heading for recommended extensions.-->
     <string name="browser_menu_recommended_section_content_description">Rekommenderade tillägg</string>
     <!-- Content description (not visible, for screen readers etc.): Label for plus icon used to add extension.
       The first parameter is the name of the extension (for example: ClearURLs). -->
     <string name="browser_menu_extension_plus_icon_content_description_2">Lägg till %1$s</string>
-    <!-- Browser menu button that opens AMO in a tab -->
+    <!-- InfernoBrowser menu button that opens AMO in a tab -->
     <string name="browser_menu_discover_more_extensions">Upptäck fler tillägg</string>
-    <!-- Browser menu description that is shown when one or more extensions are disabled due to extension errors -->
+    <!-- InfernoBrowser menu description that is shown when one or more extensions are disabled due to extension errors -->
     <string name="browser_menu_extensions_disabled_description">Tillfälligt inaktiverad</string>
     <!-- The description of the browser menu appears when the user hasn't installed any extensions. -->
     <string name="browser_menu_no_extensions_installed_description">Inga tillägg aktiverade</string>
-    <!-- Browser menu button that opens account settings -->
+    <!-- InfernoBrowser menu button that opens account settings -->
     <string name="browser_menu_account_settings">Kontoinformation</string>
-    <!-- Browser menu button that sends a user to help articles -->
+    <!-- InfernoBrowser menu button that sends a user to help articles -->
     <string name="browser_menu_help">Hjälp</string>
-    <!-- Browser menu button that sends a to a the what's new article -->
+    <!-- InfernoBrowser menu button that sends a to a the what's new article -->
     <string name="browser_menu_whats_new">Vad är nytt</string>
-    <!-- Browser menu button that opens the settings menu -->
+    <!-- InfernoBrowser menu button that opens the settings menu -->
     <string name="browser_menu_settings">Inställningar</string>
-    <!-- Browser menu button that opens a user's library -->
+    <!-- InfernoBrowser menu button that opens a user's library -->
     <string name="browser_menu_library">Bibliotek</string>
-    <!-- Browser menu toggle that requests a desktop site -->
+    <!-- InfernoBrowser menu toggle that requests a desktop site -->
     <string name="browser_menu_desktop_site">Webbplats för datorer</string>
-    <!-- Browser menu button that reopens a private tab as a regular tab -->
+    <!-- InfernoBrowser menu button that reopens a private tab as a regular tab -->
     <string name="browser_menu_open_in_regular_tab">Öppna i vanlig flik</string>
-    <!-- Browser menu toggle that adds a shortcut to the site on the device home screen. -->
+    <!-- InfernoBrowser menu toggle that adds a shortcut to the site on the device home screen. -->
     <string name="browser_menu_add_to_homescreen">Lägg till på startsidan</string>
-    <!-- Browser menu toggle that adds a PWA of the site on the device home screen. -->
+    <!-- InfernoBrowser menu toggle that adds a PWA of the site on the device home screen. -->
     <string name="browser_menu_add_app_to_homescreen">Lägg till app på startskärmen</string>
-    <!-- Browser menu toggle that adds a shortcut to the site on the device home screen. -->
+    <!-- InfernoBrowser menu toggle that adds a shortcut to the site on the device home screen. -->
     <string name="browser_menu_add_to_homescreen_2">Lägg till på startskärmen…</string>
-    <!-- Browser menu toggle that adds a PWA of the site on the device home screen. -->
+    <!-- InfernoBrowser menu toggle that adds a PWA of the site on the device home screen. -->
     <string name="browser_menu_add_app_to_homescreen_2">Lägg till app på startskärmen…</string>
     <!-- Text for notifying users that Xiaomi devices require additional permissions to add to home screen -->
     <string name="browser_menu_add_to_homescreen_xiaomi">Xiaomi-enheter kan behöva extra behörigheter för att lägga till genvägar till hemskärmen. Kontrollera dina inställningar.</string>
     <!-- Content description (not visible, for screen readers etc.) for the Resync tabs button -->
     <string name="resync_button_content_description">Omsynkronisering</string>
-    <!-- Browser menu button that opens the find in page menu -->
+    <!-- InfernoBrowser menu button that opens the find in page menu -->
     <string name="browser_menu_find_in_page">Hitta på sidan</string>
-    <!-- Browser menu button that opens the find in page menu -->
+    <!-- InfernoBrowser menu button that opens the find in page menu -->
     <string name="browser_menu_find_in_page_2">Hitta på sidan…</string>
-    <!-- Browser menu button that opens the translations dialog, which has options to translate the current browser page. -->
+    <!-- InfernoBrowser menu button that opens the translations dialog, which has options to translate the current browser page. -->
     <string name="browser_menu_translations">Översätt sida</string>
-    <!-- Browser menu button that saves the current tab to a collection -->
+    <!-- InfernoBrowser menu button that saves the current tab to a collection -->
     <string name="browser_menu_save_to_collection">Spara i samling…</string>
-    <!-- Browser menu button that saves the current tab to a collection -->
+    <!-- InfernoBrowser menu button that saves the current tab to a collection -->
     <string name="browser_menu_save_to_collection_2">Spara i samling</string>
-    <!-- Browser menu button that open a share menu to share the current site -->
+    <!-- InfernoBrowser menu button that open a share menu to share the current site -->
     <string name="browser_menu_share">Dela</string>
-    <!-- Browser menu button that open a share menu to share the current site -->
+    <!-- InfernoBrowser menu button that open a share menu to share the current site -->
     <string name="browser_menu_share_2">Dela…</string>
-    <!-- Browser menu button shown in custom tabs that opens the current tab in Fenix
+    <!-- InfernoBrowser menu button shown in custom tabs that opens the current tab in Fenix
         The first parameter is the name of the app defined in app_name (for example: Fenix) -->
     <string name="browser_menu_open_in_fenix">Öppna i %1$s</string>
 
-    <!-- Browser menu text shown in custom tabs to indicate this is a Fenix tab
+    <!-- InfernoBrowser menu text shown in custom tabs to indicate this is a Fenix tab
         The first parameter is the name of the app defined in app_name (for example: Fenix) -->
     <string name="browser_menu_powered_by">DRIVS AV %1$s</string>
 
-    <!-- Browser menu text shown in custom tabs to indicate this is a Fenix tab
+    <!-- InfernoBrowser menu text shown in custom tabs to indicate this is a Fenix tab
         The first parameter is the name of the app defined in app_name (for example: Fenix) -->
     <string name="browser_menu_powered_by2">Tillhandahålls av %1$s</string>
 
-    <!-- Browser menu button to put the current page in reader mode -->
+    <!-- InfernoBrowser menu button to put the current page in reader mode -->
     <string name="browser_menu_read">Läsvy</string>
-    <!-- Browser menu button content description to close reader mode and return the user to the regular browser -->
+    <!-- InfernoBrowser menu button content description to close reader mode and return the user to the regular browser -->
     <string name="browser_menu_read_close">Stäng läsarvy</string>
-    <!-- Browser menu button to open the current page in an external app -->
+    <!-- InfernoBrowser menu button to open the current page in an external app -->
     <string name="browser_menu_open_app_link">Öppna i app</string>
 
-    <!-- Browser menu button to show reader view appearance controls e.g. the used font type and size -->
+    <!-- InfernoBrowser menu button to show reader view appearance controls e.g. the used font type and size -->
     <string name="browser_menu_customize_reader_view">Anpassa läsvyn</string>
-    <!-- Browser menu button to show reader view appearance controls e.g. the used font type and size -->
+    <!-- InfernoBrowser menu button to show reader view appearance controls e.g. the used font type and size -->
     <string name="browser_menu_customize_reader_view_2">Anpassa läsvyn</string>
-    <!-- Browser menu label for adding a bookmark -->
+    <!-- InfernoBrowser menu label for adding a bookmark -->
     <string name="browser_menu_add">Lägg till</string>
-    <!-- Browser menu label for editing a bookmark -->
+    <!-- InfernoBrowser menu label for editing a bookmark -->
     <string name="browser_menu_edit">Redigera</string>
 
     <!-- Button shown on the home page that opens the Customize home settings -->
     <string name="browser_menu_customize_home_1">Anpassa startsidan</string>
 
-    <!-- Browser menu label to sign in to sync on the device using Mozilla accounts -->
+    <!-- InfernoBrowser menu label to sign in to sync on the device using Mozilla accounts -->
     <string name="browser_menu_sign_in">Logga in</string>
-    <!-- Browser menu caption label for the "Sign in" browser menu item described in `browser_menu_sign_in` -->
+    <!-- InfernoBrowser menu caption label for the "Sign in" browser menu item described in `browser_menu_sign_in` -->
     <string name="browser_menu_sign_in_caption">Synkronisera lösenord, flikar och mer</string>
 
-    <!-- Browser menu label to sign back in to sync on the device when the user's account needs to be reauthenticated -->
+    <!-- InfernoBrowser menu label to sign back in to sync on the device when the user's account needs to be reauthenticated -->
     <string name="browser_menu_sign_back_in_to_sync">Logga in igen för att synkronisera</string>
-    <!-- Browser menu caption label for the "Sign back in to sync" browser menu item described in `browser_menu_sign_back_in_to_sync` when there is an error in syncing -->
+    <!-- InfernoBrowser menu caption label for the "Sign back in to sync" browser menu item described in `browser_menu_sign_back_in_to_sync` when there is an error in syncing -->
     <string name="browser_menu_syncing_paused_caption">Synkronisering pausad</string>
-    <!-- Browser menu label that creates a private tab -->
+    <!-- InfernoBrowser menu label that creates a private tab -->
     <string name="browser_menu_new_private_tab">Ny privat flik</string>
-    <!-- Browser menu label that navigates to the Password screen -->
+    <!-- InfernoBrowser menu label that navigates to the Password screen -->
     <string name="browser_menu_passwords">Lösenord</string>
 
-    <!-- Browser menu label that navigates to the SUMO page for the Firefox for Android release notes.
+    <!-- InfernoBrowser menu label that navigates to the SUMO page for the Firefox for Android release notes.
          The first parameter is the name of the app defined in app_name (for example: Fenix)-->
     <string name="browser_menu_new_in_firefox">Nytt i %1$s</string>
 
-    <!-- Browser menu label that toggles the request for the desktop site of the currently visited page -->
+    <!-- InfernoBrowser menu label that toggles the request for the desktop site of the currently visited page -->
     <string name="browser_menu_switch_to_desktop_site">Växla till datorwebbplats</string>
-    <!-- Browser menu label that toggles the request for the mobile site of the currently visited page -->
+    <!-- InfernoBrowser menu label that toggles the request for the mobile site of the currently visited page -->
     <string name="browser_menu_switch_to_mobile_site">Växla till mobil webbplats</string>
-    <!-- Browser menu label that navigates to the page tools sub-menu -->
+    <!-- InfernoBrowser menu label that navigates to the page tools sub-menu -->
     <string name="browser_menu_tools">Verktyg</string>
     <!-- Content description (not visible, for screen readers etc.): Back button for all menu redesign sub-menu -->
     <string name="browser_menu_back_button_content_description">Tillbaka till huvudmenyn</string>
@@ -338,53 +338,53 @@
     <string name="browser_tools_menu_handlebar_content_description">Stäng menyblad för verktyg</string>
     <!-- Content description (not visible, for screen readers etc.) for bottom sheet handlebar custom tab menu. -->
     <string name="browser_custom_tab_menu_handlebar_content_description">Stäng menyblad för anpassad flik</string>
-    <!-- Browser menu description that describes the various tools related menu items inside of the tools sub-menu -->
+    <!-- InfernoBrowser menu description that describes the various tools related menu items inside of the tools sub-menu -->
     <string name="browser_menu_tools_description_with_translate" moz:removedIn="134" tools:ignore="UnusedResources">Läsvy, översätt, skriv ut, dela, öppna app</string>
-    <!-- Browser menu description that describes the various tools related menu items inside of the tools sub-menu -->
+    <!-- InfernoBrowser menu description that describes the various tools related menu items inside of the tools sub-menu -->
     <string name="browser_menu_tools_description" moz:removedIn="134" tools:ignore="UnusedResources">Läsvy, skriv ut, dela, öppna app</string>
-    <!-- Browser menu description that describes the various tools related menu items inside of the tools sub-menu
+    <!-- InfernoBrowser menu description that describes the various tools related menu items inside of the tools sub-menu
          The first parameter is the label of the report site issue (for example: Report Site issue) -->
     <string name="browser_menu_tools_description_with_translate_with_report_site" moz:removedIn="135" tools:ignore="UnusedResources">Läsvy, Översätt, %s, Skriv ut, Dela, Öppna app</string>
-    <!-- Browser menu description that describes the various tools related menu items inside of the tools sub-menu when the "Report broken site" feature is available-->
+    <!-- InfernoBrowser menu description that describes the various tools related menu items inside of the tools sub-menu when the "Report broken site" feature is available-->
     <string name="browser_menu_tools_description_with_translate_with_report_site_2">Läsvy, Översätt, Rapportera trasig webbplats, Skriv ut, Dela, Öppna app</string>
-    <!-- Browser menu description that describes the various tools related menu items inside of the tools sub-menu -->
+    <!-- InfernoBrowser menu description that describes the various tools related menu items inside of the tools sub-menu -->
     <string name="browser_menu_tools_description_with_translate_without_report_site">Läsvy, Översätt, Skriv ut, Dela, Öppna app</string>
-    <!-- Browser menu description that describes the various tools related menu items inside of the tools sub-menu
+    <!-- InfernoBrowser menu description that describes the various tools related menu items inside of the tools sub-menu
          The first parameter is the label of the report site issue (for example: Report Site issue) -->
     <string name="browser_menu_tools_description_with_report_site" moz:removedIn="135" tools:ignore="UnusedResources">Läsvy, %s, Skriv ut, Dela, Öppna app</string>
-    <!-- Browser menu description that describes the various tools related menu items inside of the tools sub-menu when the "Report broken site" feature is available-->
+    <!-- InfernoBrowser menu description that describes the various tools related menu items inside of the tools sub-menu when the "Report broken site" feature is available-->
     <string name="browser_menu_tools_description_with_report_site_2">Läsvy, Rapportera trasig webbplats, Skriv ut, Dela, Öppna app</string>
-    <!-- Browser menu description that describes the various tools related menu items inside of the tools sub-menu -->
+    <!-- InfernoBrowser menu description that describes the various tools related menu items inside of the tools sub-menu -->
     <string name="browser_menu_tools_description_without_report_site">Läsvy, Skriv ut, Dela, Öppna app</string>
-    <!-- Browser menu label that navigates to the save sub-menu, which contains various save related menu items such as
+    <!-- InfernoBrowser menu label that navigates to the save sub-menu, which contains various save related menu items such as
          bookmarking a page, saving to collection, shortcut or as a PDF, and adding to home screen -->
     <string name="browser_menu_save">Spara</string>
 
-    <!-- Browser menu description that describes the various save related menu items inside of the save sub-menu -->
+    <!-- InfernoBrowser menu description that describes the various save related menu items inside of the save sub-menu -->
     <string name="browser_menu_save_description">Lägg till bokmärke, genväg, hem, samling, PDF</string>
-    <!-- Browser menu label that bookmarks the currently visited page -->
+    <!-- InfernoBrowser menu label that bookmarks the currently visited page -->
     <string name="browser_menu_bookmark_this_page">Bokmärk denna sida</string>
-    <!-- Browser menu label that navigates to the edit bookmark screen for the current bookmarked page -->
+    <!-- InfernoBrowser menu label that navigates to the edit bookmark screen for the current bookmarked page -->
     <string name="browser_menu_edit_bookmark">Redigera bokmärke</string>
-    <!-- Browser menu label that the saves the currently visited page as a PDF -->
+    <!-- InfernoBrowser menu label that the saves the currently visited page as a PDF -->
     <string name="browser_menu_save_as_pdf">Spara som PDF…</string>
-    <!-- Browser menu label for turning ON reader view of the current visited page -->
+    <!-- InfernoBrowser menu label for turning ON reader view of the current visited page -->
     <string name="browser_menu_turn_on_reader_view">Aktivera Läsvyn</string>
-    <!-- Browser menu label for turning OFF reader view of the current visited page -->
+    <!-- InfernoBrowser menu label for turning OFF reader view of the current visited page -->
     <string name="browser_menu_turn_off_reader_view">Stäng av Läsvyn</string>
-    <!-- Browser menu button that reopens a private tab as a regular tab -->
+    <!-- InfernoBrowser menu button that reopens a private tab as a regular tab -->
     <string name="browser_menu_open_in_normal_tab">Flytta till icke-privat flik</string>dsa
-    <!-- Browser menu label for navigating to the translation feature, which provides language translation options the current visited page -->
+    <!-- InfernoBrowser menu label for navigating to the translation feature, which provides language translation options the current visited page -->
     <string name="browser_menu_translate_page">Översätt sida…</string>
-    <!-- Browser menu label for navigating to the Web Compat Reporter feature, which provides users the ability to send bug reports for broken sites. -->
+    <!-- InfernoBrowser menu label for navigating to the Web Compat Reporter feature, which provides users the ability to send bug reports for broken sites. -->
     <string name="browser_menu_webcompat_reporter">Rapportera trasig webbplats…</string>
-    <!-- Browser menu label that is displayed when the current page has been translated by the translation feature.
+    <!-- InfernoBrowser menu label that is displayed when the current page has been translated by the translation feature.
          The first parameter is the name of the language that page was translated to (e.g. English). -->
     <string name="browser_menu_translated_to">Översatt till %1$s</string>
-    <!-- Browser menu label for the print feature -->
+    <!-- InfernoBrowser menu label for the print feature -->
     <string name="browser_menu_print">Skriv ut…</string>
 
-    <!-- Browser menu label for the Delete browsing data on quit feature.
+    <!-- InfernoBrowser menu label for the Delete browsing data on quit feature.
         The first parameter is the name of the app defined in app_name (for example: Fenix). -->
     <string name="browser_menu_delete_browsing_data_on_quit">Avsluta %1$s</string>
 
@@ -398,7 +398,7 @@
     <!-- Text displayed when there are no extensions to be shown -->
     <string name="extensions_management_no_extensions">Inga tillägg här</string>
 
-    <!-- Browser Toolbar -->
+    <!-- InfernoBrowser Toolbar -->
     <!-- Content description for the Home screen button on the browser toolbar -->
     <string name="browser_toolbar_home">Startsidan</string>
 
@@ -2056,7 +2056,7 @@
     <string name="about_debug_menu_toast_progress">Felsökningsmeny: %1$d klick kvar för att aktivera</string>
     <string name="about_debug_menu_toast_done">Felsökningsmeny aktiverad</string>
 
-    <!-- Browser long press popup menu -->
+    <!-- InfernoBrowser long press popup menu -->
     <!-- Copy the current url -->
     <string name="browser_toolbar_long_press_popup_copy">Kopiera</string>
     <!-- Paste & go the text in the clipboard. '&amp;' is replaced with the ampersand symbol: & -->
@@ -2373,9 +2373,9 @@
     <string name="no_site_exceptions">Inga webbplatsundantag</string>
     <!-- Bookmark deletion confirmation -->
     <string name="bookmark_deletion_confirmation">Är du säker på att du vill ta bort det här bokmärket?</string>
-    <!-- Browser menu button that adds a shortcut to the home fragment -->
+    <!-- InfernoBrowser menu button that adds a shortcut to the home fragment -->
     <string name="browser_menu_add_to_shortcuts">Lägg till i genvägar</string>
-    <!-- Browser menu button that removes a shortcut from the home fragment -->
+    <!-- InfernoBrowser menu button that removes a shortcut from the home fragment -->
     <string name="browser_menu_remove_from_shortcuts">Ta bort från genvägar</string>
     <!-- text shown before the issuer name to indicate who its verified by, parameter is the name of
      the certificate authority that verified the ticket-->

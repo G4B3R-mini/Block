@@ -181,7 +181,7 @@
     <!-- Content description for the button which navigates the user to show all of their history. -->
     <string name="past_explorations_show_all_content_description_2">പഴയകാല ആരായലുകൾ</string>
 
-    <!-- Browser Fragment -->
+    <!-- InfernoBrowser Fragment -->
     <!-- Content description (not visible, for screen readers etc.): Navigate backward (browsing history) -->
     <string name="browser_menu_back">പുറകോട്ട്</string>
     <!-- Content description (not visible, for screen readers etc.): Navigate forward (browsing history) -->
@@ -190,117 +190,117 @@
     <string name="browser_menu_refresh">പുതുക്കുക</string>
     <!-- Content description (not visible, for screen readers etc.): Stop loading current website -->
     <string name="browser_menu_stop">നിർത്തുക</string>
-    <!-- Browser menu button that opens the extensions manager -->
+    <!-- InfernoBrowser menu button that opens the extensions manager -->
     <string name="browser_menu_extensions">വിപുലീകരണങ്ങൾ</string>
-    <!-- Browser menu banner header text for extensions onboarding.
+    <!-- InfernoBrowser menu banner header text for extensions onboarding.
         The first parameter is the name of the app defined in app_name (for example: Fenix). -->
     <string name="browser_menu_extensions_banner_onboarding_header">%s താങ്ങളുടേതാക്കുക</string>
-    <!-- Browser menu banner header text for extensions onboarding when all installed extensions have been disabled. -->
+    <!-- InfernoBrowser menu banner header text for extensions onboarding when all installed extensions have been disabled. -->
     <string name="browser_menu_disabled_extensions_banner_onboarding_header">നിങ്ങൾ വിപുലീകരണങ്ങൾ സ്ഥാപിച്ചിരിക്കുന്നു, പക്ഷേ പ്രവർത്തനക്ഷമമാക്കിയിട്ടില്ല</string>
-    <!-- Browser menu banner body text for extensions onboarding when all installed extensions have been disabled.
+    <!-- InfernoBrowser menu banner body text for extensions onboarding when all installed extensions have been disabled.
      The first parameter is the name of the button that opens extension manager (for example "Manage extensions"). -->
     <string name="browser_menu_disabled_extensions_banner_onboarding_body">വിപുലീകരണങ്ങൾ ഉപയോഗിക്കുന്നതിനു് ക്രമീകരണങ്ങളിൽ അല്ലെങ്കിൽ ചുവടെയുള്ള &quot;%s&quot; തിരഞ്ഞെടുത്തു് അതിനു് പ്രവർത്തനക്ഷമമാക്കുക.</string>
-    <!-- Browser menu banner link text for learning more about extensions -->
+    <!-- InfernoBrowser menu banner link text for learning more about extensions -->
     <string name="browser_menu_extensions_banner_learn_more">കൂടുതലറിയുക</string>
-    <!-- Browser menu button that opens the extensions manager -->
+    <!-- InfernoBrowser menu button that opens the extensions manager -->
     <string name="browser_menu_manage_extensions">വിപുലീകരണങ്ങൾ കൈകാര്യം ചെയ്യുക</string>
     <!-- Content description (not visible, for screen readers etc.): Section heading for recommended extensions.-->
     <string name="browser_menu_recommended_section_content_description">ശുപാർശപെട്ട വിപുലീകരണങ്ങൾ</string>
     <!-- Content description (not visible, for screen readers etc.): Label for plus icon used to add extension.
       The first parameter is the name of the extension (for example: ClearURLs). -->
     <string name="browser_menu_extension_plus_icon_content_description_2">%1$s ചേർക്കുക</string>
-    <!-- Browser menu button that opens AMO in a tab -->
+    <!-- InfernoBrowser menu button that opens AMO in a tab -->
     <string name="browser_menu_discover_more_extensions">ഇനിയിം വിപുലീകരണങ്ങൾ കണ്ടെത്തുക</string>
-    <!-- Browser menu description that is shown when one or more extensions are disabled due to extension errors -->
+    <!-- InfernoBrowser menu description that is shown when one or more extensions are disabled due to extension errors -->
     <string name="browser_menu_extensions_disabled_description">താൽക്കാലികമായി പ്രവർത്തനരഹിതമാക്കി</string>
     <!-- The description of the browser menu appears when the user hasn't installed any extensions. -->
     <string name="browser_menu_no_extensions_installed_description">വിപുലീകരണങ്ങളൊന്നും പ്രവർത്തനക്ഷമമാക്കിയിട്ടില്ല</string>
-    <!-- Browser menu button that opens account settings -->
+    <!-- InfernoBrowser menu button that opens account settings -->
     <string name="browser_menu_account_settings">രൂപരേഖ വിവരങ്ങൾ</string>
-    <!-- Browser menu button that sends a user to help articles -->
+    <!-- InfernoBrowser menu button that sends a user to help articles -->
     <string name="browser_menu_help">സഹായം</string>
-    <!-- Browser menu button that sends a to a the what's new article -->
+    <!-- InfernoBrowser menu button that sends a to a the what's new article -->
     <string name="browser_menu_whats_new">പുതിയതെന്തെല്ലാം</string>
-    <!-- Browser menu button that opens the settings menu -->
+    <!-- InfernoBrowser menu button that opens the settings menu -->
     <string name="browser_menu_settings">ക്രമീകരണങ്ങള്‍</string>
-    <!-- Browser menu button that opens a user's library -->
+    <!-- InfernoBrowser menu button that opens a user's library -->
     <string name="browser_menu_library">ലൈബ്രറി</string>
-    <!-- Browser menu toggle that requests a desktop site -->
+    <!-- InfernoBrowser menu toggle that requests a desktop site -->
     <string name="browser_menu_desktop_site">ഉപരിഫലക സൈറ്റു്</string>
-    <!-- Browser menu button that reopens a private tab as a regular tab -->
+    <!-- InfernoBrowser menu button that reopens a private tab as a regular tab -->
     <string name="browser_menu_open_in_regular_tab">സാധാരണ ടാബിൽ തുറക്കുക</string>
-    <!-- Browser menu toggle that adds a shortcut to the site on the device home screen. -->
+    <!-- InfernoBrowser menu toggle that adds a shortcut to the site on the device home screen. -->
     <string name="browser_menu_add_to_homescreen">ആമുഖതാളിലേക്കു് ചേർക്കുക</string>
-    <!-- Browser menu toggle that adds a PWA of the site on the device home screen. -->
+    <!-- InfernoBrowser menu toggle that adds a PWA of the site on the device home screen. -->
     <string name="browser_menu_add_app_to_homescreen">പ്രയോഗയന്ത്രാംശത്തിനു് ആമുഖതാളിലേക്കു് ചേർക്കുക</string>
-    <!-- Browser menu toggle that adds a shortcut to the site on the device home screen. -->
+    <!-- InfernoBrowser menu toggle that adds a shortcut to the site on the device home screen. -->
     <string name="browser_menu_add_to_homescreen_2">ആമുഖതാളിലേക്കു് ചേർക്കുക…</string>
-    <!-- Browser menu toggle that adds a PWA of the site on the device home screen. -->
+    <!-- InfernoBrowser menu toggle that adds a PWA of the site on the device home screen. -->
     <string name="browser_menu_add_app_to_homescreen_2">പ്രയോഗയന്ത്രാംശത്തിനു് ആമുഖതാളിലേക്കു് ചേർക്കുക…</string>
     <!-- Text for notifying users that Xiaomi devices require additional permissions to add to home screen -->
     <string name="browser_menu_add_to_homescreen_xiaomi">Xiaomi ഉപകരണങ്ങൾക്കു് ആമുഖപ്രതലത്തിലേക്കു് കുറുക്കുവഴികൾ ചേർക്കാൻ കൂടുതൽ അനുമതികൾ വേണ്ടപ്പെടും. ദയവായി താങ്ങളുടെ ക്രമീകരണങ്ങളിൽ നോക്കുക.</string>
     <!-- Content description (not visible, for screen readers etc.) for the Resync tabs button -->
     <string name="resync_button_content_description">വീണ്ടും സമന്വയിപ്പിക്കുക</string>
-    <!-- Browser menu button that opens the find in page menu -->
+    <!-- InfernoBrowser menu button that opens the find in page menu -->
     <string name="browser_menu_find_in_page">താളിൽ കണ്ടെത്തുക</string>
-    <!-- Browser menu button that opens the find in page menu -->
+    <!-- InfernoBrowser menu button that opens the find in page menu -->
     <string name="browser_menu_find_in_page_2">താളിൽ കണ്ടെത്തുക…</string>
-    <!-- Browser menu button that opens the translations dialog, which has options to translate the current browser page. -->
+    <!-- InfernoBrowser menu button that opens the translations dialog, which has options to translate the current browser page. -->
     <string name="browser_menu_translations">താളിനു് തർജ്ജമചെയ്യുക</string>
-    <!-- Browser menu button that saves the current tab to a collection -->
+    <!-- InfernoBrowser menu button that saves the current tab to a collection -->
     <string name="browser_menu_save_to_collection">ശേഖരത്തിലേക്ക് കരുതിവയ്ക്കുക…</string>
-    <!-- Browser menu button that saves the current tab to a collection -->
+    <!-- InfernoBrowser menu button that saves the current tab to a collection -->
     <string name="browser_menu_save_to_collection_2">ശേഖരത്തിലേക്ക് കരുതിവയ്ക്കുക</string>
-    <!-- Browser menu button that open a share menu to share the current site -->
+    <!-- InfernoBrowser menu button that open a share menu to share the current site -->
     <string name="browser_menu_share">പങ്കിടുക</string>
-    <!-- Browser menu button that open a share menu to share the current site -->
+    <!-- InfernoBrowser menu button that open a share menu to share the current site -->
     <string name="browser_menu_share_2">പങ്കിടുക…</string>
-    <!-- Browser menu button shown in custom tabs that opens the current tab in Fenix
+    <!-- InfernoBrowser menu button shown in custom tabs that opens the current tab in Fenix
         The first parameter is the name of the app defined in app_name (for example: Fenix) -->
     <string name="browser_menu_open_in_fenix">%1$s ൽ തുറക്കുക</string>
-    <!-- Browser menu text shown in custom tabs to indicate this is a Fenix tab
+    <!-- InfernoBrowser menu text shown in custom tabs to indicate this is a Fenix tab
         The first parameter is the name of the app defined in app_name (for example: Fenix) -->
     <string name="browser_menu_powered_by">%1$s ലഭ്യമാക്കുന്നത്</string>
-    <!-- Browser menu text shown in custom tabs to indicate this is a Fenix tab
+    <!-- InfernoBrowser menu text shown in custom tabs to indicate this is a Fenix tab
         The first parameter is the name of the app defined in app_name (for example: Fenix) -->
     <string name="browser_menu_powered_by2">%1$s ലഭ്യമാക്കുന്നത്</string>
-    <!-- Browser menu button to put the current page in reader mode -->
+    <!-- InfernoBrowser menu button to put the current page in reader mode -->
     <string name="browser_menu_read">വായനയ്ക്കുള്ള കാഴ്ച</string>
-    <!-- Browser menu button content description to close reader mode and return the user to the regular browser -->
+    <!-- InfernoBrowser menu button content description to close reader mode and return the user to the regular browser -->
     <string name="browser_menu_read_close">വായനയ്ക്കുള്ള കാഴ്ച അടയ്ക്കുക</string>
-    <!-- Browser menu button to open the current page in an external app -->
+    <!-- InfernoBrowser menu button to open the current page in an external app -->
     <string name="browser_menu_open_app_link">ആപ്പിൽ തുറക്കുക</string>
 
-    <!-- Browser menu button to show reader view appearance controls e.g. the used font type and size -->
+    <!-- InfernoBrowser menu button to show reader view appearance controls e.g. the used font type and size -->
     <string name="browser_menu_customize_reader_view">വായന ദൃശ്യരൂപം ഇഷ്ടാനുസൃതമാക്കുക</string>
-    <!-- Browser menu button to show reader view appearance controls e.g. the used font type and size -->
+    <!-- InfernoBrowser menu button to show reader view appearance controls e.g. the used font type and size -->
     <string name="browser_menu_customize_reader_view_2">വായന ദൃശ്യരൂപം ഇഷ്ടാനുസൃതമാക്കുക</string>
-    <!-- Browser menu label for adding a bookmark -->
+    <!-- InfernoBrowser menu label for adding a bookmark -->
     <string name="browser_menu_add">ചേര്‍ക്കു</string>
-    <!-- Browser menu label for editing a bookmark -->
+    <!-- InfernoBrowser menu label for editing a bookmark -->
     <string name="browser_menu_edit">തിരുത്തുക</string>
     <!-- Button shown on the home page that opens the Customize home settings -->
     <string name="browser_menu_customize_home_1">ആമുഖത്താൾ  ഇഷ്ടാനുസൃതമാക്കുക</string>
-    <!-- Browser menu label to sign in to sync on the device using Mozilla accounts -->
+    <!-- InfernoBrowser menu label to sign in to sync on the device using Mozilla accounts -->
     <string name="browser_menu_sign_in">പ്രവേശിക്കൽ ചെയ്യുക</string>
-    <!-- Browser menu caption label for the "Sign in" browser menu item described in `browser_menu_sign_in` -->
+    <!-- InfernoBrowser menu caption label for the "Sign in" browser menu item described in `browser_menu_sign_in` -->
     <string name="browser_menu_sign_in_caption">രഹസ്യവാക്കുകളും ടാബുകളും എന്നിവയും മറ്റും സമന്വയിപ്പിക്കുക</string>
-    <!-- Browser menu label to sign back in to sync on the device when the user's account needs to be reauthenticated -->
+    <!-- InfernoBrowser menu label to sign back in to sync on the device when the user's account needs to be reauthenticated -->
     <string name="browser_menu_sign_back_in_to_sync">സമന്വയിപ്പിക്കാനായി പ്രവേശിക്കൽ ചെയ്യുക</string>
-    <!-- Browser menu caption label for the "Sign back in to sync" browser menu item described in `browser_menu_sign_back_in_to_sync` when there is an error in syncing -->
+    <!-- InfernoBrowser menu caption label for the "Sign back in to sync" browser menu item described in `browser_menu_sign_back_in_to_sync` when there is an error in syncing -->
     <string name="browser_menu_syncing_paused_caption">സമന്വയിപ്പിക്കൽ താൽക്കാലികമായി നിർത്തി</string>
-    <!-- Browser menu label that creates a private tab -->
+    <!-- InfernoBrowser menu label that creates a private tab -->
     <string name="browser_menu_new_private_tab">പുതിയ സ്വകാര്യ ടാബ്</string>
-    <!-- Browser menu label that navigates to the Password screen -->
+    <!-- InfernoBrowser menu label that navigates to the Password screen -->
     <string name="browser_menu_passwords">രഹസ്യവാക്കുകൾ</string>
-    <!-- Browser menu label that navigates to the SUMO page for the Firefox for Android release notes.
+    <!-- InfernoBrowser menu label that navigates to the SUMO page for the Firefox for Android release notes.
          The first parameter is the name of the app defined in app_name (for example: Fenix)-->
     <string name="browser_menu_new_in_firefox">%1$s -ൽ പുതിയതു്</string>
-    <!-- Browser menu label that toggles the request for the desktop site of the currently visited page -->
+    <!-- InfernoBrowser menu label that toggles the request for the desktop site of the currently visited page -->
     <string name="browser_menu_switch_to_desktop_site">ഉപരിഫലക സൈറ്റിലേക്ക് മാറുക</string>
-    <!-- Browser menu label that toggles the request for the mobile site of the currently visited page -->
+    <!-- InfernoBrowser menu label that toggles the request for the mobile site of the currently visited page -->
     <string name="browser_menu_switch_to_mobile_site">മൊപൈൽ സൈറ്റിലേക്കു് മാറുക</string>
-    <!-- Browser menu label that navigates to the page tools sub-menu -->
+    <!-- InfernoBrowser menu label that navigates to the page tools sub-menu -->
     <string name="browser_menu_tools">ഉപകരണങ്ങള്‍</string>
     <!-- Content description (not visible, for screen readers etc.): Back button for all menu redesign sub-menu -->
     <string name="browser_menu_back_button_content_description">പ്രധാന കുറിപ്പടിക്കട്ടയിലേക്കു് മടങ്ങുക</string>
@@ -318,51 +318,51 @@
     <string name="browser_tools_menu_handlebar_content_description">കരുക്കുറിപ്പടി കടലാസു് അടയ്ക്കുക</string>
     <!-- Content description (not visible, for screen readers etc.) for bottom sheet handlebar custom tab menu. -->
     <string name="browser_custom_tab_menu_handlebar_content_description">ഇഷ്ടാനുസൃത ടാബുകുറിപ്പടി താളു് അടയ്ക്കുക</string>
-    <!-- Browser menu description that describes the various tools related menu items inside of the tools sub-menu -->
+    <!-- InfernoBrowser menu description that describes the various tools related menu items inside of the tools sub-menu -->
     <string name="browser_menu_tools_description_with_translate" moz:removedIn="134" tools:ignore="UnusedResources">വായന കാഴ്ച, വിവർത്തനം, അച്ചടിപ്പു്, പങ്കിയൽ, പ്രയോഗം തുറക്കുക </string>
-    <!-- Browser menu description that describes the various tools related menu items inside of the tools sub-menu -->
+    <!-- InfernoBrowser menu description that describes the various tools related menu items inside of the tools sub-menu -->
     <string name="browser_menu_tools_description" moz:removedIn="134" tools:ignore="UnusedResources">വായന കാഴ്ച, അച്ചടിപ്പു്, പങ്കിയൽ, പ്രയോഗം തുറക്കുക </string>
-    <!-- Browser menu description that describes the various tools related menu items inside of the tools sub-menu
+    <!-- InfernoBrowser menu description that describes the various tools related menu items inside of the tools sub-menu
          The first parameter is the label of the report site issue (for example: Report Site issue) -->
     <string name="browser_menu_tools_description_with_translate_with_report_site" moz:removedIn="135" tools:ignore="UnusedResources">വായന കാഴ്ച, വിവർത്തനം, %s, അച്ചടിപ്പു്, പങ്കിയൽ, പ്രയോഗം തുറക്കുക </string>
-    <!-- Browser menu description that describes the various tools related menu items inside of the tools sub-menu when the "Report broken site" feature is available-->
+    <!-- InfernoBrowser menu description that describes the various tools related menu items inside of the tools sub-menu when the "Report broken site" feature is available-->
     <string name="browser_menu_tools_description_with_translate_with_report_site_2">വായന കാഴ്ച, വിവർത്തനം, തകർന്ന വെബ്സ്ഥാനത്തിനെ കുറിച്ചു് വിവരം അറിയിക്കുക,അച്ചടിപ്പു്, പങ്കിയൽ, പ്രയോഗം തുറക്കുക </string>
-    <!-- Browser menu description that describes the various tools related menu items inside of the tools sub-menu -->
+    <!-- InfernoBrowser menu description that describes the various tools related menu items inside of the tools sub-menu -->
     <string name="browser_menu_tools_description_with_translate_without_report_site">വായന കാഴ്ച, വിവർത്തനം, അച്ചടിപ്പു്, പങ്കിയൽ, പ്രയോഗം തുറക്കുക </string>
-    <!-- Browser menu description that describes the various tools related menu items inside of the tools sub-menu
+    <!-- InfernoBrowser menu description that describes the various tools related menu items inside of the tools sub-menu
          The first parameter is the label of the report site issue (for example: Report Site issue) -->
     <string name="browser_menu_tools_description_with_report_site" moz:removedIn="135" tools:ignore="UnusedResources">വായന കാഴ്ച, %s, അച്ചടിപ്പു്, പങ്കിയൽ, പ്രയോഗം തുറക്കുക </string>
-    <!-- Browser menu description that describes the various tools related menu items inside of the tools sub-menu when the "Report broken site" feature is available-->
+    <!-- InfernoBrowser menu description that describes the various tools related menu items inside of the tools sub-menu when the "Report broken site" feature is available-->
     <string name="browser_menu_tools_description_with_report_site_2">വായന കാഴ്ച, തകർന്ന വെബ്സ്ഥാനത്തിനെ കുറിച്ചു് വിവരം അറിയിക്കുക,അച്ചടിപ്പു്, പങ്കിയൽ, പ്രയോഗം തുറക്കുക </string>
-    <!-- Browser menu description that describes the various tools related menu items inside of the tools sub-menu -->
+    <!-- InfernoBrowser menu description that describes the various tools related menu items inside of the tools sub-menu -->
     <string name="browser_menu_tools_description_without_report_site">വായന കാഴ്ച, അച്ചടിപ്പു്, പങ്കിയൽ, പ്രയോഗം തുറക്കുക </string>
-    <!-- Browser menu label that navigates to the save sub-menu, which contains various save related menu items such as
+    <!-- InfernoBrowser menu label that navigates to the save sub-menu, which contains various save related menu items such as
          bookmarking a page, saving to collection, shortcut or as a PDF, and adding to home screen -->
     <string name="browser_menu_save">കരുതിവയ്ക്കുക</string>
-    <!-- Browser menu description that describes the various save related menu items inside of the save sub-menu -->
+    <!-- InfernoBrowser menu description that describes the various save related menu items inside of the save sub-menu -->
     <string name="browser_menu_save_description">അടയാളക്കുറിപ്പുവയ്ക്കുക, കുറുക്കുവഴി, ആമുഖം, ശേഖരം, പീ.ഡീ.എഫ.</string>
-    <!-- Browser menu label that bookmarks the currently visited page -->
+    <!-- InfernoBrowser menu label that bookmarks the currently visited page -->
     <string name="browser_menu_bookmark_this_page">ഈ താള്‍ അടയാളപ്പെടുത്തുക</string>
-    <!-- Browser menu label that navigates to the edit bookmark screen for the current bookmarked page -->
+    <!-- InfernoBrowser menu label that navigates to the edit bookmark screen for the current bookmarked page -->
     <string name="browser_menu_edit_bookmark">അടയാളക്കുറിപ്പ് തിരുത്തുക</string>
-    <!-- Browser menu label that the saves the currently visited page as a PDF -->
+    <!-- InfernoBrowser menu label that the saves the currently visited page as a PDF -->
     <string name="browser_menu_save_as_pdf">PDF ആയി കരുതിവയ്ക്കുക…</string>
-    <!-- Browser menu label for turning ON reader view of the current visited page -->
+    <!-- InfernoBrowser menu label for turning ON reader view of the current visited page -->
     <string name="browser_menu_turn_on_reader_view">വായനാകാഴ്ച തുടങ്ങുക</string>
-    <!-- Browser menu label for turning OFF reader view of the current visited page -->
+    <!-- InfernoBrowser menu label for turning OFF reader view of the current visited page -->
     <string name="browser_menu_turn_off_reader_view">വായനാകാഴ്ച അണക്കുക</string>dsa
-    <!-- Browser menu button that reopens a private tab as a regular tab -->
+    <!-- InfernoBrowser menu button that reopens a private tab as a regular tab -->
     <string name="browser_menu_open_in_normal_tab">സ്വകാര്യമല്ലാത്ത ടാബിലേക്കു് നീക്കുക</string>dsa
-    <!-- Browser menu label for navigating to the translation feature, which provides language translation options the current visited page -->
+    <!-- InfernoBrowser menu label for navigating to the translation feature, which provides language translation options the current visited page -->
     <string name="browser_menu_translate_page">ഈ താളിന്റെ വിവർത്തനം ചെയ്യുക…</string>
-    <!-- Browser menu label for navigating to the Web Compat Reporter feature, which provides users the ability to send bug reports for broken sites. -->
+    <!-- InfernoBrowser menu label for navigating to the Web Compat Reporter feature, which provides users the ability to send bug reports for broken sites. -->
     <string name="browser_menu_webcompat_reporter">പൊട്ടിയ സൈറ്റിന്റെ വിവരം അറിയിക്കുക…</string>
-    <!-- Browser menu label that is displayed when the current page has been translated by the translation feature.
+    <!-- InfernoBrowser menu label that is displayed when the current page has been translated by the translation feature.
          The first parameter is the name of the language that page was translated to (e.g. English). -->
     <string name="browser_menu_translated_to">%1$s -ലേക്കു് വിവർത്തനം ചെയ്തു</string>
-    <!-- Browser menu label for the print feature -->
+    <!-- InfernoBrowser menu label for the print feature -->
     <string name="browser_menu_print">അച്ചടിപ്പിക്കുക…</string>
-    <!-- Browser menu label for the Delete browsing data on quit feature.
+    <!-- InfernoBrowser menu label for the Delete browsing data on quit feature.
         The first parameter is the name of the app defined in app_name (for example: Fenix). -->
     <string name="browser_menu_delete_browsing_data_on_quit">%1$s-ൽ നിന്നു് പുറത്തുകടക്കുക</string>
 
@@ -377,7 +377,7 @@
     <!-- Text displayed when there are no extensions to be shown -->
     <string name="extensions_management_no_extensions">ഇവിടെ വിപുലീകരണങ്ങളൊന്നുമില്ല</string>
 
-    <!-- Browser Toolbar -->
+    <!-- InfernoBrowser Toolbar -->
     <!-- Content description for the Home screen button on the browser toolbar -->
     <string name="browser_toolbar_home">ആമുഖതാൾ</string>
     <!-- Content description (not visible, for screen readers etc.): Erase button: Erase the browsing
@@ -1876,7 +1876,7 @@
     <string name="about_debug_menu_toast_progress">ഡീബഗ് മെനു: പ്രവർത്തനക്ഷമമാക്കാൻ %1$d ക്ലിക്ക് അവശേഷിക്കുന്നു</string>
     <string name="about_debug_menu_toast_done">ഡീബഗ് മെനു പ്രവർത്തനക്ഷമമാക്കി</string>
 
-    <!-- Browser long press popup menu -->
+    <!-- InfernoBrowser long press popup menu -->
     <!-- Copy the current url -->
     <string name="browser_toolbar_long_press_popup_copy">പകര്‍ത്തുക</string>
     <!-- Paste & go the text in the clipboard. '&amp;' is replaced with the ampersand symbol: & -->
@@ -2178,9 +2178,9 @@
     <string name="no_site_exceptions">സൈറ്റ് ഒഴിവാക്കലുകളൊന്നുമില്ല</string>
     <!-- Bookmark deletion confirmation -->
     <string name="bookmark_deletion_confirmation">ഈ അടയാളക്കുറിപ്പ് നീക്കം ചെയ്യണമെന്ന് താങ്കൾക്ക് ഉറപ്പാണോ?</string>
-    <!-- Browser menu button that adds a shortcut to the home fragment -->
+    <!-- InfernoBrowser menu button that adds a shortcut to the home fragment -->
     <string name="browser_menu_add_to_shortcuts">കുറുക്കുവഴികളിലേക്കു് ചേർക്കുക</string>
-    <!-- Browser menu button that removes a shortcut from the home fragment -->
+    <!-- InfernoBrowser menu button that removes a shortcut from the home fragment -->
     <string name="browser_menu_remove_from_shortcuts">കുറുക്കുവഴികളിൽ നിന്നു് മാറ്റുക</string>
     <!-- text shown before the issuer name to indicate who its verified by, parameter is the name of
      the certificate authority that verified the ticket-->

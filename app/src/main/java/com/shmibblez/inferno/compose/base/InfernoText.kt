@@ -37,7 +37,7 @@ interface InfernoTextStyle {
         val Title: InfernoTextStyle
             @Composable get() = object : InfernoTextStyle {
                 override val fontStyle: FontStyle = FontStyle.Normal
-                override val fontWeight: FontWeight = FontWeight.Normal
+                override val fontWeight: FontWeight = FontWeight.Bold
                 override val textAlign: TextAlign = TextAlign.Start
                 override val lineHeight: TextUnit = 24.sp
                 override val letterSpacing: TextUnit = 0.15.sp

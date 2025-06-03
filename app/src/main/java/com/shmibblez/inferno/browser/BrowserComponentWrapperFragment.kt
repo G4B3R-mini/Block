@@ -16,6 +16,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.shmibblez.inferno.R
+import com.shmibblez.inferno.browser.nav.BrowserNavHost
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.lastOpenedNormalTab
 import com.shmibblez.inferno.ext.newTab
@@ -43,88 +44,25 @@ import mozilla.components.lib.state.ext.flowScoped
 import mozilla.components.support.base.feature.ActivityResultHandler
 import mozilla.components.support.base.feature.UserInteractionHandler
 import org.mozilla.geckoview.GeckoSession
+import java.util.function.Function
 
 class OnActivityResultModel(
     val requestCode: Int, val data: Intent?, val resultCode: Int,
-)
+) {
 
-data class BrowserUiState(
-    var tabList: List<TabSessionState> = emptyList(),
-    var normalTabs: List<TabSessionState> = emptyList(),
-    var privateTabs: List<TabSessionState> = emptyList(),
-    var closedTabs: List<TabState> = emptyList(),
-    var currentTab: TabSessionState? = null,
-    var isPrivateSession: Boolean = false,
-    var searchEngine: SearchEngine? = null,
-    var pageType: BrowserComponentPageType = BrowserComponentPageType.ENGINE,
-    var selectedTabsTrayTab: InfernoTabsTraySelectedTab = InfernoTabsTraySelectedTab.NormalTabs,
-)
-
-class BrowserViewModel : ViewModel() {
-    private val _uiState = MutableStateFlow(BrowserUiState())
-    val uiState: StateFlow<BrowserUiState> = _uiState.asStateFlow()
-
-    fun update(
-        tabList: List<TabSessionState>,
-        normalTabs: List<TabSessionState>,
-        privateTabs: List<TabSessionState>,
-        closedTabs: List<TabState>,
-        currentTab: TabSessionState?,
-        isPrivateSession: Boolean,
-        searchEngine: SearchEngine?,
-        pageType: BrowserComponentPageType,
-        selectedTabsTrayTab: InfernoTabsTraySelectedTab,
-    ) {
-        _uiState.update {
-            it.copy(
-                tabList = tabList,
-                normalTabs = normalTabs,
-                privateTabs = privateTabs,
-                closedTabs = closedTabs,
-                currentTab = currentTab,
-                isPrivateSession = isPrivateSession,
-                searchEngine = searchEngine,
-                pageType = pageType,
-                selectedTabsTrayTab = selectedTabsTrayTab,
-            )
-        }
-    }
-
-    fun setSelectedTabsTrayTab(selectedTabsTrayTab: InfernoTabsTraySelectedTab) {
-        _uiState.update {
-            it.copy(
-                selectedTabsTrayTab = selectedTabsTrayTab,
-            )
-        }
-    }
 }
-
-// 3 secs max
-private const val INIT_JOB_MILLIS = 3000L;
 
 class BrowserComponentWrapperFragment : Fragment(), UserInteractionHandler, ActivityResultHandler,
     AccessibilityManager.AccessibilityStateChangeListener {
 
-//    private val args by navArgs<BrowserComponentWrapperFragmentArgs>()
-
-//    @VisibleForTesting
-//    internal lateinit var bundleArgs: Bundle
-
-    private var browserStateObserver: CoroutineScope? = null
-
-    private var initialized = false
-    private var preinitialized = false
-
-    // todo: test, before run also make changes to tab bar (tab layout)
-    private var awaitingNewTab = false
+    // helper for compose migration, might be a lil sloppy
+    var onActivityResultHandler: ((OnActivityResultModel) -> Boolean)? = null
+        private set
+    val setOnActivityResultHandler: ((OnActivityResultModel) -> Boolean) -> Unit =
+        { f -> onActivityResultHandler = f }
 
     private val baseComposeView: ComposeView
         get() = requireView().findViewById(R.id.baseComposeView)
-
-    // helper for compose migration, might be a lil sloppy
-    private var onActivityResultHandler: ((OnActivityResultModel) -> Boolean)? = null
-    private val setOnActivityResultHandler: ((OnActivityResultModel) -> Boolean) -> Unit =
-        { f -> onActivityResultHandler = f }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -146,110 +84,12 @@ class BrowserComponentWrapperFragment : Fragment(), UserInteractionHandler, Acti
             arguments?.getBoolean(FOCUS_ON_ADDRESS_BAR) ?: false || FxNimbus.features.oneClickSearch.value().enabled
         val scrollToCollection = arguments?.getBoolean(SCROLL_TO_COLLECTION) ?: false
 
-        val browserViewModel: BrowserViewModel by viewModels()
-        viewLifecycleOwner.lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                browserViewModel.uiState.collect {
-                    baseComposeView.setContent {
-                        BrowserComponent(
-                            navController = findNavController(),
-                            setOnActivityResultHandler = setOnActivityResultHandler,
-                            setSelectedTabsTrayTab = { browserViewModel.setSelectedTabsTrayTab(it) },
-                            tabList = it.tabList,
-                            normalTabs = it.normalTabs,
-                            privateTabs = it.privateTabs,
-                            closedTabs = it.closedTabs,
-                            currentTab = it.currentTab,
-                            searchEngine = it.searchEngine,
-                            pageType = it.pageType,
-                            selectedTabsTrayTab = it.selectedTabsTrayTab,
-                        )
-                    }
-                }
-            }
-        }
-
-        val store = requireComponents.core.store
-
-        browserStateObserver = store.flowScoped(viewLifecycleOwner) { flow ->
-            flow.map { it }.collect {
-                val currentTab = it.selectedTab
-
-                if (!initialized && !preinitialized) {
-                    // if first run, preinit and delay for a bit
-                    preinitialized = true
-                    delay(INIT_JOB_MILLIS)
-                    initialized = true
-                    return@collect
-                } else if (!initialized && currentTab != null) {
-                    // if not init, delaying, and current tab isn't null, warm up complete, set
-                    // init to true and continue
-                    initialized = true
-                } else if (!initialized) {
-                    // if not init and delaying, return
-                    return@collect
-                } else {
-                    // if init complete continue
-                }
-
-                val tabList: List<TabSessionState>
-
-//                Log.d("BrowserWrapperFrag", "content update")
-                // if no tab selected, false
-                val isPrivateSession: Boolean = currentTab?.content?.private ?: false
-//                val mode = BrowsingMode.fromBoolean(isPrivateSession)
-//                (context.getActivity()!! as HomeActivity).browsingModeManager.mode = mode
-//                context.components.appStore.dispatch(AppAction.ModeChange(mode))
-                val selectedTabsTrayTab: InfernoTabsTraySelectedTab =
-                    if (isPrivateSession) InfernoTabsTraySelectedTab.PrivateTabs else InfernoTabsTraySelectedTab.NormalTabs
-                tabList =
-                    if (isPrivateSession) it.privateTabs else it.normalTabs // it.toTabList().first
-                val normalTabs: List<TabSessionState> = it.normalTabs
-                val privateTabs: List<TabSessionState> = it.privateTabs
-                val closedTabs: List<TabState> = it.closedTabs
-                // if no tab selected, select one
-                if (currentTab == null) {
-                    if (tabList.isNotEmpty()) {
-                        val lastNormalTabId = store.state.lastOpenedNormalTab?.id
-                        if (tabList.any { tab -> tab.id == lastNormalTabId }) {
-                            requireComponents.useCases.tabsUseCases.selectTab(
-                                lastNormalTabId!!
-                            )
-                        } else {
-                            requireComponents.useCases.tabsUseCases.selectTab(tabList.last().id)
-                        }
-                    } else if (!awaitingNewTab) {
-                        // if tab list empty add new tab
-                        requireComponents.newTab(false)
-                        awaitingNewTab = true
-                    }
-                } else {
-                    awaitingNewTab = false
-                }
-                val searchEngine: SearchEngine? = it.search.selectedOrDefaultSearchEngine!!
-                val pageType: BrowserComponentPageType = resolvePageType(currentTab)
-
-                browserViewModel.update(
-                    tabList = tabList,
-                    normalTabs = normalTabs,
-                    privateTabs = privateTabs,
-                    closedTabs = closedTabs,
-                    currentTab = currentTab,
-                    isPrivateSession = isPrivateSession,
-                    searchEngine = searchEngine,
-                    pageType = pageType,
-                    selectedTabsTrayTab = selectedTabsTrayTab,
-                )
-            }
+        baseComposeView.setContent {
+            BrowserNavHost()
         }
 
         requireContext().components.crashReporter.install(requireContext())
         super.onViewCreated(view, savedInstanceState)
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        browserStateObserver?.cancel()
     }
 
     companion object {
@@ -304,30 +144,11 @@ class BrowserComponentWrapperFragment : Fragment(), UserInteractionHandler, Acti
         } else return false
     }
 
-//    override fun onDestroyView() {
-//        super.onDestroyView()
-////        bundleArgs.clear()
-//    }
-
     override fun onBackPressed(): Boolean {
-//        TODO("Not yet implemented")
         return false
     }
 
     override fun onAccessibilityStateChanged(enabled: Boolean) {
-        // todo: make toolbar unscrollable if true
+//        todo: anything to do here?
     }
-}
-
-private fun resolvePageType(tabSessionState: TabSessionState?): BrowserComponentPageType {
-    val url = tabSessionState?.content?.url
-    return if (tabSessionState?.engineState?.crashed == true) BrowserComponentPageType.CRASH
-    else if (url == "inferno:home" || url == "about:blank") // TODO: create const class and set base to inferno:home
-        BrowserComponentPageType.HOME
-    else if (url == "inferno:privatebrowsing" || url == "about:privatebrowsing")  // TODO: add to const class and set base to inferno:private
-        BrowserComponentPageType.HOME_PRIVATE
-    else BrowserComponentPageType.ENGINE
-
-    // TODO: if home, show home page and load engineView in compose tree as hidden,
-    //  if page then show engineView
 }

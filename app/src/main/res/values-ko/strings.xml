@@ -193,7 +193,7 @@
     <!-- Content description for the button which navigates the user to show all of their history. -->
     <string name="past_explorations_show_all_content_description_2">모든 지난 탐색 표시</string>
 
-    <!-- Browser Fragment -->
+    <!-- InfernoBrowser Fragment -->
     <!-- Content description (not visible, for screen readers etc.): Navigate backward (browsing history) -->
     <string name="browser_menu_back">뒤로</string>
     <!-- Content description (not visible, for screen readers etc.): Navigate forward (browsing history) -->
@@ -202,127 +202,127 @@
     <string name="browser_menu_refresh">새로 고침</string>
     <!-- Content description (not visible, for screen readers etc.): Stop loading current website -->
     <string name="browser_menu_stop">중지</string>
-    <!-- Browser menu button that opens the extensions manager -->
+    <!-- InfernoBrowser menu button that opens the extensions manager -->
     <string name="browser_menu_extensions">확장 기능</string>
-    <!-- Browser menu banner header text for extensions onboarding.
+    <!-- InfernoBrowser menu banner header text for extensions onboarding.
         The first parameter is the name of the app defined in app_name (for example: Fenix). -->
     <string name="browser_menu_extensions_banner_onboarding_header">나만의 %s 만들기</string>
-    <!-- Browser menu banner header text for extensions onboarding when all installed extensions have been disabled. -->
+    <!-- InfernoBrowser menu banner header text for extensions onboarding when all installed extensions have been disabled. -->
     <string name="browser_menu_disabled_extensions_banner_onboarding_header">확장 기능이 설치되어 있지만 활성화되지 않음</string>
-    <!-- Browser menu banner body text for extensions onboarding.
+    <!-- InfernoBrowser menu banner body text for extensions onboarding.
         The first parameter is the name of the app defined in app_name (for example: Fenix). -->
     <string name="browser_menu_extensions_banner_onboarding_body">확장 프로그램을 사용하면 %s의 모양과 성능을 변경하고 개인정보 보호 및 안전성을 강화하는 등 탐색 수준을 한 단계 높일 수 있습니다.</string>
-    <!-- Browser menu banner body text for extensions onboarding when all installed extensions have been disabled.
+    <!-- InfernoBrowser menu banner body text for extensions onboarding when all installed extensions have been disabled.
      The first parameter is the name of the button that opens extension manager (for example "Manage extensions"). -->
     <string name="browser_menu_disabled_extensions_banner_onboarding_body">확장 기능을 사용하려면 설정에서 활성화하거나 아래에서 “%s” 버튼을 선택하여 활성화하세요.</string>
-    <!-- Browser menu banner link text for learning more about extensions -->
+    <!-- InfernoBrowser menu banner link text for learning more about extensions -->
     <string name="browser_menu_extensions_banner_learn_more">더 알아보기</string>
-    <!-- Browser menu button that opens the extensions manager -->
+    <!-- InfernoBrowser menu button that opens the extensions manager -->
     <string name="browser_menu_manage_extensions">확장 기능 관리</string>
     <!-- Content description (not visible, for screen readers etc.): Section heading for recommended extensions.-->
     <string name="browser_menu_recommended_section_content_description">추천 확장 기능</string>
     <!-- Content description (not visible, for screen readers etc.): Label for plus icon used to add extension.
       The first parameter is the name of the extension (for example: ClearURLs). -->
     <string name="browser_menu_extension_plus_icon_content_description_2">%1$s 추가</string>
-    <!-- Browser menu button that opens AMO in a tab -->
+    <!-- InfernoBrowser menu button that opens AMO in a tab -->
     <string name="browser_menu_discover_more_extensions">더 많은 확장  기능 살펴보기</string>
-    <!-- Browser menu description that is shown when one or more extensions are disabled due to extension errors -->
+    <!-- InfernoBrowser menu description that is shown when one or more extensions are disabled due to extension errors -->
     <string name="browser_menu_extensions_disabled_description">일시적으로 비활성화됨</string>
     <!-- The description of the browser menu appears when the user hasn't installed any extensions. -->
     <string name="browser_menu_no_extensions_installed_description">사용중인 확장 기능 없음</string>
-    <!-- Browser menu button that opens account settings -->
+    <!-- InfernoBrowser menu button that opens account settings -->
     <string name="browser_menu_account_settings">계정 정보</string>
-    <!-- Browser menu button that sends a user to help articles -->
+    <!-- InfernoBrowser menu button that sends a user to help articles -->
     <string name="browser_menu_help">도움말</string>
-    <!-- Browser menu button that sends a to a the what's new article -->
+    <!-- InfernoBrowser menu button that sends a to a the what's new article -->
     <string name="browser_menu_whats_new">새 기능</string>
-    <!-- Browser menu button that opens the settings menu -->
+    <!-- InfernoBrowser menu button that opens the settings menu -->
     <string name="browser_menu_settings">설정</string>
-    <!-- Browser menu button that opens a user's library -->
+    <!-- InfernoBrowser menu button that opens a user's library -->
     <string name="browser_menu_library">라이브러리</string>
-    <!-- Browser menu toggle that requests a desktop site -->
+    <!-- InfernoBrowser menu toggle that requests a desktop site -->
     <string name="browser_menu_desktop_site">데스크톱 사이트</string>
-    <!-- Browser menu button that reopens a private tab as a regular tab -->
+    <!-- InfernoBrowser menu button that reopens a private tab as a regular tab -->
     <string name="browser_menu_open_in_regular_tab">일반 탭에서 열기</string>
-    <!-- Browser menu toggle that adds a shortcut to the site on the device home screen. -->
+    <!-- InfernoBrowser menu toggle that adds a shortcut to the site on the device home screen. -->
     <string name="browser_menu_add_to_homescreen">홈 화면에 추가</string>
-    <!-- Browser menu toggle that adds a PWA of the site on the device home screen. -->
+    <!-- InfernoBrowser menu toggle that adds a PWA of the site on the device home screen. -->
     <string name="browser_menu_add_app_to_homescreen">홈 화면에 앱 추가</string>
-    <!-- Browser menu toggle that adds a shortcut to the site on the device home screen. -->
+    <!-- InfernoBrowser menu toggle that adds a shortcut to the site on the device home screen. -->
     <string name="browser_menu_add_to_homescreen_2">홈 화면에 추가…</string>
-    <!-- Browser menu toggle that adds a PWA of the site on the device home screen. -->
+    <!-- InfernoBrowser menu toggle that adds a PWA of the site on the device home screen. -->
     <string name="browser_menu_add_app_to_homescreen_2">홈 화면에 앱 추가…</string>
     <!-- Text for notifying users that Xiaomi devices require additional permissions to add to home screen -->
     <string name="browser_menu_add_to_homescreen_xiaomi">Xiaomi 기기는 홈 화면에 바로가기를 추가하기 위해 추가 권한이 필요할 수 있습니다. 설정을 확인하세요.</string>
     <!-- Content description (not visible, for screen readers etc.) for the Resync tabs button -->
     <string name="resync_button_content_description">다시 동기화</string>
-    <!-- Browser menu button that opens the find in page menu -->
+    <!-- InfernoBrowser menu button that opens the find in page menu -->
     <string name="browser_menu_find_in_page">페이지에서 찾기</string>
-    <!-- Browser menu button that opens the find in page menu -->
+    <!-- InfernoBrowser menu button that opens the find in page menu -->
     <string name="browser_menu_find_in_page_2">페이지에서 찾기…</string>
-    <!-- Browser menu button that opens the translations dialog, which has options to translate the current browser page. -->
+    <!-- InfernoBrowser menu button that opens the translations dialog, which has options to translate the current browser page. -->
     <string name="browser_menu_translations">페이지 번역</string>
-    <!-- Browser menu button that saves the current tab to a collection -->
+    <!-- InfernoBrowser menu button that saves the current tab to a collection -->
     <string name="browser_menu_save_to_collection">모음집에 저장…</string>
-    <!-- Browser menu button that saves the current tab to a collection -->
+    <!-- InfernoBrowser menu button that saves the current tab to a collection -->
     <string name="browser_menu_save_to_collection_2">모음집에 저장</string>
-    <!-- Browser menu button that open a share menu to share the current site -->
+    <!-- InfernoBrowser menu button that open a share menu to share the current site -->
     <string name="browser_menu_share">공유</string>
-    <!-- Browser menu button that open a share menu to share the current site -->
+    <!-- InfernoBrowser menu button that open a share menu to share the current site -->
     <string name="browser_menu_share_2">공유…</string>
-    <!-- Browser menu button shown in custom tabs that opens the current tab in Fenix
+    <!-- InfernoBrowser menu button shown in custom tabs that opens the current tab in Fenix
         The first parameter is the name of the app defined in app_name (for example: Fenix) -->
     <string name="browser_menu_open_in_fenix">%1$s에서 열기</string>
-    <!-- Browser menu text shown in custom tabs to indicate this is a Fenix tab
+    <!-- InfernoBrowser menu text shown in custom tabs to indicate this is a Fenix tab
         The first parameter is the name of the app defined in app_name (for example: Fenix) -->
     <string name="browser_menu_powered_by">%1$s 제공</string>
 
-    <!-- Browser menu text shown in custom tabs to indicate this is a Fenix tab
+    <!-- InfernoBrowser menu text shown in custom tabs to indicate this is a Fenix tab
         The first parameter is the name of the app defined in app_name (for example: Fenix) -->
     <string name="browser_menu_powered_by2">%1$s 제공</string>
-    <!-- Browser menu button to put the current page in reader mode -->
+    <!-- InfernoBrowser menu button to put the current page in reader mode -->
     <string name="browser_menu_read">리더뷰</string>
 
-    <!-- Browser menu button content description to close reader mode and return the user to the regular browser -->
+    <!-- InfernoBrowser menu button content description to close reader mode and return the user to the regular browser -->
     <string name="browser_menu_read_close">리더뷰 닫기</string>
-    <!-- Browser menu button to open the current page in an external app -->
+    <!-- InfernoBrowser menu button to open the current page in an external app -->
     <string name="browser_menu_open_app_link">앱에서 열기</string>
 
-    <!-- Browser menu button to show reader view appearance controls e.g. the used font type and size -->
+    <!-- InfernoBrowser menu button to show reader view appearance controls e.g. the used font type and size -->
     <string name="browser_menu_customize_reader_view">리더뷰 사용자 지정</string>
-    <!-- Browser menu button to show reader view appearance controls e.g. the used font type and size -->
+    <!-- InfernoBrowser menu button to show reader view appearance controls e.g. the used font type and size -->
     <string name="browser_menu_customize_reader_view_2">리더뷰 사용자 지정</string>
-    <!-- Browser menu label for adding a bookmark -->
+    <!-- InfernoBrowser menu label for adding a bookmark -->
     <string name="browser_menu_add">추가</string>
-    <!-- Browser menu label for editing a bookmark -->
+    <!-- InfernoBrowser menu label for editing a bookmark -->
     <string name="browser_menu_edit">편집</string>
 
     <!-- Button shown on the home page that opens the Customize home settings -->
     <string name="browser_menu_customize_home_1">홈페이지 개인화</string>
 
-    <!-- Browser menu label to sign in to sync on the device using Mozilla accounts -->
+    <!-- InfernoBrowser menu label to sign in to sync on the device using Mozilla accounts -->
     <string name="browser_menu_sign_in">로그인</string>
-    <!-- Browser menu caption label for the "Sign in" browser menu item described in `browser_menu_sign_in` -->
+    <!-- InfernoBrowser menu caption label for the "Sign in" browser menu item described in `browser_menu_sign_in` -->
     <string name="browser_menu_sign_in_caption">비밀번호, 탭 등을 동기화하세요</string>
 
-    <!-- Browser menu label to sign back in to sync on the device when the user's account needs to be reauthenticated -->
+    <!-- InfernoBrowser menu label to sign back in to sync on the device when the user's account needs to be reauthenticated -->
     <string name="browser_menu_sign_back_in_to_sync">동기화하려면 다시 로그인</string>
-    <!-- Browser menu caption label for the "Sign back in to sync" browser menu item described in `browser_menu_sign_back_in_to_sync` when there is an error in syncing -->
+    <!-- InfernoBrowser menu caption label for the "Sign back in to sync" browser menu item described in `browser_menu_sign_back_in_to_sync` when there is an error in syncing -->
     <string name="browser_menu_syncing_paused_caption">동기화가 일시중지됨</string>
-    <!-- Browser menu label that creates a private tab -->
+    <!-- InfernoBrowser menu label that creates a private tab -->
     <string name="browser_menu_new_private_tab">새 사생활 보호 탭</string>
-    <!-- Browser menu label that navigates to the Password screen -->
+    <!-- InfernoBrowser menu label that navigates to the Password screen -->
     <string name="browser_menu_passwords">비밀번호</string>
 
-    <!-- Browser menu label that navigates to the SUMO page for the Firefox for Android release notes.
+    <!-- InfernoBrowser menu label that navigates to the SUMO page for the Firefox for Android release notes.
          The first parameter is the name of the app defined in app_name (for example: Fenix)-->
     <string name="browser_menu_new_in_firefox">%1$s 새 기능</string>
 
-    <!-- Browser menu label that toggles the request for the desktop site of the currently visited page -->
+    <!-- InfernoBrowser menu label that toggles the request for the desktop site of the currently visited page -->
     <string name="browser_menu_switch_to_desktop_site">데스크톱 사이트로 전환</string>
-    <!-- Browser menu label that toggles the request for the mobile site of the currently visited page -->
+    <!-- InfernoBrowser menu label that toggles the request for the mobile site of the currently visited page -->
     <string name="browser_menu_switch_to_mobile_site">모바일 사이트로 전환</string>
-    <!-- Browser menu label that navigates to the page tools sub-menu -->
+    <!-- InfernoBrowser menu label that navigates to the page tools sub-menu -->
     <string name="browser_menu_tools">도구</string>
     <!-- Content description (not visible, for screen readers etc.): Back button for all menu redesign sub-menu -->
     <string name="browser_menu_back_button_content_description">주 메뉴로 돌아가기</string>
@@ -340,53 +340,53 @@
     <string name="browser_tools_menu_handlebar_content_description">도구 메뉴 시트 닫기</string>
     <!-- Content description (not visible, for screen readers etc.) for bottom sheet handlebar custom tab menu. -->
     <string name="browser_custom_tab_menu_handlebar_content_description">사용자 지정 탭 메뉴 시트 닫기</string>
-    <!-- Browser menu description that describes the various tools related menu items inside of the tools sub-menu -->
+    <!-- InfernoBrowser menu description that describes the various tools related menu items inside of the tools sub-menu -->
     <string name="browser_menu_tools_description_with_translate" moz:removedIn="134" tools:ignore="UnusedResources">리더뷰, 번역, 인쇄, 공유, 앱 열기</string>
-    <!-- Browser menu description that describes the various tools related menu items inside of the tools sub-menu -->
+    <!-- InfernoBrowser menu description that describes the various tools related menu items inside of the tools sub-menu -->
     <string name="browser_menu_tools_description" moz:removedIn="134" tools:ignore="UnusedResources">리더뷰, 인쇄, 공유, 앱 열기</string>
-    <!-- Browser menu description that describes the various tools related menu items inside of the tools sub-menu
+    <!-- InfernoBrowser menu description that describes the various tools related menu items inside of the tools sub-menu
          The first parameter is the label of the report site issue (for example: Report Site issue) -->
     <string name="browser_menu_tools_description_with_translate_with_report_site" moz:removedIn="135" tools:ignore="UnusedResources">리더뷰, 번역, %s, 인쇄, 공유, 앱 열기</string>
-    <!-- Browser menu description that describes the various tools related menu items inside of the tools sub-menu when the "Report broken site" feature is available-->
+    <!-- InfernoBrowser menu description that describes the various tools related menu items inside of the tools sub-menu when the "Report broken site" feature is available-->
     <string name="browser_menu_tools_description_with_translate_with_report_site_2">리더뷰, 번역, 깨진 사이트 신고, 인쇄, 공유, 앱 열기</string>
-    <!-- Browser menu description that describes the various tools related menu items inside of the tools sub-menu -->
+    <!-- InfernoBrowser menu description that describes the various tools related menu items inside of the tools sub-menu -->
     <string name="browser_menu_tools_description_with_translate_without_report_site">리더뷰, 번역, 인쇄, 공유, 앱 열기</string>
-    <!-- Browser menu description that describes the various tools related menu items inside of the tools sub-menu
+    <!-- InfernoBrowser menu description that describes the various tools related menu items inside of the tools sub-menu
          The first parameter is the label of the report site issue (for example: Report Site issue) -->
     <string name="browser_menu_tools_description_with_report_site" moz:removedIn="135" tools:ignore="UnusedResources">리더뷰, %s, 인쇄, 공유, 앱 열기</string>
-    <!-- Browser menu description that describes the various tools related menu items inside of the tools sub-menu when the "Report broken site" feature is available-->
+    <!-- InfernoBrowser menu description that describes the various tools related menu items inside of the tools sub-menu when the "Report broken site" feature is available-->
     <string name="browser_menu_tools_description_with_report_site_2">리더뷰, 깨진 사이트 신고, 인쇄, 공유, 앱 열기</string>
-    <!-- Browser menu description that describes the various tools related menu items inside of the tools sub-menu -->
+    <!-- InfernoBrowser menu description that describes the various tools related menu items inside of the tools sub-menu -->
     <string name="browser_menu_tools_description_without_report_site">리더뷰, 인쇄, 공유, 앱 열기</string>
-    <!-- Browser menu label that navigates to the save sub-menu, which contains various save related menu items such as
+    <!-- InfernoBrowser menu label that navigates to the save sub-menu, which contains various save related menu items such as
          bookmarking a page, saving to collection, shortcut or as a PDF, and adding to home screen -->
     <string name="browser_menu_save">저장</string>
 
-    <!-- Browser menu description that describes the various save related menu items inside of the save sub-menu -->
+    <!-- InfernoBrowser menu description that describes the various save related menu items inside of the save sub-menu -->
     <string name="browser_menu_save_description">북마크, 바로 가기, 홈, 모음집, PDF 추가</string>
-    <!-- Browser menu label that bookmarks the currently visited page -->
+    <!-- InfernoBrowser menu label that bookmarks the currently visited page -->
     <string name="browser_menu_bookmark_this_page">이 페이지 북마크</string>
-    <!-- Browser menu label that navigates to the edit bookmark screen for the current bookmarked page -->
+    <!-- InfernoBrowser menu label that navigates to the edit bookmark screen for the current bookmarked page -->
     <string name="browser_menu_edit_bookmark">북마크 편집</string>
-    <!-- Browser menu label that the saves the currently visited page as a PDF -->
+    <!-- InfernoBrowser menu label that the saves the currently visited page as a PDF -->
     <string name="browser_menu_save_as_pdf">PDF로 저장…</string>
-    <!-- Browser menu label for turning ON reader view of the current visited page -->
+    <!-- InfernoBrowser menu label for turning ON reader view of the current visited page -->
     <string name="browser_menu_turn_on_reader_view">리더뷰 켜기</string>
-    <!-- Browser menu label for turning OFF reader view of the current visited page -->
+    <!-- InfernoBrowser menu label for turning OFF reader view of the current visited page -->
     <string name="browser_menu_turn_off_reader_view">리더뷰 끄기</string>
-    <!-- Browser menu button that reopens a private tab as a regular tab -->
+    <!-- InfernoBrowser menu button that reopens a private tab as a regular tab -->
     <string name="browser_menu_open_in_normal_tab">일반 탭으로 이동</string>dsa
-    <!-- Browser menu label for navigating to the translation feature, which provides language translation options the current visited page -->
+    <!-- InfernoBrowser menu label for navigating to the translation feature, which provides language translation options the current visited page -->
     <string name="browser_menu_translate_page">페이지 번역…</string>
-    <!-- Browser menu label for navigating to the Web Compat Reporter feature, which provides users the ability to send bug reports for broken sites. -->
+    <!-- InfernoBrowser menu label for navigating to the Web Compat Reporter feature, which provides users the ability to send bug reports for broken sites. -->
     <string name="browser_menu_webcompat_reporter">깨진 사이트 신고…</string>
-    <!-- Browser menu label that is displayed when the current page has been translated by the translation feature.
+    <!-- InfernoBrowser menu label that is displayed when the current page has been translated by the translation feature.
          The first parameter is the name of the language that page was translated to (e.g. English). -->
     <string name="browser_menu_translated_to">%1$s 언어로 번역됨</string>
-    <!-- Browser menu label for the print feature -->
+    <!-- InfernoBrowser menu label for the print feature -->
     <string name="browser_menu_print">인쇄…</string>
 
-    <!-- Browser menu label for the Delete browsing data on quit feature.
+    <!-- InfernoBrowser menu label for the Delete browsing data on quit feature.
         The first parameter is the name of the app defined in app_name (for example: Fenix). -->
     <string name="browser_menu_delete_browsing_data_on_quit">%1$s 종료</string>
 
@@ -401,7 +401,7 @@
     <!-- Text displayed when there are no extensions to be shown -->
     <string name="extensions_management_no_extensions">확장 기능 없음</string>
 
-    <!-- Browser Toolbar -->
+    <!-- InfernoBrowser Toolbar -->
     <!-- Content description for the Home screen button on the browser toolbar -->
     <string name="browser_toolbar_home">홈 화면</string>
 
@@ -2094,7 +2094,7 @@
     <string name="about_debug_menu_toast_progress">디버그 메뉴: 활성화하는데 클릭 %1$d회 남음</string>
     <string name="about_debug_menu_toast_done">디버그 메뉴 활성화</string>
 
-    <!-- Browser long press popup menu -->
+    <!-- InfernoBrowser long press popup menu -->
     <!-- Copy the current url -->
     <string name="browser_toolbar_long_press_popup_copy">복사</string>
     <!-- Paste & go the text in the clipboard. '&amp;' is replaced with the ampersand symbol: & -->
@@ -2413,9 +2413,9 @@
     <string name="no_site_exceptions">사이트 예외 없음</string>
     <!-- Bookmark deletion confirmation -->
     <string name="bookmark_deletion_confirmation">이 북마크를 삭제하시겠습니까?</string>
-    <!-- Browser menu button that adds a shortcut to the home fragment -->
+    <!-- InfernoBrowser menu button that adds a shortcut to the home fragment -->
     <string name="browser_menu_add_to_shortcuts">바로 가기에 추가</string>
-    <!-- Browser menu button that removes a shortcut from the home fragment -->
+    <!-- InfernoBrowser menu button that removes a shortcut from the home fragment -->
     <string name="browser_menu_remove_from_shortcuts">바로 가기에서 삭제</string>
     <!-- text shown before the issuer name to indicate who its verified by, parameter is the name of
      the certificate authority that verified the ticket-->

@@ -1321,6 +1321,7 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
 //    }
 
     companion object {
+        const val INITIAL_BROWSER_TASK = "initial_browser_task"
         const val OPEN_TO_BROWSER = "open_to_browser"
         const val OPEN_TO_BROWSER_AND_LOAD = "open_to_browser_and_load"
         const val OPEN_TO_SEARCH = "open_to_search"

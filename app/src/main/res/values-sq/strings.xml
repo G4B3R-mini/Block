@@ -185,7 +185,7 @@
     <!-- Content description for the button which navigates the user to show all of their history. -->
     <string name="past_explorations_show_all_content_description_2">Shfaq krejt eksplorimet e kaluara</string>
 
-    <!-- Browser Fragment -->
+    <!-- InfernoBrowser Fragment -->
     <!-- Content description (not visible, for screen readers etc.): Navigate backward (browsing history) -->
     <string name="browser_menu_back">Mbrapsht</string>
     <!-- Content description (not visible, for screen readers etc.): Navigate forward (browsing history) -->
@@ -194,123 +194,123 @@
     <string name="browser_menu_refresh">Rifreskoje</string>
     <!-- Content description (not visible, for screen readers etc.): Stop loading current website -->
     <string name="browser_menu_stop">Ndale</string>
-    <!-- Browser menu button that opens the extensions manager -->
+    <!-- InfernoBrowser menu button that opens the extensions manager -->
     <string name="browser_menu_extensions">Zgjerime</string>
-    <!-- Browser menu banner header text for extensions onboarding.
+    <!-- InfernoBrowser menu banner header text for extensions onboarding.
         The first parameter is the name of the app defined in app_name (for example: Fenix). -->
     <string name="browser_menu_extensions_banner_onboarding_header">Bëjeni %s si e doni</string>
-    <!-- Browser menu banner header text for extensions onboarding when all installed extensions have been disabled. -->
+    <!-- InfernoBrowser menu banner header text for extensions onboarding when all installed extensions have been disabled. -->
     <string name="browser_menu_disabled_extensions_banner_onboarding_header">Keni zgjerime të instaluara, por jo të aktivizuara</string>
-    <!-- Browser menu banner body text for extensions onboarding.
+    <!-- InfernoBrowser menu banner body text for extensions onboarding.
         The first parameter is the name of the app defined in app_name (for example: Fenix). -->
     <string name="browser_menu_extensions_banner_onboarding_body">Zgjerimet e shpien më tej shfletimin tuaj, nga ndryshimi se si duket dhe funksionon %s e deri përforcimi i privatësisë dhe sigurisë.</string>
-    <!-- Browser menu banner body text for extensions onboarding when all installed extensions have been disabled.
+    <!-- InfernoBrowser menu banner body text for extensions onboarding when all installed extensions have been disabled.
      The first parameter is the name of the button that opens extension manager (for example "Manage extensions"). -->
     <string name="browser_menu_disabled_extensions_banner_onboarding_body">Për t’i përdorur zgjerimet, aktivizojini te rregullimet, ose duke përzgjedhur “%s” më poshtë.</string>
-    <!-- Browser menu banner link text for learning more about extensions -->
+    <!-- InfernoBrowser menu banner link text for learning more about extensions -->
     <string name="browser_menu_extensions_banner_learn_more">Mësoni më tepër</string>
-    <!-- Browser menu button that opens the extensions manager -->
+    <!-- InfernoBrowser menu button that opens the extensions manager -->
     <string name="browser_menu_manage_extensions">Administroni zgjerime</string>
     <!-- Content description (not visible, for screen readers etc.): Section heading for recommended extensions.-->
     <string name="browser_menu_recommended_section_content_description">Zgjerime të rekomanduara</string>
     <!-- Content description (not visible, for screen readers etc.): Label for plus icon used to add extension.
       The first parameter is the name of the extension (for example: ClearURLs). -->
     <string name="browser_menu_extension_plus_icon_content_description_2">Shtoni %1$s</string>
-    <!-- Browser menu button that opens AMO in a tab -->
+    <!-- InfernoBrowser menu button that opens AMO in a tab -->
     <string name="browser_menu_discover_more_extensions">Zbuloni më tepër zgjerime</string>
-    <!-- Browser menu description that is shown when one or more extensions are disabled due to extension errors -->
+    <!-- InfernoBrowser menu description that is shown when one or more extensions are disabled due to extension errors -->
     <string name="browser_menu_extensions_disabled_description">Çaktivizuar përkohësisht</string>
     <!-- The description of the browser menu appears when the user hasn't installed any extensions. -->
     <string name="browser_menu_no_extensions_installed_description">S’ka zgjerime të aktivizuara </string>
-    <!-- Browser menu button that opens account settings -->
+    <!-- InfernoBrowser menu button that opens account settings -->
     <string name="browser_menu_account_settings">Hollësi llogarie</string>
-    <!-- Browser menu button that sends a user to help articles -->
+    <!-- InfernoBrowser menu button that sends a user to help articles -->
     <string name="browser_menu_help">Ndihmë</string>
-    <!-- Browser menu button that sends a to a the what's new article -->
+    <!-- InfernoBrowser menu button that sends a to a the what's new article -->
     <string name="browser_menu_whats_new">Ç’ka të Re</string>
-    <!-- Browser menu button that opens the settings menu -->
+    <!-- InfernoBrowser menu button that opens the settings menu -->
     <string name="browser_menu_settings">Rregullime</string>
-    <!-- Browser menu button that opens a user's library -->
+    <!-- InfernoBrowser menu button that opens a user's library -->
     <string name="browser_menu_library">Bibliotekë</string>
-    <!-- Browser menu toggle that requests a desktop site -->
+    <!-- InfernoBrowser menu toggle that requests a desktop site -->
     <string name="browser_menu_desktop_site">Sajt për desktop</string>
-    <!-- Browser menu button that reopens a private tab as a regular tab -->
+    <!-- InfernoBrowser menu button that reopens a private tab as a regular tab -->
     <string name="browser_menu_open_in_regular_tab">Hape në skedë të rregullt</string>
-    <!-- Browser menu toggle that adds a shortcut to the site on the device home screen. -->
+    <!-- InfernoBrowser menu toggle that adds a shortcut to the site on the device home screen. -->
     <string name="browser_menu_add_to_homescreen">Shtoje te skena e Kreut</string>
-    <!-- Browser menu toggle that adds a PWA of the site on the device home screen. -->
+    <!-- InfernoBrowser menu toggle that adds a PWA of the site on the device home screen. -->
     <string name="browser_menu_add_app_to_homescreen">Shtoje aplikacionin te skena e Kreut</string>
-    <!-- Browser menu toggle that adds a shortcut to the site on the device home screen. -->
+    <!-- InfernoBrowser menu toggle that adds a shortcut to the site on the device home screen. -->
     <string name="browser_menu_add_to_homescreen_2">Shtoje te skena e Kreut…</string>
-    <!-- Browser menu toggle that adds a PWA of the site on the device home screen. -->
+    <!-- InfernoBrowser menu toggle that adds a PWA of the site on the device home screen. -->
     <string name="browser_menu_add_app_to_homescreen_2">Shtoje aplikacionin te skena e Kreut…</string>
     <!-- Text for notifying users that Xiaomi devices require additional permissions to add to home screen -->
     <string name="browser_menu_add_to_homescreen_xiaomi">Pajisjet Xiaomi mund të duan leje ekstra për shtim shkurtoresh te skena e kreut. Ju lutemi, shihni rregullimet tuaja.</string>
     <!-- Content description (not visible, for screen readers etc.) for the Resync tabs button -->
     <string name="resync_button_content_description">Rinjëkohëso</string>
-    <!-- Browser menu button that opens the find in page menu -->
+    <!-- InfernoBrowser menu button that opens the find in page menu -->
     <string name="browser_menu_find_in_page">Gjej në faqe</string>
-    <!-- Browser menu button that opens the find in page menu -->
+    <!-- InfernoBrowser menu button that opens the find in page menu -->
     <string name="browser_menu_find_in_page_2">Gjeni në faqe…</string>
-    <!-- Browser menu button that opens the translations dialog, which has options to translate the current browser page. -->
+    <!-- InfernoBrowser menu button that opens the translations dialog, which has options to translate the current browser page. -->
     <string name="browser_menu_translations">Përktheje faqen</string>
-    <!-- Browser menu button that saves the current tab to a collection -->
+    <!-- InfernoBrowser menu button that saves the current tab to a collection -->
     <string name="browser_menu_save_to_collection">Ruajeni në koleksion…</string>
-    <!-- Browser menu button that saves the current tab to a collection -->
+    <!-- InfernoBrowser menu button that saves the current tab to a collection -->
     <string name="browser_menu_save_to_collection_2">Ruaje në koleksion</string>
-    <!-- Browser menu button that open a share menu to share the current site -->
+    <!-- InfernoBrowser menu button that open a share menu to share the current site -->
     <string name="browser_menu_share">Ndajeni me të tjerët</string>
-    <!-- Browser menu button that open a share menu to share the current site -->
+    <!-- InfernoBrowser menu button that open a share menu to share the current site -->
     <string name="browser_menu_share_2">Ndajeni me të tjerët…</string>
-    <!-- Browser menu button shown in custom tabs that opens the current tab in Fenix
+    <!-- InfernoBrowser menu button shown in custom tabs that opens the current tab in Fenix
         The first parameter is the name of the app defined in app_name (for example: Fenix) -->
     <string name="browser_menu_open_in_fenix">Hape në %1$s</string>
 
-    <!-- Browser menu text shown in custom tabs to indicate this is a Fenix tab
+    <!-- InfernoBrowser menu text shown in custom tabs to indicate this is a Fenix tab
         The first parameter is the name of the app defined in app_name (for example: Fenix) -->
     <string name="browser_menu_powered_by">BAZUAR NË %1$s</string>
-    <!-- Browser menu text shown in custom tabs to indicate this is a Fenix tab
+    <!-- InfernoBrowser menu text shown in custom tabs to indicate this is a Fenix tab
         The first parameter is the name of the app defined in app_name (for example: Fenix) -->
     <string name="browser_menu_powered_by2">Bazuar në %1$s</string>
-    <!-- Browser menu button to put the current page in reader mode -->
+    <!-- InfernoBrowser menu button to put the current page in reader mode -->
     <string name="browser_menu_read">Pamja Lexues</string>
-    <!-- Browser menu button content description to close reader mode and return the user to the regular browser -->
+    <!-- InfernoBrowser menu button content description to close reader mode and return the user to the regular browser -->
     <string name="browser_menu_read_close">Mbylle pamjen lexues</string>
-    <!-- Browser menu button to open the current page in an external app -->
+    <!-- InfernoBrowser menu button to open the current page in an external app -->
     <string name="browser_menu_open_app_link">Hape në Aplikacion</string>
 
-    <!-- Browser menu button to show reader view appearance controls e.g. the used font type and size -->
+    <!-- InfernoBrowser menu button to show reader view appearance controls e.g. the used font type and size -->
     <string name="browser_menu_customize_reader_view">Përshtatni pamjen e Lexuesit</string>
-    <!-- Browser menu button to show reader view appearance controls e.g. the used font type and size -->
+    <!-- InfernoBrowser menu button to show reader view appearance controls e.g. the used font type and size -->
     <string name="browser_menu_customize_reader_view_2">Përshtatni Pamje Lexuesi</string>
-    <!-- Browser menu label for adding a bookmark -->
+    <!-- InfernoBrowser menu label for adding a bookmark -->
     <string name="browser_menu_add">Shtoni</string>
-    <!-- Browser menu label for editing a bookmark -->
+    <!-- InfernoBrowser menu label for editing a bookmark -->
     <string name="browser_menu_edit">Përpunoni</string>
 
     <!-- Button shown on the home page that opens the Customize home settings -->
     <string name="browser_menu_customize_home_1">Përshtatni faqe hyrëse</string>
 
-    <!-- Browser menu label to sign in to sync on the device using Mozilla accounts -->
+    <!-- InfernoBrowser menu label to sign in to sync on the device using Mozilla accounts -->
     <string name="browser_menu_sign_in">Hyni</string>
-    <!-- Browser menu caption label for the "Sign in" browser menu item described in `browser_menu_sign_in` -->
+    <!-- InfernoBrowser menu caption label for the "Sign in" browser menu item described in `browser_menu_sign_in` -->
     <string name="browser_menu_sign_in_caption">Njëkohësoni fjalëkalime, skeda, etj</string>
-    <!-- Browser menu label to sign back in to sync on the device when the user's account needs to be reauthenticated -->
+    <!-- InfernoBrowser menu label to sign back in to sync on the device when the user's account needs to be reauthenticated -->
     <string name="browser_menu_sign_back_in_to_sync">Që të njëkohësohen, ribëni hyrjen</string>
-    <!-- Browser menu caption label for the "Sign back in to sync" browser menu item described in `browser_menu_sign_back_in_to_sync` when there is an error in syncing -->
+    <!-- InfernoBrowser menu caption label for the "Sign back in to sync" browser menu item described in `browser_menu_sign_back_in_to_sync` when there is an error in syncing -->
     <string name="browser_menu_syncing_paused_caption">Njëkohësimi i ndal</string>
-    <!-- Browser menu label that creates a private tab -->
+    <!-- InfernoBrowser menu label that creates a private tab -->
     <string name="browser_menu_new_private_tab">Skedë e re private</string>
-    <!-- Browser menu label that navigates to the Password screen -->
+    <!-- InfernoBrowser menu label that navigates to the Password screen -->
     <string name="browser_menu_passwords">Fjalëkalime</string>
-    <!-- Browser menu label that navigates to the SUMO page for the Firefox for Android release notes.
+    <!-- InfernoBrowser menu label that navigates to the SUMO page for the Firefox for Android release notes.
          The first parameter is the name of the app defined in app_name (for example: Fenix)-->
     <string name="browser_menu_new_in_firefox">E re në %1$s</string>
-    <!-- Browser menu label that toggles the request for the desktop site of the currently visited page -->
+    <!-- InfernoBrowser menu label that toggles the request for the desktop site of the currently visited page -->
     <string name="browser_menu_switch_to_desktop_site">Kaloni te sajti për desktop</string>
-    <!-- Browser menu label that toggles the request for the mobile site of the currently visited page -->
+    <!-- InfernoBrowser menu label that toggles the request for the mobile site of the currently visited page -->
     <string name="browser_menu_switch_to_mobile_site">Kalo te sajti për celular</string>
-    <!-- Browser menu label that navigates to the page tools sub-menu -->
+    <!-- InfernoBrowser menu label that navigates to the page tools sub-menu -->
     <string name="browser_menu_tools">Mjete</string>
     <!-- Content description (not visible, for screen readers etc.): Back button for all menu redesign sub-menu -->
     <string name="browser_menu_back_button_content_description">Mbrapsht te menuja kryesore</string>
@@ -328,53 +328,53 @@
     <string name="browser_tools_menu_handlebar_content_description">Mbyllni fletën e menusë së mjeteve</string>
     <!-- Content description (not visible, for screen readers etc.) for bottom sheet handlebar custom tab menu. -->
     <string name="browser_custom_tab_menu_handlebar_content_description">Mbyllni fletën e menusë së skedave vetjake</string>
-    <!-- Browser menu description that describes the various tools related menu items inside of the tools sub-menu -->
+    <!-- InfernoBrowser menu description that describes the various tools related menu items inside of the tools sub-menu -->
     <string name="browser_menu_tools_description_with_translate" moz:removedIn="134" tools:ignore="UnusedResources">Pamje Lexuesi, Përktheni, Shtypni, Ndani Me të Tjerë, Hapni aplikacion</string>
-    <!-- Browser menu description that describes the various tools related menu items inside of the tools sub-menu -->
+    <!-- InfernoBrowser menu description that describes the various tools related menu items inside of the tools sub-menu -->
     <string name="browser_menu_tools_description" moz:removedIn="134" tools:ignore="UnusedResources">Pamje Lexuesi, Shtypni, Ndani Me të Tjerë, Hapni aplikacion</string>
-    <!-- Browser menu description that describes the various tools related menu items inside of the tools sub-menu
+    <!-- InfernoBrowser menu description that describes the various tools related menu items inside of the tools sub-menu
          The first parameter is the label of the report site issue (for example: Report Site issue) -->
     <string name="browser_menu_tools_description_with_translate_with_report_site" moz:removedIn="135" tools:ignore="UnusedResources">Pamje Lexuesi, Përktheni, %s, Shtypni, Ndani Me të Tjerë, Hapni aplikacion</string>
-    <!-- Browser menu description that describes the various tools related menu items inside of the tools sub-menu when the "Report broken site" feature is available-->
+    <!-- InfernoBrowser menu description that describes the various tools related menu items inside of the tools sub-menu when the "Report broken site" feature is available-->
     <string name="browser_menu_tools_description_with_translate_with_report_site_2">Pamje Lexues, Përktheni, Njoftoni për sajt të dëmtuar, Shtypni, Ndani Me të Tjerë, Hapni aplikacion</string>
-    <!-- Browser menu description that describes the various tools related menu items inside of the tools sub-menu -->
+    <!-- InfernoBrowser menu description that describes the various tools related menu items inside of the tools sub-menu -->
     <string name="browser_menu_tools_description_with_translate_without_report_site">Pamje Lexuesi, Përktheni, Shtypni, Ndani Me të Tjerë, Hapni aplikacion</string>
-    <!-- Browser menu description that describes the various tools related menu items inside of the tools sub-menu
+    <!-- InfernoBrowser menu description that describes the various tools related menu items inside of the tools sub-menu
          The first parameter is the label of the report site issue (for example: Report Site issue) -->
     <string name="browser_menu_tools_description_with_report_site" moz:removedIn="135" tools:ignore="UnusedResources">Pamje Lexuesi, %s, Shtypni, Ndani Me të Tjerë, Hapni aplikacion</string>
-    <!-- Browser menu description that describes the various tools related menu items inside of the tools sub-menu when the "Report broken site" feature is available-->
+    <!-- InfernoBrowser menu description that describes the various tools related menu items inside of the tools sub-menu when the "Report broken site" feature is available-->
     <string name="browser_menu_tools_description_with_report_site_2">Pamje Lexuesi, Njoftoni për sajt të dëmtuar, Shtypni, Ndani Me të Tjerë, Hapni aplikacion</string>
-    <!-- Browser menu description that describes the various tools related menu items inside of the tools sub-menu -->
+    <!-- InfernoBrowser menu description that describes the various tools related menu items inside of the tools sub-menu -->
     <string name="browser_menu_tools_description_without_report_site">Pamje Lexuesi, Shtypni, Ndani Me të Tjerë, Hapni aplikacion</string>
-    <!-- Browser menu label that navigates to the save sub-menu, which contains various save related menu items such as
+    <!-- InfernoBrowser menu label that navigates to the save sub-menu, which contains various save related menu items such as
          bookmarking a page, saving to collection, shortcut or as a PDF, and adding to home screen -->
     <string name="browser_menu_save">Ruaje</string>
 
-    <!-- Browser menu description that describes the various save related menu items inside of the save sub-menu -->
+    <!-- InfernoBrowser menu description that describes the various save related menu items inside of the save sub-menu -->
     <string name="browser_menu_save_description">Shtoni faqerojtës, Shkurtore, Kreu, Koleksion, PDF</string>
-    <!-- Browser menu label that bookmarks the currently visited page -->
+    <!-- InfernoBrowser menu label that bookmarks the currently visited page -->
     <string name="browser_menu_bookmark_this_page">Faqeruajeni këtë faqe</string>
-    <!-- Browser menu label that navigates to the edit bookmark screen for the current bookmarked page -->
+    <!-- InfernoBrowser menu label that navigates to the edit bookmark screen for the current bookmarked page -->
     <string name="browser_menu_edit_bookmark">Përpunoni faqerojtësin</string>
-    <!-- Browser menu label that the saves the currently visited page as a PDF -->
+    <!-- InfernoBrowser menu label that the saves the currently visited page as a PDF -->
     <string name="browser_menu_save_as_pdf">Ruajeni si PDF…</string>
-    <!-- Browser menu label for turning ON reader view of the current visited page -->
+    <!-- InfernoBrowser menu label for turning ON reader view of the current visited page -->
     <string name="browser_menu_turn_on_reader_view">Aktivizo Pamjen Lexues</string>
-    <!-- Browser menu label for turning OFF reader view of the current visited page -->
+    <!-- InfernoBrowser menu label for turning OFF reader view of the current visited page -->
     <string name="browser_menu_turn_off_reader_view">Çaktivizo Pamjen Lexues</string>dsa
-    <!-- Browser menu button that reopens a private tab as a regular tab -->
+    <!-- InfernoBrowser menu button that reopens a private tab as a regular tab -->
     <string name="browser_menu_open_in_normal_tab">Kalo te skedë jo private</string>dsa
-    <!-- Browser menu label for navigating to the translation feature, which provides language translation options the current visited page -->
+    <!-- InfernoBrowser menu label for navigating to the translation feature, which provides language translation options the current visited page -->
     <string name="browser_menu_translate_page">Përktheni faqen…</string>
-    <!-- Browser menu label for navigating to the Web Compat Reporter feature, which provides users the ability to send bug reports for broken sites. -->
+    <!-- InfernoBrowser menu label for navigating to the Web Compat Reporter feature, which provides users the ability to send bug reports for broken sites. -->
     <string name="browser_menu_webcompat_reporter">Njoftoni për sajt të dëmtuar…</string>
-    <!-- Browser menu label that is displayed when the current page has been translated by the translation feature.
+    <!-- InfernoBrowser menu label that is displayed when the current page has been translated by the translation feature.
          The first parameter is the name of the language that page was translated to (e.g. English). -->
     <string name="browser_menu_translated_to">Përkthyer në %1$s</string>
-    <!-- Browser menu label for the print feature -->
+    <!-- InfernoBrowser menu label for the print feature -->
     <string name="browser_menu_print">Shtypeni…</string>
 
-    <!-- Browser menu label for the Delete browsing data on quit feature.
+    <!-- InfernoBrowser menu label for the Delete browsing data on quit feature.
         The first parameter is the name of the app defined in app_name (for example: Fenix). -->
     <string name="browser_menu_delete_browsing_data_on_quit">Mbylle %1$s</string>
 
@@ -388,7 +388,7 @@
     <!-- Text displayed when there are no extensions to be shown -->
     <string name="extensions_management_no_extensions">S’ka zgjerime këtu</string>
 
-    <!-- Browser Toolbar -->
+    <!-- InfernoBrowser Toolbar -->
     <!-- Content description for the Home screen button on the browser toolbar -->
     <string name="browser_toolbar_home">Skena e kreut</string>
 
@@ -2028,7 +2028,7 @@
     <string name="about_debug_menu_toast_progress">Menu diagnostikimesh: ende %1$d klikim(e) për aktivizim</string>
     <string name="about_debug_menu_toast_done">Menuja e diagnostikimeve u aktivizua</string>
 
-    <!-- Browser long press popup menu -->
+    <!-- InfernoBrowser long press popup menu -->
     <!-- Copy the current url -->
     <string name="browser_toolbar_long_press_popup_copy">Kopjoje</string>
     <!-- Paste & go the text in the clipboard. '&amp;' is replaced with the ampersand symbol: & -->
@@ -2344,9 +2344,9 @@
     <string name="no_site_exceptions">Pa përjashtime sajti</string>
     <!-- Bookmark deletion confirmation -->
     <string name="bookmark_deletion_confirmation">Jeni i sigurt se doni të fshihet ky faqerojtës?</string>
-    <!-- Browser menu button that adds a shortcut to the home fragment -->
+    <!-- InfernoBrowser menu button that adds a shortcut to the home fragment -->
     <string name="browser_menu_add_to_shortcuts">Shtoje te shkurtore</string>
-    <!-- Browser menu button that removes a shortcut from the home fragment -->
+    <!-- InfernoBrowser menu button that removes a shortcut from the home fragment -->
     <string name="browser_menu_remove_from_shortcuts">Hiqe prej shkurtoresh</string>
     <!-- text shown before the issuer name to indicate who its verified by, parameter is the name of
      the certificate authority that verified the ticket-->

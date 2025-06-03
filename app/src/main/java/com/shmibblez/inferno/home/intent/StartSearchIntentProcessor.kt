@@ -7,12 +7,9 @@ package com.shmibblez.inferno.home.intent
 import android.content.Intent
 import androidx.navigation.NavController
 import androidx.navigation.navOptions
-//import mozilla.telemetry.glean.private.NoExtras
-//import com.shmibblez.inferno.GleanMetrics.SearchWidget
 import com.shmibblez.inferno.HomeActivity
 import com.shmibblez.inferno.NavGraphDirections
 import com.shmibblez.inferno.R
-//import com.shmibblez.inferno.components.metrics.MetricsUtils
 import com.shmibblez.inferno.ext.nav
 
 /**
@@ -20,7 +17,6 @@ import com.shmibblez.inferno.ext.nav
  * Tapping the private browsing mode launcher icon should also open to the search fragment.
  */
 class StartSearchIntentProcessor : HomeIntentProcessor {
-
     override fun process(intent: Intent, navController: NavController, out: Intent): Boolean {
         val event = intent.extras?.getString(HomeActivity.OPEN_TO_SEARCH)
         return if (event != null) {

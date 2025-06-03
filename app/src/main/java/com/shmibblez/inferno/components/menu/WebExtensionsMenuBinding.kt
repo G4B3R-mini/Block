@@ -41,7 +41,7 @@ class WebExtensionsMenuBinding(
 ) : AbstractBinding<BrowserState>(browserStore) {
 
     override suspend fun onState(flow: Flow<BrowserState>) {
-        // Browser level flows
+        // InfernoBrowser level flows
         val browserFlow = flow.mapNotNull { state -> state }
             .distinctUntilChangedBy {
                 it.extensions

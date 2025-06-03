@@ -6,20 +6,19 @@ package com.shmibblez.inferno.components
 
 import android.content.Intent
 import mozilla.components.feature.intent.processing.IntentProcessor
-import com.shmibblez.inferno.HomeActivity
-import com.shmibblez.inferno.customtabs.ExternalAppBrowserActivity
 
 enum class IntentProcessorType {
     EXTERNAL_APP, NEW_TAB, EXTERNAL_DEEPLINK, OTHER;
 
-    /**
-     * The destination activity based on this intent
-     */
-    val activityClassName: String
-        get() = when (this) {
-            EXTERNAL_APP -> ExternalAppBrowserActivity::class.java.name
-            NEW_TAB, EXTERNAL_DEEPLINK, OTHER -> HomeActivity::class.java.name
-        }
+//    /**
+//     * The destination activity based on this intent
+//     */
+//    val activityClassName: String
+//        get() = HomeActivity::class.java.name
+//        get() = when (this) {
+//            EXTERNAL_APP -> ExternalAppBrowserActivity::class.java.name
+//            NEW_TAB, EXTERNAL_DEEPLINK, OTHER -> HomeActivity::class.java.name
+//        }
 
     /**
      * Should this intent automatically navigate to the browser?
@@ -31,17 +30,14 @@ enum class IntentProcessorType {
     }
 }
 
-/**
- * Classifies the [IntentProcessorType] based on the [IntentProcessor] that handled the [Intent].
- */
-fun IntentProcessors.getType(processor: IntentProcessor?) = when {
-    externalAppIntentProcessors.contains(processor) ||
-        customTabIntentProcessor == processor ||
-        privateCustomTabIntentProcessor == processor -> IntentProcessorType.EXTERNAL_APP
-    intentProcessor == processor ||
-        privateIntentProcessor == processor ||
-        fennecPageShortcutIntentProcessor == processor ||
-        webNotificationsIntentProcessor == processor -> IntentProcessorType.NEW_TAB
-    externalDeepLinkIntentProcessor == processor -> IntentProcessorType.EXTERNAL_DEEPLINK
-    else -> IntentProcessorType.OTHER
-}
+///**
+// * Classifies the [IntentProcessorType] based on the [IntentProcessor] that handled the [Intent].
+// */
+//fun IntentProcessors.getType(processor: IntentProcessor?) = when {
+//    externalAppIntentProcessors.contains(processor) || customTabIntentProcessor == processor || privateCustomTabIntentProcessor == processor -> IntentProcessorType.EXTERNAL_APP
+//
+//    intentProcessor == processor || privateIntentProcessor == processor || fennecPageShortcutIntentProcessor == processor || webNotificationsIntentProcessor == processor -> IntentProcessorType.NEW_TAB
+//
+//    externalDeepLinkIntentProcessor == processor -> IntentProcessorType.EXTERNAL_DEEPLINK
+//    else -> IntentProcessorType.OTHER
+//}

@@ -15,7 +15,7 @@ import mozilla.components.lib.state.State
  *
  * For example, this can be useful for debugging:
  * ```
- * val selectedTabChangedMiddleware: Middleware<BrowserState, BrowserAction> = ChangeDetectionMiddleware(
+ * val selectedTabChangedMiddleware: Middleware<BrowserState, InitialBrowserTask> = ChangeDetectionMiddleware(
  *     val selector = { it.selectedTabId }
  *     val onChange = { actionThatCausedResult, preResult, postResult ->
  *         logger.debug("$actionThatCausedResult changed selectedTabId from $preResult to $postResult")

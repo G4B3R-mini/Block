@@ -1119,7 +1119,7 @@ class Settings(private val appContext: Context) : PreferencesHolder {
         }
     var blockTrackingContentInCustomTrackingProtectionInNormalTabs: Boolean
         get() = getPref(default = true) {
-            (it?.customTrackingProtection?.blockTrackingContent == true) && it?.customTrackingProtection?.blockTrackingContentSelection.let { pref ->
+            (it?.customTrackingProtection?.blockTrackingContent == true) && it.customTrackingProtection.blockTrackingContentSelection.let { pref ->
                 pref == InfernoSettings.CustomTrackingProtection.TrackingContentSelection.BLOCK_TRACKING_NORMAL_ONLY || pref == InfernoSettings.CustomTrackingProtection.TrackingContentSelection.BLOCK_TRACKING_NORMAL_AND_PRIVATE
             }
         }
@@ -1162,7 +1162,7 @@ class Settings(private val appContext: Context) : PreferencesHolder {
         }
     var blockTrackingContentInCustomTrackingProtectionInPrivateTabs: Boolean
         get() = getPref(default = true) {
-            (it?.customTrackingProtection?.blockTrackingContent == true) && it?.customTrackingProtection?.blockTrackingContentSelection.let { pref ->
+            (it?.customTrackingProtection?.blockTrackingContent == true) && it.customTrackingProtection.blockTrackingContentSelection.let { pref ->
                 pref == InfernoSettings.CustomTrackingProtection.TrackingContentSelection.BLOCK_TRACKING_PRIVATE_ONLY || pref == InfernoSettings.CustomTrackingProtection.TrackingContentSelection.BLOCK_TRACKING_NORMAL_AND_PRIVATE
             }
         }
@@ -1236,7 +1236,7 @@ class Settings(private val appContext: Context) : PreferencesHolder {
         }
     var blockSuspectedFingerprintersInCustomTrackingProtectionInNormalTabs: Boolean
         get() = getPref(default = true) {
-            (it?.customTrackingProtection?.blockSuspectedFingerprinters == true) && it?.customTrackingProtection?.blockSuspectedFingerprintersSelection.let { pref ->
+            (it?.customTrackingProtection?.blockSuspectedFingerprinters == true) && it.customTrackingProtection.blockSuspectedFingerprintersSelection.let { pref ->
                 pref == InfernoSettings.CustomTrackingProtection.SuspectedFingerprintersSelection.BLOCK_SUSPECTED_FINGERPRINTERS_NORMAL_ONLY || pref == InfernoSettings.CustomTrackingProtection.SuspectedFingerprintersSelection.BLOCK_SUSPECTED_FINGERPRINTERS_NORMAL_AND_PRIVATE
             }
         }
@@ -1282,7 +1282,7 @@ class Settings(private val appContext: Context) : PreferencesHolder {
         }
     var blockSuspectedFingerprintersInCustomTrackingProtectionInPrivateTabs: Boolean
         get() = getPref(default = true) {
-            (it?.customTrackingProtection?.blockSuspectedFingerprinters == true) && it?.customTrackingProtection?.blockSuspectedFingerprintersSelection.let { pref ->
+            (it?.customTrackingProtection?.blockSuspectedFingerprinters == true) && it.customTrackingProtection.blockSuspectedFingerprintersSelection.let { pref ->
                 pref == InfernoSettings.CustomTrackingProtection.SuspectedFingerprintersSelection.BLOCK_SUSPECTED_FINGERPRINTERS_PRIVATE_ONLY || pref == InfernoSettings.CustomTrackingProtection.SuspectedFingerprintersSelection.BLOCK_SUSPECTED_FINGERPRINTERS_NORMAL_AND_PRIVATE
             }
         }

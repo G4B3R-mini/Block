@@ -187,7 +187,7 @@
     <!-- Content description for the button which navigates the user to show all of their history. -->
     <string name="past_explorations_show_all_content_description_2">הצגת כל מחקרי העבר</string>
 
-    <!-- Browser Fragment -->
+    <!-- InfernoBrowser Fragment -->
     <!-- Content description (not visible, for screen readers etc.): Navigate backward (browsing history) -->
     <string name="browser_menu_back">חזרה</string>
     <!-- Content description (not visible, for screen readers etc.): Navigate forward (browsing history) -->
@@ -196,125 +196,125 @@
     <string name="browser_menu_refresh">רענון</string>
     <!-- Content description (not visible, for screen readers etc.): Stop loading current website -->
     <string name="browser_menu_stop">עצירה</string>
-    <!-- Browser menu button that opens the extensions manager -->
+    <!-- InfernoBrowser menu button that opens the extensions manager -->
     <string name="browser_menu_extensions">הרחבות</string>
-    <!-- Browser menu banner header text for extensions onboarding.
+    <!-- InfernoBrowser menu banner header text for extensions onboarding.
         The first parameter is the name of the app defined in app_name (for example: Fenix). -->
     <string name="browser_menu_extensions_banner_onboarding_header">להפוך את %s לשלך</string>
-    <!-- Browser menu banner header text for extensions onboarding when all installed extensions have been disabled. -->
+    <!-- InfernoBrowser menu banner header text for extensions onboarding when all installed extensions have been disabled. -->
     <string name="browser_menu_disabled_extensions_banner_onboarding_header">יש לך הרחבות מותקנות, אך לא מופעלות</string>
-    <!-- Browser menu banner body text for extensions onboarding.
+    <!-- InfernoBrowser menu banner body text for extensions onboarding.
         The first parameter is the name of the app defined in app_name (for example: Fenix). -->
     <string name="browser_menu_extensions_banner_onboarding_body">הרחבות מעלות את חווית הגלישה שלך, משינוי האופן שבו %s נראה ומתנהג ועד להגברת הפרטיות והבטיחות.</string>
-    <!-- Browser menu banner body text for extensions onboarding when all installed extensions have been disabled.
+    <!-- InfernoBrowser menu banner body text for extensions onboarding when all installed extensions have been disabled.
      The first parameter is the name of the button that opens extension manager (for example "Manage extensions"). -->
     <string name="browser_menu_disabled_extensions_banner_onboarding_body">כדי להשתמש בהרחבות, יש להפעיל אותן בהגדרות או על־ידי לחיצה על ״%s״ שלהלן.</string>
-    <!-- Browser menu banner link text for learning more about extensions -->
+    <!-- InfernoBrowser menu banner link text for learning more about extensions -->
     <string name="browser_menu_extensions_banner_learn_more">מידע נוסף</string>
-    <!-- Browser menu button that opens the extensions manager -->
+    <!-- InfernoBrowser menu button that opens the extensions manager -->
     <string name="browser_menu_manage_extensions">ניהול הרחבות</string>
     <!-- Content description (not visible, for screen readers etc.): Section heading for recommended extensions.-->
     <string name="browser_menu_recommended_section_content_description">הרחבות מומלצות</string>
     <!-- Content description (not visible, for screen readers etc.): Label for plus icon used to add extension.
       The first parameter is the name of the extension (for example: ClearURLs). -->
     <string name="browser_menu_extension_plus_icon_content_description_2">הוספת %1$s</string>
-    <!-- Browser menu button that opens AMO in a tab -->
+    <!-- InfernoBrowser menu button that opens AMO in a tab -->
     <string name="browser_menu_discover_more_extensions">גילוי הרחבות נוספות</string>
-    <!-- Browser menu description that is shown when one or more extensions are disabled due to extension errors -->
+    <!-- InfernoBrowser menu description that is shown when one or more extensions are disabled due to extension errors -->
     <string name="browser_menu_extensions_disabled_description">מושבתות באופן זמני</string>
     <!-- The description of the browser menu appears when the user hasn't installed any extensions. -->
     <string name="browser_menu_no_extensions_installed_description">אין הרחבות פעילות</string>
-    <!-- Browser menu button that opens account settings -->
+    <!-- InfernoBrowser menu button that opens account settings -->
     <string name="browser_menu_account_settings">מידע על החשבון</string>
-    <!-- Browser menu button that sends a user to help articles -->
+    <!-- InfernoBrowser menu button that sends a user to help articles -->
     <string name="browser_menu_help">עזרה</string>
-    <!-- Browser menu button that sends a to a the what's new article -->
+    <!-- InfernoBrowser menu button that sends a to a the what's new article -->
     <string name="browser_menu_whats_new">מה חדש</string>
-    <!-- Browser menu button that opens the settings menu -->
+    <!-- InfernoBrowser menu button that opens the settings menu -->
     <string name="browser_menu_settings">הגדרות</string>
-    <!-- Browser menu button that opens a user's library -->
+    <!-- InfernoBrowser menu button that opens a user's library -->
     <string name="browser_menu_library">ספרייה</string>
-    <!-- Browser menu toggle that requests a desktop site -->
+    <!-- InfernoBrowser menu toggle that requests a desktop site -->
     <string name="browser_menu_desktop_site">אתר למחשבים</string>
-    <!-- Browser menu button that reopens a private tab as a regular tab -->
+    <!-- InfernoBrowser menu button that reopens a private tab as a regular tab -->
     <string name="browser_menu_open_in_regular_tab">פתיחה בלשונית רגילה</string>
-    <!-- Browser menu toggle that adds a shortcut to the site on the device home screen. -->
+    <!-- InfernoBrowser menu toggle that adds a shortcut to the site on the device home screen. -->
     <string name="browser_menu_add_to_homescreen">הוספה למסך הבית</string>
-    <!-- Browser menu toggle that adds a PWA of the site on the device home screen. -->
+    <!-- InfernoBrowser menu toggle that adds a PWA of the site on the device home screen. -->
     <string name="browser_menu_add_app_to_homescreen">הוספת יישומון למסך הבית</string>
-    <!-- Browser menu toggle that adds a shortcut to the site on the device home screen. -->
+    <!-- InfernoBrowser menu toggle that adds a shortcut to the site on the device home screen. -->
     <string name="browser_menu_add_to_homescreen_2">הוספה למסך הבית…</string>
-    <!-- Browser menu toggle that adds a PWA of the site on the device home screen. -->
+    <!-- InfernoBrowser menu toggle that adds a PWA of the site on the device home screen. -->
     <string name="browser_menu_add_app_to_homescreen_2">הוספת יישומון למסך הבית…</string>
     <!-- Text for notifying users that Xiaomi devices require additional permissions to add to home screen -->
     <string name="browser_menu_add_to_homescreen_xiaomi">ייתכן שמכשירי Xiaomi יזדקקו להרשאות נוספות כדי להוסיף קיצורי דרך למסך הבית. נא לבדוק את ההגדרות שלך.</string>
     <!-- Content description (not visible, for screen readers etc.) for the Resync tabs button -->
     <string name="resync_button_content_description">סנכרון מחדש</string>
-    <!-- Browser menu button that opens the find in page menu -->
+    <!-- InfernoBrowser menu button that opens the find in page menu -->
     <string name="browser_menu_find_in_page">חיפוש בדף</string>
-    <!-- Browser menu button that opens the find in page menu -->
+    <!-- InfernoBrowser menu button that opens the find in page menu -->
     <string name="browser_menu_find_in_page_2">חיפוש בדף…</string>
-    <!-- Browser menu button that opens the translations dialog, which has options to translate the current browser page. -->
+    <!-- InfernoBrowser menu button that opens the translations dialog, which has options to translate the current browser page. -->
     <string name="browser_menu_translations">תרגום הדף</string>
-    <!-- Browser menu button that saves the current tab to a collection -->
+    <!-- InfernoBrowser menu button that saves the current tab to a collection -->
     <string name="browser_menu_save_to_collection">שמירה לאוסף…</string>
-    <!-- Browser menu button that saves the current tab to a collection -->
+    <!-- InfernoBrowser menu button that saves the current tab to a collection -->
     <string name="browser_menu_save_to_collection_2">שמירה לאוסף</string>
-    <!-- Browser menu button that open a share menu to share the current site -->
+    <!-- InfernoBrowser menu button that open a share menu to share the current site -->
     <string name="browser_menu_share">שיתוף</string>
-    <!-- Browser menu button that open a share menu to share the current site -->
+    <!-- InfernoBrowser menu button that open a share menu to share the current site -->
     <string name="browser_menu_share_2">שיתוף…</string>
-    <!-- Browser menu button shown in custom tabs that opens the current tab in Fenix
+    <!-- InfernoBrowser menu button shown in custom tabs that opens the current tab in Fenix
         The first parameter is the name of the app defined in app_name (for example: Fenix) -->
     <string name="browser_menu_open_in_fenix">פתיחה ב־%1$s</string>
-    <!-- Browser menu text shown in custom tabs to indicate this is a Fenix tab
+    <!-- InfernoBrowser menu text shown in custom tabs to indicate this is a Fenix tab
         The first parameter is the name of the app defined in app_name (for example: Fenix) -->
     <string name="browser_menu_powered_by">מופעל באמצעות %1$s</string>
-    <!-- Browser menu text shown in custom tabs to indicate this is a Fenix tab
+    <!-- InfernoBrowser menu text shown in custom tabs to indicate this is a Fenix tab
         The first parameter is the name of the app defined in app_name (for example: Fenix) -->
     <string name="browser_menu_powered_by2">מופעל באמצעות %1$s</string>
-    <!-- Browser menu button to put the current page in reader mode -->
+    <!-- InfernoBrowser menu button to put the current page in reader mode -->
     <string name="browser_menu_read">תצוגת קריאה</string>
-    <!-- Browser menu button content description to close reader mode and return the user to the regular browser -->
+    <!-- InfernoBrowser menu button content description to close reader mode and return the user to the regular browser -->
     <string name="browser_menu_read_close">סגירת תצוגת הקריאה</string>
-    <!-- Browser menu button to open the current page in an external app -->
+    <!-- InfernoBrowser menu button to open the current page in an external app -->
     <string name="browser_menu_open_app_link">פתיחה ביישומון</string>
 
-    <!-- Browser menu button to show reader view appearance controls e.g. the used font type and size -->
+    <!-- InfernoBrowser menu button to show reader view appearance controls e.g. the used font type and size -->
     <string name="browser_menu_customize_reader_view">התאמה אישית של תצוגת קריאה</string>
-    <!-- Browser menu button to show reader view appearance controls e.g. the used font type and size -->
+    <!-- InfernoBrowser menu button to show reader view appearance controls e.g. the used font type and size -->
     <string name="browser_menu_customize_reader_view_2">התאמה אישית של תצוגת קריאה</string>
-    <!-- Browser menu label for adding a bookmark -->
+    <!-- InfernoBrowser menu label for adding a bookmark -->
     <string name="browser_menu_add">הוספה</string>
-    <!-- Browser menu label for editing a bookmark -->
+    <!-- InfernoBrowser menu label for editing a bookmark -->
     <string name="browser_menu_edit">עריכה</string>
 
     <!-- Button shown on the home page that opens the Customize home settings -->
     <string name="browser_menu_customize_home_1">התאמה אישית של מסך הבית</string>
 
-    <!-- Browser menu label to sign in to sync on the device using Mozilla accounts -->
+    <!-- InfernoBrowser menu label to sign in to sync on the device using Mozilla accounts -->
     <string name="browser_menu_sign_in">כניסה</string>
-    <!-- Browser menu caption label for the "Sign in" browser menu item described in `browser_menu_sign_in` -->
+    <!-- InfernoBrowser menu caption label for the "Sign in" browser menu item described in `browser_menu_sign_in` -->
     <string name="browser_menu_sign_in_caption">סנכרון ססמאות, לשוניות ועוד</string>
 
-    <!-- Browser menu label to sign back in to sync on the device when the user's account needs to be reauthenticated -->
+    <!-- InfernoBrowser menu label to sign back in to sync on the device when the user's account needs to be reauthenticated -->
     <string name="browser_menu_sign_back_in_to_sync">יש להתחבר שוב כדי לסנכרן</string>
-    <!-- Browser menu caption label for the "Sign back in to sync" browser menu item described in `browser_menu_sign_back_in_to_sync` when there is an error in syncing -->
+    <!-- InfernoBrowser menu caption label for the "Sign back in to sync" browser menu item described in `browser_menu_sign_back_in_to_sync` when there is an error in syncing -->
     <string name="browser_menu_syncing_paused_caption">הסנכרון מושהה</string>
-    <!-- Browser menu label that creates a private tab -->
+    <!-- InfernoBrowser menu label that creates a private tab -->
     <string name="browser_menu_new_private_tab">לשונית פרטית חדשה</string>
-    <!-- Browser menu label that navigates to the Password screen -->
+    <!-- InfernoBrowser menu label that navigates to the Password screen -->
     <string name="browser_menu_passwords">ססמאות</string>
 
-    <!-- Browser menu label that navigates to the SUMO page for the Firefox for Android release notes.
+    <!-- InfernoBrowser menu label that navigates to the SUMO page for the Firefox for Android release notes.
          The first parameter is the name of the app defined in app_name (for example: Fenix)-->
     <string name="browser_menu_new_in_firefox">חדש ב־%1$s</string>
 
-    <!-- Browser menu label that toggles the request for the desktop site of the currently visited page -->
+    <!-- InfernoBrowser menu label that toggles the request for the desktop site of the currently visited page -->
     <string name="browser_menu_switch_to_desktop_site">מעבר לאתר למחשבים</string>
-    <!-- Browser menu label that toggles the request for the mobile site of the currently visited page -->
+    <!-- InfernoBrowser menu label that toggles the request for the mobile site of the currently visited page -->
     <string name="browser_menu_switch_to_mobile_site">מעבר לתצוגה לניידים</string>
-    <!-- Browser menu label that navigates to the page tools sub-menu -->
+    <!-- InfernoBrowser menu label that navigates to the page tools sub-menu -->
     <string name="browser_menu_tools">כלים</string>
     <!-- Content description (not visible, for screen readers etc.): Back button for all menu redesign sub-menu -->
     <string name="browser_menu_back_button_content_description">חזרה לתפריט הראשי</string>
@@ -330,53 +330,53 @@
     <string name="browser_save_menu_handlebar_content_description">סגירת תפריט השמירה</string>
     <!-- Content description (not visible, for screen readers etc.) for bottom sheet handlebar tools menu. -->
     <string name="browser_tools_menu_handlebar_content_description">סגירת תפריט הכלים</string>
-    <!-- Browser menu description that describes the various tools related menu items inside of the tools sub-menu -->
+    <!-- InfernoBrowser menu description that describes the various tools related menu items inside of the tools sub-menu -->
     <string name="browser_menu_tools_description_with_translate" moz:removedIn="134" tools:ignore="UnusedResources">תצוגת קריאה, תרגום, הדפסה, שיתוף, פתיחת יישומון</string>
-    <!-- Browser menu description that describes the various tools related menu items inside of the tools sub-menu -->
+    <!-- InfernoBrowser menu description that describes the various tools related menu items inside of the tools sub-menu -->
     <string name="browser_menu_tools_description" moz:removedIn="134" tools:ignore="UnusedResources">תצוגת קריאה, הדפסה, שיתוף, פתיחת יישומון</string>
-    <!-- Browser menu description that describes the various tools related menu items inside of the tools sub-menu
+    <!-- InfernoBrowser menu description that describes the various tools related menu items inside of the tools sub-menu
          The first parameter is the label of the report site issue (for example: Report Site issue) -->
     <string name="browser_menu_tools_description_with_translate_with_report_site" moz:removedIn="135" tools:ignore="UnusedResources">תצוגת קריאה, תרגום, %s, הדפסה, שיתוף, פתיחת יישומון</string>
-    <!-- Browser menu description that describes the various tools related menu items inside of the tools sub-menu when the "Report broken site" feature is available-->
+    <!-- InfernoBrowser menu description that describes the various tools related menu items inside of the tools sub-menu when the "Report broken site" feature is available-->
     <string name="browser_menu_tools_description_with_translate_with_report_site_2">תצוגת קריאה, תרגום, דיווח על אתר שבור, הדפסה, שיתוף, פתיחת יישומון</string>
-    <!-- Browser menu description that describes the various tools related menu items inside of the tools sub-menu -->
+    <!-- InfernoBrowser menu description that describes the various tools related menu items inside of the tools sub-menu -->
     <string name="browser_menu_tools_description_with_translate_without_report_site">תצוגת קריאה, תרגום, הדפסה, שיתוף, פתיחת יישומון</string>
-    <!-- Browser menu description that describes the various tools related menu items inside of the tools sub-menu
+    <!-- InfernoBrowser menu description that describes the various tools related menu items inside of the tools sub-menu
          The first parameter is the label of the report site issue (for example: Report Site issue) -->
     <string name="browser_menu_tools_description_with_report_site" moz:removedIn="135" tools:ignore="UnusedResources">תצוגת קריאה, %s, הדפסה, שיתוף, פתיחת יישומון</string>
-    <!-- Browser menu description that describes the various tools related menu items inside of the tools sub-menu when the "Report broken site" feature is available-->
+    <!-- InfernoBrowser menu description that describes the various tools related menu items inside of the tools sub-menu when the "Report broken site" feature is available-->
     <string name="browser_menu_tools_description_with_report_site_2">תצוגת קריאה, דיווח על אתר שבור, הדפסה, שיתוף, פתיחת יישומון</string>
-    <!-- Browser menu description that describes the various tools related menu items inside of the tools sub-menu -->
+    <!-- InfernoBrowser menu description that describes the various tools related menu items inside of the tools sub-menu -->
     <string name="browser_menu_tools_description_without_report_site">תצוגת קריאה, הדפסה, שיתוף, פתיחת יישומון</string>
-    <!-- Browser menu label that navigates to the save sub-menu, which contains various save related menu items such as
+    <!-- InfernoBrowser menu label that navigates to the save sub-menu, which contains various save related menu items such as
          bookmarking a page, saving to collection, shortcut or as a PDF, and adding to home screen -->
     <string name="browser_menu_save">שמירה</string>
 
-    <!-- Browser menu description that describes the various save related menu items inside of the save sub-menu -->
+    <!-- InfernoBrowser menu description that describes the various save related menu items inside of the save sub-menu -->
     <string name="browser_menu_save_description">הוספת סימנייה, קיצור דרך, בית אוסף, PDF</string>
-    <!-- Browser menu label that bookmarks the currently visited page -->
+    <!-- InfernoBrowser menu label that bookmarks the currently visited page -->
     <string name="browser_menu_bookmark_this_page">יצירת סימנייה לדף זה</string>
-    <!-- Browser menu label that navigates to the edit bookmark screen for the current bookmarked page -->
+    <!-- InfernoBrowser menu label that navigates to the edit bookmark screen for the current bookmarked page -->
     <string name="browser_menu_edit_bookmark">עריכת סימנייה</string>
-    <!-- Browser menu label that the saves the currently visited page as a PDF -->
+    <!-- InfernoBrowser menu label that the saves the currently visited page as a PDF -->
     <string name="browser_menu_save_as_pdf">שמירה כ־PDF…</string>
-    <!-- Browser menu label for turning ON reader view of the current visited page -->
+    <!-- InfernoBrowser menu label for turning ON reader view of the current visited page -->
     <string name="browser_menu_turn_on_reader_view">הפעלת תצוגת קריאה</string>
-    <!-- Browser menu label for turning OFF reader view of the current visited page -->
+    <!-- InfernoBrowser menu label for turning OFF reader view of the current visited page -->
     <string name="browser_menu_turn_off_reader_view">כיבוי תצוגת קריאה</string>
-    <!-- Browser menu button that reopens a private tab as a regular tab -->
+    <!-- InfernoBrowser menu button that reopens a private tab as a regular tab -->
     <string name="browser_menu_open_in_normal_tab">העברה ללשונית שאינה פרטית</string>dsa
-    <!-- Browser menu label for navigating to the translation feature, which provides language translation options the current visited page -->
+    <!-- InfernoBrowser menu label for navigating to the translation feature, which provides language translation options the current visited page -->
     <string name="browser_menu_translate_page">תרגום הדף…</string>
-    <!-- Browser menu label for navigating to the Web Compat Reporter feature, which provides users the ability to send bug reports for broken sites. -->
+    <!-- InfernoBrowser menu label for navigating to the Web Compat Reporter feature, which provides users the ability to send bug reports for broken sites. -->
     <string name="browser_menu_webcompat_reporter">דיווח על אתר שבור…</string>
-    <!-- Browser menu label that is displayed when the current page has been translated by the translation feature.
+    <!-- InfernoBrowser menu label that is displayed when the current page has been translated by the translation feature.
          The first parameter is the name of the language that page was translated to (e.g. English). -->
     <string name="browser_menu_translated_to">תורגם ל%1$s</string>
-    <!-- Browser menu label for the print feature -->
+    <!-- InfernoBrowser menu label for the print feature -->
     <string name="browser_menu_print">הדפסה…</string>
 
-    <!-- Browser menu label for the Delete browsing data on quit feature.
+    <!-- InfernoBrowser menu label for the Delete browsing data on quit feature.
         The first parameter is the name of the app defined in app_name (for example: Fenix). -->
     <string name="browser_menu_delete_browsing_data_on_quit">יציאה מ־%1$s</string>
 
@@ -390,7 +390,7 @@
     <!-- Text displayed when there are no extensions to be shown -->
     <string name="extensions_management_no_extensions">אין כאן הרחבות</string>
 
-    <!-- Browser Toolbar -->
+    <!-- InfernoBrowser Toolbar -->
     <!-- Content description for the Home screen button on the browser toolbar -->
     <string name="browser_toolbar_home">מסך הבית</string>
 
@@ -2041,7 +2041,7 @@
     <string name="about_debug_menu_toast_progress">תפריט ניפוי שגיאות: נותרו %1$d לחיצות כדי להפעיל</string>
     <string name="about_debug_menu_toast_done">תפריט ניפוי שגיאות מופעל</string>
 
-    <!-- Browser long press popup menu -->
+    <!-- InfernoBrowser long press popup menu -->
     <!-- Copy the current url -->
     <string name="browser_toolbar_long_press_popup_copy">העתקה</string>
     <!-- Paste & go the text in the clipboard. '&amp;' is replaced with the ampersand symbol: & -->
@@ -2358,9 +2358,9 @@
     <string name="no_site_exceptions">אין חריגות לאתרים</string>
     <!-- Bookmark deletion confirmation -->
     <string name="bookmark_deletion_confirmation">האם ברצונך למחוק סימנייה זו?</string>
-    <!-- Browser menu button that adds a shortcut to the home fragment -->
+    <!-- InfernoBrowser menu button that adds a shortcut to the home fragment -->
     <string name="browser_menu_add_to_shortcuts">הוספה לקיצורי הדרך</string>
-    <!-- Browser menu button that removes a shortcut from the home fragment -->
+    <!-- InfernoBrowser menu button that removes a shortcut from the home fragment -->
     <string name="browser_menu_remove_from_shortcuts">הסרה מקיצורי הדרך</string>
     <!-- text shown before the issuer name to indicate who its verified by, parameter is the name of
      the certificate authority that verified the ticket-->

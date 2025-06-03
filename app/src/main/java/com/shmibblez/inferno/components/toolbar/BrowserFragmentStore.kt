@@ -17,7 +17,7 @@ class BrowserFragmentStore(initialState: BrowserFragmentState) :
     Store<BrowserFragmentState, BrowserFragmentAction>(initialState, ::browserStateReducer)
 
 /**
- * The state for the Browser Screen
+ * The state for the InfernoBrowser Screen
  */
 class BrowserFragmentState : State
 

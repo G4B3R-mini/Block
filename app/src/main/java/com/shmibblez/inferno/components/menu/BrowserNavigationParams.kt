@@ -7,7 +7,7 @@ package com.shmibblez.inferno.components.menu
 import com.shmibblez.inferno.settings.SupportUtils.SumoTopic
 
 /**
- * Browser navigation parameters of the URL or [SumoTopic] to be loaded.
+ * InfernoBrowser navigation parameters of the URL or [SumoTopic] to be loaded.
  *
  * @property url The URL to be loaded.
  * @property sumoTopic The [SumoTopic] to be loaded.

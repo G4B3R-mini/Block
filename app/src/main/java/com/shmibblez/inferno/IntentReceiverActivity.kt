@@ -20,19 +20,28 @@ import mozilla.components.support.utils.EXTRA_ACTIVITY_REFERRER_PACKAGE
 import mozilla.components.support.utils.INTENT_TYPE_PDF
 import mozilla.components.support.utils.ext.getApplicationInfoCompat
 import mozilla.components.support.utils.toSafeIntent
-//import com.shmibblez.inferno.GleanMetrics.Events
 import com.shmibblez.inferno.HomeActivity.Companion.PRIVATE_BROWSING_MODE
-import com.shmibblez.inferno.components.IntentProcessorType
-import com.shmibblez.inferno.components.getType
+import com.shmibblez.inferno.browser.nav.BrowserNavHost
+import com.shmibblez.inferno.browser.nav.InitialBrowserTask
+import com.shmibblez.inferno.customtabs.FennecWebAppIntentProcessor
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.isIntentInternal
 import com.shmibblez.inferno.ext.settings
+import com.shmibblez.inferno.home.intent.FennecBookmarkShortcutsIntentProcessor
+import com.shmibblez.inferno.intent.ExternalDeepLinkIntentProcessor
 import com.shmibblez.inferno.perf.MarkersActivityLifecycleCallbacks
 import com.shmibblez.inferno.perf.StartupTimeline
 import com.shmibblez.inferno.shortcut.NewTabShortcutIntentProcessor
+import com.shmibblez.inferno.shortcut.PasswordManagerIntentProcessor
+import mozilla.components.feature.customtabs.CustomTabIntentProcessor
+import mozilla.components.feature.intent.ext.getSessionId
+import mozilla.components.feature.intent.processing.TabIntentProcessor
+import mozilla.components.feature.pwa.intent.WebAppIntentProcessor
+import mozilla.components.feature.webnotifications.WebNotificationIntentProcessor
 
 /**
- * Processes incoming intents and sends them to the corresponding activity.
+ * Processes incoming intents
+ * Sends all possible actions as [InitialBrowserTask]s to [BrowserNavHost].
  */
 class IntentReceiverActivity : Activity() {
 
@@ -83,9 +92,10 @@ class IntentReceiverActivity : Activity() {
         }
 
         val processor = getIntentProcessors(private).firstOrNull { it.process(intent) }
-        val intentProcessorType = components.intentProcessors.getType(processor)
+//        val intentProcessorType = components.intentProcessors.getType(processor)
 
-        launch(intent, intentProcessorType)
+        val initialTask = processor.toInitialBrowserTask(intent, private)
+        launch(intent, initialTask)
     }
 
     private fun persistUriReadPermission(uri: Uri) {
@@ -97,16 +107,21 @@ class IntentReceiverActivity : Activity() {
         }
     }
 
-    @VisibleForTesting
-    internal fun launch(intent: Intent, intentProcessorType: IntentProcessorType) {
-        intent.setClassName(applicationContext, intentProcessorType.activityClassName)
 
-        if (!intent.hasExtra(HomeActivity.OPEN_TO_BROWSER)) {
-            intent.putExtra(
-                HomeActivity.OPEN_TO_BROWSER,
-                intentProcessorType.shouldOpenToBrowser(intent),
-            )
-        }
+    @VisibleForTesting
+    internal fun launch(intent: Intent, initialBrowserTask: InitialBrowserTask) {
+        intent.setClassName(
+            applicationContext, HomeActivity::class.java.name
+        ) // intentProcessorType.activityClassName)
+//        intent.putExtra("aaa", intentProcessorType.getBrowserAction(intent))
+        intent.putExtra(HomeActivity.INITIAL_BROWSER_TASK, initialBrowserTask)
+
+//        if (!intent.hasExtra(HomeActivity.OPEN_TO_BROWSER)) {
+//            intent.putExtra(
+//                HomeActivity.OPEN_TO_BROWSER,
+//                intentProcessorType.shouldOpenToBrowser(intent),
+//            )
+//        }
         // StrictMode violation on certain devices such as Samsung
         components.strictMode.resetAfter(StrictMode.allowThreadDiskReads()) {
             startActivity(intent)
@@ -127,13 +142,7 @@ class IntentReceiverActivity : Activity() {
             )
         }
 
-        return components.intentProcessors.externalAppIntentProcessors +
-            components.intentProcessors.fennecPageShortcutIntentProcessor +
-            components.intentProcessors.externalDeepLinkIntentProcessor +
-            components.intentProcessors.webNotificationsIntentProcessor +
-            components.intentProcessors.passwordManagerIntentProcessor +
-            modeDependentProcessors +
-            NewTabShortcutIntentProcessor()
+        return components.intentProcessors.externalAppIntentProcessors + components.intentProcessors.fennecPageShortcutIntentProcessor + components.intentProcessors.externalDeepLinkIntentProcessor + components.intentProcessors.webNotificationsIntentProcessor + components.intentProcessors.passwordManagerIntentProcessor + modeDependentProcessors + NewTabShortcutIntentProcessor()
     }
 
     private fun addReferrerInformation(intent: Intent) {
@@ -143,8 +152,7 @@ class IntentReceiverActivity : Activity() {
             return
         }
         // unfortunately you can get a RuntimeException thrown from android here
-        @Suppress("TooGenericExceptionCaught")
-        val r = try {
+        @Suppress("TooGenericExceptionCaught") val r = try {
             // NB: referrer can be spoofed by the calling application. Use with caution.
             referrer
         } catch (e: RuntimeException) {
@@ -175,4 +183,95 @@ private fun Intent.stripUnwantedFlags() {
     // IntentReceiverActivity is started with the "excludeFromRecents" flag (set in manifest). We
     // do not want to propagate this flag from the intent receiver activity to the browser.
     flags = flags and Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS.inv()
+}
+
+private fun IntentProcessor?.toInitialBrowserTask(
+    intent: Intent,
+    private: Boolean = false,
+): InitialBrowserTask {
+    return when (this) {
+        /**
+         * external app processors (web apps, custom tabs, etc)
+         * todo: check if need to use custom tab or just initial currentTab
+         */
+        // IntentProcessors.externalAppIntentProcessors
+        is WebAppIntentProcessor,
+        is FennecWebAppIntentProcessor,
+            -> {
+            intent.getSessionId().let {
+                if (!it.isNullOrEmpty()) {
+                    // if url all good, launch external app component
+                    InitialBrowserTask.ExternalApp(url = it, private = false)
+                } else {
+                    // if url null or empty, launch browser normally
+                    InitialBrowserTask.OpenToBrowser(private = false)
+                }
+            }
+        }
+        // IntentProcessors.customTabIntentProcessor
+        // IntentProcessors.privateCustomTabIntentProcessor
+        is CustomTabIntentProcessor,
+            -> {
+            intent.getSessionId().let {
+                if (!it.isNullOrEmpty()) {
+                    // if url all good, launch external app component
+                    InitialBrowserTask.ExternalApp(url = it, private = private)
+                } else {
+                    // if url null or empty, launch browser normally
+                    InitialBrowserTask.OpenToBrowser(private = false)
+                }
+            }
+        }
+
+        /**
+         * new tab processors (shortcut opened, web notification clicked, etc)
+         */
+        // IntentProcessors.intentProcessor
+        // IntentProcessors.privateIntentProcessor
+        is TabIntentProcessor -> {
+            // in case of processViewIntent, processSendIntent, and processSearchIntent,
+            // just open to browser in normal/private mode, tab should already be selected
+            InitialBrowserTask.OpenToBrowser(private = private)
+        }
+        // IntentProcessors.fennecPageShortcutIntentProcessor
+        is FennecBookmarkShortcutsIntentProcessor -> {
+            // open to browser, tab should already be selected
+            InitialBrowserTask.OpenToBrowser(private = false)
+        }
+        // IntentProcessors.webNotificationsIntentProcessor
+        is WebNotificationIntentProcessor -> {
+            // todo: test, 99% sure this is implemented by gecko engine already
+            // open to browser, corresponding tab should already be selected/created
+            InitialBrowserTask.OpenToBrowser(private = false)
+        }
+
+        /**
+         * deeplink processor
+         */
+        // IntentProcessors.externalDeepLinkIntentProcessor
+        is ExternalDeepLinkIntentProcessor -> {
+            // no idea how this works
+            // todo: check what is done with deep link intent flags, may need to integrate
+            InitialBrowserTask.OpenToBrowser(private = false)
+        }
+
+        /**
+         * password manager processor
+         */
+        // IntentProcessors.passwordManagerIntentProcessor
+        is PasswordManagerIntentProcessor -> {
+            InitialBrowserTask.OpenPasswordManager
+        }
+
+        /**
+         * other, just open to browser
+         */
+        null -> {
+            InitialBrowserTask.OpenToBrowser(private = private)
+        }
+
+        else -> {
+            InitialBrowserTask.OpenToBrowser(private = private)
+        }
+    }
 }
