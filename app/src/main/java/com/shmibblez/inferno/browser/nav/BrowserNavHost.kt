@@ -12,6 +12,8 @@ import com.shmibblez.inferno.browser.BrowserComponent
 import com.shmibblez.inferno.browser.rememberBrowserComponentState
 import com.shmibblez.inferno.library.history.HistoryFragment
 import com.shmibblez.inferno.settings.nav.SettingsNavHost
+import com.shmibblez.inferno.settings.passwords.PasswordExceptionSettingsPage
+import com.shmibblez.inferno.settings.passwords.PasswordSettingsPage
 import kotlinx.serialization.Serializable
 
 /**
@@ -78,7 +80,12 @@ interface BrowserRoute {
     object InfernoBrowser : BrowserRoute
 
     @Serializable
-    object PasswordManager : BrowserRoute
+    object PasswordManager : BrowserRoute {
+
+        @Serializable
+        object Exceptions : BrowserRoute
+
+    }
 
     @Serializable
     object History : BrowserRoute
@@ -152,6 +159,11 @@ fun BrowserNavHost(
 //        popExitTransition = ,
 //        sizeTransform = ,
     ) {
+
+        composable<BrowserRoute.ExternalBrowser> {
+            // todo: create ExternalBrowserComponent
+        }
+
         composable<BrowserRoute.InfernoBrowser> {
             BrowserComponent(
                 navController = nav,
@@ -160,8 +172,17 @@ fun BrowserNavHost(
             )
         }
 
-        composable<BrowserRoute.InfernoSettings> {
-            SettingsNavHost(goBackLegacy = { nav.popBackStack() })
+        composable<BrowserRoute.PasswordManager> {
+            PasswordSettingsPage(
+                goBack = { nav.popBackStack() },
+                onNavToPasswordExceptionSettingsPage = {
+                    nav.navigate(route = BrowserRoute.PasswordManager.Exceptions)
+                },
+            )
+        }
+
+        composable<BrowserRoute.PasswordManager.Exceptions> {
+            PasswordExceptionSettingsPage(goBack = { nav.popBackStack() })
         }
 
         composable<BrowserRoute.History> {
@@ -169,5 +190,10 @@ fun BrowserNavHost(
              * todo: implement [HistoryFragment]
              */
         }
+
+        composable<BrowserRoute.InfernoSettings> {
+            SettingsNavHost(goBackLegacy = { nav.popBackStack() })
+        }
+
     }
 }

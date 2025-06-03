@@ -319,6 +319,10 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
 //            },
 //        ).showSplashScreen()
 
+        // todo: modify layout res, only view will be home activity
+        //  get initial task from intent
+        //  set content view to compose BrowserNavHost
+
         lifecycleScope.launch {
             val debugSettingsRepository = DefaultDebugSettingsRepository(
                 context = this@HomeActivity,
