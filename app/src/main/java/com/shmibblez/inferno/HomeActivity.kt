@@ -4,13 +4,6 @@
 
 package com.shmibblez.inferno
 
-//import mozilla.telemetry.glean.private.NoExtras
-//import com.shmibblez.inferno.GleanMetrics.AppIcon
-//import com.shmibblez.inferno.GleanMetrics.Events
-//import com.shmibblez.inferno.GleanMetrics.Metrics
-//import com.shmibblez.inferno.GleanMetrics.NavigationBar
-//import com.shmibblez.inferno.GleanMetrics.SplashScreen
-//import com.shmibblez.inferno.GleanMetrics.StartOnHome
 //import com.shmibblez.inferno.ext.recordEventInNimbus
 //import com.shmibblez.inferno.perf.StartupTypeTelemetry
 import android.app.assist.AssistContent
@@ -35,7 +28,6 @@ import android.view.View
 import android.view.ViewConfiguration
 import android.view.WindowManager.LayoutParams.FLAG_SECURE
 import androidx.annotation.CallSuper
-import androidx.annotation.IdRes
 import androidx.annotation.RequiresApi
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.ActionBar
@@ -43,32 +35,25 @@ import androidx.appcompat.widget.Toolbar
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
-import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.NavigationUI
 import com.shmibblez.inferno.addons.ExtensionsProcessDisabledBackgroundController
 import com.shmibblez.inferno.addons.ExtensionsProcessDisabledForegroundController
 import com.shmibblez.inferno.browser.browsingmode.BrowsingMode
 import com.shmibblez.inferno.browser.browsingmode.BrowsingModeManager
 import com.shmibblez.inferno.browser.browsingmode.DefaultBrowsingModeManager
+import com.shmibblez.inferno.browser.nav.BrowserNavHost
+import com.shmibblez.inferno.browser.nav.InitialBrowserTask
 import com.shmibblez.inferno.components.appstate.AppAction
 import com.shmibblez.inferno.components.appstate.OrientationMode
 import com.shmibblez.inferno.customtabs.ExternalAppBrowserActivity
 import com.shmibblez.inferno.databinding.ActivityHomeBinding
 import com.shmibblez.inferno.debugsettings.data.DefaultDebugSettingsRepository
-import com.shmibblez.inferno.debugsettings.ui.FenixOverlay
 import com.shmibblez.inferno.experiments.ResearchSurfaceDialogFragment
-import com.shmibblez.inferno.ext.alreadyOnDestination
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.getIntentSessionId
-import com.shmibblez.inferno.ext.getNavDirections
-import com.shmibblez.inferno.ext.hasTopDestination
-import com.shmibblez.inferno.ext.nav
 import com.shmibblez.inferno.ext.settings
 import com.shmibblez.inferno.extension.WebExtensionPromptFeature
 import com.shmibblez.inferno.home.HomeFragment
 import com.shmibblez.inferno.home.intent.AssistIntentProcessor
-import com.shmibblez.inferno.home.intent.CrashReporterIntentProcessor
 import com.shmibblez.inferno.home.intent.HomeDeepLinkIntentProcessor
 import com.shmibblez.inferno.home.intent.OpenBrowserIntentProcessor
 import com.shmibblez.inferno.home.intent.OpenPasswordManagerIntentProcessor
@@ -91,8 +76,6 @@ import com.shmibblez.inferno.perf.StartupPathProvider
 import com.shmibblez.inferno.perf.StartupTimeline
 import com.shmibblez.inferno.session.PrivateNotificationService
 import com.shmibblez.inferno.settings.SupportUtils
-import com.shmibblez.inferno.tabhistory.TabHistoryDialogFragment
-import com.shmibblez.inferno.tabstray.TabsTrayFragment
 import com.shmibblez.inferno.theme.DefaultThemeManager
 import com.shmibblez.inferno.theme.StatusBarColorManager
 import com.shmibblez.inferno.theme.ThemeManager
@@ -103,7 +86,6 @@ import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import mozilla.appservices.places.BookmarkRoot
 import mozilla.components.browser.state.action.MediaSessionAction
@@ -214,9 +196,9 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
 
     private var inflater: LayoutInflater? = null
 
-    private val navHost by lazy {
-        supportFragmentManager.findFragmentById(R.id.container) as NavHostFragment
-    }
+//    private val navHost by lazy {
+//        supportFragmentManager.findFragmentById(R.id.container) as NavHostFragment
+//    }
 
     private lateinit var navigationToolbar: Toolbar
     private var isToolbarInflated = false
@@ -319,9 +301,11 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
 //            },
 //        ).showSplashScreen()
 
-        // todo: modify layout res, only view will be home activity
-        //  get initial task from intent
-        //  set content view to compose BrowserNavHost
+        // initialize compose
+        val initialTask = intent.getSerializableExtra(INITIAL_BROWSER_TASK) as InitialBrowserTask?
+        binding.rootCompose.setContent {
+            BrowserNavHost(initialAction = initialTask)
+        }
 
         lifecycleScope.launch {
             val debugSettingsRepository = DefaultDebugSettingsRepository(
@@ -329,26 +313,26 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
                 writeScope = this,
             )
 
-            debugSettingsRepository.debugDrawerEnabled.distinctUntilChanged().collect { enabled ->
-                // todo: implement debug overlay
-                with(binding.debugOverlay) {
-                    if (enabled) {
-                        visibility = View.VISIBLE
-
-                        setContent {
-                            FenixOverlay(
-                                browserStore = components.core.store,
-                                inactiveTabsEnabled = settings().inactiveTabsAreEnabled,
-                                loginsStorage = components.core.passwordsStorage,
-                            )
-                        }
-                    } else {
-                        setContent {}
-
-                        visibility = View.GONE
-                    }
-                }
-            }
+//            debugSettingsRepository.debugDrawerEnabled.distinctUntilChanged().collect { enabled ->
+//                // todo: implement debug overlay
+//                with(binding.debugOverlay) {
+//                    if (enabled) {
+//                        visibility = View.VISIBLE
+//
+//                        setContent {
+//                            FenixOverlay(
+//                                browserStore = components.core.store,
+//                                inactiveTabsEnabled = settings().inactiveTabsAreEnabled,
+//                                loginsStorage = components.core.passwordsStorage,
+//                            )
+//                        }
+//                    } else {
+//                        setContent {}
+//
+//                        visibility = View.GONE
+//                    }
+//                }
+//            }
         }
 
         setContentView(binding.root)
@@ -374,11 +358,11 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
             showFullscreenMessageIfNeeded(applicationContext)
         }
 
-        // Unless the activity is recreated, navigate to home first (without rendering it)
-        // to add it to the back stack.
-        if (savedInstanceState == null) {
-            navigateToHome(navHost.navController)
-        }
+//        // Unless the activity is recreated, navigate to home first (without rendering it)
+//        // to add it to the back stack.
+//        if (savedInstanceState == null) {
+//            navigateToHome(navHost.navController)
+//        }
 
         // always start on browser
 //            if (!shouldStartOnHome() && shouldNavigateToBrowserOnColdStart(savedInstanceState)) {
@@ -448,7 +432,7 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
 //            attachOnHomeActivityOnCreate(lifecycle)
 //        }
 
-        components.core.requestInterceptor.setNavigationController(navHost.navController)
+//        components.core.requestInterceptor.setNavigationController(navHost.navController)
 
         supportFragmentManager.registerFragmentLifecycleCallbacks(
             StatusBarColorManager(themeManager, this),
@@ -703,17 +687,20 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
             components.useCases.sessionUseCases.exitFullscreen(tab.id)
         }
 
-        val intentProcessors = listOf(
-            CrashReporterIntentProcessor(components.appStore),
-        ) + externalSourceIntentProcessors
-        val intentHandled =
-            intentProcessors.any { it.process(intent, navHost.navController, this.intent) }
-        browsingModeManager.mode = getModeFromIntentOrLastKnown(intent)
-
-        if (intentHandled) {
-            supportFragmentManager.primaryNavigationFragment?.childFragmentManager?.fragments?.lastOrNull()
-                ?.let { it as? TabsTrayFragment }?.also { it.dismissAllowingStateLoss() }
-        }
+        // todo: process intents (add callback to BrowserComponent)
+        //  could also start and stop BrowserComponentState here, pass to BrowserNavHost,
+        //  would facilitate init of callbacks, also for biometric feature
+//        val intentProcessors = listOf(
+//            CrashReporterIntentProcessor(components.appStore),
+//        ) + externalSourceIntentProcessors
+//        val intentHandled =
+//            intentProcessors.any { it.process(intent, navHost.navController, this.intent) }
+//        browsingModeManager.mode = getModeFromIntentOrLastKnown(intent)
+//
+//        if (intentHandled) {
+//            supportFragmentManager.primaryNavigationFragment?.childFragmentManager?.fragments?.lastOrNull()
+//                ?.let { it as? TabsTrayFragment }?.also { it.dismissAllowingStateLoss() }
+//        }
     }
 
     /**
@@ -849,28 +836,31 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
         if (shouldUseCustomBackLongPress() && keyCode == KeyEvent.KEYCODE_BACK) {
             backLongPressJob?.cancel()
 
-            // check if the key has been pressed for longer than the time needed for a press to turn into a long press
-            // and if tab history is already visible we do not want to dismiss it.
-            if (event.eventTime - event.downTime >= ViewConfiguration.getLongPressTimeout() && navHost.navController.hasTopDestination(
-                    TabHistoryDialogFragment.NAME
-                )
-            ) {
-                // returning true avoids further processing of the KeyUp event and avoids dismissing tab history.
-                return true
-            }
+            // todo: nav
+//            // check if the key has been pressed for longer than the time needed for a press to turn into a long press
+//            // and if tab history is already visible we do not want to dismiss it.
+//            if (event.eventTime - event.downTime >= ViewConfiguration.getLongPressTimeout() && navHost.navController.hasTopDestination(
+//                    TabHistoryDialogFragment.NAME
+//                )
+//            ) {
+//                // returning true avoids further processing of the KeyUp event and avoids dismissing tab history.
+//                return true
+//            }
         }
 
         if (keyCode == KeyEvent.KEYCODE_FORWARD) {
-            if (navHost.navController.hasTopDestination(TabHistoryDialogFragment.NAME)) {
-                // returning true avoids further processing of the KeyUp event
-                return true
-            }
+            // todo: nav
+//            if (navHost.navController.hasTopDestination(TabHistoryDialogFragment.NAME)) {
+//                // returning true avoids further processing of the KeyUp event
+//                return true
+//            }
 
-            supportFragmentManager.primaryNavigationFragment?.childFragmentManager?.fragments?.forEach {
-                if (it is UserInteractionHandler && it.onForwardPressed()) {
-                    return true
-                }
-            }
+            // todo: nav
+//            supportFragmentManager.primaryNavigationFragment?.childFragmentManager?.fragments?.forEach {
+//                if (it is UserInteractionHandler && it.onForwardPressed()) {
+//                    return true
+//                }
+//            }
         }
 
         return super.onKeyUp(keyCode, event)
@@ -985,15 +975,16 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
 
     @Suppress("SpreadOperator")
     private fun setupNavigationToolbar(vararg topLevelDestinationIds: Int) {
-        NavigationUI.setupWithNavController(
-            navigationToolbar,
-            navHost.navController,
-            AppBarConfiguration.Builder(*topLevelDestinationIds).build(),
-        )
-
-        navigationToolbar.setNavigationOnClickListener {
-            onBackPressedDispatcher.onBackPressed()
-        }
+        // todo: nav
+//        NavigationUI.setupWithNavController(
+//            navigationToolbar,
+//            navHost.navController,
+//            AppBarConfiguration.Builder(*topLevelDestinationIds).build(),
+//        )
+//
+//        navigationToolbar.setNavigationOnClickListener {
+//            onBackPressedDispatcher.onBackPressed()
+//        }
     }
 
     /**
@@ -1036,12 +1027,13 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
     }
 
     fun openToBrowser(from: BrowserDirection, customTabSessionId: String? = null) {
-        if (navHost.navController.alreadyOnDestination(R.id.browserComponentWrapperFragment)) return
-        @IdRes val fragmentId = if (from.fragmentId != 0) from.fragmentId else null
-        val directions = getNavDirections(from, customTabSessionId)
-        if (directions != null) {
-            navHost.navController.nav(fragmentId, directions)
-        }
+        // todo: nav
+//        if (navHost.navController.alreadyOnDestination(R.id.browserComponentWrapperFragment)) return
+//        @IdRes val fragmentId = if (from.fragmentId != 0) from.fragmentId else null
+//        val directions = getNavDirections(from, customTabSessionId)
+//        if (directions != null) {
+//            navHost.navController.nav(fragmentId, directions)
+//        }
     }
 
     /**
@@ -1191,11 +1183,12 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
     }
 
     private fun openPopup(webExtensionState: WebExtensionState) {
-        val action = NavGraphDirections.actionGlobalWebExtensionActionPopupFragment(
-            webExtensionId = webExtensionState.id,
-            webExtensionTitle = webExtensionState.name,
-        )
-        navHost.navController.navigate(action)
+        // todo: nav, web extension popup
+//        val action = NavGraphDirections.actionGlobalWebExtensionActionPopupFragment(
+//            webExtensionId = webExtensionState.id,
+//            webExtensionTitle = webExtensionState.name,
+//        )
+//        navHost.navController.navigate(action)
     }
 
     /**
@@ -1250,13 +1243,15 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
     }
 
     fun processIntent(intent: Intent): Boolean {
-        return externalSourceIntentProcessors.any {
-            it.process(
-                intent,
-                navHost.navController,
-                this.intent,
-            )
-        }
+        // todo: process intent
+//        return externalSourceIntentProcessors.any {
+//            it.process(
+//                intent,
+//                navHost.navController,
+//                this.intent,
+//            )
+//        }
+        return false // todo: remove when fix above
     }
 
     @VisibleForTesting

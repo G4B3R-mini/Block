@@ -31,16 +31,22 @@ import mozilla.components.lib.state.ext.flowScoped
 import mozilla.components.support.base.feature.LifecycleAwareFeature
 
 @Composable
-fun rememberBrowserComponentState(): MutableState<BrowserComponentState> {
-    val context = LocalContext.current
+fun rememberBrowserComponentState(
+    initiallyExternal: Boolean,
+    lifecycleOwner: LifecycleOwner? = null,
+    components: Components = LocalContext.current.components,
+    store: BrowserStore = LocalContext.current.components.core.store,
+    tabsUseCases: TabsUseCases = LocalContext.current.components.useCases.tabsUseCases,
+): MutableState<BrowserComponentState> {
 
     val state = remember {
         mutableStateOf(
             BrowserComponentState(
-                // lifecycleOwner =,
-                components = context.components,
-                store = context.components.core.store,
-                tabsUseCases = context.components.useCases.tabsUseCases,
+                initiallyExternal = initiallyExternal,
+                lifecycleOwner = lifecycleOwner,
+                components = components,
+                store = store,
+                tabsUseCases = tabsUseCases,
             )
         )
     }
@@ -57,6 +63,7 @@ fun rememberBrowserComponentState(): MutableState<BrowserComponentState> {
 private const val INIT_JOB_MILLIS = 3000L
 
 class BrowserComponentState(
+    initiallyExternal: Boolean,
     val lifecycleOwner: LifecycleOwner? = null,
     val components: Components,
     val store: BrowserStore,
@@ -70,6 +77,9 @@ class BrowserComponentState(
 
     // todo: test, before run also make changes to tab bar (tab layout)
     private var awaitingNewTab = false
+
+    var isExternal by mutableStateOf(initiallyExternal)
+        private set
 
     var tabList: List<TabSessionState> by mutableStateOf(emptyList())
         private set

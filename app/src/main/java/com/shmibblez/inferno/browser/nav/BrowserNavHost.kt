@@ -5,12 +5,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.shmibblez.inferno.browser.BrowserComponent
 import com.shmibblez.inferno.browser.ExternalBrowserComponent
 import com.shmibblez.inferno.browser.rememberBrowserComponentState
+import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.library.history.HistoryFragment
 import com.shmibblez.inferno.settings.nav.SettingsNavHost
 import com.shmibblez.inferno.settings.passwords.PasswordExceptionSettingsPage
@@ -52,7 +54,7 @@ sealed interface InitialBrowserTask : java.io.Serializable {
     fun asStartDestination(): BrowserRoute {
         return when (this) {
             AppIcon -> BrowserRoute.InfernoBrowser
-            is ExternalApp -> BrowserRoute.ExternalBrowser
+            is ExternalApp -> BrowserRoute.InfernoBrowser // BrowserRoute.ExternalBrowser
             OpenPasswordManager -> BrowserRoute.InfernoBrowser
             is OpenToBrowser -> BrowserRoute.InfernoBrowser
             is OpenToBrowserAndLoad -> BrowserRoute.InfernoBrowser
@@ -74,8 +76,8 @@ sealed interface InitialBrowserTask : java.io.Serializable {
 
 interface BrowserRoute {
 
-    @Serializable
-    object ExternalBrowser : BrowserRoute
+//    @Serializable
+//    object ExternalBrowser : BrowserRoute
 
     @Serializable
     object InfernoBrowser : BrowserRoute
@@ -103,9 +105,15 @@ fun BrowserNavHost(
         ?: BrowserRoute.InfernoBrowser,
 ) {
     val nav = rememberNavController()
-    val browserComponentState by rememberBrowserComponentState()
+
+    val browserComponentState by rememberBrowserComponentState(initiallyExternal = initialAction is InitialBrowserTask.ExternalApp)
+
+    val context = LocalContext.current
 
     LaunchedEffect(initialAction) {
+        // set nav host for request interceptor
+        context.components.core.requestInterceptor.setNavigationController(nav)
+
         when (initialAction) {
             null -> {}
 //            else -> {
@@ -118,13 +126,13 @@ fun BrowserNavHost(
             }
 
             is InitialBrowserTask.OpenToBrowser -> {
-                if (initialAction.private) {
-                    // todo:
-//                    browserComponentState.switchToPrivate()
-                } else {
-                    // todo:
-//                    browserComponentState.switchToNormal()
-                }
+//                if (initialAction.private) {
+//                    // todo:
+////                    browserComponentState.switchToPrivate()
+//                } else {
+//                    // todo:
+////                    browserComponentState.switchToNormal()
+//                }
             }
 
             is InitialBrowserTask.OpenToBrowserAndLoad -> {
@@ -161,21 +169,22 @@ fun BrowserNavHost(
 //        sizeTransform = ,
     ) {
 
-        composable<BrowserRoute.ExternalBrowser> {
-            // todo: create ExternalBrowserComponent, or modify BrowserComponent and add state to
-            //  reflect mode (externalMode boolean in state to decide which toolbar to show)
-            //  - when open in browser selected, move tab to normal/private tabs and switch
-            //  externalMode to false, do through accompanying functions (eg deactivateExternalMode(),
-            //  which also moves tab to normal or private tabs)
-            //  - this is why customTabSessionId exists
-            ExternalBrowserComponent()
-        }
+//        composable<BrowserRoute.ExternalBrowser> {
+//            // todo: create ExternalBrowserComponent, or modify BrowserComponent and add state to
+//            //  reflect mode (externalMode boolean in state to decide which toolbar to show)
+//            //  - when open in browser selected, move tab to normal/private tabs and switch
+//            //  externalMode to false, do through accompanying functions (eg deactivateExternalMode(),
+//            //  which also moves tab to normal or private tabs)
+//            //  - this is why customTabSessionId exists
+//            ExternalBrowserComponent()
+//        }
 
         composable<BrowserRoute.InfernoBrowser> {
             BrowserComponent(
                 navController = nav,
                 state = browserComponentState,
                 onNavToSettings = { nav.navigate(route = BrowserRoute.InfernoSettings) },
+                onNavToHistory = {nav.navigate(route = BrowserRoute.History)}
             )
         }
 

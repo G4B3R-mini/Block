@@ -324,7 +324,7 @@ fun nav(
 }
 
 enum class BrowserComponentMode {
-    TOOLBAR, TOOLBAR_SEARCH, FIND_IN_PAGE, READER_VIEW, FULLSCREEN,
+    TOOLBAR, TOOLBAR_SEARCH, TOOLBAR_EXTERNAL, FIND_IN_PAGE, READER_VIEW, FULLSCREEN,
 }
 
 enum class BrowserComponentPageType {
@@ -338,6 +338,7 @@ object UiConst {
     val TAB_BAR_HEIGHT = 36.dp
     val AWESOME_BAR_HEIGHT = 200.dp
     val TAB_WIDTH = 112.dp
+    val EXTERNAL_TOOLBAR_HEIGHT = TOOLBAR_HEIGHT + TAB_BAR_HEIGHT
 
     //    val TAB_CORNER_RADIUS = 8.dp
     val FIND_IN_PAGE_BAR_HEIGHT = 50.dp
@@ -348,6 +349,7 @@ object UiConst {
         return when (browserComponentMode) {
             BrowserComponentMode.TOOLBAR -> TOOLBAR_HEIGHT + TAB_BAR_HEIGHT
             BrowserComponentMode.TOOLBAR_SEARCH -> TOOLBAR_HEIGHT + AWESOME_BAR_HEIGHT
+            BrowserComponentMode.TOOLBAR_EXTERNAL -> EXTERNAL_TOOLBAR_HEIGHT
             BrowserComponentMode.FIND_IN_PAGE -> FIND_IN_PAGE_BAR_HEIGHT
             BrowserComponentMode.READER_VIEW -> READER_VIEW_HEIGHT
             BrowserComponentMode.FULLSCREEN -> FULLSCREEN_BOTTOM_BAR_HEIGHT
@@ -369,6 +371,7 @@ fun BrowserComponent(
     navController: NavController,
     state: BrowserComponentState,
     onNavToSettings: () -> Unit,
+    onNavToHistory: () -> Unit,
 ) {
     Log.d("BrowserComponent", "rebuilt")
     val coroutineScope = rememberCoroutineScope()
@@ -707,7 +710,8 @@ fun BrowserComponent(
             onRequestSearchBar = { /* todo */ },
             onNavToSettings = onNavToSettings,
             onNavToTabsTray = { showTabsTray = true },
-            onNavToHistory = { navToHistory(navController) })
+            onNavToHistory = onNavToHistory,
+            )
     }
 
     if (showTabsTray) {
@@ -717,7 +721,7 @@ fun BrowserComponent(
             mode = tabsTrayMode,
             setMode = { mode -> tabsTrayMode = mode },
             activeTabId = state.currentTab?.id,
-            normalTabs =state.normalTabs,
+            normalTabs = state.normalTabs,
             privateTabs = state.privateTabs,
             recentlyClosedTabs = state.closedTabs,
             tabDisplayType = InfernoTabsTrayDisplayType.List,
@@ -931,9 +935,7 @@ fun BrowserComponent(
                                 coroutineScope = coroutineScope,
                                 snackbarHostState = snackbarHostState,
                                 setInitiallySelectedTabTray = { selectedTab ->
-                                    state.setSelectedTabsTrayTab(
-                                        selectedTab
-                                    )
+                                    state.setSelectedTabsTrayTab(selectedTab)
                                 },
                                 tab = tab,
                             )
@@ -950,11 +952,9 @@ fun BrowserComponent(
                                     setAlertDialog = { activeAlertDialog = it },
                                     snackbarHostState = snackbarHostState,
                                     setInitiallySelectedTabTray =
-                                        { selectedTab: InfernoTabsTraySelectedTab ->
-                                            state.setSelectedTabsTrayTab(
-                                                selectedTab
-                                            )
-                                        },
+                                    { selectedTab: InfernoTabsTraySelectedTab ->
+                                        state.setSelectedTabsTrayTab(selectedTab)
+                                    },
                                     dismissTabsTray = { dismissTabsTray() })
                                 return
                             } else {
@@ -1671,9 +1671,7 @@ fun BrowserComponent(
                                 activity = context.getActivity()!!,
                                 engineView = engineView!!,
                                 swipeRefresh = swipeRefresh!!,
-                                enableFullscreen = {
-                                    browserMode = BrowserComponentMode.FULLSCREEN
-                                },
+                                enableFullscreen = { browserMode = BrowserComponentMode.FULLSCREEN },
                                 disableFullscreen = { browserMode = BrowserComponentMode.TOOLBAR },
                             )
                         }
@@ -1954,6 +1952,9 @@ fun BrowserComponent(
                     Modifier
                         .fillMaxSize()
                 ) {
+                    if (browserMode == BrowserComponentMode.TOOLBAR_EXTERNAL) {
+                        InfernoExternalToolbar()
+                    }
                     if (browserMode == BrowserComponentMode.TOOLBAR || browserMode == BrowserComponentMode.TOOLBAR_SEARCH) {
                         if (browserMode == BrowserComponentMode.TOOLBAR) {
                             InfernoTabBar(state.tabList, state.currentTab)
@@ -1974,7 +1975,7 @@ fun BrowserComponent(
                                 }
                             },
                             onNavToSettings = onNavToSettings,
-                            onNavToHistory = { navToHistory(navController) },
+                            onNavToHistory = onNavToHistory,
                             onNavToTabsTray = { showTabsTray = true },
                             searchEngine = state.searchEngine,
                             editMode = browserMode == BrowserComponentMode.TOOLBAR_SEARCH,
@@ -2030,15 +2031,6 @@ fun hideToolbar(context: Context) {
 //        engineView.setDynamicToolbarMaxHeight(bottomBarTotalHeight)
 //    }
 //}
-
-/*** navigation ***/
-
-private fun navToHistory(nav: NavController) {
-    nav.nav(
-        R.id.browserComponentWrapperFragment,
-        BrowserComponentWrapperFragmentDirections.actionGlobalHistoryFragment(),
-    )
-}
 
 private data class OnBackPressedHandler(
     val context: Context,
@@ -2154,7 +2146,7 @@ internal fun showCancelledDownloadWarning(
                         stringResource(R.string.mozac_feature_downloads_cancel_active_downloads_warning_content_title),
                         downloadCount
                     ),
-                    fontColor =LocalContext.current.infernoTheme().value.primaryTextColor,
+                    fontColor = LocalContext.current.infernoTheme().value.primaryTextColor,
                     fontWeight = FontWeight.Bold,
                 )
             },
