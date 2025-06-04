@@ -520,7 +520,7 @@ private fun SelectBanner(
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         InfernoIcon(
-            painter = painterResource(R.drawable.ic_close),
+            painter = painterResource(R.drawable.ic_close_24),
             contentDescription = stringResource(android.R.string.cancel),
             modifier = Modifier
                 .clickable { setMode.invoke(InfernoTabsTrayMode.Normal) }
@@ -570,7 +570,7 @@ private fun SelectBanner(
                 },
             )
             InfernoIcon(
-                painter = painterResource(R.drawable.ic_menu),
+                painter = painterResource(R.drawable.ic_menu_24),
                 contentDescription = stringResource(id = R.string.open_tabs_menu),
                 modifier = Modifier
                     .fillMaxSize()
@@ -686,7 +686,7 @@ private fun NormalBanner(
                 },
             )
             InfernoIcon(
-                painter = painterResource(R.drawable.ic_menu),
+                painter = painterResource(R.drawable.ic_menu_24),
                 contentDescription = stringResource(id = R.string.open_tabs_menu),
                 modifier = Modifier
                     .fillMaxSize()
@@ -705,11 +705,11 @@ private fun BoxScope.NewTabButton(
     val context = LocalContext.current
     val onClick: () -> Unit = when (selectedTab) {
         InfernoTabsTraySelectedTab.NormalTabs -> {
-            { context.components.newTab(isPrivateSession = false, nextTo = activeTabId) }
+            { context.components.newTab(private = false, nextTo = activeTabId) }
         }
 
         InfernoTabsTraySelectedTab.PrivateTabs -> {
-            { context.components.newTab(isPrivateSession = true) }
+            { context.components.newTab(private = true) }
         }
 
         InfernoTabsTraySelectedTab.SyncedTabs -> {

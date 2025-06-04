@@ -1,8 +1,10 @@
 package com.shmibblez.inferno.toolbar
 
+import androidx.annotation.IntRange
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.constraintlayout.motion.widget.MotionScene.Transition.TransitionOnClick
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.ext.infernoTheme
 import com.shmibblez.inferno.proto.InfernoSettings
@@ -198,7 +200,10 @@ fun InfernoSettings.ToolbarItem.ToToolbarOption(
 }
 
 @Composable
-fun InfernoSettings.ToolbarItem.ToToolbarIcon(tint: Color = LocalContext.current.infernoTheme().value.primaryIconColor) {
+fun InfernoSettings.ToolbarItem.ToToolbarIcon(
+    tint: Color = LocalContext.current.infernoTheme().value.primaryIconColor,
+    variant: Boolean = false,
+) {
     when (this) {
         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_SETTINGS -> ToolbarOptionsIcons.ToolbarSettings(
             tint = tint,
@@ -228,6 +233,7 @@ fun InfernoSettings.ToolbarItem.ToToolbarIcon(tint: Color = LocalContext.current
 
         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_REQUEST_DESKTOP -> ToolbarOptionsIcons.ToolbarRequestDesktopSite(
             tint = tint,
+            variant = variant,
         )
 
         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_FIND_IN_PAGE -> ToolbarOptionsIcons.ToolbarFindInPage(

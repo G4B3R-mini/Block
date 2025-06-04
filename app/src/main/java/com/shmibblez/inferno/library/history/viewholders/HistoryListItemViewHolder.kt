@@ -37,7 +37,7 @@ class HistoryListItemViewHolder(
         }
 
         binding.historyLayout.overflowView.apply {
-            setImageResource(R.drawable.ic_close)
+            setImageResource(R.drawable.ic_close_24)
             contentDescription = view.context.getString(R.string.history_delete_item)
             setOnClickListener {
                 val item = item ?: return@setOnClickListener
@@ -107,7 +107,7 @@ class HistoryListItemViewHolder(
         ) {
             binding.historyLayout.loadFavicon(item.url)
         } else if (item is History.Group) {
-            binding.historyLayout.iconView.setImageResource(R.drawable.ic_multiple_tabs)
+            binding.historyLayout.iconView.setImageResource(R.drawable.ic_multiple_tabs_24)
         }
 
         if (mode is HistoryFragmentState.Mode.Editing) {

@@ -121,7 +121,7 @@ class HistoryFragmentStore(
  * Actions to dispatch through the `HistoryStore` to modify `HistoryState` through the reducer.
  */
 sealed class HistoryFragmentAction : Action {
-    object ExitEditMode : HistoryFragmentAction()
+    data object ExitEditMode : HistoryFragmentAction()
     data class AddItemForRemoval(val item: History) : HistoryFragmentAction()
     data class RemoveItemForRemoval(val item: History) : HistoryFragmentAction()
 

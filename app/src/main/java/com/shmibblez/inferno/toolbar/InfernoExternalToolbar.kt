@@ -1,14 +1,18 @@
 package com.shmibblez.inferno.toolbar
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -20,21 +24,35 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.UiConst
 import com.shmibblez.inferno.compose.base.InfernoIcon
-import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.compose.base.InfernoTextStyle
 import com.shmibblez.inferno.ext.infernoTheme
-import mozilla.components.browser.state.state.TabSessionState
+import com.shmibblez.inferno.proto.InfernoSettings
+import mozilla.components.browser.state.state.CustomTabSessionState
 
 private val ICON_SIZE = 18.dp
 
 @Composable
 fun InfernoExternalToolbar(
-    session: TabSessionState,
+    session: CustomTabSessionState?,
+    onNavToBrowser: () -> Unit,
+    onToggleDesktopMode: () -> Unit,
+    onGoBack: (tabId: String) -> Unit,
+    onGoForward: (tabId: String) -> Unit,
+    onReload: (tabId: String) -> Unit,
+    onShare: (url: String) -> Unit,
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
+    // todo: reader mode not available for custom tabs?
+//    val readerModeEnabled = session?.readerState?.readerable ?: false
+    val isDesktopSite = session?.content?.desktopMode ?: false
+    val canGoBack = session?.content?.canGoBack ?: false
+    val canGoForward = session?.content?.canGoForward ?: false
+
+    // todo: custom tab request desktop and nav actions, use icon since ToolbarOptions use normal tab session
 
     Row(
         modifier = Modifier
@@ -50,7 +68,7 @@ fun InfernoExternalToolbar(
     ) {
         // back button
         InfernoIcon(
-            painter = painterResource(R.drawable.ic_back_button),
+            painter = painterResource(R.drawable.ic_back_button_24),
             contentDescription = stringResource(R.string.browser_menu_tools),
             modifier = Modifier.size(18.dp),
         )
@@ -61,28 +79,171 @@ fun InfernoExternalToolbar(
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.Center,
         ) {
-            InfernoText(text = session.content.title, infernoStyle = InfernoTextStyle.Normal)
-            InfernoText(text = session.content.url, infernoStyle = InfernoTextStyle.Subtitle)
+            InfernoText(
+                text = session?.content?.title ?: "", infernoStyle = InfernoTextStyle.Normal
+            )
+            InfernoText(
+                text = session?.content?.url ?: "", infernoStyle = InfernoTextStyle.Subtitle
+            )
         }
 
-        // todo: check what other options should be here
         // menu button
-        DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
+        Box(
+            modifier = Modifier
+                .size(ICON_SIZE)
+                .clickable { menuExpanded = !menuExpanded },
+        ) {
             InfernoIcon(
-                painter = painterResource(R.drawable.ic_menu),
+                painter = painterResource(R.drawable.ic_menu_24),
                 contentDescription = stringResource(R.string.browser_menu_back),
                 modifier = Modifier.size(ICON_SIZE),
             )
-            DropdownMenuItem(
-                text = {
+
+            DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
+                // powered by inferno browser
+                InfernoText(
+                    text = stringResource(
+                        R.string.browser_menu_powered_by2, stringResource(R.string.app_name)
+                    ),
+                )
+
+                // divider
+                HorizontalDivider(
+                    thickness = 1.dp,
+                    color = LocalContext.current.infernoTheme().value.primaryIconColor,
+                )
+
+                // toggle desktop mode
+                Row(
+                    modifier = Modifier.clickable {
+                        onToggleDesktopMode.invoke()
+                        menuExpanded = false
+                    },
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.Start),
+                ) {
+                    InfernoSettings.ToolbarItem.TOOLBAR_ITEM_REQUEST_DESKTOP.ToToolbarIcon(
+                        variant = isDesktopSite
+                    )
                     InfernoText(
                         text = stringResource(
-                            R.string.browser_menu_open_in_fenix, stringResource(R.string.app_name)
+                            when (session?.content?.desktopMode ?: false) {
+                                true -> R.string.browser_menu_switch_to_mobile_site
+                                false -> R.string.browser_menu_switch_to_desktop_site
+                            }
                         ),
                     )
-                },
-                onClick =, // todo
-            )
+                }
+
+//                // enable reader mode
+//                Row(
+//                    modifier = Modifier.clickable(
+//                        enabled = readerModeEnabled
+//                    ) {
+//                        onRequestReaderMode.invoke()
+//                        menuExpanded = false
+//                    },
+//                    verticalAlignment = Alignment.CenterVertically,
+//                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.Start),
+//                ) {
+//                    InfernoSettings.ToolbarItem.TOOLBAR_ITEM_REQUEST_READER_VIEW.ToToolbarIcon(
+//                        tint = when (readerModeEnabled) {
+//                            true -> LocalContext.current.infernoTheme().value.primaryIconColor
+//                            false -> LocalContext.current.infernoTheme().value.secondaryIconColor
+//                        },
+//                    )
+//                    InfernoText(
+//                        text = stringResource(R.string.browser_menu_turn_on_reader_view),
+//                        fontColor = when (readerModeEnabled) {
+//                            true -> LocalContext.current.infernoTheme().value.primaryTextColor
+//                            false -> LocalContext.current.infernoTheme().value.secondaryTextColor
+//                        },
+//                    )
+//                }
+
+                // open in browser
+                DropdownMenuItem(
+                    text = {
+                        InfernoText(
+                            text = stringResource(
+                                R.string.browser_menu_open_in_fenix,
+                                stringResource(R.string.app_name)
+                            ),
+                        )
+                    },
+                    onClick = {
+                        onNavToBrowser.invoke()
+                        menuExpanded = false
+                    },
+                )
+
+                // divider
+                HorizontalDivider(
+                    thickness = 1.dp,
+                    color = LocalContext.current.infernoTheme().value.primaryIconColor,
+                )
+
+                // nav options
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    // back
+                    Box(
+                        modifier = Modifier
+                            .wrapContentSize()
+                            .clickable(
+                                enabled = canGoBack,
+                                onClick = { session?.id?.let(onGoBack); menuExpanded = false },
+                            ),
+                    ) {
+                        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_BACK.ToToolbarIcon(
+                            tint = when (canGoBack) {
+                                true -> LocalContext.current.infernoTheme().value.primaryIconColor
+                                false -> LocalContext.current.infernoTheme().value.secondaryIconColor
+                            }
+                        )
+                    }
+                    // forward
+                    Box(
+                        modifier = Modifier
+                            .wrapContentSize()
+                            .clickable(
+                                enabled = canGoForward,
+                                onClick = { session?.id?.let(onGoForward); menuExpanded = false },
+                            ),
+                    ) {
+                        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_FORWARD.ToToolbarIcon(
+                            tint = when (canGoForward) {
+                                true -> LocalContext.current.infernoTheme().value.primaryIconColor
+                                false -> LocalContext.current.infernoTheme().value.secondaryIconColor
+                            }
+                        )
+                    }
+                    // reload
+                    Box(
+                        modifier = Modifier
+                            .wrapContentSize()
+                            .clickable(
+                                onClick = { session?.id?.let(onReload); menuExpanded = false },
+                            ),
+                    ) {
+                        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_RELOAD.ToToolbarIcon()
+                    }
+                    // share
+                    Box(
+                        modifier = Modifier
+                            .wrapContentSize()
+                            .clickable(
+                                onClick = {
+                                    session?.content?.url?.let(onShare); menuExpanded = false
+                                },
+                            ),
+                    ) {
+                        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_SHARE.ToToolbarIcon()
+                    }
+                }
+            }
         }
     }
 }

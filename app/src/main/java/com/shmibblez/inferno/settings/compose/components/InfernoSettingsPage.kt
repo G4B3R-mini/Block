@@ -33,7 +33,7 @@ fun InfernoSettingsPage(
             TopAppBar(
                 navigationIcon = {
                     InfernoIcon(
-                        painter = painterResource(R.drawable.ic_back_button),
+                        painter = painterResource(R.drawable.ic_back_button_24),
                         contentDescription = stringResource(R.string.browser_menu_back),
                         modifier = Modifier
                             .padding(start = 8.dp)

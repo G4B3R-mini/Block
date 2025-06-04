@@ -39,7 +39,7 @@ class CollectionCreationBottomBarView(
 
         iconButton.apply {
             val drawable = context.getDrawableWithTint(
-                R.drawable.ic_close,
+                R.drawable.ic_close_24,
                 ContextCompat.getColor(context, R.color.photonWhite),
             )
             setImageDrawable(drawable)

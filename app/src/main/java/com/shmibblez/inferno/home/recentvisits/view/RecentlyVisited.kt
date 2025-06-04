@@ -174,7 +174,7 @@ private fun RecentlyVisitedHistoryGroup(
                     onClick = { onRecentVisitClick(recentVisit) },
                     onLongClick = { isMenuExpanded = true },
                 ),
-            beforeIconPainter = painterResource(R.drawable.ic_multiple_tabs),
+            beforeIconPainter = painterResource(R.drawable.ic_multiple_tabs_24),
             description = stringResource(id = captionId, recentVisit.historyMetadata.size),
         )
 

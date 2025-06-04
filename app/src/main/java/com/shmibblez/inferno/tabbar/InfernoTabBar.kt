@@ -219,7 +219,7 @@ fun InfernoTabBar(tabList: List<TabSessionState>, selectedTab: TabSessionState?)
                         .size(12.dp)
                         .clickable {
                             context.components.newTab(
-                                isPrivateSession = isPrivateSession,
+                                private = isPrivateSession,
                                 nextTo = selectedTab.id, // todo: next to current based on config, default is true
                             )
                         },
@@ -361,7 +361,7 @@ private fun MiniTab(
                     .clickable {
                         context.components.useCases.tabsUseCases.removeTab(tabSessionState.id)
                     },
-                painter = painterResource(R.drawable.ic_close),
+                painter = painterResource(R.drawable.ic_close_24),
                 contentDescription = stringResource(R.string.close_tab),
             )
             // separator

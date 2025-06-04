@@ -52,7 +52,7 @@
         app:layout_constraintBottom_toBottomOf="@+id/multiselect_title"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/multiselect_title"
-        app:srcCompat="@drawable/ic_close"
+        app:srcCompat="@drawable/ic_close_24"
         app:tint="@color/fx_mobile_icon_color_oncolor" />
 
     <TextView
@@ -120,7 +120,7 @@
         app:layout_constraintBottom_toBottomOf="@id/tab_layout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/topBar"
-        app:srcCompat="@drawable/ic_menu"
+        app:srcCompat="@drawable/ic_menu_24"
         app:tint="@color/fx_mobile_icon_color_primary" />
 
     <View

@@ -28,6 +28,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import androidx.paging.map
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.mapNotNull
@@ -65,6 +66,7 @@ import com.shmibblez.inferno.library.history.state.bindings.MenuBinding
 import com.shmibblez.inferno.library.history.state.bindings.PendingDeletionBinding
 import com.shmibblez.inferno.tabstray.Page
 import com.shmibblez.inferno.utils.allowUndo
+
 //import com.shmibblez.inferno.GleanMetrics.History as GleanHistory
 
 @SuppressWarnings("TooManyFunctions", "LargeClass")
@@ -260,6 +262,7 @@ class HistoryFragment : LibraryPageFragment<History>(), UserInteractionHandler, 
                     is History.Regular -> {
                         shareTabs.add(ShareData(url = history.url, title = history.title))
                     }
+
                     is History.Group -> {
                         shareTabs.addAll(
                             history.items.map { metadata ->
@@ -267,6 +270,7 @@ class HistoryFragment : LibraryPageFragment<History>(), UserInteractionHandler, 
                             },
                         )
                     }
+
                     else -> {
                         // no-op, There is no [History.Metadata] in the HistoryFragment.
                     }
@@ -277,6 +281,7 @@ class HistoryFragment : LibraryPageFragment<History>(), UserInteractionHandler, 
             historyStore.dispatch(HistoryFragmentAction.ExitEditMode)
             true
         }
+
         R.id.delete_history_multi_select -> {
             with(historyStore) {
                 dispatch(HistoryFragmentAction.DeleteItems(state.mode.selectedItems))
@@ -285,6 +290,7 @@ class HistoryFragment : LibraryPageFragment<History>(), UserInteractionHandler, 
             }
             true
         }
+
         R.id.open_history_in_new_tabs_multi_select -> {
             openItemsInNewTab { selectedItem ->
 //                GleanHistory.openedItemsInNewTabs.record(NoExtras())
@@ -295,6 +301,7 @@ class HistoryFragment : LibraryPageFragment<History>(), UserInteractionHandler, 
             historyStore.dispatch(HistoryFragmentAction.ExitEditMode)
             true
         }
+
         R.id.open_history_in_private_tabs_multi_select -> {
             openItemsInNewTab(private = true) { selectedItem ->
 //                GleanHistory.openedItemsInNewTabs.record(NoExtras())
@@ -310,6 +317,7 @@ class HistoryFragment : LibraryPageFragment<History>(), UserInteractionHandler, 
             historyStore.dispatch(HistoryFragmentAction.ExitEditMode)
             true
         }
+
         R.id.history_search -> {
             findNavController().nav(
                 R.id.historyFragment,
@@ -317,6 +325,7 @@ class HistoryFragment : LibraryPageFragment<History>(), UserInteractionHandler, 
             )
             true
         }
+
         R.id.history_delete -> {
             DeleteConfirmationDialogFragment(
                 onDeleteTimeRange = ::onDeleteTimeRange,
@@ -388,6 +397,7 @@ class HistoryFragment : LibraryPageFragment<History>(), UserInteractionHandler, 
                         .build(),
                 )
             }
+
             else -> Unit
         }
     }
@@ -488,7 +498,8 @@ class HistoryFragment : LibraryPageFragment<History>(), UserInteractionHandler, 
         @SuppressLint("InflateParams")
         override fun onCreateDialog(savedInstanceState: Bundle?): Dialog =
             AlertDialog.Builder(requireContext()).apply {
-                val layout = getLayoutInflater().inflate(R.layout.delete_history_time_range_dialog, null)
+                val layout =
+                    getLayoutInflater().inflate(R.layout.delete_history_time_range_dialog, null)
                 val radioGroup = layout.findViewById<RadioGroup>(R.id.radio_group)
                 radioGroup.check(R.id.last_hour_button)
                 setView(layout)

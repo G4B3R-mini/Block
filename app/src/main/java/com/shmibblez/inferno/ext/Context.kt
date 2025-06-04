@@ -48,9 +48,9 @@ val Context.components: Components
  */
 // todo: next to current, go to tab action add new tab and copy
 fun Components.newTab(
-    isPrivateSession: Boolean = false,
     nextTo: String? = null,
-    url: String = if (!isPrivateSession) "inferno:home" else "inferno:private",
+    private: Boolean = false,
+    url: String = if (!private) "inferno:home" else "inferno:private",
     selectTab: Boolean = true,
     startLoading: Boolean = true,
     parentId: String? = null,
@@ -59,16 +59,26 @@ fun Components.newTab(
     engineSession: EngineSession? = null,
     source: SessionState.Source = SessionState.Source.Internal.NewTab,
     searchTerms: String = "",
-    private: Boolean = false,
     historyMetadata: HistoryMetadataKey? = null,
     isSearch: Boolean = false,
     searchEngineName: String? = null,
     additionalHeaders: Map<String, String>? = null,
 ): String {
     val tabId = this.useCases.tabsUseCases.addTab(
-        url = if (isPrivateSession) "inferno:privatebrowsing" else "inferno:home",
-        selectTab = true,
-        private = isPrivateSession
+        url = url,
+        selectTab = selectTab,
+        startLoading = startLoading,
+        parentId = parentId,
+        flags = flags,
+        contextId = contextId,
+        engineSession = engineSession,
+        source = source,
+        searchTerms = searchTerms,
+        private = private,
+        historyMetadata = historyMetadata,
+        isSearch = isSearch,
+        searchEngineName = searchEngineName,
+        additionalHeaders = additionalHeaders,
     )
 
     if (nextTo != null)

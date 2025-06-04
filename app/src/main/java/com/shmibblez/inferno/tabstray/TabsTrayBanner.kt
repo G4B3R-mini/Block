@@ -289,7 +289,7 @@ private fun TabPageBanner(
 
                 )
                 Icon(
-                    painter = painterResource(R.drawable.ic_menu),
+                    painter = painterResource(R.drawable.ic_menu_24),
                     contentDescription = stringResource(id = R.string.open_tabs_menu),
                     tint = FirefoxTheme.colors.iconPrimary,
                 )
@@ -337,7 +337,7 @@ private fun MultiSelectBanner(
     ) {
         IconButton(onClick = onExitSelectModeClick) {
             InfernoIcon(
-                painter = painterResource(id = R.drawable.ic_close),
+                painter = painterResource(id = R.drawable.ic_close_24),
                 contentDescription = stringResource(id = R.string.tab_tray_close_multiselect_content_description),
                 tint = FirefoxTheme.colors.iconOnColor,
             )
@@ -384,7 +384,7 @@ private fun MultiSelectBanner(
             enabled = buttonsEnabled,
         ) {
             Icon(
-                painter = painterResource(id = R.drawable.ic_menu),
+                painter = painterResource(id = R.drawable.ic_menu_24),
                 contentDescription = stringResource(id = R.string.tab_tray_multiselect_menu_content_description),
                 tint = buttonTint,
             )

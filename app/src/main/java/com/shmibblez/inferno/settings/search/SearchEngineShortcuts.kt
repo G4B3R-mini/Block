@@ -189,7 +189,7 @@ private fun SearchItem(
                     },
                 ) {
                     Icon(
-                        painter = painterResource(id = R.drawable.ic_menu),
+                        painter = painterResource(id = R.drawable.ic_menu_24),
                         contentDescription = stringResource(id = R.string.content_description_menu),
                         tint = FirefoxTheme.colors.iconPrimary,
                     )

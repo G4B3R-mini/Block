@@ -24,7 +24,7 @@
         app:tint="@color/fx_mobile_icon_color_oncolor"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_close" />
+        app:srcCompat="@drawable/ic_close_24" />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/title"

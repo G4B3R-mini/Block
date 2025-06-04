@@ -122,7 +122,7 @@ private fun Header(
             modifier = Modifier.size(20.dp),
         ) {
             Icon(
-                painter = painterResource(id = R.drawable.ic_close),
+                painter = painterResource(id = R.drawable.ic_close_24),
                 contentDescription = stringResource(id = R.string.microsurvey_close_button_content_description),
                 tint = FirefoxTheme.colors.iconPrimary,
             )

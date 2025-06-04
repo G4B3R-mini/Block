@@ -18,7 +18,6 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.NavDirections
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
-import mozilla.components.concept.base.crash.Breadcrumb
 import mozilla.components.support.utils.ext.isLandscape
 import com.shmibblez.inferno.NavHostActivity
 import com.shmibblez.inferno.R
@@ -43,7 +42,7 @@ fun Fragment.getPreferenceKey(@StringRes resourceId: Int): String = getString(re
  */
 fun Fragment.showToolbar(title: String) {
     (requireActivity() as AppCompatActivity).title = title
-    activity?.setNavigationIcon(R.drawable.ic_back_button)
+    activity?.setNavigationIcon(R.drawable.ic_back_button_24)
     (activity as NavHostActivity).getSupportActionBarAndInflateIfNecessary().show()
 }
 

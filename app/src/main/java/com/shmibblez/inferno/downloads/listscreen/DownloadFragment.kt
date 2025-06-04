@@ -274,7 +274,7 @@ class DownloadFragment : ComposeFragment(), UserInteractionHandler, MenuProvider
         activity?.title = title
         val toolbar = activity?.findViewById<Toolbar>(R.id.navigationToolbar)
         toolbar?.setToolbarColors(foregroundColor, backgroundColor)
-        toolbar?.setNavigationIcon(R.drawable.ic_back_button)
+        toolbar?.setNavigationIcon(R.drawable.ic_back_button_24)
         toolbar?.navigationIcon?.setTint(foregroundColor)
     }
 

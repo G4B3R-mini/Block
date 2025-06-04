@@ -44,7 +44,6 @@ import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -142,6 +141,7 @@ import com.shmibblez.inferno.tabstray.TabsTrayFragmentDirections
 import com.shmibblez.inferno.tabstray.ext.isActiveDownload
 import com.shmibblez.inferno.tabstray.ext.isNormalTab
 import com.shmibblez.inferno.theme.ThemeManager
+import com.shmibblez.inferno.toolbar.InfernoExternalToolbar
 import com.shmibblez.inferno.toolbar.InfernoToolbar
 import com.shmibblez.inferno.toolbar.ToolbarMenuBottomSheet
 import com.shmibblez.inferno.wifi.SitePermissionsWifiIntegration
@@ -212,6 +212,7 @@ import mozilla.components.service.sync.logins.SyncableLoginsStorage
 import mozilla.components.support.base.feature.ActivityResultHandler
 import mozilla.components.support.base.feature.ViewBoundFeatureWrapper
 import mozilla.components.support.base.log.logger.Logger
+import mozilla.components.support.ktx.android.content.share
 import mozilla.components.support.ktx.android.view.enterImmersiveMode
 import mozilla.components.support.ktx.android.view.exitImmersiveMode
 import mozilla.components.support.ktx.android.view.hideKeyboard
@@ -321,10 +322,6 @@ fun nav(
     options: NavOptions? = null,
 ) {
     navController.nav(id, directions, options)
-}
-
-enum class BrowserComponentMode {
-    TOOLBAR, TOOLBAR_SEARCH, TOOLBAR_EXTERNAL, FIND_IN_PAGE, READER_VIEW, FULLSCREEN,
 }
 
 enum class BrowserComponentPageType {
@@ -517,26 +514,12 @@ fun BrowserComponent(
             )
         )
     }
-    val bottomBarOffsetPx = remember { Animatable(0F) }
 
-    // browser display mode, also sets bottomBarHeightDp
-    var browserMode by remember {
-        run {
-            val toolbarState = mutableStateOf(BrowserComponentMode.TOOLBAR)
-            object : MutableState<BrowserComponentMode> by toolbarState {
-                override var value
-                    get() = toolbarState.value
-                    set(value) {
-                        toolbarState.value = value
-                        bottomBarHeightDp = UiConst.calcBottomBarHeight(value)
-                        // reset bottom bar offset
-                        coroutineScope.launch {
-                            bottomBarOffsetPx.snapTo(0F)
-                        }
-                    }
-            }
-        }
+    LaunchedEffect(state.browserMode) {
+        bottomBarHeightDp = UiConst.calcBottomBarHeight(state.browserMode)
     }
+
+    val bottomBarOffsetPx = remember { Animatable(0F) }
 
 
     val webPrompterState = rememberInfernoPromptFeatureState(
@@ -659,9 +642,9 @@ fun BrowserComponent(
         engine = context.components.core.engine,
         store = store,
         onReaderViewStatusChange = { _, active ->
-            browserMode = when (active) {
-                true -> BrowserComponentMode.READER_VIEW
-                false -> BrowserComponentMode.TOOLBAR
+            when (active) {
+                true -> state.setBrowserModeReaderView()
+                false -> state.setBrowserModeToolbar()
             }
         },
     )
@@ -669,8 +652,8 @@ fun BrowserComponent(
     val backHandler = OnBackPressedHandler(
         context = context,
         toolbarBackPressedHandler = {
-            if (browserMode != BrowserComponentMode.TOOLBAR) {
-                browserMode = BrowserComponentMode.TOOLBAR
+            if (state.browserMode != BrowserComponentMode.TOOLBAR) {
+                state.setBrowserModeToolbar()
                 true
             } else {
                 false
@@ -696,22 +679,23 @@ fun BrowserComponent(
     // bottom sheet menu setup
     var showToolbarMenuBottomSheet by remember { mutableStateOf(false) }
     if (showToolbarMenuBottomSheet) {
-        ToolbarMenuBottomSheet(tabSessionState = state.currentTab,
+        ToolbarMenuBottomSheet(
+            tabSessionState = state.currentTab,
             loading = state.currentTab?.content?.loading ?: false,
             tabCount = state.tabList.size,
             onDismissMenuBottomSheet = { showToolbarMenuBottomSheet = false },
-            onActivateFindInPage = { browserMode = BrowserComponentMode.FIND_IN_PAGE },
+            onActivateFindInPage = { state.setBrowserModeFindInPage() },
             onActivateReaderView = {
                 val successful = infernoReaderViewState.showReaderView()
                 if (successful) {
-                    browserMode = BrowserComponentMode.READER_VIEW
+                    state.setBrowserModeReaderView()
                 }
             },
             onRequestSearchBar = { /* todo */ },
             onNavToSettings = onNavToSettings,
             onNavToTabsTray = { showTabsTray = true },
             onNavToHistory = onNavToHistory,
-            )
+        )
     }
 
     if (showTabsTray) {
@@ -951,8 +935,7 @@ fun BrowserComponent(
                                     coroutineScope = coroutineScope,
                                     setAlertDialog = { activeAlertDialog = it },
                                     snackbarHostState = snackbarHostState,
-                                    setInitiallySelectedTabTray =
-                                    { selectedTab: InfernoTabsTraySelectedTab ->
+                                    setInitiallySelectedTabTray = { selectedTab: InfernoTabsTraySelectedTab ->
                                         state.setSelectedTabsTrayTab(selectedTab)
                                     },
                                     dismissTabsTray = { dismissTabsTray() })
@@ -1430,8 +1413,8 @@ fun BrowserComponent(
                             activity = context.getActivity()!!,
                             engineView = engineView!!,
                             swipeRefresh = swipeRefresh!!,
-                            enableFullscreen = { browserMode = BrowserComponentMode.FULLSCREEN },
-                            disableFullscreen = { browserMode = BrowserComponentMode.TOOLBAR },
+                            enableFullscreen = { state.setBrowserModeFullscreen() },
+                            disableFullscreen = { state.setBrowserModeToolbar() },
                         )
                     },
                 ),
@@ -1453,8 +1436,8 @@ fun BrowserComponent(
                             activity = context.getActivity()!!,
                             engineView = engineView!!,
                             swipeRefresh = swipeRefresh!!,
-                            enableFullscreen = { browserMode = BrowserComponentMode.FULLSCREEN },
-                            disableFullscreen = { browserMode = BrowserComponentMode.TOOLBAR },
+                            enableFullscreen = { state.setBrowserModeFullscreen() },
+                            disableFullscreen = { state.setBrowserModeToolbar() },
                         )
                     }
             }
@@ -1671,8 +1654,8 @@ fun BrowserComponent(
                                 activity = context.getActivity()!!,
                                 engineView = engineView!!,
                                 swipeRefresh = swipeRefresh!!,
-                                enableFullscreen = { browserMode = BrowserComponentMode.FULLSCREEN },
-                                disableFullscreen = { browserMode = BrowserComponentMode.TOOLBAR },
+                                enableFullscreen = { state.setBrowserModeFullscreen() },
+                                disableFullscreen = { state.setBrowserModeToolbar() },
                             )
                         }
                     }
@@ -1949,51 +1932,62 @@ fun BrowserComponent(
                     },
             ) {
                 Column(
-                    Modifier
-                        .fillMaxSize()
+                    Modifier.fillMaxSize()
                 ) {
-                    if (browserMode == BrowserComponentMode.TOOLBAR_EXTERNAL) {
-                        InfernoExternalToolbar()
+                    if (state.browserMode == BrowserComponentMode.TOOLBAR_EXTERNAL) {
+                        InfernoExternalToolbar(
+                            session = state.currentCustomTab,
+                            onNavToBrowser = { state.migrateExternalToNormal() },
+                            onToggleDesktopMode = { state.toggleDesktopMode() },
+                            onGoBack = {
+                                context.components.useCases.sessionUseCases.goBack.invoke(it)
+                            },
+                            onGoForward = {
+                                context.components.useCases.sessionUseCases.goBack.invoke(it)
+                            },
+                            onReload = {
+                                context.components.useCases.sessionUseCases.goBack.invoke(it)
+                            },
+                            onShare = { context.share(it) },
+                        )
                     }
-                    if (browserMode == BrowserComponentMode.TOOLBAR || browserMode == BrowserComponentMode.TOOLBAR_SEARCH) {
-                        if (browserMode == BrowserComponentMode.TOOLBAR) {
+                    if (state.browserMode == BrowserComponentMode.TOOLBAR || state.browserMode == BrowserComponentMode.TOOLBAR_SEARCH) {
+                        if (state.browserMode == BrowserComponentMode.TOOLBAR) {
                             InfernoTabBar(state.tabList, state.currentTab)
                         }
+                        // todo: package in variables above, invoke here or in top app bar based on
+                        //  settings
                         InfernoToolbar(
                             tabSessionState = state.currentTab,
                             tabCount = state.tabList.size,
                             onShowMenuBottomSheet = { showToolbarMenuBottomSheet = true },
                             onDismissMenuBottomSheet = { showToolbarMenuBottomSheet = false },
                             onRequestSearchBar = { /* todo: search bar */ },
-                            onActivateFindInPage = {
-                                browserMode = BrowserComponentMode.FIND_IN_PAGE
-                            },
+                            onActivateFindInPage = { state.setBrowserModeFindInPage() },
                             onActivateReaderView = {
                                 val successful = infernoReaderViewState.showReaderView()
                                 if (successful) {
-                                    browserMode = BrowserComponentMode.READER_VIEW
+                                    state.setBrowserModeReaderView()
                                 }
                             },
                             onNavToSettings = onNavToSettings,
                             onNavToHistory = onNavToHistory,
                             onNavToTabsTray = { showTabsTray = true },
                             searchEngine = state.searchEngine,
-                            editMode = browserMode == BrowserComponentMode.TOOLBAR_SEARCH,
-                            onStartSearch = { browserMode = BrowserComponentMode.TOOLBAR_SEARCH },
-                            onStopSearch = { browserMode = BrowserComponentMode.TOOLBAR },
+                            editMode = state.browserMode == BrowserComponentMode.TOOLBAR_SEARCH,
+                            onStartSearch = { state.setBrowserModeSearch() },
+                            onStopSearch = { state.setBrowserModeToolbar() },
                         )
                     }
-                    if (browserMode == BrowserComponentMode.FIND_IN_PAGE) {
+                    if (state.browserMode == BrowserComponentMode.FIND_IN_PAGE) {
                         BrowserFindInPageBar(
-                            onDismiss = {
-                                browserMode = BrowserComponentMode.TOOLBAR
-                            },
+                            onDismiss = { state.setBrowserModeToolbar() },
                             engineSession = state.currentTab?.engineState?.engineSession,
                             engineView = engineView,
                             session = state.currentTab,
                         )
                     }
-                    if (browserMode == BrowserComponentMode.READER_VIEW) {
+                    if (state.browserMode == BrowserComponentMode.READER_VIEW) {
                         InfernoReaderViewControls(
                             state = infernoReaderViewState,
                         )

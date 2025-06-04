@@ -6,6 +6,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.LifecycleOwner
@@ -18,10 +19,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import mozilla.components.browser.state.search.SearchEngine
 import mozilla.components.browser.state.selector.normalTabs
 import mozilla.components.browser.state.selector.privateTabs
 import mozilla.components.browser.state.selector.selectedTab
+import mozilla.components.browser.state.state.CustomTabSessionState
 import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.browser.state.state.recover.TabState
 import mozilla.components.browser.state.state.selectedOrDefaultSearchEngine
@@ -30,9 +33,13 @@ import mozilla.components.feature.tabs.TabsUseCases
 import mozilla.components.lib.state.ext.flowScoped
 import mozilla.components.support.base.feature.LifecycleAwareFeature
 
+enum class BrowserComponentMode {
+    TOOLBAR, TOOLBAR_SEARCH, TOOLBAR_EXTERNAL, FIND_IN_PAGE, READER_VIEW, FULLSCREEN,
+}
+
 @Composable
 fun rememberBrowserComponentState(
-    initiallyExternal: Boolean,
+    coroutineScope: CoroutineScope = rememberCoroutineScope(),
     lifecycleOwner: LifecycleOwner? = null,
     components: Components = LocalContext.current.components,
     store: BrowserStore = LocalContext.current.components.core.store,
@@ -42,7 +49,7 @@ fun rememberBrowserComponentState(
     val state = remember {
         mutableStateOf(
             BrowserComponentState(
-                initiallyExternal = initiallyExternal,
+                coroutineScope = coroutineScope,
                 lifecycleOwner = lifecycleOwner,
                 components = components,
                 store = store,
@@ -63,7 +70,7 @@ fun rememberBrowserComponentState(
 private const val INIT_JOB_MILLIS = 3000L
 
 class BrowserComponentState(
-    initiallyExternal: Boolean,
+    val coroutineScope: CoroutineScope,
     val lifecycleOwner: LifecycleOwner? = null,
     val components: Components,
     val store: BrowserStore,
@@ -78,8 +85,11 @@ class BrowserComponentState(
     // todo: test, before run also make changes to tab bar (tab layout)
     private var awaitingNewTab = false
 
-    var isExternal by mutableStateOf(initiallyExternal)
+    // browser display mode, also sets bottomBarHeightDp
+    var browserMode by mutableStateOf(BrowserComponentMode.TOOLBAR)
         private set
+    private val isExternal
+        get() = currentCustomTab != null
 
     var tabList: List<TabSessionState> by mutableStateOf(emptyList())
         private set
@@ -87,9 +97,13 @@ class BrowserComponentState(
         private set
     var privateTabs: List<TabSessionState> by mutableStateOf(emptyList())
         private set
+    var customTabs: List<CustomTabSessionState> by mutableStateOf(emptyList())
+        private set
     var closedTabs: List<TabState> by mutableStateOf(emptyList())
         private set
     var currentTab: TabSessionState? by mutableStateOf(null)
+        private set
+    var currentCustomTab: CustomTabSessionState? by mutableStateOf(null)
         private set
     var isPrivateSession: Boolean by mutableStateOf(false)
         private set
@@ -110,6 +124,19 @@ class BrowserComponentState(
         browserStateObserver = store.flowScoped(lifecycleOwner) { flow ->
             flow.map { it }.collect {
                 currentTab = it.selectedTab
+                currentCustomTab = it.customTabs.firstOrNull()
+
+                // select external tab if not selected
+                if (isExternal && currentTab?.id != currentCustomTab?.id) {
+                    currentCustomTab?.id?.let { components.useCases.tabsUseCases.selectTab(it) }
+                }
+
+                // update browser mode based on if external
+                if (isExternal && browserMode != BrowserComponentMode.TOOLBAR_EXTERNAL) {
+                    browserMode = BrowserComponentMode.TOOLBAR_EXTERNAL
+                } else if (!isExternal && browserMode == BrowserComponentMode.TOOLBAR_EXTERNAL) {
+                    browserMode = BrowserComponentMode.TOOLBAR
+                }
 
                 if (!initialized && !preinitialized) {
                     // if first run, preinit and delay for a bit
@@ -144,6 +171,7 @@ class BrowserComponentState(
                 }
                 normalTabs = it.normalTabs
                 privateTabs = it.privateTabs
+                customTabs = it.customTabs
                 closedTabs = it.closedTabs
                 // if no tab selected, select one
                 if (currentTab == null) {
@@ -158,7 +186,7 @@ class BrowserComponentState(
                         }
                     } else if (!awaitingNewTab) {
                         // if tab list empty add new tab
-                        components.newTab(false)
+                        components.newTab(private = false)
                         awaitingNewTab = true
                     }
                 } else {
@@ -174,10 +202,61 @@ class BrowserComponentState(
         browserStateObserver?.cancel()
     }
 
+    fun toggleDesktopMode() {
+        when (currentTab?.content?.desktopMode) {
+            false -> components.useCases.sessionUseCases.requestDesktopSite(true)
+            true -> components.useCases.sessionUseCases.requestDesktopSite(false)
+            null -> {} // no-op
+        }
+    }
+
+    /**
+     * external helpers
+     */
+    fun migrateExternalToNormal() {
+        currentCustomTab?.id?.let {
+            components.useCases.customTabsUseCases.migrate(it, select = true)
+            browserMode = BrowserComponentMode.TOOLBAR
+        }
+    }
+
+    /**
+     * browser mode
+     */
+
+    fun setBrowserModeToolbar() {
+        browserMode = when (isExternal) {
+            true -> BrowserComponentMode.TOOLBAR_EXTERNAL
+            false -> BrowserComponentMode.TOOLBAR
+        }
+    }
+
+    fun setBrowserModeSearch() {
+        browserMode = BrowserComponentMode.TOOLBAR_SEARCH
+    }
+
+    fun setBrowserModeReaderView() {
+        browserMode = BrowserComponentMode.READER_VIEW
+    }
+
+    fun setBrowserModeFindInPage() {
+        browserMode = BrowserComponentMode.FIND_IN_PAGE
+    }
+
+    fun setBrowserModeFullscreen() {
+        browserMode = BrowserComponentMode.FULLSCREEN
+    }
+
+    /**
+     * tabs tray
+     */
     fun setSelectedTabsTrayTab(selectedTabsTrayTab: InfernoTabsTraySelectedTab) {
         this.selectedTabsTrayTab = selectedTabsTrayTab
     }
 
+    /**
+     * page type
+     */
     private fun resolvePageType(tabSessionState: TabSessionState?): BrowserComponentPageType {
         val url = tabSessionState?.content?.url
         return if (tabSessionState?.engineState?.crashed == true) BrowserComponentPageType.CRASH

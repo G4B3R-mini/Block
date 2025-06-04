@@ -123,7 +123,7 @@ fun Collection(
                             },
                         ) {
                             InfernoIcon(
-                                painter = painterResource(R.drawable.ic_menu),
+                                painter = painterResource(R.drawable.ic_menu_24),
                                 contentDescription = stringResource(
                                     R.string.collection_menu_button_content_description,
                                 ),

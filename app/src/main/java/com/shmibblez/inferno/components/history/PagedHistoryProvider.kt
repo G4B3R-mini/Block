@@ -4,6 +4,7 @@
 
 package com.shmibblez.inferno.components.history
 
+import android.annotation.SuppressLint
 import androidx.annotation.VisibleForTesting
 import mozilla.components.browser.storage.sync.PlacesHistoryStorage
 import mozilla.components.concept.storage.HistoryMetadata
@@ -110,6 +111,7 @@ class DefaultPagedHistoryProvider(
 
     @Volatile private var historyGroups: List<HistoryDB.Group>? = null
 
+    @SuppressLint("VisibleForTests")
     override suspend fun getHistory(
         offset: Int,
         numberOfItems: Int,

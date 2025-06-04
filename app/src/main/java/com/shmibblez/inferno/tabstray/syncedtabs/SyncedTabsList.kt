@@ -105,7 +105,7 @@ fun SyncedTabsList(
                                         description = syncedTab.displayURL,
                                         onClick = { onTabClick(syncedTab.tab) },
                                         iconDescription = stringResource(R.string.close_tab),
-                                        iconPainter = painterResource(R.drawable.ic_close),
+                                        iconPainter = painterResource(R.drawable.ic_close_24),
                                         onIconClick = { onTabCloseClick(syncedTab.action.deviceId, syncedTab.tab) },
                                     )
                                     is SyncedTabsListItem.Tab.Action.None -> FaviconListItem(
