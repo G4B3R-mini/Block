@@ -7,11 +7,16 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -31,111 +36,105 @@ import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.compose.base.InfernoTextStyle
 import com.shmibblez.inferno.ext.infernoTheme
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun HistoryViewer(
     state: HistoryViewerState,
     modifier: Modifier,
     onOpenHistoryItem: (History) -> Unit,
-    onDeleteItem: (History) -> Unit,
 ) {
-    LazyColumn(
+    val pullToRefreshState = rememberPullToRefreshState()
+    PullToRefreshBox(
+        state = pullToRefreshState,
+        isRefreshing = state.isRefreshing,
+        onRefresh = { state.refreshList() },
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        items(state.historyGroups ?: emptyList()) {
-            var expanded by remember { mutableStateOf(false) }
-            HistoryItem(
-                item = it,
-                modifier = Modifier.padding(horizontal = 8.dp),
-                selectionMode = state.mode is HistoryViewerState.Mode.Selection,
-                selectedItems = (state.mode as? HistoryViewerState.Mode.Selection)?.selectedItems
-                    ?: emptySet(),
-                expanded = if (it is History.Group) expanded else false,
-                onToggleExpanded = if (it is History.Group) {
-                    { expanded = !expanded }
-                } else {
-                    {}
-                },
-                pendingDeletionCount = state.pendingDeletion?.size ?: 0,
-                onClick = { clicked ->
-                    when (state.mode) {
-                        // if normal, expand group or open in browser
-                        HistoryViewerState.Mode.Normal -> {
-                            if (clicked is History.Group) {
-                                expanded = !expanded
-                            } else {
-                                onOpenHistoryItem.invoke(clicked)
-                            }
-                        }
-                        // if selection, add individual items
-                        is HistoryViewerState.Mode.Selection -> {
-                            // add individual items
-                            (state.mode as HistoryViewerState.Mode.Selection).let {
-                                if (clicked is History.Group) {
-                                    (state.mode as HistoryViewerState.Mode.Selection).selectedItems += clicked.items
-                                } else {
-                                    (state.mode as HistoryViewerState.Mode.Selection).selectedItems
-                                }
-                            }
-                        }
-                        // if syncing do nothing
-                        HistoryViewerState.Mode.Syncing -> {} // no-op
-                    }
-                },
-                onLongClick = { clicked ->
-                    when (state.mode) {
-                        // if normal, select item (or child items in case of group)
-                        HistoryViewerState.Mode.Normal -> {
-                            // add individual items
-                            (state.mode as HistoryViewerState.Mode.Selection).let {
-                                if (clicked is History.Group) {
-                                    (state.mode as HistoryViewerState.Mode.Selection).selectedItems += clicked.items
-                                } else {
-                                    (state.mode as HistoryViewerState.Mode.Selection).selectedItems
-                                }
-                            }
-                        }
-                        // if selection, add individual items
-                        is HistoryViewerState.Mode.Selection -> {
-                            // add individual items
-                            (state.mode as HistoryViewerState.Mode.Selection).let {
-                                if (clicked is History.Group) {
-                                    (state.mode as HistoryViewerState.Mode.Selection).selectedItems += clicked.items
-                                } else {
-                                    (state.mode as HistoryViewerState.Mode.Selection).selectedItems
-                                }
-                            }
-                        }
-                        // if syncing, do nothing
-                        HistoryViewerState.Mode.Syncing -> {} // no-op
-                    }
-                },
-                onDeletePressed = { deleted ->
-                    onDeleteItem.invoke(deleted)
-                },
+        contentAlignment = Alignment.Center,
+        indicator = {
+            PullToRefreshDefaults.Indicator(
+                state = pullToRefreshState,
+                isRefreshing = state.isRefreshing,
+//                modifier = ,
+                containerColor = LocalContext.current.infernoTheme().value.secondaryBackgroundColor,
+                color = LocalContext.current.infernoTheme().value.primaryActionColor,
+//                threshold = ,
             )
+        },
+    ) {
+        LazyColumn(
+//        modifier = modifier,
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            items(state.visibleItems ?: emptyList()) { item ->
+                when (item) {
+                    is History.Regular -> {
+                        HistoryRegularItem(item = item,
+                            onOpen = onOpenHistoryItem,
+                            selected = state.selectedItems?.contains(item),
+                            onSelect = { state.selectRegularItem(it) },
+                            onUnselect = { state.unselectRegularItem(it) },
+                            onDelete = { state.deleteItem(it) })
+                    }
+
+                    is History.Metadata -> {
+                        HistoryMetadataItem(item = item,
+                            onOpen = onOpenHistoryItem,
+                            selected = state.selectedItems?.contains(item),
+                            onSelect = { state.selectMetadataItem(it) },
+                            onUnselect = { state.unselectMetadataItem(it) },
+                            onDelete = { state.deleteItem(it) })
+                    }
+
+                    is History.Group -> {
+                        HistoryGroupItem(item = item,
+                            onOpenSubItem = onOpenHistoryItem,
+                            selectedItems = state.selectedItems,
+                            onSelectGroup = { state.selectGroupItem(it) },
+                            onUnselectGroup = { state.unselectGroupItem(it) },
+                            onSelectSubItem = { group, subItem ->
+                                state.selectGroupSubItem(group, subItem)
+                            },
+                            onUnselectSubItem = { group, subItem ->
+                                state.unselectGroupSubItem(group, subItem)
+                            },
+                            onDeleteGroup = { state.deleteItem(it) },
+                            onDeleteSubItem = { state.deleteItem(it) })
+                    }
+                }
+            }
         }
     }
 }
 
+/**
+ * @param selected if not in selection mode, null; if in selection mode, true or false
+ * @param expanded if not expandable, null; if expandable, true or false
+ */
 @Composable
-private fun HistoryItem(
-    item: History,
-    isChild: Boolean = false,
+private fun <T : History> ItemTemplate(
+    item: T,
+    onOpen: (History) -> Unit,
     modifier: Modifier = Modifier,
-    selectionMode: Boolean,
-    selectedItems: Set<History>,
-    expanded: Boolean,
-    onToggleExpanded: () -> Unit,
-    pendingDeletionCount: Int,
-    onClick: (History) -> Unit,
-    onLongClick: (History) -> Unit,
-    onDeletePressed: (History) -> Unit,
+    title: String,
+    subtitle: String,
+    leadingIcon: @Composable () -> Unit,
+    onDelete: (T) -> Unit,
+    selected: Boolean? = null,
+    onToggleSelected: (() -> Unit)?,
+    expanded: Boolean? = null,
+    onToggleExpanded: (() -> Unit)? = null,
 ) {
     Row(
         modifier = modifier.combinedClickable(
-            onClick = { onClick.invoke(item) },
-            onLongClick = { onLongClick.invoke(item) },
+            onClick = {
+                when (selected != null) {
+                    // if in selection mode, toggle selected
+                    true -> onToggleSelected?.invoke()
+                    // if not in selection mode, open
+                    false -> onOpen.invoke(item)
+                }
+            },
+            onLongClick = onToggleSelected ?: {},
         ),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -143,7 +142,8 @@ private fun HistoryItem(
         // icon
         // if selected show circle with checkbox
         // if not selected, show favicon or group icon
-        if (selectedItems.contains(item)) {
+        if (selected == true) {
+            // selected checkbox
             Box(
                 modifier = Modifier
                     .size(18.dp)
@@ -159,15 +159,8 @@ private fun HistoryItem(
                 )
             }
         } else {
-            when (item) {
-                is History.Metadata -> Favicon(item.url, size = 18.dp)
-                is History.Regular -> Favicon(item.url, size = 18.dp)
-                is History.Group -> InfernoIcon(
-                    painterResource(R.drawable.ic_multiple_tabs_24),
-                    contentDescription = "",
-                    modifier = Modifier.size(18.dp),
-                )
-            }
+            // icon
+            leadingIcon.invoke()
         }
 
         // title and description
@@ -175,19 +168,14 @@ private fun HistoryItem(
             modifier = Modifier.weight(1F),
             horizontalAlignment = Alignment.Start,
         ) {
-            InfernoText(text = item.title, infernoStyle = InfernoTextStyle.Normal)
-            InfernoText(
-                text = when (item) {
-                    is History.Group -> "${item.items.size - pendingDeletionCount}"
-                    is History.Metadata -> item.url
-                    is History.Regular -> item.url
-                },
-                infernoStyle = InfernoTextStyle.Subtitle,
-            )
+            // title
+            InfernoText(text = title, infernoStyle = InfernoTextStyle.Normal)
+            // subtitle
+            InfernoText(text = subtitle, infernoStyle = InfernoTextStyle.Subtitle)
         }
 
         // expand icon
-        if (!isChild && item is History.Group) {
+        if (expanded != null) {
             InfernoIcon(
                 painter = painterResource(
                     when (expanded) {
@@ -198,40 +186,139 @@ private fun HistoryItem(
                 contentDescription = stringResource(R.string.a11y_action_label_expand),
                 modifier = Modifier
                     .size(18.dp)
-                    .clickable(onClick = onToggleExpanded),
+                    .clickable(onClick = onToggleExpanded!!),
             )
         }
 
-        // delete button
-        if (!selectionMode) {
+        // delete icon
+        if (selected == null) {
             InfernoIcon(
                 painter = painterResource(R.drawable.ic_close_24),
                 contentDescription = stringResource(R.string.history_delete_item),
                 modifier = Modifier
                     .size(18.dp)
-                    .clickable { onDeletePressed.invoke(item) },
+                    .clickable { onDelete.invoke(item) },
             )
         }
+    }
+}
 
-        // if expanded show content
-        if (!isChild && item is History.Group && expanded) {
-            Column {
-                for (subItem in item.items) {
-                    HistoryItem(
-                        item = subItem,
-                        isChild = true,
-                        modifier = Modifier.padding(start = 16.dp),
-                        selectionMode = selectionMode,
-                        selectedItems = selectedItems,
-                        expanded = false,
-                        onToggleExpanded = {},
-                        pendingDeletionCount = 0,
-                        onClick = { onClick.invoke(subItem) },
-                        onLongClick = { onLongClick.invoke(subItem) },
-                        onDeletePressed = { onDeletePressed.invoke(subItem) },
-                    )
+@Composable
+private fun HistoryGroupItem(
+    item: History.Group,
+    onOpenSubItem: (History.Metadata) -> Unit,
+    selectedItems: Set<History>?,
+    onSelectGroup: (History.Group) -> Unit,
+    onUnselectGroup: (History.Group) -> Unit,
+    onSelectSubItem: (group: History.Group, subItem: History.Metadata) -> Unit,
+    onUnselectSubItem: (group: History.Group, subItem: History.Metadata) -> Unit,
+    onDeleteGroup: (History.Group) -> Unit,
+    onDeleteSubItem: (History.Metadata) -> Unit,
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val groupSelected = selectedItems?.contains(item) ?: false
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        // group item
+        ItemTemplate(
+            item = item,
+            onOpen = {},
+            title = item.title,
+            subtitle = stringResource(R.string.history_search_group_sites_1, "${item.items.size}"),
+            leadingIcon = {
+                InfernoIcon(
+                    painterResource(R.drawable.ic_multiple_tabs_24),
+                    contentDescription = "",
+                    modifier = Modifier.size(18.dp),
+                )
+            },
+            onDelete = { onDeleteGroup.invoke(it) },
+            selected = groupSelected,
+            onToggleSelected = {
+                when (groupSelected) {
+                    true -> onUnselectGroup.invoke(item)
+                    false -> onSelectGroup.invoke(item)
                 }
+            },
+            expanded = expanded,
+            onToggleExpanded = { expanded = !expanded },
+        )
+
+        // group sub items
+        if (expanded) {
+            for (subItem in item.items) {
+                val subItemSelected = groupSelected || selectedItems?.contains(subItem) == true
+                ItemTemplate(
+                    item = subItem,
+                    onOpen = { onOpenSubItem.invoke(subItem) },
+                    modifier = Modifier.padding(start = 16.dp),
+                    title = subItem.title,
+                    subtitle = subItem.url,
+                    leadingIcon = { Favicon(subItem.url, size = 18.dp) },
+                    onDelete = { onDeleteSubItem.invoke(subItem) },
+                    selected = subItemSelected,
+                    onToggleSelected = {
+                        when (subItemSelected) {
+                            true -> onUnselectSubItem.invoke(item, subItem)
+                            false -> onSelectSubItem.invoke(item, subItem)
+                        }
+                    },
+                )
             }
         }
     }
+}
+
+@Composable
+private fun HistoryRegularItem(
+    item: History.Regular,
+    onOpen: (History) -> Unit,
+    selected: Boolean?,
+    onSelect: (History.Regular) -> Unit,
+    onUnselect: (History.Regular) -> Unit,
+    onDelete: (History.Regular) -> Unit,
+) {
+    ItemTemplate(
+        item = item,
+        onOpen = onOpen,
+        title = item.title,
+        subtitle = item.url,
+        leadingIcon = { Favicon(item.url, size = 18.dp) },
+        onDelete = onDelete,
+        selected = selected,
+        onToggleSelected = {
+            when (selected) {
+                true -> onUnselect.invoke(item)
+                false -> onSelect.invoke(item)
+                null -> {}
+            }
+        },
+    )
+}
+
+@Composable
+private fun HistoryMetadataItem(
+    item: History.Metadata,
+    onOpen: (History) -> Unit,
+    selected: Boolean?,
+    onSelect: (History.Metadata) -> Unit,
+    onUnselect: (History.Metadata) -> Unit,
+    onDelete: (History.Metadata) -> Unit,
+) {
+    ItemTemplate(
+        item = item,
+        onOpen = onOpen,
+        title = item.title,
+        subtitle = item.url,
+        leadingIcon = { Favicon(item.url, size = 18.dp) },
+        onDelete = onDelete,
+        selected = selected,
+        onToggleSelected = {
+            when (selected) {
+                true -> onUnselect.invoke(item)
+                false -> onSelect.invoke(item)
+                null -> {}
+            }
+        },
+    )
 }

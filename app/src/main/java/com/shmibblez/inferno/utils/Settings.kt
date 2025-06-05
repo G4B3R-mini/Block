@@ -102,7 +102,7 @@ class Settings(private val appContext: Context) : PreferencesHolder {
         /**
          * The minimum number a search groups should contain.
          */
-        @VisibleForTesting
+//        @VisibleForTesting
         internal var SEARCH_GROUP_MINIMUM_SITES: Int = 2
 
         // The maximum number of top sites to display.
