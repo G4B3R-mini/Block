@@ -1,5 +1,9 @@
 package com.shmibblez.inferno.browser.nav
 
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.EaseIn
+import androidx.compose.animation.core.EaseOut
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -21,32 +25,33 @@ import kotlinx.serialization.Serializable
 /**
  * actions from intent handlers
  */
-sealed interface InitialBrowserTask : java.io.Serializable {
+sealed class InitialBrowserTask : java.io.Serializable {
 
-    data class ExternalApp(val url: String, val private: Boolean = false) : InitialBrowserTask,
+    data class ExternalApp(val url: String, val private: Boolean = false) : InitialBrowserTask(),
         java.io.Serializable
 
-    data class OpenToBrowser(val private: Boolean = false) : InitialBrowserTask,
+    data class OpenToBrowser(val private: Boolean = false) : InitialBrowserTask(),
         java.io.Serializable
 
     data class OpenToBrowserAndLoad(val url: String, val private: Boolean = false) :
-        InitialBrowserTask, java.io.Serializable
+        InitialBrowserTask(), java.io.Serializable
 
-    data class OpenToSearch(val private: Boolean = false) : InitialBrowserTask, java.io.Serializable
+    data class OpenToSearch(val private: Boolean = false) : InitialBrowserTask(),
+        java.io.Serializable
 
-    data object PrivateBrowsingMode : InitialBrowserTask, java.io.Serializable {
+    data object PrivateBrowsingMode : InitialBrowserTask(), java.io.Serializable {
         private fun readResolve(): Any = PrivateBrowsingMode
     }
 
-    data object StartInRecentsScreen : InitialBrowserTask, java.io.Serializable {
+    data object StartInRecentsScreen : InitialBrowserTask(), java.io.Serializable {
         private fun readResolve(): Any = StartInRecentsScreen
     }
 
-    data object OpenPasswordManager : InitialBrowserTask, java.io.Serializable {
+    data object OpenPasswordManager : InitialBrowserTask(), java.io.Serializable {
         private fun readResolve(): Any = OpenPasswordManager
     }
 
-    data object AppIcon : InitialBrowserTask, java.io.Serializable {
+    data object AppIcon : InitialBrowserTask(), java.io.Serializable {
         private fun readResolve(): Any = AppIcon
     }
 
@@ -162,10 +167,42 @@ fun BrowserNavHost(
         startDestination = startDestination,
         modifier = Modifier.fillMaxSize(),
 //        contentAlignment = ,
-//        enterTransition = ,
-//        exitTransition = ,
-//        popEnterTransition = ,
-//        popExitTransition = ,
+        enterTransition = {
+            slideIntoContainer(
+                animationSpec = tween(
+                    300,
+                    easing = EaseOut,
+                ),
+                towards = AnimatedContentTransitionScope.SlideDirection.Start,
+            )
+        },
+        exitTransition = {
+            slideOutOfContainer(
+                animationSpec = tween(
+                    300,
+                    easing = EaseOut,
+                ),
+                towards = AnimatedContentTransitionScope.SlideDirection.Start,
+            )
+        },
+        popEnterTransition = {
+            slideIntoContainer(
+                animationSpec = tween(
+                    300,
+                    easing = EaseIn,
+                ),
+                towards = AnimatedContentTransitionScope.SlideDirection.End,
+            )
+        },
+        popExitTransition = {
+            slideOutOfContainer(
+                animationSpec = tween(
+                    300,
+                    easing = EaseIn,
+                ),
+                towards = AnimatedContentTransitionScope.SlideDirection.End,
+            )
+        },
 //        sizeTransform = ,
     ) {
 

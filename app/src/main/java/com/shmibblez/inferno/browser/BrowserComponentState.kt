@@ -112,7 +112,6 @@ class BrowserComponentState(
     var pageType: BrowserComponentPageType by mutableStateOf(BrowserComponentPageType.ENGINE)
         private set
     var selectedTabsTrayTab: InfernoTabsTraySelectedTab by mutableStateOf(InfernoTabsTraySelectedTab.NormalTabs)
-        private set
 
     // helper for compose migration, might be a lil sloppy
     var onActivityResultHandler: ((OnActivityResultModel) -> Boolean)? = null
@@ -245,13 +244,6 @@ class BrowserComponentState(
 
     fun setBrowserModeFullscreen() {
         browserMode = BrowserComponentMode.FULLSCREEN
-    }
-
-    /**
-     * tabs tray
-     */
-    fun setSelectedTabsTrayTab(selectedTabsTrayTab: InfernoTabsTraySelectedTab) {
-        this.selectedTabsTrayTab = selectedTabsTrayTab
     }
 
     /**

@@ -18,6 +18,7 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -49,7 +50,7 @@ internal fun HistoryViewer(
         isRefreshing = state.isRefreshing,
         onRefresh = { state.refreshList() },
         modifier = modifier,
-        contentAlignment = Alignment.Center,
+        contentAlignment = Alignment.TopCenter,
         indicator = {
             PullToRefreshDefaults.Indicator(
                 state = pullToRefreshState,
@@ -62,7 +63,7 @@ internal fun HistoryViewer(
         },
     ) {
         LazyColumn(
-//        modifier = modifier,
+            modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             items(state.visibleItems ?: emptyList()) { item ->
@@ -89,6 +90,7 @@ internal fun HistoryViewer(
                         HistoryGroupItem(item = item,
                             onOpenSubItem = onOpenHistoryItem,
                             selectedItems = state.selectedItems,
+                            pendingDeletion = state.pendingDeletion,
                             onSelectGroup = { state.selectGroupItem(it) },
                             onUnselectGroup = { state.unselectGroupItem(it) },
                             onSelectSubItem = { group, subItem ->
@@ -102,9 +104,15 @@ internal fun HistoryViewer(
                     }
                 }
             }
+
+            item {
+                // todo: load more when called
+            }
         }
     }
 }
+
+private val LEADING_ICON_SIZE = 32.dp
 
 /**
  * @param selected if not in selection mode, null; if in selection mode, true or false
@@ -136,7 +144,7 @@ private fun <T : History> ItemTemplate(
             },
             onLongClick = onToggleSelected ?: {},
         ),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         // icon
@@ -146,7 +154,7 @@ private fun <T : History> ItemTemplate(
             // selected checkbox
             Box(
                 modifier = Modifier
-                    .size(18.dp)
+                    .size(LEADING_ICON_SIZE)
                     .background(
                         LocalContext.current.infernoTheme().value.primaryActionColor, CircleShape,
                     ),
@@ -155,7 +163,7 @@ private fun <T : History> ItemTemplate(
                 InfernoIcon(
                     painter = painterResource(R.drawable.ic_checkmark_24),
                     contentDescription = "",
-                    modifier = Modifier.size(12.dp),
+                    modifier = Modifier.size(18.dp),
                 )
             }
         } else {
@@ -169,9 +177,17 @@ private fun <T : History> ItemTemplate(
             horizontalAlignment = Alignment.Start,
         ) {
             // title
-            InfernoText(text = title, infernoStyle = InfernoTextStyle.Normal)
+            InfernoText(
+                text = title,
+                infernoStyle = InfernoTextStyle.Normal,
+                maxLines = 1,
+            )
             // subtitle
-            InfernoText(text = subtitle, infernoStyle = InfernoTextStyle.Subtitle)
+            InfernoText(
+                text = subtitle,
+                infernoStyle = InfernoTextStyle.Subtitle,
+                maxLines = 1,
+            )
         }
 
         // expand icon
@@ -179,8 +195,8 @@ private fun <T : History> ItemTemplate(
             InfernoIcon(
                 painter = painterResource(
                     when (expanded) {
-                        true -> R.drawable.ic_arrow_drop_up_24
-                        false -> R.drawable.ic_arrow_drop_down_24
+                        true -> R.drawable.ic_chevron_up_24
+                        false -> R.drawable.ic_chevron_down_24
                     }
                 ),
                 contentDescription = stringResource(R.string.a11y_action_label_expand),
@@ -208,6 +224,7 @@ private fun HistoryGroupItem(
     item: History.Group,
     onOpenSubItem: (History.Metadata) -> Unit,
     selectedItems: Set<History>?,
+    pendingDeletion: List<History>,
     onSelectGroup: (History.Group) -> Unit,
     onUnselectGroup: (History.Group) -> Unit,
     onSelectSubItem: (group: History.Group, subItem: History.Metadata) -> Unit,
@@ -216,7 +233,16 @@ private fun HistoryGroupItem(
     onDeleteSubItem: (History.Metadata) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val groupSelected = selectedItems?.contains(item) ?: false
+    val groupSelected = selectedItems?.contains(item)
+
+    // if all sub items selected, select group
+    LaunchedEffect(selectedItems) {
+        if (groupSelected != null && !groupSelected && selectedItems.containsAll(item.items)) {
+            // if group not selected && all sub items selected, select group
+            // this also auto removes all sub items from selected list
+            onSelectGroup.invoke(item)
+        }
+    }
 
     Column(modifier = Modifier.fillMaxWidth()) {
         // group item
@@ -224,12 +250,12 @@ private fun HistoryGroupItem(
             item = item,
             onOpen = {},
             title = item.title,
-            subtitle = stringResource(R.string.history_search_group_sites_1, "${item.items.size}"),
+            subtitle = stringResource(R.string.history_search_group_sites_1, item.items.size),
             leadingIcon = {
                 InfernoIcon(
                     painterResource(R.drawable.ic_multiple_tabs_24),
                     contentDescription = "",
-                    modifier = Modifier.size(18.dp),
+                    modifier = Modifier.size(LEADING_ICON_SIZE),
                 )
             },
             onDelete = { onDeleteGroup.invoke(it) },
@@ -238,6 +264,7 @@ private fun HistoryGroupItem(
                 when (groupSelected) {
                     true -> onUnselectGroup.invoke(item)
                     false -> onSelectGroup.invoke(item)
+                    null -> onSelectGroup.invoke(item)
                 }
             },
             expanded = expanded,
@@ -247,20 +274,27 @@ private fun HistoryGroupItem(
         // group sub items
         if (expanded) {
             for (subItem in item.items) {
-                val subItemSelected = groupSelected || selectedItems?.contains(subItem) == true
+                // if item pending deletion, dont draw
+                if (pendingDeletion.contains(subItem)) continue
+
+                val subItemSelected =
+                    if (groupSelected == null) null else groupSelected || selectedItems.contains(
+                        subItem
+                    )
                 ItemTemplate(
                     item = subItem,
                     onOpen = { onOpenSubItem.invoke(subItem) },
                     modifier = Modifier.padding(start = 16.dp),
                     title = subItem.title,
                     subtitle = subItem.url,
-                    leadingIcon = { Favicon(subItem.url, size = 18.dp) },
+                    leadingIcon = { Favicon(subItem.url, size = LEADING_ICON_SIZE) },
                     onDelete = { onDeleteSubItem.invoke(subItem) },
                     selected = subItemSelected,
                     onToggleSelected = {
                         when (subItemSelected) {
                             true -> onUnselectSubItem.invoke(item, subItem)
                             false -> onSelectSubItem.invoke(item, subItem)
+                            null -> onSelectSubItem.invoke(item, subItem)
                         }
                     },
                 )
@@ -283,14 +317,14 @@ private fun HistoryRegularItem(
         onOpen = onOpen,
         title = item.title,
         subtitle = item.url,
-        leadingIcon = { Favicon(item.url, size = 18.dp) },
+        leadingIcon = { Favicon(item.url, size = LEADING_ICON_SIZE) },
         onDelete = onDelete,
         selected = selected,
         onToggleSelected = {
             when (selected) {
                 true -> onUnselect.invoke(item)
                 false -> onSelect.invoke(item)
-                null -> {}
+                null -> onSelect.invoke(item)
             }
         },
     )
@@ -310,14 +344,14 @@ private fun HistoryMetadataItem(
         onOpen = onOpen,
         title = item.title,
         subtitle = item.url,
-        leadingIcon = { Favicon(item.url, size = 18.dp) },
+        leadingIcon = { Favicon(item.url, size = LEADING_ICON_SIZE) },
         onDelete = onDelete,
         selected = selected,
         onToggleSelected = {
             when (selected) {
                 true -> onUnselect.invoke(item)
                 false -> onSelect.invoke(item)
-                null -> {}
+                null -> onSelect.invoke(item)
             }
         },
     )

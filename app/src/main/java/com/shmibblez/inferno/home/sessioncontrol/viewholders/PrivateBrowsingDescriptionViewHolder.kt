@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextDecoration
@@ -27,9 +28,9 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.LifecycleOwner
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.ComposeViewHolder
+import com.shmibblez.inferno.ext.infernoTheme
 import com.shmibblez.inferno.ext.settings
 import com.shmibblez.inferno.home.privatebrowsing.interactor.PrivateBrowsingInteractor
-import com.shmibblez.inferno.theme.FirefoxTheme
 
 /**
  * View holder for a private browsing description.
@@ -90,7 +91,7 @@ fun PrivateBrowsingDescription(
                 stringResource(R.string.app_name),
             ),
             modifier = Modifier.padding(top = 4.dp),
-            color = FirefoxTheme.colors.textPrimary,
+            color = LocalContext.current.infernoTheme().value.primaryTextColor,
             fontSize = 14.sp,
             lineHeight = 20.sp,
         )
@@ -111,7 +112,7 @@ fun PrivateBrowsingDescription(
                 text = stringResource(R.string.private_browsing_common_myths),
                 modifier = Modifier.padding(top = 10.dp),
                 style = TextStyle(
-                    color = FirefoxTheme.colors.textPrimary,
+                    color = LocalContext.current.infernoTheme().value.primaryTextColor,
                     fontSize = 14.sp,
                     textDecoration = TextDecoration.Underline,
                     textDirection = TextDirection.Content,
@@ -124,9 +125,7 @@ fun PrivateBrowsingDescription(
 @Composable
 @Preview
 private fun PrivateBrowsingDescriptionPreview() {
-    FirefoxTheme {
-        PrivateBrowsingDescription(
-            onLearnMoreClick = {},
-        )
-    }
+    PrivateBrowsingDescription(
+        onLearnMoreClick = {},
+    )
 }

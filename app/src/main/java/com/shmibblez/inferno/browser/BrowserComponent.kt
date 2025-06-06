@@ -330,6 +330,7 @@ enum class BrowserComponentPageType {
 
 object UiConst {
     const val BAR_BG_ALPHA = 0.74F
+    val TOP_BAR_INTERNAL_PADDING = 16.dp
 
     val TOOLBAR_HEIGHT = 44.dp
     val TAB_BAR_HEIGHT = 36.dp
@@ -699,6 +700,8 @@ fun BrowserComponent(
     }
 
     if (showTabsTray) {
+        // request screenshot before showing
+        thumbnailsFeature.get()?.requestScreenshot()
         // todo: missing functionality from [TabsTrayFragment], [DefaultTabsTrayInteractor], and [DefaultTabsTrayController]
         InfernoTabsTray(
             dismiss = ::dismissTabsTray,
@@ -919,7 +922,7 @@ fun BrowserComponent(
                                 coroutineScope = coroutineScope,
                                 snackbarHostState = snackbarHostState,
                                 setInitiallySelectedTabTray = { selectedTab ->
-                                    state.setSelectedTabsTrayTab(selectedTab)
+                                    state.selectedTabsTrayTab = selectedTab
                                 },
                                 tab = tab,
                             )
@@ -936,7 +939,7 @@ fun BrowserComponent(
                                     setAlertDialog = { activeAlertDialog = it },
                                     snackbarHostState = snackbarHostState,
                                     setInitiallySelectedTabTray = { selectedTab: InfernoTabsTraySelectedTab ->
-                                        state.setSelectedTabsTrayTab(selectedTab)
+                                        state.selectedTabsTrayTab = selectedTab
                                     },
                                     dismissTabsTray = { dismissTabsTray() })
                                 return
@@ -1143,6 +1146,7 @@ fun BrowserComponent(
     fun setEngineDynamicToolbarMaxHeight(h: Int = 0) {
 //        engineView?.setDynamicToolbarMaxHeight(h)
         engineView?.setDynamicToolbarMaxHeight(h)
+        engineView?.setVerticalClipping(h)
     }
 
     // on back pressed handlers
@@ -1263,7 +1267,7 @@ fun BrowserComponent(
             biometricPromptFeature.set(
                 feature = BiometricPromptFeature(
                     context = context,
-                    fragment = view.findFragment(),
+                    fragment = null, // view.findFragment(),
                     onAuthFailure = {
                         // todo: test biometrics
                         webPrompterState.onBiometricResult(isAuthenticated = false)
@@ -1603,7 +1607,8 @@ fun BrowserComponent(
                 Lifecycle.Event.ON_DESTROY -> {
 //                    super.onDestroyView()
                     engineView!!.setActivityContext(null)
-                    context.accessibilityManager.removeAccessibilityStateChangeListener(view.findFragment<BrowserComponentWrapperFragment>())
+                    // todo: accessibility
+//                    context.accessibilityManager.removeAccessibilityStateChangeListener(view.findFragment<BrowserComponentWrapperFragment>())
 
 //                    _bottomToolbarContainerView = null
 //                    _browserToolbarView = null
@@ -2654,89 +2659,6 @@ internal fun shouldPullToRefreshBeEnabled(inFullScreen: Boolean, context: Contex
 ////    if (isToolbarAtBottom) {
 ////        binding.browserLayout.removeView(browserToolbar)
 ////    }
-//
-//    // todo: toolbar
-////    _bottomToolbarContainerView = BottomToolbarContainerView(
-////        context = context,
-////        parent = binding.browserLayout,
-////        hideOnScroll = isToolbarDynamic(context),
-////        content = {
-////            val areLoginBarsShown by remember { mutableStateOf(loginBarsIntegration.isVisible) }
-////
-////            FirefoxTheme {
-////                Column(
-////                    modifier = Modifier.background(FirefoxTheme.colors.layer1),
-////                ) {
-////                    if (!activity.isMicrosurveyPromptDismissed.value) {
-////                        currentMicrosurvey?.let {
-////                            if (isToolbarAtBottom) {
-////                                removeBottomToolbarDivider(browserToolbar)
-////                            }
-////
-////                            HorizontalDivider()
-////
-////                            MicrosurveyRequestPrompt(
-////                                microsurvey = it,
-////                                activity = activity,
-////                                onStartSurveyClicked = {
-////                                    context.components.appStore.dispatch(
-////                                        MicrosurveyAction.Started(
-////                                            it.id
-////                                        )
-////                                    )
-////                                    navController.nav(
-////                                        R.id.browserFragment,
-////                                        BrowserComponentWrapperFragmentDirections.actionGlobalMicrosurveyDialog(
-////                                            it.id
-////                                        ),
-////                                    )
-////                                },
-////                                onCloseButtonClicked = {
-////                                    context.components.appStore.dispatch(
-////                                        MicrosurveyAction.Dismissed(it.id),
-////                                    )
-////
-////                                    context.settings().shouldShowMicrosurveyPrompt = false
-////                                    activity.isMicrosurveyPromptDismissed.value = true
-////
-////                                    resumeDownloadDialogState(
-////                                        getCurrentTab()?.id,
-////                                        context.components.core.store,
-////                                        context,
-////                                    )
-////                                },
-////                            )
-////                        }
-////                    } else {
-////                        restoreBottomToolbarDivider(browserToolbar)
-////                    }
-////
-////                    if (isToolbarAtBottom) {
-////                        AndroidView(factory = { _ -> browserToolbar })
-////                    }
-////
-////                    NavigationButtonsCFR(
-////                        context = context,
-////                        activity = activity,
-////                        showDivider = !isToolbarAtBottom && !areLoginBarsShown && (currentMicrosurvey == null || activity.isMicrosurveyPromptDismissed.value),
-////                    )
-////                }
-////            }
-////        },
-////    )
-////
-////    bottomToolbarContainerIntegration.set(
-////        feature = BottomToolbarContainerIntegration(
-////            toolbar = bottomToolbarContainerView.toolbarContainerView,
-////            store = context.components.core.store,
-////            sessionId = customTabSessionId,
-////        ),
-////        owner = lifecycleOwner,
-////        view = view,
-////    )
-//
-////        NavigationBar.browserInitializeTimespan.stop()
-//}
 
 //@Suppress("LongMethod")
 //@Composable
@@ -2890,22 +2812,6 @@ internal fun shouldPullToRefreshBeEnabled(inFullScreen: Boolean, context: Contex
 //    }
 //}
 
-private fun onTabCounterClicked(
-    browsingMode: BrowsingMode,
-    navController: NavController,
-    thumbnailsFeature: ViewBoundFeatureWrapper<BrowserThumbnails>,
-) {
-    thumbnailsFeature.get()?.requestScreenshot()
-    navController.nav(
-        R.id.browserComponentWrapperFragment,
-        BrowserComponentWrapperFragmentDirections.actionGlobalTabsTrayFragment(
-            page = when (browsingMode) {
-                BrowsingMode.Normal -> Page.NormalTabs
-                BrowsingMode.Private -> Page.PrivateTabs
-            },
-        ),
-    )
-}
 
 @VisibleForTesting
 internal fun initializeMicrosurveyFeature(
@@ -3023,19 +2929,6 @@ internal fun initializeMicrosurveyFeature(
 //    reinitializeEngineView(context, fullScreenFeature)
 //}
 
-//private fun removeBottomToolbarDivider(browserToolbar: BrowserToolbar, context: Context) {
-//    val safeContext = context ?: return
-//    if (safeContext.isToolbarAtBottom()) {
-//        val drawable = ResourcesCompat.getDrawable(
-//            context.resources,
-//            R.drawable.toolbar_background_no_divider,
-//            null,
-//        )
-//        browserToolbar.background = drawable
-//        browserToolbar.elevation = 0.0f
-//    }
-//}
-
 //private fun restoreBottomToolbarDivider(browserToolbar: BrowserToolbar, context: Context) {
 //    val safeContext = context ?: return
 //    if (safeContext.isToolbarAtBottom()) {
@@ -3046,31 +2939,6 @@ internal fun initializeMicrosurveyFeature(
 //        )
 //        browserToolbar.background = defaultBackground
 //    }
-//}
-
-//private fun updateNavbarDivider(context: Context) {
-//    val safeContext = context ?: return
-//
-//    // Evaluate showing the navbar divider only if addressbar is shown at the top
-//    // and the toolbar chrome should be is visible.
-//    if (!safeContext.isToolbarAtBottom()) { // && webAppToolbarShouldBeVisible) {
-//        resetNavbar(context)
-//    }
-//}
-
-///**
-// * Build and show a new navbar.
-// * Useful when needed to force an update of it's layout.
-// */
-//private fun resetNavbar(context: Context) {
-//    if (context?.shouldAddNavigationBar() != true) return // || !webAppToolbarShouldBeVisible) return
-//
-//    // todo: toolbar
-//    // Prevent showing two navigation bars at the same time.
-////    _bottomToolbarContainerView?.toolbarContainerView?.let {
-////        binding.browserLayout.removeView(it)
-////    }
-//    reinitializeNavBar()
 //}
 
 private var currentMicrosurvey: MicrosurveyUIData? = null

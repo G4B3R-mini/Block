@@ -1,6 +1,5 @@
 package com.shmibblez.inferno.toolbar
 
-import androidx.annotation.IntRange
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -15,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -179,6 +179,7 @@ internal class ToolbarOnlyComponents {
                     .fillMaxWidth(),
                 color = LocalContext.current.infernoTheme().value.primaryActionColor,
                 trackColor = Color.Transparent,
+                drawStopIndicator = {}, // dont draw
             )
         }
 
@@ -726,7 +727,7 @@ class ToolbarOptions {
         fun ToolbarShare(type: ToolbarOptionType, onClick: (() -> Unit)? = null) {
             val context = LocalContext.current
             ToolbarOptionTemplate(
-                iconPainter = painterResource(R.drawable.ic_share),
+                iconPainter = painterResource(R.drawable.ic_share_24),
                 description = stringResource(R.string.share_header_2),
                 onClick = {
                     val url = context.components.core.store.state.selectedTab?.getUrl().orEmpty()
@@ -989,7 +990,7 @@ class ToolbarOptionsIcons {
         @Composable
         fun ToolbarShare(tint: Color = LocalContext.current.infernoTheme().value.primaryIconColor) {
             ToolbarIconTemplate(
-                iconPainter = painterResource(R.drawable.ic_share),
+                iconPainter = painterResource(R.drawable.ic_share_24),
                 contentDescription = stringResource(R.string.share_header_2),
                 tint = tint,
             )

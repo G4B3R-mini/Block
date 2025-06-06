@@ -116,10 +116,10 @@ fun FaviconPlaceholder(
     Box(
         modifier = modifier
             .size(size)
-            .clip(RoundedCornerShape(2.dp))
-            .background(
-                color = LocalContext.current.infernoTheme().value.secondaryBackgroundColor, // FirefoxTheme.colors.layer2,
-            ),
+            .clip(RoundedCornerShape(2.dp)),
+//            .background(
+//                color = Color.Transparent, // LocalContext.current.infernoTheme().value.secondaryBackgroundColor, // FirefoxTheme.colors.layer2,
+//            ),
     )
 }
 

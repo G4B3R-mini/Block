@@ -150,7 +150,7 @@ class CustomTabToolbarMenu(
 
     private val sharePage = BrowserMenuImageText(
         label = context.getString(R.string.browser_menu_share),
-        imageResource = R.drawable.ic_share,
+        imageResource = R.drawable.ic_share_24,
         iconTintColorResource = primaryTextColor(),
     ) {
         onItemTapped.invoke(ToolbarMenu.Item.Share)

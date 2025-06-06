@@ -32,18 +32,38 @@ that's it for now, hopefully this project doesn't die
 
 # Currently Under Development
 
-## IntentProcessor and ExtralAppBrowser
+## Massiv Bugs
 
-other activities exist, the best way to handle intent handling is to forward to different activities
-since each has a different behaviour (external vs browser).
+- [ ] BrowserComponent
+    - [ ] MozEngineView not working properly when go to other page then return (most likely has to
+      do with lifecycle management, when return to page need to reset/relink)
+- [ ] theme settings
+    - [ ] sometimes current theme selected when edit custom theme
+
+## InfernoHistoryPage
+
+- [ ] loading not working properly
+- [ ] make sure to call loadMore() when reach end of list
+    - [ ] add loading item which invokes loadMore()
+    - [ ] add var to state isLoadingMore, which is different from isRefreshing, if already loading
+      more then do not load more. Also isLoadingMore and isRefreshing should not both be true at the
+      same time, maybe store loadMore job in var and cancel if refresh invoked, refresh takes
+      precedence over loadMore
+- [ ] refreshList() not working properly (when refresh page goes blank need to debug)
+- [ ] calling refreshList() right after deleting is probably not instantaneous, in that case may
+  need to not refresh after deleting, just keep everything in pendingDeletion, only call refresh if
+  user requests it, then clear all vars including pendingDeletion
+
+## IntentProcessor and ExternalAppBrowser
+
+- [ ] pending testing, ExternalAppBrowser not used anymore lol
+- [ ] VERY buggy
+- [ ] tidy up external toolbar ui (padding)
+- [ ] make browser components use custom tab if not setup already
 
 ### Steps:
 
-- [ ] check activities that are opened from intent processors
-- [ ] start with migrating and adding some stuff to ExternalAppBrowserActivity in Compose
-    - [ ] can open directly to browser, maybe some other pages (would require creating nav graph)
-- [ ] check if can use BrowserComponent directly in HomeActivity (rename to BrowserActivity)
-    - [ ] requires checking if other fragments exist, other than settings frag
+- [ ] rename HomeActivity to BrowserActivity, or just keep it sounds nice
 
 ## Settings Pages Status
 
@@ -99,11 +119,6 @@ Did you add an account?
 - [ ] Other stuff
     - [ ] make sure to check setting usage, still have not completed migration from android prefs to
       datastore
-
-## Massiv Bugs
-
-- [ ] theme settings
-    - [ ] sometimes current theme selected when edit custom theme
 
 ## Under Construction
 

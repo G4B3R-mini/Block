@@ -371,7 +371,7 @@ private fun MultiSelectBanner(
             enabled = buttonsEnabled,
         ) {
             Icon(
-                painter = painterResource(id = R.drawable.ic_share),
+                painter = painterResource(id = R.drawable.ic_share_24),
                 contentDescription = stringResource(
                     id = R.string.tab_tray_multiselect_share_content_description,
                 ),

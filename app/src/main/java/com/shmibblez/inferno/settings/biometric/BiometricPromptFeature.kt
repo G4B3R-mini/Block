@@ -29,7 +29,7 @@ import com.shmibblez.inferno.settings.biometric.ext.isHardwareAvailable
  */
 class BiometricPromptFeature(
     private val context: Context,
-    private val fragment: Fragment,
+    private val fragment: Fragment? = null,
     private val onAuthFailure: () -> Unit,
     private val onAuthSuccess: () -> Unit,
 ) : LifecycleAwareFeature {
@@ -38,9 +38,12 @@ class BiometricPromptFeature(
     @VisibleForTesting
     internal var biometricPrompt: BiometricPrompt? = null
 
+    // todo: biometric, create state, use in component, when necessary show prompt
+    //  or just skip prompt altogether, pass biometric state to other components like
+    //  card prompt ( in InfernoWebPrompter), and state handles requesting and handling biometric
     override fun start() {
         val executor = ContextCompat.getMainExecutor(context)
-        biometricPrompt = BiometricPrompt(fragment, executor, PromptCallback())
+//        biometricPrompt = BiometricPrompt(fragment, executor, PromptCallback())
     }
 
     override fun stop() {

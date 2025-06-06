@@ -5,11 +5,19 @@
 package com.shmibblez.inferno.ext
 
 import android.app.Activity
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
+import android.content.Intent.ACTION_SEND
+import android.content.Intent.EXTRA_SUBJECT
+import android.content.Intent.EXTRA_TEXT
+import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.content.res.Configuration
+import android.net.Uri
 import android.os.Build
+import android.os.Parcel
 import android.provider.Settings
+import android.service.chooser.ChooserAction
 import android.view.ContextThemeWrapper
 import android.view.View
 import android.view.ViewGroup
@@ -28,7 +36,10 @@ import mozilla.components.browser.state.state.SessionState
 import mozilla.components.concept.engine.EngineSession
 import mozilla.components.concept.engine.EngineSession.LoadUrlFlags
 import mozilla.components.concept.storage.HistoryMetadataKey
+import mozilla.components.support.base.log.Log
+import mozilla.components.support.ktx.android.content.createChooserExcludingCurrentApp
 import java.lang.String.format
+import java.util.ArrayList
 import java.util.Locale
 
 /**
@@ -42,6 +53,39 @@ val Context.application: BrowserApplication
  */
 val Context.components: Components
     get() = application.components
+
+
+/**
+ * Shares content via [ACTION_SEND] intent.
+ *
+ * @param text the data to be shared [EXTRA_TEXT]
+ * @param subject of the intent [EXTRA_TEXT]
+ * @return true it is able to share false otherwise.
+ */
+fun Context.shareTextList(
+    textList: ArrayList<String>,
+    subject: String = getString(R.string.mozac_support_ktx_share_dialog_title),
+): Boolean {
+    return try {
+        val shareIntent = Intent().apply {
+            action = Intent.ACTION_SEND_MULTIPLE
+            putStringArrayListExtra(Intent.ACTION_SEND_MULTIPLE, textList)
+            type = "text/plain"
+        }
+        startActivity(Intent.createChooser(shareIntent, subject))
+
+        true
+    } catch (e: ActivityNotFoundException) {
+        Log.log(
+            Log.Priority.WARN,
+            message = "No activity to share to found",
+            throwable = e,
+            tag = "share"
+        )
+
+        false
+    }
+}
 
 /**
  * Add new tab convenience fun
@@ -86,91 +130,6 @@ fun Components.newTab(
         this.useCases.tabsUseCases.moveTabs(listOf(tabId), nextTo, true)
 
     return tabId
-
-//    /**<from [TabsUseCases]>*/
-//    val store = this.core.store
-//    val state = store.state
-//
-//    val tab = createTab(
-//        url = url,
-//        private = private,
-//        source = source,
-//        contextId = contextId,
-//        parent = parentId?.let { store.state.findTab(it) },
-//        engineSession = engineSession,
-//        searchTerms = searchTerms,
-//        initialLoadFlags = flags,
-//        initialAdditionalHeaders = additionalHeaders,
-//        historyMetadata = historyMetadata,
-//        desktopMode = store.state.desktopMode,
-//    )
-//
-//    /*</from [TabsUseCases]*/
-//
-//    /**<from store.dispatch(TabListAction.AddTabAction(tab, select = selectTab))>*/
-//
-//    /**
-//     * Checks that the provided tab doesn't already exist and throws an
-//     * [IllegalArgumentException] otherwise.
-//     *
-//     * @param state the current [BrowserState] (including all existing tabs).
-//     * @param tab the [TabSessionState] to check.
-//     */
-////    private fun requireUniqueTab(state: BrowserState, tab: TabSessionState) {
-//    require(state.tabs.find { it.id == tab.id } == null) {
-//        "Tab with same ID already exists"
-//    }
-////    }
-//
-//    val updatedTabList = if (tab.parentId != null) {
-//        val parentIndex = state.tabs.indexOfFirst { it.id == tab.parentId }
-//        require(parentIndex != -1) {
-//            "The parent does not exist"
-//        }
-//
-//        // Add the child tab next to its parent
-//        val childIndex = parentIndex + 1
-//        state.tabs.subList(0, childIndex) + tab + state.tabs.subList(childIndex, state.tabs.size)
-//    } else if (nextTo != null) {
-//        // add the tab next to requested tab
-//        // index of nextTo
-//        val nextToIndex = state.tabs.indexOfFirst { it.id == nextTo } + 1
-//        state.tabs.take(nextToIndex) + tab + state.tabs.drop(nextToIndex)
-//    } else {
-//        state.tabs + tab
-//    }
-//
-//    state.copy(
-//        tabs = updatedTabList,
-//        selectedTabId = if (selectTab || state.selectedTabId == null) {
-//            tab.id
-//        } else {
-//            state.selectedTabId
-//        },
-//    )
-//
-//    /*</from store.dispatch(TabListAction.AddTabAction(tab, select = selectTab))>*/
-//
-//    /**<from [TabsUseCases]>*/
-//
-//    store.dispatch(ContentAction.UpdateIsSearchAction(tab.id, isSearch, searchEngineName))
-//
-//    // If an engine session is specified then loading will have already started when linking
-//    // the tab to its engine session. Otherwise we ask to load the URL here.
-//    if (startLoading && engineSession == null) {
-//        store.dispatch(
-//            EngineAction.LoadUrlAction(
-//                tabId = tab.id,
-//                url = url,
-//                flags = flags,
-//                additionalHeaders = additionalHeaders,
-//                includeParent = true,
-//            ),
-//        )
-//    }
-//
-//    return tab.id
-    /*</from [TabsUseCases]>*/
 }
 
 

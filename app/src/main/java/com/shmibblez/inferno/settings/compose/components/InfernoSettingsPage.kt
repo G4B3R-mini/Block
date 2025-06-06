@@ -16,8 +16,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.shmibblez.inferno.R
+import com.shmibblez.inferno.browser.UiConst
 import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.base.InfernoText
+import com.shmibblez.inferno.compose.base.InfernoTextStyle
 import com.shmibblez.inferno.ext.infernoTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -36,12 +38,18 @@ fun InfernoSettingsPage(
                         painter = painterResource(R.drawable.ic_back_button_24),
                         contentDescription = stringResource(R.string.browser_menu_back),
                         modifier = Modifier
-                            .padding(start = 8.dp)
+                            .padding(start = UiConst.TOP_BAR_INTERNAL_PADDING)
                             .size(18.dp)
                             .clickable(onClick = goBack),
                     )
                 },
-                title = { InfernoText(title, modifier = Modifier.padding(horizontal = 8.dp)) },
+                title = {
+                    InfernoText(
+                        text = title,
+                        infernoStyle = InfernoTextStyle.Title,
+                        modifier = Modifier.padding(horizontal = UiConst.TOP_BAR_INTERNAL_PADDING),
+                    )
+                },
                 colors = TopAppBarColors(
                     containerColor = LocalContext.current.infernoTheme().value.primaryBackgroundColor,
                     scrolledContainerColor = LocalContext.current.infernoTheme().value.primaryBackgroundColor,

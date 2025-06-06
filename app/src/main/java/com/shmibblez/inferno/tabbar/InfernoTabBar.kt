@@ -33,8 +33,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -61,12 +59,6 @@ import mozilla.components.browser.state.state.TabSessionState
 // todo:
 //   - add gesture detection for switching tabs (swipe left/right to go to tab on left/right)
 //   - update MiniTabViewHolder layout for individual tab layout
-//fun BrowserState.toTabList(
-//    tabsFilter: (TabSessionState) -> Boolean = { true },
-//): Pair<List<TabSessionState>, TabSessionState?> {
-//    val tabStates = tabs.filter(tabsFilter)
-//    return Pair(tabStates, selectedTab)
-//}
 
 inline fun <T> Iterable<T>.findIndex(predicate: (T) -> Boolean): Int? {
     forEachIndexed { i, e -> if (predicate(e)) return i }
@@ -74,7 +66,7 @@ inline fun <T> Iterable<T>.findIndex(predicate: (T) -> Boolean): Int? {
 }
 
 private val verticalDividerPadding = 6.dp
-private val TAB_END_PADDING = 2.dp
+private val TAB_END_PADDING = 4.dp
 
 @Composable
 fun InfernoTabBar(tabList: List<TabSessionState>, selectedTab: TabSessionState?) {
@@ -83,7 +75,7 @@ fun InfernoTabBar(tabList: List<TabSessionState>, selectedTab: TabSessionState?)
         val screenWidth = configuration.screenWidthDp.dp
         // available space for tabs to occupy
         // screen width - side padding - add square width
-        val availableTabSpace = screenWidth - (2F * TAB_END_PADDING) - 1.dp - UiConst.TAB_BAR_HEIGHT
+        val availableTabSpace = screenWidth - (1F * TAB_END_PADDING) - 1.dp - UiConst.TAB_BAR_HEIGHT
         val tabWidth = availableTabSpace / tabList.size.let { if (it <= 0) 1 else it }
         return when (tabWidth > UiConst.TAB_WIDTH) {
             true -> tabWidth
@@ -162,42 +154,6 @@ fun InfernoTabBar(tabList: List<TabSessionState>, selectedTab: TabSessionState?)
                     }
                     item { Spacer(Modifier.width(TAB_END_PADDING)) }
                 }
-                // todo: make start and end of tabs fade, how to add alpha just to
-                //  edges when exiting?
-//                // start gradient
-//                Box(
-//                    modifier = Modifier
-//                        .align(Alignment.CenterStart)
-//                        .fillMaxHeight()
-//                        .width(8.dp)
-//                        .background(
-//                            brush = Brush.horizontalGradient(
-//                                colors = listOf(
-//                                    LocalContext.current.infernoTheme().value.primaryBackgroundColor.copy(
-//                                        alpha = UiConst.BAR_BG_ALPHA
-//                                    ),
-//                                    Color.Transparent,
-//                                ),
-//                            ),
-//                        ),
-//                )
-//                // end gradient
-//                Box(
-//                    modifier = Modifier
-//                        .align(Alignment.CenterEnd)
-//                        .fillMaxHeight()
-//                        .width(8.dp)
-//                        .background(
-//                            brush = Brush.horizontalGradient(
-//                                colors = listOf(
-//                                    Color.Transparent,
-//                                    LocalContext.current.infernoTheme().value.primaryBackgroundColor.copy(
-//                                        alpha = UiConst.BAR_BG_ALPHA
-//                                    ),
-//                                ),
-//                            ),
-//                        ),
-//                )
             }
 
             // divider
@@ -291,18 +247,6 @@ private fun MiniTab(
             val isHomePage = url == "inferno:home" || url == "about:blank"
             val isPrivateHomePage =
                 url == "inferno:privatebrowsing" || url == "about:privatebrowsing"
-            val icon = tabSessionState.content.icon
-            val favicon = if (isHomePage) {
-                painterResource(R.drawable.inferno)
-            } else if (isPrivateHomePage) {
-                painterResource(R.drawable.ic_private_browsing)
-            } else {
-                if (icon != null) BitmapPainter(icon.asImageBitmap()) else painterResource(R.drawable.mozac_ic_globe_24)
-            }
-//            context.components.core.icons.loadIcon(IconRequest(
-//                url = TODO(),
-//                resources = TODO(),
-//            ))
 
             // favicon
             when {
@@ -317,7 +261,7 @@ private fun MiniTab(
                 }
 
                 isPrivateHomePage -> {
-                    Image(
+                    InfernoIcon(
                         painter = painterResource(R.drawable.ic_private_browsing),
                         contentDescription = "favicon",
                         modifier = Modifier
@@ -336,18 +280,10 @@ private fun MiniTab(
                     )
                 }
             }
-//        // site name with gradient
-//        Box(
-//            modifier = Modifier
-//                .weight(1F)
-//                .wrapContentHeight()
-//                .padding(0.dp)
-//                .weight(1F),
-//        ) {
+            // site title
             InfernoText(
                 text = tabSessionState.content.title.ifEmpty { tabSessionState.content.url },
                 modifier = Modifier.weight(1F),
-//                    .align(Alignment.CenterStart),
                 textAlign = TextAlign.Start,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -375,9 +311,3 @@ private fun MiniTab(
         }
     }
 }
-
-// TODO: add listener for tab private changed, if yes then show private tabs, update here too
-//private fun updateTabsToolbar(isPrivate: Boolean) {
-//    val tabsToolbar = requireView().findViewById<TabsToolbar>(R.id.tabsToolbar)
-//    tabsToolbar.updateToolbar(isPrivate)
-//}

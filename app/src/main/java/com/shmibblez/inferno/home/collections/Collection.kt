@@ -112,7 +112,7 @@ fun Collection(
                             onClick = { onCollectionShareTabsClicked(collection) },
                         ) {
                             InfernoIcon(
-                                painter = painterResource(R.drawable.ic_share),
+                                painter = painterResource(R.drawable.ic_share_24),
                                 contentDescription = stringResource(R.string.share_button_content_description),
                             )
                         }

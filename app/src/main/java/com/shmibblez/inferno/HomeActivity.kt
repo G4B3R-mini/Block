@@ -233,7 +233,7 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
     )
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    @Suppress("ComplexMethod")
+    @Suppress("ComplexMethod", "DEPRECATION")
     final override fun onCreate(savedInstanceState: Bundle?) {
         // DO NOT MOVE ANYTHING ABOVE THIS getProfilerTime CALL.
         val startTimeProfiler = components.core.engine.profiler?.getProfilerTime()
@@ -302,7 +302,12 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
 //        ).showSplashScreen()
 
         // initialize compose
-        val initialTask = intent.getSerializableExtra(INITIAL_BROWSER_TASK) as InitialBrowserTask?
+        val initialTask = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            intent.getSerializableExtra(INITIAL_BROWSER_TASK, InitialBrowserTask::class.java)
+        } else {
+            // deprecated but no other option if below tiramisu
+            intent.getSerializableExtra(INITIAL_BROWSER_TASK) as InitialBrowserTask?
+        }
         binding.rootCompose.setContent {
             BrowserNavHost(initialAction = initialTask)
         }
