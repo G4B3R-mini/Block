@@ -1,14 +1,18 @@
 package com.shmibblez.inferno.toolbar
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -34,6 +38,8 @@ import com.shmibblez.inferno.proto.InfernoSettings
 import mozilla.components.browser.state.state.CustomTabSessionState
 
 private val ICON_SIZE = 18.dp
+
+// todo: not loading, reference ExternalAppBrowserFragment
 
 @Composable
 fun InfernoExternalToolbar(
@@ -62,9 +68,10 @@ fun InfernoExternalToolbar(
                 )
             )
             .fillMaxWidth()
-            .height(UiConst.EXTERNAL_TOOLBAR_HEIGHT),
+            .height(UiConst.EXTERNAL_TOOLBAR_HEIGHT)
+            .padding(horizontal = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(ICON_SIZE),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         // back button
         InfernoIcon(
@@ -80,10 +87,12 @@ fun InfernoExternalToolbar(
             verticalArrangement = Arrangement.Center,
         ) {
             InfernoText(
-                text = session?.content?.title ?: "", infernoStyle = InfernoTextStyle.Normal
+                text = session?.content?.title ?: "", infernoStyle = InfernoTextStyle.Normal,
+                maxLines = 1,
             )
             InfernoText(
-                text = session?.content?.url ?: "", infernoStyle = InfernoTextStyle.Subtitle
+                text = session?.content?.url ?: "", infernoStyle = InfernoTextStyle.Subtitle,
+                maxLines = 1,
             )
         }
 
@@ -99,12 +108,18 @@ fun InfernoExternalToolbar(
                 modifier = Modifier.size(ICON_SIZE),
             )
 
-            DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
+            DropdownMenu(
+                expanded = menuExpanded,
+                onDismissRequest = { menuExpanded = false },
+                modifier = Modifier.padding(horizontal = 8.dp),
+                containerColor = LocalContext.current.infernoTheme().value.secondaryBackgroundColor,
+            ) {
                 // powered by inferno browser
                 InfernoText(
                     text = stringResource(
                         R.string.browser_menu_powered_by2, stringResource(R.string.app_name)
                     ),
+                    modifier = Modifier.padding(bottom = 16.dp),
                 )
 
                 // divider
@@ -115,10 +130,12 @@ fun InfernoExternalToolbar(
 
                 // toggle desktop mode
                 Row(
-                    modifier = Modifier.clickable {
-                        onToggleDesktopMode.invoke()
-                        menuExpanded = false
-                    },
+                    modifier = Modifier
+                        .clickable {
+                            onToggleDesktopMode.invoke()
+                            menuExpanded = false
+                        }
+                        .padding(vertical = 16.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.Start),
                 ) {
@@ -162,20 +179,30 @@ fun InfernoExternalToolbar(
 //                }
 
                 // open in browser
-                DropdownMenuItem(
-                    text = {
-                        InfernoText(
-                            text = stringResource(
-                                R.string.browser_menu_open_in_fenix,
-                                stringResource(R.string.app_name)
-                            ),
-                        )
-                    },
-                    onClick = {
-                        onNavToBrowser.invoke()
-                        menuExpanded = false
-                    },
-                )
+                Row(
+                    modifier = Modifier
+                        .clickable {
+                            onNavToBrowser.invoke()
+                            menuExpanded = false
+                        }
+                        .padding(vertical = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.Start),
+                ) {
+                    // inferno icon
+                    Image(
+                        painter = painterResource(R.drawable.inferno),
+                        contentDescription = "",
+                        modifier = Modifier.size(18.dp),
+                    )
+                    // open in browser text
+                            InfernoText(
+                                text = stringResource(
+                                    R.string.browser_menu_open_in_fenix,
+                                    stringResource(R.string.app_name)
+                                ),
+                            )
+                }
 
                 // divider
                 HorizontalDivider(
@@ -187,11 +214,11 @@ fun InfernoExternalToolbar(
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween,
-                ) {
+                    modifier = Modifier.padding(top = 16.dp).fillMaxWidth(),
+                    ) {
                     // back
                     Box(
                         modifier = Modifier
-                            .wrapContentSize()
                             .clickable(
                                 enabled = canGoBack,
                                 onClick = { session?.id?.let(onGoBack); menuExpanded = false },

@@ -51,6 +51,8 @@ that's it for now, hopefully this project doesn't die
 
 - [ ] offset wonky, works pretty well thou
 - [ ] delete time range (2 hours, 2 days, everything), copy moz implementation
+- [ ] reference DefaultPagedHistoryProvider
+- [ ] also add time range deletion, copy [R.layout.delete_history_time_range_dialog](./app/src/main/res/layout/delete_history_time_range_dialog.xml)
 
 ## IntentProcessor and ExternalAppBrowser
 

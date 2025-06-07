@@ -266,7 +266,9 @@ internal class HistoryViewerState(
             offset.toLong(),
             numberOfItems.toLong(),
             excludeTypes = excludedVisitTypes,
-        ).map { transformVisitInfoToHistoryItem(it) }.also {
+        ).map {
+            transformVisitInfoToHistoryItem(it)
+        }.also {
             // update offset
             dbOffset += it.size + 1
             // check if no more items to display

@@ -36,6 +36,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.BottomAppBarScrollBehavior
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
@@ -1869,7 +1870,7 @@ fun BrowserComponent(
                     setSwipeView = { sr -> swipeRefresh = sr },
                 )
 
-                if (state.currentTab == null) {
+                if (state.isPendingTab) {
                     InfernoLoadingComponent()
                 } else {
                     when (state.pageType) {
@@ -1899,6 +1900,7 @@ fun BrowserComponent(
         bottomBar = {
             // hide and show when scrolling
             BottomAppBar(
+//                scrollBehavior = BottomAppBarScrollBehavior, // todo: scroll behavior, remove offset
                 contentPadding = PaddingValues(0.dp),
                 containerColor = Color.Transparent,
                 modifier = Modifier
@@ -1912,6 +1914,7 @@ fun BrowserComponent(
                 Column(
                     Modifier.fillMaxSize()
                 ) {
+                    context.components.useCases.customTabsUseCases.migrate
                     if (state.browserMode == BrowserComponentMode.TOOLBAR_EXTERNAL) {
                         InfernoExternalToolbar(
                             session = state.currentCustomTab,

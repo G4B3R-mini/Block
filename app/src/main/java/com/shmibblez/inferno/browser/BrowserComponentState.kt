@@ -1,5 +1,6 @@
 package com.shmibblez.inferno.browser
 
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.MutableState
@@ -107,6 +108,8 @@ class BrowserComponentState(
         private set
     val customTabSessionId: String?
         get() = currentCustomTab?.id
+    var isPendingTab by mutableStateOf(true)
+        private set
     var isPrivateSession: Boolean by mutableStateOf(false)
         private set
     var searchEngine: SearchEngine? by mutableStateOf(null)
@@ -126,10 +129,16 @@ class BrowserComponentState(
             flow.map { it }.collect {
                 currentTab = it.selectedTab
                 currentCustomTab = it.customTabs.firstOrNull()
+                isPendingTab = currentTab == null && currentCustomTab == null
+
+                Log.d(
+                    "BrowserComponentState",
+                    "browserStateObserver, isPendingTab: $isPendingTab, currentTab id: ${currentTab?.id}, customTabId: ${currentCustomTab?.id}"
+                )
 
                 // select external tab if not selected
-                if (isExternal && currentTab?.id != currentCustomTab?.id) {
-                    currentCustomTab?.id?.let { components.useCases.tabsUseCases.selectTab(it) }
+                if (isExternal && it.selectedTabId != currentCustomTab?.id) {
+                    currentCustomTab?.id?.let {tabId -> components.useCases.tabsUseCases.selectTab(tabId) }
                 }
 
                 // update browser mode based on if external
@@ -175,8 +184,12 @@ class BrowserComponentState(
                 customTabs = it.customTabs
                 closedTabs = it.closedTabs
                 // if no tab selected, select one
-                if (currentTab == null) {
-                    if (tabList.isNotEmpty()) {
+                if (isPendingTab) {
+                    if (customTabSessionId != null) {
+                        // if custom tab select
+                        tabsUseCases.selectTab(customTabSessionId!!)
+                    } else if (tabList.isNotEmpty()) {
+                        // if tabs exist select
                         val lastNormalTabId = store.state.lastOpenedNormalTab?.id
                         if (tabList.any { tab -> tab.id == lastNormalTabId }) {
                             tabsUseCases.selectTab(
@@ -186,13 +199,16 @@ class BrowserComponentState(
                             tabsUseCases.selectTab(tabList.last().id)
                         }
                     } else if (!awaitingNewTab) {
-                        // if tab list empty add new tab
+                        // if no tabs available add new tab
                         components.newTab(private = false)
                         awaitingNewTab = true
                     }
                 } else {
                     awaitingNewTab = false
                 }
+
+                Log.d("BrowserComponentState", "browserStateObserver, selectedTab id: ${it.selectedTabId}")
+
                 searchEngine = it.search.selectedOrDefaultSearchEngine!!
                 pageType = resolvePageType(currentTab)
             }
