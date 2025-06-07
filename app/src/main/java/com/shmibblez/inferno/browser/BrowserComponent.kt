@@ -67,7 +67,6 @@ import androidx.core.content.getSystemService
 import androidx.core.view.OnApplyWindowInsetsListener
 import androidx.core.view.children
 import androidx.core.view.isVisible
-import androidx.fragment.app.findFragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
@@ -107,7 +106,6 @@ import com.shmibblez.inferno.customtabs.ExternalAppBrowserActivity
 import com.shmibblez.inferno.downloads.DownloadService
 import com.shmibblez.inferno.downloads.dialog.DynamicDownloadDialog
 import com.shmibblez.inferno.ext.DEFAULT_ACTIVE_DAYS
-import com.shmibblez.inferno.ext.accessibilityManager
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.consumeFlow
 import com.shmibblez.inferno.ext.dpToPx
@@ -136,7 +134,6 @@ import com.shmibblez.inferno.tabs.tabstray.InfernoTabsTray
 import com.shmibblez.inferno.tabs.tabstray.InfernoTabsTrayDisplayType
 import com.shmibblez.inferno.tabs.tabstray.InfernoTabsTrayMode
 import com.shmibblez.inferno.tabs.tabstray.InfernoTabsTraySelectedTab
-import com.shmibblez.inferno.tabstray.Page
 import com.shmibblez.inferno.tabstray.TabsTrayFragmentDirections
 import com.shmibblez.inferno.tabstray.ext.isActiveDownload
 import com.shmibblez.inferno.tabstray.ext.isNormalTab
@@ -432,8 +429,6 @@ fun BrowserComponent(
 
     var pipFeature by remember { mutableStateOf<PictureInPictureFeature?>(null) }
 
-    val customTabSessionId by remember { mutableStateOf<String?>(null) }
-
     val browserInitialized by remember { mutableStateOf(false) }
     val initUIJob by remember { mutableStateOf<Job?>(null) }
 
@@ -485,28 +480,6 @@ fun BrowserComponent(
             tempWebPrompterState?.onPermissionsResult(permissions, grantResults)
         }
 
-
-    /* BaseBrowserFragment vars */
-
-//    val colorsProvider = DialogColorsProvider {
-//        DialogColors(
-//            title = ThemeManager.resolveAttributeColor(attribute = R.attr.textPrimary),
-//            description = ThemeManager.resolveAttributeColor(attribute = R.attr.textSecondary),
-//        )
-//    }
-
-//    val passwordGeneratorColorsProvider = PasswordGeneratorDialogColorsProvider {
-//        PasswordGeneratorDialogColors(
-//            title = ThemeManager.resolveAttributeColor(attribute = R.attr.textPrimary),
-//            description = ThemeManager.resolveAttributeColor(attribute = R.attr.textSecondary),
-//            background = ThemeManager.resolveAttributeColor(attribute = R.attr.layer1),
-//            cancelText = ThemeManager.resolveAttributeColor(attribute = R.attr.textAccent),
-//            confirmButton = ThemeManager.resolveAttributeColor(attribute = R.attr.actionPrimary),
-//            passwordBox = ThemeManager.resolveAttributeColor(attribute = R.attr.layer2),
-//            boxBorder = ThemeManager.resolveAttributeColor(attribute = R.attr.textDisabled),
-//        )
-//    }
-
     // connection to the nested scroll system and listen to the scroll
     var bottomBarHeightDp by remember {
         mutableStateOf(
@@ -526,7 +499,7 @@ fun BrowserComponent(
     val webPrompterState = rememberInfernoPromptFeatureState(
         activity = context.getActivity()!!,
         store = store,
-        customTabId = customTabSessionId,
+        customTabId = state.customTabSessionId,
         tabsUseCases = context.components.useCases.tabsUseCases,
         fileUploadsDirCleaner = context.components.core.fileUploadsDirCleaner,
         creditCardValidationDelegate = DefaultCreditCardValidationDelegate(
@@ -1084,7 +1057,7 @@ fun BrowserComponent(
         applicationContext = context.applicationContext,
         store = store,
         useCases = context.components.useCases.downloadUseCases,
-        tabId = customTabSessionId,
+        customTabSessionId = state.customTabSessionId,
         downloadManager = downloadManager,
         shouldForwardToThirdParties = {
             context.settings().shouldUseExternalDownloadManager
@@ -1210,7 +1183,7 @@ fun BrowserComponent(
                 feature = SecureWindowFeature(
                     window = context.getActivity()!!.window,
                     store = store,
-                    customTabId = customTabSessionId,
+                    customTabId = state.customTabSessionId,
                     isSecure = { !allowScreenshotsInPrivateMode && it.content.private },
                     clearFlagOnStop = false,
                 ),
@@ -1222,7 +1195,7 @@ fun BrowserComponent(
                 feature = MediaSessionFullscreenFeature(
                     context.getActivity()!!,
                     context.components.core.store,
-                    customTabSessionId,
+                    state.customTabSessionId,
                 ),
                 owner = lifecycleOwner,
                 view = view,
@@ -1232,14 +1205,14 @@ fun BrowserComponent(
                 context = context.applicationContext,
                 httpClient = context.components.core.client,
                 store = store,
-                tabId = customTabSessionId,
+                tabId = state.customTabSessionId,
             )
 
             val copyDownloadFeature = CopyDownloadFeature(
                 context = context.applicationContext,
                 httpClient = context.components.core.client,
                 store = store,
-                tabId = customTabSessionId,
+                tabId = state.customTabSessionId,
                 onCopyConfirmation = {
                     showSnackbarForClipboardCopy(context, coroutineScope, snackbarHostState)
                 },
@@ -1261,7 +1234,7 @@ fun BrowserComponent(
                 store = store,
                 activity = context.getActivity()!!,
                 crashReporting = context.components.crashReporter, // context.components.analytics.crashReporter,
-                tabId = customTabSessionId,
+                tabId = state.customTabSessionId,
             )
 
             biometricPromptFeature.set(
@@ -1287,7 +1260,7 @@ fun BrowserComponent(
                     context.components.useCases.sessionUseCases.goBack,
                     context.components.useCases.sessionUseCases.goForward,
                     engineView!!, // binding.engineView,
-                    customTabSessionId,
+                    state.customTabSessionId,
                 ),
                 owner = lifecycleOwner,
                 view = view,
@@ -1310,7 +1283,7 @@ fun BrowserComponent(
 //            )
 
             searchFeature.set(
-                feature = SearchFeature(store, customTabSessionId) { request, tabId ->
+                feature = SearchFeature(store, state.customTabSessionId) { request, tabId ->
                     val parentSession = store.state.findTabOrCustomTab(tabId)
                     val useCase = if (request.isPrivate) {
                         context.components.useCases.searchUseCases.newPrivateTabSearch
@@ -1343,7 +1316,7 @@ fun BrowserComponent(
                         positiveButtonBackgroundColor = accentHighContrastColor,
                         positiveButtonTextColor = R.color.fx_mobile_text_color_action_primary,
                     ),
-                    sessionId = customTabSessionId,
+                    sessionId = state.customTabSessionId,
                     onNeedToRequestPermissions = { permissions ->
                         // todo: test
                         requestSitePermissionsLauncher.launch(permissions)
@@ -1408,7 +1381,7 @@ fun BrowserComponent(
                 feature = FullScreenFeature(
                     context.components.core.store,
                     context.components.useCases.sessionUseCases,
-                    customTabSessionId,
+                    state.customTabSessionId,
                     { viewportFitChange(it, context) },
                     { inFullScreen ->
                         fullScreenChanged(
@@ -1427,9 +1400,9 @@ fun BrowserComponent(
             )
 
             store.flowScoped(lifecycleOwner) { flow ->
-                flow.mapNotNull { state ->
-                    state.findTabOrCustomTabOrSelectedTab(
-                        customTabSessionId
+                flow.mapNotNull { browserState ->
+                    browserState.findTabOrCustomTabOrSelectedTab(
+                        state.customTabSessionId
                     )
                 }.distinctUntilChangedBy { tab -> tab.content.pictureInPictureEnabled }
                     .collect { tab ->
@@ -1462,7 +1435,7 @@ fun BrowserComponent(
                     context.components.useCases.sessionUseCases.reload,
                     swipeRefresh!!,
                     { },
-                    customTabSessionId,
+                    state.customTabSessionId,
                 ),
                 owner = lifecycleOwner,
                 view = view,
@@ -1471,7 +1444,7 @@ fun BrowserComponent(
 
             webchannelIntegration.set(
                 feature = FxaWebChannelIntegration(
-                    customTabSessionId = customTabSessionId,
+                    customTabSessionId = state.customTabSessionId,
                     runtime = context.components.core.engine,
                     store = context.components.core.store,
                     accountManager = context.components.backgroundServices.accountManager,
@@ -1649,7 +1622,7 @@ fun BrowserComponent(
 //                    currentStartDownloadDialog?.dismiss()
 
                     context.components.core.store.state.findTabOrCustomTabOrSelectedTab(
-                        customTabSessionId
+                        state.customTabSessionId
                     )?.let { session ->
                         // If we didn't enter PiP, exit full screen on stop
                         if (!session.content.pictureInPictureEnabled && fullScreenFeature.onBackPressed()) {
@@ -1694,7 +1667,7 @@ fun BrowserComponent(
                     components.services.appLinksInterceptor.updateFragmentManger(
                         fragmentManager = parentFragmentManager,
                     )
-                    context.settings().shouldOpenLinksInApp(customTabSessionId != null)
+                    context.settings().shouldOpenLinksInApp(state.customTabSessionId != null)
                         .let { openLinksInExternalApp ->
                             components.services.appLinksInterceptor.updateLaunchInApp {
                                 openLinksInExternalApp
@@ -1728,7 +1701,7 @@ fun BrowserComponent(
         store = store,
         engineView = engineView,
         useCases = context.components.useCases.contextMenuUseCases,
-        tabId = customTabSessionId,
+        tabId = state.customTabSessionId,
     )
 
     Scaffold(
@@ -2805,7 +2778,7 @@ internal fun shouldPullToRefreshBeEnabled(inFullScreen: Boolean, context: Contex
 ////            },
 ////            onVisibilityUpdated = {
 ////                configureEngineViewWithDynamicToolbarsMaxHeight(
-////                    context, customTabSessionId, findInPageIntegration
+////                    context, state.customTabSessionId, findInPageIntegration
 ////                )
 ////            },
 ////        )
@@ -2920,7 +2893,7 @@ internal fun initializeMicrosurveyFeature(
 ////        feature = BottomToolbarContainerIntegration(
 ////            toolbar = bottomToolbarContainerView.toolbarContainerView,
 ////            store = context.components.core.store,
-////            sessionId = customTabSessionId,
+////            sessionId = state.customTabSessionId,
 ////        ),
 ////        owner = lifecycleOwner,
 ////        view = view,

@@ -7,35 +7,44 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.BottomAppBarDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.Favicon
 import com.shmibblez.inferno.compose.base.InfernoIcon
-import com.shmibblez.inferno.library.history.History
-import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.compose.base.InfernoTextStyle
 import com.shmibblez.inferno.ext.infernoTheme
+import com.shmibblez.inferno.library.history.History
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,17 +53,27 @@ internal fun HistoryViewer(
     modifier: Modifier,
     onOpenHistoryItem: (History) -> Unit,
 ) {
+    var isRefreshing by remember { mutableStateOf(false) }
     val pullToRefreshState = rememberPullToRefreshState()
+
+    BottomAppBarDefaults.exitAlwaysScrollBehavior()
+
+    LaunchedEffect(state.isBusy) {
+        if (isRefreshing && !state.isBusy) {
+            isRefreshing = false
+        }
+    }
+
     PullToRefreshBox(
         state = pullToRefreshState,
-        isRefreshing = state.isRefreshing,
+        isRefreshing = isRefreshing,
         onRefresh = { state.refreshList() },
         modifier = modifier,
         contentAlignment = Alignment.TopCenter,
         indicator = {
             PullToRefreshDefaults.Indicator(
                 state = pullToRefreshState,
-                isRefreshing = state.isRefreshing,
+                isRefreshing = isRefreshing,
 //                modifier = ,
                 containerColor = LocalContext.current.infernoTheme().value.secondaryBackgroundColor,
                 color = LocalContext.current.infernoTheme().value.primaryActionColor,
@@ -66,6 +85,10 @@ internal fun HistoryViewer(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
+            // top spacer
+            item { Spacer(Modifier.height(16.dp)) }
+
+            // history items
             items(state.visibleItems ?: emptyList()) { item ->
                 when (item) {
                     is History.Regular -> {
@@ -87,29 +110,74 @@ internal fun HistoryViewer(
                     }
 
                     is History.Group -> {
-                        HistoryGroupItem(item = item,
-                            onOpenSubItem = onOpenHistoryItem,
-                            selectedItems = state.selectedItems,
-                            pendingDeletion = state.pendingDeletion,
-                            onSelectGroup = { state.selectGroupItem(it) },
-                            onUnselectGroup = { state.unselectGroupItem(it) },
-                            onSelectSubItem = { group, subItem ->
-                                state.selectGroupSubItem(group, subItem)
-                            },
-                            onUnselectSubItem = { group, subItem ->
-                                state.unselectGroupSubItem(group, subItem)
-                            },
-                            onDeleteGroup = { state.deleteItem(it) },
-                            onDeleteSubItem = { state.deleteItem(it) })
+                        if (!state.pendingDeletion.containsAll(item.items)) {
+                            HistoryGroupItem(item = item,
+                                onOpenSubItem = onOpenHistoryItem,
+                                selectedItems = state.selectedItems,
+                                pendingDeletion = state.pendingDeletion,
+                                onSelectGroup = { state.selectGroupItem(it) },
+                                onUnselectGroup = { state.unselectGroupItem(it) },
+                                onSelectSubItem = { group, subItem ->
+                                    state.selectGroupSubItem(group, subItem)
+                                },
+                                onUnselectSubItem = { group, subItem ->
+                                    state.unselectGroupSubItem(group, subItem)
+                                },
+                                onDeleteGroup = { state.deleteItem(it) },
+                                onDeleteSubItem = { state.deleteItem(it) })
+                        }
                     }
                 }
             }
 
             item {
-                // todo: load more when called
+                LoadMoreItem(
+                    onLoadMore = { state.loadMore() },
+                    atEndOfList = state.noMoreItems,
+                )
             }
         }
     }
+}
+
+private const val ATTEMPT_LOAD_INTERVAL = 250L
+
+@Composable
+private fun LoadMoreItem(onLoadMore: () -> Unit, atEndOfList: Boolean) {
+    val coroutineScope = rememberCoroutineScope()
+    var attemptLoad = remember { true }
+
+    DisposableEffect(null, atEndOfList) {
+        coroutineScope.launch {
+            while (!atEndOfList && attemptLoad) {
+                onLoadMore.invoke()
+                delay(ATTEMPT_LOAD_INTERVAL)
+            }
+        }
+        onDispose { attemptLoad = false }
+    }
+    when (atEndOfList) {
+        true -> {
+            InfernoText(
+                text = "No more items", // todo: string res
+                modifier = Modifier
+                    .fillMaxWidth()
+//                    .background(LocalContext.current.infernoTheme().value.secondaryBackgroundColor)
+                    .padding(16.dp),
+                textAlign = TextAlign.Center,
+            )
+        }
+
+        false -> {
+            LinearProgressIndicator(
+                modifier = Modifier.fillMaxWidth(),
+                color = LocalContext.current.infernoTheme().value.primaryActionColor,
+                trackColor = LocalContext.current.infernoTheme().value.secondaryBackgroundColor,
+            )
+        }
+    }
+
+
 }
 
 private val LEADING_ICON_SIZE = 32.dp
@@ -133,17 +201,19 @@ private fun <T : History> ItemTemplate(
     onToggleExpanded: (() -> Unit)? = null,
 ) {
     Row(
-        modifier = modifier.combinedClickable(
-            onClick = {
-                when (selected != null) {
-                    // if in selection mode, toggle selected
-                    true -> onToggleSelected?.invoke()
-                    // if not in selection mode, open
-                    false -> onOpen.invoke(item)
-                }
-            },
-            onLongClick = onToggleSelected ?: {},
-        ),
+        modifier = modifier
+            .padding(horizontal = 16.dp)
+            .combinedClickable(
+                onClick = {
+                    when (selected != null) {
+                        // if in selection mode, toggle selected
+                        true -> onToggleSelected?.invoke()
+                        // if not in selection mode, open
+                        false -> onOpen.invoke(item)
+                    }
+                },
+                onLongClick = onToggleSelected ?: {},
+            ),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {

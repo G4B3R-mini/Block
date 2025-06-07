@@ -105,6 +105,8 @@ class BrowserComponentState(
         private set
     var currentCustomTab: CustomTabSessionState? by mutableStateOf(null)
         private set
+    val customTabSessionId: String?
+        get() = currentCustomTab?.id
     var isPrivateSession: Boolean by mutableStateOf(false)
         private set
     var searchEngine: SearchEngine? by mutableStateOf(null)

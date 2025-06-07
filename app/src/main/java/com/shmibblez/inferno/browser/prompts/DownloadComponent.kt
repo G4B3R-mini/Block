@@ -69,7 +69,7 @@ fun DownloadComponent(
     downloadManager: DownloadManager = AndroidDownloadManager(
         applicationContext, store
     ),
-    tabId: String? = null,
+    customTabSessionId: String? = null,
 //    promptsStyling: PromptsStyling? = null,
     shouldForwardToThirdParties: () -> Boolean = { false },
     useCustomFirstPartyDownloadPrompt: Boolean = true,
@@ -178,7 +178,7 @@ fun DownloadComponent(
 //    }
 
     fun withActiveDownload(block: (Pair<SessionState, DownloadState>) -> Unit) {
-        val state = store.state.findTabOrCustomTabOrSelectedTab(tabId) ?: return
+        val state = store.state.findTabOrCustomTabOrSelectedTab(customTabSessionId) ?: return
         val download = state.content.download ?: return
         block(Pair(state, download))
     }
@@ -265,7 +265,7 @@ fun DownloadComponent(
         // Dismiss the previous prompts when the user navigates to another site.
         // This prevents prompts from the previous page from covering content.
         dismissPromptScope = store.flowScoped { flow ->
-            flow.mapNotNull { state -> state.findTabOrCustomTabOrSelectedTab(tabId) }
+            flow.mapNotNull { state -> state.findTabOrCustomTabOrSelectedTab(customTabSessionId) }
                 .distinctUntilChangedBy { it.content.url }.collect {
                     val currentHost = previousTab?.content?.url
                     val newHost = it.content.url
@@ -285,7 +285,7 @@ fun DownloadComponent(
         }
 
         scope = store.flowScoped { flow ->
-            flow.mapNotNull { state -> state.findTabOrCustomTabOrSelectedTab(tabId) }
+            flow.mapNotNull { state -> state.findTabOrCustomTabOrSelectedTab(customTabSessionId) }
                 .distinctUntilChangedBy { it.content.download }.collect { state ->
                     state.content.download?.let { newDownloadState ->
                         previousTab = state
@@ -394,7 +394,7 @@ fun DownloadComponent(
         for (entry in stoppedDownloadStates) {
             // If the download is just paused, don't show any in-app notification
             if (shouldShowCompletedDownloadDialog(
-                    entry.value.downloadState, entry.value.downloadJobStatus, tabId
+                    entry.value.downloadState, entry.value.downloadJobStatus, customTabSessionId
                 )
             ) {
                 DynamicDownloadPrompt(

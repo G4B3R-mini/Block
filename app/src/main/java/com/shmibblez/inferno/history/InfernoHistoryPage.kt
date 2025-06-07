@@ -84,9 +84,7 @@ fun InfernoHistoryPage(goBack: () -> Unit) {
             state = historyViewerState,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(edgeInsets)
-                .padding(top = 16.dp)
-                .padding(horizontal = 16.dp),
+                .padding(edgeInsets),
             onOpenHistoryItem = {
                 when (it) {
                     is History.Group -> {}

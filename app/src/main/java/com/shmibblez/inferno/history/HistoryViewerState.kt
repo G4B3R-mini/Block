@@ -20,10 +20,9 @@ import com.shmibblez.inferno.library.history.History
 import com.shmibblez.inferno.utils.Settings.Companion.SEARCH_GROUP_MINIMUM_SITES
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.cancel
 import mozilla.components.browser.state.action.HistoryMetadataAction
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.browser.storage.sync.PlacesHistoryStorage
@@ -32,6 +31,116 @@ import mozilla.components.concept.storage.VisitInfo
 import mozilla.components.concept.storage.VisitType
 import mozilla.components.support.base.feature.LifecycleAwareFeature
 import mozilla.components.support.ktx.kotlin.tryGetHostFromUrl
+
+/** handles jobs consecutively, ensuring only unique jobs are in queue */
+class ConsecutiveUniqueJobHandler<T : Enum<T>>(
+    val scope: CoroutineScope,
+) {
+    class ResultScope<out E : Throwable, out R : Any>(
+        val isSuccess: Boolean,
+        val isFailure: Boolean,
+        val e: E?,
+        val r: R?,
+    ) {
+        fun onSuccess(callback: (r: R) -> Unit) {
+            if (isSuccess) callback.invoke(r!!)
+        }
+
+        fun onFailure(callback: (e: E) -> Unit) {
+            if (isFailure) callback.invoke(e!!)
+        }
+    }
+
+    /**
+     * operation wrapper
+     *
+     * @param type type of operation
+     * @param task task to complete
+     */
+    data class Op<T : Enum<T>, R : Any>(
+        val type: T,
+        val task: suspend () -> R?,
+        val onComplete: (ResultScope<Throwable, R>.(currentlyIdle: Boolean) -> Unit)? = null,
+    ) {
+        override fun equals(other: Any?): Boolean {
+            return other != null && other is Op<*, *> && other.type == this.type
+        }
+
+        override fun hashCode(): Int {
+//            var result = type.hashCode()
+//            result = 31 * result + task.hashCode()
+//            result = 31 * result + (onComplete?.hashCode() ?: 0)
+//            return result
+            return type.ordinal
+        }
+
+        fun invoke(
+            scope: CoroutineScope,
+            onFinish: () -> Unit,
+            isIdle: () -> Boolean,
+        ): Deferred<R?> {
+            Log.d("CUJobHandler.Op", "invoke called, starting job")
+            return scope.async {
+                val r = task.runCatching { this.invoke() }
+                onFinish.invoke()
+                Log.d("CUJobHandler.Op", "invoke onFinish invoked, ending job")
+                onComplete?.invoke(
+                    ResultScope(
+                        isSuccess = r.isSuccess,
+                        isFailure = r.isFailure,
+                        e = r.exceptionOrNull(),
+                        r = r.getOrNull(),
+                    ),
+                    isIdle.invoke(),
+                )
+                r.getOrNull()
+            }
+        }
+    }
+
+    private var queue = emptyList<Any>()
+    private var currentTask: Deferred<Any?>? = null
+
+    /** true if no pending tasks & not currently busy */
+    private val isIdle: Boolean
+        get() = queue.isEmpty()
+
+    private fun invokeNext() {
+        Log.d("CUJobHandler", "invokeNext called")
+        if (currentTask != null) return
+        val op = queue.firstOrNull()?.let { it as Op<*, *> } ?: return
+        Log.d("CUJobHandler", "invokeNext, isIdle: $isIdle")
+        currentTask = op.invoke(
+            scope = scope,
+            onFinish = {
+                Log.d(
+                    "CUJobHandler.Op",
+                    "onFinish start, queue: ${queue.map { (it as Op<*, *>).type }}, isIdle: $isIdle"
+                )
+                queue -= op; currentTask = null; invokeNext()
+                Log.d(
+                    "CUJobHandler.Op",
+                    "onFinish end, queue: ${queue.map { (it as Op<*, *>).type }}, isIdle: $isIdle"
+                )
+            },
+            isIdle = { queue.isEmpty() },
+        )
+    }
+
+    fun <R : Any> processTask(
+//        op: Op<T, R>,
+        type: T,
+        task: suspend () -> R?,
+        onComplete: (ResultScope<Throwable, R>.(currentlyIdle: Boolean) -> Unit)? = null,
+    ) {
+        Log.d("CUJobHandler", "processTask called")
+        val op = Op(type, task, onComplete)
+        if (queue.contains(op)) return
+        queue += op
+        invokeNext()
+    }
+}
+
 
 @Composable
 internal fun rememberHistoryViewerState(
@@ -68,7 +177,7 @@ internal class HistoryViewerState(
     private val browserStore: BrowserStore,
     private val historyStorage: PlacesHistoryStorage,
     private val coroutineScope: CoroutineScope,
-    val numberOfItemsToLoad: Int = NUMBER_OF_HISTORY_ITEMS,
+    private val numberOfItemsToLoad: Int = NUMBER_OF_HISTORY_ITEMS,
 ) : LifecycleAwareFeature {
 
     internal sealed interface Mode {
@@ -88,42 +197,15 @@ internal class HistoryViewerState(
      * database vars and funs
      */
 
-    private val jobs: MutableList<Job> = mutableListOf()
+    internal enum class TaskType { LOAD_MORE, REFRESH, DELETE, }
 
-    val isLoading: Boolean
-        get() = jobs.isNotEmpty()
+    private val taskHandler = ConsecutiveUniqueJobHandler<TaskType>(coroutineScope)
 
-    var isRefreshing: Boolean by mutableStateOf(false)
+    var isBusy by mutableStateOf(false)
         private set
 
-    // removes all jobs that are not active
-    private fun clearFinishedJobs() {
-        jobs.removeAll { !it.isActive }
-    }
-
-    // launches suspend function and tracks its state
-    private fun launchSuspend(
-        onSuccess: (() -> Unit)? = null,
-        onFail: ((e: Exception) -> Unit)? = null,
-        block: suspend CoroutineScope.() -> Unit,
-    ): Job {
-        val job = coroutineScope.launch(
-            block = {
-                try {
-                    block.invoke(this)
-                } catch (e: Exception) {
-                    onFail?.invoke(e)
-                }
-            },
-        ).apply {
-            this.invokeOnCompletion {
-                onSuccess?.invoke()
-                clearFinishedJobs()
-            }
-        }
-        jobs.add(job)
-        return job
-    }
+    var noMoreItems by mutableStateOf(false)
+        private set
 
     /**
      * Types of visits we currently do not display in the History UI.
@@ -145,7 +227,7 @@ internal class HistoryViewerState(
         it == VisitType.REDIRECT_PERMANENT || it == VisitType.REDIRECT_TEMPORARY
     }
 
-    private var offset = 0
+    private var dbOffset = 0
 
     @Volatile
     private var historyGroups: List<HistoryDB.Group>? = null
@@ -174,21 +256,6 @@ internal class HistoryViewerState(
         return getHistoryAndSearchGroups(offset, numberOfItems)
     }
 
-    /**
-     * Removes [group] and any corresponding history visits.
-     */
-    private suspend fun deleteMetadataSearchGroup(group: History.Group) {
-        // The intention is to delete items from history for good.
-        // Corresponding metadata items would also be removed,
-        // because of ON DELETE CASCADE relation in DB schema.
-        for (historyMetadata in group.items) {
-            historyStorage.deleteVisitsFor(historyMetadata.url)
-        }
-
-        // Force a re-fetch of the groups next time we go through #getHistory.
-        historyGroups = null
-    }
-
     @Suppress("MagicNumber")
     private suspend fun getHistoryAndSearchGroups(
         offset: Int,
@@ -199,7 +266,12 @@ internal class HistoryViewerState(
             offset.toLong(),
             numberOfItems.toLong(),
             excludeTypes = excludedVisitTypes,
-        ).map { transformVisitInfoToHistoryItem(it) }
+        ).map { transformVisitInfoToHistoryItem(it) }.also {
+            // update offset
+            dbOffset += it.size + 1
+            // check if no more items to display
+            if (it.isEmpty() && numberOfItems != 0) noMoreItems = true
+        }
 
         // We'll use this list to filter out redirects from metadata groups below.
         val redirectsInThePage = if (history.isNotEmpty()) {
@@ -266,61 +338,186 @@ internal class HistoryViewerState(
         )
     }
 
-    private suspend fun resetList(numberOfItems: Int = numberOfItemsToLoad) {
-        offset = 0
-        allItems = emptyList()
+
+    /**
+     * Removes [group] and any corresponding history visits.
+     */
+    private suspend fun deleteMetadataSearchGroup(group: History.Group) {
+        // The intention is to delete items from history for good.
+        // Corresponding metadata items would also be removed,
+        // because of ON DELETE CASCADE relation in DB schema.
+        for (historyMetadata in group.items) {
+            historyStorage.deleteVisitsFor(historyMetadata.url)
+        }
+
+        // Force a re-fetch of the groups next time we go through #getHistory.
+        historyGroups = null
+    }
+
+    /** loads up to where offset was before */
+    private suspend fun resetListSus() {
+        Log.d("HistoryViewerState", "resetListSus invoked")
+        dbOffset = 0
         historyGroups = emptyList()
 
-        loadMore(numberOfItems)
+        loadMoreSus()
     }
 
-    /** completely reloads list up to current offset, for external use */
-    fun refreshList() {
-        // if already refreshing or in selection mode, return
-        if (isRefreshing || mode.isSelection()) return
+    /** completely reloads list up to current offset */
+    private suspend fun refreshListSus() {
+        Log.d("HistoryViewerState", "refreshListSus invoked")
+        val n = dbOffset
+        dbOffset = 0
+        historyGroups = emptyList()
 
-        launchSuspend {
-            refreshListSuspending()
-        }
-    }
-
-    /** completely reloads list up to current offset (suspending) */
-    private suspend fun refreshListSuspending() {
-        // if already refreshing or in selection mode, return
-        if (isRefreshing || mode.isSelection()) return
-        // if not refreshing, refresh
-        isRefreshing = true
-        resetList(offset)
-        isRefreshing = false
-    }
-
-    // todo: call from HistoryViewer loading item, if refreshing call good ol while(!isRefreshing)
-    //  with delay(100) inside suspend, then continue
-    fun loadMore() {
-        launchSuspend {
-            loadMore()
-        }
-    }
-
-    private suspend fun loadMore(numberOfItems: Int = numberOfItemsToLoad) {
-        // if currently refreshing return
-        if (isRefreshing) return
-
-        isRefreshing = true
-        allItems += getHistory(offset, numberOfItems).run {
-            positionWithOffset(offset)
+        allItems = getHistory(dbOffset, n).run {
+            positionWithOffset(dbOffset)
         }
         visibleItems = allItems - pendingDeletion.toSet()
-        isRefreshing = false
+    }
+
+    private suspend fun loadMoreSus(numberOfItems: Int = numberOfItemsToLoad) {
+        Log.d("HistoryViewerState", "loadMoreSus invoked")
+        allItems += getHistory(dbOffset, numberOfItems).run {
+            positionWithOffset(dbOffset)
+        }
+        visibleItems = allItems - pendingDeletion.toSet()
+    }
+
+    /** delete [item] from history, does not refresh, updates [visibleItems] list */
+    private suspend fun deleteItemSus(item: History) {
+        Log.d("HistoryViewerState", "deleteItemSus invoked")
+        pendingDeletion += item
+        when (item) {
+            is History.Regular -> {
+                try {
+                    historyStorage.deleteVisitsFor(item.url)
+                    allItems -= item
+                } catch (e: Exception) {
+                    Log.e(
+                        "HistoryViewerState", "deleteItem: failed to delete Regular item, e: $e"
+                    )
+                }
+            }
+
+            is History.Group -> {
+                // NB: If we have non-search groups, this logic needs to be updated.
+                try {
+                    deleteMetadataSearchGroup(item)
+                    browserStore.dispatch(
+                        HistoryMetadataAction.DisbandSearchGroupAction(searchTerm = item.title),
+                    )
+                    allItems -= item
+                } catch (e: Exception) {
+                    Log.e(
+                        "HistoryViewerState", "deleteItem: failed to delete Group item, e: $e"
+                    )
+                }
+            }
+            // We won't encounter individual metadata entries outside of groups.
+            is History.Metadata -> {
+                try {
+                    context.components.core.historyStorage.deleteVisitsFor(item.url)
+                    // there is a case when all metadata items are selected which
+                    // would lead to group item with no children existing
+                    // this is handled by HistoryGroupItem in HistoryViewer though
+                    //
+                    // required code to disband group is commented below
+                    // context.components.core.store.dispatch(
+                    //     HistoryMetadataAction.DisbandSearchGroupAction(searchTerm = group.title),
+                    // )
+//                        allItems -= item
+                    refreshListSus()
+                } catch (e: Exception) {
+                    Log.e(
+                        "HistoryViewerState", "deleteItem: failed to delete Metadata item, e: $e"
+                    )
+                }
+            }
+        }
+        // since doesnt refresh list, maintain pendingDeletion
+//        pendingDeletion -= item
+    }
+
+    /**
+     * selected items helpers
+     */
+
+    /** delete selected items and exit selection mode */
+    private suspend fun deleteItemsSus(items: Set<History>) {
+        Log.d("HistoryViewerState", "deleteItemsSus invoked")
+        // add all to pending deletion so not shown
+        pendingDeletion += items
+        val ops = mutableListOf<Deferred<Any>>()
+
+        // delete
+        for (item in items) {
+            val deleteJob = coroutineScope.async { deleteItemSus(item) }
+            ops.add(deleteJob)
+        }
+        ops.awaitAll()
+        refreshListSus()
+        // reset pending deletion
+        pendingDeletion = emptyList()
+        mode = Mode.Normal
+    }
+
+
+    /**
+     * public state management funs
+     */
+
+
+    fun loadMore() {
+        Log.d("HistoryViewerState", "loadMore invoked")
+        taskHandler.processTask(
+            type = TaskType.LOAD_MORE,
+            task = { loadMoreSus() },
+            onComplete = { isBusy = !it },
+        )
+    }
+
+    fun refreshList() {
+        Log.d("HistoryViewerState", "refreshList invoked")
+        taskHandler.processTask(
+            type = TaskType.REFRESH,
+            task = { refreshListSus() },
+            onComplete = { isBusy = !it },
+        )
+    }
+
+    fun deleteItem(item: History) {
+        Log.d("HistoryViewerState", "deleteItem invoked")
+        taskHandler.processTask(
+            type = TaskType.DELETE,
+            task = { deleteItemSus(item) },
+            onComplete = { isBusy = !it },
+        )
+    }
+
+    fun deleteSelected() {
+        Log.d("HistoryViewerState", "deleteSelected invoked")
+        val items = (mode as? Mode.Selection)?.selectedItems ?: return
+        taskHandler.processTask(
+            type = TaskType.DELETE,
+            task = { deleteItemsSus(items = items) },
+            onComplete = { isBusy = !it },
+        )
+    }
+
+    fun deleteTimeframe() {
+        // todo
     }
 
 
     override fun start() {
-        launchSuspend { resetList() }
+        taskHandler.processTask(type = TaskType.LOAD_MORE,
+            task = { resetListSus() },
+            onComplete = { isBusy = !it })
     }
 
     override fun stop() {
-        jobs.forEach { it.cancel() }
+        coroutineScope.cancel()
     }
 
     /**
@@ -344,6 +541,10 @@ internal class HistoryViewerState(
             override var value: List<History>
                 get() = state.value
                 set(value) {
+                    Log.d(
+                        "HistoryViewerState",
+                        "pendingDeletion set, old size: ${state.value.size}, new size: ${value.size}"
+                    )
                     state.value = value
                     visibleItems = allItems - state.value.toSet()
                 }
@@ -351,7 +552,6 @@ internal class HistoryViewerState(
     }
         private set
 
-    // todo: every time update occurs, visibleItems = allItems - pendingDeletion
     /** items that should be displayed to user, internally [allItems] - [pendingDeletion] */
     var visibleItems: List<History>? by mutableStateOf(null)
         private set
@@ -361,8 +561,8 @@ internal class HistoryViewerState(
         get() = (mode as? Mode.Selection)?.selectedItems
 
     fun selectRegularItem(item: History.Regular) {
-        // if refreshing, return
-        if (isRefreshing) return
+        // if busy, return
+        if (isBusy) return
 
         when (mode.isSelection()) {
             // if in selection mode
@@ -378,14 +578,17 @@ internal class HistoryViewerState(
     }
 
     fun unselectRegularItem(item: History.Regular) {
+        // if busy, return
+        if (isBusy) return
+
         // if in selection mode, remove, no need to check if present
         (mode as? Mode.Selection)?.let { it.selectedItems -= item }
     }
 
 
     fun selectMetadataItem(item: History.Metadata) {
-        // if refreshing, return
-        if (isRefreshing) return
+        // if busy, return
+        if (isBusy) return
 
         when (mode.isSelection()) {
             // if in selection mode
@@ -401,14 +604,17 @@ internal class HistoryViewerState(
     }
 
     fun unselectMetadataItem(item: History.Metadata) {
+        // if busy, return
+        if (isBusy) return
+
         // if in selection mode, remove, no need to check if present
         (mode as? Mode.Selection)?.let { it.selectedItems -= item }
     }
 
 
     fun selectGroupItem(item: History.Group) {
-        // if refreshing, return
-        if (isRefreshing) return
+        // if busy, return
+        if (isBusy) return
 
         if (mode.isSelection()) {
             // if in selection mode
@@ -427,6 +633,9 @@ internal class HistoryViewerState(
     }
 
     fun unselectGroupItem(item: History.Group) {
+        // if busy, return
+        if (isBusy) return
+
         // if not in selection mode, return
         if (!mode.isSelection()) return
         // if in selection mode
@@ -445,8 +654,8 @@ internal class HistoryViewerState(
      * @param item item to select
      */
     fun selectGroupSubItem(group: History.Group, item: History.Metadata) {
-        // if refreshing, return
-        if (isRefreshing) return
+        // if busy, return
+        if (isBusy) return
 
         if (mode.isSelection()) {
             // if in selection mode
@@ -469,6 +678,9 @@ internal class HistoryViewerState(
      * @param item item to select
      */
     fun unselectGroupSubItem(group: History.Group, item: History.Metadata) {
+        // if busy, return
+        if (isBusy) return
+
         // if not in selection mode, or item not in group, return
         if (!mode.isSelection() || !group.items.contains(item)) return
         // if in selection mode
@@ -482,148 +694,6 @@ internal class HistoryViewerState(
             }
             // remove sub-item, no need to check if in list
             it.selectedItems -= item
-        }
-    }
-
-
-    /** delete [item] from history, does not refresh, updates [visibleItems] list */
-    fun deleteItem(item: History) {
-        // if refreshing, return
-        if (isRefreshing) return
-
-        // todo: copy for deleteAll in selection
-        launchSuspend {
-            pendingDeletion += item
-            when (item) {
-                is History.Regular -> {
-                    try {
-                        historyStorage.deleteVisitsFor(item.url)
-                        allItems -= item
-                    } catch (e: Exception) {
-                        Log.e(
-                            "HistoryViewerState", "deleteItem: failed to delete Regular item, e: $e"
-                        )
-                    }
-                }
-
-                is History.Group -> {
-                    // NB: If we have non-search groups, this logic needs to be updated.
-                    try {
-                        deleteMetadataSearchGroup(item)
-                        browserStore.dispatch(
-                            HistoryMetadataAction.DisbandSearchGroupAction(searchTerm = item.title),
-                        )
-                        allItems -= item
-                    } catch (e: Exception) {
-                        Log.e(
-                            "HistoryViewerState", "deleteItem: failed to delete Group item, e: $e"
-                        )
-                    }
-                }
-                // We won't encounter individual metadata entries outside of groups.
-                is History.Metadata -> {
-                    try {
-                        context.components.core.historyStorage.deleteVisitsFor(item.url)
-                        // there is a case when all metadata items are selected which
-                        // would lead to group item with no children existing
-                        // this is handled by HistoryGroupItem in HistoryViewer though
-                        //
-                        // required code to disband group is commented below
-                        // context.components.core.store.dispatch(
-                        //     HistoryMetadataAction.DisbandSearchGroupAction(searchTerm = group.title),
-                        // )
-//                        allItems -= item
-                        refreshList()
-                    } catch (e: Exception) {
-                        Log.e(
-                            "HistoryViewerState",
-                            "deleteItem: failed to delete Metadata item, e: $e"
-                        )
-                    }
-                }
-            }
-            pendingDeletion -= item
-        }
-    }
-
-    /**
-     * selected items helpers
-     */
-
-    /** delete selected items and exit selection mode */
-    fun deleteSelected() {
-        // if refreshing, return
-        if (isRefreshing) return
-
-        selectedItems?.let { items ->
-            launchSuspend {
-                // add all to pending deletion so not shown
-                pendingDeletion += items
-                val ops = mutableListOf<Deferred<Any>>()
-                for (item in items) {
-                    when (item) {
-                        is History.Regular -> launchSuspend {
-                            val deleteJob = this.async {
-                                try {
-                                    historyStorage.deleteVisitsFor(item.url)
-                                } catch (e: Exception) {
-                                    Log.e(
-                                        "HistoryViewerState",
-                                        "deleteAll: failed to delete Regular item, e: $e"
-                                    )
-                                }
-                            }
-                            ops.add(deleteJob)
-                        }
-
-                        is History.Group -> {
-                            // NB: If we have non-search groups, this logic needs to be updated.
-                            val deleteJob = this.async {
-                                try {
-                                    deleteMetadataSearchGroup(item)
-                                    browserStore.dispatch(
-                                        HistoryMetadataAction.DisbandSearchGroupAction(searchTerm = item.title),
-                                    )
-                                } catch (e: Exception) {
-                                    Log.e(
-                                        "HistoryViewerState",
-                                        "deleteAll: failed to delete Group item, e: $e"
-                                    )
-                                }
-                            }
-                            ops.add(deleteJob)
-                        }
-
-                        is History.Metadata -> {
-                            val deleteJob = this.async {
-                                try {
-                                    context.components.core.historyStorage.deleteVisitsFor(item.url)
-                                    // there is a case when all metadata items are selected which
-                                    // would lead to group item with no children existing
-                                    // this is handled by HistoryGroupItem in HistoryViewer though
-                                    //
-                                    // required code to disband group is commented below
-                                    // context.components.core.store.dispatch(
-                                    //     HistoryMetadataAction.DisbandSearchGroupAction(searchTerm = group.title),
-                                    // )
-                                } catch (e: Exception) {
-                                    Log.e(
-                                        "HistoryViewerState",
-                                        "deleteAll: failed to delete Metadata item, e: $e"
-                                    )
-                                }
-                            }
-                            ops.add(deleteJob)
-                            // todo: check sub-page for history groups, refresh
-                        }
-                    }
-                }
-                ops.awaitAll()
-                refreshListSuspending()
-                // reset pending deletion
-                pendingDeletion = emptyList()
-                mode = Mode.Normal
-            }
         }
     }
 
@@ -656,7 +726,12 @@ internal class HistoryViewerState(
         // load urls
         (mode as? Mode.Selection)?.selectedItems?.forEachIndexed { i, it ->
             when (it) {
-                is History.Group -> it.items.forEachIndexed { j, meta -> loadUrl(meta.url, i + j) }
+                is History.Group -> it.items.forEachIndexed { j, meta ->
+                    loadUrl(
+                        meta.url, i + j
+                    )
+                }
+
                 is History.Metadata -> loadUrl(it.url, i)
                 is History.Regular -> loadUrl(it.url, i)
             }
