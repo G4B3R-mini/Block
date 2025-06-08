@@ -75,6 +75,7 @@ class ExternalAppBrowserFragment : BaseBrowserFragment() {
         val activity = requireActivity()
         val components = activity.components
 
+        // todo: key to everything working might be here
         val manifest = args.webAppManifestUrl?.ifEmpty { null }?.let { url ->
             requireComponents.core.webAppManifestStorage.getManifestCache(url)
         }

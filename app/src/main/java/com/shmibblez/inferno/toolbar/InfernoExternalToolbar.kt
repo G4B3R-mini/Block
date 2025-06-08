@@ -40,6 +40,8 @@ import mozilla.components.browser.state.state.CustomTabSessionState
 private val ICON_SIZE = 18.dp
 
 // todo: not loading, reference ExternalAppBrowserFragment
+// todo: setup custom tab in browser state once selected (reset customTabInitialized bool),
+//  then copy logic below to initialize
 
 @Composable
 fun InfernoExternalToolbar(

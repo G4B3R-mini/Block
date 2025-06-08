@@ -2034,37 +2034,40 @@ fun MozEngineView(
     setSwipeView: (VerticalSwipeRefreshLayout) -> Unit,
     setEngineView: (GeckoEngineView) -> Unit,
 ) {
-    AndroidView(modifier = modifier, factory = { context ->
-        val vl = VerticalSwipeRefreshLayout(context)
-        val gv = GeckoEngineView(context)
-        setSwipeView(vl)
-        setEngineView(gv)
-        vl.layoutParams = LayoutParams(
-            LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT
-        )
-        // todo: user prefs if swipe refresh enabled or not
-        vl.visibility = View.VISIBLE
-        vl.isEnabled = true
-        vl.isActivated = true
-        vl.isVisible = true
-        vl.addView(gv)
-        gv.layoutParams.width = LayoutParams.MATCH_PARENT
-        gv.layoutParams.height = LayoutParams.MATCH_PARENT
-        gv.setBackgroundColor(android.graphics.Color.TRANSPARENT)
-        gv.visibility = View.VISIBLE
-        gv.setBackgroundColor(android.graphics.Color.DKGRAY)
-        gv.isEnabled = true
-        gv.isActivated = true
-        gv.isVisible = true
-        vl
-    }, update = { sv ->
-        var gv: GeckoEngineView? = null
-        for (v in sv.children) {
-            if (v is GeckoEngineView) {
-                gv = v
-                break
+    AndroidView(
+        modifier = modifier,
+        factory = { context ->
+            val vl = VerticalSwipeRefreshLayout(context)
+            val gv = GeckoEngineView(context)
+            setSwipeView(vl)
+            setEngineView(gv)
+            vl.layoutParams = LayoutParams(
+                LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT
+            )
+            // todo: user prefs if swipe refresh enabled or not
+            vl.visibility = View.VISIBLE
+            vl.isEnabled = true
+            vl.isActivated = true
+            vl.isVisible = true
+            vl.addView(gv)
+            gv.layoutParams.width = LayoutParams.MATCH_PARENT
+            gv.layoutParams.height = LayoutParams.MATCH_PARENT
+            gv.setBackgroundColor(android.graphics.Color.TRANSPARENT)
+            gv.visibility = View.VISIBLE
+            gv.setBackgroundColor(android.graphics.Color.DKGRAY)
+            gv.isEnabled = true
+            gv.isActivated = true
+            gv.isVisible = true
+            vl
+        },
+        update = { sv ->
+            var gv: GeckoEngineView? = null
+            for (v in sv.children) {
+                if (v is GeckoEngineView) {
+                    gv = v
+                    break
+                }
             }
-        }
 //        // setup views
 //        with(sv.layoutParams) {
 //            this.width = LayoutParams.MATCH_PARENT
@@ -2074,9 +2077,10 @@ fun MozEngineView(
 //            this.width = LayoutParams.MATCH_PARENT
 //            this.height = LayoutParams.MATCH_PARENT
 //        }
-        gv!!.isEnabled = true
-        gv.isActivated = true
-    })
+            gv!!.isEnabled = true
+            gv.isActivated = true
+        },
+    )
 }
 
 // todo: reader view button, what this for?

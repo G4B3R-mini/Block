@@ -52,14 +52,23 @@ that's it for now, hopefully this project doesn't die
 - [ ] offset wonky, works pretty well thou
 - [ ] delete time range (2 hours, 2 days, everything), copy moz implementation
 - [ ] reference DefaultPagedHistoryProvider
-- [ ] also add time range deletion, copy [R.layout.delete_history_time_range_dialog](./app/src/main/res/layout/delete_history_time_range_dialog.xml)
+- [ ] also add time range deletion,
+  copy [R.layout.delete_history_time_range_dialog](./app/src/main/res/layout/delete_history_time_range_dialog.xml)
 
 ## IntentProcessor and ExternalAppBrowser
 
-- [ ] pending testing, ExternalAppBrowser not used anymore lol
-- [ ] VERY buggy
-- [ ] tidy up external toolbar ui (padding)
-- [ ] make browser components use custom tab if not setup already
+- [ ] for navigation, back pressed handler
+    - [ ] if tab can go back, then go back, if cannot go back anymore, call system pop and return to
+      app that requested browser, and custom tab is closed
+- [ ] slightly less buggy now
+- [ ] make browser components use custom tab if not setup already (web prompter, find in page,
+  permissions, download feature)
+- [ ] current strategy for custom tab manifest:
+    - [ ] move browserComponentState to parent activity, there call start() and stop() accordingly,
+      this also means access to biometric setup and activity callbacks (FileManager and other stuff
+      for web prompter) will be much easier, no need for complex fragment wrapper implementation
+    - [ ] funs in ExternalAppBrowserFragment will be moved to BrowserComponentState, listeners will
+      be added/removed, depending on if custom tab exists
 
 ## TabTray
 
