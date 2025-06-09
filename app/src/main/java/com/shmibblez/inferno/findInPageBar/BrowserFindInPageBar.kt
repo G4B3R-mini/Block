@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -131,6 +132,17 @@ fun BrowserFindInPageBar(
                 focusedContainerColor = Color.Transparent,
                 unfocusedContainerColor = Color.Transparent,
                 errorContainerColor = Color.Transparent,
+                cursorColor = LocalContext.current.infernoTheme().value.primaryActionColor,
+                errorCursorColor = LocalContext.current.infernoTheme().value.errorColor,
+                selectionColors = TextSelectionColors(
+                    handleColor = LocalContext.current.infernoTheme().value.primaryActionColor,
+                    backgroundColor = LocalContext.current.infernoTheme().value.primaryActionColor.copy(
+                        alpha = 0.4F,
+                    ),
+                ),
+                focusedIndicatorColor = LocalContext.current.infernoTheme().value.primaryActionColor,
+                unfocusedIndicatorColor = LocalContext.current.infernoTheme().value.secondaryActionColor,
+                errorIndicatorColor = LocalContext.current.infernoTheme().value.errorColor,
             ),
         )
         InfernoText(

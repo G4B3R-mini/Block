@@ -124,11 +124,12 @@
             </intent-filter>
         </activity-alias>
 
+<!--        android:launchMode="singleTask"-->
         <activity
             android:name=".HomeActivity"
             android:configChanges="keyboard|keyboardHidden|mcc|mnc|orientation|screenSize|layoutDirection|smallestScreenSize|screenLayout"
             android:exported="true"
-            android:launchMode="singleTask"
+            android:launchMode="standard"
             android:resizeableActivity="true"
             android:supportsPictureInPicture="true"
             android:theme="@style/SplashScreen"

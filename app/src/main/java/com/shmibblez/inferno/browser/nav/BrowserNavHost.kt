@@ -28,7 +28,7 @@ import kotlinx.serialization.Serializable
  */
 sealed class InitialBrowserTask : java.io.Serializable {
 
-    data class ExternalApp(val url: String, val private: Boolean = false) : InitialBrowserTask(),
+    data class ExternalApp(val tabId: String, val private: Boolean = false) : InitialBrowserTask(),
         java.io.Serializable
 
     data class OpenToBrowser(val private: Boolean = false) : InitialBrowserTask(),
@@ -105,6 +105,7 @@ interface BrowserRoute {
 
 @Composable
 fun BrowserNavHost(
+    customTabSessionId: String?,
     initialAction: InitialBrowserTask? = null,
     startDestination: BrowserRoute = initialAction?.asStartDestination()
         ?: BrowserRoute.InfernoBrowser,
@@ -112,6 +113,7 @@ fun BrowserNavHost(
     val nav = rememberNavController()
 
     val browserComponentState by rememberBrowserComponentState(
+        customTabSessionId = customTabSessionId,
         activity = LocalContext.current.getActivity()!!,
     )
 
@@ -121,48 +123,45 @@ fun BrowserNavHost(
         // set nav host for request interceptor
         context.components.core.requestInterceptor.setNavigationController(nav)
 
-        // todo: test, if changes not available were in big trouble
-//        when (initialAction) {
-//            null -> {}
-////            else -> {
-////                throw NoWhenBranchMatchedException("unimplemented InitialBrowserTask: $initialAction")
-////            }
-//            InitialBrowserTask.AppIcon -> {}
-//            is InitialBrowserTask.ExternalApp -> {}
-//            InitialBrowserTask.OpenPasswordManager -> {
-//                nav.navigate(route = BrowserRoute.PasswordManager)
-//            }
-//
-//            is InitialBrowserTask.OpenToBrowser -> {
-////                if (initialAction.private) {
-////                    // todo:
-//////                    browserComponentState.switchToPrivate()
-////                } else {
-////                    // todo:
-//////                    browserComponentState.switchToNormal()
-////                }
-//            }
-//
-//            is InitialBrowserTask.OpenToBrowserAndLoad -> {
-//                // todo: tab should already be selected as currentTab, maybe just make private if not private
-////                browserComponentState.loadUrl(url = initialAction.url, private = initialAction.private)
-//            }
-//
-//            is InitialBrowserTask.OpenToSearch -> {
-//                // todo: open new tab and focus toolbar address bar
-////                browserComponentState.beginSearch(private = initialAction.private)
-//            }
-//
-//            InitialBrowserTask.PrivateBrowsingMode -> {
-//                // todo:
-////                browserComponentState.switchToPrivate()
-//            }
-//
-//            InitialBrowserTask.StartInRecentsScreen -> {
-//                // todo:
-////                browserComponentState.goToRecents()
-//            }
-//        }
+        when (initialAction) {
+            InitialBrowserTask.AppIcon -> {}
+            is InitialBrowserTask.ExternalApp -> {}
+            InitialBrowserTask.OpenPasswordManager -> {
+                nav.navigate(route = BrowserRoute.PasswordManager)
+            }
+
+            is InitialBrowserTask.OpenToBrowser -> {
+//                if (initialAction.private) {
+//                    // todo:
+////                    browserComponentState.switchToPrivate()
+//                } else {
+//                    // todo:
+////                    browserComponentState.switchToNormal()
+//                }
+            }
+
+            is InitialBrowserTask.OpenToBrowserAndLoad -> {
+                // todo: tab should already be selected as currentTab, maybe just make private if not private
+//                browserComponentState.loadUrl(url = initialAction.url, private = initialAction.private)
+            }
+
+            is InitialBrowserTask.OpenToSearch -> {
+                // todo: open new tab and focus toolbar address bar
+//                browserComponentState.beginSearch(private = initialAction.private)
+            }
+
+            InitialBrowserTask.PrivateBrowsingMode -> {
+                // todo:
+//                browserComponentState.switchToPrivate()
+            }
+
+            InitialBrowserTask.StartInRecentsScreen -> {
+                // todo:
+//                browserComponentState.goToRecents()
+            }
+
+            null -> {}
+        }
     }
 
     NavHost(
@@ -220,7 +219,8 @@ fun BrowserNavHost(
 //        }
 
         composable<BrowserRoute.InfernoBrowser> {
-            BrowserComponent(navController = nav,
+            BrowserComponent(
+                navController = nav,
                 state = browserComponentState,
                 onNavToSettings = { nav.navigate(route = BrowserRoute.InfernoSettings) },
                 onNavToHistory = { nav.navigate(route = BrowserRoute.History) })

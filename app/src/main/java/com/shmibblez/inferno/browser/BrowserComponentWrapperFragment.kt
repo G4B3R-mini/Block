@@ -85,7 +85,7 @@ class BrowserComponentWrapperFragment : Fragment(), UserInteractionHandler, Acti
         val scrollToCollection = arguments?.getBoolean(SCROLL_TO_COLLECTION) ?: false
 
         baseComposeView.setContent {
-            BrowserNavHost()
+//            BrowserNavHost()
         }
 
         requireContext().components.crashReporter.install(requireContext())

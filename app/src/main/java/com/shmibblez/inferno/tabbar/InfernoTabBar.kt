@@ -33,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -261,7 +262,7 @@ private fun MiniTab(
                 }
 
                 isPrivateHomePage -> {
-                    InfernoIcon(
+                    Image(
                         painter = painterResource(R.drawable.ic_private_browsing),
                         contentDescription = "favicon",
                         modifier = Modifier
@@ -271,13 +272,27 @@ private fun MiniTab(
                 }
 
                 else -> {
-                    Favicon(
-                        url = url ?: "",
-                        size = 18.dp,
-                        modifier = Modifier
-                            .aspectRatio(1F)
-                            .padding(6.dp),
-                    )
+                    when (tabSessionState.content.icon) {
+                        null -> {
+                            Favicon(
+                                url = url ?: "",
+                                size = 18.dp,
+                                modifier = Modifier
+                                    .aspectRatio(1F)
+                                    .padding(6.dp),
+                            )
+                        }
+
+                        else -> {
+                            Image(
+                                bitmap = tabSessionState.content.icon!!.asImageBitmap(),
+                                contentDescription = "favicon",
+                                modifier = Modifier
+                                    .padding(6.dp)
+                                    .size(18.dp),
+                            )
+                        }
+                    }
                 }
             }
             // site title

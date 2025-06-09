@@ -37,6 +37,7 @@ import kotlinx.coroutines.flow.map
 import mozilla.components.browser.icons.BrowserIcons
 import mozilla.components.browser.icons.Icon
 import mozilla.components.browser.state.search.SearchEngine
+import mozilla.components.browser.state.selector.findCustomTab
 import mozilla.components.browser.state.selector.normalTabs
 import mozilla.components.browser.state.selector.privateTabs
 import mozilla.components.browser.state.selector.selectedTab
@@ -208,6 +209,7 @@ private class CustomTabManager(
 
 @Composable
 fun rememberBrowserComponentState(
+    customTabSessionId: String?,
     activity: AppCompatActivity,
     coroutineScope: CoroutineScope = rememberCoroutineScope(),
     lifecycleOwner: LifecycleOwner? = null,
@@ -219,6 +221,7 @@ fun rememberBrowserComponentState(
     val state = remember {
         mutableStateOf(
             BrowserComponentState(
+                customTabSessionId = customTabSessionId,
                 activity = activity,
                 coroutineScope = coroutineScope,
                 lifecycleOwner = lifecycleOwner,
@@ -241,6 +244,7 @@ fun rememberBrowserComponentState(
 private const val INIT_JOB_MILLIS = 3000L
 
 class BrowserComponentState(
+    val customTabSessionId: String?,
     val activity: AppCompatActivity,
     val coroutineScope: CoroutineScope,
     val lifecycleOwner: LifecycleOwner? = null,
@@ -263,7 +267,7 @@ class BrowserComponentState(
     var browserMode by mutableStateOf(BrowserComponentMode.TOOLBAR)
         private set
     private val isExternal
-        get() = currentCustomTab != null
+        get() = customTabSessionId != null
 
     var tabList: List<TabSessionState> by mutableStateOf(emptyList())
         private set
@@ -279,8 +283,6 @@ class BrowserComponentState(
         private set
     var currentCustomTab: CustomTabSessionState? by mutableStateOf(null)
         private set
-    val customTabSessionId: String?
-        get() = currentCustomTab?.id
     var isPendingTab by mutableStateOf(true)
         private set
     var isPrivateSession: Boolean by mutableStateOf(false)
@@ -302,7 +304,8 @@ class BrowserComponentState(
         browserStateObserver = store.flowScoped(lifecycleOwner) { flow ->
             flow.map { it }.collect {
                 currentTab = it.selectedTab
-                currentCustomTab = it.customTabs.firstOrNull()
+                // if custom tab id not null and custom tab null, find tab and set
+                customTabSessionId?.let { id -> currentCustomTab = it.findCustomTab(id) }
                 isPendingTab = currentTab == null && currentCustomTab == null
 
                 currentCustomTab?.let { ct ->

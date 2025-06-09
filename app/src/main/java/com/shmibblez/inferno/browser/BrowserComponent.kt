@@ -335,12 +335,12 @@ object UiConst {
     val TAB_BAR_HEIGHT = 36.dp
     val AWESOME_BAR_HEIGHT = 200.dp
     val TAB_WIDTH = 112.dp
-    val EXTERNAL_TOOLBAR_HEIGHT = TOOLBAR_HEIGHT + TAB_BAR_HEIGHT
+    val EXTERNAL_TOOLBAR_HEIGHT = 62.dp // TOOLBAR_HEIGHT + TAB_BAR_HEIGHT
 
     //    val TAB_CORNER_RADIUS = 8.dp
     val FIND_IN_PAGE_BAR_HEIGHT = 50.dp
     val READER_VIEW_HEIGHT = 50.dp
-    val PROGRESS_BAR_HEIGHT = 1.dp
+    val PROGRESS_BAR_HEIGHT = 2.dp
     private val FULLSCREEN_BOTTOM_BAR_HEIGHT = 0.dp
     fun calcBottomBarHeight(browserComponentMode: BrowserComponentMode): Dp {
         return when (browserComponentMode) {
@@ -1933,18 +1933,31 @@ fun BrowserComponent(
                     if (state.browserMode == BrowserComponentMode.TOOLBAR_EXTERNAL) {
                         InfernoExternalToolbar(
                             session = state.currentCustomTab,
-                            onNavToBrowser = { state.migrateExternalToNormal() },
+                            onNavToBrowser = {
+                                state.migrateExternalToNormal()
+                                context.getActivity()?.let {
+                                    it.finish()
+                                    // todo: intent launcher, create funs for adding flags to intent for different task types (browser, custom tab, pwa)
+                                    val intent = Intent(context, HomeActivity::class.java)
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                    it.startActivity(intent)
+                                }
+                            },
                             onToggleDesktopMode = { state.toggleDesktopMode() },
-                            // todo: add onBaseBack, or add backhandler to browserComponentState
-                            //  which handles back when no more tabs in external app / custom tab
                             onGoBack = {
-                                context.components.useCases.sessionUseCases.goBack.invoke(it)
+                                if (state.currentCustomTab?.content?.canGoBack != false) {
+                                    // if can go back (or sesh null), invoke go back
+                                    context.components.useCases.sessionUseCases.goBack.invoke(it)
+                                } else {
+                                    // if cant go back, end activity / return to app that launcehd
+                                    context.getActivity()!!.finish()
+                                }
                             },
                             onGoForward = {
-                                context.components.useCases.sessionUseCases.goBack.invoke(it)
+                                context.components.useCases.sessionUseCases.goForward.invoke(it)
                             },
                             onReload = {
-                                context.components.useCases.sessionUseCases.goBack.invoke(it)
+                                context.components.useCases.sessionUseCases.reload.invoke(it)
                             },
                             onShare = { context.share(it) },
                         )

@@ -37,8 +37,7 @@ that's it for now, hopefully this project doesn't die
 - [ ] BrowserComponent, custom sesh
     - [ ] show toolbar menu icon that pops up menu, but only show options available for custom tab,
       also add some options for custom tabs (open in browser, etc)
-    - [ ] why does it go into stronk mode when custom tab session present, prepare to log everytin
-- [ ] MozEngineView not working properly when go to other page then return (most likely has to
+- [ ] MozEngineView not working properly when go to new compose page then return (most likely has to
   do with lifecycle management, when return to page need to reset/relink)
 - [ ] theme settings
     - [ ] sometimes current theme selected when edit custom theme
@@ -47,16 +46,25 @@ that's it for now, hopefully this project doesn't die
       loaded, make sure to use runBlocking {} properly (was blocking app
       last time I tried it)
 
-## InfernoHistoryPage
-
-- [ ] offset wonky, works pretty well thou
-- [ ] delete time range (2 hours, 2 days, everything), copy moz implementation
-- [ ] reference DefaultPagedHistoryProvider
-- [ ] also add time range deletion,
-  copy [R.layout.delete_history_time_range_dialog](./app/src/main/res/layout/delete_history_time_range_dialog.xml)
-
 ## IntentProcessor and ExternalAppBrowser
 
+- [ ] pending
+    - [ ] external toolbar visibility depending on tab manifest
+    - [ ] show loading progressbar
+- [ ] new structure
+    - [ ] link custom tab session to activity BrowserComponentState
+    - [ ] make BrowserComponentState parcelable and store in activity
+    - [ ] there can be multiple instances of HomeActivity
+    - [ ] figure out how to set flags for each activity / task
+    - [ ] there can only be one instance of: browser task, external app task, or web app task, each
+      with one instance allowed to be saved in recents screen
+    - [ ] each possible instance is different, but they're all instances of HomeActivity, this is
+      why when creating a new activity from intent receiver, flag must be set, and existing ones
+      must be checked in order to determine if should create new instance or override currently
+      existing one
+    - [ ] launchMode standard allows multiple top-level instances, set flag and check if existing to
+      know if should create or override existing instance, dont want to fill up recents screen with
+      tons of instances
 - [ ] for navigation, back pressed handler
     - [ ] if tab can go back, then go back, if cannot go back anymore, call system pop and return to
       app that requested browser, and custom tab is closed
@@ -69,6 +77,14 @@ that's it for now, hopefully this project doesn't die
       for web prompter) will be much easier, no need for complex fragment wrapper implementation
     - [ ] funs in ExternalAppBrowserFragment will be moved to BrowserComponentState, listeners will
       be added/removed, depending on if custom tab exists
+
+## InfernoHistoryPage
+
+- [ ] offset wonky, works pretty well thou, check how implemented in moz pager
+- [ ] delete time range (2 hours, 2 days, everything), copy moz implementation
+- [ ] reference DefaultPagedHistoryProvider
+- [ ] also add time range deletion,
+  copy [R.layout.delete_history_time_range_dialog](./app/src/main/res/layout/delete_history_time_range_dialog.xml)
 
 ## TabTray
 
@@ -134,6 +150,10 @@ Did you add an account?
 - [ ] Other stuff
     - [ ] make sure to check setting usage, still have not completed migration from android prefs to
       datastore
+
+## Toolbar
+
+- [ ] add keyboard listener to toolbar, if hidden, remove focus, if pops up, request focus
 
 ## Under Construction
 

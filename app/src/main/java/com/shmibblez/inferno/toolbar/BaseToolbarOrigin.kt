@@ -527,7 +527,7 @@ private fun ToolbarUndoClearText(onClick: () -> Unit, modifier: Modifier) {
         modifier = modifier
             .size(TOOLBAR_INDICATOR_ICON_SIZE)
             .clickable(onClick = onClick),
-        tint = LocalContext.current.infernoTheme().value.secondaryBackgroundColor,
+        tint = LocalContext.current.infernoTheme().value.secondaryIconColor,
     )
 }
 

@@ -94,7 +94,7 @@ fun Context.shareTextList(
 fun Components.newTab(
     nextTo: String? = null,
     private: Boolean = false,
-    url: String = if (!private) "inferno:home" else "inferno:private",
+    url: String = if (!private) "inferno:home" else "inferno:privatebrowsing",
     selectTab: Boolean = true,
     startLoading: Boolean = true,
     parentId: String? = null,

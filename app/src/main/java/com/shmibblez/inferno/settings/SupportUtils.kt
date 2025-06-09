@@ -23,7 +23,7 @@ import java.util.Locale
 object SupportUtils {
     const val INFERNO_HOME_URL = "inferno:home"
     const val INFERNO_HOME_URL_2 = "about:blank"
-    const val INFERNO_PRIVATE_HOME_URL = "inferno:private"
+    const val INFERNO_PRIVATE_HOME_URL = "inferno:privatebrowsing"
     const val INFERNO_PRIVATE_HOME_URL_2 = "about:privatebrowsing"
     const val RATE_APP_URL = "market://details?id=" + BuildConfig.APPLICATION_ID
     const val POCKET_TRENDING_URL = "https://getpocket.com/fenix-top-articles"

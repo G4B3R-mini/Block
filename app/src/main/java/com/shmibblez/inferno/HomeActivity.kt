@@ -309,7 +309,10 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
             intent.getSerializableExtra(INITIAL_BROWSER_TASK) as InitialBrowserTask?
         }
         binding.rootCompose.setContent {
-            BrowserNavHost(initialAction = initialTask)
+            BrowserNavHost(
+                customTabSessionId = (initialTask as? InitialBrowserTask.ExternalApp)?.tabId,
+                initialAction = initialTask,
+                )
         }
 
         lifecycleScope.launch {

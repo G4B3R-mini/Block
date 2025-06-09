@@ -201,7 +201,7 @@ private fun IntentProcessor?.toInitialBrowserTask(
             intent.getSessionId().let {
                 if (!it.isNullOrEmpty()) {
                     // if url good, launch external app component
-                    InitialBrowserTask.ExternalApp(url = it, private = false)
+                    InitialBrowserTask.ExternalApp(tabId = it, private = false)
                 } else {
                     // if url null or empty, launch browser normally
                     InitialBrowserTask.OpenToBrowser(private = false)
@@ -215,7 +215,7 @@ private fun IntentProcessor?.toInitialBrowserTask(
             intent.getSessionId().let {
                 if (!it.isNullOrEmpty()) {
                     // if url good, launch external app component
-                    InitialBrowserTask.ExternalApp(url = it, private = private)
+                    InitialBrowserTask.ExternalApp(tabId = it, private = private)
                 } else {
                     // if url null or empty, launch browser normally
                     InitialBrowserTask.OpenToBrowser(private = false)
