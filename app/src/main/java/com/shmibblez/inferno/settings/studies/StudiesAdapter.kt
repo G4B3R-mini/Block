@@ -169,7 +169,7 @@ class StudiesAdapter(
             it.featureIds.size == 1 && it.featureIds.contains(MESSAGING_FEATURE_ID)
         }
 
-    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+//    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     internal data class Section(@StringRes val title: Int, val visibleDivider: Boolean = true)
 
     /**
