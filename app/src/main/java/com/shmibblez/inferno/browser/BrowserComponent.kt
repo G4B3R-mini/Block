@@ -36,7 +36,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomAppBar
-import androidx.compose.material3.BottomAppBarScrollBehavior
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
@@ -92,6 +91,8 @@ import com.shmibblez.inferno.browser.prompts.login.InfernoLoginDelegate
 import com.shmibblez.inferno.browser.prompts.rememberInfernoPromptFeatureState
 import com.shmibblez.inferno.browser.readermode.InfernoReaderViewControls
 import com.shmibblez.inferno.browser.readermode.rememberInfernoReaderViewFeatureState
+import com.shmibblez.inferno.browser.state.BrowserComponentMode
+import com.shmibblez.inferno.browser.state.BrowserComponentState
 import com.shmibblez.inferno.browser.tabstrip.isTabStripEnabled
 import com.shmibblez.inferno.components.Components
 import com.shmibblez.inferno.components.TabCollectionStorage
@@ -1698,6 +1699,21 @@ fun BrowserComponent(
         }
     }
 
+    // todo: fix all feature init
+    LaunchedEffect(engineView, state.customTabSessionId) {
+        sessionFeature.set(
+            feature = SessionFeature(
+                context.components.core.store,
+                context.components.useCases.sessionUseCases.goBack,
+                context.components.useCases.sessionUseCases.goForward,
+                engineView!!, // binding.engineView,
+                state.customTabSessionId,
+            ),
+            owner = lifecycleOwner,
+            view = view,
+        )
+    }
+
     ContextMenuComponent(
         store = store,
         engineView = engineView,
@@ -1914,12 +1930,13 @@ fun BrowserComponent(
                 Column(
                     Modifier.fillMaxSize()
                 ) {
-                    context.components.useCases.customTabsUseCases.migrate
                     if (state.browserMode == BrowserComponentMode.TOOLBAR_EXTERNAL) {
                         InfernoExternalToolbar(
                             session = state.currentCustomTab,
                             onNavToBrowser = { state.migrateExternalToNormal() },
                             onToggleDesktopMode = { state.toggleDesktopMode() },
+                            // todo: add onBaseBack, or add backhandler to browserComponentState
+                            //  which handles back when no more tabs in external app / custom tab
                             onGoBack = {
                                 context.components.useCases.sessionUseCases.goBack.invoke(it)
                             },

@@ -14,7 +14,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.shmibblez.inferno.browser.BrowserComponent
-import com.shmibblez.inferno.browser.rememberBrowserComponentState
+import com.shmibblez.inferno.browser.getActivity
+import com.shmibblez.inferno.browser.state.rememberBrowserComponentState
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.history.InfernoHistoryPage
 import com.shmibblez.inferno.settings.nav.SettingsNavHost
@@ -110,7 +111,9 @@ fun BrowserNavHost(
 ) {
     val nav = rememberNavController()
 
-    val browserComponentState by rememberBrowserComponentState()
+    val browserComponentState by rememberBrowserComponentState(
+        activity = LocalContext.current.getActivity()!!,
+    )
 
     val context = LocalContext.current
 

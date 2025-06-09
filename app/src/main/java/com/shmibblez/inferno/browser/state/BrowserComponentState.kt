@@ -1,6 +1,8 @@
-package com.shmibblez.inferno.browser
+package com.shmibblez.inferno.browser.state
 
 import android.util.Log
+import androidx.annotation.VisibleForTesting
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.MutableState
@@ -10,36 +12,203 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import com.shmibblez.inferno.browser.BrowserComponentPageType
+import com.shmibblez.inferno.browser.OnActivityResultModel
 import com.shmibblez.inferno.components.Components
+import com.shmibblez.inferno.customtabs.ExternalAppBrowserFragment
+import com.shmibblez.inferno.customtabs.PoweredByNotification
+import com.shmibblez.inferno.customtabs.WebAppSiteControlsBuilder
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.lastOpenedNormalTab
 import com.shmibblez.inferno.ext.newTab
 import com.shmibblez.inferno.tabs.tabstray.InfernoTabsTraySelectedTab
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
+import mozilla.components.browser.icons.BrowserIcons
+import mozilla.components.browser.icons.Icon
 import mozilla.components.browser.state.search.SearchEngine
 import mozilla.components.browser.state.selector.normalTabs
 import mozilla.components.browser.state.selector.privateTabs
 import mozilla.components.browser.state.selector.selectedTab
 import mozilla.components.browser.state.state.CustomTabSessionState
+import mozilla.components.browser.state.state.ExternalAppType
 import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.browser.state.state.recover.TabState
 import mozilla.components.browser.state.state.selectedOrDefaultSearchEngine
 import mozilla.components.browser.state.store.BrowserStore
+import mozilla.components.concept.engine.manifest.WebAppManifest
+import mozilla.components.feature.customtabs.CustomTabWindowFeature
+import mozilla.components.feature.pwa.ManifestStorage
+import mozilla.components.feature.pwa.WebAppShortcutManager
+import mozilla.components.feature.pwa.feature.ManifestUpdateFeature
+import mozilla.components.feature.pwa.feature.SiteControlsBuilder
+import mozilla.components.feature.pwa.feature.WebAppActivityFeature
+import mozilla.components.feature.pwa.feature.WebAppContentFeature
+import mozilla.components.feature.pwa.feature.WebAppHideToolbarFeature
+import mozilla.components.feature.pwa.feature.WebAppSiteControlsFeature
+import mozilla.components.feature.session.SessionUseCases
 import mozilla.components.feature.tabs.TabsUseCases
 import mozilla.components.lib.state.ext.flowScoped
+import mozilla.components.support.base.android.NotificationsDelegate
 import mozilla.components.support.base.feature.LifecycleAwareFeature
+import mozilla.components.support.ktx.android.arch.lifecycle.addObservers
 
 enum class BrowserComponentMode {
     TOOLBAR, TOOLBAR_SEARCH, TOOLBAR_EXTERNAL, FIND_IN_PAGE, READER_VIEW, FULLSCREEN,
 }
 
+private class CustomTabManager(
+    private val customTabSessionState: CustomTabSessionState,
+    private val activity: AppCompatActivity,
+
+    private val icons: BrowserIcons,
+    private val store: BrowserStore,
+    private val shortcutManager: WebAppShortcutManager,
+    private val storage: ManifestStorage,
+    private val controlsBuilder: SiteControlsBuilder = SiteControlsBuilder.Default(),
+    private val notificationsDelegate: NotificationsDelegate,
+    private val components: Components,
+) : LifecycleAwareFeature {
+
+    private var manifest: WebAppManifest? = null
+    private val scope = MainScope()
+
+    val testObserver = LifecycleEventObserver { source, event ->
+        when (event) {
+            Lifecycle.Event.ON_CREATE -> Log.d(
+                "CustomTabManager", "test observer, event: ON_CREATE"
+            )
+
+            Lifecycle.Event.ON_START -> Log.d("CustomTabManager", "test observer, event: ON_START")
+            Lifecycle.Event.ON_RESUME -> Log.d(
+                "CustomTabManager", "test observer, event: ON_RESUME"
+            )
+
+            Lifecycle.Event.ON_PAUSE -> Log.d("CustomTabManager", "test observer, event: ON_PAUSE")
+            Lifecycle.Event.ON_STOP -> Log.d("CustomTabManager", "test observer, event: ON_STOP")
+            Lifecycle.Event.ON_DESTROY -> Log.d(
+                "CustomTabManager", "test observer, event: ON_DESTROY"
+            )
+
+            Lifecycle.Event.ON_ANY -> Log.d("CustomTabManager", "test observer, event: ON_ANY")
+        }
+    }
+
+    /** observers */
+    // manifest != null
+    var webAppActivityObserver: WebAppActivityFeature? = null
+    var webAppContentObserver: WebAppContentFeature? = null
+    var manifestUpdateObserver: ManifestUpdateFeature? = null
+    var webAppSiteControlsObserver: WebAppSiteControlsFeature? = null
+
+    // manifest == null
+    var poweredByObserver: PoweredByNotification? = null
+
+
+    override fun start() {
+        manifest = customTabSessionState.content.webAppManifest
+
+        val isPwaTabOrTwaTab =
+            customTabSessionState.config.externalAppType == ExternalAppType.PROGRESSIVE_WEB_APP || customTabSessionState.config.externalAppType == ExternalAppType.TRUSTED_WEB_ACTIVITY
+        if (isPwaTabOrTwaTab) {
+            /**
+             * if true override displayMode and hide toolbar, also no menu options
+             * display mode can be used to not show components in BrowserComponent (unnecessary overhead)
+             * todo: check [WebAppHideToolbarFeature], [ExternalAppBrowserFragment]
+             */
+        }
+
+        Log.d("CustomTabManager", "start()")
+
+        if (manifest != null) {
+            Log.d("CustomTabManager", "start(), initializing observers with manifest != null")
+            webAppActivityObserver = WebAppActivityFeature(
+                activity,
+                icons,
+                manifest!!,
+            )
+            webAppContentObserver = WebAppContentFeature(
+                store = store,
+                tabId = customTabSessionState.id,
+                manifest!!,
+            )
+            manifestUpdateObserver = ManifestUpdateFeature(
+                activity.applicationContext,
+                store,
+                shortcutManager,
+                storage,
+                customTabSessionState.id,
+                manifest!!,
+            )
+            webAppSiteControlsObserver = WebAppSiteControlsFeature(
+                activity.applicationContext,
+                store,
+                components.useCases.sessionUseCases.reload,
+                customTabSessionState.id,
+                manifest,
+                WebAppSiteControlsBuilder(
+                    store,
+                    components.useCases.sessionUseCases.reload,
+                    customTabSessionState.id,
+                    manifest!!,
+                ),
+                notificationsDelegate = components.notificationsDelegate,
+            )
+            activity.lifecycle.addObservers(
+                webAppActivityObserver!!,
+                webAppContentObserver!!,
+                manifestUpdateObserver!!,
+            )
+            // todo: bind to view lifecycle instead
+//            viewLifecycleOwner.lifecycle.addObserver(
+            activity.lifecycle.addObserver(webAppSiteControlsObserver!!)
+        } else {
+            Log.d("CustomTabManager", "start(), initializing observers with manifest == null")
+            // todo: bind to view lifecycle instead
+//            viewLifecycleOwner.lifecycle.addObserver(
+            poweredByObserver = PoweredByNotification(
+                activity.applicationContext,
+                store,
+                customTabSessionState.id,
+                components.notificationsDelegate,
+            )
+            activity.lifecycle.addObserver(poweredByObserver!!)
+        }
+        activity.lifecycle.addObserver(testObserver)
+    }
+
+    override fun stop() {
+        Log.d("CustomTabManager", "stop()")
+        scope.cancel()
+        webAppActivityObserver?.let {
+            activity.lifecycle.removeObserver(it)
+        }
+        webAppContentObserver?.let {
+            activity.lifecycle.removeObserver(it)
+        }
+        manifestUpdateObserver?.let {
+            activity.lifecycle.removeObserver(it)
+        }
+        poweredByObserver?.let {
+            activity.lifecycle.removeObserver(it)
+        }
+        activity.lifecycle.removeObserver(testObserver!!)
+    }
+}
+
 @Composable
 fun rememberBrowserComponentState(
+    activity: AppCompatActivity,
     coroutineScope: CoroutineScope = rememberCoroutineScope(),
     lifecycleOwner: LifecycleOwner? = null,
     components: Components = LocalContext.current.components,
@@ -50,6 +219,7 @@ fun rememberBrowserComponentState(
     val state = remember {
         mutableStateOf(
             BrowserComponentState(
+                activity = activity,
                 coroutineScope = coroutineScope,
                 lifecycleOwner = lifecycleOwner,
                 components = components,
@@ -71,6 +241,7 @@ fun rememberBrowserComponentState(
 private const val INIT_JOB_MILLIS = 3000L
 
 class BrowserComponentState(
+    val activity: AppCompatActivity,
     val coroutineScope: CoroutineScope,
     val lifecycleOwner: LifecycleOwner? = null,
     val components: Components,
@@ -82,6 +253,8 @@ class BrowserComponentState(
 
     private var initialized = false
     private var preinitialized = false
+
+    private var customTabManager: CustomTabManager? = null
 
     // todo: test, before run also make changes to tab bar (tab layout)
     private var awaitingNewTab = false
@@ -124,6 +297,7 @@ class BrowserComponentState(
     val setOnActivityResultHandler: ((OnActivityResultModel) -> Boolean) -> Unit =
         { f -> onActivityResultHandler = f }
 
+
     override fun start() {
         browserStateObserver = store.flowScoped(lifecycleOwner) { flow ->
             flow.map { it }.collect {
@@ -131,14 +305,54 @@ class BrowserComponentState(
                 currentCustomTab = it.customTabs.firstOrNull()
                 isPendingTab = currentTab == null && currentCustomTab == null
 
-                Log.d(
-                    "BrowserComponentState",
-                    "browserStateObserver, isPendingTab: $isPendingTab, currentTab id: ${currentTab?.id}, customTabId: ${currentCustomTab?.id}"
-                )
+                currentCustomTab?.let { ct ->
+                    Log.d(
+                        "BrowserComponentState",
+                        "windowRequest: ${ct.content.windowRequest}\nconfig: ${ct.config}\nmanifest: ${ct.content.webAppManifest}\ncontent: ${ct.content}"
+                    )
+                }
+
+                // set and manage customTabManager
+                if (currentCustomTab != null && customTabManager == null) {
+                    // if custom tab exists and manager not setup, setup
+                    customTabManager = CustomTabManager(
+                        customTabSessionState = currentCustomTab!!,
+                        activity = activity,
+                        icons = components.core.icons,
+                        store = store,
+                        shortcutManager = components.core.webAppShortcutManager,
+                        storage = components.core.webAppManifestStorage,
+                        controlsBuilder = SiteControlsBuilder.CopyAndRefresh(components.useCases.sessionUseCases.reload),
+                        notificationsDelegate = components.notificationsDelegate,
+                        components = components,
+                    )
+                    customTabManager!!.start()
+                } else if (currentCustomTab == null && customTabManager != null) {
+                    // if custom tab nonexistent and manager exists, unexist manager and stop
+                    customTabManager!!.stop()
+                    customTabManager = null
+                }
 
                 // select external tab if not selected
                 if (isExternal && it.selectedTabId != currentCustomTab?.id) {
-                    currentCustomTab?.id?.let {tabId -> components.useCases.tabsUseCases.selectTab(tabId) }
+                    currentCustomTab?.id?.let { tabId ->
+                        components.useCases.tabsUseCases.selectTab(
+                            tabId
+                        )
+                    }
+                    // todo: may be because of windowRequest
+                    /**
+                     * check [CustomTabWindowFeature], best way to implement? options
+                     * - CustomTabManager has scope that listens for changes
+                     * - CustomTabManager.update called here
+                     * - implement CustomTabWindowFeature and add to observers for lifecycle, this simply
+                     * - calls state.engineState.engineSession?.loadUrl(windowRequest.url),
+                     *   instead of launching intent to new custom tab, check: what does intent do?
+                     *   open new activity or simply reload? check intent handlers of observers, might be there
+                     */
+//                    components.useCases.tabsUseCases.selectTab
+//                    components.
+//                    components.useCases.sessionUseCases.loadUrl(currentCustomTab!!.content.url, currentCustomTab!!.id)
                 }
 
                 // update browser mode based on if external
@@ -206,8 +420,6 @@ class BrowserComponentState(
                 } else {
                     awaitingNewTab = false
                 }
-
-                Log.d("BrowserComponentState", "browserStateObserver, selectedTab id: ${it.selectedTabId}")
 
                 searchEngine = it.search.selectedOrDefaultSearchEngine!!
                 pageType = resolvePageType(currentTab)
