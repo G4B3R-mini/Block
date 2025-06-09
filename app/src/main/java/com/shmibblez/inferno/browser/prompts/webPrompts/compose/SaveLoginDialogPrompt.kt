@@ -2,12 +2,12 @@ package com.shmibblez.inferno.browser.prompts.webPrompts.compose
 
 import android.graphics.Bitmap
 import androidx.annotation.VisibleForTesting
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -21,7 +21,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -34,11 +33,11 @@ import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplate
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateAction
 import com.shmibblez.inferno.browser.prompts.PromptBottomSheetTemplateButtonPosition
+import com.shmibblez.inferno.compose.Favicon
 import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.base.InfernoOutlinedTextField
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.ext.components
-import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.dialog.emitSaveFact
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers.IO
@@ -47,7 +46,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import mozilla.components.browser.state.action.ContentAction
 import mozilla.components.concept.engine.prompt.PromptRequest
 import mozilla.components.concept.storage.LoginEntry
 import mozilla.components.concept.storage.LoginValidationDelegate
@@ -63,6 +61,7 @@ import kotlin.coroutines.cancellation.CancellationException
 fun SaveLoginDialogPrompt(
     promptRequest: PromptRequest.SaveLoginPrompt,
     icon: Bitmap? = null,
+    url: String?,
     onShowSnackbarAfterLoginChange: (Boolean) -> Unit,
     loginValidationDelegate: LoginValidationDelegate?,
     onCancel: () -> Unit,
@@ -171,13 +170,15 @@ fun SaveLoginDialogPrompt(
         onDismissRequest = onCancel,
         negativeAction = PromptBottomSheetTemplateAction(text = negativeText, action = onCancel),
         positiveAction = PromptBottomSheetTemplateAction(text = confirmText, action = {
-            onConfirm.invoke(LoginEntry(
-                origin = promptRequest.logins[0].origin,
-                formActionOrigin = promptRequest.logins[0].formActionOrigin,
-                httpRealm = promptRequest.logins[0].httpRealm,
-                username = username,
-                password = password,
-            ))
+            onConfirm.invoke(
+                LoginEntry(
+                    origin = promptRequest.logins[0].origin,
+                    formActionOrigin = promptRequest.logins[0].formActionOrigin,
+                    httpRealm = promptRequest.logins[0].httpRealm,
+                    username = username,
+                    password = password,
+                )
+            )
             onShowSnackbarAfterLoginChange.invoke(isUpdate)
         }),
     ) {
@@ -186,14 +187,21 @@ fun SaveLoginDialogPrompt(
             horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.Start),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            // globe icon
-            InfernoIcon(
-                painter = if (icon != null) BitmapPainter(icon.asImageBitmap()) else painterResource(
-                    R.drawable.mozac_ic_globe_24
-                ),
-                contentDescription = "",
-                modifier = Modifier.size(24.dp),
-            )
+            // site icon
+            when (icon) {
+                null -> Favicon(
+                    url = url ?: "",
+                    size = 24.dp,
+                    modifier = Modifier.size(24.dp),
+                )
+
+                else -> Image(
+                    bitmap = icon.asImageBitmap(),
+                    contentDescription = "",
+                    modifier = Modifier.size(24.dp),
+                )
+            }
+
             // host name
             // todo: text color secondary
             InfernoText(

@@ -41,9 +41,9 @@ fun InfernoHistoryPage(goBack: () -> Unit) {
     var showConfirmDeleteSelectedDialog by remember { mutableStateOf(false) }
     var showDeleteTimeRangeDialog by remember { mutableStateOf(false) }
 
-    LaunchedEffect((historyViewerState.mode as? HistoryViewerState.Mode.Selection)?.selectedItems) {
+    LaunchedEffect((historyViewerState.mode as? HistoryManagerState.Mode.Selection)?.selectedItems) {
         val selectedItems =
-            (historyViewerState.mode as? HistoryViewerState.Mode.Selection)?.selectedItems
+            (historyViewerState.mode as? HistoryManagerState.Mode.Selection)?.selectedItems
         if (selectedItems?.isEmpty() == true) {
             historyViewerState.switchToNormalMode()
         }
@@ -53,9 +53,9 @@ fun InfernoHistoryPage(goBack: () -> Unit) {
         modifier = Modifier.fillMaxSize(),
         topBar = {
             when (historyViewerState.mode) {
-                is HistoryViewerState.Mode.Selection -> EditingTopBar(
+                is HistoryManagerState.Mode.Selection -> EditingTopBar(
                     onStopEditing = { historyViewerState.switchToNormalMode() },
-                    mode = historyViewerState.mode as HistoryViewerState.Mode.Selection,
+                    mode = historyViewerState.mode as HistoryManagerState.Mode.Selection,
                     onShareSelected = { historyViewerState.shareSelected() },
                     onOpenSelectedInBrowser = {
                         historyViewerState.openSelectedInBrowser(
@@ -70,8 +70,8 @@ fun InfernoHistoryPage(goBack: () -> Unit) {
                     onDeleteSelected = { showConfirmDeleteSelectedDialog = true },
                 )
 
-                HistoryViewerState.Mode.Syncing,
-                HistoryViewerState.Mode.Normal,
+                HistoryManagerState.Mode.Syncing,
+                HistoryManagerState.Mode.Normal,
                     -> NormalTopBar(
                     goBack = goBack,
                     onDeleteSelected = { showDeleteTimeRangeDialog = true },
@@ -80,7 +80,7 @@ fun InfernoHistoryPage(goBack: () -> Unit) {
         },
         containerColor = context.infernoTheme().value.primaryBackgroundColor,
     ) { edgeInsets ->
-        HistoryViewer(
+        HistoryManager(
             state = historyViewerState,
             modifier = Modifier
                 .fillMaxSize()
@@ -177,7 +177,7 @@ private fun NormalTopBar(
 @Composable
 private fun EditingTopBar(
     onStopEditing: () -> Unit,
-    mode: HistoryViewerState.Mode.Selection,
+    mode: HistoryManagerState.Mode.Selection,
     onShareSelected: () -> Unit,
     onOpenSelectedInBrowser: () -> Unit,
     onOpenSelectedInBrowserPrivate: () -> Unit,

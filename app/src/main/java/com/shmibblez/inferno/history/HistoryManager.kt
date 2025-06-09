@@ -48,8 +48,8 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun HistoryViewer(
-    state: HistoryViewerState,
+internal fun HistoryManager(
+    state: HistoryManagerState,
     modifier: Modifier,
     onOpenHistoryItem: (History) -> Unit,
 ) {

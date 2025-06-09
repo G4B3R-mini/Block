@@ -47,6 +47,7 @@ private val MENU_OPTION_PADDING = 8.dp
 
 @Composable
 fun InfernoExternalToolbar(
+    showExternalToolbar: Boolean,
     session: CustomTabSessionState?,
     onNavToBrowser: () -> Unit,
     onToggleDesktopMode: () -> Unit,
@@ -55,6 +56,8 @@ fun InfernoExternalToolbar(
     onReload: (tabId: String) -> Unit,
     onShare: (url: String) -> Unit,
 ) {
+    if (!showExternalToolbar) return
+
     var menuExpanded by remember { mutableStateOf(false) }
     // todo: reader mode not available for custom tabs?
 //    val readerModeEnabled = session?.readerState?.readerable ?: false
@@ -96,9 +99,14 @@ fun InfernoExternalToolbar(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            // back button
+            // back/close button
             InfernoIcon(
-                painter = painterResource(R.drawable.ic_back_button_24),
+                painter = painterResource(
+                    when (canGoBack) {
+                        true -> R.drawable.ic_back_button_24
+                        false -> R.drawable.ic_close_24
+                    }
+                ),
                 contentDescription = stringResource(R.string.browser_menu_tools),
                 modifier = Modifier
                     .size(18.dp)

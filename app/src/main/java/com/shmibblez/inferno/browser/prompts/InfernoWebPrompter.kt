@@ -33,7 +33,6 @@ import com.shmibblez.inferno.browser.prompts.webPrompts.compose.SelectProviderDi
 import com.shmibblez.inferno.browser.prompts.webPrompts.compose.SelectableListPrompt
 import com.shmibblez.inferno.browser.prompts.webPrompts.compose.TextPromptDialogPrompt
 import com.shmibblez.inferno.browser.prompts.webPrompts.compose.TimeSelectionPrompt
-import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.concept.engine.prompt.PromptRequest
 import mozilla.components.concept.engine.prompt.PromptRequest.Alert
 import mozilla.components.concept.engine.prompt.PromptRequest.Authentication
@@ -54,7 +53,6 @@ import mozilla.components.concept.engine.prompt.PromptRequest.SingleChoice
 import mozilla.components.concept.engine.prompt.PromptRequest.TextPrompt
 import mozilla.components.concept.engine.prompt.PromptRequest.TimeSelection
 import mozilla.components.support.ktx.util.PromptAbuserDetector
-import java.security.InvalidParameterException
 
 // todo:
 //   - colors
@@ -69,15 +67,14 @@ import java.security.InvalidParameterException
 @Composable
 fun InfernoWebPrompter(
     state: InfernoPromptFeatureState,
-    currentTab: TabSessionState?,
 ) {
-    if (currentTab == null) return
+    // get active request, return if none
+    val promptRequest = state.visiblePrompt ?: return
+    // get selected tab id, if none return
+    val selectedTabId = state.selectedTabId ?: return // state.customTabSessionId ?: currentTab.id
+
     val context = LocalContext.current
-//    val logger = remember { Logger("Prompt Component") }
-//    var promptRequest by remember { mutableStateOf<PromptRequest?>(null) }
-    val sessionId = currentTab.id
     val promptAbuserDetector = remember { PromptAbuserDetector() }
-    val promptRequest = state.visiblePrompt
 
     Box(
         modifier = Modifier.fillMaxWidth(),
@@ -85,13 +82,13 @@ fun InfernoWebPrompter(
         // display prompt depending on type
         when (promptRequest) {
             is Alert -> AlertDialogPrompt(promptRequest = promptRequest,
-                onCancel = { state.onCancel(sessionId, promptRequest.uid) },
-                onConfirm = { state.onConfirm(sessionId, promptRequest.uid, it) })
+                onCancel = { state.onCancel(selectedTabId, promptRequest.uid) },
+                onConfirm = { state.onConfirm(selectedTabId, promptRequest.uid, it) })
 
             is Authentication -> AuthenticationPrompt(
                 promptRequest = promptRequest,
-                onCancel = { state.onCancel(sessionId, promptRequest.uid) },
-                onConfirm = { state.onConfirm(sessionId, promptRequest.uid, it) },
+                onCancel = { state.onCancel(selectedTabId, promptRequest.uid) },
+                onConfirm = { state.onConfirm(selectedTabId, promptRequest.uid, it) },
             )
 
             is BeforeUnload -> {
@@ -106,15 +103,15 @@ fun InfernoWebPrompter(
                     negativeLabel = stayLabel,
                     positiveLabel = leaveLabel,
                     hasShownManyDialogs = false,
-                    onCancel = { state.onCancel(sessionId, promptRequest.uid, it) },
-                    onConfirm = { state.onConfirm(sessionId, promptRequest.uid) },
+                    onCancel = { state.onCancel(selectedTabId, promptRequest.uid, it) },
+                    onConfirm = { state.onConfirm(selectedTabId, promptRequest.uid) },
                 )
             }
 
             is PromptRequest.Color -> ColorPickerDialogPrompt(
                 promptRequest = promptRequest,
-                onCancel = { state.onCancel(sessionId, promptRequest.uid) },
-                onConfirm = { state.onConfirm(sessionId, promptRequest.uid, it) },
+                onCancel = { state.onCancel(selectedTabId, promptRequest.uid) },
+                onConfirm = { state.onConfirm(selectedTabId, promptRequest.uid, it) },
             )
 
             is Confirm -> {
@@ -129,8 +126,8 @@ fun InfernoWebPrompter(
                     negativeButtonText = negativeButton,
                     neutralButtonText = neutralButton,
                     positiveButtonText = positiveButton,
-                    onCancel = { state.onCancel(sessionId, promptRequest.uid) },
-                    onConfirm = { state.onConfirm(sessionId, promptRequest.uid, it) },
+                    onCancel = { state.onCancel(selectedTabId, promptRequest.uid) },
+                    onConfirm = { state.onConfirm(selectedTabId, promptRequest.uid, it) },
                 )
             }
 
@@ -150,35 +147,35 @@ fun InfernoWebPrompter(
                     promptRequest = promptRequest,
                     title = title,
                     message = message,
-                    onCancel = { state.onCancel(sessionId, promptRequest.uid) },
-                    onConfirm = { state.onConfirm(sessionId, promptRequest.uid, it) },
+                    onCancel = { state.onCancel(selectedTabId, promptRequest.uid) },
+                    onConfirm = { state.onConfirm(selectedTabId, promptRequest.uid, it) },
                 )
             }
 
             is IdentityCredential.SelectAccount -> SelectAccountDialogPrompt(
                 promptRequest = promptRequest,
-                onCancel = { state.onCancel(sessionId, promptRequest.uid) },
-                onConfirm = { state.onConfirm(sessionId, promptRequest.uid, it) },
+                onCancel = { state.onCancel(selectedTabId, promptRequest.uid) },
+                onConfirm = { state.onConfirm(selectedTabId, promptRequest.uid, it) },
             )
 
             is IdentityCredential.SelectProvider -> SelectProviderDialogPrompt(
                 promptRequest = promptRequest,
-                onCancel = { state.onCancel(sessionId, promptRequest.uid) },
-                onConfirm = { state.onConfirm(sessionId, promptRequest.uid, it) },
+                onCancel = { state.onCancel(selectedTabId, promptRequest.uid) },
+                onConfirm = { state.onConfirm(selectedTabId, promptRequest.uid, it) },
             )
 
             is MenuChoice -> ChoiceDialogPrompt(
                 promptRequest = promptRequest,
                 dialogType = MENU_CHOICE_DIALOG_TYPE,
-                onCancel = { state.onCancel(sessionId, promptRequest.uid) },
-                onConfirm = { state.onConfirm(sessionId, promptRequest.uid, it) },
+                onCancel = { state.onCancel(selectedTabId, promptRequest.uid) },
+                onConfirm = { state.onConfirm(selectedTabId, promptRequest.uid, it) },
             )
 
             is MultipleChoice -> ChoiceDialogPrompt(
                 promptRequest = promptRequest,
                 dialogType = MULTIPLE_CHOICE_DIALOG_TYPE,
-                onCancel = { state.onCancel(sessionId, promptRequest.uid) },
-                onConfirm = { state.onConfirm(sessionId, promptRequest.uid, it) },
+                onCancel = { state.onCancel(selectedTabId, promptRequest.uid) },
+                onConfirm = { state.onConfirm(selectedTabId, promptRequest.uid, it) },
             )
 
             is Popup -> {
@@ -193,8 +190,8 @@ fun InfernoWebPrompter(
                     negativeLabel = negativeLabel,
                     positiveLabel = positiveLabel,
                     hasShownManyDialogs = promptAbuserDetector.areDialogsBeingAbused(),
-                    onCancel = { state.onCancel(sessionId, promptRequest.uid, it) },
-                    onConfirm = { state.onConfirm(sessionId, promptRequest.uid) },
+                    onCancel = { state.onCancel(selectedTabId, promptRequest.uid, it) },
+                    onConfirm = { state.onConfirm(selectedTabId, promptRequest.uid) },
                 )
             }
 
@@ -213,32 +210,33 @@ fun InfernoWebPrompter(
                     negativeLabel = negativeAction,
                     positiveLabel = positiveAction,
                     hasShownManyDialogs = false,
-                    onCancel = { state.onCancel(sessionId, promptRequest.uid, it) },
-                    onConfirm = { state.onConfirm(sessionId, promptRequest.uid) },
+                    onCancel = { state.onCancel(selectedTabId, promptRequest.uid, it) },
+                    onConfirm = { state.onConfirm(selectedTabId, promptRequest.uid) },
                 )
             }
 
             is SaveCreditCard -> CreditCardSaveDialogPrompt(
                 promptRequest = promptRequest,
-                onCancel = { state.onCancel(sessionId, promptRequest.uid) },
-                onConfirm = { state.onConfirm(sessionId, promptRequest.uid, it) },
+                onCancel = { state.onCancel(selectedTabId, promptRequest.uid) },
+                onConfirm = { state.onConfirm(selectedTabId, promptRequest.uid, it) },
             )
 
             is SaveLoginPrompt -> SaveLoginDialogPrompt(
                 promptRequest = promptRequest,
-                icon = currentTab.content.icon,
+                icon = state.selectedTabIcon,
+                url = state.currentUrl,
                 onShowSnackbarAfterLoginChange = state.onSaveLogin,
                 loginValidationDelegate = state.loginValidationDelegate,
-                onCancel = { state.onCancel(sessionId, promptRequest.uid) },
-                onConfirm = { state.onConfirm(sessionId, promptRequest.uid, it) },
+                onCancel = { state.onCancel(selectedTabId, promptRequest.uid) },
+                onConfirm = { state.onConfirm(selectedTabId, promptRequest.uid, it) },
             )
 
             is SelectAddress -> SelectableListPrompt(
                 promptRequest = promptRequest,
                 header = stringResource(R.string.mozac_feature_prompts_select_address_2),
                 manageText = stringResource(R.string.mozac_feature_prompts_manage_address),
-                onCancel = { state.onCancel(sessionId, promptRequest.uid) },
-                onConfirm = { state.onConfirm(sessionId, promptRequest.uid, it) },
+                onCancel = { state.onCancel(selectedTabId, promptRequest.uid) },
+                onConfirm = { state.onConfirm(selectedTabId, promptRequest.uid, it) },
             )
 
 
@@ -246,8 +244,8 @@ fun InfernoWebPrompter(
                 promptRequest = promptRequest,
                 header = stringResource(R.string.mozac_feature_prompts_select_credit_card_2),
                 manageText = stringResource(R.string.mozac_feature_prompts_manage_credit_cards_2),
-                onCancel = { state.onCancel(sessionId, promptRequest.uid) },
-                onConfirm = { state.onConfirm(sessionId, promptRequest.uid, it) },
+                onCancel = { state.onCancel(selectedTabId, promptRequest.uid) },
+                onConfirm = { state.onConfirm(selectedTabId, promptRequest.uid, it) },
             )
 
             is SelectLoginPrompt -> {
@@ -260,26 +258,26 @@ fun InfernoWebPrompter(
                     is SelectLoginPromptController.LoginPickerDialog -> LoginPickerPrompt(
                         promptRequest = promptRequest,
                         controller = state.selectLoginPromptController as SelectLoginPromptController.LoginPickerDialog,
-                        onCancel = { state.onCancel(sessionId, promptRequest.uid) },
-                        onConfirm = { state.onConfirm(sessionId, promptRequest.uid, it) },
+                        onCancel = { state.onCancel(selectedTabId, promptRequest.uid) },
+                        onConfirm = { state.onConfirm(selectedTabId, promptRequest.uid, it) },
                     )
 
                     is SelectLoginPromptController.StrongPasswordBarDialog -> {
                         // if not shown already, show (prevents spam)
-                        if ((state.selectLoginPromptController as SelectLoginPromptController.StrongPasswordBarDialog).dismissedSessionId != sessionId) {
+                        if ((state.selectLoginPromptController as SelectLoginPromptController.StrongPasswordBarDialog).dismissedSessionId != selectedTabId) {
                             PasswordGeneratorDialogPrompt(promptRequest = promptRequest,
                                 currentUrl = state.currentUrl ?: "<empty>",
                                 askFirst = true,
                                 onCancel = {
-                                    state.onCancel(sessionId, promptRequest.uid)
+                                    state.onCancel(selectedTabId, promptRequest.uid)
                                     (state.selectLoginPromptController as SelectLoginPromptController.StrongPasswordBarDialog).dismissedSessionId =
-                                        sessionId
+                                        selectedTabId
                                 },
                                 onConfirm = {
-                                    state.onConfirm(sessionId, promptRequest.uid, it)
+                                    state.onConfirm(selectedTabId, promptRequest.uid, it)
                                     state.onSaveLogin.invoke(false)
                                     (state.selectLoginPromptController as SelectLoginPromptController.StrongPasswordBarDialog).dismissedSessionId =
-                                        sessionId
+                                        selectedTabId
                                 })
                             R.string.mozac_feature_prompts_suggest_strong_password_2
                         }
@@ -287,20 +285,20 @@ fun InfernoWebPrompter(
 
                     is SelectLoginPromptController.PasswordGeneratorDialog -> {
                         // if not shown already, show (prevents spam)
-                        if ((state.selectLoginPromptController as SelectLoginPromptController.PasswordGeneratorDialog).dismissedSessionId != sessionId) {
+                        if ((state.selectLoginPromptController as SelectLoginPromptController.PasswordGeneratorDialog).dismissedSessionId != selectedTabId) {
                             PasswordGeneratorDialogPrompt(promptRequest,
                                 currentUrl = state.currentUrl ?: "<empty>",
                                 askFirst = false,
                                 onCancel = {
-                                    state.onCancel(sessionId, promptRequest.uid)
+                                    state.onCancel(selectedTabId, promptRequest.uid)
                                     (state.selectLoginPromptController as SelectLoginPromptController.PasswordGeneratorDialog).dismissedSessionId =
-                                        sessionId
+                                        selectedTabId
                                 },
                                 onConfirm = {
-                                    state.onConfirm(sessionId, promptRequest.uid, it)
+                                    state.onConfirm(selectedTabId, promptRequest.uid, it)
                                     state.onSaveLogin.invoke(false)
                                     (state.selectLoginPromptController as SelectLoginPromptController.PasswordGeneratorDialog).dismissedSessionId =
-                                        sessionId
+                                        selectedTabId
                                 })
                         }
                     }
@@ -324,15 +322,15 @@ fun InfernoWebPrompter(
             is SingleChoice -> ChoiceDialogPrompt(
                 promptRequest = promptRequest,
                 dialogType = SINGLE_CHOICE_DIALOG_TYPE,
-                onCancel = { state.onCancel(sessionId, promptRequest.uid) },
-                onConfirm = { state.onConfirm(sessionId, promptRequest.uid, it) },
+                onCancel = { state.onCancel(selectedTabId, promptRequest.uid) },
+                onConfirm = { state.onConfirm(selectedTabId, promptRequest.uid, it) },
             )
 
             is TextPrompt -> TextPromptDialogPrompt(
                 promptRequest = promptRequest,
                 hasShownManyDialogs = promptAbuserDetector.areDialogsBeingAbused(),
-                onCancel = { state.onCancel(sessionId, promptRequest.uid) },
-                onConfirm = { state.onConfirm(sessionId, promptRequest.uid, it) },
+                onCancel = { state.onCancel(selectedTabId, promptRequest.uid) },
+                onConfirm = { state.onConfirm(selectedTabId, promptRequest.uid, it) },
             )
 
             is TimeSelection -> {
@@ -344,13 +342,13 @@ fun InfernoWebPrompter(
                 }
                 TimeSelectionPrompt(promptRequest = promptRequest,
                     type = selectionType,
-                    onCancel = { state.onCancel(sessionId, promptRequest.uid) },
-                    onConfirm = { state.onConfirm(sessionId, promptRequest.uid, it) },
-                    onClear = { state.onClear(sessionId, promptRequest.uid) })
+                    onCancel = { state.onCancel(selectedTabId, promptRequest.uid) },
+                    onConfirm = { state.onConfirm(selectedTabId, promptRequest.uid, it) },
+                    onClear = { state.onClear(selectedTabId, promptRequest.uid) })
             }
 
-            null -> return
-            else -> throw InvalidParameterException("Not valid prompt request type $promptRequest")
+            /** no-op, handled in [InfernoPromptFeatureState] */
+            is PromptRequest.File -> {}
         }
     }
 }

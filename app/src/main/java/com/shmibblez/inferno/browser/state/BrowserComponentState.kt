@@ -1,7 +1,6 @@
 package com.shmibblez.inferno.browser.state
 
 import android.util.Log
-import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -10,12 +9,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.shmibblez.inferno.browser.BrowserComponentPageType
 import com.shmibblez.inferno.browser.OnActivityResultModel
@@ -28,14 +27,11 @@ import com.shmibblez.inferno.ext.lastOpenedNormalTab
 import com.shmibblez.inferno.ext.newTab
 import com.shmibblez.inferno.tabs.tabstray.InfernoTabsTraySelectedTab
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.map
 import mozilla.components.browser.icons.BrowserIcons
-import mozilla.components.browser.icons.Icon
 import mozilla.components.browser.state.search.SearchEngine
 import mozilla.components.browser.state.selector.findCustomTab
 import mozilla.components.browser.state.selector.normalTabs
@@ -57,7 +53,6 @@ import mozilla.components.feature.pwa.feature.WebAppActivityFeature
 import mozilla.components.feature.pwa.feature.WebAppContentFeature
 import mozilla.components.feature.pwa.feature.WebAppHideToolbarFeature
 import mozilla.components.feature.pwa.feature.WebAppSiteControlsFeature
-import mozilla.components.feature.session.SessionUseCases
 import mozilla.components.feature.tabs.TabsUseCases
 import mozilla.components.lib.state.ext.flowScoped
 import mozilla.components.support.base.android.NotificationsDelegate
@@ -79,9 +74,10 @@ private class CustomTabManager(
     private val controlsBuilder: SiteControlsBuilder = SiteControlsBuilder.Default(),
     private val notificationsDelegate: NotificationsDelegate,
     private val components: Components,
+    private val setShowExternalToolbar: (Boolean) -> Unit,
 ) : LifecycleAwareFeature {
 
-    private var manifest: WebAppManifest? = null
+    private var manifest: WebAppManifest? = customTabSessionState.content.webAppManifest
     private val scope = MainScope()
 
     val testObserver = LifecycleEventObserver { source, event ->
@@ -106,6 +102,10 @@ private class CustomTabManager(
     }
 
     /** observers */
+    // features
+    var hideToolbarFeature: WebAppHideToolbarFeature? = null
+    var windowFeature: CustomTabWindowFeature? = null
+
     // manifest != null
     var webAppActivityObserver: WebAppActivityFeature? = null
     var webAppContentObserver: WebAppContentFeature? = null
@@ -117,20 +117,35 @@ private class CustomTabManager(
 
 
     override fun start() {
-        manifest = customTabSessionState.content.webAppManifest
+        Log.d("CustomTabManager", "start()")
 
         val isPwaTabOrTwaTab =
             customTabSessionState.config.externalAppType == ExternalAppType.PROGRESSIVE_WEB_APP || customTabSessionState.config.externalAppType == ExternalAppType.TRUSTED_WEB_ACTIVITY
+
+        // setup features
+
+        // Only set hideToolbarFeature if isPwaTabOrTwaTab
         if (isPwaTabOrTwaTab) {
-            /**
-             * if true override displayMode and hide toolbar, also no menu options
-             * display mode can be used to not show components in BrowserComponent (unnecessary overhead)
-             * todo: check [WebAppHideToolbarFeature], [ExternalAppBrowserFragment]
-             */
+            hideToolbarFeature = WebAppHideToolbarFeature(
+                store = store,
+                customTabsStore = components.core.customTabsStore,
+                tabId = customTabSessionState.id,
+                manifest = manifest,
+                setToolbarVisibility = setShowExternalToolbar,
+            )
         }
 
-        Log.d("CustomTabManager", "start()")
 
+        windowFeature = CustomTabWindowFeature(
+            activity = activity,
+            store = store,
+            sessionId = customTabSessionState.id,
+        )
+
+        hideToolbarFeature?.start()
+        windowFeature?.start()
+
+        // setup observers
         if (manifest != null) {
             Log.d("CustomTabManager", "start(), initializing observers with manifest != null")
             webAppActivityObserver = WebAppActivityFeature(
@@ -163,7 +178,7 @@ private class CustomTabManager(
                     customTabSessionState.id,
                     manifest!!,
                 ),
-                notificationsDelegate = components.notificationsDelegate,
+                notificationsDelegate = notificationsDelegate,
             )
             activity.lifecycle.addObservers(
                 webAppActivityObserver!!,
@@ -181,7 +196,7 @@ private class CustomTabManager(
                 activity.applicationContext,
                 store,
                 customTabSessionState.id,
-                components.notificationsDelegate,
+                notificationsDelegate,
             )
             activity.lifecycle.addObserver(poweredByObserver!!)
         }
@@ -190,6 +205,12 @@ private class CustomTabManager(
 
     override fun stop() {
         Log.d("CustomTabManager", "stop()")
+
+        // stop features
+        hideToolbarFeature?.stop()
+        windowFeature?.stop()
+
+        // stop observers
         scope.cancel()
         webAppActivityObserver?.let {
             activity.lifecycle.removeObserver(it)
@@ -218,19 +239,53 @@ fun rememberBrowserComponentState(
     tabsUseCases: TabsUseCases = LocalContext.current.components.useCases.tabsUseCases,
 ): MutableState<BrowserComponentState> {
 
-    val state = remember {
-        mutableStateOf(
-            BrowserComponentState(
-                customTabSessionId = customTabSessionId,
-                activity = activity,
-                coroutineScope = coroutineScope,
-                lifecycleOwner = lifecycleOwner,
-                components = components,
-                store = store,
-                tabsUseCases = tabsUseCases,
+    val state = rememberSaveable(
+        customTabSessionId,
+        stateSaver = Saver(
+            save = {
+                customTabSessionId
+            },
+            restore = {
+                BrowserComponentState(
+                    customTabSessionId = customTabSessionId,
+                    activity = activity,
+                    coroutineScope = coroutineScope,
+                    lifecycleOwner = lifecycleOwner,
+                    components = components,
+                    store = store,
+                    tabsUseCases = tabsUseCases,
+                )
+            },
+        ),
+        key = null,
+        init = {
+            mutableStateOf(
+                BrowserComponentState(
+                    customTabSessionId = customTabSessionId,
+                    activity = activity,
+                    coroutineScope = coroutineScope,
+                    lifecycleOwner = lifecycleOwner,
+                    components = components,
+                    store = store,
+                    tabsUseCases = tabsUseCases,
+                )
             )
-        )
-    }
+        }
+    )
+
+//    val state = remember {
+//        mutableStateOf(
+//            BrowserComponentState(
+//                customTabSessionId = customTabSessionId,
+//                activity = activity,
+//                coroutineScope = coroutineScope,
+//                lifecycleOwner = lifecycleOwner,
+//                components = components,
+//                store = store,
+//                tabsUseCases = tabsUseCases,
+//            )
+//        )
+//    }
 
     DisposableEffect(null) {
         state.value.start()
@@ -292,6 +347,8 @@ class BrowserComponentState(
     var pageType: BrowserComponentPageType by mutableStateOf(BrowserComponentPageType.ENGINE)
         private set
     var selectedTabsTrayTab: InfernoTabsTraySelectedTab by mutableStateOf(InfernoTabsTraySelectedTab.NormalTabs)
+    var showExternalToolbar by mutableStateOf(true)
+        private set
 
     // helper for compose migration, might be a lil sloppy
     var onActivityResultHandler: ((OnActivityResultModel) -> Boolean)? = null
@@ -328,6 +385,7 @@ class BrowserComponentState(
                         controlsBuilder = SiteControlsBuilder.CopyAndRefresh(components.useCases.sessionUseCases.reload),
                         notificationsDelegate = components.notificationsDelegate,
                         components = components,
+                        setShowExternalToolbar = { showExternalToolbar = it }
                     )
                     customTabManager!!.start()
                 } else if (currentCustomTab == null && customTabManager != null) {

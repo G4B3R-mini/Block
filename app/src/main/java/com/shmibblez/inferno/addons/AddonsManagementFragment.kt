@@ -131,7 +131,8 @@ class AddonsManagementFragment : Fragment(R.layout.fragment_add_ons_management) 
                                                     false,
                                                 )
                                         } else {
-                                            @Suppress("DEPRECATION") info.collectionInfo =
+                                            @Suppress("DEPRECATION")
+                                            info.collectionInfo =
                                                 AccessibilityNodeInfo.CollectionInfo.obtain(
                                                     it.itemCount,
                                                     1,

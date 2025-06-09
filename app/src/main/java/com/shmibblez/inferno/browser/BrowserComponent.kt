@@ -1088,10 +1088,7 @@ fun BrowserComponent(
         },
     )
 
-    InfernoWebPrompter(
-        state = webPrompterState,
-        currentTab = state.currentTab,
-    )
+    InfernoWebPrompter(state = webPrompterState)
 
     /// views
     var engineView by remember { mutableStateOf<EngineView?>(null) }
@@ -1932,6 +1929,7 @@ fun BrowserComponent(
                 ) {
                     if (state.browserMode == BrowserComponentMode.TOOLBAR_EXTERNAL) {
                         InfernoExternalToolbar(
+                            showExternalToolbar = state.showExternalToolbar,
                             session = state.currentCustomTab,
                             onNavToBrowser = {
                                 state.migrateExternalToNormal()

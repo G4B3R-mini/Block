@@ -48,35 +48,16 @@ that's it for now, hopefully this project doesn't die
 
 ## IntentProcessor and ExternalAppBrowser
 
-- [ ] pending
-    - [ ] external toolbar visibility depending on tab manifest
-    - [ ] show loading progressbar
-- [ ] new structure
-    - [ ] link custom tab session to activity BrowserComponentState
-    - [ ] make BrowserComponentState parcelable and store in activity
-    - [ ] there can be multiple instances of HomeActivity
-    - [ ] figure out how to set flags for each activity / task
-    - [ ] there can only be one instance of: browser task, external app task, or web app task, each
-      with one instance allowed to be saved in recents screen
-    - [ ] each possible instance is different, but they're all instances of HomeActivity, this is
-      why when creating a new activity from intent receiver, flag must be set, and existing ones
-      must be checked in order to determine if should create new instance or override currently
-      existing one
-    - [ ] launchMode standard allows multiple top-level instances, set flag and check if existing to
-      know if should create or override existing instance, dont want to fill up recents screen with
-      tons of instances
-- [ ] for navigation, back pressed handler
-    - [ ] if tab can go back, then go back, if cannot go back anymore, call system pop and return to
-      app that requested browser, and custom tab is closed
-- [ ] slightly less buggy now
-- [ ] make browser components use custom tab if not setup already (web prompter, find in page,
-  permissions, download feature)
+- [ ] make browser components use custom tab if not setup already (find in page, permissions)
 - [ ] current strategy for custom tab manifest:
     - [ ] move browserComponentState to parent activity, there call start() and stop() accordingly,
       this also means access to biometric setup and activity callbacks (FileManager and other stuff
       for web prompter) will be much easier, no need for complex fragment wrapper implementation
-    - [ ] funs in ExternalAppBrowserFragment will be moved to BrowserComponentState, listeners will
-      be added/removed, depending on if custom tab exists
+
+## InfernoPromptFeatureState
+
+- [ ] add filePicker param and move creation to base activity, this avoids having to create a custom
+  FilePicker for use in compose, and assures all logic is handled correctly
 
 ## InfernoHistoryPage
 
@@ -185,6 +166,13 @@ Did you add an account?
 
 `Features that will probably eventually be added`
 
+- [ ] app shortcuts
+    - [ ] custom tabs that have launcher shortcuts
+    - [ ] have gesture for accessing settings from here since bottom bar will be hidden
+    - [ ] also have gesture for toolbar, quick settings for changing shortcut name (works above
+      android
+      7.0, shouldnt be a problem) and editing other manifest details manually, see if can store
+      variable in app manifest to edit manually or update automatically
 - [ ] workspaces
     - Requires storing multiple engines probably, one for each workspace. Should check zen browser
       implementation for ideas.
@@ -200,6 +188,8 @@ Did you add an account?
 - [ ] bug reporting system / feedback page
     - [ ] for bug reporting show select in settings: (disabled, send report auto, or ask to send
       report)
+- [ ] history page
+    - [ ] search feature
 - [ ] login manager (settings)
     - [ ] add search function to filter logins, implemented by moz in [SavedLoginsFragment]
     - [ ] add login sorting and save selected in prefs
@@ -214,3 +204,29 @@ Did you add an account?
       and requires dialog to confirm
 - [ ] enhanced tracking protection
     - [ ] exceptions
+
+# Current Structures
+
+- Intent Receiver
+    - All intents received go to HomeActivity, only important param passed is customTabId, the rest
+      is handled by BrowserComponent
+    - HomeActivity Manifest launchMode is set to "standard", this means multiple tasks with
+      HomeActivity can exist at the top level
+        - Only one instance of each type of HomeActivity can exist, possible instances are normal
+          browsing, custom tab (opened by another app), or custom tab opened from shortcut
+        - This has not been tested with shortcut apps however, if not working there is a mechanism
+          in mind: in IntentReceiver, specify intent extra for browser type, depending on this
+          check existing instances and decide if need to create new instance or use existing
+- Browser State
+    - Browser State is stored in compose in BrowserComponentState, by means of
+      rememberBrowserComponentState.
+    - BrowserComponentState listens to tab flow and updates accordingly
+    - if a CustomTabSessionId is specified in intent that created the activity, it's applied
+      accordingly in BrowserComponentState; the custom tab is selected and a CustomTabManager is
+      created, which takes care of changes specific to this CustomTabSession (window sizing)
+- Features
+    - All features (DownloadComponent, InfernoPromptFeature, etc.) are either compose adaptations or
+      direct usage of Mozilla's features
+    - These listen to browser state changes and apply changes accordingly
+    - In the case of compose adaptations, all mozilla logic is moved / adapted to a State instance
+      that is remembered in compose and passed to an accompanying ui composable component

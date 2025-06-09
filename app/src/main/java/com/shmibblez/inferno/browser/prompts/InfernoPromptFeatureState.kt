@@ -2,6 +2,7 @@ package com.shmibblez.inferno.browser.prompts
 
 import android.app.Activity
 import android.content.Intent
+import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
 import androidx.activity.compose.ManagedActivityResultLauncher
@@ -129,7 +130,7 @@ fun rememberInfernoPromptFeatureState(
     state = InfernoPromptFeatureState(
         activity = activity,
         store = store,
-        customTabId = customTabId,
+        customTabSessionId = customTabId,
         tabsUseCases = tabsUseCases,
         shareDelegate = shareDelegate,
         exitFullscreenUsecase = exitFullscreenUsecase,
@@ -173,9 +174,9 @@ fun rememberInfernoPromptFeatureState(
 }
 
 class InfernoPromptFeatureState internal constructor(
-    activity: AppCompatActivity,
+    private val activity: AppCompatActivity,
     private val store: BrowserStore,
-    private var customTabId: String?,
+    val customTabSessionId: String?,
     private val tabsUseCases: TabsUseCases,
     internal val shareDelegate: ShareDelegate,
     private val exitFullscreenUsecase: ExitFullScreenUseCase = SessionUseCases(store).exitFullscreen,
@@ -208,6 +209,9 @@ class InfernoPromptFeatureState internal constructor(
     private var handlePromptScope: CoroutineScope? = null
     private var dismissPromptScope: CoroutineScope? = null
 
+//    var customTabSessionId = customTabSessionId
+//        private set
+
     @VisibleForTesting
     var activePromptRequest: PromptRequest? = null
         private set(value) {
@@ -225,7 +229,11 @@ class InfernoPromptFeatureState internal constructor(
     var currentUrl: String? = null
         private set
 
-    var sessionId: String? = null
+    var selectedTabId: String? = null
+        private set
+
+    var selectedTabIcon by mutableStateOf<Bitmap?>(null)
+        private set
 
     private val promptAbuserDetector = PromptAbuserDetector()
     private val logger = Logger("PromptFeature")
@@ -237,15 +245,17 @@ class InfernoPromptFeatureState internal constructor(
     internal var filePicker = FilePicker(
         activity,
         store,
-        customTabId,
+        this.customTabSessionId,
         fileUploadsDirCleaner,
         androidPhotoPicker,
         onNeedToRequestPermissions,
     )
+        private set
 
     var selectLoginPromptController by mutableStateOf(
         SelectLoginPromptController()
     )
+        private set
 
     private val creditCardDelegate = creditCardDelegate.invoke(this, activityResultLauncher)
 
@@ -258,21 +268,20 @@ class InfernoPromptFeatureState internal constructor(
 //                    creditCardSelectBar = it,
 //                    manageCreditCardsCallback = onManageCreditCards,
 //                    selectCreditCardCallback = onSelectCreditCard,
-//                    sessionId = customTabId,
+//                    sessionId = customTabSessionId,
 //                )
 //            }
 //        }
     // todo: implement as state to integrate with credit card picker component,
     //  store value for biometric auth, reset when dismissed
-    var creditCardDialogController = with(this.creditCardDelegate) {
+    private var creditCardDialogController = with(this.creditCardDelegate) {
         CreditCardDialogController(
             store = store,
             manageCreditCardsCallback = onManageCreditCards,
             selectCreditCardCallback = onSelectCreditCard,
-            sessionId = customTabId,
+            sessionId = this@InfernoPromptFeatureState.customTabSessionId,
         )
     }
-        private set
 
     //    @VisibleForTesting(otherwise = PRIVATE)
 //    internal var addressPicker =
@@ -282,7 +291,7 @@ class InfernoPromptFeatureState internal constructor(
 //                    store = store,
 //                    addressSelectBar = it,
 //                    onManageAddresses = onManageAddresses,
-//                    sessionId = customTabId,
+//                    sessionId = customTabSessionId,
 //                )
 //            }
 //        }
@@ -291,9 +300,10 @@ class InfernoPromptFeatureState internal constructor(
         InfernoAddressPicker(
             store = store,
             onManageAddresses = onManageAddresses,
-            sessionId = customTabId,
+            sessionId = this@InfernoPromptFeatureState.customTabSessionId,
         )
     }
+        private set
 
     override val onNeedToRequestPermissions
         get() = filePicker.onNeedToRequestPermissions
@@ -313,31 +323,32 @@ class InfernoPromptFeatureState internal constructor(
         promptAbuserDetector.resetJSAlertAbuseState()
 
         handlePromptScope = store.flowScoped { flow ->
-            flow.map { state -> state.findTabOrCustomTabOrSelectedTab(customTabId) }.ifAnyChanged {
-                arrayOf(it?.content?.promptRequests, it?.content?.loading)
-            }.collect { state ->
-                state?.content?.let { content ->
-                    if (content.promptRequests.lastOrNull() != activePromptRequest) {
-                        // Dismiss any active select login or credit card prompt if it does
-                        // not match the current prompt request for the session.
-                        when (activePromptRequest) {
-                            is SelectLoginPrompt -> {
-                                if (selectLoginPromptController.isLoginPickerDialog()) {
-                                    (selectLoginPromptController as SelectLoginPromptController.LoginPickerDialog).dismissCurrentLoginSelect(
-                                        activePromptRequest as SelectLoginPrompt,
-                                    )
+            flow.map { state -> state.findTabOrCustomTabOrSelectedTab(customTabSessionId) }
+                .ifAnyChanged {
+                    arrayOf(it?.content?.promptRequests, it?.content?.loading)
+                }.collect { state ->
+                    state?.content?.let { content ->
+                        if (content.promptRequests.lastOrNull() != activePromptRequest) {
+                            // Dismiss any active select login or credit card prompt if it does
+                            // not match the current prompt request for the session.
+                            when (activePromptRequest) {
+                                is SelectLoginPrompt -> {
+                                    if (selectLoginPromptController.isLoginPickerDialog()) {
+                                        (selectLoginPromptController as SelectLoginPromptController.LoginPickerDialog).dismissCurrentLoginSelect(
+                                            activePromptRequest as SelectLoginPrompt,
+                                        )
+                                    }
+                                    if (selectLoginPromptController.isStrongPasswordBarDialog()) {
+                                        (selectLoginPromptController as SelectLoginPromptController.StrongPasswordBarDialog).dismissCurrentSuggestStrongPassword(
+                                            activePromptRequest as SelectLoginPrompt,
+                                        )
+                                    }
+                                    if (selectLoginPromptController.isPasswordGeneratorDialog()) {
+                                        (selectLoginPromptController as SelectLoginPromptController.PasswordGeneratorDialog).dismissCurrentPasswordGenerator(
+                                            activePromptRequest as SelectLoginPrompt,
+                                        )
+                                    }
                                 }
-                                if (selectLoginPromptController.isStrongPasswordBarDialog()) {
-                                    (selectLoginPromptController as SelectLoginPromptController.StrongPasswordBarDialog).dismissCurrentSuggestStrongPassword(
-                                        activePromptRequest as SelectLoginPrompt,
-                                    )
-                                }
-                                if (selectLoginPromptController.isPasswordGeneratorDialog()) {
-                                    (selectLoginPromptController as SelectLoginPromptController.PasswordGeneratorDialog).dismissCurrentPasswordGenerator(
-                                        activePromptRequest as SelectLoginPrompt,
-                                    )
-                                }
-                            }
 
 //                            removes fragment, nothing else
 //                                is SaveLoginPrompt -> {
@@ -349,17 +360,17 @@ class InfernoPromptFeatureState internal constructor(
 //                                    (activePrompt?.get() as? CreditCardSaveDialogFragment)?.dismissAllowingStateLoss()
 //                                }
 
-                            is SelectCreditCard -> {
-                                creditCardDialogController.dismissSelectCreditCardRequest(
-                                    activePromptRequest as SelectCreditCard,
-                                )
-                            }
+                                is SelectCreditCard -> {
+                                    creditCardDialogController.dismissSelectCreditCardRequest(
+                                        activePromptRequest as SelectCreditCard,
+                                    )
+                                }
 
-                            is SelectAddress -> {
-                                addressPicker.dismissSelectAddressRequest(
-                                    activePromptRequest as SelectAddress,
-                                )
-                            }
+                                is SelectAddress -> {
+                                    addressPicker.dismissSelectAddressRequest(
+                                        activePromptRequest as SelectAddress,
+                                    )
+                                }
 
 //                                is SingleChoice,
 //                                is MultipleChoice,
@@ -375,25 +386,26 @@ class InfernoPromptFeatureState internal constructor(
 //                                    }
 //                                }
 
-                            else -> {
-                                // no-op
+                                else -> {
+                                    // no-op
+                                }
                             }
+
+                            // dismisses prompt in InfernoWebPrompter
+                            activePromptRequest = null
+                            onPromptRequested(state)
+                        } else if (!content.loading) {
+                            promptAbuserDetector.resetJSAlertAbuseState()
+                        } else if (content.loading) {
+                            dismissSelectPrompts()
                         }
 
-                        // dismisses prompt in InfernoWebPrompter
-                        activePromptRequest = null
-                        onPromptRequested(state)
-                    } else if (!content.loading) {
-                        promptAbuserDetector.resetJSAlertAbuseState()
-                    } else if (content.loading) {
-                        dismissSelectPrompts()
+                        currentUrl = content.url
+                        selectedTabId = state.id
+                        selectedTabIcon = state.content.icon
+                        activePromptRequest = content.promptRequests.lastOrNull()
                     }
-
-                    currentUrl = content.url
-                    sessionId = state.id
-                    activePromptRequest = content.promptRequests.lastOrNull()
                 }
-            }
         }
 
         // Dismiss all prompts when page host or session id changes. See Fenix#5326
@@ -401,7 +413,7 @@ class InfernoPromptFeatureState internal constructor(
             flow.ifAnyChanged { state ->
                 arrayOf(
                     state.selectedTabId,
-                    state.findTabOrCustomTabOrSelectedTab(customTabId)?.content?.url?.tryGetHostFromUrl(),
+                    state.findTabOrCustomTabOrSelectedTab(customTabSessionId)?.content?.url?.tryGetHostFromUrl(),
                 )
             }.collect {
                 dismissSelectPrompts()
@@ -515,7 +527,7 @@ class InfernoPromptFeatureState internal constructor(
         promptRequest: PromptRequest,
         session: SessionState,
     ) {
-        store.state.findTabOrCustomTabOrSelectedTab(customTabId)?.let {
+        store.state.findTabOrCustomTabOrSelectedTab(customTabSessionId)?.let {
             promptRequest.executeIfWindowedPrompt { exitFullscreenUsecase(it.id) }
         }
 
@@ -527,7 +539,7 @@ class InfernoPromptFeatureState internal constructor(
                 filePicker.handleFileRequest(promptRequest)
             }
 
-//            is Share -> handleShareRequest(promptRequest, session)
+            is Share -> handleShareRequest(promptRequest, session)
             is SelectCreditCard -> {
 //                emitSuccessfulCreditCardAutofillFormDetectedFact()
                 if (isCreditCardAutofillEnabled() && promptRequest.creditCards.isNotEmpty()) {
@@ -717,18 +729,18 @@ class InfernoPromptFeatureState internal constructor(
         }
     }
 
-//    private fun handleShareRequest(promptRequest: Share, session: SessionState) {
-////        emitPromptDisplayedFact(promptName = "ShareSheet")
-//        shareDelegate.showShareSheet(
-//            context = activity.applicationContext,
-//            shareData = promptRequest.data,
-//            onDismiss = {
-////                emitPromptDismissedFact(promptName = "ShareSheet")
-//                onCancel(session.id, promptRequest.uid)
-//            },
-//            onSuccess = { onConfirm(session.id, promptRequest.uid, null) },
-//        )
-//    }
+    private fun handleShareRequest(promptRequest: Share, session: SessionState) {
+//        emitPromptDisplayedFact(promptName = "ShareSheet")
+        shareDelegate.showShareSheet(
+            context = activity.applicationContext,
+            shareData = promptRequest.data,
+            onDismiss = {
+//                emitPromptDismissedFact(promptName = "ShareSheet")
+                onCancel(session.id, promptRequest.uid)
+            },
+            onSuccess = { onConfirm(session.id, promptRequest.uid, null) },
+        )
+    }
 
     private fun showDialogRequest(prompt: PromptRequest) {
 //        try {
@@ -906,18 +918,19 @@ class InfernoPromptFeatureState internal constructor(
                 when (selectLoginPromptController) {
                     is SelectLoginPromptController.StrongPasswordBarDialog -> {
                         // if not shown already, show (prevents spam)
-                        (selectLoginPromptController as SelectLoginPromptController.StrongPasswordBarDialog).dismissedSessionId != sessionId
+                        (selectLoginPromptController as SelectLoginPromptController.StrongPasswordBarDialog).dismissedSessionId != selectedTabId
                     }
 
                     is SelectLoginPromptController.PasswordGeneratorDialog -> {
                         // if not shown already, show (prevents spam)
-                        (selectLoginPromptController as SelectLoginPromptController.PasswordGeneratorDialog).dismissedSessionId != sessionId
+                        (selectLoginPromptController as SelectLoginPromptController.PasswordGeneratorDialog).dismissedSessionId != selectedTabId
                     }
 
                     else -> true
                 }
 
             }
+
             is Alert, is TextPrompt, is Confirm, is Repost, is Popup -> promptAbuserDetector.shouldShowMoreDialogs
         }
     }

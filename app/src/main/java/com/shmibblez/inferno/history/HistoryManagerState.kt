@@ -17,6 +17,7 @@ import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.newTab
 import com.shmibblez.inferno.ext.shareTextList
 import com.shmibblez.inferno.library.history.History
+import com.shmibblez.inferno.library.history.HistoryView
 import com.shmibblez.inferno.utils.Settings.Companion.SEARCH_GROUP_MINIMUM_SITES
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
@@ -31,6 +32,12 @@ import mozilla.components.concept.storage.VisitInfo
 import mozilla.components.concept.storage.VisitType
 import mozilla.components.support.base.feature.LifecycleAwareFeature
 import mozilla.components.support.ktx.kotlin.tryGetHostFromUrl
+
+/**
+ * todo: this is wack
+ *  look over [HistoryView] and use existing pager implementation
+ *  (check if compatible with refresh, requires custom page size each time)
+ */
 
 /** handles jobs consecutively, ensuring only unique jobs are in queue */
 class ConsecutiveUniqueJobHandler<T : Enum<T>>(
@@ -147,11 +154,11 @@ internal fun rememberHistoryViewerState(
     browserStore: BrowserStore = LocalContext.current.components.core.store,
     historyStorage: PlacesHistoryStorage = LocalContext.current.components.core.historyStorage,
     coroutineScope: CoroutineScope = rememberCoroutineScope(),
-): MutableState<HistoryViewerState> {
+): MutableState<HistoryManagerState> {
     val context = LocalContext.current
     val state = remember {
         mutableStateOf(
-            HistoryViewerState(
+            HistoryManagerState(
                 context = context,
                 browserStore = browserStore,
                 historyStorage = historyStorage,
@@ -172,7 +179,7 @@ private const val NUMBER_OF_HISTORY_ITEMS = 25
 private const val BUFFER_TIME = 15000 // 15 seconds in ms
 
 
-internal class HistoryViewerState(
+internal class HistoryManagerState(
     private val context: Context,
     private val browserStore: BrowserStore,
     private val historyStorage: PlacesHistoryStorage,
@@ -266,13 +273,13 @@ internal class HistoryViewerState(
             offset.toLong(),
             numberOfItems.toLong(),
             excludeTypes = excludedVisitTypes,
-        ).map {
-            transformVisitInfoToHistoryItem(it)
-        }.also {
+        ).also {
             // update offset
-            dbOffset += it.size + 1
+            dbOffset += it.size + 1 // +1 is to start at item after last next time
             // check if no more items to display
             if (it.isEmpty() && numberOfItems != 0) noMoreItems = true
+        }.map {
+            transformVisitInfoToHistoryItem(it)
         }
 
         // We'll use this list to filter out redirects from metadata groups below.
@@ -358,7 +365,7 @@ internal class HistoryViewerState(
 
     /** loads up to where offset was before */
     private suspend fun resetListSus() {
-        Log.d("HistoryViewerState", "resetListSus invoked")
+        Log.d("HistoryManagerState", "resetListSus invoked")
         dbOffset = 0
         historyGroups = emptyList()
 
@@ -367,7 +374,7 @@ internal class HistoryViewerState(
 
     /** completely reloads list up to current offset */
     private suspend fun refreshListSus() {
-        Log.d("HistoryViewerState", "refreshListSus invoked")
+        Log.d("HistoryManagerState", "refreshListSus invoked")
         val n = dbOffset
         dbOffset = 0
         historyGroups = emptyList()
@@ -379,7 +386,7 @@ internal class HistoryViewerState(
     }
 
     private suspend fun loadMoreSus(numberOfItems: Int = numberOfItemsToLoad) {
-        Log.d("HistoryViewerState", "loadMoreSus invoked")
+        Log.d("HistoryManagerState", "loadMoreSus invoked")
         allItems += getHistory(dbOffset, numberOfItems).run {
             positionWithOffset(dbOffset)
         }
@@ -388,7 +395,7 @@ internal class HistoryViewerState(
 
     /** delete [item] from history, does not refresh, updates [visibleItems] list */
     private suspend fun deleteItemSus(item: History) {
-        Log.d("HistoryViewerState", "deleteItemSus invoked")
+        Log.d("HistoryManagerState", "deleteItemSus invoked")
         pendingDeletion += item
         when (item) {
             is History.Regular -> {
@@ -397,7 +404,7 @@ internal class HistoryViewerState(
                     allItems -= item
                 } catch (e: Exception) {
                     Log.e(
-                        "HistoryViewerState", "deleteItem: failed to delete Regular item, e: $e"
+                        "HistoryManagerState", "deleteItem: failed to delete Regular item, e: $e"
                     )
                 }
             }
@@ -412,7 +419,7 @@ internal class HistoryViewerState(
                     allItems -= item
                 } catch (e: Exception) {
                     Log.e(
-                        "HistoryViewerState", "deleteItem: failed to delete Group item, e: $e"
+                        "HistoryManagerState", "deleteItem: failed to delete Group item, e: $e"
                     )
                 }
             }
@@ -432,7 +439,7 @@ internal class HistoryViewerState(
                     refreshListSus()
                 } catch (e: Exception) {
                     Log.e(
-                        "HistoryViewerState", "deleteItem: failed to delete Metadata item, e: $e"
+                        "HistoryManagerState", "deleteItem: failed to delete Metadata item, e: $e"
                     )
                 }
             }
@@ -447,7 +454,7 @@ internal class HistoryViewerState(
 
     /** delete selected items and exit selection mode */
     private suspend fun deleteItemsSus(items: Set<History>) {
-        Log.d("HistoryViewerState", "deleteItemsSus invoked")
+        Log.d("HistoryManagerState", "deleteItemsSus invoked")
         // add all to pending deletion so not shown
         pendingDeletion += items
         val ops = mutableListOf<Deferred<Any>>()
@@ -471,7 +478,7 @@ internal class HistoryViewerState(
 
 
     fun loadMore() {
-        Log.d("HistoryViewerState", "loadMore invoked")
+        Log.d("HistoryManagerState", "loadMore invoked")
         taskHandler.processTask(
             type = TaskType.LOAD_MORE,
             task = { loadMoreSus() },
@@ -480,7 +487,7 @@ internal class HistoryViewerState(
     }
 
     fun refreshList() {
-        Log.d("HistoryViewerState", "refreshList invoked")
+        Log.d("HistoryManagerState", "refreshList invoked")
         taskHandler.processTask(
             type = TaskType.REFRESH,
             task = { refreshListSus() },
@@ -489,7 +496,7 @@ internal class HistoryViewerState(
     }
 
     fun deleteItem(item: History) {
-        Log.d("HistoryViewerState", "deleteItem invoked")
+        Log.d("HistoryManagerState", "deleteItem invoked")
         taskHandler.processTask(
             type = TaskType.DELETE,
             task = { deleteItemSus(item) },
@@ -498,7 +505,7 @@ internal class HistoryViewerState(
     }
 
     fun deleteSelected() {
-        Log.d("HistoryViewerState", "deleteSelected invoked")
+        Log.d("HistoryManagerState", "deleteSelected invoked")
         val items = (mode as? Mode.Selection)?.selectedItems ?: return
         taskHandler.processTask(
             type = TaskType.DELETE,
@@ -544,7 +551,7 @@ internal class HistoryViewerState(
                 get() = state.value
                 set(value) {
                     Log.d(
-                        "HistoryViewerState",
+                        "HistoryManagerState",
                         "pendingDeletion set, old size: ${state.value.size}, new size: ${value.size}"
                     )
                     state.value = value

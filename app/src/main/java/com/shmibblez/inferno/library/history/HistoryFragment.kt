@@ -28,7 +28,6 @@ import androidx.navigation.fragment.findNavController
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
-import androidx.paging.map
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.mapNotNull
@@ -69,6 +68,11 @@ import com.shmibblez.inferno.utils.allowUndo
 
 //import com.shmibblez.inferno.GleanMetrics.History as GleanHistory
 
+/**
+ * todo: this page is wack
+ *  look over [HistoryView] and use existing pager implementation
+ *  (check if compatible with refresh, requires custom page size each time)
+ */
 @SuppressWarnings("TooManyFunctions", "LargeClass")
 class HistoryFragment : LibraryPageFragment<History>(), UserInteractionHandler, MenuProvider {
     private lateinit var historyStore: HistoryFragmentStore
