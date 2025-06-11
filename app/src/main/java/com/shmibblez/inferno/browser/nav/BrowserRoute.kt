@@ -1,30 +1,40 @@
 package com.shmibblez.inferno.browser.nav
 
-import kotlinx.serialization.Serializable
+import android.annotation.SuppressLint
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+import mozilla.components.feature.addons.Addon
 
-interface BrowserRoute {
+@SuppressLint("ParcelCreator")
+@Parcelize
+open class BrowserRoute() : Parcelable {
 
 //    @Serializable
 //    object ExternalBrowser : BrowserRoute
 
-    @Serializable
-    object InfernoBrowser : BrowserRoute
+//    @SuppressLint("ParcelCreator")
+    @Parcelize
+    object InfernoBrowser : BrowserRoute()
 
-    @Serializable
-    object PasswordManager : BrowserRoute {
+    @Parcelize
+    object PasswordManager : BrowserRoute() {
 
-        @Serializable
-        object Exceptions : BrowserRoute
+        @Parcelize
+        object Exceptions : BrowserRoute()
 
     }
 
-    @Serializable
-    object History : BrowserRoute
+    @Parcelize
+    object History : BrowserRoute()
 
-    @Serializable
-    object InfernoSettings : BrowserRoute
+    @Parcelize
+    object InfernoSettings : BrowserRoute()
 
-    @Serializable
-    object MozExtensions : BrowserRoute
+    @Parcelize
+    object MozExtensions : BrowserRoute() {
 
+        @Parcelize
+        data class MozExtension( val addon: Addon): BrowserRoute()
+
+    }
 }

@@ -367,8 +367,9 @@ object UiConst {
 fun BrowserComponent(
     navController: NavController,
     state: BrowserComponentState,
-    onNavToSettings: () -> Unit,
     onNavToHistory: () -> Unit,
+    onNavToSettings: () -> Unit,
+    onNavToExtensions: () -> Unit,
 ) {
     Log.d("BrowserComponent", "rebuilt")
     val coroutineScope = rememberCoroutineScope()

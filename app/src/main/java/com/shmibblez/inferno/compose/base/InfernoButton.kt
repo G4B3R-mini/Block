@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
 import com.shmibblez.inferno.ext.infernoTheme
 
 @Composable
@@ -18,12 +19,13 @@ fun InfernoButton(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    leadingIcon: (@Composable () -> Unit)? = null,
     enabled: Boolean = true,
     shape: Shape = ButtonDefaults.shape,
     colors: ButtonColors = ButtonColors(
         containerColor = LocalContext.current.infernoTheme().value.primaryActionColor,
         contentColor = LocalContext.current.infernoTheme().value.primaryTextColor,
-        disabledContainerColor = LocalContext.current.infernoTheme().value.secondaryBackgroundColor,
+        disabledContainerColor = LocalContext.current.infernoTheme().value.secondaryActionColor,
         disabledContentColor = LocalContext.current.infernoTheme().value.secondaryTextColor
     ),
     elevation: ButtonElevation? = ButtonDefaults.buttonElevation(),
@@ -42,8 +44,11 @@ fun InfernoButton(
         contentPadding = contentPadding,
         interactionSource = interactionSource,
     ) {
+        leadingIcon?.invoke()
         InfernoText(
             text = text,
+            modifier = Modifier.weight(1F),
+            textAlign = TextAlign.Center,
             fontColor = LocalContext.current.infernoTheme().value.let {
                 when (enabled) {
                     true -> colors.contentColor

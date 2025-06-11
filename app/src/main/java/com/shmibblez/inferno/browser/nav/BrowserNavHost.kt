@@ -13,15 +13,18 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import com.shmibblez.inferno.browser.BrowserComponent
 import com.shmibblez.inferno.browser.getActivity
 import com.shmibblez.inferno.browser.state.rememberBrowserComponentState
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.history.InfernoHistoryPage
+import com.shmibblez.inferno.settings.extensions.ExtensionPage
 import com.shmibblez.inferno.settings.extensions.ExtensionsPage
 import com.shmibblez.inferno.settings.nav.SettingsNavHost
 import com.shmibblez.inferno.settings.passwords.PasswordExceptionSettingsPage
 import com.shmibblez.inferno.settings.passwords.PasswordSettingsPage
+import mozilla.components.feature.addons.Addon
 
 @Composable
 fun BrowserNavHost(
@@ -61,7 +64,7 @@ fun BrowserNavHost(
             }
 
             is InitialBrowserTask.OpenToBrowserAndLoad -> {
-                // todo: tab should already be selected as currentTab, maybe just make private if not private
+                // todo: tab should already be selected as currentTab
 //                browserComponentState.loadUrl(url = initialAction.url, private = initialAction.private)
             }
 
@@ -128,21 +131,14 @@ fun BrowserNavHost(
 //        sizeTransform = ,
     ) {
 
-//        composable<BrowserRoute.ExternalBrowser> {
-//            // todo: create ExternalBrowserComponent, or modify BrowserComponent and add state to
-//            //  reflect mode (externalMode boolean in state to decide which toolbar to show)
-//            //  - when open in browser selected, move tab to normal/private tabs and switch
-//            //  externalMode to false, do through accompanying functions (eg deactivateExternalMode(),
-//            //  which also moves tab to normal or private tabs)
-//            //  - this is why customTabSessionId exists
-//            ExternalBrowserComponent()
-//        }
-
         composable<BrowserRoute.InfernoBrowser> {
-            BrowserComponent(navController = nav,
+            BrowserComponent(
+                navController = nav,
                 state = browserComponentState,
+                onNavToHistory = { nav.navigate(route = BrowserRoute.History) },
                 onNavToSettings = { nav.navigate(route = BrowserRoute.InfernoSettings) },
-                onNavToHistory = { nav.navigate(route = BrowserRoute.History) })
+                onNavToExtensions = { nav.navigate(route = BrowserRoute.MozExtensions) },
+            )
         }
 
         composable<BrowserRoute.PasswordManager> {
@@ -167,7 +163,16 @@ fun BrowserNavHost(
         }
 
         composable<BrowserRoute.MozExtensions> {
-            ExtensionsPage(goBack = { nav.popBackStack() })
+            ExtensionsPage(
+                goBack = { nav.popBackStack() },
+                onNavToAddon = { nav.navigate(route = BrowserRoute.MozExtensions.MozExtension(addon = it)) },
+                onNavToBrowser = { nav.popBackStack() },
+            )
+        }
+
+        composable<BrowserRoute.MozExtensions.MozExtension> { backStackEntry ->
+            val addon: Addon = backStackEntry.toRoute()
+            ExtensionPage(addon = addon, goBack = { nav.popBackStack() })
         }
     }
 }

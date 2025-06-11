@@ -1,10 +1,9 @@
 package com.shmibblez.inferno.settings.extensions
 
 import androidx.annotation.FloatRange
-import androidx.annotation.StringRes
-import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,20 +12,20 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
@@ -38,26 +37,35 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.shmibblez.inferno.R
+import com.shmibblez.inferno.compose.base.InfernoButton
 import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.compose.base.InfernoTextStyle
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.infernoTheme
+import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.feature.addons.Addon
 import mozilla.components.feature.addons.AddonManager
-import mozilla.components.feature.addons.ui.AddonsManagerAdapter
+import mozilla.components.feature.addons.ui.AddonsManagerAdapterDelegate
 import mozilla.components.feature.addons.ui.displayName
 import mozilla.components.feature.addons.ui.summary
-import mozilla.components.support.base.feature.LifecycleAwareFeature
+
+
+private val ADDON_ICON_SIZE = 34.dp
+private val STAR_SIZE = 12.dp
+private val ITEM_HORIZONTAL_PADDING = 16.dp
+
 
 @Composable
 internal fun rememberAddonsManagerState(
     addonManager: AddonManager = LocalContext.current.components.addonManager,
+    store: BrowserStore = LocalContext.current.components.core.store,
 ): MutableState<AddonsManagerState> {
     val state = remember {
         mutableStateOf(
             AddonsManagerState(
                 addonManager = addonManager,
+                store = store,
             )
         )
     }
@@ -70,59 +78,139 @@ internal fun rememberAddonsManagerState(
     return state
 }
 
-internal class AddonsManagerState(
-    val addonManager: AddonManager,
-) : LifecycleAwareFeature {
-
-    var addons by mutableStateOf<List<Addon>>(emptyList())
-
-
-    /**
-     * todo: from [AddonsManagerAdapter]
-     * when addon clicked, new page (details page)
-     * if not installed, show details
-     * if installed, show details & settings above, when settings clicked show dialog
-     * can make component for details since will be shown in both pages
-     */
-//    fun onAddonItemClicked(addon: Addon) {
-//        if (addon.isInstalled()) {
-//            showInstalledAddonDetailsFragment(addon)
-//        } else {
-//            showDetailsFragment(addon)
-//        }
-//    }
-
-    override fun start() {
-        TODO("Not yet implemented")
-    }
-
-    override fun stop() {
-        TODO("Not yet implemented")
-    }
-
-}
-
-private const val VIEW_HOLDER_TYPE_SECTION = 0
-private const val VIEW_HOLDER_TYPE_NOT_YET_SUPPORTED_SECTION = 1
-private const val VIEW_HOLDER_TYPE_ADDON = 2
-private const val VIEW_HOLDER_TYPE_FOOTER = 3
-private const val VIEW_HOLDER_TYPE_HEADER = 4
-
-private val ADDON_ICON_SIZE = 34.dp
-
 @Composable
 internal fun AddonsManager(
     state: AddonsManagerState,
     modifier: Modifier = Modifier,
+    onNavToAddon: (addon: Addon) -> Unit,
+    onRequestFindMoreAddons: () -> Unit,
+    // todo: pass to addonItem, there listen for errors, if error show closeable label
+    onRequestLearnMore: (link: AddonsManagerAdapterDelegate.LearnMoreLinks, addon: Addon) -> Unit,
 ) {
+    val store = LocalContext.current.components.core.store
+
     LazyColumn(
         modifier = modifier,
     ) {
 
+        // restart header
+        if (store.state.extensionsProcessDisabled) {
+            item {
+                AddonHeader(onClick = { state.restartAddons() })
+            }
+        }
+
+        // installed addons
+        if (state.installedAddons.isNotEmpty()) {
+            // header
+            item {
+                AddonSection(stringResource(R.string.mozac_feature_addons_enabled))
+            }
+            // items
+            items(state.installedAddons) { addon ->
+                // todo: message bars (error, learn more link) R.string.mozac_feature_addons_status_blocklisted_1
+                //  also depending on if installed, disabled, supported, show action button (install (+), uninstall (trash), unsupported (invisible))
+                AddonItem(
+                    addon = addon,
+                    onClick = onNavToAddon,
+                )
+            }
+        }
+
+        // disabled addons
+        if (state.disabledAddons.isNotEmpty()) {
+            // header
+            item {
+                AddonSection(stringResource(R.string.mozac_feature_addons_disabled_section))
+            }
+            // items
+            items(state.disabledAddons) { addon ->
+                AddonItem(
+                    addon = addon,
+                    onClick = onNavToAddon,
+                )
+            }
+        }
+
+        // recommended addons
+        if (state.recommendedAddons.isNotEmpty()) {
+            // header
+            item {
+                AddonSection(stringResource(R.string.mozac_feature_addons_recommended_section))
+            }
+            // items
+            items(state.recommendedAddons) { addon ->
+                AddonItem(
+                    addon = addon,
+                    onClick = onNavToAddon,
+                    // todo: what other addon type requires onRequestLearnMore?
+                    onRequestLearnMore = onRequestLearnMore,
+                )
+            }
+        }
+
+        // unsupported addons
+        if (state.unsupportedAddons.isNotEmpty()) {
+            // header
+            item {
+                AddonSection(stringResource(R.string.mozac_feature_addons_unavailable_section))
+            }
+            // items
+            items(state.unsupportedAddons) { addon ->
+                AddonItem(
+                    addon = addon,
+                    onClick = onNavToAddon,
+                )
+            }
+        }
+
+        // find more addons button
+        item {
+            FindMoreAddonsButton(onClick = onRequestFindMoreAddons)
+        }
+
     }
 }
 
-private val STAR_SIZE = 12.dp
+@Composable
+private fun AddonHeader(onClick: () -> Unit) {
+    Column(
+        modifier = Modifier.padding(horizontal = ITEM_HORIZONTAL_PADDING),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalAlignment = Alignment.Start,
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.Start),
+        ) {
+            // warning icon
+            InfernoIcon(
+                painter = painterResource(R.drawable.mozac_ic_warning_fill_24),
+                contentDescription = "",
+                modifier = Modifier.size(18.dp),
+            )
+            // reset title
+            InfernoText(
+                text = stringResource(R.string.mozac_feature_extensions_manager_notification_content_text),
+                infernoStyle = InfernoTextStyle.Normal,
+                fontWeight = FontWeight.Bold,
+            )
+        }
+
+        // reset description
+        InfernoText(
+            text = stringResource(R.string.mozac_feature_extensions_manager_notification_content_text),
+            infernoStyle = InfernoTextStyle.Normal
+        )
+
+        // reset button
+        InfernoButton(
+            text = stringResource(R.string.mozac_feature_extensions_manager_notification_restart_button),
+            onClick = onClick,
+            modifier = Modifier.fillMaxWidth(),
+        )
+    }
+
+}
 
 @Composable
 private fun StarRating(@FloatRange(0.0, 5.0) rating: Float, modifier: Modifier = Modifier) {
@@ -190,22 +278,10 @@ private fun PartialStar(@FloatRange(0.0, 1.0) percent: Float) {
     }
 }
 
-@VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-private data class Section(@StringRes val title: Int, val visibleDivider: Boolean = true)
-
-@VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-private data class NotYetSupportedSection(@StringRes val title: Int)
-
-@VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-private object FooterSection
-
-@VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-private object HeaderSection
-
 @Composable
-private fun AddonSection(section: Section) {
+private fun AddonSection(title: String) {
     InfernoText(
-        text = stringResource(section.title),
+        text = title,
         infernoStyle = InfernoTextStyle.Normal,
         fontWeight = FontWeight.Bold,
         modifier = Modifier
@@ -214,31 +290,38 @@ private fun AddonSection(section: Section) {
     )
 }
 
-@Composable
-private fun UnsupportedAddonSection(section: NotYetSupportedSection, unsupportedSize: Int) {
-    InfernoText(
-        text = when (unsupportedSize) {
-            1 -> stringResource(R.string.mozac_feature_addons_unsupported_caption_2)
-            else -> stringResource(
-                R.string.mozac_feature_addons_unsupported_caption_plural_2,
-                "$unsupportedSize",
-            )
-        },
-        infernoStyle = InfernoTextStyle.Normal,
-        fontWeight = FontWeight.Bold,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-    )
-}
-
-// todo: header section and footer section (find more extensions)
+//@Composable
+//private fun UnsupportedAddonSection(unsupportedSize: Int) {
+//    InfernoText(
+//        text = when (unsupportedSize) {
+//            1 -> stringResource(R.string.mozac_feature_addons_unsupported_caption_2)
+//            else -> stringResource(
+//                R.string.mozac_feature_addons_unsupported_caption_plural_2,
+//                "$unsupportedSize",
+//            )
+//        },
+//        infernoStyle = InfernoTextStyle.Normal,
+//        fontWeight = FontWeight.Bold,
+//        modifier = Modifier
+//            .fillMaxWidth()
+//            .padding(vertical = 8.dp),
+//    )
+//}
 
 @Composable
-private fun AddonItem(addon: Addon) {
+private fun AddonItem(
+    addon: Addon,
+    onClick: (addon: Addon) -> Unit,
+    onActionClick: ((addon: Addon) -> Unit)? = null,
+    // todo: integrate onRequestLearnMore, variable in case error occurred, and callback
+    //  in state.install for setting error here,
+    //  add x to label left side to close
+    onRequestLearnMore: ((link: AddonsManagerAdapterDelegate.LearnMoreLinks, addon: Addon) -> Unit)? = null,
+) {
     val context = LocalContext.current
 
     Row(
+        modifier = Modifier.clickable { onClick.invoke(addon) },
         horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.Start),
         verticalAlignment = Alignment.Top,
     ) {
@@ -315,13 +398,32 @@ private fun AddonItem(addon: Addon) {
             }
         }
 
-        // add icon
-        InfernoIcon(
-            painter = painterResource(R.drawable.ic_new_24),
-            contentDescription = "",
-            modifier = Modifier
-                .size(18.dp)
-                .align(Alignment.CenterVertically),
-        )
+        // add icon, show if not installed, else use empty placeholder
+        if (!addon.isInstalled()) {
+            InfernoIcon(
+                painter = painterResource(R.drawable.ic_new_24),
+                contentDescription = "",
+                modifier = Modifier
+                    .size(18.dp)
+                    .align(Alignment.CenterVertically)
+                    .clickable { onActionClick?.invoke(addon) },
+            )
+        } else {
+            Box(
+                modifier = Modifier
+                    .size(18.dp)
+                    .align(Alignment.CenterVertically),
+            )
+        }
     }
+}
+
+@Composable
+private fun FindMoreAddonsButton(onClick: () -> Unit) {
+    InfernoButton(
+        text = stringResource(R.string.mozac_feature_addons_find_more_extensions_button_text),
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RectangleShape,
+    )
 }
