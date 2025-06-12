@@ -816,7 +816,7 @@ private fun PrivateTabsIcon(selected: Boolean, onSelected: () -> Unit) {
             .size(ICON_SIZE),
         icon = {
             InfernoIcon(
-                painter = painterResource(R.drawable.ic_private_browsing),
+                painter = painterResource(R.drawable.ic_private_browsing_24),
                 contentDescription = "private tabs",
                 modifier = Modifier.fillMaxSize(),
             )

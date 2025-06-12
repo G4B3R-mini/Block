@@ -1,8 +1,14 @@
 package com.shmibblez.inferno.settings.extensions
 
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
+import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.history.ConsecutiveUniqueJobHandler
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
@@ -12,6 +18,29 @@ import mozilla.components.feature.addons.Addon
 import mozilla.components.feature.addons.AddonManager
 import mozilla.components.feature.addons.ui.AddonsManagerAdapter
 import mozilla.components.support.base.feature.LifecycleAwareFeature
+
+
+@Composable
+internal fun rememberAddonsManagerState(
+    addonManager: AddonManager = LocalContext.current.components.addonManager,
+    store: BrowserStore = LocalContext.current.components.core.store,
+): MutableState<AddonsManagerState> {
+    val state = remember {
+        mutableStateOf(
+            AddonsManagerState(
+                addonManager = addonManager,
+                store = store,
+            )
+        )
+    }
+
+    DisposableEffect(null) {
+        state.value.start()
+        onDispose { state.value.stop() }
+    }
+
+    return state
+}
 
 internal class AddonsManagerState(
     val addonManager: AddonManager,

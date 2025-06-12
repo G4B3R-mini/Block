@@ -235,7 +235,7 @@ fun RecentTabImage(
             ?.asImageBitmap()
 
         isPrivateHomePage -> AppCompatResources.getDrawable(
-            context, R.drawable.ic_private_browsing
+            context, R.drawable.ic_private_browsing_24
         )?.toBitmap()?.asImageBitmap()
 
         else -> null
@@ -301,7 +301,7 @@ private fun RecentTabIcon(
             ?.asImageBitmap()
 
         isPrivateHomePage -> AppCompatResources.getDrawable(
-            context, R.drawable.ic_private_browsing
+            context, R.drawable.ic_private_browsing_24
         )?.toBitmap()?.asImageBitmap()
 
         else -> null

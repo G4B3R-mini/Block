@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -631,7 +630,7 @@ class ToolbarOptions {
                                 .fillMaxSize()
                                 .padding(extraPadding),
                             painter = when (isPrivateMode) {
-                                true -> painterResource(id = R.drawable.ic_private_browsing)
+                                true -> painterResource(id = R.drawable.ic_private_browsing_24)
                                 false -> painterResource(id = R.drawable.ic_globe_24)
                             },
                             contentDescription = contentDescription,
@@ -651,7 +650,7 @@ class ToolbarOptions {
                                 .align(Alignment.BottomEnd),
                             painter = when (isPrivateMode) {
                                 true -> painterResource(id = R.drawable.ic_globe_24)
-                                false -> painterResource(id = R.drawable.ic_private_browsing)
+                                false -> painterResource(id = R.drawable.ic_private_browsing_24)
                             },
                             contentDescription = contentDescription,
                         )
@@ -943,7 +942,7 @@ class ToolbarOptionsIcons {
                                 .padding(2.dp)
                                 .size(TOOLBAR_SWITCH_ICON_SIZE)
                                 .align(Alignment.BottomEnd),
-                            painter = painterResource(id = R.drawable.ic_private_browsing),
+                            painter = painterResource(id = R.drawable.ic_private_browsing_24),
                             contentDescription = contentDescription,
                             tint = iconTint,
                         )

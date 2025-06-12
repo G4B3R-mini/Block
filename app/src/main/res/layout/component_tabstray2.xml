@@ -98,7 +98,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:contentDescription="@string/tabs_header_private_tabs_title"
-            android:icon="@drawable/ic_private_browsing" />
+            android:icon="@drawable/ic_private_browsing_24" />
 
         <com.google.android.material.tabs.TabItem
             android:layout_width="0dp"

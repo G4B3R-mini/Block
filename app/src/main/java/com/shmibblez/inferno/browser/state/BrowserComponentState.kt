@@ -7,7 +7,6 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -19,7 +18,6 @@ import androidx.lifecycle.LifecycleOwner
 import com.shmibblez.inferno.browser.BrowserComponentPageType
 import com.shmibblez.inferno.browser.OnActivityResultModel
 import com.shmibblez.inferno.components.Components
-import com.shmibblez.inferno.customtabs.ExternalAppBrowserFragment
 import com.shmibblez.inferno.customtabs.PoweredByNotification
 import com.shmibblez.inferno.customtabs.WebAppSiteControlsBuilder
 import com.shmibblez.inferno.ext.components
@@ -48,7 +46,6 @@ import mozilla.components.feature.customtabs.CustomTabWindowFeature
 import mozilla.components.feature.pwa.ManifestStorage
 import mozilla.components.feature.pwa.WebAppShortcutManager
 import mozilla.components.feature.pwa.feature.ManifestUpdateFeature
-import mozilla.components.feature.pwa.feature.SiteControlsBuilder
 import mozilla.components.feature.pwa.feature.WebAppActivityFeature
 import mozilla.components.feature.pwa.feature.WebAppContentFeature
 import mozilla.components.feature.pwa.feature.WebAppHideToolbarFeature
@@ -71,7 +68,7 @@ private class CustomTabManager(
     private val store: BrowserStore,
     private val shortcutManager: WebAppShortcutManager,
     private val storage: ManifestStorage,
-    private val controlsBuilder: SiteControlsBuilder = SiteControlsBuilder.Default(),
+//    private val controlsBuilder: SiteControlsBuilder = SiteControlsBuilder.Default(),
     private val notificationsDelegate: NotificationsDelegate,
     private val components: Components,
     private val setShowExternalToolbar: (Boolean) -> Unit,
@@ -224,7 +221,7 @@ private class CustomTabManager(
         poweredByObserver?.let {
             activity.lifecycle.removeObserver(it)
         }
-        activity.lifecycle.removeObserver(testObserver!!)
+        activity.lifecycle.removeObserver(testObserver)
     }
 }
 
@@ -382,10 +379,10 @@ class BrowserComponentState(
                         store = store,
                         shortcutManager = components.core.webAppShortcutManager,
                         storage = components.core.webAppManifestStorage,
-                        controlsBuilder = SiteControlsBuilder.CopyAndRefresh(components.useCases.sessionUseCases.reload),
+//                        controlsBuilder = SiteControlsBuilder.CopyAndRefresh(components.useCases.sessionUseCases.reload),
                         notificationsDelegate = components.notificationsDelegate,
                         components = components,
-                        setShowExternalToolbar = { showExternalToolbar = it }
+                        setShowExternalToolbar = {show -> showExternalToolbar = show }
                     )
                     customTabManager!!.start()
                 } else if (currentCustomTab == null && customTabManager != null) {
@@ -462,7 +459,7 @@ class BrowserComponentState(
                 if (isPendingTab) {
                     if (customTabSessionId != null) {
                         // if custom tab select
-                        tabsUseCases.selectTab(customTabSessionId!!)
+                        tabsUseCases.selectTab(customTabSessionId)
                     } else if (tabList.isNotEmpty()) {
                         // if tabs exist select
                         val lastNormalTabId = store.state.lastOpenedNormalTab?.id

@@ -246,7 +246,7 @@ private fun TabPageBanner(
                         .testTag(TabsTrayTestTag.privateTabsPageButton),
                     icon = {
                         Icon(
-                            painter = painterResource(id = R.drawable.ic_private_browsing),
+                            painter = painterResource(id = R.drawable.ic_private_browsing_24),
                             contentDescription = stringResource(id = R.string.tabs_header_private_tabs_title),
                         )
                     },

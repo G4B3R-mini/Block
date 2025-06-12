@@ -14,9 +14,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import com.shmibblez.inferno.ext.infernoTheme
 
+/**
+ * @param sensitive whether action is sensitive
+ */
 @Composable
 fun InfernoButton(
     text: String,
+    sensitive: Boolean = false,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     leadingIcon: (@Composable () -> Unit)? = null,
@@ -24,9 +28,15 @@ fun InfernoButton(
     shape: Shape = ButtonDefaults.shape,
     colors: ButtonColors = ButtonColors(
         containerColor = LocalContext.current.infernoTheme().value.primaryActionColor,
-        contentColor = LocalContext.current.infernoTheme().value.primaryTextColor,
+        contentColor = when (sensitive) {
+            true -> LocalContext.current.infernoTheme().value.errorColor
+            false -> LocalContext.current.infernoTheme().value.primaryTextColor
+        },
         disabledContainerColor = LocalContext.current.infernoTheme().value.secondaryActionColor,
-        disabledContentColor = LocalContext.current.infernoTheme().value.secondaryTextColor
+        disabledContentColor = when (sensitive) {
+            true -> LocalContext.current.infernoTheme().value.errorColor
+            false -> LocalContext.current.infernoTheme().value.secondaryTextColor
+        }
     ),
     elevation: ButtonElevation? = ButtonDefaults.buttonElevation(),
     border: BorderStroke? = null,

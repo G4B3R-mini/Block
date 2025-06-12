@@ -416,7 +416,7 @@ private fun TopSiteFavicon(url: String, imageUrl: String? = null) {
         )
 
         SupportUtils.INFERNO_PRIVATE_HOME_URL, SupportUtils.INFERNO_PRIVATE_HOME_URL_2 -> FaviconImage(
-            painterResource(R.drawable.ic_private_browsing)
+            painterResource(R.drawable.ic_private_browsing_24)
         )
 
         SupportUtils.POCKET_TRENDING_URL -> FaviconImage(painterResource(R.drawable.ic_pocket))

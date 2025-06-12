@@ -263,7 +263,7 @@ private fun MiniTab(
 
                 isPrivateHomePage -> {
                     Image(
-                        painter = painterResource(R.drawable.ic_private_browsing),
+                        painter = painterResource(R.drawable.ic_private_browsing_24),
                         contentDescription = "favicon",
                         modifier = Modifier
                             .padding(6.dp)

@@ -255,7 +255,7 @@ fun BrowserNavHost(
         composable<BrowserRoute.Settings.ExtensionsSettingsPage.ExtensionSettingsPage> {
             @Suppress("DEPRECATION") val addon = it.arguments?.getParcelable<Addon>(BrowserRoute.Settings.ExtensionsSettingsPage.ExtensionSettingsPage.ADDON_KEY)
             ExtensionPage(
-                addon = addon!!,
+                initialAddon = addon!!,
                 goBack = {
                     nav.popBackStack()
                 },

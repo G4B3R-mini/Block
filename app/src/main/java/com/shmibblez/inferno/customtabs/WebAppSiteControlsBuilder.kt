@@ -31,7 +31,7 @@ class WebAppSiteControlsBuilder(
             return
         }
 
-        builder.setSmallIcon(R.drawable.ic_private_browsing)
+        builder.setSmallIcon(R.drawable.ic_private_browsing_24)
         builder.setContentTitle(context.getString(R.string.pwa_site_controls_title_private, manifest.name))
     }
 

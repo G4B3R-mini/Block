@@ -60,7 +60,7 @@
                 android:textSize="16sp"
                 android:textColor="?attr/textPrimary"
                 android:drawablePadding="32dp"
-                android:drawableStart="@drawable/ic_private_browsing"
+                android:drawableStart="@drawable/ic_private_browsing_24"
                 app:drawableTint="?attr/textPrimary" />
 
             <TextView
@@ -102,7 +102,7 @@
                 android:text="@string/mozac_feature_addons_permissions"
                 android:textColor="?attr/textPrimary"
                 android:textSize="16sp"
-                app:drawableStartCompat="@drawable/ic_permission" />
+                app:drawableStartCompat="@drawable/ic_permission_24" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/remove_add_on"

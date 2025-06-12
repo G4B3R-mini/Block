@@ -27,6 +27,13 @@ fun ExtensionsPage(
         addonManager = context.components.addonManager,
     )
 
+    // todo: in state, catch error when loading
+    //  if error, show error page with message R.string.mozac_feature_addons_failed_to_query_extensions
+    //  and reload button, and cancel button, on cancel goBack
+    //  when click reload, call state reloadAfterError, and rename state.initiallyLoading to
+    //  state.visiblyLoading, if loading, show loading screen here
+    //  maybe put all this in AddonsManager since in charge of ui
+
     InfernoSettingsPage(
         title = stringResource(R.string.preferences_extensions),
         goBack = goBack,

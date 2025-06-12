@@ -63,7 +63,7 @@ fun Favicon(
         isHomepage -> AppCompatResources.getDrawable(context, R.drawable.inferno)?.toBitmap()
             ?.asImageBitmap()
 
-        isPrivateHomepage -> AppCompatResources.getDrawable(context, R.drawable.ic_private_browsing)
+        isPrivateHomepage -> AppCompatResources.getDrawable(context, R.drawable.ic_private_browsing_24)
             ?.toBitmap()?.asImageBitmap()
 
         else -> null

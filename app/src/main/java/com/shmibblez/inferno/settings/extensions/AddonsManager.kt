@@ -14,11 +14,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,7 +28,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.StarRating
@@ -42,44 +38,15 @@ import com.shmibblez.inferno.compose.base.InfernoTextStyle
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.infernoTheme
 import com.shmibblez.inferno.toolbar.InfernoLoadingSquare
-import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.feature.addons.Addon
-import mozilla.components.feature.addons.AddonManager
 import mozilla.components.feature.addons.ui.AddonsManagerAdapterDelegate
 import mozilla.components.feature.addons.ui.displayName
 import mozilla.components.feature.addons.ui.summary
-import mozilla.components.feature.addons.ui.translateName
-import mozilla.components.support.ktx.android.content.appName
-import mozilla.components.support.ktx.android.content.appVersionName
 import java.text.NumberFormat
 import java.util.Locale
 
-
 private val ADDON_ICON_SIZE = 28.dp
 private val ITEM_HORIZONTAL_PADDING = 16.dp
-
-
-@Composable
-internal fun rememberAddonsManagerState(
-    addonManager: AddonManager = LocalContext.current.components.addonManager,
-    store: BrowserStore = LocalContext.current.components.core.store,
-): MutableState<AddonsManagerState> {
-    val state = remember {
-        mutableStateOf(
-            AddonsManagerState(
-                addonManager = addonManager,
-                store = store,
-            )
-        )
-    }
-
-    DisposableEffect(null) {
-        state.value.start()
-        onDispose { state.value.stop() }
-    }
-
-    return state
-}
 
 @Composable
 internal fun AddonsManager(
@@ -238,136 +205,6 @@ private fun AddonHeader(onClick: () -> Unit) {
 }
 
 @Composable
-private fun AddonMessageBars(
-    addon: Addon,
-    onLearnMoreLinkClicked: (link: AddonsManagerAdapterDelegate.LearnMoreLinks, addon: Addon) -> Unit,
-) {
-    val context = LocalContext.current
-
-    // show error/warning if applicable
-    when {
-        addon.isDisabledAsBlocklisted() -> {
-            AddonMessageBar(
-                leadingIcon = {
-                    InfernoIcon(
-                        painter = painterResource(R.drawable.mozac_ic_critical_fill_24),
-                        contentDescription = "",
-                        modifier = Modifier.size(18.dp),
-                    )
-                },
-                text = stringResource(R.string.mozac_feature_addons_status_blocklisted_1),
-                learnMoreText = stringResource(R.string.mozac_feature_addons_status_see_details),
-                onLearnMoreLinkClicked = {
-                    onLearnMoreLinkClicked.invoke(
-                        AddonsManagerAdapterDelegate.LearnMoreLinks.BLOCKLISTED_ADDON,
-                        addon,
-                    )
-                },
-            )
-        }
-
-        addon.isDisabledAsNotCorrectlySigned() -> {
-            AddonMessageBar(
-                leadingIcon = {
-                    InfernoIcon(
-                        painter = painterResource(R.drawable.mozac_ic_critical_fill_24),
-                        contentDescription = "",
-                        modifier = Modifier.size(18.dp),
-                    )
-                },
-                text = stringResource(
-                    R.string.mozac_feature_addons_status_unsigned, addon.translateName(context)
-                ),
-                learnMoreText = stringResource(R.string.mozac_feature_addons_status_learn_more),
-                onLearnMoreLinkClicked = {
-                    onLearnMoreLinkClicked.invoke(
-                        AddonsManagerAdapterDelegate.LearnMoreLinks.ADDON_NOT_CORRECTLY_SIGNED,
-                        addon,
-                    )
-                },
-            )
-        }
-
-        addon.isDisabledAsIncompatible() -> {
-            AddonMessageBar(
-                leadingIcon = {
-                    InfernoIcon(
-                        painter = painterResource(R.drawable.mozac_ic_critical_fill_24),
-                        contentDescription = "",
-                        modifier = Modifier.size(18.dp),
-                    )
-                },
-                text = stringResource(
-                    R.string.mozac_feature_addons_status_incompatible,
-                    addon.translateName(context),
-                    context.appName,
-                    context.appVersionName,
-                ),
-            )
-        }
-
-        addon.isSoftBlocked() -> {
-            AddonMessageBar(
-                leadingIcon = {
-                    InfernoIcon(
-                        painter = painterResource(R.drawable.mozac_ic_warning_fill_24),
-                        contentDescription = "",
-                        modifier = Modifier.size(18.dp),
-                    )
-                },
-                text = stringResource(R.string.mozac_feature_addons_status_softblocked_1),
-                learnMoreText = stringResource(R.string.mozac_feature_addons_status_see_details),
-                onLearnMoreLinkClicked = {
-                    onLearnMoreLinkClicked.invoke(
-                        AddonsManagerAdapterDelegate.LearnMoreLinks.BLOCKLISTED_ADDON,
-                        addon,
-                    )
-                },
-            )
-        }
-    }
-}
-
-@Composable
-private fun AddonMessageBar(
-    leadingIcon: @Composable () -> Unit,
-    text: String,
-    learnMoreText: String? = null,
-    onLearnMoreLinkClicked: (() -> Unit)? = null,
-) {
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.Top,
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(
-                color = LocalContext.current.infernoTheme().value.secondaryTextColor,
-                shape = MaterialTheme.shapes.medium,
-            )
-            .padding(16.dp),
-    ) {
-        leadingIcon.invoke()
-        Column(
-            verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
-            horizontalAlignment = Alignment.Start,
-        ) {
-            InfernoText(
-                text = text,
-                infernoStyle = InfernoTextStyle.Normal,
-            )
-
-            if (onLearnMoreLinkClicked != null) {
-                InfernoText(
-                    text = learnMoreText ?: "",
-                    modifier = Modifier.clickable { onLearnMoreLinkClicked.invoke() },
-                    style = LocalTextStyle.current.copy(textDecoration = TextDecoration.Underline),
-                )
-            }
-        }
-    }
-}
-
-@Composable
 private fun AddonSection(title: String) {
     InfernoText(
         text = title,
@@ -483,7 +320,7 @@ private fun AddonItem(
                             contentAlignment = Alignment.Center,
                         ) {
                             InfernoIcon(
-                                painter = painterResource(R.drawable.ic_private_browsing),
+                                painter = painterResource(R.drawable.ic_private_browsing_24),
                                 contentDescription = "",
                                 modifier = Modifier.size(14.dp),
                             )
