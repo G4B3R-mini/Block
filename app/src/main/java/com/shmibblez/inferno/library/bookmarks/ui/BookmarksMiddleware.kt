@@ -31,7 +31,7 @@ private const val WARN_OPEN_ALL_SIZE = 15
  * @param bookmarksStorage Storage layer for reading and writing bookmarks.
  * @param clipboardManager For copying bookmark URLs.
  * @param addNewTabUseCase For opening tabs from menus.
- * @param getNavController Fetch the NavController for navigating within the local Composable nav graph.
+ * @param getNavController Fetch the NavController for navigating within the local Composable settings graph.
  * @param exitBookmarks Invoked when back is clicked while the navController's backstack is empty.
  * @param wasPreviousAppDestinationHome Check whether the previous destination before entering bookmarks was home.
  * @param navigateToSearch Navigate to search.

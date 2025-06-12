@@ -18,17 +18,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.launch
-import mozilla.components.concept.engine.webextension.InstallationMethod
-import mozilla.components.feature.addons.Addon
-import mozilla.components.feature.addons.AddonManager
-import mozilla.components.feature.addons.AddonManagerException
-import mozilla.components.feature.addons.ui.AddonsManagerAdapter
 import com.shmibblez.inferno.BrowserDirection
-import com.shmibblez.inferno.BuildConfig
-import com.shmibblez.inferno.Config
 import com.shmibblez.inferno.HomeActivity
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.databinding.FragmentAddOnsManagementBinding
@@ -39,6 +29,14 @@ import com.shmibblez.inferno.ext.settings
 import com.shmibblez.inferno.ext.showToolbar
 import com.shmibblez.inferno.settings.SupportUtils.AMO_HOMEPAGE_FOR_ANDROID
 import com.shmibblez.inferno.theme.ThemeManager
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.launch
+import mozilla.components.concept.engine.webextension.InstallationMethod
+import mozilla.components.feature.addons.Addon
+import mozilla.components.feature.addons.AddonManager
+import mozilla.components.feature.addons.AddonManagerException
+import mozilla.components.feature.addons.ui.AddonsManagerAdapter
 
 /**
  * Fragment use for managing add-ons.

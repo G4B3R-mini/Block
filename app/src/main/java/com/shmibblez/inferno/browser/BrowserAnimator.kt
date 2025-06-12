@@ -22,7 +22,7 @@ import java.lang.ref.WeakReference
 
 /**
  * Handles properly animating the browser engine based on `SHOULD_ANIMATE_FLAG` passed in through
- * nav arguments.
+ * settings arguments.
  */
 class BrowserAnimator(
     private val fragment: WeakReference<Fragment>,

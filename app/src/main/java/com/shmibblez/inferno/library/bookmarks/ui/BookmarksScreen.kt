@@ -91,7 +91,7 @@ import mozilla.components.ui.icons.R as iconsR
  * The UI host for the Bookmarks list screen and related subscreens.
  *
  * @param buildStore A builder function to construct a [BookmarksStore] using the NavController that's local
- * to the nav graph for the Bookmarks view hierarchy.
+ * to the settings graph for the Bookmarks view hierarchy.
  * @param startDestination the screen on which to initialize [BookmarksScreen] with.
  */
 @Composable

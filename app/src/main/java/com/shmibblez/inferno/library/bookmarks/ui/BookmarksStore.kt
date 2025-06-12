@@ -17,7 +17,7 @@ import com.shmibblez.inferno.HomeActivity
  *
  * @property context the android [Context]
  * @property navController A [NavController] for interacting with the androidx navigation library.
- * @property composeNavController A [NavController] for navigating within the local Composable nav graph.
+ * @property composeNavController A [NavController] for navigating within the local Composable settings graph.
  * @property homeActivity so that we can reference openToBrowserAndLoad and browsingMode :(
  */
 internal class LifecycleHolder(

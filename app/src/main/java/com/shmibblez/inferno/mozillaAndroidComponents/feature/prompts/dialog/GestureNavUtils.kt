@@ -15,8 +15,8 @@ object GestureNavUtils {
     /**
      * Find out if the device supports gesture navigation and has gestures enabled.
      *
-     * Gesture nav support was added in Android Q, but on recent devices it is possible to
-     * switch navigation mode between gesture nav and 3-button navigation.
+     * Gesture settings support was added in Android Q, but on recent devices it is possible to
+     * switch navigation mode between gesture settings and 3-button navigation.
      * The system gesture inset needs to be greater than 0 at the left edge of the screen
      * for the back gesture to be picked up, so this seems to be the most reliable way of
      * detecting gesture navigation use.

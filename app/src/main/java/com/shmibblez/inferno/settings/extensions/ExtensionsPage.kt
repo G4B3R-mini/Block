@@ -39,16 +39,18 @@ fun ExtensionsPage(
                 context.components.newTab(url = AMO_HOMEPAGE_FOR_ANDROID)
                 onNavToBrowser.invoke()
             },
-            onRequestLearnMore = { link, addon ->
+            onLearnMoreLinkClicked = { link, addon ->
                 val url = when (link) {
-                    AddonsManagerAdapterDelegate.LearnMoreLinks.BLOCKLISTED_ADDON ->
-                        "${BuildConfig.AMO_BASE_URL}/android/blocked-addon/${addon.id}/${addon.version}/"
-                    AddonsManagerAdapterDelegate.LearnMoreLinks.ADDON_NOT_CORRECTLY_SIGNED ->
-                        SupportUtils.getSumoURLForTopic(context, SupportUtils.SumoTopic.UNSIGNED_ADDONS)
+                    AddonsManagerAdapterDelegate.LearnMoreLinks.BLOCKLISTED_ADDON -> "${BuildConfig.AMO_BASE_URL}/android/blocked-addon/${addon.id}/${addon.version}/"
+
+                    AddonsManagerAdapterDelegate.LearnMoreLinks.ADDON_NOT_CORRECTLY_SIGNED -> SupportUtils.getSumoURLForTopic(
+                        context,
+                        SupportUtils.SumoTopic.UNSIGNED_ADDONS,
+                    )
                 }
                 context.components.newTab(url = url)
                 onNavToBrowser.invoke()
-            }
+            },
         )
     }
 }

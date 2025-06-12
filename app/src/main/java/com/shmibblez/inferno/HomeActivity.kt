@@ -844,7 +844,7 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
         if (shouldUseCustomBackLongPress() && keyCode == KeyEvent.KEYCODE_BACK) {
             backLongPressJob?.cancel()
 
-            // todo: nav
+            // todo: settings
 //            // check if the key has been pressed for longer than the time needed for a press to turn into a long press
 //            // and if tab history is already visible we do not want to dismiss it.
 //            if (event.eventTime - event.downTime >= ViewConfiguration.getLongPressTimeout() && navHost.navController.hasTopDestination(
@@ -857,13 +857,13 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
         }
 
         if (keyCode == KeyEvent.KEYCODE_FORWARD) {
-            // todo: nav
+            // todo: settings
 //            if (navHost.navController.hasTopDestination(TabHistoryDialogFragment.NAME)) {
 //                // returning true avoids further processing of the KeyUp event
 //                return true
 //            }
 
-            // todo: nav
+            // todo: settings
 //            supportFragmentManager.primaryNavigationFragment?.childFragmentManager?.fragments?.forEach {
 //                if (it is UserInteractionHandler && it.onForwardPressed()) {
 //                    return true
@@ -983,7 +983,7 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
 
     @Suppress("SpreadOperator")
     private fun setupNavigationToolbar(vararg topLevelDestinationIds: Int) {
-        // todo: nav
+        // todo: settings
 //        NavigationUI.setupWithNavController(
 //            navigationToolbar,
 //            navHost.navController,
@@ -1035,12 +1035,12 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
     }
 
     fun openToBrowser(from: BrowserDirection, customTabSessionId: String? = null) {
-        // todo: nav
+        // todo: settings
 //        if (navHost.navController.alreadyOnDestination(R.id.browserComponentWrapperFragment)) return
 //        @IdRes val fragmentId = if (from.fragmentId != 0) from.fragmentId else null
 //        val directions = getNavDirections(from, customTabSessionId)
 //        if (directions != null) {
-//            navHost.navController.nav(fragmentId, directions)
+//            navHost.navController.settings(fragmentId, directions)
 //        }
     }
 
@@ -1191,7 +1191,7 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
     }
 
     private fun openPopup(webExtensionState: WebExtensionState) {
-        // todo: nav, web extension popup
+        // todo: settings, web extension popup
 //        val action = NavGraphDirections.actionGlobalWebExtensionActionPopupFragment(
 //            webExtensionId = webExtensionState.id,
 //            webExtensionTitle = webExtensionState.name,

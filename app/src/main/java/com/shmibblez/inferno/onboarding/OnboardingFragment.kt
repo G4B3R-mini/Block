@@ -37,7 +37,7 @@
 //import com.shmibblez.inferno.ext.hideToolbar
 //import com.shmibblez.inferno.ext.isDefaultBrowserPromptSupported
 //import com.shmibblez.inferno.ext.isLargeWindow
-//import com.shmibblez.inferno.ext.nav
+//import com.shmibblez.inferno.ext.settings
 //import com.shmibblez.inferno.ext.openSetDefaultBrowserOption
 //import com.shmibblez.inferno.ext.requireComponents
 //import com.shmibblez.inferno.ext.settings
@@ -155,7 +155,7 @@
 //                )
 //            },
 //            onSignInButtonClick = {
-//                findNavController().nav(
+//                findNavController().settings(
 //                    id = R.id.onboardingFragment,
 //                    directions = OnboardingFragmentDirections.actionGlobalTurnOnSync(
 //                        entrypoint = FenixFxAEntryPoint.NewUserOnboarding,
@@ -321,7 +321,7 @@
 //            isMarketingTelemetryEnabled = settings.isMarketingTelemetryEnabled,
 //        )
 //
-//        findNavController().nav(
+//        findNavController().settings(
 //            id = R.id.onboardingFragment,
 //            directions = OnboardingFragmentDirections.actionHome(),
 //        )

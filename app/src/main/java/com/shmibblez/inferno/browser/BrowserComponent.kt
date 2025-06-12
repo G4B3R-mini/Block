@@ -363,13 +363,13 @@ object UiConst {
     "UnusedMaterial3ScaffoldPaddingParameter"
 )
 
-// todo: home nav args, do stuff like new tab, new tab specific url, deeplink url, etc
+// todo: home settings args, do stuff like new tab, new tab specific url, deeplink url, etc
 fun BrowserComponent(
     navController: NavController,
     state: BrowserComponentState,
     onNavToHistory: () -> Unit,
     onNavToSettings: () -> Unit,
-    onNavToExtensions: () -> Unit,
+    onNavToExtensions: () -> Unit, // todo: add toolbar icon for extensions
 ) {
     Log.d("BrowserComponent", "rebuilt")
     val coroutineScope = rememberCoroutineScope()
@@ -1173,7 +1173,7 @@ fun BrowserComponent(
 //        view = view,
 //    )
 
-            // todo: nav to quick settings when site security icons clicked
+            // todo: settings to quick settings when site security icons clicked
 //    browserToolbarView.view.display.setOnSiteSecurityClickedListener {
 //        showQuickSettingsDialog()
 //    }
@@ -1889,11 +1889,35 @@ fun BrowserComponent(
                 } else {
                     when (state.pageType) {
                         BrowserComponentPageType.HOME_PRIVATE -> {
-                            InfernoHomeComponent(isPrivate = true, navController)
+                            InfernoHomeComponent(
+                                isPrivate = true,
+                                onShowTabsTray = {
+                                    state.selectedTabsTrayTab =
+                                        it ?: InfernoTabsTraySelectedTab.PrivateTabs
+                                    showTabsTray = true
+                                },
+                                onNavToHistory = onNavToHistory,
+                                onNavToBookmarks = {
+                                    // todo: bookmarks page
+                                    //  settings
+                                },
+                            )
                         }
 
                         BrowserComponentPageType.HOME -> {
-                            InfernoHomeComponent(isPrivate = false, navController)
+                            InfernoHomeComponent(
+                                isPrivate = false,
+                                onShowTabsTray = {
+                                    state.selectedTabsTrayTab =
+                                        it ?: InfernoTabsTraySelectedTab.NormalTabs
+                                    showTabsTray = true
+                                },
+                                onNavToHistory = onNavToHistory,
+                                onNavToBookmarks = {
+                                    // todo: bookmarks page
+                                    //  settings
+                                },
+                            )
                         }
 
                         BrowserComponentPageType.CRASH -> {
@@ -2805,7 +2829,7 @@ internal fun shouldPullToRefreshBeEnabled(inFullScreen: Boolean, context: Contex
 ////            },
 ////            onTabsButtonLongPress = {},
 ////            onMenuButtonClick = {
-////                navController.nav(
+////                navController.settings(
 ////                    R.id.browserFragment,
 ////                    BrowserComponentWrapperFragmentDirections.actionGlobalMenuDialogFragment(
 ////                        accesspoint = MenuAccessPoint.Browser,
@@ -2883,7 +2907,7 @@ internal fun initializeMicrosurveyFeature(
 ////                                            it.id
 ////                                        )
 ////                                    )
-////                                    navController.nav(
+////                                    navController.settings(
 ////                                        R.id.browserFragment,
 ////                                        BrowserComponentWrapperFragmentDirections.actionGlobalMicrosurveyDialog(
 ////                                            it.id
@@ -4254,7 +4278,7 @@ fun navToQuickSettingsSheet(
 //                            cookieBannerUIMode = cookieBannerUIMode,
 //                        )
 //                    }
-//                    nav(navController, R.id.browserFragment, directions)
+//                    settings(navController, R.id.browserFragment, directions)
 //                }
             }
         }

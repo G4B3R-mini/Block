@@ -101,17 +101,17 @@ sealed class CfrToolsAction : Action {
     data class HomepageSyncCfrUpdated(val newValue: Boolean) : CfrToolsAction(), CfrPreferenceUpdate
 
     /**
-     * [CfrPreferenceUpdate] fired when the user toggles the homepage nav toolbar CFR.
+     * [CfrPreferenceUpdate] fired when the user toggles the homepage settings toolbar CFR.
      *
      * @property newValue The updated value of the pref indicating whether or not to show the homepage
-     * nav toolbar CFR.
+     * settings toolbar CFR.
      */
     data class HomepageNavToolbarCfrUpdated(val newValue: Boolean) : CfrToolsAction(), CfrPreferenceUpdate
 
     /**
-     * [CfrPreferenceUpdate] fired when the user toggles the nav buttons CFR.
+     * [CfrPreferenceUpdate] fired when the user toggles the settings buttons CFR.
      *
-     * @property newValue The updated value of the pref indicating whether or not to show the nav
+     * @property newValue The updated value of the pref indicating whether or not to show the settings
      * buttons CFR.
      */
     data class NavButtonsCfrUpdated(val newValue: Boolean) : CfrToolsAction(), CfrPreferenceUpdate

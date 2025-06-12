@@ -67,7 +67,7 @@ fun InfernoExternalToolbar(
     val loading = session?.content?.loading ?: false
     val progress = (session?.content?.progress ?: 100).toFloat() / 100F
 
-    // todo: custom tab request desktop and nav actions, use icon since ToolbarOptions use normal tab session
+    // todo: custom tab request desktop and settings actions, use icon since ToolbarOptions use normal tab session
 
     Box(
         modifier = Modifier
@@ -242,7 +242,7 @@ fun InfernoExternalToolbar(
                         )
                     }
 
-                    // nav options
+                    // settings options
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween,

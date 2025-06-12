@@ -33,6 +33,9 @@ interface InfernoTextStyle {
     val fontSize: TextUnit
     val fontColor: Color
 
+    @Composable
+    fun toTextStyle() : TextStyle
+
     companion object {
         val Title: InfernoTextStyle
             @Composable get() = object : InfernoTextStyle {
@@ -48,6 +51,16 @@ interface InfernoTextStyle {
                 override val fontSize: TextUnit = 20.sp
                 override val fontColor: Color =
                     LocalContext.current.infernoTheme().value.primaryTextColor
+
+                @Composable
+                override fun toTextStyle(): TextStyle {
+                    return LocalTextStyle.current.copy(
+                        fontSize = fontSize,
+                        lineHeight = lineHeight,
+                        color = fontColor,
+                        letterSpacing = letterSpacing,
+                    )
+                }
             }
         val Normal: InfernoTextStyle
             @Composable get() = object : InfernoTextStyle {
@@ -63,6 +76,16 @@ interface InfernoTextStyle {
                 override val fontSize: TextUnit = 16.sp
                 override val fontColor: Color =
                     LocalContext.current.infernoTheme().value.primaryTextColor
+
+                @Composable
+                override fun toTextStyle(): TextStyle {
+                    return LocalTextStyle.current.copy(
+                        fontSize = fontSize,
+                        lineHeight = lineHeight,
+                        color = fontColor,
+                        letterSpacing = letterSpacing,
+                    )
+                }
             }
         val Small: InfernoTextStyle
             @Composable get() = object : InfernoTextStyle {
@@ -78,6 +101,16 @@ interface InfernoTextStyle {
                 override val fontSize: TextUnit = 12.sp
                 override val fontColor: Color =
                     LocalContext.current.infernoTheme().value.primaryTextColor
+
+                @Composable
+                override fun toTextStyle(): TextStyle {
+                    return LocalTextStyle.current.copy(
+                        fontSize = fontSize,
+                        lineHeight = lineHeight,
+                        color = fontColor,
+                        letterSpacing = letterSpacing,
+                    )
+                }
             }
         val Subtitle: InfernoTextStyle
             @Composable get() = object : InfernoTextStyle {
@@ -93,6 +126,16 @@ interface InfernoTextStyle {
                 override val fontSize: TextUnit = 12.sp
                 override val fontColor: Color =
                     LocalContext.current.infernoTheme().value.secondaryTextColor
+
+                @Composable
+                override fun toTextStyle(): TextStyle {
+                    return LocalTextStyle.current.copy(
+                        fontSize = fontSize,
+                        lineHeight = lineHeight,
+                        color = fontColor,
+                        letterSpacing = letterSpacing,
+                    )
+                }
             }
         val Error: InfernoTextStyle
             @Composable get() = object : InfernoTextStyle {
@@ -107,6 +150,16 @@ interface InfernoTextStyle {
                 override val minLines: Int = 1
                 override val fontSize: TextUnit = 12.sp
                 override val fontColor: Color = LocalContext.current.infernoTheme().value.errorColor
+
+                @Composable
+                override fun toTextStyle(): TextStyle {
+                    return LocalTextStyle.current.copy(
+                        fontSize = fontSize,
+                        lineHeight = lineHeight,
+                        color = fontColor,
+                        letterSpacing = letterSpacing,
+                    )
+                }
             }
     }
 }
@@ -130,13 +183,9 @@ fun InfernoText(
     minLines: Int = infernoStyle.minLines,
     fontSize: TextUnit = infernoStyle.fontSize,
     fontColor: Color = infernoStyle.fontColor,
-    style: TextStyle = LocalTextStyle.current.copy(
-        fontSize = fontSize,
-        lineHeight = lineHeight,
-        color = fontColor,
-        letterSpacing = letterSpacing,
-    ),
+    style: TextStyle? = null,
 ) {
+    // removes material padding
     CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides Dp.Unspecified) {
         Text(
             text = text,
@@ -148,7 +197,12 @@ fun InfernoText(
             softWrap = softWrap,
             maxLines = maxLines,
             minLines = minLines,
-            style = style,
+            style = LocalTextStyle.current.copy(
+                fontSize = fontSize,
+                lineHeight = lineHeight,
+                color = fontColor,
+                letterSpacing = letterSpacing,
+            ).merge(style),
         )
     }
 }

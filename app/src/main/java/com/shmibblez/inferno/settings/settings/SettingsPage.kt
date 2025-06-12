@@ -1,4 +1,4 @@
-package com.shmibblez.inferno.settings.nav
+package com.shmibblez.inferno.settings.settings
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.fillMaxSize
@@ -34,6 +34,7 @@ fun SettingsPage(
     onNavigateToTabBarSettings: () -> Unit,
     onNavigateToSearchSettings: () -> Unit,
     onNavigateToThemeSettings: () -> Unit,
+    onNavigateToExtensionSettings: () -> Unit,
     onNavigateToGestureSettings: () -> Unit,
     onNavigateToHomePageSettings: () -> Unit,
     onNavigateToOnQuitSettings: () -> Unit,
@@ -107,6 +108,13 @@ fun SettingsPage(
                 PreferenceAction(
                     title = stringResource(R.string.preferences_theme),
                     action = onNavigateToThemeSettings,
+                )
+            }
+            // extensions settings
+            item {
+                PreferenceAction(
+                    title = stringResource(R.string.preferences_extensions),
+                    action = onNavigateToExtensionSettings,
                 )
             }
 

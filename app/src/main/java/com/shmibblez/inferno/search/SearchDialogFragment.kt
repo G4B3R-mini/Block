@@ -1022,7 +1022,7 @@ class SearchDialogFragment : AppCompatDialogFragment(), UserInteractionHandler {
             val currentClassName = this::class.java.canonicalName?.substringAfterLast('.')
                 ?: this::class.java.simpleName
 
-            // Throw this entry away if it's the current top and ignore returning the base nav graph.
+            // Throw this entry away if it's the current top and ignore returning the base settings graph.
             if (entry.destination !is NavGraph && !entry.destination.displayName.contains(currentClassName, true)) {
                 return entry
             }

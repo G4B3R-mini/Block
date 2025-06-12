@@ -1840,7 +1840,7 @@ class HomeFragment : Fragment() {
 //import com.shmibblez.inferno.ext.containsQueryParameters
 //import com.shmibblez.inferno.ext.hideToolbar
 //import com.shmibblez.inferno.ext.isToolbarAtBottom
-//import com.shmibblez.inferno.ext.nav
+//import com.shmibblez.inferno.ext.settings
 //import com.shmibblez.inferno.ext.openSetDefaultBrowserOption
 ////import com.shmibblez.inferno.ext.recordEventInNimbus
 //import com.shmibblez.inferno.ext.requireComponents
@@ -2382,7 +2382,7 @@ class HomeFragment : Fragment() {
 //                                            context.components.appStore.dispatch(
 //                                                MicrosurveyAction.Started(it.id),
 //                                            )
-//                                            findNavController().nav(
+//                                            findNavController().settings(
 //                                                R.id.homeFragment,
 //                                                HomeFragmentDirections.actionGlobalMicrosurveyDialog(it.id),
 //                                            )
@@ -2457,7 +2457,7 @@ class HomeFragment : Fragment() {
 //                                                    sessionId = null,
 //                                                )
 //
-//                                            findNavController().nav(
+//                                            findNavController().settings(
 //                                                findNavController().currentDestination?.id,
 //                                                directions,
 //                                                BrowserAnimator.getToolbarNavOptions(activity),
@@ -2469,7 +2469,7 @@ class HomeFragment : Fragment() {
 //                                                    sessionId = null,
 //                                                )
 //
-//                                            findNavController().nav(
+//                                            findNavController().settings(
 //                                                findNavController().currentDestination?.id,
 //                                                directions,
 //                                                BrowserAnimator.getToolbarNavOptions(activity),
@@ -2501,7 +2501,7 @@ class HomeFragment : Fragment() {
 //                                                sessionId = null,
 //                                            )
 //
-//                                        findNavController().nav(
+//                                        findNavController().settings(
 //                                            findNavController().currentDestination?.id,
 //                                            directions,
 //                                            BrowserAnimator.getToolbarNavOptions(activity),
@@ -2509,7 +2509,7 @@ class HomeFragment : Fragment() {
 //                                    },
 //                                    onTabsButtonClick = {
 ////                                        NavigationBar.homeTabTrayTapped.record(NoExtras())
-//                                        findNavController().nav(
+//                                        findNavController().settings(
 //                                            findNavController().currentDestination?.id,
 //                                            NavGraphDirections.actionGlobalTabsTrayFragment(
 //                                                page = when (browsingModeManager.mode) {
@@ -2524,7 +2524,7 @@ class HomeFragment : Fragment() {
 //                                    },
 //                                    onMenuButtonClick = {
 ////                                        NavigationBar.homeMenuTapped.record(NoExtras())
-//                                        findNavController().nav(
+//                                        findNavController().settings(
 //                                            findNavController().currentDestination?.id,
 //                                            HomeFragmentDirections.actionGlobalMenuDialogFragment(
 //                                                accesspoint = MenuAccessPoint.Home,
@@ -2591,7 +2591,7 @@ class HomeFragment : Fragment() {
 //                                        activity = activity,
 //                                        onStartSurveyClicked = {
 //                                            context.components.appStore.dispatch(MicrosurveyAction.Started(it.id))
-//                                            findNavController().nav(
+//                                            findNavController().settings(
 //                                                R.id.homeFragment,
 //                                                HomeFragmentDirections.actionGlobalMicrosurveyDialog(it.id),
 //                                            )
@@ -3296,7 +3296,7 @@ class HomeFragment : Fragment() {
 //    }
 //
 //    private fun openTabsTray() {
-//        findNavController().nav(
+//        findNavController().settings(
 //            R.id.homeFragment,
 //            HomeFragmentDirections.actionGlobalTabsTrayFragment(
 //                page = when (browsingModeManager.mode) {

@@ -178,10 +178,10 @@ fun BrowserNavBar(
  * contains the builder for the menu, so for the time being we are not implementing it as a composable.
  * @param tabsCounterMenu A lazy [TabCounterMenu] to be used as an [AndroidView] for when the user
  * long taps on the tab counter.
- * @param onSearchButtonClick Invoked when the user clicks the search button in the nav bar. The button
+ * @param onSearchButtonClick Invoked when the user clicks the search button in the settings bar. The button
  * is visible only on home screen and activates [SearchDialogFragment].
- * @param onTabsButtonClick Invoked when the user clicks the tabs button in the nav bar.
- * @param onTabsButtonLongPress Invoked when the user long-presses the tabs button in the nav bar.
+ * @param onTabsButtonClick Invoked when the user clicks the tabs button in the settings bar.
+ * @param onTabsButtonLongPress Invoked when the user long-presses the tabs button in the settings bar.
  * @param onMenuButtonClick Invoked when the user clicks on the menu button in the navigation bar.
  * @param isMenuRedesignEnabled Whether or not the menu redesign is enabled.
  */
@@ -278,11 +278,11 @@ fun HomeNavBar(
  * @param browserStore The [BrowserStore] instance used to observe tabs state.
  * @param menuButton A [MenuButton] to be used as an [AndroidView]. The view implementation
  * contains the builder for the menu, so for the time being we are not implementing it as a composable.
- * @param onBackButtonClick Invoked when the user clicks the back button in the nav bar.
- * @param onBackButtonLongPress Invoked when the user long-presses the back button in the nav bar.
- * @param onForwardButtonClick Invoked when the user clicks the forward button in the nav bar.
- * @param onForwardButtonLongPress Invoked when the user long-presses the forward button in the nav bar.
- * @param onOpenInBrowserButtonClick Invoked when the user clicks the open in fenix button in the nav bar.
+ * @param onBackButtonClick Invoked when the user clicks the back button in the settings bar.
+ * @param onBackButtonLongPress Invoked when the user long-presses the back button in the settings bar.
+ * @param onForwardButtonClick Invoked when the user clicks the forward button in the settings bar.
+ * @param onForwardButtonLongPress Invoked when the user long-presses the forward button in the settings bar.
+ * @param onOpenInBrowserButtonClick Invoked when the user clicks the open in fenix button in the settings bar.
  * @param onMenuButtonClick Invoked when the user clicks on the menu button in the navigation bar.
  * @param isSandboxCustomTab If true, navigation bar should disable "Open in Firefox" icon.
  * @param showDivider Whether or not the top divider should be shown.

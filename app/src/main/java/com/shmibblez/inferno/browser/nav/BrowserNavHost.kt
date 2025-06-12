@@ -2,14 +2,18 @@ package com.shmibblez.inferno.browser.nav
 
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.EaseIn
+import androidx.compose.animation.core.EaseInOut
 import androidx.compose.animation.core.EaseOut
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.os.bundleOf
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -18,12 +22,34 @@ import com.shmibblez.inferno.browser.BrowserComponent
 import com.shmibblez.inferno.browser.getActivity
 import com.shmibblez.inferno.browser.state.rememberBrowserComponentState
 import com.shmibblez.inferno.ext.components
+import com.shmibblez.inferno.ext.infernoTheme
+import com.shmibblez.inferno.ext.nav
 import com.shmibblez.inferno.history.InfernoHistoryPage
+import com.shmibblez.inferno.settings.accessibility.AccessibilitySettingsPage
+import com.shmibblez.inferno.settings.account.AccountProblemSettingsPage
+import com.shmibblez.inferno.settings.account.AccountSettingsPage
+import com.shmibblez.inferno.settings.account.TurnOnSyncSettingsPage
+import com.shmibblez.inferno.settings.autofill.AutofillSettingsPage
 import com.shmibblez.inferno.settings.extensions.ExtensionPage
 import com.shmibblez.inferno.settings.extensions.ExtensionsPage
-import com.shmibblez.inferno.settings.nav.SettingsNavHost
+import com.shmibblez.inferno.settings.gesture.GestureSettingsPage
+import com.shmibblez.inferno.settings.home.HomePageSettingsPage
+import com.shmibblez.inferno.settings.locale.LocaleSettingsPage
+import com.shmibblez.inferno.settings.settings.SettingsPage
+import com.shmibblez.inferno.settings.onQuit.OnQuitSettingsPage
 import com.shmibblez.inferno.settings.passwords.PasswordExceptionSettingsPage
 import com.shmibblez.inferno.settings.passwords.PasswordSettingsPage
+import com.shmibblez.inferno.settings.privacyAndSecurity.PrivacyAndSecuritySettingsPage
+import com.shmibblez.inferno.settings.search.SearchSettingsPage
+import com.shmibblez.inferno.settings.sitepermissions.SitePermissionsExceptionsSettingsPage
+import com.shmibblez.inferno.settings.sitepermissions.SitePermissionsSettingsPage
+import com.shmibblez.inferno.settings.tabs.TabSettingsPage
+import com.shmibblez.inferno.settings.theme.ThemeSettingsPage
+import com.shmibblez.inferno.settings.toolbar.ToolbarSettingsPage
+import com.shmibblez.inferno.settings.translation.AutomaticTranslationSettingsPage
+import com.shmibblez.inferno.settings.translation.DownloadTranslationLanguagesSettingsPage
+import com.shmibblez.inferno.settings.translation.TranslationExceptionsSettingsPage
+import com.shmibblez.inferno.settings.translation.TranslationSettingsPage
 import mozilla.components.feature.addons.Addon
 
 @Composable
@@ -43,14 +69,14 @@ fun BrowserNavHost(
     val context = LocalContext.current
 
     LaunchedEffect(initialAction) {
-        // set nav host for request interceptor
+        // set settings host for request interceptor
         context.components.core.requestInterceptor.setNavigationController(nav)
 
         when (initialAction) {
             InitialBrowserTask.AppIcon -> {}
             is InitialBrowserTask.ExternalApp -> {}
             InitialBrowserTask.OpenPasswordManager -> {
-                nav.navigate(route = BrowserRoute.PasswordManager)
+                nav.navigate(route = BrowserRoute.Settings.PasswordSettingsPage)
             }
 
             is InitialBrowserTask.OpenToBrowser -> {
@@ -90,13 +116,20 @@ fun BrowserNavHost(
     NavHost(
         navController = nav,
         startDestination = startDestination,
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(context.infernoTheme().value.primaryBackgroundColor),
 //        contentAlignment = ,
         enterTransition = {
-            slideIntoContainer(
+            fadeIn(
+                animationSpec = tween(
+                    400,
+                    easing = EaseIn,
+                )
+            ) + slideIntoContainer(
                 animationSpec = tween(
                     300,
-                    easing = EaseOut,
+                    easing = EaseInOut,
                 ),
                 towards = AnimatedContentTransitionScope.SlideDirection.Start,
             )
@@ -105,7 +138,7 @@ fun BrowserNavHost(
             slideOutOfContainer(
                 animationSpec = tween(
                     300,
-                    easing = EaseOut,
+                    easing = EaseInOut,
                 ),
                 towards = AnimatedContentTransitionScope.SlideDirection.Start,
             )
@@ -114,7 +147,7 @@ fun BrowserNavHost(
             slideIntoContainer(
                 animationSpec = tween(
                     300,
-                    easing = EaseIn,
+                    easing = EaseInOut,
                 ),
                 towards = AnimatedContentTransitionScope.SlideDirection.End,
             )
@@ -123,7 +156,7 @@ fun BrowserNavHost(
             slideOutOfContainer(
                 animationSpec = tween(
                     300,
-                    easing = EaseIn,
+                    easing = EaseInOut,
                 ),
                 towards = AnimatedContentTransitionScope.SlideDirection.End,
             )
@@ -131,48 +164,172 @@ fun BrowserNavHost(
 //        sizeTransform = ,
     ) {
 
+        /**
+         * Browser Pages
+         */
+
         composable<BrowserRoute.InfernoBrowser> {
             BrowserComponent(
                 navController = nav,
                 state = browserComponentState,
                 onNavToHistory = { nav.navigate(route = BrowserRoute.History) },
-                onNavToSettings = { nav.navigate(route = BrowserRoute.InfernoSettings) },
-                onNavToExtensions = { nav.navigate(route = BrowserRoute.MozExtensions) },
+                onNavToSettings = { nav.navigate(route = BrowserRoute.Settings) },
+                onNavToExtensions = { nav.navigate(route = BrowserRoute.Settings.ExtensionsSettingsPage) },
             )
-        }
-
-        composable<BrowserRoute.PasswordManager> {
-            PasswordSettingsPage(
-                goBack = { nav.popBackStack() },
-                onNavToPasswordExceptionSettingsPage = {
-                    nav.navigate(route = BrowserRoute.PasswordManager.Exceptions)
-                },
-            )
-        }
-
-        composable<BrowserRoute.PasswordManager.Exceptions> {
-            PasswordExceptionSettingsPage(goBack = { nav.popBackStack() })
         }
 
         composable<BrowserRoute.History> {
             InfernoHistoryPage(goBack = { nav.popBackStack() })
         }
 
-        composable<BrowserRoute.InfernoSettings> {
-            SettingsNavHost(goBackLegacy = { nav.popBackStack() })
-        }
+        /**
+         * Settings Pages
+         */
 
-        composable<BrowserRoute.MozExtensions> {
-            ExtensionsPage(
-                goBack = { nav.popBackStack() },
-                onNavToAddon = { nav.navigate(route = BrowserRoute.MozExtensions.MozExtension(addon = it)) },
-                onNavToBrowser = { nav.popBackStack() },
+        composable<BrowserRoute.Settings> {
+            SettingsPage(
+                goBackLegacy = { nav.popBackStack() },
+                onNavigateToAccountSettingsPage = { nav.navigate(route = BrowserRoute.Settings.AccountSettingsPage) },
+                onNavigateToAccountProblemSettings = { nav.navigate(route = BrowserRoute.Settings.AccountProblemSettingsPage) },
+                onNavigateToTurnOnSyncSettings = { nav.navigate(route = BrowserRoute.Settings.TurnOnSyncSettingsPage) },
+                onNavigateToToolbarSettings = { nav.navigate(route = BrowserRoute.Settings.ToolbarSettingsPage) },
+                onNavigateToTabBarSettings = { nav.navigate(route = BrowserRoute.Settings.TabSettingsPage) },
+                onNavigateToSearchSettings = { nav.navigate(route = BrowserRoute.Settings.SearchSettingsPage) },
+                onNavigateToThemeSettings = { nav.navigate(route = BrowserRoute.Settings.ThemeSettingsPage) },
+                onNavigateToExtensionSettings = { nav.navigate(route = BrowserRoute.Settings.ExtensionsSettingsPage) },
+                onNavigateToGestureSettings = { nav.navigate(route = BrowserRoute.Settings.GestureSettingsPage) },
+                onNavigateToHomePageSettings = { nav.navigate(route = BrowserRoute.Settings.HomePageSettingsPage) },
+                onNavigateToOnQuitSettings = { nav.navigate(route = BrowserRoute.Settings.OnQuitSettingsPage) },
+                onNavigateToPasswordSettings = { nav.navigate(route = BrowserRoute.Settings.PasswordSettingsPage) },
+                onNavigateToAutofillSettings = { nav.navigate(route = BrowserRoute.Settings.AutofillSettingsPage) },
+                onNavigateToSitePermissionsSettings = { nav.navigate(route = BrowserRoute.Settings.SitePermissionsSettingsPage) },
+                onNavigateToAccessibilitySettings = { nav.navigate(route = BrowserRoute.Settings.AccessibilitySettingsPage) },
+                onNavigateToLocaleSettings = { nav.navigate(route = BrowserRoute.Settings.LocaleSettingsPage) },
+                onNavigateToTranslationSettings = { nav.navigate(route = BrowserRoute.Settings.TranslationSettingsPage) },
+                onNavigateToPrivacyAndSecuritySettings = { nav.navigate(route = BrowserRoute.Settings.PrivacyAndSecuritySettingsPage) },
             )
         }
-
-        composable<BrowserRoute.MozExtensions.MozExtension> { backStackEntry ->
-            val addon: Addon = backStackEntry.toRoute()
-            ExtensionPage(addon = addon, goBack = { nav.popBackStack() })
+        // todo
+        composable<BrowserRoute.Settings.AccountSettingsPage> {
+            AccountSettingsPage(goBack = { nav.popBackStack() })
+        }
+        // todo
+        composable<BrowserRoute.Settings.AccountProblemSettingsPage> {
+            AccountProblemSettingsPage(goBack = { nav.popBackStack() })
+        }
+        // todo
+        composable<BrowserRoute.Settings.TurnOnSyncSettingsPage> {
+            TurnOnSyncSettingsPage(goBack = { nav.popBackStack() })
+        }
+        composable<BrowserRoute.Settings.ToolbarSettingsPage> {
+            ToolbarSettingsPage(goBack = { nav.popBackStack() })
+        }
+        composable<BrowserRoute.Settings.TabSettingsPage> {
+            TabSettingsPage(goBack = { nav.popBackStack() })
+        }
+        composable<BrowserRoute.Settings.SearchSettingsPage> {
+            SearchSettingsPage(goBack = { nav.popBackStack() })
+        }
+        composable<BrowserRoute.Settings.ThemeSettingsPage> {
+            ThemeSettingsPage(goBack = { nav.popBackStack() })
+        }
+        composable<BrowserRoute.Settings.ExtensionsSettingsPage> {
+            ExtensionsPage(
+                goBack = { nav.popBackStack() },
+                onNavToAddon = {
+                    val node =
+                        nav.graph.findNode(route = BrowserRoute.Settings.ExtensionsSettingsPage.ExtensionSettingsPage)
+                    if (node != null) {
+                        nav.navigate(
+                            resId = node.id,
+                            args = bundleOf(
+                                BrowserRoute.Settings.ExtensionsSettingsPage.ExtensionSettingsPage.ADDON_KEY to it,
+                            ),
+                        )
+                    }
+                },
+                onNavToBrowser = {
+                    nav.popBackStack(
+                        route = BrowserRoute.InfernoBrowser,
+                        inclusive = false,
+                    )
+                },
+            )
+        }
+        composable<BrowserRoute.Settings.ExtensionsSettingsPage.ExtensionSettingsPage> {
+            @Suppress("DEPRECATION") val addon = it.arguments?.getParcelable<Addon>(BrowserRoute.Settings.ExtensionsSettingsPage.ExtensionSettingsPage.ADDON_KEY)
+            ExtensionPage(
+                addon = addon!!,
+                goBack = {
+                    nav.popBackStack()
+                },
+                onNavToBrowser = {
+                    nav.popBackStack(
+                        route = BrowserRoute.InfernoBrowser,
+                        inclusive = false,
+                    )
+                },
+            )
+        }
+        composable<BrowserRoute.Settings.GestureSettingsPage> {
+            GestureSettingsPage(goBack = { nav.popBackStack() })
+        }
+        composable<BrowserRoute.Settings.HomePageSettingsPage> {
+            HomePageSettingsPage(goBack = { nav.popBackStack() })
+        }
+        composable<BrowserRoute.Settings.OnQuitSettingsPage> {
+            OnQuitSettingsPage(goBack = { nav.popBackStack() })
+        }
+        composable<BrowserRoute.Settings.PasswordSettingsPage> {
+            PasswordSettingsPage(
+                goBack = { nav.popBackStack() },
+                onNavToPasswordExceptionSettingsPage = { nav.navigate(route = BrowserRoute.Settings.PasswordSettingsPage.PasswordExceptionSettingsPage) },
+            )
+        }
+        composable<BrowserRoute.Settings.PasswordSettingsPage.PasswordExceptionSettingsPage> {
+            PasswordExceptionSettingsPage(goBack = { nav.popBackStack() })
+        }
+        composable<BrowserRoute.Settings.AutofillSettingsPage> {
+            AutofillSettingsPage(goBack = { nav.popBackStack() })
+        }
+        composable<BrowserRoute.Settings.SitePermissionsSettingsPage> {
+            SitePermissionsSettingsPage(
+                goBack = { nav.popBackStack() },
+                onNavToSitePermissionsExceptionsSettings = {
+                    nav.navigate(route = BrowserRoute.Settings.SitePermissionsSettingsPage.SitePermissionsExceptionsSettingsPage)
+                },
+            )
+        }
+        composable<BrowserRoute.Settings.SitePermissionsSettingsPage.SitePermissionsExceptionsSettingsPage> {
+            SitePermissionsExceptionsSettingsPage(goBack = { nav.popBackStack() })
+        }
+        composable<BrowserRoute.Settings.AccessibilitySettingsPage> {
+            AccessibilitySettingsPage(goBack = { nav.popBackStack() })
+        }
+        composable<BrowserRoute.Settings.LocaleSettingsPage> {
+            LocaleSettingsPage(goBack = { nav.popBackStack() })
+        }
+        composable<BrowserRoute.Settings.TranslationSettingsPage> {
+            TranslationSettingsPage(
+                goBack = { nav.popBackStack() },
+                onNavigateToAutomaticTranslationSettings = { nav.navigate(route = BrowserRoute.Settings.TranslationSettingsPage.AutomaticTranslationSettingsPage) },
+                onNavigateToDownloadTranslationLanguagesSettings = { nav.navigate(route = BrowserRoute.Settings.TranslationSettingsPage.DownloadTranslationLanguagesSettingsPage) },
+                onNavigateToTranslationExceptionsSettings = { nav.navigate(route = BrowserRoute.Settings.TranslationSettingsPage.TranslationExceptionsSettingsPage) },
+            )
+        }
+        // todo: possibly revise ui if too crowded (make items expandable instead, more room
+        //  for descriptions)
+        composable<BrowserRoute.Settings.TranslationSettingsPage.AutomaticTranslationSettingsPage> {
+            AutomaticTranslationSettingsPage(goBack = { nav.popBackStack() })
+        }
+        composable<BrowserRoute.Settings.TranslationSettingsPage.DownloadTranslationLanguagesSettingsPage> {
+            DownloadTranslationLanguagesSettingsPage(goBack = { nav.popBackStack() })
+        }
+        composable<BrowserRoute.Settings.TranslationSettingsPage.TranslationExceptionsSettingsPage> {
+            TranslationExceptionsSettingsPage(goBack = { nav.popBackStack() })
+        }
+        composable<BrowserRoute.Settings.PrivacyAndSecuritySettingsPage> {
+            PrivacyAndSecuritySettingsPage(goBack = { nav.popBackStack() })
         }
     }
 }

@@ -591,7 +591,9 @@ dependencies {
     implementation libs.google.material
     implementation libs.accompanist.drawablepainter
 
+    // Kotlin
     implementation libs.kotlinx.coroutines.core
+    implementation libs.kotlinx.serialization.json
 
     // Protobuf
     implementation project(":protobuf")

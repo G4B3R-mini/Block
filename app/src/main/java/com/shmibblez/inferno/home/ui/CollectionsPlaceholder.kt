@@ -20,16 +20,21 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.shmibblez.inferno.R
+import com.shmibblez.inferno.components.appstate.AppAction
 import com.shmibblez.inferno.compose.PlaceholderCard
 import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.button.PrimaryButton
+import com.shmibblez.inferno.ext.components
+import com.shmibblez.inferno.ext.settings
 import com.shmibblez.inferno.home.fake.FakeHomepagePreview
 import com.shmibblez.inferno.home.sessioncontrol.CollectionInteractor
+import com.shmibblez.inferno.home.sessioncontrol.DefaultSessionControlController
 import com.shmibblez.inferno.theme.FirefoxTheme
 
 @Composable

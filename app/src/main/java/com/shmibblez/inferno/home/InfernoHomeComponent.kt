@@ -13,35 +13,32 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.NavController
 import com.shmibblez.inferno.HomeActivity
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.getActivity
 import com.shmibblez.inferno.components.TabCollectionStorage
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.containsQueryParameters
-import com.shmibblez.inferno.ext.nav
 import com.shmibblez.inferno.ext.settings
 import com.shmibblez.inferno.home.bookmarks.BookmarksFeature
-import com.shmibblez.inferno.home.bookmarks.controller.DefaultBookmarksController
-import com.shmibblez.inferno.home.privatebrowsing.controller.DefaultPrivateBrowsingController
+import com.shmibblez.inferno.home.controllers.InfernoBookmarksController
+import com.shmibblez.inferno.home.controllers.InfernoPrivateBrowsingController
+import com.shmibblez.inferno.home.controllers.InfernoRecentSyncedTabController
+import com.shmibblez.inferno.home.controllers.InfernoRecentTabController
+import com.shmibblez.inferno.home.controllers.InfernoRecentVisitsController
+import com.shmibblez.inferno.home.controllers.InfernoSearchSelectorController
+import com.shmibblez.inferno.home.controllers.InfernoSessionControlController
+import com.shmibblez.inferno.home.controllers.InfernoToolbarController
 import com.shmibblez.inferno.home.recentsyncedtabs.RecentSyncedTabFeature
-import com.shmibblez.inferno.home.recentsyncedtabs.controller.DefaultRecentSyncedTabController
 import com.shmibblez.inferno.home.recenttabs.RecentTabsListFeature
-import com.shmibblez.inferno.home.recenttabs.controller.DefaultRecentTabsController
 import com.shmibblez.inferno.home.recentvisits.RecentVisitsFeature
-import com.shmibblez.inferno.home.recentvisits.controller.DefaultRecentVisitsController
-import com.shmibblez.inferno.home.sessioncontrol.DefaultSessionControlController
 import com.shmibblez.inferno.home.sessioncontrol.SessionControlInteractor
 import com.shmibblez.inferno.home.store.HomepageState
-import com.shmibblez.inferno.home.toolbar.DefaultToolbarController
 import com.shmibblez.inferno.home.topsites.DefaultTopSitesView
 import com.shmibblez.inferno.home.ui.Homepage
 import com.shmibblez.inferno.messaging.DefaultMessageController
-import com.shmibblez.inferno.search.toolbar.DefaultSearchSelectorController
-import com.shmibblez.inferno.tabstray.Page
+import com.shmibblez.inferno.tabs.tabstray.InfernoTabsTraySelectedTab
 import com.shmibblez.inferno.tabstray.TabsTrayAccessPoint
-import com.shmibblez.inferno.theme.FirefoxTheme
 import com.shmibblez.inferno.utils.Settings.Companion.TOP_SITES_PROVIDER_MAX_THRESHOLD
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.launch
@@ -84,7 +81,13 @@ internal const val TOAST_ELEVATION = 80f
  * Home page in new tabs, replaces [HomeFragment]
  */
 @Composable
-fun InfernoHomeComponent(isPrivate: Boolean, navController: NavController, modifier: Modifier = Modifier) {
+fun InfernoHomeComponent(
+    isPrivate: Boolean,
+    modifier: Modifier = Modifier,
+    onShowTabsTray: (InfernoTabsTraySelectedTab?) -> Unit,
+    onNavToHistory: () -> Unit,
+    onNavToBookmarks: () -> Unit,
+) {
     val settings = LocalContext.current.settings()
     val context = LocalContext.current
     val components = context.components
@@ -125,7 +128,7 @@ fun InfernoHomeComponent(isPrivate: Boolean, navController: NavController, modif
                     settings = components.settings,
                 ),
                 storage = components.core.topSitesStorage,
-                config = {getTopSitesConfig(context)},
+                config = { getTopSitesConfig(context) },
             ),
             owner = lifecycleOwner,
             view = view,
@@ -219,8 +222,9 @@ fun InfernoHomeComponent(isPrivate: Boolean, navController: NavController, modif
 //            }
         }
     }
+    // todo: override controller for custom controls, the way it's currently done is way too hacky
     val sessionControlInteractor = SessionControlInteractor(
-        controller = DefaultSessionControlController(
+        controller = InfernoSessionControlController(
             activity = context.getActivity()!! as HomeActivity,
             settings = components.settings,
             engine = components.core.engine,
@@ -237,7 +241,6 @@ fun InfernoHomeComponent(isPrivate: Boolean, navController: NavController, modif
             reloadUrlUseCase = components.useCases.sessionUseCases.reload,
             topSitesUseCases = components.useCases.topSitesUseCase,
             appStore = components.appStore,
-            navController = navController,
             viewLifecycleScope = lifecycleOwner.lifecycleScope,
             registerCollectionStorageObserver = {
                 components.core.tabCollectionStorage.register(
@@ -279,38 +282,26 @@ fun InfernoHomeComponent(isPrivate: Boolean, navController: NavController, modif
 //                    elevation = Companion.TOAST_ELEVATION,
 //                )
             },
-            showTabTray = {
-                navController.nav(
-                    R.id.homeFragment,
-                    HomeFragmentDirections.actionGlobalTabsTrayFragment(
-                        page = when (isPrivate) {
-                            false -> Page.NormalTabs
-                            true -> Page.PrivateTabs
-                        },
-                    ),
-                )
-            },
+            showTabTray = onShowTabsTray,
+            onNavToHistory = onNavToHistory,
+            onNavToBookmarks = onNavToBookmarks,
         ),
-        recentTabController = DefaultRecentTabsController(
+        recentTabController = InfernoRecentTabController(
             selectTabUseCase = components.useCases.tabsUseCases.selectTab,
-            navController = navController,
             appStore = components.appStore,
         ),
-        recentSyncedTabController = DefaultRecentSyncedTabController(
+        recentSyncedTabController = InfernoRecentSyncedTabController(
             tabsUseCase = components.useCases.tabsUseCases,
-            navController = navController,
             accessPoint = TabsTrayAccessPoint.HomeRecentSyncedTab,
             appStore = components.appStore,
         ),
-        bookmarksController = DefaultBookmarksController(
+        bookmarksController = InfernoBookmarksController(
             activity = context.getActivity()!! as HomeActivity,
-            navController = navController,
             appStore = components.appStore,
             browserStore = components.core.store,
             selectTabUseCase = components.useCases.tabsUseCases.selectTab,
         ),
-        recentVisitsController = DefaultRecentVisitsController(
-            navController = navController,
+        recentVisitsController = InfernoRecentVisitsController(
             appStore = components.appStore,
             selectOrAddTabUseCase = components.useCases.tabsUseCases.selectOrAddTab,
             storage = components.core.historyStorage,
@@ -322,33 +313,30 @@ fun InfernoHomeComponent(isPrivate: Boolean, navController: NavController, modif
 //                appStore = components.appStore,
 //                settings = components.settings,
 //            ),
-        privateBrowsingController = DefaultPrivateBrowsingController(
+        privateBrowsingController = InfernoPrivateBrowsingController(
             activity = context.getActivity()!! as HomeActivity,
             appStore = components.appStore,
-            navController = navController,
         ),
-        searchSelectorController = DefaultSearchSelectorController(
+        searchSelectorController = InfernoSearchSelectorController(
             activity = context.getActivity()!! as HomeActivity,
-            navController = navController,
         ),
-        toolbarController = DefaultToolbarController(
+        toolbarController = InfernoToolbarController(
             activity = context.getActivity()!! as HomeActivity,
             store = components.core.store,
-            navController = navController,
         ),
     )
 
-        Homepage(
-            modifier = modifier.focusable(),
-            state = HomepageState.build(
-                appState = appState,
-                settings = settings,
-                isPrivate = isPrivate,
-            ),
+    Homepage(
+        modifier = modifier.focusable(),
+        state = HomepageState.build(
+            appState = appState,
+            settings = settings,
             isPrivate = isPrivate,
-            interactor = sessionControlInteractor,
-            onTopSitesItemBound = { },
-        )
+        ),
+        isPrivate = isPrivate,
+        interactor = sessionControlInteractor,
+        onTopSitesItemBound = { },
+    )
 }
 
 /**

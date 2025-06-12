@@ -230,7 +230,7 @@ fun Activity.setNavigationIcon(
 }
 
 /**
- * Delegate to the relevant 'get nav directions' function based on the given [Activity].
+ * Delegate to the relevant 'get settings directions' function based on the given [Activity].
  *
  * @param from The [BrowserDirection] to indicate which fragment the browser is being opened from.
  * @param customTabSessionId Optional custom tab session ID if navigating from a custom tab.

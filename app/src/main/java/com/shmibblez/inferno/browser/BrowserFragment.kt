@@ -772,7 +772,7 @@ class BrowserFragment : BaseBrowserFragment(), UserInteractionHandler {
 //                            )
                         }
                         // todo
-//                        nav(R.id.browserComponentWrapperFragment, directions)
+//                        settings(R.id.browserComponentWrapperFragment, directions)
                     }
                 }
             }

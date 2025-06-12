@@ -175,7 +175,8 @@ internal fun Homepage(
                 }
 
                 CollectionsSection(
-                    collectionsState = collectionsState, interactor = interactor
+                    collectionsState = collectionsState,
+                    interactor = interactor,
                 )
 
 //                    if (showPocketStories) {
@@ -250,7 +251,7 @@ private fun BookmarksSection(
             ),
         ),
         backgroundColor = cardBackgroundColor,
-        onBookmarkClick = interactor::onBookmarkClicked,
+        onBookmarkClick =   interactor::onBookmarkClicked,
     )
 }
 
@@ -277,10 +278,13 @@ private fun RecentlyVisitedSection(
                 title = stringResource(R.string.recently_visited_menu_item_remove),
                 onClick = { visit ->
                     when (visit) {
-                        is RecentHistoryGroup -> interactor.onRemoveRecentHistoryGroup(visit.title)
-                        is RecentHistoryHighlight -> interactor.onRemoveRecentHistoryHighlight(
-                            visit.url,
-                        )
+                        is RecentHistoryGroup -> {
+                            interactor.onRemoveRecentHistoryGroup(visit.title)
+                        }
+
+                        is RecentHistoryHighlight -> {
+                            interactor.onRemoveRecentHistoryHighlight(visit.url)
+                        }
                     }
                 },
             ),
@@ -295,7 +299,7 @@ private fun RecentlyVisitedSection(
 
                 is RecentHistoryGroup -> {
 //                    RecentlyVisitedHomepage.searchGroupOpened.record(NoExtras())
-                    // TODO: history
+                    // todo: history
 //                    History.recentSearchesTapped.record(
 //                        History.RecentSearchesTappedExtra(
 //                            pageNumber.toString(),
