@@ -48,6 +48,9 @@ import java.util.Locale
 private val ADDON_ICON_SIZE = 28.dp
 private val ITEM_HORIZONTAL_PADDING = 16.dp
 
+// todo: add loading indicator, could be progress circle for add button,
+//  or snackbar
+//  error may be occurring, also listen for errors in AddonsManagerState
 @Composable
 internal fun AddonsManager(
     state: AddonsManagerState,
