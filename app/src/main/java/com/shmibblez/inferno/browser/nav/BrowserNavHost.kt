@@ -1,9 +1,7 @@
 package com.shmibblez.inferno.browser.nav
 
 import androidx.compose.animation.AnimatedContentTransitionScope
-import androidx.compose.animation.core.EaseIn
 import androidx.compose.animation.core.EaseInOut
-import androidx.compose.animation.core.EaseOut
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.background
@@ -17,13 +15,11 @@ import androidx.core.os.bundleOf
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.toRoute
 import com.shmibblez.inferno.browser.BrowserComponent
 import com.shmibblez.inferno.browser.getActivity
 import com.shmibblez.inferno.browser.state.rememberBrowserComponentState
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.infernoTheme
-import com.shmibblez.inferno.ext.nav
 import com.shmibblez.inferno.history.InfernoHistoryPage
 import com.shmibblez.inferno.settings.accessibility.AccessibilitySettingsPage
 import com.shmibblez.inferno.settings.account.AccountProblemSettingsPage
@@ -35,12 +31,12 @@ import com.shmibblez.inferno.settings.extensions.ExtensionsPage
 import com.shmibblez.inferno.settings.gesture.GestureSettingsPage
 import com.shmibblez.inferno.settings.home.HomePageSettingsPage
 import com.shmibblez.inferno.settings.locale.LocaleSettingsPage
-import com.shmibblez.inferno.settings.settings.SettingsPage
 import com.shmibblez.inferno.settings.onQuit.OnQuitSettingsPage
 import com.shmibblez.inferno.settings.passwords.PasswordExceptionSettingsPage
 import com.shmibblez.inferno.settings.passwords.PasswordSettingsPage
 import com.shmibblez.inferno.settings.privacyAndSecurity.PrivacyAndSecuritySettingsPage
 import com.shmibblez.inferno.settings.search.SearchSettingsPage
+import com.shmibblez.inferno.settings.settings.SettingsPage
 import com.shmibblez.inferno.settings.sitepermissions.SitePermissionsExceptionsSettingsPage
 import com.shmibblez.inferno.settings.sitepermissions.SitePermissionsSettingsPage
 import com.shmibblez.inferno.settings.tabs.TabSettingsPage
@@ -124,7 +120,7 @@ fun BrowserNavHost(
             fadeIn(
                 animationSpec = tween(
                     400,
-                    easing = EaseIn,
+                    easing = EaseInOut,
                 )
             ) + slideIntoContainer(
                 animationSpec = tween(

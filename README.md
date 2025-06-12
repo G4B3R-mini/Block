@@ -34,9 +34,8 @@ that's it for now, hopefully this project doesn't die
 
 ## Massiv Bugs
 
-- [ ] BrowserComponent, custom sesh
-    - [ ] show toolbar menu icon that pops up menu, but only show options available for custom tab,
-      also add some options for custom tabs (open in browser, etc)
+- [ ] BrowserComponent
+  - [ ] every time google search is performed, open in app requested
 - [ ] MozEngineView not working properly when go to new compose page then return (most likely has to
   do with lifecycle management, when return to page need to reset/relink)
 - [ ] theme settings

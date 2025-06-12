@@ -146,7 +146,8 @@ internal fun ExtensionPage(
                 label {
                     InfernoText(
                         text = stringResource(R.string.mozac_feature_addons_more_info_link_2),
-                        modifier = Modifier.clickable { openWebsite(addon.detailUrl.toUri()) }
+                        modifier = Modifier.clickable { openWebsite(addon.detailUrl.toUri()) },
+                        fontColor = context.infernoTheme().value.primaryActionColor,
                     )
                 }
             }
