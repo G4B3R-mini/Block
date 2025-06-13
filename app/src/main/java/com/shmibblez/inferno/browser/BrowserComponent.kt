@@ -20,7 +20,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.CallSuper
 import androidx.annotation.IdRes
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
@@ -52,6 +51,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
@@ -109,7 +109,6 @@ import com.shmibblez.inferno.downloads.DownloadService
 import com.shmibblez.inferno.downloads.dialog.DynamicDownloadDialog
 import com.shmibblez.inferno.ext.DEFAULT_ACTIVE_DAYS
 import com.shmibblez.inferno.ext.components
-import com.shmibblez.inferno.ext.consumeFlow
 import com.shmibblez.inferno.ext.dpToPx
 import com.shmibblez.inferno.ext.infernoTheme
 import com.shmibblez.inferno.ext.isLargeWindow
@@ -123,8 +122,6 @@ import com.shmibblez.inferno.home.InfernoHomeComponent
 import com.shmibblez.inferno.library.bookmarks.friendlyRootTitle
 import com.shmibblez.inferno.loading.InfernoLoadingComponent
 import com.shmibblez.inferno.messaging.FenixMessageSurfaceId
-import com.shmibblez.inferno.messaging.MessagingFeature
-import com.shmibblez.inferno.microsurvey.ui.ext.MicrosurveyUIData
 import com.shmibblez.inferno.perf.MarkersFragmentLifecycleCallbacks
 import com.shmibblez.inferno.settings.SupportUtils
 import com.shmibblez.inferno.settings.biometric.BiometricPromptFeature
@@ -167,13 +164,11 @@ import mozilla.components.browser.state.selector.findTab
 import mozilla.components.browser.state.selector.findTabOrCustomTab
 import mozilla.components.browser.state.selector.findTabOrCustomTabOrSelectedTab
 import mozilla.components.browser.state.selector.getNormalOrPrivateTabs
-import mozilla.components.browser.state.selector.selectedTab
 import mozilla.components.browser.state.state.CustomTabSessionState
 import mozilla.components.browser.state.state.SessionState
 import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.browser.state.state.content.DownloadState
 import mozilla.components.browser.state.state.content.DownloadState.Status
-import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.browser.thumbnails.BrowserThumbnails
 import mozilla.components.browser.toolbar.BrowserToolbar
 import mozilla.components.concept.engine.EngineView
@@ -283,10 +278,10 @@ import kotlin.math.roundToInt
 //private const val TOAST_METRIC_SOURCE = "add_bookmark_toast"
 //private const val LAST_SAVED_GENERATED_PASSWORD = "last_saved_generated_password"
 
-val onboardingLinksList: List<String> = listOf(
-    SupportUtils.getMozillaPageUrl(SupportUtils.MozillaPage.PRIVATE_NOTICE),
-    SupportUtils.FXACCOUNT_SUMO_URL,
-)
+//val onboardingLinksList: List<String> = listOf(
+//    SupportUtils.getMozillaPageUrl(SupportUtils.MozillaPage.PRIVATE_NOTICE),
+//    SupportUtils.FXACCOUNT_SUMO_URL,
+//)
 //}
 
 //companion object {
@@ -391,16 +386,18 @@ fun BrowserComponent(
     }
 
     /* BrowserFragment vars */
-    val windowFeature = ViewBoundFeatureWrapper<WindowFeature>()
+    var windowFeature by remember { mutableStateOf<WindowFeature?>(null) }
 //    val openInAppOnboardingObserver = ViewBoundFeatureWrapper<OpenInAppOnboardingObserver>()
-    val reviewQualityCheckFeature = ViewBoundFeatureWrapper<ReviewQualityCheckFeature>()
+    var reviewQualityCheckFeature by remember { mutableStateOf<ReviewQualityCheckFeature?>(null) }
 //    val translationsBinding = ViewBoundFeatureWrapper<TranslationsBinding>()
 
+    // as is in Fenix, currently doesnt do anything
     var reviewQualityCheckAvailable by remember {
         mutableStateOf(
             false
         )
     }
+
     var pwaOnboardingObserver: PwaOnboardingObserver? = null
 
     /* BrowserFragment  vars */
@@ -408,25 +405,33 @@ fun BrowserComponent(
     /* BaseBrowserFragment vars */
     lateinit var browserAnimator: BrowserAnimator
 
-    val thumbnailsFeature = remember { ViewBoundFeatureWrapper<BrowserThumbnails>() }
+    var thumbnailsFeature by remember { mutableStateOf<BrowserThumbnails?>(null) }
 
-    @VisibleForTesting val messagingFeatureMicrosurvey = ViewBoundFeatureWrapper<MessagingFeature>()
+//    @VisibleForTesting val messagingFeatureMicrosurvey = ViewBoundFeatureWrapper<MessagingFeature>()
 
-    val sessionFeature = remember { ViewBoundFeatureWrapper<SessionFeature>() }
-    val shareDownloadsFeature = remember { ViewBoundFeatureWrapper<ShareDownloadFeature>() }
-    val copyDownloadsFeature = remember { ViewBoundFeatureWrapper<CopyDownloadFeature>() }
+    var sessionFeature by remember { mutableStateOf<SessionFeature?>(null) }
+    var shareDownloadsFeature by remember { mutableStateOf<ShareDownloadFeature?>(null) }
+    var copyDownloadsFeature by remember { mutableStateOf<CopyDownloadFeature?>(null) }
 
-    val sitePermissionsFeature = ViewBoundFeatureWrapper<SitePermissionsFeature>()
-    val fullScreenFeature = ViewBoundFeatureWrapper<FullScreenFeature>()
-    val swipeRefreshFeature = ViewBoundFeatureWrapper<SwipeRefreshFeature>()
-    val webchannelIntegration = ViewBoundFeatureWrapper<FxaWebChannelIntegration>()
-    val sitePermissionWifiIntegration = ViewBoundFeatureWrapper<SitePermissionsWifiIntegration>()
-    val secureWindowFeature = ViewBoundFeatureWrapper<SecureWindowFeature>()
-    val fullScreenMediaSessionFeature = ViewBoundFeatureWrapper<MediaSessionFullscreenFeature>()
-    val searchFeature = ViewBoundFeatureWrapper<SearchFeature>()
-    val webAuthnFeature = ViewBoundFeatureWrapper<WebAuthnFeature>()
-    val screenOrientationFeature = ViewBoundFeatureWrapper<ScreenOrientationFeature>()
-    val biometricPromptFeature = ViewBoundFeatureWrapper<BiometricPromptFeature>()
+    var sitePermissionsFeature by remember { mutableStateOf<SitePermissionsFeature?>(null) }
+    var fullScreenFeature by remember { mutableStateOf<FullScreenFeature?>(null) }
+    var swipeRefreshFeature by remember { mutableStateOf<SwipeRefreshFeature?>(null) }
+    var webchannelIntegration by remember { mutableStateOf<FxaWebChannelIntegration?>(null) }
+    var sitePermissionWifiIntegration by remember {
+        mutableStateOf<SitePermissionsWifiIntegration?>(
+            null
+        )
+    }
+    var secureWindowFeature by remember { mutableStateOf<SecureWindowFeature?>(null) }
+    var fullScreenMediaSessionFeature by remember {
+        mutableStateOf<MediaSessionFullscreenFeature?>(
+            null
+        )
+    }
+    var searchFeature by remember { mutableStateOf<SearchFeature?>(null) }
+    var webAuthnFeature by remember { mutableStateOf<WebAuthnFeature?>(null) }
+    var screenOrientationFeature by remember { mutableStateOf<ScreenOrientationFeature?>(null) }
+    var biometricPromptFeature by remember { mutableStateOf<BiometricPromptFeature?>(null) }
 //    val crashContentIntegration = ViewBoundFeatureWrapper<CrashContentIntegration>()
 //    val openInFirefoxBinding = ViewBoundFeatureWrapper<OpenInFirefoxBinding>()
 
@@ -469,9 +474,7 @@ fun BrowserComponent(
             val grantResults = results.values.map {
                 if (it) PackageManager.PERMISSION_GRANTED else PackageManager.PERMISSION_DENIED
             }.toIntArray()
-            sitePermissionsFeature.withFeature {
-                it.onPermissionsResult(permissions, grantResults)
-            }
+            sitePermissionsFeature?.onPermissionsResult(permissions, grantResults)
         }
     var tempWebPrompterState by remember { mutableStateOf<InfernoPromptFeatureState?>(null) }
     val requestPromptsPermissionsLauncher: ActivityResultLauncher<Array<String>> =
@@ -677,7 +680,7 @@ fun BrowserComponent(
 
     if (showTabsTray) {
         // request screenshot before showing
-        thumbnailsFeature.get()?.requestScreenshot()
+        thumbnailsFeature?.requestScreenshot()
         // todo: missing functionality from [TabsTrayFragment], [DefaultTabsTrayInteractor], and [DefaultTabsTrayController]
         InfernoTabsTray(
             dismiss = ::dismissTabsTray,
@@ -912,7 +915,7 @@ fun BrowserComponent(
                                     source = source,
                                     context = context,
                                     coroutineScope = coroutineScope,
-                                    setAlertDialog = { activeAlertDialog = it },
+                                    setAlertDialog = { ad -> activeAlertDialog = ad },
                                     snackbarHostState = snackbarHostState,
                                     setInitiallySelectedTabTray = { selectedTab: InfernoTabsTraySelectedTab ->
                                         state.selectedTabsTrayTab = selectedTab
@@ -1097,7 +1100,7 @@ fun BrowserComponent(
 
     /// event handlers
     val activityResultHandler: List<ActivityResultHandler?> = listOf(
-        webAuthnFeature.get(), webPrompterState,
+        webAuthnFeature, webPrompterState,
 //        promptsFeature,
     )
     // sets parent fragment handler for onActivityResult
@@ -1125,448 +1128,6 @@ fun BrowserComponent(
     // on back pressed handlers
     BackHandler {
         onBackPressed(backHandler)
-    }
-
-    // moz components setup and shared preferences
-    LaunchedEffect(engineView == null) {
-        if (engineView == null) return@LaunchedEffect
-//        setEngineDynamicToolbarMaxHeight(bottomBarHeightDp.dpToPx(context) - bottomBarOffsetPx.value.toInt())
-        setEngineDynamicToolbarMaxHeight(0)
-
-        /* BaseBrowserFragment onViewCreated */
-        // DO NOT ADD ANYTHING ABOVE THIS getProfilerTime CALL!
-        val profilerStartTime = context.components.core.engine.profiler?.getProfilerTime()
-
-        fun initializeUI() {
-
-            // browser animations
-//            browserAnimator = BrowserAnimator(
-//                fragment = WeakReference(this),
-//                engineView = WeakReference(engineView!!),
-//                swipeRefresh = WeakReference(swipeRefresh!!),
-//                viewLifecycleScope = WeakReference(coroutineScope),// viewLifecycleOwner.lifecycleScope),
-//            ).apply {
-//                beginAnimateInIfNecessary()
-//            }
-
-            val openInFenixIntent = Intent(context, IntentReceiverActivity::class.java).apply {
-                action = Intent.ACTION_VIEW
-                putExtra(HomeActivity.OPEN_TO_BROWSER, true)
-            }
-
-            if (context.settings().microsurveyFeatureEnabled) {
-                listenForMicrosurveyMessage(context, lifecycleOwner)
-            }
-
-
-            // todo: open in firefox
-//    openInFirefoxBinding.set(
-//        feature = OpenInFirefoxBinding(
-//            activity = activity,
-//            appStore = context.components.appStore,
-//            customTabSessionId = customTabSessionId,
-//            customTabsUseCases = context.components.useCases.customTabsUseCases,
-//            openInFenixIntent = openInFenixIntent,
-//            sessionFeature = sessionFeature,
-//        ),
-//        owner = lifecycleOwner,
-//        view = view,
-//    )
-
-            // todo: settings to quick settings when site security icons clicked
-//    browserToolbarView.view.display.setOnSiteSecurityClickedListener {
-//        showQuickSettingsDialog()
-//    }
-
-            val allowScreenshotsInPrivateMode = context.settings().allowScreenshotsInPrivateMode
-            secureWindowFeature.set(
-                feature = SecureWindowFeature(
-                    window = context.getActivity()!!.window,
-                    store = store,
-                    customTabId = state.customTabSessionId,
-                    isSecure = { !allowScreenshotsInPrivateMode && it.content.private },
-                    clearFlagOnStop = false,
-                ),
-                owner = lifecycleOwner,
-                view = view,
-            )
-
-            fullScreenMediaSessionFeature.set(
-                feature = MediaSessionFullscreenFeature(
-                    context.getActivity()!!,
-                    context.components.core.store,
-                    state.customTabSessionId,
-                ),
-                owner = lifecycleOwner,
-                view = view,
-            )
-
-            val shareDownloadFeature = ShareDownloadFeature(
-                context = context.applicationContext,
-                httpClient = context.components.core.client,
-                store = store,
-                tabId = state.customTabSessionId,
-            )
-
-            val copyDownloadFeature = CopyDownloadFeature(
-                context = context.applicationContext,
-                httpClient = context.components.core.client,
-                store = store,
-                tabId = state.customTabSessionId,
-                onCopyConfirmation = {
-                    showSnackbarForClipboardCopy(context, coroutineScope, snackbarHostState)
-                },
-            )
-
-            shareDownloadsFeature.set(
-                shareDownloadFeature,
-                owner = lifecycleOwner,
-                view = view,
-            )
-
-            copyDownloadsFeature.set(
-                copyDownloadFeature,
-                owner = lifecycleOwner,
-                view = view,
-            )
-
-            pipFeature = PictureInPictureFeature(
-                store = store,
-                activity = context.getActivity()!!,
-                crashReporting = context.components.crashReporter, // context.components.analytics.crashReporter,
-                tabId = state.customTabSessionId,
-            )
-
-            biometricPromptFeature.set(
-                feature = BiometricPromptFeature(
-                    context = context,
-                    fragment = null, // view.findFragment(),
-                    onAuthFailure = {
-                        // todo: test biometrics
-                        webPrompterState.onBiometricResult(isAuthenticated = false)
-                    },
-                    onAuthSuccess = {
-                        // todo: test biometrics
-                        webPrompterState.onBiometricResult(isAuthenticated = true)
-                    },
-                ),
-                owner = lifecycleOwner,
-                view = view,
-            )
-
-            sessionFeature.set(
-                feature = SessionFeature(
-                    context.components.core.store,
-                    context.components.useCases.sessionUseCases.goBack,
-                    context.components.useCases.sessionUseCases.goForward,
-                    engineView!!, // binding.engineView,
-                    state.customTabSessionId,
-                ),
-                owner = lifecycleOwner,
-                view = view,
-            )
-
-//            crashContentIntegration.set(
-//                feature = CrashContentIntegration(
-//                    context = context,
-//                    browserStore = context.components.core.store,
-//                    appStore = context.components.appStore,
-//                    toolbar = browserToolbarView.view,
-//                    crashReporterView = binding.crashReporterView,
-//                    components = context.components,
-//                    settings = context.settings(),
-//                    navController = navController,
-//                    sessionId = customTabSessionId,
-//                ),
-//                owner = lifecycleOwner,
-//                view = view,
-//            )
-
-            searchFeature.set(
-                feature = SearchFeature(store, state.customTabSessionId) { request, tabId ->
-                    val parentSession = store.state.findTabOrCustomTab(tabId)
-                    val useCase = if (request.isPrivate) {
-                        context.components.useCases.searchUseCases.newPrivateTabSearch
-                    } else {
-                        context.components.useCases.searchUseCases.newTabSearch
-                    }
-
-                    if (parentSession is CustomTabSessionState) {
-                        useCase.invoke(request.query)
-                        context.getActivity()!!.startActivity(openInFenixIntent)
-                    } else {
-                        useCase.invoke(request.query, parentSessionId = parentSession?.id)
-                    }
-                },
-                owner = lifecycleOwner,
-                view = view,
-            )
-
-            val accentHighContrastColor =
-                ThemeManager.resolveAttribute(R.attr.actionPrimary, context)
-
-            sitePermissionsFeature.set(
-                feature = SitePermissionsFeature(
-                    context = context,
-                    storage = context.components.core.geckoSitePermissionsStorage,
-                    fragmentManager = parentFragmentManager,
-                    promptsStyling = SitePermissionsFeature.PromptsStyling(
-                        gravity = getAppropriateLayoutGravity(context),
-                        shouldWidthMatchParent = true,
-                        positiveButtonBackgroundColor = accentHighContrastColor,
-                        positiveButtonTextColor = R.color.fx_mobile_text_color_action_primary,
-                    ),
-                    sessionId = state.customTabSessionId,
-                    onNeedToRequestPermissions = { permissions ->
-                        // todo: test
-                        requestSitePermissionsLauncher.launch(permissions)
-//                        requestPermissions(permissions, REQUEST_CODE_APP_PERMISSIONS)
-                    },
-                    onShouldShowRequestPermissionRationale = {
-                        // todo: permissions
-                        false
-//                        shouldShowRequestPermissionRationale(
-//                            it,
-//                        )
-                    },
-                    store = store,
-                ),
-                owner = lifecycleOwner,
-                view = view,
-            )
-
-            sitePermissionWifiIntegration.set(
-                feature = SitePermissionsWifiIntegration(
-                    settings = context.settings(),
-                    wifiConnectionMonitor = context.components.wifiConnectionMonitor,
-                ),
-                owner = lifecycleOwner,
-                view = view,
-            )
-
-            // This component feature only works on Fenix when built on Mozilla infrastructure.
-            // sike
-//            if (BuildConfig.MOZILLA_OFFICIAL) {
-            webAuthnFeature.set(
-                feature = WebAuthnFeature(
-                    engine = context.components.core.engine,
-                    activity = context.getActivity()!!,
-                    exitFullScreen = context.components.useCases.sessionUseCases.exitFullscreen::invoke,
-                    currentTab = { store.state.selectedTabId },
-                ),
-                owner = lifecycleOwner,
-                view = view,
-            )
-//            }
-
-            screenOrientationFeature.set(
-                feature = ScreenOrientationFeature(
-                    engine = context.components.core.engine,
-                    activity = context.getActivity()!!,
-                ),
-                owner = lifecycleOwner,
-                view = view,
-            )
-
-            // todo: site permissions
-//            context.settings().setSitePermissionSettingListener(viewLifecycleOwner) {
-//                // If the user connects to WIFI while on the BrowserFragment, this will update the
-//                // SitePermissionsRules (specifically autoplay) accordingly
-//                runIfFragmentIsAttached {
-//                    assignSitePermissionsRules(context, sitePermissionsFeature)
-//                }
-//            }
-
-            fullScreenFeature.set(
-                feature = FullScreenFeature(
-                    context.components.core.store,
-                    context.components.useCases.sessionUseCases,
-                    state.customTabSessionId,
-                    { viewportFitChange(it, context) },
-                    { inFullScreen ->
-                        fullScreenChanged(
-                            inFullScreen = inFullScreen,
-                            context = context,
-                            activity = context.getActivity()!!,
-                            engineView = engineView!!,
-                            swipeRefresh = swipeRefresh!!,
-                            enableFullscreen = { state.setBrowserModeFullscreen() },
-                            disableFullscreen = { state.setBrowserModeToolbar() },
-                        )
-                    },
-                ),
-                owner = lifecycleOwner,
-                view = view,
-            )
-
-            store.flowScoped(lifecycleOwner) { flow ->
-                flow.mapNotNull { browserState ->
-                    browserState.findTabOrCustomTabOrSelectedTab(
-                        state.customTabSessionId
-                    )
-                }.distinctUntilChangedBy { tab -> tab.content.pictureInPictureEnabled }
-                    .collect { tab ->
-                        pipModeChanged(
-                            session = tab,
-                            backPressedHandler = backHandler,
-                            context = context,
-                            activity = context.getActivity()!!,
-                            engineView = engineView!!,
-                            swipeRefresh = swipeRefresh!!,
-                            enableFullscreen = { state.setBrowserModeFullscreen() },
-                            disableFullscreen = { state.setBrowserModeToolbar() },
-                        )
-                    }
-            }
-
-            // todo: swipe refresh
-//            binding.swipeRefresh.isEnabled = shouldPullToRefreshBeEnabled(false)
-//
-//            if (binding.swipeRefresh.isEnabled) {
-//                val primaryTextColor = ThemeManager.resolveAttribute(R.attr.textPrimary, context)
-//                val primaryBackgroundColor = ThemeManager.resolveAttribute(R.attr.layer2, context)
-//                binding.swipeRefresh.apply {
-//                    setColorSchemeResources(primaryTextColor)
-//                    setProgressBackgroundColorSchemeResource(primaryBackgroundColor)
-//                }
-            swipeRefreshFeature.set(
-                feature = SwipeRefreshFeature(
-                    context.components.core.store,
-                    context.components.useCases.sessionUseCases.reload,
-                    swipeRefresh!!,
-                    { },
-                    state.customTabSessionId,
-                ),
-                owner = lifecycleOwner,
-                view = view,
-            )
-//            }
-
-            webchannelIntegration.set(
-                feature = FxaWebChannelIntegration(
-                    customTabSessionId = state.customTabSessionId,
-                    runtime = context.components.core.engine,
-                    store = context.components.core.store,
-                    accountManager = context.components.backgroundServices.accountManager,
-                    serverConfig = context.components.backgroundServices.serverConfig,
-                    activityRef = WeakReference(context.getActivity()),
-                ),
-                owner = lifecycleOwner,
-                view = view,
-            )
-
-            initializeMicrosurveyFeature(context, lifecycleOwner, messagingFeatureMicrosurvey)
-
-            // TODO: super
-//    super.initializeUI(view, tab)
-
-            /* super */
-            // TODO
-//    val tab = getCurrentTab()
-//    browserInitialized = if (tab != null) {
-//        initializeUI(view, tab)
-//        true
-//    } else {
-//        false
-//    }
-            /* super */
-
-            val components = context.components
-
-            updateBrowserToolbarLeadingAndNavigationActions(
-                context = context,
-                redesignEnabled = context.settings().navigationToolbarEnabled,
-                isLandscape = context.isLandscape(),
-                isTablet = isLargeWindow(context),
-                isPrivate = (context.getActivity()!! as HomeActivity).browsingModeManager.mode.isPrivate,
-                feltPrivateBrowsingEnabled = context.settings().feltPrivateBrowsingEnabled,
-                isWindowSizeSmall = true, // AcornWindowSize.getWindowSize(context) == AcornWindowSize.Small,
-            )
-
-            updateBrowserToolbarMenuVisibility()
-
-            // todo: translation, browser toolbar interactor
-//            initTranslationsAction(
-//                context, view, browserToolbarInteractor!!, translationsAvailable.value
-//            )
-            initReviewQualityCheck(
-                context,
-                lifecycleOwner,
-                view,
-                navController,
-                { reviewQualityCheckAvailable = it },
-                reviewQualityCheckAvailable,
-                reviewQualityCheckFeature
-            )
-            // todo: init share page action, browser toolbar interactor
-//            initSharePageAction(context, browserToolbarInteractor)
-            initReloadAction(context)
-
-            thumbnailsFeature.set(
-                feature = BrowserThumbnails(context, engineView!!, components.core.store),
-                owner = lifecycleOwner,
-                view = view,
-            )
-
-            windowFeature.set(
-                feature = WindowFeature(
-                    store = components.core.store,
-                    tabsUseCases = components.useCases.tabsUseCases,
-                ),
-                owner = lifecycleOwner,
-                view = view,
-            )
-
-//        if (context.settings().shouldShowOpenInAppCfr) {
-//            openInAppOnboardingObserver.set(
-//                feature = OpenInAppOnboardingObserver(
-//                    context = context,
-//                    store = context.components.core.store,
-//                    lifecycleOwner = lifecycleOwner,
-//                    navController = navController,
-//                    settings = context.settings(),
-//                    appLinksUseCases = context.components.useCases.appLinksUseCases,
-//                    container = binding.browserLayout as ViewGroup,
-//                    shouldScrollWithTopToolbar = !context.settings().shouldUseBottomToolbar,
-//                ),
-//                owner = lifecycleOwner,
-//                view = view,
-//            )
-//        }
-        }
-        initializeUI()
-
-        observeTabSelection(
-            context.components.core.store,
-            context,
-            lifecycleOwner,
-            coroutineScope,
-            browserInitialized,
-        )
-
-        if (!context.components.fenixOnboarding.userHasBeenOnboarded()) {
-            observeTabSource(
-                context.components.core.store, context, lifecycleOwner, coroutineScope
-            )
-        }
-
-        // todo: accessibility
-//        context.accessibilityManager.addAccessibilityStateChangeListener(view) // this)
-
-        context.components.backgroundServices.closeSyncedTabsCommandReceiver.register(
-            observer = CloseLastSyncedTabObserver(
-                scope = coroutineScope, // viewLifecycleOwner.lifecycleScope,
-                navController = navController,
-            ),
-            view = view,
-        )
-
-        // DO NOT MOVE ANYTHING BELOW THIS addMarker CALL!
-        context.components.core.engine.profiler?.addMarker(
-            MarkersFragmentLifecycleCallbacks.MARKER_NAME,
-            profilerStartTime,
-            "BaseBrowserFragment.onViewCreated",
-        )/* BaseBrowserFragment onViewCreated */
     }
 
     DisposableEffect(lifecycleOwner) {
@@ -1625,7 +1186,7 @@ fun BrowserComponent(
                         state.customTabSessionId
                     )?.let { session ->
                         // If we didn't enter PiP, exit full screen on stop
-                        if (!session.content.pictureInPictureEnabled && fullScreenFeature.onBackPressed()) {
+                        if (!session.content.pictureInPictureEnabled && fullScreenFeature?.onBackPressed() == true) {
                             fullScreenChanged(
                                 inFullScreen = false,
                                 context = context,
@@ -1698,18 +1259,400 @@ fun BrowserComponent(
     }
 
     // todo: fix all feature init
-    LaunchedEffect(engineView, state.customTabSessionId) {
-        sessionFeature.set(
-            feature = SessionFeature(
-                context.components.core.store,
-                context.components.useCases.sessionUseCases.goBack,
-                context.components.useCases.sessionUseCases.goForward,
-                engineView!!, // binding.engineView,
-                state.customTabSessionId,
-            ),
-            owner = lifecycleOwner,
-            view = view,
-        )
+    DisposableEffect(engineView == null, state.customTabSessionId) {
+        if (engineView != null) {
+
+//        setEngineDynamicToolbarMaxHeight(bottomBarHeightDp.dpToPx(context) - bottomBarOffsetPx.value.toInt())
+            setEngineDynamicToolbarMaxHeight(0)
+
+            /**
+             * component init profiler start
+             */
+            // DO NOT ADD ANYTHING ABOVE THIS getProfilerTime CALL!
+            val profilerStartTime = context.components.core.engine.profiler?.getProfilerTime()
+
+            /**
+             * Initialize UI
+             */
+            run {
+                // browser animations
+//            browserAnimator = BrowserAnimator(
+//                fragment = WeakReference(this),
+//                engineView = WeakReference(engineView!!),
+//                swipeRefresh = WeakReference(swipeRefresh!!),
+//                viewLifecycleScope = WeakReference(coroutineScope),// viewLifecycleOwner.lifecycleScope),
+//            ).apply {
+//                beginAnimateInIfNecessary()
+//            }
+
+                val openInFenixIntent = Intent(context, IntentReceiverActivity::class.java).apply {
+                    action = Intent.ACTION_VIEW
+                    putExtra(HomeActivity.OPEN_TO_BROWSER, true)
+                }
+
+                // todo: implement microsurvey?
+//                if (context.settings().microsurveyFeatureEnabled) {
+//                    listenForMicrosurveyMessage(context, lifecycleOwner)
+//                }
+
+
+                // todo: open in firefox
+//    openInFirefoxBinding.set(
+//        feature = OpenInFirefoxBinding(
+//            activity = activity,
+//            appStore = context.components.appStore,
+//            customTabSessionId = customTabSessionId,
+//            customTabsUseCases = context.components.useCases.customTabsUseCases,
+//            openInFenixIntent = openInFenixIntent,
+//            sessionFeature = sessionFeature,
+//        ),
+//        owner = lifecycleOwner,
+//        view = view,
+//    )
+
+                // todo: settings to quick settings when site security icons clicked
+//    browserToolbarView.view.display.setOnSiteSecurityClickedListener {
+//        showQuickSettingsDialog()
+//    }
+
+                // todo: move to LaunchedEffect that listens to setting change
+                val allowScreenshotsInPrivateMode = context.settings().allowScreenshotsInPrivateMode
+                secureWindowFeature = SecureWindowFeature(
+                    window = context.getActivity()!!.window,
+                    store = store,
+                    customTabId = state.customTabSessionId,
+                    isSecure = { !allowScreenshotsInPrivateMode && it.content.private },
+                    clearFlagOnStop = false,
+                ).apply { this.start() }
+
+                fullScreenMediaSessionFeature = MediaSessionFullscreenFeature(
+                    context.getActivity()!!,
+                    context.components.core.store,
+                    state.customTabSessionId,
+                ).apply { this.start() }
+
+                shareDownloadsFeature = ShareDownloadFeature(
+                    context = context.applicationContext,
+                    httpClient = context.components.core.client,
+                    store = store,
+                    tabId = state.customTabSessionId,
+                ).apply { this.start() }
+
+                copyDownloadsFeature = CopyDownloadFeature(
+                    context = context.applicationContext,
+                    httpClient = context.components.core.client,
+                    store = store,
+                    tabId = state.customTabSessionId,
+                    onCopyConfirmation = {
+                        showSnackbarForClipboardCopy(context, coroutineScope, snackbarHostState)
+                    },
+                ).apply { this.start() }
+
+                pipFeature = PictureInPictureFeature(
+                    store = store,
+                    activity = context.getActivity()!!,
+                    crashReporting = context.components.crashReporter, // context.components.analytics.crashReporter,
+                    tabId = state.customTabSessionId,
+                )
+
+                biometricPromptFeature = BiometricPromptFeature(
+                    context = context,
+                    fragment = null, // view.findFragment(),
+                    onAuthFailure = {
+                        // todo: test biometrics
+                        webPrompterState.onBiometricResult(isAuthenticated = false)
+                    },
+                    onAuthSuccess = {
+                        // todo: test biometrics
+                        webPrompterState.onBiometricResult(isAuthenticated = true)
+                    },
+                ).apply { this.start() }
+
+                sessionFeature = SessionFeature(
+                    context.components.core.store,
+                    context.components.useCases.sessionUseCases.goBack,
+                    context.components.useCases.sessionUseCases.goForward,
+                    engineView!!, // binding.engineView,
+                    state.customTabSessionId,
+                ).apply { this.start() }
+
+                // todo: crash handling
+//            crashContentIntegration.set(
+//                feature = CrashContentIntegration(
+//                    context = context,
+//                    browserStore = context.components.core.store,
+//                    appStore = context.components.appStore,
+//                    toolbar = browserToolbarView.view,
+//                    crashReporterView = binding.crashReporterView,
+//                    components = context.components,
+//                    settings = context.settings(),
+//                    navController = navController,
+//                    sessionId = customTabSessionId,
+//                ),
+//                owner = lifecycleOwner,
+//                view = view,
+//            )
+
+                searchFeature = SearchFeature(store, state.customTabSessionId) { request, tabId ->
+                    val parentSession = store.state.findTabOrCustomTab(tabId)
+                    val useCase = if (request.isPrivate) {
+                        context.components.useCases.searchUseCases.newPrivateTabSearch
+                    } else {
+                        context.components.useCases.searchUseCases.newTabSearch
+                    }
+
+                    if (parentSession is CustomTabSessionState) {
+                        useCase.invoke(request.query)
+                        context.getActivity()!!.startActivity(openInFenixIntent)
+                    } else {
+                        useCase.invoke(request.query, parentSessionId = parentSession?.id)
+                    }
+                }.apply { this.start() }
+
+                val accentHighContrastColor =
+                    ThemeManager.resolveAttribute(R.attr.actionPrimary, context)
+
+                sitePermissionsFeature = SitePermissionsFeature(
+                    context = context,
+                    storage = context.components.core.geckoSitePermissionsStorage,
+                    fragmentManager = parentFragmentManager,
+                    promptsStyling = SitePermissionsFeature.PromptsStyling(
+                        gravity = getAppropriateLayoutGravity(context),
+                        shouldWidthMatchParent = true,
+                        positiveButtonBackgroundColor = accentHighContrastColor,
+                        positiveButtonTextColor = R.color.fx_mobile_text_color_action_primary,
+                    ),
+                    sessionId = state.customTabSessionId,
+                    onNeedToRequestPermissions = { permissions ->
+                        // todo: test
+                        requestSitePermissionsLauncher.launch(permissions)
+//                        requestPermissions(permissions, REQUEST_CODE_APP_PERMISSIONS)
+                    },
+                    onShouldShowRequestPermissionRationale = {
+                        // todo: permissions
+                        false
+//                        shouldShowRequestPermissionRationale(
+//                            it,
+//                        )
+                    },
+                    store = store,
+                ).apply { this.start() }
+
+                sitePermissionWifiIntegration = SitePermissionsWifiIntegration(
+                    settings = context.settings(),
+                    wifiConnectionMonitor = context.components.wifiConnectionMonitor,
+                ).apply { this.start() }
+
+                // This component feature only works on Fenix when built on Mozilla infrastructure.
+                // sike
+//            if (BuildConfig.MOZILLA_OFFICIAL) {
+                webAuthnFeature = WebAuthnFeature(
+                    engine = context.components.core.engine,
+                    activity = context.getActivity()!!,
+                    exitFullScreen = context.components.useCases.sessionUseCases.exitFullscreen::invoke,
+                    currentTab = { store.state.selectedTabId },
+                ).apply { this.start() }
+
+                screenOrientationFeature = ScreenOrientationFeature(
+                    engine = context.components.core.engine,
+                    activity = context.getActivity()!!,
+                ).apply { this.start() }
+
+                // todo: site permissions
+//            context.settings().setSitePermissionSettingListener(viewLifecycleOwner) {
+//                // If the user connects to WIFI while on the BrowserFragment, this will update the
+//                // SitePermissionsRules (specifically autoplay) accordingly
+//                runIfFragmentIsAttached {
+//                    assignSitePermissionsRules(context, sitePermissionsFeature)
+//                }
+//            }
+
+                fullScreenFeature = FullScreenFeature(
+                    context.components.core.store,
+                    context.components.useCases.sessionUseCases,
+                    state.customTabSessionId,
+                    { viewportFitChange(it, context) },
+                    { inFullScreen ->
+                        fullScreenChanged(
+                            inFullScreen = inFullScreen,
+                            context = context,
+                            activity = context.getActivity()!!,
+                            engineView = engineView!!,
+                            swipeRefresh = swipeRefresh!!,
+                            enableFullscreen = { state.setBrowserModeFullscreen() },
+                            disableFullscreen = { state.setBrowserModeToolbar() },
+                        )
+                    },
+                ).apply { this.start() }
+
+                // pip mode change listener
+                store.flowScoped(lifecycleOwner) { flow ->
+                    flow.mapNotNull { browserState ->
+                        browserState.findTabOrCustomTabOrSelectedTab(
+                            state.customTabSessionId
+                        )
+                    }.distinctUntilChangedBy { tab -> tab.content.pictureInPictureEnabled }
+                        .collect { tab ->
+                            pipModeChanged(
+                                session = tab,
+                                backPressedHandler = backHandler,
+                                context = context,
+                                activity = context.getActivity()!!,
+                                engineView = engineView!!,
+                                swipeRefresh = swipeRefresh!!,
+                                enableFullscreen = { state.setBrowserModeFullscreen() },
+                                disableFullscreen = { state.setBrowserModeToolbar() },
+                            )
+                        }
+                }
+
+                // todo: swipe refresh
+//            binding.swipeRefresh.isEnabled = shouldPullToRefreshBeEnabled(false)
+//
+//            if (binding.swipeRefresh.isEnabled) {
+//                val primaryTextColor = ThemeManager.resolveAttribute(R.attr.textPrimary, context)
+//                val primaryBackgroundColor = ThemeManager.resolveAttribute(R.attr.layer2, context)
+//                binding.swipeRefresh.apply {
+//                    setColorSchemeResources(primaryTextColor)
+//                    setProgressBackgroundColorSchemeResource(primaryBackgroundColor)
+//                }
+                swipeRefreshFeature = SwipeRefreshFeature(
+                    context.components.core.store,
+                    context.components.useCases.sessionUseCases.reload,
+                    swipeRefresh!!,
+                    { },
+                    state.customTabSessionId,
+                ).apply { this.start() }
+//            }
+
+                webchannelIntegration = FxaWebChannelIntegration(
+                    customTabSessionId = state.customTabSessionId,
+                    runtime = context.components.core.engine,
+                    store = context.components.core.store,
+                    accountManager = context.components.backgroundServices.accountManager,
+                    serverConfig = context.components.backgroundServices.serverConfig,
+                    activityRef = WeakReference(context.getActivity()),
+                ).apply { this.start() }
+
+                // todo: implement microsurvey?
+//                initializeMicrosurveyFeature(context, lifecycleOwner, messagingFeatureMicrosurvey)
+
+                /* super */
+
+                val components = context.components
+
+                updateBrowserToolbarLeadingAndNavigationActions(
+                    context = context,
+                    redesignEnabled = context.settings().navigationToolbarEnabled,
+                    isLandscape = context.isLandscape(),
+                    isTablet = isLargeWindow(context),
+                    isPrivate = (context.getActivity()!! as HomeActivity).browsingModeManager.mode.isPrivate,
+                    feltPrivateBrowsingEnabled = context.settings().feltPrivateBrowsingEnabled,
+                    isWindowSizeSmall = true, // AcornWindowSize.getWindowSize(context) == AcornWindowSize.Small,
+                )
+
+                updateBrowserToolbarMenuVisibility()
+
+                // todo: translation, browser toolbar interactor
+//            initTranslationsAction(
+//                context, view, browserToolbarInteractor!!, translationsAvailable.value
+//            )
+                initReviewQualityCheck(
+                    context,
+                    lifecycleOwner,
+                    view,
+                    navController,
+                    { reviewQualityCheckAvailable = it },
+                    reviewQualityCheckAvailable,
+                    { reviewQualityCheckFeature = it }
+                )
+                // todo: init share page action, browser toolbar interactor
+//            initSharePageAction(context, browserToolbarInteractor)
+                initReloadAction(context)
+
+                thumbnailsFeature = BrowserThumbnails(
+                    context,
+                    engineView!!,
+                    components.core.store
+                ).apply { this.start() }
+
+                windowFeature = WindowFeature(
+                    store = components.core.store,
+                    tabsUseCases = components.useCases.tabsUseCases,
+                ).apply { this.start() }
+
+//        if (context.settings().shouldShowOpenInAppCfr) {
+//            openInAppOnboardingObserver.set(
+//                feature = OpenInAppOnboardingObserver(
+//                    context = context,
+//                    store = context.components.core.store,
+//                    lifecycleOwner = lifecycleOwner,
+//                    navController = navController,
+//                    settings = context.settings(),
+//                    appLinksUseCases = context.components.useCases.appLinksUseCases,
+//                    container = binding.browserLayout as ViewGroup,
+//                    shouldScrollWithTopToolbar = !context.settings().shouldUseBottomToolbar,
+//                ),
+//                owner = lifecycleOwner,
+//                view = view,
+//            )
+//        }
+            }
+
+            // todo: handle resume download dialog state
+//            observeTabSelection(
+//                context.components.core.store,
+//                context,
+//                lifecycleOwner,
+//                coroutineScope,
+//                browserInitialized,
+//            )
+
+            // todo: onboarding (welcome screen)
+//            if (!context.components.fenixOnboarding.userHasBeenOnboarded()) {
+//                observeTabSource(
+//                    context.components.core.store, context, lifecycleOwner, coroutineScope
+//                )
+//            }
+
+            // todo: accessibility
+//        context.accessibilityManager.addAccessibilityStateChangeListener(view) // this)
+
+            context.components.backgroundServices.closeSyncedTabsCommandReceiver.register(
+                observer = CloseLastSyncedTabObserver(
+                    scope = coroutineScope, // viewLifecycleOwner.lifecycleScope,
+                    navController = navController,
+                ),
+                view = view,
+            )
+
+            // DO NOT MOVE ANYTHING BELOW THIS addMarker CALL!
+            context.components.core.engine.profiler?.addMarker(
+                MarkersFragmentLifecycleCallbacks.MARKER_NAME,
+                profilerStartTime,
+                "BrowserComponent.DisposableEffect for component setup",
+            )
+        }
+
+        onDispose {
+            secureWindowFeature?.stop()
+            fullScreenMediaSessionFeature?.stop()
+            shareDownloadsFeature?.stop()
+            copyDownloadsFeature?.stop()
+//            pipFeature // not LifecycleAwareFeature
+            biometricPromptFeature?.stop()
+            sessionFeature?.stop()
+            searchFeature?.stop()
+            sitePermissionsFeature?.stop()
+            sitePermissionWifiIntegration?.stop()
+            webAuthnFeature?.stop()
+            screenOrientationFeature?.stop()
+            fullScreenFeature?.stop()
+            swipeRefreshFeature?.stop()
+            webchannelIntegration?.stop()
+            thumbnailsFeature?.stop()
+            windowFeature?.stop()
+        }
     }
 
     ContextMenuComponent(
@@ -1972,7 +1915,7 @@ fun BrowserComponent(
                                     // if can go back (or sesh null), invoke go back
                                     context.components.useCases.sessionUseCases.goBack.invoke(it)
                                 } else {
-                                    // if cant go back, end activity / return to app that launcehd
+                                    // if cant go back, end activity / return to app that launched
                                     context.getActivity()!!.finish()
                                 }
                             },
@@ -2064,9 +2007,9 @@ private data class OnBackPressedHandler(
     val context: Context,
     val toolbarBackPressedHandler: () -> Boolean,
     val readerViewBackPressedHandler: () -> Boolean,
-    val fullScreenFeature: ViewBoundFeatureWrapper<FullScreenFeature>,
+    val fullScreenFeature: FullScreenFeature?,
 //    val promptsFeature: ViewBoundFeatureWrapper<PromptFeature>,
-    val sessionFeature: ViewBoundFeatureWrapper<SessionFeature>,
+    val sessionFeature: SessionFeature?,
 )
 
 // combines Moz BrowserFragment and Moz BaseBrowserFragment implementations
@@ -2075,9 +2018,9 @@ private fun onBackPressed(
 ): Boolean {
     with(onBackPressedHandler) {
         // todo: findInPageIntegration.onBackPressed() ||
-        return readerViewBackPressedHandler.invoke() || fullScreenFeature.onBackPressed() || toolbarBackPressedHandler.invoke()
+        return readerViewBackPressedHandler.invoke() || fullScreenFeature?.onBackPressed() ?: false || toolbarBackPressedHandler.invoke()
 //                || promptsFeature.onBackPressed()
-                || sessionFeature.onBackPressed() || removeSessionIfNeeded(context)
+                || sessionFeature?.onBackPressed() ?: false || removeSessionIfNeeded(context)
     }
 }
 
@@ -2087,22 +2030,29 @@ fun MozEngineView(
     setSwipeView: (VerticalSwipeRefreshLayout) -> Unit,
     setEngineView: (GeckoEngineView) -> Unit,
 ) {
+    val infernoTheme = LocalContext.current.infernoTheme().value
+    val trackColor = infernoTheme.primaryActionColor.toArgb()
+    val discColor = infernoTheme.secondaryBackgroundColor.toArgb()
+
     AndroidView(
         modifier = modifier,
         factory = { context ->
-            val vl = VerticalSwipeRefreshLayout(context)
+            val vr = VerticalSwipeRefreshLayout(context)
             val gv = GeckoEngineView(context)
-            setSwipeView(vl)
+            setSwipeView(vr)
             setEngineView(gv)
-            vl.layoutParams = LayoutParams(
+            vr.layoutParams = LayoutParams(
                 LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT
             )
+//            vl.setProgressBackgroundColorSchemeColor(discColor)
+
+            vr.setColorSchemeColors(trackColor, discColor)
             // todo: user prefs if swipe refresh enabled or not
-            vl.visibility = View.VISIBLE
-            vl.isEnabled = true
-            vl.isActivated = true
-            vl.isVisible = true
-            vl.addView(gv)
+            vr.visibility = View.VISIBLE
+            vr.isEnabled = true
+            vr.isActivated = true
+            vr.isVisible = true
+            vr.addView(gv)
             gv.layoutParams.width = LayoutParams.MATCH_PARENT
             gv.layoutParams.height = LayoutParams.MATCH_PARENT
             gv.setBackgroundColor(android.graphics.Color.TRANSPARENT)
@@ -2111,11 +2061,13 @@ fun MozEngineView(
             gv.isEnabled = true
             gv.isActivated = true
             gv.isVisible = true
-            vl
+            vr
         },
-        update = { sv ->
+        update = { vr ->
+            // if theme changed update colors
+            vr.setColorSchemeColors(trackColor, discColor)
             var gv: GeckoEngineView? = null
-            for (v in sv.children) {
+            for (v in vr.children) {
                 if (v is GeckoEngineView) {
                     gv = v
                     break
@@ -2559,14 +2511,13 @@ private fun showSnackbarAfterLoginChange(
  */
 private fun showBiometricPrompt(
     context: Context,
-    biometricPromptFeature: ViewBoundFeatureWrapper<BiometricPromptFeature>,
+    biometricPromptFeature: BiometricPromptFeature?,
     webPrompterState: InfernoPromptFeatureState?,
     startForResult: ManagedActivityResultLauncher<Intent, ActivityResult>,
     setAlertDialog: ((@Composable () -> Unit)?) -> Unit,
 ) {
     if (BiometricPromptFeature.canUseFeature(context)) {
-        biometricPromptFeature.get()
-            ?.requestAuthentication(context.getString(R.string.credit_cards_biometric_prompt_unlock_message_2))
+        biometricPromptFeature?.requestAuthentication(context.getString(R.string.credit_cards_biometric_prompt_unlock_message_2))
         return
     }
 
@@ -2845,25 +2796,25 @@ internal fun shouldPullToRefreshBeEnabled(inFullScreen: Boolean, context: Contex
 //    }
 //}
 
-
-@VisibleForTesting
-internal fun initializeMicrosurveyFeature(
-    context: Context,
-    lifecycleOwner: LifecycleOwner,
-    messagingFeatureMicrosurvey: ViewBoundFeatureWrapper<MessagingFeature>,
-) {
-    if (context.settings().isExperimentationEnabled && context.settings().microsurveyFeatureEnabled) {
-        // todo: microsurvey
-//        messagingFeatureMicrosurvey.set(
-//            feature = MessagingFeature(
-//                appStore = context.components.appStore,
-//                surface = FenixMessageSurfaceId.MICROSURVEY,
-//            ),
-//            owner = lifecycleOwner,
-//            view = binding.root,
-//        )
-    }
-}
+// todo: implement microsurvey?
+//@VisibleForTesting
+//internal fun initializeMicrosurveyFeature(
+//    context: Context,
+//    lifecycleOwner: LifecycleOwner,
+//    messagingFeatureMicrosurvey: ViewBoundFeatureWrapper<MessagingFeature>,
+//) {
+//    if (context.settings().isExperimentationEnabled && context.settings().microsurveyFeatureEnabled) {
+//        // todo: implement microsurvey?
+////        messagingFeatureMicrosurvey.set(
+////            feature = MessagingFeature(
+////                appStore = context.components.appStore,
+////                surface = FenixMessageSurfaceId.MICROSURVEY,
+////            ),
+////            owner = lifecycleOwner,
+////            view = binding.root,
+////        )
+//    }
+//}
 
 //@Suppress("LongMethod")
 //private fun initializeMicrosurveyPrompt(
@@ -2974,34 +2925,34 @@ internal fun initializeMicrosurveyFeature(
 //    }
 //}
 
-private var currentMicrosurvey: MicrosurveyUIData? = null
+//private var currentMicrosurvey: MicrosurveyUIData? = null
 
-/**
- * Listens for the microsurvey message and initializes the microsurvey prompt if one is available.
- */
-private fun listenForMicrosurveyMessage(context: Context, lifecycleOwner: LifecycleOwner) {
-    // todo: microsurvey
-//    binding.root.consumeFrom(context.components.appStore, lifecycleOwner) { state ->
-//        state.messaging.messageToShow[FenixMessageSurfaceId.MICROSURVEY]?.let { message ->
-//            if (message.id != currentMicrosurvey?.id) {
-//                message.toMicrosurveyUIData()?.let { microsurvey ->
-//                    context.components.settings.shouldShowMicrosurveyPrompt = true
-//                    currentMicrosurvey = microsurvey
-//
-//                    _bottomToolbarContainerView?.toolbarContainerView.let {
-//                        binding.browserLayout.removeView(it)
-//                    }
-//
-//                    if (context.shouldAddNavigationBar()) {
-//                        reinitializeNavBar()
-//                    } else {
-//                        initializeMicrosurveyPrompt()
-//                    }
-//                }
-//            }
-//        }
-//    }
-}
+///**
+// * Listens for the microsurvey message and initializes the microsurvey prompt if one is available.
+// */
+//private fun listenForMicrosurveyMessage(context: Context, lifecycleOwner: LifecycleOwner) {
+//    // todo: microsurvey
+////    binding.root.consumeFrom(context.components.appStore, lifecycleOwner) { state ->
+////        state.messaging.messageToShow[FenixMessageSurfaceId.MICROSURVEY]?.let { message ->
+////            if (message.id != currentMicrosurvey?.id) {
+////                message.toMicrosurveyUIData()?.let { microsurvey ->
+////                    context.components.settings.shouldShowMicrosurveyPrompt = true
+////                    currentMicrosurvey = microsurvey
+////
+////                    _bottomToolbarContainerView?.toolbarContainerView.let {
+////                        binding.browserLayout.removeView(it)
+////                    }
+////
+////                    if (context.shouldAddNavigationBar()) {
+////                        reinitializeNavBar()
+////                    } else {
+////                        initializeMicrosurveyPrompt()
+////                    }
+////                }
+////            }
+////        }
+////    }
+//}
 
 //private fun shouldShowMicrosurveyPrompt(context: Context) =
 //    context.components.settings.shouldShowMicrosurveyPrompt
@@ -3018,88 +2969,84 @@ private fun listenForMicrosurveyMessage(context: Context, lifecycleOwner: Lifecy
 //): List<ContextMenuCandidate>
 
 
-@VisibleForTesting
-internal fun observeTabSelection(
-    store: BrowserStore,
-    context: Context,
-    lifecycleOwner: LifecycleOwner,
-    coroutineScope: CoroutineScope,
-    browserInitialized: Boolean,
-) {
-    consumeFlow(store, lifecycleOwner, context, coroutineScope) { flow ->
-        flow.distinctUntilChangedBy {
-            it.selectedTabId
-        }.mapNotNull {
-            it.selectedTab
-        }.collect {
-//            currentStartDownloadDialog?.dismiss()
-            handleTabSelected(it, browserInitialized)
-        }
-    }
-}
-
-@VisibleForTesting
-@Suppress("ComplexCondition")
-internal fun observeTabSource(
-    store: BrowserStore,
-    context: Context,
-    lifecycleOwner: LifecycleOwner,
-    coroutineScope: CoroutineScope,
-) {
-    consumeFlow(store, lifecycleOwner, context, coroutineScope) { flow ->
-        flow.mapNotNull { state ->
-            state.selectedTab
-        }.collect {
-            if (!context.components.fenixOnboarding.userHasBeenOnboarded() && it.content.loadRequest?.triggeredByRedirect != true && it.source !is SessionState.Source.External && it.content.url !in onboardingLinksList) {
-                context.components.fenixOnboarding.finish()
-            }
-        }
-    }
-}
-
-private fun handleTabSelected(selectedTab: TabSessionState, browserInitialized: Boolean) {
-    // todo: theme
-//    if (!this.isRemoving) {
-//        updateThemeForSession(selectedTab)
-//    }
-
-    // todo: toolbar
-//    if (browserInitialized) {
-//        view?.let {
-//            fullScreenChanged(false)
-////            browserToolbarView.expand()
-//
-//            val context = context
-//            resumeDownloadDialogState(selectedTab.id, context.components.core.store, context)
-//            it.announceForAccessibility(selectedTab.toDisplayTitle())
+//@VisibleForTesting
+//internal fun observeTabSelection(
+//    store: BrowserStore,
+//    context: Context,
+//    lifecycleOwner: LifecycleOwner,
+//    coroutineScope: CoroutineScope,
+//    browserInitialized: Boolean,
+//) {
+//    consumeFlow(store, lifecycleOwner, context, coroutineScope) { flow ->
+//        flow.distinctUntilChangedBy {
+//            it.selectedTabId
+//        }.mapNotNull {
+//            it.selectedTab
+//        }.collect {
+////            currentStartDownloadDialog?.dismiss()
+////            handleTabSelected(it, browserInitialized)
 //        }
-//    } else {
-//        view?.let { view -> initializeUI(view) }
 //    }
-}
+//}
+
+//@VisibleForTesting
+//@Suppress("ComplexCondition")
+//internal fun observeTabSource(
+//    store: BrowserStore,
+//    context: Context,
+//    lifecycleOwner: LifecycleOwner,
+//    coroutineScope: CoroutineScope,
+//) {
+//    consumeFlow(store, lifecycleOwner, context, coroutineScope) { flow ->
+//        flow.mapNotNull { state ->
+//            state.selectedTab
+//        }.collect {
+//            if (!context.components.fenixOnboarding.userHasBeenOnboarded() && it.content.loadRequest?.triggeredByRedirect != true && it.source !is SessionState.Source.External && it.content.url !in onboardingLinksList) {
+//                context.components.fenixOnboarding.finish()
+//            }
+//        }
+//    }
+//}
+
+//private fun handleTabSelected(selectedTab: TabSessionState, browserInitialized: Boolean) {
+//    // todo: theme
+////    if (!this.isRemoving) {
+////        updateThemeForSession(selectedTab)
+////    }
+//
+//    // todo: toolbar
+////    if (browserInitialized) {
+////        view?.let {
+////            fullScreenChanged(false)
+//////            browserToolbarView.expand()
+////
+////            val context = context
+// todo: implement this fun, resume download when tab selected again
+////            resumeDownloadDialogState(selectedTab.id, context.components.core.store, context)
+////            it.announceForAccessibility(selectedTab.toDisplayTitle())
+////        }
+////    } else {
+////        view?.let { view -> initializeUI(view) }
+////    }
+//}
 
 
 private fun evaluateMessagesForMicrosurvey(components: Components) =
     components.appStore.dispatch(MessagingAction.Evaluate(FenixMessageSurfaceId.MICROSURVEY))
 
 
-@CallSuper
-fun onForwardPressed(sessionFeature: ViewBoundFeatureWrapper<SessionFeature>): Boolean {
-    return sessionFeature.onForwardPressed()
-}
-
-/**
- * Forwards activity results to the [ActivityResultHandler] features.
- *//* override */ fun onActivityResult(
-    requestCode: Int, data: Intent?, resultCode: Int,
-): Boolean {
-    // todo: onActivityResult
-//    return listOf(
-//        promptsFeature,
-//        webAuthnFeature,
-//    ).any { it.onActivityResult(requestCode, data, resultCode) }
-    return true
-}
+// todo: onActivityResult
+///**
+// * Forwards activity results to the [ActivityResultHandler] features.
+// *//* override */ fun onActivityResult(
+//    requestCode: Int, data: Intent?, resultCode: Int,
+//): Boolean {
+////    return listOf(
+////        promptsFeature,
+////        webAuthnFeature,
+////    ).any { it.onActivityResult(requestCode, data, resultCode) }
+//    return true
+//}
 
 /**
  * Navigate to GlobalTabHistoryDialogFragment.
@@ -3874,7 +3821,7 @@ private fun initReviewQualityCheck(
     navController: NavController,
     setReviewQualityCheckAvailable: (Boolean) -> Unit,
     reviewQualityCheckAvailable: Boolean,
-    reviewQualityCheckFeature: ViewBoundFeatureWrapper<ReviewQualityCheckFeature>,
+    setReviewQualityCheckFeature: (ReviewQualityCheckFeature) -> Unit,
 ) {
     val reviewQualityCheck = BrowserToolbar.ToggleButton(
         image = AppCompatResources.getDrawable(
@@ -3904,8 +3851,8 @@ private fun initReviewQualityCheck(
     // todo: qualityCheck???, also page actions not implemented
 //    browserToolbarView.view.addPageAction(reviewQualityCheck)
 
-    reviewQualityCheckFeature.set(
-        feature = ReviewQualityCheckFeature(
+    setReviewQualityCheckFeature(
+        ReviewQualityCheckFeature(
             appStore = context.components.appStore,
             browserStore = context.components.core.store,
             shoppingExperienceFeature = DefaultShoppingExperienceFeature(),
@@ -3919,9 +3866,7 @@ private fun initReviewQualityCheck(
             onProductPageDetected = {
                 // Shopping.productPageVisits.add()
             },
-        ),
-        owner = lifecycleOwner,
-        view = view,
+        )
     )
 }
 

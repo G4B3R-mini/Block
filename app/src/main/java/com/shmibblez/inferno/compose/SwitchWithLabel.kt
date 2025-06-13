@@ -4,32 +4,23 @@
 
 package com.shmibblez.inferno.compose
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.selection.toggleable
-import androidx.compose.material3.SwitchDefaults
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.compositeOver
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.dp
-import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.annotation.LightDarkPreview
-import com.shmibblez.inferno.theme.FirefoxTheme
-import androidx.compose.material3.Switch as MaterialSwitch
+import com.shmibblez.inferno.compose.base.InfernoSwitch
+import com.shmibblez.inferno.compose.base.InfernoText
+import com.shmibblez.inferno.compose.base.InfernoTextStyle
+import com.shmibblez.inferno.ext.infernoTheme
 
 private const val DISABLED_ALPHA = 0.5f
 
@@ -70,36 +61,38 @@ fun SwitchWithLabel(
             modifier = Modifier
                 .weight(1f),
         ) {
-            Text(
+            InfernoText(
                 text = label,
                 modifier = Modifier
                     .defaultMinSize(minHeight = 24.dp)
                     .wrapContentHeight(),
-                color = if (enabled) {
-                    FirefoxTheme.colors.textPrimary
+                fontColor = if (enabled) {
+                    LocalContext.current.infernoTheme().value.primaryTextColor
                 } else {
-                    FirefoxTheme.colors.textDisabled
+                    LocalContext.current.infernoTheme().value.secondaryTextColor
                 },
-                style = FirefoxTheme.typography.subtitle1,
+//                style = FirefoxTheme.typography.subtitle1,
+                infernoStyle = InfernoTextStyle.Subtitle,
             )
 
             description?.let {
-                Text(
+                InfernoText(
                     text = description,
                     modifier = Modifier
                         .defaultMinSize(minHeight = 20.dp)
                         .wrapContentHeight(),
-                    color = if (enabled) {
-                        FirefoxTheme.colors.textSecondary
+                    fontColor = if (enabled) {
+                        LocalContext.current.infernoTheme().value.primaryTextColor
                     } else {
-                        FirefoxTheme.colors.textDisabled
+                        LocalContext.current.infernoTheme().value.secondaryTextColor
                     },
-                    style = FirefoxTheme.typography.body2,
+                    infernoStyle = InfernoTextStyle.Normal,
+//                    style = FirefoxTheme.typography.body2,
                 )
             }
         }
 
-        Switch(
+        InfernoSwitch(
             modifier = Modifier.clearAndSetSemantics {},
             checked = checked,
             onCheckedChange = onCheckedChange,
@@ -108,109 +101,109 @@ fun SwitchWithLabel(
     }
 }
 
-/**
- * UI for a switch that can be on or off.
- *
- * @param checked Whether or not the switch is checked.
- * @param onCheckedChange Invoked when Switch is being clicked, therefore the change of checked
- * state is requested.
- * @param modifier Modifier to be applied to the switch layout.
- * @param enabled Whether the switch is enabled or grayed out.
- */
-@Composable
-private fun Switch(
-    checked: Boolean,
-    onCheckedChange: ((Boolean) -> Unit),
-    modifier: Modifier = Modifier,
-    enabled: Boolean = true,
-) {
-    MaterialSwitch(
-        checked = checked,
-        onCheckedChange = onCheckedChange,
-        modifier = modifier,
-        enabled = enabled,
-        colors = SwitchDefaults.colors(
-            uncheckedThumbColor = FirefoxTheme.colors.formOff,
-            uncheckedTrackColor = FirefoxTheme.colors.formSurface,
-            checkedThumbColor = FirefoxTheme.colors.formOn,
-            checkedTrackColor = FirefoxTheme.colors.formSurface,
-            disabledUncheckedThumbColor = FirefoxTheme.colors.formOff
-                .copy(alpha = DISABLED_ALPHA)
-                .compositeOver(FirefoxTheme.colors.formSurface),
-            disabledUncheckedTrackColor = FirefoxTheme.colors.formSurface.copy(alpha = DISABLED_ALPHA),
-            disabledCheckedThumbColor = FirefoxTheme.colors.formOn
-                .copy(alpha = DISABLED_ALPHA)
-                .compositeOver(FirefoxTheme.colors.formSurface),
-            disabledCheckedTrackColor = FirefoxTheme.colors.formSurface.copy(alpha = DISABLED_ALPHA),
-        ),
-    )
-}
+///**
+// * UI for a switch that can be on or off.
+// *
+// * @param checked Whether or not the switch is checked.
+// * @param onCheckedChange Invoked when Switch is being clicked, therefore the change of checked
+// * state is requested.
+// * @param modifier Modifier to be applied to the switch layout.
+// * @param enabled Whether the switch is enabled or grayed out.
+// */
+//@Composable
+//private fun Switch(
+//    checked: Boolean,
+//    onCheckedChange: ((Boolean) -> Unit),
+//    modifier: Modifier = Modifier,
+//    enabled: Boolean = true,
+//) {
+//    MaterialSwitch(
+//        checked = checked,
+//        onCheckedChange = onCheckedChange,
+//        modifier = modifier,
+//        enabled = enabled,
+//        colors = SwitchDefaults.colors(
+//            uncheckedThumbColor = FirefoxTheme.colors.formOff,
+//            uncheckedTrackColor = FirefoxTheme.colors.formSurface,
+//            checkedThumbColor = FirefoxTheme.colors.formOn,
+//            checkedTrackColor = FirefoxTheme.colors.formSurface,
+//            disabledUncheckedThumbColor = FirefoxTheme.colors.formOff
+//                .copy(alpha = DISABLED_ALPHA)
+//                .compositeOver(FirefoxTheme.colors.formSurface),
+//            disabledUncheckedTrackColor = FirefoxTheme.colors.formSurface.copy(alpha = DISABLED_ALPHA),
+//            disabledCheckedThumbColor = FirefoxTheme.colors.formOn
+//                .copy(alpha = DISABLED_ALPHA)
+//                .compositeOver(FirefoxTheme.colors.formSurface),
+//            disabledCheckedTrackColor = FirefoxTheme.colors.formSurface.copy(alpha = DISABLED_ALPHA),
+//        ),
+//    )
+//}
 
-@LightDarkPreview
-@Composable
-private fun SwitchWithLabelPreview() {
-    FirefoxTheme {
-        Column(
-            modifier = Modifier
-                .background(FirefoxTheme.colors.layer1)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            Text(
-                text = "Enabled",
-                style = FirefoxTheme.typography.headline7,
-                color = FirefoxTheme.colors.textPrimary,
-            )
-
-            Spacer(Modifier.height(8.dp))
-
-            var enabledSwitchState by remember { mutableStateOf(false) }
-            SwitchWithLabel(
-                label = if (enabledSwitchState) "On" else "Off",
-                checked = enabledSwitchState,
-                description = "Description text",
-            ) { enabledSwitchState = it }
-
-            Text(
-                text = "Disabled",
-                style = FirefoxTheme.typography.headline7,
-                color = FirefoxTheme.colors.textPrimary,
-            )
-
-            Spacer(Modifier.height(8.dp))
-
-            var disabledSwitchStateOff by remember { mutableStateOf(false) }
-            SwitchWithLabel(
-                label = "Off",
-                checked = disabledSwitchStateOff,
-                enabled = false,
-            ) { disabledSwitchStateOff = it }
-
-            var disabledSwitchStateOn by remember { mutableStateOf(true) }
-            SwitchWithLabel(
-                label = "On",
-                checked = disabledSwitchStateOn,
-                enabled = false,
-            ) { disabledSwitchStateOn = it }
-
-            Text(
-                text = "Nested",
-                style = FirefoxTheme.typography.headline7,
-                color = FirefoxTheme.colors.textPrimary,
-            )
-
-            Spacer(Modifier.height(8.dp))
-
-            Row {
-                Spacer(Modifier.weight(1f))
-
-                var nestedSwitchState by remember { mutableStateOf(false) }
-                SwitchWithLabel(
-                    label = "Nested",
-                    checked = nestedSwitchState,
-                    modifier = Modifier.weight(1f),
-                ) { nestedSwitchState = it }
-            }
-        }
-    }
-}
+//@LightDarkPreview
+//@Composable
+//private fun SwitchWithLabelPreview() {
+//    FirefoxTheme {
+//        Column(
+//            modifier = Modifier
+//                .background(FirefoxTheme.colors.layer1)
+//                .padding(16.dp),
+//            verticalArrangement = Arrangement.spacedBy(8.dp),
+//        ) {
+//            Text(
+//                text = "Enabled",
+//                style = FirefoxTheme.typography.headline7,
+//                color = FirefoxTheme.colors.textPrimary,
+//            )
+//
+//            Spacer(Modifier.height(8.dp))
+//
+//            var enabledSwitchState by remember { mutableStateOf(false) }
+//            SwitchWithLabel(
+//                label = if (enabledSwitchState) "On" else "Off",
+//                checked = enabledSwitchState,
+//                description = "Description text",
+//            ) { enabledSwitchState = it }
+//
+//            Text(
+//                text = "Disabled",
+//                style = FirefoxTheme.typography.headline7,
+//                color = FirefoxTheme.colors.textPrimary,
+//            )
+//
+//            Spacer(Modifier.height(8.dp))
+//
+//            var disabledSwitchStateOff by remember { mutableStateOf(false) }
+//            SwitchWithLabel(
+//                label = "Off",
+//                checked = disabledSwitchStateOff,
+//                enabled = false,
+//            ) { disabledSwitchStateOff = it }
+//
+//            var disabledSwitchStateOn by remember { mutableStateOf(true) }
+//            SwitchWithLabel(
+//                label = "On",
+//                checked = disabledSwitchStateOn,
+//                enabled = false,
+//            ) { disabledSwitchStateOn = it }
+//
+//            Text(
+//                text = "Nested",
+//                style = FirefoxTheme.typography.headline7,
+//                color = FirefoxTheme.colors.textPrimary,
+//            )
+//
+//            Spacer(Modifier.height(8.dp))
+//
+//            Row {
+//                Spacer(Modifier.weight(1f))
+//
+//                var nestedSwitchState by remember { mutableStateOf(false) }
+//                SwitchWithLabel(
+//                    label = "Nested",
+//                    checked = nestedSwitchState,
+//                    modifier = Modifier.weight(1f),
+//                ) { nestedSwitchState = it }
+//            }
+//        }
+//    }
+//}

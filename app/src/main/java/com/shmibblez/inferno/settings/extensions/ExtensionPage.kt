@@ -88,6 +88,8 @@ internal fun ExtensionPage(
     val scope = rememberCoroutineScope()
     val addonManager = context.components.addonManager
 
+    var showPermissionDialog by remember { mutableStateOf(false) }
+
     var addon by remember { mutableStateOf(initialAddon) }
 
     fun refreshAddon(updatedAddon: Addon) {
@@ -346,17 +348,18 @@ internal fun ExtensionPage(
                             onNavToBrowser.invoke()
                         } else {
                             /**
-                             * todo: show settings dialog
-                             *  reference [InstalledAddonDetailsFragmentDirections.actionInstalledAddonFragmentToAddonInternalSettingsFragment]
+                             * based off: [InstalledAddonDetailsFragmentDirections.actionInstalledAddonFragmentToAddonInternalSettingsFragment]
+                             * instead of new page with engine view and prompt/download request support, just opens new custom tab
                              */
+                            // open in custom tab
+                            val url = addon.installedState?.optionsPageUrl
+                            if (url != null) {
+                                val intent = SupportUtils.createCustomTabIntent(context, url)
+                                context.startActivity(intent)
+                            }
                         }
                     },
-                    onClickPermissions = {
-                        /**
-                         * todo: show permissions dialog
-                         *  reference [InstalledAddonDetailsFragmentDirections.actionInstalledAddonFragmentToAddonPermissionsDetailsFragment]
-                         */
-                    },
+                    onClickPermissions = { showPermissionDialog = true },
                     onRemove = {
                         // todo
                     },
@@ -459,6 +462,14 @@ internal fun ExtensionPage(
             ExtensionUpdaterDialog(
                 updateAttempt = showUpdaterDialogFor!!,
                 onDismiss = { showUpdaterDialogFor = null },
+            )
+        }
+
+        if (showPermissionDialog) {
+            ExtensionPermissionsDialog(
+                onDismiss = {showPermissionDialog = false},
+                addon = addon,
+                openWebsite = openWebsite,
             )
         }
     }

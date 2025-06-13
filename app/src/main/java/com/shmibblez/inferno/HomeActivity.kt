@@ -42,6 +42,7 @@ import com.shmibblez.inferno.browser.browsingmode.BrowsingModeManager
 import com.shmibblez.inferno.browser.browsingmode.DefaultBrowsingModeManager
 import com.shmibblez.inferno.browser.nav.BrowserNavHost
 import com.shmibblez.inferno.browser.nav.InitialBrowserTask
+import com.shmibblez.inferno.browser.state.BrowserComponentState
 import com.shmibblez.inferno.components.appstate.AppAction
 import com.shmibblez.inferno.components.appstate.OrientationMode
 import com.shmibblez.inferno.customtabs.ExternalAppBrowserActivity
@@ -132,6 +133,8 @@ import java.util.Locale
  */
 @SuppressWarnings("TooManyFunctions", "LargeClass", "LongMethod")
 open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
+    var browserComponentState: BrowserComponentState? = null
+
     @VisibleForTesting
     internal lateinit var binding: ActivityHomeBinding
     lateinit var themeManager: ThemeManager
@@ -148,6 +151,7 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
         WebExtensionPopupObserver(components.core.store, ::openPopup)
     }
 
+    // todo: implement
     val webExtensionPromptFeature by lazy {
         WebExtensionPromptFeature(
             store = components.core.store,
@@ -155,20 +159,20 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
             fragmentManager = supportFragmentManager,
             onLinkClicked = { url, shouldOpenInBrowser ->
                 // todo:
-                if (shouldOpenInBrowser) {
-                    openToBrowserAndLoad(
-                        searchTermOrURL = url,
-                        newTab = true,
-                        from = BrowserDirection.FromGlobal,
-                    )
-                } else {
-                    startActivity(
-                        SupportUtils.createCustomTabIntent(
-                            context = this,
-                            url = url,
-                        ),
-                    )
-                }
+//                if (shouldOpenInBrowser) {
+//                    openToBrowserAndLoad(
+//                        searchTermOrURL = url,
+//                        newTab = true,
+//                        from = BrowserDirection.FromGlobal,
+//                    )
+//                } else {
+//                    startActivity(
+//                        SupportUtils.createCustomTabIntent(
+//                            context = this,
+//                            url = url,
+//                        ),
+//                    )
+//                }
             },
         )
     }
@@ -309,9 +313,22 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
             // deprecated but no other option if below tiramisu
             intent.getSerializableExtra(INITIAL_BROWSER_TASK) as InitialBrowserTask?
         }
+
+        // initialize and start
+        browserComponentState = BrowserComponentState(
+            customTabSessionId = (initialTask as? InitialBrowserTask.ExternalApp)?.tabId,
+            activity = this,
+            coroutineScope = this.lifecycleScope,
+            lifecycleOwner = this,
+            components = this.components,
+            store = this.components.core.store,
+            tabsUseCases = this.components.useCases.tabsUseCases,
+        ).apply { this.start() }
+
         binding.rootCompose.setContent {
             BrowserNavHost(
-                customTabSessionId = (initialTask as? InitialBrowserTask.ExternalApp)?.tabId,
+                browserComponentState = browserComponentState!!,
+//                customTabSessionId = (initialTask as? InitialBrowserTask.ExternalApp)?.tabId,
                 initialAction = initialTask,
                 )
         }
@@ -640,6 +657,9 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
     @CallSuper
     override fun onDestroy() {
         super.onDestroy()
+
+        // stop browser component state
+        browserComponentState?.stop()
 
         Log.d("HomeActivity", "onDestroy()")
 

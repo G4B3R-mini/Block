@@ -36,6 +36,8 @@ that's it for now, hopefully this project doesn't die
 
 - [ ] BrowserComponent
   - [ ] every time google search is performed, open in app requested
+  - [ ] load page, select, and return to browser not working properly (from extensions page links)
+    - [ ] find more addons link (page stops working), extension settings page (very buggy)
 - [ ] MozEngineView not working properly when go to new compose page then return (most likely has to
   do with lifecycle management, when return to page need to reset/relink)
 - [ ] theme settings

@@ -11,7 +11,20 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import androidx.preference.PreferenceManager
+import com.shmibblez.inferno.R
+import com.shmibblez.inferno.browser.prompts.PromptFeature
+import com.shmibblez.inferno.compose.snackbar.Snackbar
+import com.shmibblez.inferno.compose.snackbar.SnackbarState
+import com.shmibblez.inferno.databinding.DownloadDialogLayoutBinding
+import com.shmibblez.inferno.downloads.DownloadService
+import com.shmibblez.inferno.downloads.dialog.DynamicDownloadDialog
+import com.shmibblez.inferno.downloads.dialog.FirstPartyDownloadDialog
+import com.shmibblez.inferno.downloads.dialog.StartDownloadDialog
+import com.shmibblez.inferno.downloads.dialog.ThirdPartyDownloadDialog
+import com.shmibblez.inferno.ext.components
+import com.shmibblez.inferno.ext.requireComponents
+import com.shmibblez.inferno.ext.settings
+import com.shmibblez.inferno.theme.ThemeManager
 import mozilla.components.browser.state.action.ContentAction
 import mozilla.components.browser.state.action.CustomTabListAction
 import mozilla.components.browser.state.state.CustomTabSessionState
@@ -26,24 +39,9 @@ import mozilla.components.concept.fetch.Response
 import mozilla.components.feature.downloads.AbstractFetchDownloadService
 import mozilla.components.feature.downloads.DownloadsFeature
 import mozilla.components.feature.downloads.manager.FetchDownloadManager
-import com.shmibblez.inferno.browser.prompts.PromptFeature
 import mozilla.components.support.base.feature.UserInteractionHandler
 import mozilla.components.support.base.feature.ViewBoundFeatureWrapper
 import org.jetbrains.annotations.VisibleForTesting
-import com.shmibblez.inferno.R
-import com.shmibblez.inferno.compose.snackbar.Snackbar
-import com.shmibblez.inferno.compose.snackbar.SnackbarState
-import com.shmibblez.inferno.databinding.DownloadDialogLayoutBinding
-import com.shmibblez.inferno.downloads.DownloadService
-import com.shmibblez.inferno.downloads.dialog.DynamicDownloadDialog
-import com.shmibblez.inferno.downloads.dialog.FirstPartyDownloadDialog
-import com.shmibblez.inferno.downloads.dialog.StartDownloadDialog
-import com.shmibblez.inferno.downloads.dialog.ThirdPartyDownloadDialog
-import com.shmibblez.inferno.ext.components
-import com.shmibblez.inferno.ext.getPreferenceKey
-import com.shmibblez.inferno.ext.requireComponents
-import com.shmibblez.inferno.ext.settings
-import com.shmibblez.inferno.theme.ThemeManager
 
 /**
  * Provides shared functionality to our fragments for add-on settings and

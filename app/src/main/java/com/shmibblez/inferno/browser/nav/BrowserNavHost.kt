@@ -17,9 +17,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.shmibblez.inferno.browser.BrowserComponent
 import com.shmibblez.inferno.browser.getActivity
+import com.shmibblez.inferno.browser.nav.InitialBrowserTask.AppIcon.asStartDestination
+import com.shmibblez.inferno.browser.state.BrowserComponentState
 import com.shmibblez.inferno.browser.state.rememberBrowserComponentState
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.infernoTheme
+import com.shmibblez.inferno.extension.WebExtensionPromptFeature
 import com.shmibblez.inferno.history.InfernoHistoryPage
 import com.shmibblez.inferno.settings.accessibility.AccessibilitySettingsPage
 import com.shmibblez.inferno.settings.account.AccountProblemSettingsPage
@@ -50,17 +53,22 @@ import mozilla.components.feature.addons.Addon
 
 @Composable
 fun BrowserNavHost(
-    customTabSessionId: String?,
+    browserComponentState: BrowserComponentState,
+//    customTabSessionId: String?,
     initialAction: InitialBrowserTask? = null,
-    startDestination: BrowserRoute = initialAction?.asStartDestination()
-        ?: BrowserRoute.InfernoBrowser,
+    startDestination: BrowserRoute = initialAction.asStartDestination(),
 ) {
     val nav = rememberNavController()
 
-    val browserComponentState by rememberBrowserComponentState(
-        customTabSessionId = customTabSessionId,
-        activity = LocalContext.current.getActivity()!!,
-    )
+//    val browserComponentState by rememberBrowserComponentState(
+//        customTabSessionId = customTabSessionId,
+//        activity = LocalContext.current.getActivity()!!,
+//    )
+    /**
+     * todo: implement [WebExtensionPromptFeature] and init here
+     */
+
+
 
     val context = LocalContext.current
 

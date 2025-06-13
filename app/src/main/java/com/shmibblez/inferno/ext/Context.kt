@@ -58,7 +58,7 @@ val Context.components: Components
 /**
  * Shares content via [ACTION_SEND] intent.
  *
- * @param text the data to be shared [EXTRA_TEXT]
+// * @param text the data to be shared [EXTRA_TEXT]
  * @param subject of the intent [EXTRA_TEXT]
  * @return true it is able to share false otherwise.
  */

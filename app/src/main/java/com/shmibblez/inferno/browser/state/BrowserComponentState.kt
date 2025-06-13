@@ -28,6 +28,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.map
 import mozilla.components.browser.icons.BrowserIcons
 import mozilla.components.browser.state.search.SearchEngine
@@ -236,39 +237,34 @@ fun rememberBrowserComponentState(
     tabsUseCases: TabsUseCases = LocalContext.current.components.useCases.tabsUseCases,
 ): MutableState<BrowserComponentState> {
 
-    val state = rememberSaveable(
-        customTabSessionId,
-        stateSaver = Saver(
-            save = {
-                customTabSessionId
-            },
-            restore = {
-                BrowserComponentState(
-                    customTabSessionId = customTabSessionId,
-                    activity = activity,
-                    coroutineScope = coroutineScope,
-                    lifecycleOwner = lifecycleOwner,
-                    components = components,
-                    store = store,
-                    tabsUseCases = tabsUseCases,
-                )
-            },
-        ),
-        key = null,
-        init = {
-            mutableStateOf(
-                BrowserComponentState(
-                    customTabSessionId = customTabSessionId,
-                    activity = activity,
-                    coroutineScope = coroutineScope,
-                    lifecycleOwner = lifecycleOwner,
-                    components = components,
-                    store = store,
-                    tabsUseCases = tabsUseCases,
-                )
+    val state = rememberSaveable(customTabSessionId, stateSaver = Saver(
+        save = {
+            customTabSessionId
+        },
+        restore = {
+            BrowserComponentState(
+                customTabSessionId = customTabSessionId,
+                activity = activity,
+                coroutineScope = coroutineScope,
+                lifecycleOwner = lifecycleOwner,
+                components = components,
+                store = store,
+                tabsUseCases = tabsUseCases,
             )
-        }
-    )
+        },
+    ), key = null, init = {
+        mutableStateOf(
+            BrowserComponentState(
+                customTabSessionId = customTabSessionId,
+                activity = activity,
+                coroutineScope = coroutineScope,
+                lifecycleOwner = lifecycleOwner,
+                components = components,
+                store = store,
+                tabsUseCases = tabsUseCases,
+            )
+        )
+    })
 
 //    val state = remember {
 //        mutableStateOf(
@@ -355,6 +351,7 @@ class BrowserComponentState(
 
 
     override fun start() {
+        Log.d("BrowserComponentState", "----------------------------\n\nstart()\n\n----------------------------")
         browserStateObserver = store.flowScoped(lifecycleOwner) { flow ->
             flow.map { it }.collect {
                 currentTab = it.selectedTab
@@ -362,18 +359,18 @@ class BrowserComponentState(
                 customTabSessionId?.let { id -> currentCustomTab = it.findCustomTab(id) }
                 isPendingTab = currentTab == null && currentCustomTab == null
 
-                currentCustomTab?.let { ct ->
-                    Log.d(
-                        "BrowserComponentState",
-                        "windowRequest: ${ct.content.windowRequest}\nconfig: ${ct.config}\nmanifest: ${ct.content.webAppManifest}\ncontent: ${ct.content}"
-                    )
-                }
+//                currentCustomTab?.let { ct ->
+//                    Log.d(
+//                        "BrowserComponentState",
+//                        "windowRequest: ${ct.content.windowRequest}\nconfig: ${ct.config}\nmanifest: ${ct.content.webAppManifest}\ncontent: ${ct.content}"
+//                    )
+//                }
+
 
                 // set and manage customTabManager
                 if (currentCustomTab != null && customTabManager == null) {
                     // if custom tab exists and manager not setup, setup
-                    customTabManager = CustomTabManager(
-                        customTabSessionState = currentCustomTab!!,
+                    customTabManager = CustomTabManager(customTabSessionState = currentCustomTab!!,
                         activity = activity,
                         icons = components.core.icons,
                         store = store,
@@ -382,8 +379,7 @@ class BrowserComponentState(
 //                        controlsBuilder = SiteControlsBuilder.CopyAndRefresh(components.useCases.sessionUseCases.reload),
                         notificationsDelegate = components.notificationsDelegate,
                         components = components,
-                        setShowExternalToolbar = {show -> showExternalToolbar = show }
-                    )
+                        setShowExternalToolbar = { show -> showExternalToolbar = show })
                     customTabManager!!.start()
                 } else if (currentCustomTab == null && customTabManager != null) {
                     // if custom tab nonexistent and manager exists, unexist manager and stop
@@ -398,20 +394,34 @@ class BrowserComponentState(
                             tabId
                         )
                     }
-                    // todo: may be because of windowRequest
-                    /**
-                     * check [CustomTabWindowFeature], best way to implement? options
-                     * - CustomTabManager has scope that listens for changes
-                     * - CustomTabManager.update called here
-                     * - implement CustomTabWindowFeature and add to observers for lifecycle, this simply
-                     * - calls state.engineState.engineSession?.loadUrl(windowRequest.url),
-                     *   instead of launching intent to new custom tab, check: what does intent do?
-                     *   open new activity or simply reload? check intent handlers of observers, might be there
-                     */
-//                    components.useCases.tabsUseCases.selectTab
-//                    components.
-//                    components.useCases.sessionUseCases.loadUrl(currentCustomTab!!.content.url, currentCustomTab!!.id)
                 }
+
+                var logStr = StringBuilder().apply {
+                    append("state changed:")
+                    append("\n  - currentCustomTab:")
+                    when (currentCustomTab) {
+                        null -> append(" null")
+                        else -> {
+                            append("\n    - id: $customTabSessionId")
+                            append("\n    - loading: ${currentCustomTab?.content?.loading}")
+                            append("\n    - engineState crash: ${currentCustomTab?.engineState?.crashed}")
+                        }
+                    }
+                    append("\n  - customTabs.size: ${customTabs.size}")
+                    append("\n  - currentTab:")
+                    when (currentTab) {
+                        null -> append(" null")
+                        else -> {
+                            append("\n    - id: ${currentTab?.id}")
+                            append("\n    - loading: ${currentTab?.content?.loading}")
+                            append("\n    - engineState crash: ${currentTab?.engineState?.crashed}")
+                        }
+                    }
+                    append("\n  - webExtensionPromptRequest: ${it.webExtensionPromptRequest}")
+                    append("\n\n")
+                }.toString()
+
+                Log.d("BrowserComponentState", logStr)
 
                 // update browser mode based on if external
                 if (isExternal && browserMode != BrowserComponentMode.TOOLBAR_EXTERNAL) {
@@ -486,6 +496,7 @@ class BrowserComponentState(
     }
 
     override fun stop() {
+        Log.d("BrowserComponentState", "----------------------------\n\nstop()()\n\n----------------------------")
         browserStateObserver?.cancel()
     }
 

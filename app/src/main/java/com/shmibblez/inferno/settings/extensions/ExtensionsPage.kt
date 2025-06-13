@@ -9,6 +9,7 @@ import androidx.compose.ui.res.stringResource
 import com.shmibblez.inferno.BuildConfig
 import com.shmibblez.inferno.settings.compose.components.InfernoSettingsPage
 import com.shmibblez.inferno.R
+import com.shmibblez.inferno.addons.AddonsManagementView
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.newTab
 import com.shmibblez.inferno.settings.SupportUtils
@@ -16,6 +17,9 @@ import com.shmibblez.inferno.settings.SupportUtils.AMO_HOMEPAGE_FOR_ANDROID
 import mozilla.components.feature.addons.Addon
 import mozilla.components.feature.addons.ui.AddonsManagerAdapterDelegate
 
+/**
+ * based off [AddonsManagementView]
+ */
 @Composable
 fun ExtensionsPage(
     goBack: () -> Unit,
@@ -23,6 +27,9 @@ fun ExtensionsPage(
     onNavToBrowser: () -> Unit,
 ) {
     val context = LocalContext.current
+    // todo: should take onRefreshSuccess and onRefreshError to show error page
+    //  also take onStartRefreshAfterErrorOrInit
+    //  this means need to store refreshError in state, set to null at start of refresh
     val addonManagerState by rememberAddonsManagerState(
         addonManager = context.components.addonManager,
     )
@@ -33,6 +40,8 @@ fun ExtensionsPage(
     //  when click reload, call state reloadAfterError, and rename state.initiallyLoading to
     //  state.visiblyLoading, if loading, show loading screen here
     //  maybe put all this in AddonsManager since in charge of ui
+
+
 
     InfernoSettingsPage(
         title = stringResource(R.string.preferences_extensions),

@@ -12,8 +12,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.shmibblez.inferno.ext.infernoTheme
 import mozilla.components.support.images.compose.loader.Fallback
 import mozilla.components.support.images.compose.loader.ImageLoaderScope
 import mozilla.components.support.images.compose.loader.Placeholder
@@ -62,7 +64,11 @@ internal fun DefaultImagePlaceholder(
     modifier: Modifier,
     contentDescription: String? = null,
 ) {
-    Image(ColorPainter(FirefoxTheme.colors.layer2), contentDescription, modifier)
+    Image(
+        ColorPainter(LocalContext.current.infernoTheme().value.secondaryBackgroundColor),
+        contentDescription,
+        modifier,
+    )
 }
 
 @Composable

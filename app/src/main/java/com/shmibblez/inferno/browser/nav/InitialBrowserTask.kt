@@ -33,7 +33,7 @@ sealed class InitialBrowserTask : java.io.Serializable {
         private fun readResolve(): Any = AppIcon
     }
 
-    fun asStartDestination(): BrowserRoute {
+    fun InitialBrowserTask?.asStartDestination(): BrowserRoute {
         return when (this) {
             AppIcon -> BrowserRoute.InfernoBrowser
             is ExternalApp -> BrowserRoute.InfernoBrowser // BrowserRoute.ExternalBrowser
@@ -43,6 +43,7 @@ sealed class InitialBrowserTask : java.io.Serializable {
             is OpenToSearch -> BrowserRoute.InfernoBrowser
             PrivateBrowsingMode -> BrowserRoute.InfernoBrowser
             StartInRecentsScreen -> BrowserRoute.InfernoBrowser
+            null -> BrowserRoute.InfernoBrowser
         }
     }
 

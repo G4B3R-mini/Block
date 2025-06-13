@@ -7,7 +7,9 @@ package com.shmibblez.inferno.addons.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -21,6 +23,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 //import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.Divider
 //import com.shmibblez.inferno.mozillaAndroidComponents.base.compose.annotation.LightDarkPreview
@@ -32,6 +36,8 @@ import com.shmibblez.inferno.addons.AddonPermissionsUpdateRequest
 import com.shmibblez.inferno.compose.LinkText
 import com.shmibblez.inferno.compose.LinkTextState
 import com.shmibblez.inferno.compose.SwitchWithLabel
+import com.shmibblez.inferno.compose.base.InfernoText
+import com.shmibblez.inferno.compose.base.InfernoTextStyle
 import com.shmibblez.inferno.compose.list.TextListItem
 import com.shmibblez.inferno.settings.SupportUtils
 import com.shmibblez.inferno.theme.FirefoxTheme
@@ -54,8 +60,9 @@ fun AddonPermissionsScreen(
     onAddAllSitesPermissions: () -> Unit,
     onRemoveAllSitesPermissions: () -> Unit,
     onLearnMoreClick: (String) -> Unit,
+    bottomPadding: Dp = 54.dp,
 ) {
-    LazyColumn(modifier = Modifier.padding(vertical = 8.dp)) {
+    LazyColumn(modifier = Modifier.padding(vertical = 8.dp).fillMaxWidth()) {
         if (permissions.isNotEmpty()) {
             // Required Permissions Header
             item {
@@ -175,6 +182,11 @@ fun AddonPermissionsScreen(
                 )
             }
         }
+
+        // bottom padding for dialog buttons
+        item {
+            Spacer(modifier = Modifier.height(bottomPadding))
+        }
     }
 }
 
@@ -216,13 +228,15 @@ private fun SectionHeader(label: String, testTag: String = "") {
                 }
             },
     ) {
-        Text(
+        InfernoText(
             text = label,
-            color =  MaterialTheme.colorScheme.secondary, // FirefoxTheme.colors.textAccent,
-            style = MaterialTheme.typography.headlineMedium ,// FirefoxTheme.typography.headline8,
+            infernoStyle = InfernoTextStyle.Normal,
+            fontWeight = FontWeight.Bold,
+//            color =  MaterialTheme.colorScheme.secondary, // FirefoxTheme.colors.textAccent,
+//            style = MaterialTheme.typography.headlineMedium ,// FirefoxTheme.typography.headline8,
             modifier = Modifier
-                .weight(1f)
-                .semantics { heading() },
+                .weight(1f),
+//                .semantics { heading() },
         )
     }
 }
