@@ -32,12 +32,24 @@ that's it for now, hopefully this project doesn't die
 
 # Currently Under Development
 
+## Critical
+
+`Errors that make something unusable, these should be fixed as soon as possible`
+
+- [ ] Settings Page
+  - [ ] when back pressed, nothing happens (does not go back to browser)
+    - [ ] check browser component back handlers, something may be interfering there
+
+[//]: # (`Nothing critical wooooooo`)
+
 ## Massiv Bugs
 
+- [ ] Homepage
+  - [ ] remove sponsored top sites
 - [ ] BrowserComponent
-  - [ ] every time google search is performed, open in app requested
-  - [ ] load page, select, and return to browser not working properly (from extensions page links)
-    - [ ] find more addons link (page stops working), extension settings page (very buggy)
+    - [ ] every time google search is performed, open in app requested
+    - [ ] load page, select, and return to browser not working properly (from extensions page links)
+        - [ ] find more addons link (page stops working), extension settings page (very buggy)
 - [ ] MozEngineView not working properly when go to new compose page then return (most likely has to
   do with lifecycle management, when return to page need to reset/relink)
 - [ ] theme settings

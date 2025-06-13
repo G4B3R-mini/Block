@@ -330,7 +330,7 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
                 browserComponentState = browserComponentState!!,
 //                customTabSessionId = (initialTask as? InitialBrowserTask.ExternalApp)?.tabId,
                 initialAction = initialTask,
-                )
+            )
         }
 
         lifecycleScope.launch {
