@@ -155,20 +155,20 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
             fragmentManager = supportFragmentManager,
             onLinkClicked = { url, shouldOpenInBrowser ->
                 // todo:
-//                if (shouldOpenInBrowser) {
-//                    openToBrowserAndLoad(
-//                        searchTermOrURL = url,
-//                        newTab = true,
-//                        from = BrowserDirection.FromGlobal,
-//                    )
-//                } else {
-//                    startActivity(
-//                        SupportUtils.createCustomTabIntent(
-//                            context = this,
-//                            url = url,
-//                        ),
-//                    )
-//                }
+                if (shouldOpenInBrowser) {
+                    openToBrowserAndLoad(
+                        searchTermOrURL = url,
+                        newTab = true,
+                        from = BrowserDirection.FromGlobal,
+                    )
+                } else {
+                    startActivity(
+                        SupportUtils.createCustomTabIntent(
+                            context = this,
+                            url = url,
+                        ),
+                    )
+                }
             },
         )
     }
@@ -425,9 +425,9 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
         )
 
         // todo: WebExtensionPromptFeature
-//        if (!isCustomTabIntent(intent)) {
-//            lifecycle.addObserver(webExtensionPromptFeature)
-//        }
+        if (!isCustomTabIntent(intent)) {
+            lifecycle.addObserver(webExtensionPromptFeature)
+        }
 
         if (shouldAddToRecentsScreen(intent)) {
             intent.removeExtra(START_IN_RECENTS_SCREEN)

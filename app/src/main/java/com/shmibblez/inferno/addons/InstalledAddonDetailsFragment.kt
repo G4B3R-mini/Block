@@ -164,10 +164,10 @@ class InstalledAddonDetailsFragment : Fragment() {
         bindRemoveButton()
         bindReportButton()
         context?.let {
-            val messageBarWarningView =
-                binding.root.findViewById<View>(mozilla.components.feature.addons.R.id.add_on_messagebar_warning)
-            val messageBarErrorView =
-                binding.root.findViewById<View>(mozilla.components.feature.addons.R.id.add_on_messagebar_error)
+//            val messageBarWarningView =
+//                binding.root.findViewById<View>(mozilla.components.feature.addons.R.id.add_on_messagebar_warning)
+//            val messageBarErrorView =
+//                binding.root.findViewById<View>(mozilla.components.feature.addons.R.id.add_on_messagebar_error)
 
 //            AddonsManagerAdapter.bindMessageBars(
 //                it,

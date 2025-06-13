@@ -10,11 +10,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -100,6 +103,7 @@ internal fun ExtensionPage(
     fun refreshPrivateSwitchVisible(): Boolean {
         return addon.incognito != Addon.Incognito.NOT_ALLOWED
     }
+
     fun refreshSettingsOptionVisible(): Boolean {
         return !addon.installedState?.optionsPageUrl.isNullOrEmpty()
     }
@@ -114,7 +118,7 @@ internal fun ExtensionPage(
     }
 
     fun refreshPrivateSwitchEnabled(): Boolean {
-        return addon.incognito != Addon.Incognito.NOT_ALLOWED && addon.isAllowedInPrivateBrowsing()
+        return addon.incognito != Addon.Incognito.NOT_ALLOWED && addon.isEnabled()
     }
 
     var enableSwitchEnabled by remember { mutableStateOf(refreshEnableSwitchEnabled()) }
@@ -324,7 +328,8 @@ internal fun ExtensionPage(
                     onClickSettings = {
                         if (!settingsOptionVisible) return@installedAddonOptions
                         // settings can be in web page or in settings dialog, check
-                        val settingUrl = addon.installedState?.optionsPageUrl ?: return@installedAddonOptions
+                        val settingUrl =
+                            addon.installedState?.optionsPageUrl ?: return@installedAddonOptions
                         if (addon.installedState?.openOptionsPageInTab == true) {
 //                            val shouldCreatePrivateSession = (activity as HomeActivity).browsingModeManager.mode.isPrivate
                             // if current tab is private
@@ -505,7 +510,7 @@ private fun LazyListScope.installedAddonOptions(
             InfernoIcon(
                 painter = painterResource(R.drawable.ic_private_browsing_24),
                 contentDescription = "",
-                modifier = Modifier.size(18.dp),
+                modifier = Modifier.size(22.dp),
             )
         },
         trailingContent = {
@@ -536,7 +541,7 @@ private fun LazyListScope.installedAddonOptions(
                 InfernoIcon(
                     painter = painterResource(R.drawable.ic_settings_24),
                     contentDescription = "",
-                    modifier = Modifier.size(18.dp),
+                    modifier = Modifier.size(22.dp),
                 )
             },
             trailingContent = null,
@@ -550,7 +555,7 @@ private fun LazyListScope.installedAddonOptions(
             InfernoIcon(
                 painter = painterResource(R.drawable.ic_permission_24),
                 contentDescription = "",
-                modifier = Modifier.size(18.dp),
+                modifier = Modifier.size(22.dp),
             )
         },
         trailingContent = null,
@@ -565,8 +570,16 @@ private fun LazyListScope.installedAddonOptions(
             onClick = onRemove,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = 16.dp)
+                .padding(bottom = 8.dp),
             enabled = buttonsEnabled,
+            shape = MaterialTheme.shapes.extraSmall,
+            colors = ButtonColors(
+                containerColor = LocalContext.current.infernoTheme().value.secondaryBackgroundColor,
+                contentColor = LocalContext.current.infernoTheme().value.errorColor,
+                disabledContainerColor = LocalContext.current.infernoTheme().value.secondaryBackgroundColor,
+                disabledContentColor = LocalContext.current.infernoTheme().value.errorColor,
+            ),
         )
     }
     // report button
@@ -576,8 +589,16 @@ private fun LazyListScope.installedAddonOptions(
             onClick = onReport,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = 16.dp)
+                .padding(bottom = 8.dp),
             enabled = buttonsEnabled,
+            shape = MaterialTheme.shapes.extraSmall,
+            colors = ButtonColors(
+                containerColor = LocalContext.current.infernoTheme().value.secondaryBackgroundColor,
+                contentColor = LocalContext.current.infernoTheme().value.primaryTextColor,
+                disabledContainerColor = LocalContext.current.infernoTheme().value.secondaryBackgroundColor,
+                disabledContentColor = LocalContext.current.infernoTheme().value.secondaryTextColor,
+            ),
         )
     }
 
@@ -594,15 +615,16 @@ private fun LazyListScope.installedAddonOption(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 4.dp)
+                .padding(horizontal = 16.dp)
+                .height(44.dp)
                 .clickable { onClick?.invoke() },
-            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.Start),
+            horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.Start),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             // leading icon
             when (leadingIcon) {
                 null -> {
-                    Box(modifier = Modifier.size(18.dp))
+                    Box(modifier = Modifier.size(22.dp))
                 }
 
                 else -> {
