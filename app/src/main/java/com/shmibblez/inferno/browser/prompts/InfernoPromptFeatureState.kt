@@ -25,7 +25,7 @@ import com.shmibblez.inferno.browser.prompts.creditcard.CreditCardDialogControll
 import com.shmibblez.inferno.browser.prompts.creditcard.InfernoCreditCardDelegate
 import com.shmibblez.inferno.browser.prompts.login.InfernoLoginDelegate
 import com.shmibblez.inferno.browser.prompts.login.SelectLoginPromptController
-import com.shmibblez.inferno.browser.prompts.webPrompts.AndroidPhotoPicker
+import com.shmibblez.inferno.browser.prompts.webPrompts.InfernoAndroidPhotoPicker
 import com.shmibblez.inferno.browser.prompts.webPrompts.FilePicker
 import com.shmibblez.inferno.browser.prompts.webPrompts.FileUploadsDirCleaner
 import com.shmibblez.inferno.browser.prompts.webPrompts.compose.MultiButtonDialogButtonType
@@ -116,8 +116,8 @@ fun rememberInfernoPromptFeatureState(
     onNeedToRequestPermissions: OnNeedToRequestPermissions,
 ): InfernoPromptFeatureState {
     var state: InfernoPromptFeatureState? = null
-    val singleMediaPicker = AndroidPhotoPicker.singleMediaPicker(getWebPromptState = { state })
-    val multipleMediaPicker = AndroidPhotoPicker.multipleMediaPicker(getWebPromptState = { state })
+    val singleMediaPicker = InfernoAndroidPhotoPicker.singleMediaPicker(getWebPromptState = { state })
+    val multipleMediaPicker = InfernoAndroidPhotoPicker.multipleMediaPicker(getWebPromptState = { state })
     val activityResultLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             // todo: check if null
@@ -152,7 +152,7 @@ fun rememberInfernoPromptFeatureState(
         addressDelegate = addressDelegate,
         fileUploadsDirCleaner = fileUploadsDirCleaner,
         onNeedToRequestPermissions = onNeedToRequestPermissions,
-        androidPhotoPicker = AndroidPhotoPicker(
+        infernoAndroidPhotoPicker = InfernoAndroidPhotoPicker(
             context = activity.applicationContext,
             singleMediaPicker = singleMediaPicker,
             multipleMediaPicker = multipleMediaPicker,
@@ -200,7 +200,7 @@ class InfernoPromptFeatureState internal constructor(
     addressDelegate: AddressDelegate = DefaultAddressDelegate(),
     fileUploadsDirCleaner: FileUploadsDirCleaner,
     onNeedToRequestPermissions: OnNeedToRequestPermissions,
-    androidPhotoPicker: AndroidPhotoPicker?,
+    infernoAndroidPhotoPicker: InfernoAndroidPhotoPicker?,
     activityResultLauncher: ManagedActivityResultLauncher<Intent, ActivityResult>,
 ) : InfernoFeatureState, PermissionsFeature, InfernoPrompter, ActivityResultHandler,
     UserInteractionHandler {
@@ -247,7 +247,7 @@ class InfernoPromptFeatureState internal constructor(
         store,
         this.customTabSessionId,
         fileUploadsDirCleaner,
-        androidPhotoPicker,
+        infernoAndroidPhotoPicker,
         onNeedToRequestPermissions,
     )
         private set
@@ -995,7 +995,7 @@ class InfernoPromptFeatureState internal constructor(
      * @param uriList An array of [Uri] objects representing the selected photos.
      */
     // todo:
-    //   - called from AndroidPhotoPicker, need to change to include prompt state, call from there
+    //   - called from InfernoAndroidPhotoPicker, need to change to include prompt state, call from there
     //   - see where else called from
     fun onAndroidPhotoPickerResult(uriList: Array<Uri>) {
         filePicker.onAndroidPhotoPickerResult(uriList)

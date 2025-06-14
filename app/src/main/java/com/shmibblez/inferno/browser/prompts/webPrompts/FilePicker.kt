@@ -55,7 +55,7 @@ class FilePicker(
     private val store: BrowserStore,
     private var sessionId: String? = null,
     private var fileUploadsDirCleaner: FileUploadsDirCleaner,
-    @get:VisibleForTesting internal var androidPhotoPicker: AndroidPhotoPicker? = null,
+    @get:VisibleForTesting internal var infernoAndroidPhotoPicker: InfernoAndroidPhotoPicker? = null,
     override val onNeedToRequestPermissions: OnNeedToRequestPermissions,
 ) : PermissionsFeature {
 
@@ -259,7 +259,7 @@ class FilePicker(
 
     @VisibleForTesting
     internal fun canUseAndroidPhotoPicker(): Boolean {
-        return androidPhotoPicker != null && isPhotoOrVideoRequest(currentRequest) && androidPhotoPicker?.isPhotoPickerAvailable == true
+        return infernoAndroidPhotoPicker != null && isPhotoOrVideoRequest(currentRequest) && infernoAndroidPhotoPicker?.isPhotoPickerAvailable == true
     }
 
     @VisibleForTesting
@@ -292,13 +292,13 @@ class FilePicker(
 
     private fun launchAndroidPhotoPicker() {
         if ((currentRequest as File).isMultipleFilesSelection) {
-            androidPhotoPicker?.multipleMediaPicker?.launch(
+            infernoAndroidPhotoPicker?.multipleMediaPicker?.launch(
                 PickVisualMediaRequest(
                     getVisualMediaType(currentRequest),
                 ),
             )
         } else {
-            androidPhotoPicker?.singleMediaPicker?.launch(
+            infernoAndroidPhotoPicker?.singleMediaPicker?.launch(
                 PickVisualMediaRequest(
                     getVisualMediaType(currentRequest),
                 ),

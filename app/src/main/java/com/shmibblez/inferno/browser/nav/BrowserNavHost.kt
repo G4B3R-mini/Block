@@ -15,6 +15,7 @@ import androidx.core.os.bundleOf
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.shmibblez.inferno.biometric.BiometricPromptCallbackManager
 import com.shmibblez.inferno.browser.BrowserComponent
 import com.shmibblez.inferno.browser.getActivity
 import com.shmibblez.inferno.browser.nav.InitialBrowserTask.AppIcon.asStartDestination
@@ -54,6 +55,7 @@ import mozilla.components.feature.addons.Addon
 @Composable
 fun BrowserNavHost(
     browserComponentState: BrowserComponentState,
+    biometricPromptCallbackManager: BiometricPromptCallbackManager,
 //    customTabSessionId: String?,
     initialAction: InitialBrowserTask? = null,
     startDestination: BrowserRoute = initialAction.asStartDestination(),
@@ -174,7 +176,7 @@ fun BrowserNavHost(
 
         composable<BrowserRoute.InfernoBrowser> {
             BrowserComponent(
-                navController = nav,
+                biometricPromptCallbackManager = biometricPromptCallbackManager,
                 state = browserComponentState,
                 onNavToHistory = { nav.navigate(route = BrowserRoute.History) },
                 onNavToSettings = { nav.navigate(route = BrowserRoute.Settings) },

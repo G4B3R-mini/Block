@@ -20,7 +20,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.IdRes
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
@@ -72,16 +71,13 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.lifecycleScope
-import androidx.navigation.NavController
-import androidx.navigation.NavDirections
-import androidx.navigation.NavOptions
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.shmibblez.inferno.BrowserDirection
 import com.shmibblez.inferno.HomeActivity
 import com.shmibblez.inferno.IntentReceiverActivity
 import com.shmibblez.inferno.NavGraphDirections
 import com.shmibblez.inferno.R
+import com.shmibblez.inferno.biometric.BiometricPromptCallbackManager
 import com.shmibblez.inferno.browser.browsingmode.BrowsingMode
 import com.shmibblez.inferno.browser.prompts.DownloadComponent
 import com.shmibblez.inferno.browser.prompts.InfernoPromptFeatureState
@@ -111,19 +107,14 @@ import com.shmibblez.inferno.ext.DEFAULT_ACTIVE_DAYS
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.dpToPx
 import com.shmibblez.inferno.ext.infernoTheme
-import com.shmibblez.inferno.ext.isLargeWindow
-import com.shmibblez.inferno.ext.nav
-import com.shmibblez.inferno.ext.navigateWithBreadcrumb
 import com.shmibblez.inferno.ext.settings
 import com.shmibblez.inferno.findInPageBar.BrowserFindInPageBar
 import com.shmibblez.inferno.home.CrashComponent
 import com.shmibblez.inferno.home.HomeFragment
 import com.shmibblez.inferno.home.InfernoHomeComponent
-import com.shmibblez.inferno.library.bookmarks.friendlyRootTitle
 import com.shmibblez.inferno.loading.InfernoLoadingComponent
 import com.shmibblez.inferno.messaging.FenixMessageSurfaceId
 import com.shmibblez.inferno.perf.MarkersFragmentLifecycleCallbacks
-import com.shmibblez.inferno.settings.SupportUtils
 import com.shmibblez.inferno.settings.biometric.BiometricPromptFeature
 import com.shmibblez.inferno.shopping.DefaultShoppingExperienceFeature
 import com.shmibblez.inferno.shopping.ReviewQualityCheckFeature
@@ -154,7 +145,6 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import mozilla.appservices.places.BookmarkRoot
-import mozilla.appservices.places.uniffi.PlacesApiException
 import mozilla.components.browser.engine.gecko.GeckoEngineView
 import mozilla.components.browser.state.action.DebugAction
 import mozilla.components.browser.state.action.LastAccessAction
@@ -173,7 +163,6 @@ import mozilla.components.browser.thumbnails.BrowserThumbnails
 import mozilla.components.browser.toolbar.BrowserToolbar
 import mozilla.components.concept.engine.EngineView
 import mozilla.components.concept.engine.mediasession.MediaSession
-import mozilla.components.concept.engine.permission.SitePermissions
 import mozilla.components.concept.engine.prompt.ShareData
 import mozilla.components.concept.storage.LoginEntry
 import mozilla.components.feature.accounts.push.CloseTabsUseCases
@@ -209,9 +198,6 @@ import mozilla.components.support.base.log.logger.Logger
 import mozilla.components.support.ktx.android.content.share
 import mozilla.components.support.ktx.android.view.enterImmersiveMode
 import mozilla.components.support.ktx.android.view.exitImmersiveMode
-import mozilla.components.support.ktx.android.view.hideKeyboard
-import mozilla.components.support.ktx.kotlin.getOrigin
-import mozilla.components.support.utils.ext.isLandscape
 import mozilla.components.ui.widgets.VerticalSwipeRefreshLayout
 import java.lang.ref.WeakReference
 import java.util.concurrent.TimeUnit
@@ -309,14 +295,14 @@ fun Context.getActivity(): AppCompatActivity? = when (this) {
     else -> null
 }
 
-fun nav(
-    navController: NavController,
-    @IdRes id: Int?,
-    directions: NavDirections,
-    options: NavOptions? = null,
-) {
-    navController.nav(id, directions, options)
-}
+//fun nav(
+//    navController: NavController,
+//    @IdRes id: Int?,
+//    directions: NavDirections,
+//    options: NavOptions? = null,
+//) {
+//    navController.nav(id, directions, options)
+//}
 
 enum class BrowserComponentPageType {
     CRASH, ENGINE, HOME, HOME_PRIVATE
@@ -360,8 +346,9 @@ object UiConst {
 
 // todo: home settings args, do stuff like new tab, new tab specific url, deeplink url, etc
 fun BrowserComponent(
-    navController: NavController,
+//    navController: NavController,
     state: BrowserComponentState,
+    biometricPromptCallbackManager: BiometricPromptCallbackManager,
     onNavToHistory: () -> Unit,
     onNavToSettings: () -> Unit,
     onNavToExtensions: () -> Unit, // todo: add toolbar icon for extensions
@@ -371,8 +358,7 @@ fun BrowserComponent(
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
     val store = context.components.core.store
-    val view = LocalView.current
-//    val localConfiguration = LocalConfiguration.current
+
     val parentFragmentManager = context.getActivity()!!.supportFragmentManager
     val snackbarHostState = remember { AcornSnackbarHostState() }
     var activeAlertDialog by remember { mutableStateOf<(@Composable () -> Unit)?>(null) }
@@ -528,6 +514,7 @@ fun BrowserComponent(
         },
         loginExceptionStorage = context.components.core.loginExceptionStorage,
         shareDelegate = object : ShareDelegate {
+            // todo: replace with context.share
             override fun showShareSheet(
                 context: Context,
                 shareData: ShareData,
@@ -539,7 +526,7 @@ fun BrowserComponent(
                     showPage = true,
                     sessionId = getCurrentTab(context)?.id,
                 )
-                navController.navigate(directions)
+//                navController.navigate(directions)
             }
         },
         onNeedToRequestPermissions = { permissions ->
@@ -549,8 +536,9 @@ fun BrowserComponent(
         loginDelegate = object : InfernoLoginDelegate {
             override val onManageLogins = {
                 browserAnimator.captureEngineViewAndDrawStatically {
+                    // todo: navigation, go to saved logins page with logins manager expanded
                     val directions = NavGraphDirections.actionGlobalSavedLoginsAuthFragment()
-                    navController.navigate(directions)
+//                    navController.navigate(directions)
                 }
             }
         },
@@ -592,8 +580,9 @@ fun BrowserComponent(
         creditCardDelegate = { prompterState, activityResultLauncher ->
             object : InfernoCreditCardDelegate {
                 override val onManageCreditCards = {
+                    // todo: navigation, go to credit cards page with manager expanded
                     val directions = NavGraphDirections.actionGlobalAutofillSettingFragment()
-                    navController.navigate(directions)
+//                    navController.navigate(directions)
                 }
                 override val onSelectCreditCard = {
                     showBiometricPrompt(
@@ -610,8 +599,9 @@ fun BrowserComponent(
             override val addressPickerView
                 get() = null
             override val onManageAddresses = {
+                // todo: navigation, go to address page with address manager expanded
                 val directions = NavGraphDirections.actionGlobalAutofillSettingFragment()
-                navController.navigate(directions)
+//                navController.navigate(directions)
             }
         },
     )
@@ -717,7 +707,7 @@ fun BrowserComponent(
                                 context = context,
                                 coroutineScope = coroutineScope,
                                 snackbarHostState = snackbarHostState,
-                                navController = navController,
+//                                navController = navController,
                                 dismissTabsTray = ::dismissTabsTray
                             )
                         }
@@ -775,17 +765,14 @@ fun BrowserComponent(
                 tabsTrayMode = InfernoTabsTrayMode.Normal
             },
             onTabSettingsClick = {
-                navController.navigate(
-                    TabsTrayFragmentDirections.actionGlobalTabSettingsFragment(),
-                )
+                // todo: nav to tab settings page
+//                navController.navigate(
+//                    TabsTrayFragmentDirections.actionGlobalTabSettingsFragment(),
+//                )
             },
-            onHistoryClick = {
-                navController.navigate(
-                    TabsTrayFragmentDirections.actionGlobalHistoryFragment()
-                )
-            },
+            onHistoryClick = onNavToHistory,
             onShareAllTabsClick = {
-                // todo:
+                // todo: context.shareTextList -> all urls
 //                if (tabsTrayStore.state.selectedPage == Page.NormalTabs) {
 //                    tabsTrayStore.dispatch(TabsTrayAction.ShareAllNormalTabs)
 //                } else if (tabsTrayStore.state.selectedPage == Page.PrivateTabs) {
@@ -833,6 +820,7 @@ fun BrowserComponent(
 //                )
             },
             onAccountSettingsClick = {
+                // todo: nav to account settings
                 val isSignedIn =
                     context.components.backgroundServices.accountManager.authenticatedAccount() != null
 
@@ -841,7 +829,7 @@ fun BrowserComponent(
                 } else {
                     TabsTrayFragmentDirections.actionGlobalTurnOnSync(entrypoint = FenixFxAEntryPoint.NavigationInteraction)
                 }
-                navController.navigate(direction)
+//                navController.navigate(direction)
             },
             onTabClick = { tab ->
                 fun getTabPositionFromId(tabsList: List<TabSessionState>, tabId: String): Int {
@@ -1159,19 +1147,21 @@ fun BrowserComponent(
                 Lifecycle.Event.ON_START -> {
 //                    super.onStart()
 //                    val context = context
-                    val settings = context.settings()
 
-                    if (!settings.userKnowsAboutPwas) {
-                        pwaOnboardingObserver = PwaOnboardingObserver(
-                            store = context.components.core.store,
-                            lifecycleOwner = lifecycleOwner,
-                            navController = navController,
-                            settings = settings,
-                            webAppUseCases = context.components.useCases.webAppUseCases,
-                        ).also {
-                            it.start()
-                        }
-                    }
+                    // todo: onboarding, pwa
+//                    val settings = context.settings()
+
+//                    if (!settings.userKnowsAboutPwas) {
+//                        pwaOnboardingObserver = PwaOnboardingObserver(
+//                            store = context.components.core.store,
+//                            lifecycleOwner = lifecycleOwner,
+//                            navController = navController,
+//                            settings = settings,
+//                            webAppUseCases = context.components.useCases.webAppUseCases,
+//                        ).also {
+//                            it.start()
+//                        }
+//                    }
 
                     subscribeToTabCollections(context, lifecycleOwner)
                     updateLastBrowseActivity(context)
@@ -1206,9 +1196,10 @@ fun BrowserComponent(
 
                 Lifecycle.Event.ON_PAUSE -> {
 //                    super.onPause()
-                    if (navController.currentDestination?.id != R.id.searchDialogFragment) {
-                        view.hideKeyboard()
-                    }
+                    // todo: nav replace with getCurrentNavDestination callback param
+//                    if (navController.currentDestination?.id != R.id.searchDialogFragment) {
+//                        view.hideKeyboard()
+//                    }
 
                     context.components.services.appLinksInterceptor.updateFragmentManger(
                         fragmentManager = null,
@@ -1237,12 +1228,13 @@ fun BrowserComponent(
 
                     evaluateMessagesForMicrosurvey(components)
 
-                    context.components.core.tabCollectionStorage.register(
-                        collectionStorageObserver(
-                            context, navController, view, coroutineScope, snackbarHostState
-                        ),
-                        lifecycleOwner,
-                    )
+                    // todo: collection storage observer
+//                    context.components.core.tabCollectionStorage.register(
+//                        collectionStorageObserver(
+//                            context, view, coroutineScope, snackbarHostState
+//                        ),
+//                        lifecycleOwner,
+//                    )
                 }
 
                 else -> {
@@ -1541,31 +1533,21 @@ fun BrowserComponent(
 
                 val components = context.components
 
-                updateBrowserToolbarLeadingAndNavigationActions(
-                    context = context,
-                    redesignEnabled = context.settings().navigationToolbarEnabled,
-                    isLandscape = context.isLandscape(),
-                    isTablet = isLargeWindow(context),
-                    isPrivate = (context.getActivity()!! as HomeActivity).browsingModeManager.mode.isPrivate,
-                    feltPrivateBrowsingEnabled = context.settings().feltPrivateBrowsingEnabled,
-                    isWindowSizeSmall = true, // AcornWindowSize.getWindowSize(context) == AcornWindowSize.Small,
-                )
-
-                updateBrowserToolbarMenuVisibility()
-
                 // todo: translation, browser toolbar interactor
 //            initTranslationsAction(
 //                context, view, browserToolbarInteractor!!, translationsAvailable.value
 //            )
-                initReviewQualityCheck(
-                    context,
-                    lifecycleOwner,
-                    view,
-                    navController,
-                    { reviewQualityCheckAvailable = it },
-                    reviewQualityCheckAvailable,
-                    { reviewQualityCheckFeature = it }
-                )
+
+                // todo: quality check (for shopping, add icon, requires checking if enabled like readerView toggle)
+//                initReviewQualityCheck(
+//                    context,
+//                    lifecycleOwner,
+//                    view,
+////                    navController,
+//                    { reviewQualityCheckAvailable = it },
+//                    reviewQualityCheckAvailable,
+//                    { reviewQualityCheckFeature = it }
+//                )
                 // todo: init share page action, browser toolbar interactor
 //            initSharePageAction(context, browserToolbarInteractor)
                 initReloadAction(context)
@@ -1618,13 +1600,14 @@ fun BrowserComponent(
             // todo: accessibility
 //        context.accessibilityManager.addAccessibilityStateChangeListener(view) // this)
 
-            context.components.backgroundServices.closeSyncedTabsCommandReceiver.register(
-                observer = CloseLastSyncedTabObserver(
-                    scope = coroutineScope, // viewLifecycleOwner.lifecycleScope,
-                    navController = navController,
-                ),
-                view = view,
-            )
+            // todo: synced tabs
+//            context.components.backgroundServices.closeSyncedTabsCommandReceiver.register(
+//                observer = CloseLastSyncedTabObserver(
+//                    scope = coroutineScope, // viewLifecycleOwner.lifecycleScope,
+//                    navController = navController,
+//                ),
+//                view = view,
+//            )
 
             // DO NOT MOVE ANYTHING BELOW THIS addMarker CALL!
             context.components.core.engine.profiler?.addMarker(
@@ -2044,8 +2027,8 @@ fun MozEngineView(
             vr.layoutParams = LayoutParams(
                 LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT
             )
-//            vl.setProgressBackgroundColorSchemeColor(discColor)
-
+            // set loading indicator colors
+            vr.setProgressBackgroundColorSchemeColor(discColor)
             vr.setColorSchemeColors(trackColor, discColor)
             // todo: user prefs if swipe refresh enabled or not
             vr.visibility = View.VISIBLE
@@ -2064,7 +2047,8 @@ fun MozEngineView(
             vr
         },
         update = { vr ->
-            // if theme changed update colors
+            // if theme changed update loading indicator colors
+            vr.setProgressBackgroundColorSchemeColor(discColor)
             vr.setColorSchemeColors(trackColor, discColor)
             var gv: GeckoEngineView? = null
             for (v in vr.children) {
@@ -2392,7 +2376,7 @@ private fun showBookmarkSnackbar(
     context: Context,
     coroutineScope: CoroutineScope,
     snackbarHostState: AcornSnackbarHostState,
-    navController: NavController,
+//    navController: NavController,
     dismissTabsTray: () -> Unit,
 ) {
     val displayFolderTitle = parentFolderTitle ?: context.getString(R.string.library_bookmarks)
@@ -2415,9 +2399,10 @@ private fun showBookmarkSnackbar(
 
         when (result) {
             SnackbarResult.ActionPerformed -> {
-                navController.navigate(
-                    TabsTrayFragmentDirections.actionGlobalBookmarkFragment(BookmarkRoot.Mobile.id),
-                )
+                // todo: nav, go to bookmarks
+//                navController.navigate(
+//                    TabsTrayFragmentDirections.actionGlobalBookmarkFragment(BookmarkRoot.Mobile.id),
+//                )
                 dismissTabsTray.invoke()
             }
 
@@ -3048,18 +3033,18 @@ private fun evaluateMessagesForMicrosurvey(components: Components) =
 //    return true
 //}
 
-/**
- * Navigate to GlobalTabHistoryDialogFragment.
- */
-private fun navigateToGlobalTabHistoryDialogFragment(
-    navController: NavController, customTabSessionId: String?,
-) {
-    navController.navigate(
-        NavGraphDirections.actionGlobalTabHistoryDialogFragment(
-            activeSessionId = customTabSessionId,
-        ),
-    )
-}
+///**
+// * Navigate to GlobalTabHistoryDialogFragment.
+// */
+//private fun navigateToGlobalTabHistoryDialogFragment(
+//    navController: NavController, customTabSessionId: String?,
+//) {
+//    navController.navigate(
+//        NavGraphDirections.actionGlobalTabHistoryDialogFragment(
+//            activeSessionId = customTabSessionId,
+//        ),
+//    )
+//}
 
 /* override */ fun onBackLongPressed(): Boolean {
     // todo:
@@ -3216,36 +3201,36 @@ private fun assignSitePermissionsRules(
 //    }
 }
 
-/**
- * Displays the quick settings dialog,
- * which lets the user control tracking protection and site settings.
- */
-private fun showQuickSettingsDialog(
-    context: Context,
-    lifecycleOwner: LifecycleOwner,
-    coroutineScope: CoroutineScope,
-    navController: NavController,
-    view: View,
-    customTabSessionId: String?,
-) {
-    val tab = getCurrentTab(context, customTabSessionId) ?: return
-    lifecycleOwner.lifecycleScope.launch(Main) {
-        val sitePermissions: SitePermissions? = tab.content.url.getOrigin()?.let { origin ->
-            val storage = context.components.core.permissionStorage
-            storage.findSitePermissionsBy(origin, tab.content.private)
-        }
-
-        view?.let {
-            navToQuickSettingsSheet(
-                tab,
-                sitePermissions,
-                context = context,
-                coroutineScope = coroutineScope,
-                navController = navController
-            )
-        }
-    }
-}
+///**
+// * Displays the quick settings dialog,
+// * which lets the user control tracking protection and site settings.
+// */
+//private fun showQuickSettingsDialog(
+//    context: Context,
+//    lifecycleOwner: LifecycleOwner,
+//    coroutineScope: CoroutineScope,
+//    navController: NavController,
+//    view: View,
+//    customTabSessionId: String?,
+//) {
+//    val tab = getCurrentTab(context, customTabSessionId) ?: return
+//    lifecycleOwner.lifecycleScope.launch(Main) {
+//        val sitePermissions: SitePermissions? = tab.content.url.getOrigin()?.let { origin ->
+//            val storage = context.components.core.permissionStorage
+//            storage.findSitePermissionsBy(origin, tab.content.private)
+//        }
+//
+//        view?.let {
+//            navToQuickSettingsSheet(
+//                tab,
+//                sitePermissions,
+//                context = context,
+//                coroutineScope = coroutineScope,
+//                navController = navController
+//            )
+//        }
+//    }
+//}
 
 /**
  * Set the activity normal/private theme to match the current session.
@@ -3270,85 +3255,86 @@ fun getCurrentTab(context: Context, customTabSessionId: String? = null): Session
     return context.components.core.store.state.findCustomTabOrSelectedTab(customTabSessionId)
 }
 
-private suspend fun bookmarkTapped(
-    sessionUrl: String,
-    sessionTitle: String,
-    context: Context,
-    navController: NavController,
-    coroutineScope: CoroutineScope,
-    snackbarHostState: AcornSnackbarHostState,
-) = withContext(IO) {
-    val bookmarksStorage = context.components.core.bookmarksStorage
-    val existing =
-        bookmarksStorage.getBookmarksWithUrl(sessionUrl).firstOrNull { it.url == sessionUrl }
-    if (existing != null) {
-        // Bookmark exists, go to edit fragment
-        withContext(Main) {
-            nav(
-                navController,
-                R.id.browserComponentWrapperFragment,
-                BrowserComponentWrapperFragmentDirections.actionGlobalBookmarkEditFragment(
-                    existing.guid, true
-                ),
-            )
-        }
-    } else {
-        // Save bookmark, then go to edit fragment
-        try {
-            val parentNode = Result.runCatching {
-                val parentGuid = bookmarksStorage.getRecentBookmarks(1).firstOrNull()?.parentGuid
-                    ?: BookmarkRoot.Mobile.id
-
-                bookmarksStorage.getBookmark(parentGuid)!!
-            }.getOrElse {
-                // this should be a temporary hack until the menu redesign is completed
-                // see MenuDialogMiddleware for the updated version
-                throw PlacesApiException.UrlParseFailed(reason = "no parent node")
-            }
-
-            val guid = bookmarksStorage.addItem(
-                parentNode.guid,
-                url = sessionUrl,
-                title = sessionTitle,
-                position = null,
-            )
-
-//                MetricsUtils.recordBookmarkMetrics(MetricsUtils.BookmarkAction.ADD, METRIC_SOURCE)
-            showBookmarkSavedSnackbar(
-                message = context.getString(
-                    R.string.bookmark_saved_in_folder_snackbar,
-                    friendlyRootTitle(context, parentNode),
-                ),
-                context = context,
-                coroutineScope = coroutineScope,
-                snackbarHostState = snackbarHostState,
-                onClick = {
-//                        MetricsUtils.recordBookmarkMetrics(
-//                            MetricsUtils.BookmarkAction.EDIT,
-//                            TOAST_METRIC_SOURCE,
-//                        )
-                    navController.navigateWithBreadcrumb(
-                        directions = BrowserComponentWrapperFragmentDirections.actionGlobalBookmarkEditFragment(
-                            guid,
-                            true,
-                        ),
-                        navigateFrom = "BrowserFragment",
-                        navigateTo = "ActionGlobalBookmarkEditFragment",
-                    )
-                },
-            )
-        } catch (e: PlacesApiException.UrlParseFailed) {
-            withContext(Main) {
-                coroutineScope.launch {
-                    snackbarHostState.warningSnackbarHostState.showSnackbar(
-                        message = context.getString(R.string.bookmark_invalid_url_error),
-                        duration = SnackbarDuration.Long,
-                    )
-                }
-            }
-        }
-    }
-}
+// todo: bookmarks
+//private suspend fun bookmarkTapped(
+//    sessionUrl: String,
+//    sessionTitle: String,
+//    context: Context,
+//    navController: NavController,
+//    coroutineScope: CoroutineScope,
+//    snackbarHostState: AcornSnackbarHostState,
+//) = withContext(IO) {
+//    val bookmarksStorage = context.components.core.bookmarksStorage
+//    val existing =
+//        bookmarksStorage.getBookmarksWithUrl(sessionUrl).firstOrNull { it.url == sessionUrl }
+//    if (existing != null) {
+//        // Bookmark exists, go to edit fragment
+//        withContext(Main) {
+//            nav(
+//                navController,
+//                R.id.browserComponentWrapperFragment,
+//                BrowserComponentWrapperFragmentDirections.actionGlobalBookmarkEditFragment(
+//                    existing.guid, true
+//                ),
+//            )
+//        }
+//    } else {
+//        // Save bookmark, then go to edit fragment
+//        try {
+//            val parentNode = Result.runCatching {
+//                val parentGuid = bookmarksStorage.getRecentBookmarks(1).firstOrNull()?.parentGuid
+//                    ?: BookmarkRoot.Mobile.id
+//
+//                bookmarksStorage.getBookmark(parentGuid)!!
+//            }.getOrElse {
+//                // this should be a temporary hack until the menu redesign is completed
+//                // see MenuDialogMiddleware for the updated version
+//                throw PlacesApiException.UrlParseFailed(reason = "no parent node")
+//            }
+//
+//            val guid = bookmarksStorage.addItem(
+//                parentNode.guid,
+//                url = sessionUrl,
+//                title = sessionTitle,
+//                position = null,
+//            )
+//
+////                MetricsUtils.recordBookmarkMetrics(MetricsUtils.BookmarkAction.ADD, METRIC_SOURCE)
+//            showBookmarkSavedSnackbar(
+//                message = context.getString(
+//                    R.string.bookmark_saved_in_folder_snackbar,
+//                    friendlyRootTitle(context, parentNode),
+//                ),
+//                context = context,
+//                coroutineScope = coroutineScope,
+//                snackbarHostState = snackbarHostState,
+//                onClick = {
+////                        MetricsUtils.recordBookmarkMetrics(
+////                            MetricsUtils.BookmarkAction.EDIT,
+////                            TOAST_METRIC_SOURCE,
+////                        )
+//                    navController.navigateWithBreadcrumb(
+//                        directions = BrowserComponentWrapperFragmentDirections.actionGlobalBookmarkEditFragment(
+//                            guid,
+//                            true,
+//                        ),
+//                        navigateFrom = "BrowserFragment",
+//                        navigateTo = "ActionGlobalBookmarkEditFragment",
+//                    )
+//                },
+//            )
+//        } catch (e: PlacesApiException.UrlParseFailed) {
+//            withContext(Main) {
+//                coroutineScope.launch {
+//                    snackbarHostState.warningSnackbarHostState.showSnackbar(
+//                        message = context.getString(R.string.bookmark_invalid_url_error),
+//                        duration = SnackbarDuration.Long,
+//                    )
+//                }
+//            }
+//        }
+//    }
+//}
 
 private fun showBookmarkSavedSnackbar(
     message: String,
@@ -3676,12 +3662,12 @@ private fun removeLastSavedGeneratedPassword(setLastSavedGeneratedPassword: (Str
     setLastSavedGeneratedPassword(null)
 }
 
-private fun navigateToSavedLoginsFragment(navController: NavController) {
-    if (navController.currentDestination?.id == R.id.browserComponentWrapperFragment) {
-        val directions = BrowserComponentWrapperFragmentDirections.actionLoginsListFragment()
-        navController.navigate(directions)
-    }
-}
+//private fun navigateToSavedLoginsFragment(navController: NavController) {
+//    if (navController.currentDestination?.id == R.id.browserComponentWrapperFragment) {
+//        val directions = BrowserComponentWrapperFragmentDirections.actionLoginsListFragment()
+//        navController.navigate(directions)
+//    }
+//}
 
 /* BaseBrowserFragment funs */
 
@@ -3814,346 +3800,62 @@ private fun initReloadAction(context: Context) {
 //    }
 }
 
-private fun initReviewQualityCheck(
-    context: Context,
-    lifecycleOwner: LifecycleOwner,
-    view: View,
-    navController: NavController,
-    setReviewQualityCheckAvailable: (Boolean) -> Unit,
-    reviewQualityCheckAvailable: Boolean,
-    setReviewQualityCheckFeature: (ReviewQualityCheckFeature) -> Unit,
-) {
-    val reviewQualityCheck = BrowserToolbar.ToggleButton(
-        image = AppCompatResources.getDrawable(
-            context,
-            R.drawable.mozac_ic_shopping_24,
-        )!!.apply {
-            setTint(getColor(context, R.color.fx_mobile_text_color_primary))
-        },
-        imageSelected = AppCompatResources.getDrawable(
-            context,
-            R.drawable.ic_shopping_selected,
-        )!!,
-        contentDescription = context.getString(R.string.review_quality_check_open_handle_content_description),
-        contentDescriptionSelected = context.getString(R.string.review_quality_check_close_handle_content_description),
-        visible = { reviewQualityCheckAvailable },
-        weight = { REVIEW_QUALITY_CHECK_WEIGHT },
-        listener = { _ ->
-            context.components.appStore.dispatch(
-                ShoppingAction.ShoppingSheetStateUpdated(expanded = true),
-            )
-            navController.navigate(
-                BrowserComponentWrapperFragmentDirections.actionGlobalReviewQualityCheckDialogFragment(),
-            )
-        },
-    )
-
-    // todo: qualityCheck???, also page actions not implemented
-//    browserToolbarView.view.addPageAction(reviewQualityCheck)
-
-    setReviewQualityCheckFeature(
-        ReviewQualityCheckFeature(
-            appStore = context.components.appStore,
-            browserStore = context.components.core.store,
-            shoppingExperienceFeature = DefaultShoppingExperienceFeature(),
-            onIconVisibilityChange = {
-                setReviewQualityCheckAvailable(it)
-                safeInvalidateBrowserToolbarView()
-            },
-            onBottomSheetStateChange = {
-                reviewQualityCheck.setSelected(selected = it, notifyListener = false)
-            },
-            onProductPageDetected = {
-                // Shopping.productPageVisits.add()
-            },
-        )
-    )
-}
-
-@VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-internal fun addLeadingAction(
-    context: Context,
-    showHomeButton: Boolean,
-    showEraseButton: Boolean,
-) {
-    // todo: leading action
-//    if (leadingAction != null) return
-//
-//    leadingAction = if (showEraseButton) {
-//        BrowserToolbar.Button(
-//            imageDrawable = AppCompatResources.getDrawable(
-//                context,
-//                R.drawable.mozac_ic_data_clearance_24,
-//            )!!,
-//            contentDescription = context.getString(R.string.browser_toolbar_erase),
-//            iconTintColorResource = ThemeManager.resolveAttribute(R.attr.textPrimary, context),
-//            listener = browserToolbarInteractor::onEraseButtonClicked,
-//        )
-//    } else if (showHomeButton) {
-//        BrowserToolbar.Button(
-//            imageDrawable = AppCompatResources.getDrawable(
-//                context,
-//                R.drawable.mozac_ic_home_24,
-//            )!!,
-//            contentDescription = context.getString(R.string.browser_toolbar_home),
-//            iconTintColorResource = ThemeManager.resolveAttribute(R.attr.textPrimary, context),
-//            listener = browserToolbarInteractor::onHomeButtonClicked,
-//        )
-//    } else {
-//        null
-//    }
-//
-//    leadingAction?.let {
-//        browserToolbarView.view.addNavigationAction(it)
-//    }
-}
-
-@VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-internal fun removeLeadingAction() {
-    // todo: leading action
-//    leadingAction?.let {
-//        browserToolbarView.view.removeNavigationAction(it)
-//    }
-//    leadingAction = null
-}
-
-/**
- * This code takes care of the [InfernoToolbar] leading and navigation actions.
- * The older design requires a HomeButton followed by navigation buttons for tablets.
- * The newer design expects NavigationButtons and a HomeButton in landscape mode for phones and in both modes
- * for tablets.
- */
-@VisibleForTesting
-internal fun updateBrowserToolbarLeadingAndNavigationActions(
-    context: Context,
-    redesignEnabled: Boolean,
-    isLandscape: Boolean,
-    isTablet: Boolean,
-    isPrivate: Boolean,
-    feltPrivateBrowsingEnabled: Boolean,
-    isWindowSizeSmall: Boolean,
-) {
-    if (redesignEnabled) {
-        updateAddressBarNavigationActions(
-            context = context,
-            isWindowSizeSmall = isWindowSizeSmall,
-        )
-        updateAddressBarLeadingAction(
-            redesignEnabled = true,
-            isLandscape = isLandscape,
-            isTablet = isTablet,
-            isPrivate = isPrivate,
-            feltPrivateBrowsingEnabled = feltPrivateBrowsingEnabled,
-            context = context,
-        )
-    } else {
-        updateAddressBarLeadingAction(
-            redesignEnabled = false,
-            isLandscape = isLandscape,
-            isPrivate = isPrivate,
-            isTablet = isTablet,
-            feltPrivateBrowsingEnabled = feltPrivateBrowsingEnabled,
-            context = context,
-        )
-        updateTabletToolbarActions(isTablet = isTablet, context)
-    }
-    // todo: toolbar
-//    browserToolbarView.view.invalidateActions()
-}
-
-private fun updateBrowserToolbarMenuVisibility() {
-    // todo: toolbar
-//    browserToolbarView.updateMenuVisibility(
-//        isVisible = false // !context.shouldAddNavigationBar(),
+// todo: review quality check
+//private fun initReviewQualityCheck(
+//    context: Context,
+//    lifecycleOwner: LifecycleOwner,
+//    view: View,
+////    navController: NavController,
+//    setReviewQualityCheckAvailable: (Boolean) -> Unit,
+//    reviewQualityCheckAvailable: Boolean,
+//    setReviewQualityCheckFeature: (ReviewQualityCheckFeature) -> Unit,
+//) {
+//    val reviewQualityCheck = BrowserToolbar.ToggleButton(
+//        image = AppCompatResources.getDrawable(
+//            context,
+//            R.drawable.mozac_ic_shopping_24,
+//        )!!.apply {
+//            setTint(getColor(context, R.color.fx_mobile_text_color_primary))
+//        },
+//        imageSelected = AppCompatResources.getDrawable(
+//            context,
+//            R.drawable.ic_shopping_selected,
+//        )!!,
+//        contentDescription = context.getString(R.string.review_quality_check_open_handle_content_description),
+//        contentDescriptionSelected = context.getString(R.string.review_quality_check_close_handle_content_description),
+//        visible = { reviewQualityCheckAvailable },
+//        weight = { REVIEW_QUALITY_CHECK_WEIGHT },
+//        listener = { _ ->
+//            context.components.appStore.dispatch(
+//                ShoppingAction.ShoppingSheetStateUpdated(expanded = true),
+//            )
+//            // todo: nav & quality check
+////            navController.navigate(
+////                BrowserComponentWrapperFragmentDirections.actionGlobalReviewQualityCheckDialogFragment(),
+////            )
+//        },
 //    )
-}
-
-@VisibleForTesting
-internal fun updateAddressBarLeadingAction(
-    redesignEnabled: Boolean,
-    isLandscape: Boolean,
-    isTablet: Boolean,
-    isPrivate: Boolean,
-    feltPrivateBrowsingEnabled: Boolean,
-    context: Context,
-) {
-    val showHomeButton = !redesignEnabled
-    val showEraseButton = feltPrivateBrowsingEnabled && isPrivate && (isLandscape || isTablet)
-
-    if (showHomeButton || showEraseButton) {
-        addLeadingAction(
-            context = context,
-            showHomeButton = showHomeButton,
-            showEraseButton = showEraseButton,
-        )
-    } else {
-        removeLeadingAction()
-    }
-}
-
-@VisibleForTesting
-internal fun updateAddressBarNavigationActions(
-    context: Context,
-    isWindowSizeSmall: Boolean,
-) {
-    if (!isWindowSizeSmall) {
-        addNavigationActions(context)
-    } else {
-        removeNavigationActions()
-    }
-}
-
-@VisibleForTesting
-internal fun updateTabletToolbarActions(isTablet: Boolean, context: Context) {
-    // todo: isTablet
-//    if (isTablet == this.isTablet) return
 //
-//    if (isTablet) {
-//        addTabletActions(context)
-//    } else {
-//        removeTabletActions()
-//    }
+//    // todo: qualityCheck???, also page actions not implemented
+////    browserToolbarView.view.addPageAction(reviewQualityCheck)
 //
-//    this.isTablet = isTablet
-}
-
-@VisibleForTesting
-internal fun addNavigationActions(context: Context) {
-    val enableTint = ThemeManager.resolveAttribute(R.attr.textPrimary, context)
-    val disableTint = ThemeManager.resolveAttribute(R.attr.textDisabled, context)
-
-    // todo: back action
-//    if (backAction == null) {
-//        backAction = BrowserToolbar.TwoStateButton(
-//            primaryImage = AppCompatResources.getDrawable(
-//                context,
-//                R.drawable.mozac_ic_back_24,
-//            )!!,
-//            primaryContentDescription = context.getString(R.string.browser_menu_back),
-//            primaryImageTintResource = enableTint,
-//            isInPrimaryState = { getSafeCurrentTab()?.content?.canGoBack ?: false },
-//            secondaryImageTintResource = disableTint,
-//            disableInSecondaryState = true,
-//            longClickListener = {
-////                    if (!this.isTablet) {
-////                        NavigationBar.browserBackLongTapped.record(NoExtras())
-////                    }
-//                browserToolbarInteractor.onBrowserToolbarMenuItemTapped(
-//                    ToolbarMenu.Item.Back(viewHistory = true),
-//                )
+//    setReviewQualityCheckFeature(
+//        ReviewQualityCheckFeature(
+//            appStore = context.components.appStore,
+//            browserStore = context.components.core.store,
+//            shoppingExperienceFeature = DefaultShoppingExperienceFeature(),
+//            onIconVisibilityChange = {
+//                setReviewQualityCheckAvailable(it)
+//                safeInvalidateBrowserToolbarView()
 //            },
-//            listener = {
-////                    if (!this.isTablet) {
-////                        NavigationBar.browserBackTapped.record(NoExtras())
-////                    }
-//                browserToolbarInteractor.onBrowserToolbarMenuItemTapped(
-//                    ToolbarMenu.Item.Back(viewHistory = false),
-//                )
+//            onBottomSheetStateChange = {
+//                reviewQualityCheck.setSelected(selected = it, notifyListener = false)
 //            },
-//        ).also {
-//            browserToolbarView.view.addNavigationAction(it)
-//        }
-//    }
-
-    // todo: forward action
-//    if (forwardAction == null) {
-//        forwardAction = BrowserToolbar.TwoStateButton(
-//            primaryImage = AppCompatResources.getDrawable(
-//                context,
-//                R.drawable.mozac_ic_forward_24,
-//            )!!,
-//            primaryContentDescription = context.getString(R.string.browser_menu_forward),
-//            primaryImageTintResource = enableTint,
-//            isInPrimaryState = { getSafeCurrentTab()?.content?.canGoForward ?: false },
-//            secondaryImageTintResource = disableTint,
-//            disableInSecondaryState = true,
-//            longClickListener = {
-////                    if (!this.isTablet) {
-////                        NavigationBar.browserForwardLongTapped.record(NoExtras())
-////                    }
-//                browserToolbarInteractor.onBrowserToolbarMenuItemTapped(
-//                    ToolbarMenu.Item.Forward(viewHistory = true),
-//                )
+//            onProductPageDetected = {
+//                // Shopping.productPageVisits.add()
 //            },
-//            listener = {
-////                    if (!this.isTablet) {
-////                        NavigationBar.browserForwardTapped.record(NoExtras())
-////                    }
-//                browserToolbarInteractor.onBrowserToolbarMenuItemTapped(
-//                    ToolbarMenu.Item.Forward(viewHistory = false),
-//                )
-//            },
-//        ).also {
-//            browserToolbarView.view.addNavigationAction(it)
-//        }
-//    }
-}
-
-//@VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-//internal fun addTabletActions(context: Context) {
-//    addNavigationActions(context)
-//
-//    val enableTint = ThemeManager.resolveAttribute(R.attr.textPrimary, context)
-//    // todo: refresh action
-////    if (refreshAction == null) {
-////        refreshAction = BrowserToolbar.TwoStateButton(
-////            primaryImage = AppCompatResources.getDrawable(
-////                context,
-////                R.drawable.mozac_ic_arrow_clockwise_24,
-////            )!!,
-////            primaryContentDescription = context.getString(R.string.browser_menu_refresh),
-////            primaryImageTintResource = enableTint,
-////            isInPrimaryState = {
-////                getSafeCurrentTab()?.content?.loading == false
-////            },
-////            secondaryImage = AppCompatResources.getDrawable(
-////                context,
-////                R.drawable.mozac_ic_stop,
-////            )!!,
-////            secondaryContentDescription = context.getString(R.string.browser_menu_stop),
-////            disableInSecondaryState = false,
-////            longClickListener = {
-////                browserToolbarInteractor.onBrowserToolbarMenuItemTapped(
-////                    ToolbarMenu.Item.Reload(bypassCache = true),
-////                )
-////            },
-////            listener = {
-////                if (getCurrentTab()?.content?.loading == true) {
-////                    browserToolbarInteractor.onBrowserToolbarMenuItemTapped(ToolbarMenu.Item.Stop)
-////                } else {
-////                    browserToolbarInteractor.onBrowserToolbarMenuItemTapped(
-////                        ToolbarMenu.Item.Reload(bypassCache = false),
-////                    )
-////                }
-////            },
-////        ).also {
-////            browserToolbarView.view.addNavigationAction(it)
-////        }
-////    }
-//}
-
-@VisibleForTesting
-internal fun removeNavigationActions() {
-    // todo: forward action
-//    forwardAction?.let {
-//        browserToolbarView.view.removeNavigationAction(it)
-//    }
-//    forwardAction = null
-    // todo: back action
-//    backAction?.let {
-//        browserToolbarView.view.removeNavigationAction(it)
-//    }
-//    backAction = null
-}
-
-//@VisibleForTesting
-//internal fun removeTabletActions() {
-//    removeNavigationActions()
-//
-//    // todo: refresh action
-////    refreshAction?.let {
-////        browserToolbarView.view.removeNavigationAction(it)
-////    }
+//        )
+//    )
 //}
 
 @SuppressLint("VisibleForTests")
@@ -4175,152 +3877,154 @@ private fun subscribeToTabCollections(context: Context, lifecycleOwner: Lifecycl
 }
 
 
-fun navToQuickSettingsSheet(
-    tab: SessionState,
-    sitePermissions: SitePermissions?,
-    context: Context,
-    coroutineScope: CoroutineScope,
-    navController: NavController,
-) {
-    val useCase = context.components.useCases.trackingProtectionUseCases
-//        FxNimbus.features.cookieBanners.recordExposure()
-    useCase.containsException(tab.id) { _ -> // hasTrackingProtectionException ->
-//        lifecycleScope.launch {
-        coroutineScope.launch {
-//            val cookieBannersStorage = context.components.core.cookieBannersStorage
-//            val cookieBannerUIMode = cookieBannersStorage.getCookieBannerUIMode(
-//                context,
-//                tab,
+//fun navToQuickSettingsSheet(
+//    tab: SessionState,
+//    sitePermissions: SitePermissions?,
+//    context: Context,
+//    coroutineScope: CoroutineScope,
+//    navController: NavController,
+//) {
+//    val useCase = context.components.useCases.trackingProtectionUseCases
+////        FxNimbus.features.cookieBanners.recordExposure()
+//    useCase.containsException(tab.id) { _ -> // hasTrackingProtectionException ->
+////        lifecycleScope.launch {
+//        coroutineScope.launch {
+////            val cookieBannersStorage = context.components.core.cookieBannersStorage
+////            val cookieBannerUIMode = cookieBannersStorage.getCookieBannerUIMode(
+////                context,
+////                tab,
+////            )
+//            withContext(Main) {
+//                // todo: check if fragment attached
+////                runIfFragmentIsAttached {
+////                    val isTrackingProtectionEnabled =
+////                        tab.trackingProtection.enabled && !hasTrackingProtectionException
+////                    val directions = if (context.settings().enableUnifiedTrustPanel) {
+////                        BrowserComponentWrapperFragmentDirections.actionBrowserFragmentToTrustPanelFragment(
+////                            sessionId = tab.id,
+////                            url = tab.content.url,
+////                            title = tab.content.title,
+////                            isSecured = tab.content.securityInfo.secure,
+////                            sitePermissions = sitePermissions,
+////                            certificateName = tab.content.securityInfo.issuer,
+////                            permissionHighlights = tab.content.permissionHighlights,
+////                            isTrackingProtectionEnabled = isTrackingProtectionEnabled,
+////                            cookieBannerUIMode = cookieBannerUIMode,
+////                        )
+////                    } else {
+////                        BrowserComponentWrapperFragmentDirections.actionBrowserFragmentToQuickSettingsSheetDialogFragment(
+////                            sessionId = tab.id,
+////                            url = tab.content.url,
+////                            title = tab.content.title,
+////                            isSecured = tab.content.securityInfo.secure,
+////                            sitePermissions = sitePermissions,
+////                            gravity = getAppropriateLayoutGravity(),
+////                            certificateName = tab.content.securityInfo.issuer,
+////                            permissionHighlights = tab.content.permissionHighlights,
+////                            isTrackingProtectionEnabled = isTrackingProtectionEnabled,
+////                            cookieBannerUIMode = cookieBannerUIMode,
+////                        )
+////                    }
+////                    settings(navController, R.id.browserFragment, directions)
+////                }
+//            }
+//        }
+//    }
+//}
+
+// todo: collection storage observer
+//private fun collectionStorageObserver(
+//    context: Context,
+////    navController: NavController,
+//    view: View,
+//    coroutineScope: CoroutineScope,
+//    snackbarHostState: AcornSnackbarHostState,
+//): TabCollectionStorage.Observer {
+//    return object : TabCollectionStorage.Observer {
+//        override fun onCollectionCreated(
+//            title: String,
+//            sessions: List<TabSessionState>,
+//            id: Long?,
+//        ) {
+//            showTabSavedToCollectionSnackbar(
+//                sessions.size, context, coroutineScope, snackbarHostState, true
 //            )
-            withContext(Main) {
-                // todo: check if fragment attached
-//                runIfFragmentIsAttached {
-//                    val isTrackingProtectionEnabled =
-//                        tab.trackingProtection.enabled && !hasTrackingProtectionException
-//                    val directions = if (context.settings().enableUnifiedTrustPanel) {
-//                        BrowserComponentWrapperFragmentDirections.actionBrowserFragmentToTrustPanelFragment(
-//                            sessionId = tab.id,
-//                            url = tab.content.url,
-//                            title = tab.content.title,
-//                            isSecured = tab.content.securityInfo.secure,
-//                            sitePermissions = sitePermissions,
-//                            certificateName = tab.content.securityInfo.issuer,
-//                            permissionHighlights = tab.content.permissionHighlights,
-//                            isTrackingProtectionEnabled = isTrackingProtectionEnabled,
-//                            cookieBannerUIMode = cookieBannerUIMode,
-//                        )
-//                    } else {
-//                        BrowserComponentWrapperFragmentDirections.actionBrowserFragmentToQuickSettingsSheetDialogFragment(
-//                            sessionId = tab.id,
-//                            url = tab.content.url,
-//                            title = tab.content.title,
-//                            isSecured = tab.content.securityInfo.secure,
-//                            sitePermissions = sitePermissions,
-//                            gravity = getAppropriateLayoutGravity(),
-//                            certificateName = tab.content.securityInfo.issuer,
-//                            permissionHighlights = tab.content.permissionHighlights,
-//                            isTrackingProtectionEnabled = isTrackingProtectionEnabled,
-//                            cookieBannerUIMode = cookieBannerUIMode,
-//                        )
+//        }
+//
+//        override fun onTabsAdded(
+//            tabCollection: TabCollection, sessions: List<TabSessionState>,
+//        ) {
+//            showTabSavedToCollectionSnackbar(
+//                sessions.size, context, coroutineScope, snackbarHostState
+//            )
+//        }
+//
+//        fun showTabSavedToCollectionSnackbar(
+//            tabSize: Int,
+//            context: Context,
+////            navController: NavController,
+//            coroutineScope: CoroutineScope,
+//            snackbarHostState: AcornSnackbarHostState,
+//            isNewCollection: Boolean = false,
+//        ) {
+//            view?.let {
+//                val messageStringRes = when {
+//                    isNewCollection -> {
+//                        R.string.create_collection_tabs_saved_new_collection
 //                    }
-//                    settings(navController, R.id.browserFragment, directions)
+//
+//                    tabSize > 1 -> {
+//                        R.string.create_collection_tabs_saved
+//                    }
+//
+//                    else -> {
+//                        R.string.create_collection_tab_saved
+//                    }
 //                }
-            }
-        }
-    }
-}
-
-private fun collectionStorageObserver(
-    context: Context,
-    navController: NavController,
-    view: View,
-    coroutineScope: CoroutineScope,
-    snackbarHostState: AcornSnackbarHostState,
-): TabCollectionStorage.Observer {
-    return object : TabCollectionStorage.Observer {
-        override fun onCollectionCreated(
-            title: String,
-            sessions: List<TabSessionState>,
-            id: Long?,
-        ) {
-            showTabSavedToCollectionSnackbar(
-                sessions.size, context, navController, coroutineScope, snackbarHostState, true
-            )
-        }
-
-        override fun onTabsAdded(
-            tabCollection: TabCollection, sessions: List<TabSessionState>,
-        ) {
-            showTabSavedToCollectionSnackbar(
-                sessions.size, context, navController, coroutineScope, snackbarHostState
-            )
-        }
-
-        fun showTabSavedToCollectionSnackbar(
-            tabSize: Int,
-            context: Context,
-            navController: NavController,
-            coroutineScope: CoroutineScope,
-            snackbarHostState: AcornSnackbarHostState,
-            isNewCollection: Boolean = false,
-        ) {
-            view?.let {
-                val messageStringRes = when {
-                    isNewCollection -> {
-                        R.string.create_collection_tabs_saved_new_collection
-                    }
-
-                    tabSize > 1 -> {
-                        R.string.create_collection_tabs_saved
-                    }
-
-                    else -> {
-                        R.string.create_collection_tab_saved
-                    }
-                }
-
-                // show snackbar
-                coroutineScope.launch {
-                    val result = snackbarHostState.defaultSnackbarHostState.showSnackbar(
-                        message = context.getString(messageStringRes),
-                        duration = SnackbarDuration.Long,
-                        actionLabel = context.getString(R.string.create_collection_view),
-                    )
-                    when (result) {
-                        SnackbarResult.ActionPerformed -> {
-                            navController.navigate(
-                                BrowserComponentWrapperFragmentDirections.actionGlobalHome(
-                                    focusOnAddressBar = false,
-                                    scrollToCollection = true,
-                                ),
-                            )
-                        }
-
-                        SnackbarResult.Dismissed -> {}
-                    }
-                }
-
-//                Snackbar.make(
-//                    snackBarParentView = binding.dynamicSnackbarContainer,
-//                    snackbarState = SnackbarState(
+//
+//                // show snackbar
+//                coroutineScope.launch {
+//                    val result = snackbarHostState.defaultSnackbarHostState.showSnackbar(
 //                        message = context.getString(messageStringRes),
-//                        action = Action(
-//                            label = context.getString(R.string.create_collection_view),
-//                            onClick = {
-//                                navController.navigate(
-//                                    BrowserComponentWrapperFragmentDirections.actionGlobalHome(
-//                                        focusOnAddressBar = false,
-//                                        scrollToCollection = true,
-//                                    ),
-//                                )
-//                            },
-//                        ),
-//                    ),
-//                ).show()
-            }
-        }
-    }
-}
+//                        duration = SnackbarDuration.Long,
+//                        actionLabel = context.getString(R.string.create_collection_view),
+//                    )
+//                    when (result) {
+//                        SnackbarResult.ActionPerformed -> {
+//                            // todo: nav, new tab with home
+////                            navController.navigate(
+////                                BrowserComponentWrapperFragmentDirections.actionGlobalHome(
+////                                    focusOnAddressBar = false,
+////                                    scrollToCollection = true,
+////                                ),
+////                            )
+//                        }
+//
+//                        SnackbarResult.Dismissed -> {}
+//                    }
+//                }
+//
+////                Snackbar.make(
+////                    snackBarParentView = binding.dynamicSnackbarContainer,
+////                    snackbarState = SnackbarState(
+////                        message = context.getString(messageStringRes),
+////                        action = Action(
+////                            label = context.getString(R.string.create_collection_view),
+////                            onClick = {
+////                                navController.navigate(
+////                                    BrowserComponentWrapperFragmentDirections.actionGlobalHome(
+////                                        focusOnAddressBar = false,
+////                                        scrollToCollection = true,
+////                                    ),
+////                                )
+////                            },
+////                        ),
+////                    ),
+////                ).show()
+//            }
+//        }
+//    }
+//}
 
 //fun getContextMenuCandidates(
 //    context: Context,

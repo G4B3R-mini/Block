@@ -22,7 +22,6 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.CallSuper
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.HorizontalDivider
@@ -46,11 +45,9 @@ import androidx.core.view.OnApplyWindowInsetsListener
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
-import androidx.preference.PreferenceManager
 import com.google.android.material.snackbar.Snackbar.LENGTH_LONG
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers.IO
@@ -104,7 +101,7 @@ import mozilla.components.feature.prompts.address.AddressDelegate
 import mozilla.components.feature.prompts.creditcard.CreditCardDelegate
 import mozilla.components.feature.prompts.dialog.FullScreenNotificationToast
 import mozilla.components.feature.prompts.dialog.GestureNavUtils
-import com.shmibblez.inferno.browser.prompts.webPrompts.AndroidPhotoPicker
+import com.shmibblez.inferno.browser.prompts.webPrompts.InfernoAndroidPhotoPicker
 import mozilla.components.feature.prompts.identitycredential.DialogColors
 import mozilla.components.feature.prompts.identitycredential.DialogColorsProvider
 import mozilla.components.feature.prompts.login.LoginDelegate
@@ -201,7 +198,6 @@ import com.shmibblez.inferno.downloads.dialog.StartDownloadDialog
 import com.shmibblez.inferno.downloads.dialog.ThirdPartyDownloadDialog
 import com.shmibblez.inferno.ext.accessibilityManager
 import com.shmibblez.inferno.ext.components
-import com.shmibblez.inferno.ext.getPreferenceKey
 import com.shmibblez.inferno.ext.hideToolbar
 import com.shmibblez.inferno.ext.isKeyboardVisible
 import com.shmibblez.inferno.ext.isToolbarAtBottom
@@ -223,7 +219,6 @@ import com.shmibblez.inferno.microsurvey.ui.MicrosurveyRequestPrompt
 import com.shmibblez.inferno.microsurvey.ui.ext.MicrosurveyUIData
 import com.shmibblez.inferno.microsurvey.ui.ext.toMicrosurveyUIData
 import com.shmibblez.inferno.perf.MarkersFragmentLifecycleCallbacks
-import com.shmibblez.inferno.proto.infernoSettingsDataStore
 import com.shmibblez.inferno.settings.SupportUtils
 import com.shmibblez.inferno.settings.biometric.BiometricPromptFeature
 import com.shmibblez.inferno.snackbar.FenixSnackbarDelegate
@@ -354,14 +349,14 @@ abstract class BaseBrowserFragment :
 
     // Registers a photo picker activity launcher in single-select mode.
     private val singleMediaPicker =
-        AndroidPhotoPicker.singleMediaPicker(
+        InfernoAndroidPhotoPicker.singleMediaPicker(
             { this },
             { null }, //getPromptsFeature() },
         )
 
     // Registers a photo picker activity launcher in multi-select mode.
     private val multipleMediaPicker =
-        AndroidPhotoPicker.multipleMediaPicker(
+        InfernoAndroidPhotoPicker.multipleMediaPicker(
             { this },
             { null }, // getPromptsFeature() },
         )
@@ -1013,7 +1008,7 @@ abstract class BaseBrowserFragment :
                         findNavController().navigate(directions)
                     }
                 },
-                androidPhotoPicker = AndroidPhotoPicker(
+                infernoAndroidPhotoPicker = InfernoAndroidPhotoPicker(
                     requireContext(),
                     singleMediaPicker,
                     multipleMediaPicker,

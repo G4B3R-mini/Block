@@ -11,7 +11,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.annotation.VisibleForTesting.Companion.PRIVATE
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
-import com.shmibblez.inferno.browser.prompts.webPrompts.AndroidPhotoPicker
+import com.shmibblez.inferno.browser.prompts.webPrompts.InfernoAndroidPhotoPicker
 import com.shmibblez.inferno.browser.prompts.webPrompts.FilePicker
 import com.shmibblez.inferno.browser.prompts.webPrompts.FileUploadsDirCleaner
 import mozilla.components.browser.state.store.BrowserStore
@@ -129,7 +129,7 @@ class PromptFeature private constructor(
     private val addressDelegate: AddressDelegate = DefaultAddressDelegate(),
     private val fileUploadsDirCleaner: FileUploadsDirCleaner,
     onNeedToRequestPermissions: OnNeedToRequestPermissions,
-    androidPhotoPicker: AndroidPhotoPicker?,
+    infernoAndroidPhotoPicker: InfernoAndroidPhotoPicker?,
 ) :
     LifecycleAwareFeature,
     PermissionsFeature,
@@ -182,7 +182,7 @@ class PromptFeature private constructor(
         addressDelegate: AddressDelegate = DefaultAddressDelegate(),
         fileUploadsDirCleaner: FileUploadsDirCleaner,
         onNeedToRequestPermissions: OnNeedToRequestPermissions,
-        androidPhotoPicker: AndroidPhotoPicker? = null,
+        infernoAndroidPhotoPicker: InfernoAndroidPhotoPicker? = null,
     ) : this(
         container = activity,
         store = store,
@@ -212,7 +212,7 @@ class PromptFeature private constructor(
         removeLastSavedGeneratedPassword = removeLastSavedGeneratedPassword,
         creditCardDelegate = creditCardDelegate,
         addressDelegate = addressDelegate,
-        androidPhotoPicker = androidPhotoPicker,
+        infernoAndroidPhotoPicker = infernoAndroidPhotoPicker,
     )
 
     constructor(
@@ -242,7 +242,7 @@ class PromptFeature private constructor(
         creditCardDelegate: CreditCardDelegate = object : CreditCardDelegate {},
         addressDelegate: AddressDelegate = DefaultAddressDelegate(),
         fileUploadsDirCleaner: FileUploadsDirCleaner,
-        androidPhotoPicker: AndroidPhotoPicker? = null,
+        infernoAndroidPhotoPicker: InfernoAndroidPhotoPicker? = null,
         onNeedToRequestPermissions: OnNeedToRequestPermissions,
     ) : this(
         container = fragment.requireActivity(),
@@ -271,7 +271,7 @@ class PromptFeature private constructor(
         addressDelegate = addressDelegate,
         fileUploadsDirCleaner = fileUploadsDirCleaner,
         onNeedToRequestPermissions = onNeedToRequestPermissions,
-        androidPhotoPicker = androidPhotoPicker,
+        infernoAndroidPhotoPicker = infernoAndroidPhotoPicker,
     )
 
     @VisibleForTesting
@@ -281,7 +281,7 @@ class PromptFeature private constructor(
         store,
         customTabId,
         fileUploadsDirCleaner,
-        androidPhotoPicker,
+        infernoAndroidPhotoPicker,
         onNeedToRequestPermissions,
     )
 

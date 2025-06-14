@@ -33,10 +33,12 @@ import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.widget.Toolbar
 import androidx.compose.runtime.mutableStateOf
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import com.shmibblez.inferno.addons.ExtensionsProcessDisabledBackgroundController
 import com.shmibblez.inferno.addons.ExtensionsProcessDisabledForegroundController
+import com.shmibblez.inferno.biometric.BiometricPromptCallbackManager
 import com.shmibblez.inferno.browser.browsingmode.BrowsingMode
 import com.shmibblez.inferno.browser.browsingmode.BrowsingModeManager
 import com.shmibblez.inferno.browser.browsingmode.DefaultBrowsingModeManager
@@ -124,6 +126,7 @@ import mozilla.components.support.webextensions.WebExtensionPopupObserver
 import org.mozilla.experiments.nimbus.initializeTooling
 import java.lang.ref.WeakReference
 import java.util.Locale
+import java.util.concurrent.Executor
 
 /**
  * The main activity of the application. The application is primarily a single Activity (this one)
@@ -133,7 +136,9 @@ import java.util.Locale
  */
 @SuppressWarnings("TooManyFunctions", "LargeClass", "LongMethod")
 open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
-    var browserComponentState: BrowserComponentState? = null
+    private lateinit var browserComponentState: BrowserComponentState
+    private lateinit var executor: Executor
+    private lateinit var biometricPromptCallbackManager: BiometricPromptCallbackManager
 
     @VisibleForTesting
     internal lateinit var binding: ActivityHomeBinding
@@ -325,9 +330,16 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
             tabsUseCases = this.components.useCases.tabsUseCases,
         ).apply { this.start() }
 
+        executor = ContextCompat.getMainExecutor(this)
+        biometricPromptCallbackManager = BiometricPromptCallbackManager(
+            activity = this,
+            executor = executor,
+        )
+
         binding.rootCompose.setContent {
             BrowserNavHost(
-                browserComponentState = browserComponentState!!,
+                browserComponentState = browserComponentState,
+                biometricPromptCallbackManager = biometricPromptCallbackManager,
 //                customTabSessionId = (initialTask as? InitialBrowserTask.ExternalApp)?.tabId,
                 initialAction = initialTask,
             )
@@ -657,11 +669,11 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
     @CallSuper
     override fun onDestroy() {
         super.onDestroy()
+        Log.d("HomeActivity", "onDestroy()")
 
         // stop browser component state
-        browserComponentState?.stop()
-
-        Log.d("HomeActivity", "onDestroy()")
+        browserComponentState.stop()
+        biometricPromptCallbackManager.cancelAuthentication()
 
         components.core.contileTopSitesUpdater.stopPeriodicWork()
 //        components.core.pocketStoriesService.stopPeriodicStoriesRefresh()

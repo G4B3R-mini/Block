@@ -5,30 +5,55 @@
 package com.shmibblez.inferno
 
 import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.util.Log
 import androidx.core.content.getSystemService
+import androidx.core.net.toUri
 import androidx.navigation.NavController
+import com.shmibblez.inferno.ext.components
 import mozilla.components.browser.errorpages.ErrorPages
 import mozilla.components.browser.errorpages.ErrorType
 import mozilla.components.concept.engine.EngineSession
 import mozilla.components.concept.engine.request.RequestInterceptor
-//import com.shmibblez.inferno.GleanMetrics.ErrorPage
-import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.isOnline
 import java.lang.ref.WeakReference
+
+
+//private val IGNORED_SCHEMES =
+//    Regex("^(https?|javascript|about|googlechrome)\$", RegexOption.IGNORE_CASE)
 
 class AppRequestInterceptor(
     private val context: Context,
 ) : RequestInterceptor {
 
+    interface AppRequestCallback {
+        fun onRequestReceived(openInAppAvailable: Boolean)
+    }
+
     private var navController: WeakReference<NavController>? = null
+    private val requestListeners = mutableListOf<AppRequestCallback>()
 
     fun setNavigationController(navController: NavController) {
         this.navController = WeakReference(navController)
     }
 
     override fun interceptsAppInitiatedRequests() = true
+
+    private fun getHostName(url: String): String? {
+        val uri = url.toUri()
+        val domain: String = uri.host ?: return null
+        return domain.split('.').let {
+            Log.d("AppRequestsInterceptor", "getHostName, domain parts: $it")
+            when (it.size) {
+                0 -> null
+                1 -> it[0]
+                2 -> it[0]
+                else -> it[1]
+            }
+        }
+    }
 
     override fun onLoadRequest(
         engineSession: EngineSession,
@@ -40,18 +65,81 @@ class AppRequestInterceptor(
         isDirectNavigation: Boolean,
         isSubframeRequest: Boolean,
     ): RequestInterceptor.InterceptionResponse? {
-        val services = context.components.services
 
-        return services.appLinksInterceptor.onLoadRequest(
-            engineSession,
-            uri,
-            lastUri,
-            hasUserGesture,
-            isSameDomain,
-            isRedirect,
-            isDirectNavigation,
-            isSubframeRequest,
+        // intent for testing matches
+        val intent = Intent(Intent.ACTION_VIEW)
+        intent.setData(uri.toUri())
+
+        val results =
+            context.packageManager.queryIntentActivities(intent, PackageManager.GET_RESOLVED_FILTER)
+        var resultSize = results.size
+        val host = getHostName(uri)
+
+        Log.d(
+            "AppRequestsInterceptor",
+            "-----------------------------\n\nNew Request, size: $resultSize\nfull url: $uri\nurl host: $host\n\n-----------------------------"
         )
+
+        results@ for (r in results) {
+            Log.d(
+                "AppRequestsInterceptor",
+                "result schemes: ${
+                    r?.filter?.schemesIterator()?.asSequence()?.toList()
+                }\nactivity package strs: ${r?.activityInfo?.packageName?.split(".")}",
+            )
+            val packageName = r?.activityInfo?.packageName
+            if (packageName == null) {
+                resultSize -= 1
+                continue@results
+            }
+
+            // if package name and host matches, break, there are valid results
+            // if doesn't, keep checking
+            when (packageName.split('.').contains(host)) {
+                true -> break@results
+                false -> resultSize -= 1
+            }
+
+//            var containsNotHttpOrHttps = false
+//            r.filter?.schemesIterator()
+//            r.filter?.schemesIterator()?.forEach { scheme ->
+//                // check if scheme is anything other than http or https
+//                if (scheme?.matches(IGNORED_SCHEMES) == false) {
+//                    containsNotHttpOrHttps = true
+//                }
+//                // will open any intent, ignore
+//            }
+//            if (!containsNotHttpOrHttps) {
+//                resultSize -= 1
+//            }
+//            r.activityInfo.labelRes
+        }
+        Log.d(
+            "AppRequestsInterceptor",
+            "-----------------------------\n\nRequest End, size after filter: $resultSize\n\n-----------------------------"
+        )
+
+        val openInAppAvailable: Boolean = resultSize > 0
+
+        requestListeners.forEach { it.onRequestReceived(openInAppAvailable) }
+
+        return when (openInAppAvailable) {
+            true -> {
+                val services = context.components.services
+                services.appLinksInterceptor.onLoadRequest(
+                    engineSession,
+                    uri,
+                    lastUri,
+                    hasUserGesture,
+                    isSameDomain,
+                    isRedirect,
+                    isDirectNavigation,
+                    isSubframeRequest,
+                )
+            }
+
+            false -> null
+        }
     }
 
     override fun onErrorRequest(
@@ -114,18 +202,18 @@ class AppRequestInterceptor(
         ErrorType.ERROR_HTTPS_ONLY,
         ErrorType.ERROR_BAD_HSTS_CERT,
         ErrorType.ERROR_UNKNOWN_PROTOCOL,
-        -> RiskLevel.Low
+            -> RiskLevel.Low
 
         ErrorType.ERROR_SECURITY_BAD_CERT,
         ErrorType.ERROR_SECURITY_SSL,
         ErrorType.ERROR_PORT_BLOCKED,
-        -> RiskLevel.Medium
+            -> RiskLevel.Medium
 
         ErrorType.ERROR_SAFEBROWSING_HARMFUL_URI,
         ErrorType.ERROR_SAFEBROWSING_MALWARE_URI,
         ErrorType.ERROR_SAFEBROWSING_PHISHING_URI,
         ErrorType.ERROR_SAFEBROWSING_UNWANTED_URI,
-        -> RiskLevel.High
+            -> RiskLevel.High
     }
 
     private fun getErrorPageTitle(context: Context, type: ErrorType): String? {
@@ -138,19 +226,18 @@ class AppRequestInterceptor(
 
     private fun getErrorPageDescription(context: Context, type: ErrorType): String? {
         return when (type) {
-            ErrorType.ERROR_HTTPS_ONLY ->
-                context.getString(R.string.errorpage_httpsonly_message_title) +
-                    "<br><br>" +
-                    context.getString(R.string.errorpage_httpsonly_message_summary)
+            ErrorType.ERROR_HTTPS_ONLY -> context.getString(R.string.errorpage_httpsonly_message_title) + "<br><br>" + context.getString(
+                R.string.errorpage_httpsonly_message_summary
+            )
             // Returning `null` will let the component use its default description for this error type
             else -> null
         }
     }
 
     internal enum class RiskLevel(val htmlRes: String) {
-        Low(LOW_AND_MEDIUM_RISK_ERROR_PAGES),
-        Medium(LOW_AND_MEDIUM_RISK_ERROR_PAGES),
-        High(HIGH_RISK_ERROR_PAGES),
+        Low(LOW_AND_MEDIUM_RISK_ERROR_PAGES), Medium(LOW_AND_MEDIUM_RISK_ERROR_PAGES), High(
+            HIGH_RISK_ERROR_PAGES
+        ),
     }
 
     companion object {

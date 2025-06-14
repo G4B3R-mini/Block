@@ -9,7 +9,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.Composable
 import androidx.fragment.app.Fragment
 import com.shmibblez.inferno.browser.prompts.InfernoPromptFeatureState
@@ -22,7 +21,7 @@ import mozilla.components.feature.prompts.PromptFeature
  * @property singleMediaPicker An [ActivityResultLauncher] for picking a single photo.
  * @property multipleMediaPicker An [ActivityResultLauncher] for picking multiple photos.
  */
-class AndroidPhotoPicker(
+class InfernoAndroidPhotoPicker(
     val context: Context,
     val singleMediaPicker: ActivityResultLauncher<PickVisualMediaRequest>,
     val multipleMediaPicker: ActivityResultLauncher<PickVisualMediaRequest>,

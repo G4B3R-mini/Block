@@ -84,10 +84,6 @@ that's it for now, hopefully this project doesn't die
 
 - [ ] missing functionality (synced tabs, tab grid layout, maybe some menu options)
 
-### Steps:
-
-- [ ] rename HomeActivity to BrowserActivity, or just keep it sounds nice
-
 ## Settings Pages Status
 
 - [ ] Account Item & Account Pages
