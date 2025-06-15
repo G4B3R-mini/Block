@@ -32,6 +32,27 @@ that's it for now, hopefully this project doesn't die
 
 # Currently Under Development
 
+## Pending Launch
+
+- [ ] Autofill Settings Page
+    - [ ] add biometric, fix padding (copy fixes to passwords page)
+- [ ] Web Prompter
+    - [ ] AndroidPhotoPicker not working, activity callbacks murky (may have to add something
+      similar to biometric prompt with listener and callback structure)
+- [ ] Home Page
+    - [ ] override actions (currently functions do nothing)
+    - [ ] remove sponsored top sites
+- [ ] Crash Reporter
+    - [ ] In onboarding, show quick settings on second page (crash reporting
+      checked by default, show message saying this helps development of app, but can be disabled
+      right there), first page is welcome page, third page is theme
+    - [ ] Add crash reporting quick access (bug icon) and add to settings at bottom
+        - [ ] Crash reporting page will have a list of crashes with X on the right, when one clicked
+          goes to crash page
+            - [ ] crash page shows error log (# of lines then 3 dots) and optional checkbox for info
+              like device type, time error occurred, android version, and other relevant info, and
+              at the bottom cancel button and send
+
 ## Critical
 
 `Errors that make something unusable, these should be fixed as soon as possible`

@@ -31,7 +31,7 @@ fun InfernoSettingsPage(
     content: @Composable (PaddingValues) -> Unit,
 ) {
     BackHandler(enabled = true) { goBack.invoke() }
-    
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
