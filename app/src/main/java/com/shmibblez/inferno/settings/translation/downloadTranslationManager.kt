@@ -612,7 +612,7 @@ private fun DownloadTranslationItemDescription(
                 horizontal = PrefUiConst.PREFERENCE_HORIZONTAL_PADDING,
                 vertical = PrefUiConst.PREFERENCE_VERTICAL_PADDING,
             ),
-        horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING),
+        horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_HORIZONTAL_INTERNAL_PADDING),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         // language name and download size

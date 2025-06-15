@@ -296,7 +296,10 @@ fun BrowserNavHost(
             PasswordExceptionSettingsPage(goBack = { nav.popBackStack() })
         }
         composable<BrowserRoute.Settings.AutofillSettingsPage> {
-            AutofillSettingsPage(goBack = { nav.popBackStack() })
+            AutofillSettingsPage(
+                goBack = { nav.popBackStack() },
+                biometricPromptCallbackManager = biometricPromptCallbackManager,
+            )
         }
         composable<BrowserRoute.Settings.SitePermissionsSettingsPage> {
             SitePermissionsSettingsPage(

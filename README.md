@@ -34,8 +34,8 @@ that's it for now, hopefully this project doesn't die
 
 ## Pending Launch
 
-- [ ] Autofill Settings Page
-    - [ ] add biometric, fix padding (copy fixes to passwords page)
+- [x] Autofill Settings Page
+    - [x] add biometric, fix padding (copy fixes to passwords page)
 - [ ] Web Prompter
     - [ ] AndroidPhotoPicker not working, activity callbacks murky (may have to add something
       similar to biometric prompt with listener and callback structure)
@@ -79,6 +79,10 @@ that's it for now, hopefully this project doesn't die
     - [ ] currently default instance loaded first, fix so custom instance is first instance
       loaded, make sure to use runBlocking {} properly (was blocking app
       last time I tried it)
+- [ ] Extensions
+    - [ ] Decentraleyes settings page not loading correctly, has to do with in-browser settings
+      page (in fenix, separate page that implements EngineView and a couple features, in inferno,
+      goes to new custom tab)
 
 ## IntentProcessor and ExternalAppBrowser
 

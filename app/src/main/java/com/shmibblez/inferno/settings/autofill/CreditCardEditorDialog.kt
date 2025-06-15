@@ -15,6 +15,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.prompts.webPrompts.compose.sub.NumberPicker
 import com.shmibblez.inferno.browser.prompts.webPrompts.compose.sub.rememberNumberPickerState
@@ -102,7 +103,7 @@ fun CreditCardEditorDialog(
 
     InfernoDialog(onDismiss = onDismiss) {
         LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING)
+            verticalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_VERTICAL_INTERNAL_PADDING)
         ) {
             // number
             item {
@@ -160,7 +161,10 @@ fun CreditCardEditorDialog(
                     InfernoText(
                         text = stringResource(R.string.credit_cards_expiration_date)
                     )
-                    Row(modifier = Modifier.fillMaxWidth()) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    ) {
                         // month picker
                         NumberPicker(
                             state = monthPickerState,
@@ -179,7 +183,7 @@ fun CreditCardEditorDialog(
         }
         Row(
             modifier = Modifier.padding(vertical = PrefUiConst.PREFERENCE_VERTICAL_PADDING),
-            horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING),
+            horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_HORIZONTAL_INTERNAL_PADDING),
         ) {
             InfernoOutlinedButton(
                 modifier = Modifier.weight(1F),

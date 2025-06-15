@@ -181,9 +181,9 @@ private fun ExceptionItem(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = PrefUiConst.PREFERENCE_HORIZONTAL_PADDING)
-            .padding(top = PrefUiConst.PREFERENCE_INTERNAL_PADDING)
+            .padding(top = PrefUiConst.PREFERENCE_VERTICAL_INTERNAL_PADDING)
             .clickable(onClick = onDeleteItemClicked),
-        horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING),
+        horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_HORIZONTAL_INTERNAL_PADDING),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         // label

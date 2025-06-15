@@ -67,8 +67,12 @@ import mozilla.components.support.ktx.util.PromptAbuserDetector
 @Composable
 fun InfernoWebPrompter(
     state: InfernoWebPrompterState,
+    onNavToAutofillSettings: () -> Unit,
 ) {
-    Log.d("InfernoWebPrompter", "rebuild\n-  visiblePrompt: ${state.visiblePrompt}\n-  selectedTabId: ${state.selectedTabId}")
+    Log.d(
+        "InfernoWebPrompter",
+        "rebuild\n-  visiblePrompt: ${state.visiblePrompt}\n-  selectedTabId: ${state.selectedTabId}"
+    )
     // get active request, return if none
     val promptRequest = state.visiblePrompt ?: return
     // get selected tab id, if none return
@@ -234,13 +238,27 @@ fun InfernoWebPrompter(
                 onConfirm = { state.onConfirm(selectedTabId, promptRequest.uid, it) },
             )
 
-            is SelectAddress -> SelectableListPrompt(
-                promptRequest = promptRequest,
-                header = stringResource(R.string.mozac_feature_prompts_select_address_2),
-                manageText = stringResource(R.string.mozac_feature_prompts_manage_address),
-                onCancel = { state.onCancel(selectedTabId, promptRequest.uid) },
-                onConfirm = { state.onConfirm(selectedTabId, promptRequest.uid, it) },
-            )
+            is SelectAddress -> {
+                // todo: find better mechanism to debounce requests
+                if (state.addressPicker.dismissedSessionId != selectedTabId)
+                    SelectableListPrompt(
+                        promptRequest = promptRequest,
+                        header = stringResource(R.string.mozac_feature_prompts_select_address_2),
+                        manageText = stringResource(R.string.mozac_feature_prompts_manage_address),
+                        onCancel = {
+                            state.onCancel(selectedTabId, promptRequest.uid)
+                            state.addressPicker.dismissedSessionId = selectedTabId
+                            Log.d(
+                                "InfernoWebPrompter",
+                                "SelectAddress onCancel, prompt uid: ${promptRequest.uid}"
+                            )
+                        },
+                        onConfirm = {
+                            state.onConfirm(selectedTabId, promptRequest.uid, it)
+                        },
+                        onNavToAutofillSettings = onNavToAutofillSettings,
+                    )
+            }
 
 
             is SelectCreditCard -> SelectableListPrompt(
@@ -249,10 +267,10 @@ fun InfernoWebPrompter(
                 manageText = stringResource(R.string.mozac_feature_prompts_manage_credit_cards_2),
                 onCancel = { state.onCancel(selectedTabId, promptRequest.uid) },
                 onConfirm = { state.onConfirm(selectedTabId, promptRequest.uid, it) },
+                onNavToAutofillSettings = onNavToAutofillSettings,
             )
 
             is SelectLoginPrompt -> {
-                // todo: test login password prompter
                 Log.d(
                     "InfernoWebPrompter",
                     "SelectLoginPrompt uid: ${promptRequest.uid}, type: ${state.selectLoginPromptController.javaClass.simpleName}"
@@ -267,6 +285,7 @@ fun InfernoWebPrompter(
 
                     is SelectLoginPromptController.StrongPasswordBarDialog -> {
                         // if not shown already, show (prevents spam)
+                        // todo: find better mechanism to debounce requests
                         if ((state.selectLoginPromptController as SelectLoginPromptController.StrongPasswordBarDialog).dismissedSessionId != selectedTabId) {
                             PasswordGeneratorDialogPrompt(promptRequest = promptRequest,
                                 currentUrl = state.currentUrl ?: "<empty>",
@@ -288,6 +307,7 @@ fun InfernoWebPrompter(
 
                     is SelectLoginPromptController.PasswordGeneratorDialog -> {
                         // if not shown already, show (prevents spam)
+                        // todo: find better mechanism to debounce requests
                         if ((state.selectLoginPromptController as SelectLoginPromptController.PasswordGeneratorDialog).dismissedSessionId != selectedTabId) {
                             PasswordGeneratorDialogPrompt(promptRequest,
                                 currentUrl = state.currentUrl ?: "<empty>",

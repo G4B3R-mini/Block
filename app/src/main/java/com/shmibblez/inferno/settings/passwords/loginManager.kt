@@ -273,8 +273,8 @@ private fun LoginItem(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = PrefUiConst.PREFERENCE_HORIZONTAL_PADDING)
-            .padding(top = PrefUiConst.PREFERENCE_INTERNAL_PADDING),
-        horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING),
+            .padding(top = PrefUiConst.PREFERENCE_VERTICAL_INTERNAL_PADDING),
+        horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_HORIZONTAL_INTERNAL_PADDING),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         // edit icon
@@ -316,8 +316,8 @@ private fun AddLoginItem(onAddLoginClicked: () -> Unit) {
         modifier = Modifier
             .clickable { onAddLoginClicked.invoke() }
             .padding(horizontal = PrefUiConst.PREFERENCE_HORIZONTAL_PADDING)
-            .padding(top = PrefUiConst.PREFERENCE_INTERNAL_PADDING * 2F),
-        horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING),
+            .padding(top = PrefUiConst.PREFERENCE_VERTICAL_INTERNAL_PADDING * 2F),
+        horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_HORIZONTAL_INTERNAL_PADDING),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         // add icon
@@ -343,6 +343,6 @@ private fun AuthenticateItem(onAuthClicked: () -> Unit) {
             .fillMaxWidth()
             .clickable { onAuthClicked.invoke() }
             .padding(horizontal = PrefUiConst.PREFERENCE_HORIZONTAL_PADDING)
-            .padding(top = PrefUiConst.PREFERENCE_INTERNAL_PADDING * 2F),
+            .padding(top = PrefUiConst.PREFERENCE_VERTICAL_INTERNAL_PADDING * 2F),
     )
 }

@@ -288,7 +288,7 @@ private fun LazyListScope.sitePermissionsItem(
     item {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING),
+            horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_HORIZONTAL_INTERNAL_PADDING),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             // favicon

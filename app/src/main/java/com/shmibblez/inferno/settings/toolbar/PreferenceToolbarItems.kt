@@ -186,7 +186,7 @@ private fun ToolbarItem(
                 vertical = PrefUiConst.PREFERENCE_VERTICAL_PADDING,
             ),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING),
+        horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_HORIZONTAL_INTERNAL_PADDING),
     ) {
         // drag handle, only show if selected
         if (selected) {

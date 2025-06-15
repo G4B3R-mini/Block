@@ -1,5 +1,8 @@
 package com.shmibblez.inferno.browser.prompts.address
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import com.shmibblez.inferno.browser.prompts.concept.SelectablePromptState
 import com.shmibblez.inferno.browser.prompts.consumePromptFrom
 import mozilla.components.browser.state.action.ContentAction
@@ -23,6 +26,7 @@ class InfernoAddressPicker(
     private val onManageAddresses: () -> Unit = {},
     private var sessionId: String? = null,
 ) : SelectablePromptState.Listener<Address> {
+    var dismissedSessionId by mutableStateOf<String?>(null)
 
 //    init {
 //        addressSelectBar.listener = this

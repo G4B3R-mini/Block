@@ -178,8 +178,8 @@ private fun DefaultLocaleItem(
             .clickable { onDefaultLocaleSelected.invoke() }
             .fillMaxWidth()
             .padding(horizontal = PrefUiConst.PREFERENCE_HORIZONTAL_PADDING)
-            .padding(top = PrefUiConst.PREFERENCE_INTERNAL_PADDING),
-        horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING),
+            .padding(top = PrefUiConst.PREFERENCE_VERTICAL_INTERNAL_PADDING),
+        horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_HORIZONTAL_INTERNAL_PADDING),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         // locale info
@@ -219,8 +219,8 @@ private fun LocaleItem(
             .clickable { onLocaleSelected.invoke(locale) }
             .fillMaxWidth()
             .padding(horizontal = PrefUiConst.PREFERENCE_HORIZONTAL_PADDING)
-            .padding(top = PrefUiConst.PREFERENCE_INTERNAL_PADDING),
-        horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING),
+            .padding(top = PrefUiConst.PREFERENCE_VERTICAL_INTERNAL_PADDING),
+        horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_HORIZONTAL_INTERNAL_PADDING),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         // locale info

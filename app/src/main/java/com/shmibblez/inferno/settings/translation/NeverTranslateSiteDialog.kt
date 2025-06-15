@@ -33,7 +33,7 @@ fun NeverTranslateSiteDialog(
         // cancel/confirm buttons
         Row(
             modifier = Modifier.padding(vertical = PrefUiConst.PREFERENCE_VERTICAL_PADDING),
-            horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING),
+            horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_HORIZONTAL_INTERNAL_PADDING),
         ) {
             // cancel
             InfernoOutlinedButton(

@@ -133,7 +133,8 @@ fun PasswordSettingsPage(
                              */
                             onNavToPasswordExceptionSettingsPage.invoke()
                         },
-                    horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING),
+                    horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_HORIZONTAL_INTERNAL_PADDING),
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     InfernoIcon(
                         painter = painterResource(R.drawable.ic_globe_24),

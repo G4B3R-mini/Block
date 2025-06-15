@@ -3,7 +3,6 @@ package com.shmibblez.inferno.settings.autofill
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import com.shmibblez.inferno.R
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -26,6 +25,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.compose.base.InfernoTextStyle
@@ -115,7 +115,8 @@ internal fun rememberAddressManagerState(): MutableState<AddressManagerState> {
     val state = remember {
         mutableStateOf(
             AddressManagerState(
-                storage = context.components.core.autofillStorage, coroutineScope = coroutineScope
+                storage = context.components.core.autofillStorage,
+                coroutineScope = coroutineScope,
             )
         )
     }
@@ -172,11 +173,12 @@ internal fun LazyListScope.addressManager(
         item {
             AddAddressItem(onAddAddressClicked = onAddAddressClicked)
         }
-        item {
-            Spacer(
-                modifier = Modifier.padding(bottom = PrefUiConst.PREFERENCE_HALF_VERTICAL_PADDING),
-            )
-        }
+
+    }
+    item {
+        Spacer(
+            modifier = Modifier.padding(bottom = PrefUiConst.PREFERENCE_HALF_VERTICAL_PADDING),
+        )
     }
 }
 
@@ -190,8 +192,8 @@ private fun AddressItem(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = PrefUiConst.PREFERENCE_HORIZONTAL_PADDING)
-            .padding(top = PrefUiConst.PREFERENCE_INTERNAL_PADDING),
-        horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING),
+            .padding(top = PrefUiConst.PREFERENCE_VERTICAL_INTERNAL_PADDING * 2F),
+        horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_HORIZONTAL_INTERNAL_PADDING),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         // edit icon
@@ -233,8 +235,8 @@ private fun AddAddressItem(onAddAddressClicked: () -> Unit) {
         modifier = Modifier
             .clickable { onAddAddressClicked.invoke() }
             .padding(horizontal = PrefUiConst.PREFERENCE_HORIZONTAL_PADDING)
-            .padding(top = PrefUiConst.PREFERENCE_INTERNAL_PADDING),
-        horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING),
+            .padding(top = PrefUiConst.PREFERENCE_VERTICAL_INTERNAL_PADDING * 2F),
+        horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_HORIZONTAL_INTERNAL_PADDING),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         // add icon
@@ -269,20 +271,20 @@ internal fun Address.Companion.empty(): Address {
     )
 }
 
-internal fun Address.toUpdatableAddressFields(): UpdatableAddressFields {
-    return UpdatableAddressFields(
-        name = this.name,
-        organization = this.organization,
-        streetAddress = this.streetAddress,
-        addressLevel3 = this.addressLevel3,
-        addressLevel2 = this.addressLevel2,
-        addressLevel1 = this.addressLevel1,
-        postalCode = this.postalCode,
-        country = this.country,
-        tel = this.tel,
-        email = this.email
-    )
-}
+//internal fun Address.toUpdatableAddressFields(): UpdatableAddressFields {
+//    return UpdatableAddressFields(
+//        name = this.name,
+//        organization = this.organization,
+//        streetAddress = this.streetAddress,
+//        addressLevel3 = this.addressLevel3,
+//        addressLevel2 = this.addressLevel2,
+//        addressLevel1 = this.addressLevel1,
+//        postalCode = this.postalCode,
+//        country = this.country,
+//        tel = this.tel,
+//        email = this.email
+//    )
+//}
 
 //internal fun UpdatableAddressFields.copy(
 //    name: String?,

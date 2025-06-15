@@ -44,7 +44,7 @@ fun AddressEditorDialog(
 
     InfernoDialog(onDismiss = onDismiss) {
         LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING)
+            verticalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_VERTICAL_INTERNAL_PADDING)
         ) {
             // name
             item {
@@ -160,7 +160,7 @@ fun AddressEditorDialog(
         }
         Row(
             modifier = Modifier.padding(vertical = PrefUiConst.PREFERENCE_VERTICAL_PADDING),
-            horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING),
+            horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_HORIZONTAL_INTERNAL_PADDING),
         ) {
             InfernoOutlinedButton(
                 modifier = Modifier.weight(1F),

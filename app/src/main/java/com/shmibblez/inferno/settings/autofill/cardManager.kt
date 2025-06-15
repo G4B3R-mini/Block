@@ -1,5 +1,9 @@
 package com.shmibblez.inferno.settings.autofill
 
+import android.content.Context
+import android.widget.Toast
+import androidx.biometric.BiometricPrompt
+import androidx.biometric.BiometricPrompt.AuthenticationCallback
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -27,12 +31,15 @@ import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.shmibblez.inferno.R
+import com.shmibblez.inferno.biometric.BiometricPromptCallbackManager
 import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.compose.base.InfernoTextStyle
 import com.shmibblez.inferno.ext.components
+import com.shmibblez.inferno.ext.infernoTheme
 import com.shmibblez.inferno.settings.compose.components.PrefUiConst
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -51,10 +58,40 @@ private val ICON_SIZE = 18.dp
 private val CREDIT_CARD_ICON_SIZE = 40.dp
 
 internal class CreditCardManagerState(
+    private val context: Context,
     val storage: AutofillCreditCardsAddressesStorage,
     val coroutineScope: CoroutineScope,
+    private val biometricPromptCallbackManager: BiometricPromptCallbackManager,
     initiallyExpanded: Boolean = false,
 ) : LifecycleAwareFeature {
+
+    private val authCallback = object: AuthenticationCallback() {
+        override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+            super.onAuthenticationError(errorCode, errString)
+            authenticated = false
+            Toast.makeText(context, "Failed to authenticate, unknown error occurred: $errString", Toast.LENGTH_LONG).show()
+        }
+
+        override fun onAuthenticationFailed() {
+            super.onAuthenticationFailed()
+            authenticated = false
+            Toast.makeText(context, "Failed to authenticate, retry?", Toast.LENGTH_SHORT).show()
+        }
+
+        override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+            super.onAuthenticationSucceeded(result)
+            authenticated = true
+        }
+    }
+
+    var authenticated by mutableStateOf(false)
+        private set
+
+    fun startAuth() {
+        biometricPromptCallbackManager.showPrompt(
+            title = context.getString(R.string.credit_cards_biometric_prompt_message)
+        )
+    }
 
     private val jobs: MutableList<Job> = mutableListOf()
 
@@ -107,23 +144,30 @@ internal class CreditCardManagerState(
 
     override fun start() {
         refreshCreditCards()
+        biometricPromptCallbackManager.addCallbackListener(authCallback)
     }
 
     override fun stop() {
         jobs.forEach { it.cancel() }
+        biometricPromptCallbackManager.removeCallbackListener(authCallback)
     }
 
 }
 
 @Composable
-internal fun rememberCardManagerState(): MutableState<CreditCardManagerState> {
+internal fun rememberCardManagerState(
+    biometricPromptCallbackManager: BiometricPromptCallbackManager,
+): MutableState<CreditCardManagerState> {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
     val state = remember {
         mutableStateOf(
             CreditCardManagerState(
-                storage = context.components.core.autofillStorage, coroutineScope = coroutineScope
+                context = context,
+                storage = context.components.core.autofillStorage,
+                coroutineScope = coroutineScope,
+                biometricPromptCallbackManager = biometricPromptCallbackManager,
             )
         )
     }
@@ -174,15 +218,26 @@ internal fun LazyListScope.cardManager(
 
     // credit card items
     if (state.expanded) {
-        items(state.creditCards) {
-            LoginItem(
-                creditCard = it,
-                onEditCreditCardClicked = onEditCreditCardClicked,
-                onDeleteCreditCardClicked = onDeleteCreditCardClicked,
-            )
-        }
-        item {
-            AddLoginItem(onAddCreditCardClicked = onAddCreditCardClicked)
+        when (state.authenticated) {
+            true -> {
+                items(state.creditCards) {
+                    CardItem(
+                        creditCard = it,
+                        onEditCreditCardClicked = onEditCreditCardClicked,
+                        onDeleteCreditCardClicked = onDeleteCreditCardClicked,
+                    )
+                }
+
+                item {
+                    AddCardItem(onAddCreditCardClicked = onAddCreditCardClicked)
+                }
+            }
+
+            false -> {
+                item {
+                    AuthenticateItem(onAuthClicked = { state.startAuth() })
+                }
+            }
         }
     }
 
@@ -195,7 +250,7 @@ internal fun LazyListScope.cardManager(
 }
 
 @Composable
-private fun LoginItem(
+private fun CardItem(
     creditCard: CreditCard,
     onEditCreditCardClicked: (CreditCard) -> Unit,
     onDeleteCreditCardClicked: (CreditCard) -> Unit,
@@ -215,8 +270,8 @@ private fun LoginItem(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = PrefUiConst.PREFERENCE_HORIZONTAL_PADDING)
-            .padding(top = PrefUiConst.PREFERENCE_INTERNAL_PADDING),
-        horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING),
+            .padding(top = PrefUiConst.PREFERENCE_VERTICAL_INTERNAL_PADDING * 2F),
+        horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_HORIZONTAL_INTERNAL_PADDING),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         // edit icon
@@ -263,13 +318,13 @@ private fun LoginItem(
 }
 
 @Composable
-private fun AddLoginItem(onAddCreditCardClicked: () -> Unit) {
+private fun AddCardItem(onAddCreditCardClicked: () -> Unit) {
     Row(
         modifier = Modifier
             .clickable { onAddCreditCardClicked.invoke() }
             .padding(horizontal = PrefUiConst.PREFERENCE_HORIZONTAL_PADDING)
-            .padding(top = PrefUiConst.PREFERENCE_INTERNAL_PADDING),
-        horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING),
+            .padding(top = PrefUiConst.PREFERENCE_VERTICAL_INTERNAL_PADDING * 2F),
+        horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_HORIZONTAL_INTERNAL_PADDING),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         // add icon
@@ -282,4 +337,20 @@ private fun AddLoginItem(onAddCreditCardClicked: () -> Unit) {
         // add card text
         InfernoText(text = stringResource(R.string.credit_cards_add_card))
     }
+}
+
+
+@Composable
+private fun AuthenticateItem(onAuthClicked: () -> Unit) {
+    // add login text
+    InfernoText(
+        text = stringResource(R.string.credit_cards_biometric_prompt_message),
+        fontColor = LocalContext.current.infernoTheme().value.primaryActionColor,
+        textDecoration = TextDecoration.Underline,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onAuthClicked.invoke() }
+            .padding(horizontal = PrefUiConst.PREFERENCE_HORIZONTAL_PADDING)
+            .padding(top = PrefUiConst.PREFERENCE_VERTICAL_INTERNAL_PADDING * 2F),
+    )
 }

@@ -43,7 +43,32 @@ interface InfernoTextStyle {
                 override val fontStyle: FontStyle = FontStyle.Normal
                 override val fontWeight: FontWeight = FontWeight.Bold
                 override val textAlign: TextAlign = TextAlign.Start
-                override val lineHeight: TextUnit = 24.sp
+                override val lineHeight: TextUnit = 28.sp
+                override val letterSpacing: TextUnit = 0.15.sp
+                override val overflow: TextOverflow = TextOverflow.Ellipsis
+                override val softWrap: Boolean = true
+                override val maxLines: Int = Int.MAX_VALUE
+                override val minLines: Int = 1
+                override val fontSize: TextUnit = 20.sp
+                override val fontColor: Color =
+                    LocalContext.current.infernoTheme().value.primaryTextColor
+
+                @Composable
+                override fun toTextStyle(): TextStyle {
+                    return LocalTextStyle.current.copy(
+                        fontSize = fontSize,
+                        lineHeight = lineHeight,
+                        color = fontColor,
+                        letterSpacing = letterSpacing,
+                    )
+                }
+            }
+        val Large: InfernoTextStyle
+            @Composable get() = object : InfernoTextStyle {
+                override val fontStyle: FontStyle = FontStyle.Normal
+                override val fontWeight: FontWeight = FontWeight.Normal
+                override val textAlign: TextAlign = TextAlign.Start
+                override val lineHeight: TextUnit = 28.sp
                 override val letterSpacing: TextUnit = 0.15.sp
                 override val overflow: TextOverflow = TextOverflow.Ellipsis
                 override val softWrap: Boolean = true

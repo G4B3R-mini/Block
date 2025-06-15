@@ -143,7 +143,7 @@ fun ExtensionPermissionsDialog(
                 text = stringResource(R.string.tab_tray_inactive_auto_close_button_content_description),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = PrefUiConst.PREFERENCE_INTERNAL_PADDING)
+                    .padding(bottom = PrefUiConst.PREFERENCE_VERTICAL_INTERNAL_PADDING)
                     .align(Alignment.BottomCenter),
                 onClick = onDismiss
             )

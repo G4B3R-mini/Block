@@ -203,7 +203,7 @@ private fun DeleteLanguageFileOptions(
         // cancel/delete buttons
         Row(
             modifier = Modifier.padding(vertical = PrefUiConst.PREFERENCE_VERTICAL_PADDING),
-            horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING),
+            horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_HORIZONTAL_INTERNAL_PADDING),
         ) {
             // cancel
             InfernoOutlinedButton(
@@ -262,7 +262,7 @@ private fun DownloadLanguageFileOptions(
                 role = Role.Checkbox,
                 onValueChange = onSavingModeStateChange,
             ),
-            horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING),
+            horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_HORIZONTAL_INTERNAL_PADDING),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             // checkbox
@@ -287,7 +287,7 @@ private fun DownloadLanguageFileOptions(
         // cancel/confirm buttons
         Row(
             modifier = Modifier.padding(vertical = PrefUiConst.PREFERENCE_VERTICAL_PADDING),
-            horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING),
+            horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_HORIZONTAL_INTERNAL_PADDING),
         ) {
             // cancel
             InfernoOutlinedButton(

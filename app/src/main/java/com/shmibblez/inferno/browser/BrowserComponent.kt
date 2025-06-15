@@ -493,7 +493,8 @@ fun BrowserComponent(
                 onSuccess: () -> Unit,
             ) {
                 (shareData.url ?: shareData.text)?.let {
-                    val subject = shareData.title ?: context.getString(R.string.mozac_support_ktx_share_dialog_title)
+                    val subject = shareData.title
+                        ?: context.getString(R.string.mozac_support_ktx_share_dialog_title)
                     context.share(it, subject = subject)
                 }
 //                val directions = NavGraphDirections.actionGlobalShareFragment(
@@ -1050,7 +1051,10 @@ fun BrowserComponent(
         },
     )
 
-    InfernoWebPrompter(state = webPrompterState)
+    InfernoWebPrompter(
+        state = webPrompterState,
+        onNavToAutofillSettings = onNavToAutofillSettings,
+    )
 
     /// views
     var engineView by remember { mutableStateOf<EngineView?>(null) }

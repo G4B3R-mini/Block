@@ -34,6 +34,7 @@ import com.shmibblez.inferno.settings.compose.components.PreferenceSwitch
 import com.shmibblez.inferno.settings.compose.components.PreferenceTitle
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
+import mozilla.components.support.utils.WebURLFinder.Companion.isValidWebURL
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -179,7 +180,15 @@ fun HomePageSettingsPage(goBack: () -> Unit) {
                 // show option for setting home url
                 false -> {
                     item {
+                        fun checkForUrlError(url: String): String? {
+                            return when (url.isValidWebURL()) {
+                                true -> null
+                                false -> "Invalid url." // todo: string res
+                            }
+                        }
+
                         var customUrl by remember { mutableStateOf(settings.customHomeUrl.ifBlank { PrefUiConst.CUSTOM_HOME_URL_DEFAULT }) }
+                        var urlError by remember { mutableStateOf(checkForUrlError(customUrl)) }
 
                         Column(
                             modifier = Modifier
@@ -195,18 +204,23 @@ fun HomePageSettingsPage(goBack: () -> Unit) {
 
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING),
+                                horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_HORIZONTAL_INTERNAL_PADDING),
                             ) {
                                 // url editor
                                 InfernoOutlinedTextField(
                                     value = customUrl,
-                                    onValueChange = { customUrl = it.trim() },
+                                    onValueChange = {
+                                        customUrl = it.trim()
+                                        urlError = checkForUrlError(customUrl)
+                                    },
                                     modifier = Modifier.weight(1F),
-                                    isError = URLUtil.isValidUrl(customUrl),
+                                    isError = urlError != null,
                                     supportingText = {
-                                        InfernoText(
-                                            "Invalid url.", infernoStyle = InfernoTextStyle.Error
-                                        )
+                                        if (urlError != null) {
+                                            InfernoText(
+                                                urlError!!, infernoStyle = InfernoTextStyle.Error
+                                            )
+                                        }
                                     },
                                 )
 

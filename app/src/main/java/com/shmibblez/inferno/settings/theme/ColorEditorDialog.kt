@@ -116,7 +116,7 @@ internal fun ColorEditorDialog(data: ColorEditorDialogData) {
         ),
     ) {
         LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING)
+            verticalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_VERTICAL_INTERNAL_PADDING)
         ) {
             // color title & preview
             item {
@@ -238,7 +238,7 @@ internal fun ColorEditorDialog(data: ColorEditorDialogData) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = PrefUiConst.PREFERENCE_INTERNAL_PADDING),
+                .padding(vertical = PrefUiConst.PREFERENCE_HORIZONTAL_INTERNAL_PADDING),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             InfernoOutlinedButton(
@@ -281,7 +281,7 @@ private fun AboutItem(
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.Start,
-        verticalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING),
+        verticalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_VERTICAL_INTERNAL_PADDING),
     ) {
         // about expand title
         Row(

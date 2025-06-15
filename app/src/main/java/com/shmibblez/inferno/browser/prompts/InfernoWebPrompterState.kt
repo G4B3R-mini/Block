@@ -316,8 +316,8 @@ class InfernoWebPrompterState internal constructor(
 //                )
 //            }
 //        }
-    @VisibleForTesting(otherwise = PRIVATE)
-    internal var addressPicker = with(addressDelegate) {
+
+    var addressPicker = with(addressDelegate) {
         InfernoAddressPicker(
             store = store,
             onManageAddresses = onManageAddresses,
@@ -867,6 +867,7 @@ class InfernoWebPrompterState internal constructor(
             is Color,
             is Popup,
             is BeforeUnload,
+            is SelectAddress,
             is Confirm,
             is Repost,
             is PromptRequest.IdentityCredential.SelectProvider,

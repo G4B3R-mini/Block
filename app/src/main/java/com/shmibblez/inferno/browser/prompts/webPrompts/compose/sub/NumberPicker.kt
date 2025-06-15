@@ -39,6 +39,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.shmibblez.inferno.compose.base.InfernoText
+import com.shmibblez.inferno.compose.base.InfernoTextStyle
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
@@ -98,17 +99,18 @@ private fun Picker(
                 .fadingEdge(fadingEdgeGradient)
         ) {
             items(listScrollCount) { index ->
-                InfernoText(text = getItem(index),
+                InfernoText(
+                    text = getItem(index),
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
+//                    overflow = TextOverflow.Ellipsis,
+                    infernoStyle = InfernoTextStyle.Large,
                     style = textStyle,
-                    fontColor = Color.White,
-                    fontSize = 32.sp,
                     modifier = Modifier
                         .onSizeChanged { size ->
                             itemHeightPixels.intValue = size.height
                         }
-                        .then(textModifier))
+                        .then(textModifier),
+                )
             }
         }
 
@@ -159,19 +161,20 @@ fun NumberPicker(
             items = values,
             startIndex = startIndex,
             visibleItemsCount = 3,
-            modifier = Modifier.fillMaxWidth(0.5f),
+            modifier = Modifier.fillMaxWidth(), // 0.5f),
             textModifier = Modifier.padding(8.dp),
             dividerColor = Color(0xFFE8E8E8)
         )
         InfernoText(
             text = state.selectedItem,
+            infernoStyle = InfernoTextStyle.Large,
             textAlign = TextAlign.Center,
-            fontWeight = FontWeight(500),
-            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+//            fontSize = 20.sp,
             modifier = Modifier
-                .padding(bottom = 16.dp)
-                .fillMaxWidth(0.5f)
-                .padding(vertical = 10.dp, horizontal = 16.dp),
+                .padding(bottom = 16.dp, top = 8.dp)
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
         )
     }
 }

@@ -186,10 +186,10 @@ fun EditThemeDialog(
                     .fillMaxWidth()
                     .align(Alignment.TopCenter)
                     .padding(
-                        top = PrefUiConst.PREFERENCE_INTERNAL_PADDING,
+                        top = PrefUiConst.PREFERENCE_VERTICAL_INTERNAL_PADDING,
                         bottom = LIST_BOTTOM_PADDING,
                     ),
-                verticalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING * 2),
+                verticalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_VERTICAL_INTERNAL_PADDING * 2),
             ) {
                 /**
                  * name
@@ -586,7 +586,7 @@ fun EditThemeDialog(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = PrefUiConst.PREFERENCE_INTERNAL_PADDING)
+                    .padding(bottom = PrefUiConst.PREFERENCE_HORIZONTAL_INTERNAL_PADDING)
                     .align(Alignment.BottomCenter),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
             ) {
@@ -628,7 +628,7 @@ private fun ColorEditor(
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(
-            PrefUiConst.PREFERENCE_INTERNAL_PADDING, Alignment.Start
+            PrefUiConst.PREFERENCE_HORIZONTAL_INTERNAL_PADDING, Alignment.Start
         ),
         verticalAlignment = Alignment.CenterVertically,
     ) {

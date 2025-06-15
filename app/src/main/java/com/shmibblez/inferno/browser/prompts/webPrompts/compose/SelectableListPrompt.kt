@@ -48,6 +48,7 @@ fun SelectableListPrompt(
     onCancel: () -> Unit,
     onConfirm: (Any) -> Unit,
     creditCardDialogController: CreditCardDialogController? = null,
+    onNavToAutofillSettings: () -> Unit,
 ) {
     if (promptRequest !is PromptRequest.SelectAddress && promptRequest !is PromptRequest.SelectCreditCard) {
         throw IllegalArgumentException("unsupported prompt type, supported above")
@@ -56,7 +57,6 @@ fun SelectableListPrompt(
         throw IllegalArgumentException("if ${PromptRequest::class.simpleName} is a ${PromptRequest.SelectCreditCard::class.simpleName} prompt, a ${CreditCardDialogController::class.simpleName} must be provided")
     }
     var expanded by remember { mutableStateOf(true) }
-    val navController = LocalView.current.findNavController()
 
     PromptBottomSheetTemplate(
         onDismissRequest = onCancel,
@@ -123,7 +123,13 @@ fun SelectableListPrompt(
                         throw IllegalArgumentException("unsupported prompt type")
                     }
                 }
-                item { ManageOptions(promptRequest, navController, manageText) }
+                item {
+                    ManageOptions(
+                        data = promptRequest,
+                        manageText = manageText,
+                        onNavToAutofillSettings = onNavToAutofillSettings,
+                    )
+                }
             }
 
         }
@@ -131,7 +137,10 @@ fun SelectableListPrompt(
         // manage addresses / credit cards
         if (!expanded) {
             ManageOptions(
-                promptRequest, navController, manageText, modifier = Modifier.padding(top = 8.dp)
+                data = promptRequest,
+                manageText = manageText,
+                modifier = Modifier.padding(top = 8.dp),
+                onNavToAutofillSettings = onNavToAutofillSettings
             )
         }
     }
@@ -140,9 +149,10 @@ fun SelectableListPrompt(
 @Composable
 fun ManageOptions(
     data: PromptRequest,
-    navController: NavController,
+//    navController: NavController,
     manageText: String,
     modifier: Modifier = Modifier,
+    onNavToAutofillSettings: () -> Unit,
 ) {
     Row(
         modifier = modifier
@@ -152,14 +162,12 @@ fun ManageOptions(
                 when (data) {
                     is PromptRequest.SelectAddress -> {
                         // go to manage directions page
-                        val directions = NavGraphDirections.actionGlobalAutofillSettingFragment()
-                        navController.navigate(directions)
+                        onNavToAutofillSettings.invoke()
                     }
 
                     is PromptRequest.SelectCreditCard -> {
                         // go to manage credit cards page
-                        val directions = NavGraphDirections.actionGlobalAutofillSettingFragment()
-                        navController.navigate(directions)
+                        onNavToAutofillSettings.invoke()
                     }
 
                     else -> {

@@ -1,14 +1,10 @@
 package com.shmibblez.inferno.settings.autofill
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -19,11 +15,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import com.shmibblez.inferno.R
-import com.shmibblez.inferno.compose.base.InfernoIcon
-import com.shmibblez.inferno.compose.base.InfernoText
+import com.shmibblez.inferno.biometric.BiometricPromptCallbackManager
 import com.shmibblez.inferno.proto.InfernoSettings
 import com.shmibblez.inferno.proto.infernoSettingsDataStore
 import com.shmibblez.inferno.settings.compose.components.InfernoSettingsPage
@@ -37,14 +31,19 @@ import mozilla.components.concept.storage.CreditCard
 //  options, check that first
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun AutofillSettingsPage(goBack: () -> Unit) {
+fun AutofillSettingsPage(
+    goBack: () -> Unit,
+    biometricPromptCallbackManager: BiometricPromptCallbackManager,
+) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val settings by context.infernoSettingsDataStore.data.collectAsState(InfernoSettings.getDefaultInstance())
 
     val addressManagerState by rememberAddressManagerState()
     var showAddressEditorFor by remember { mutableStateOf<Pair<Boolean, Address>?>(null) }
-    val creditCardManagerState by rememberCardManagerState()
+    val creditCardManagerState by rememberCardManagerState(
+        biometricPromptCallbackManager = biometricPromptCallbackManager,
+    )
     var showCreditCardEditorFor by remember { mutableStateOf<Pair<Boolean, CreditCard?>?>(null) }
 
     InfernoSettingsPage(

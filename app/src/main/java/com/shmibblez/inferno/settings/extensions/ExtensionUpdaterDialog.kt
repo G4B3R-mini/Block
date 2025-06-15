@@ -39,7 +39,7 @@ internal fun ExtensionUpdaterDialog(
 //        .show()
 //        .withCenterAlignedButtons()
         LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING)
+            verticalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_VERTICAL_INTERNAL_PADDING)
         ) {
             // title
             item {
