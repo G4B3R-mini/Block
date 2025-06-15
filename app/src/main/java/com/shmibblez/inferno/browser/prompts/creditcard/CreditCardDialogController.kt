@@ -31,6 +31,8 @@ class CreditCardDialogController(
     private var sessionId: String? = null,
 ) {
 
+    var dismissedSessionId by mutableStateOf<String?>(null)
+
 //    init {
 //        creditCardSelectBar.listener = this
 //    }

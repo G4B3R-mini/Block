@@ -120,8 +120,10 @@ fun rememberInfernoWebPrompterState(
     onNeedToRequestPermissions: OnNeedToRequestPermissions,
 ): InfernoWebPrompterState {
     var state: InfernoWebPrompterState? = null
-    val singleMediaPicker = InfernoAndroidPhotoPicker.singleMediaPicker(getWebPromptState = { state })
-    val multipleMediaPicker = InfernoAndroidPhotoPicker.multipleMediaPicker(getWebPromptState = { state })
+    val singleMediaPicker =
+        InfernoAndroidPhotoPicker.singleMediaPicker(getWebPromptState = { state })
+    val multipleMediaPicker =
+        InfernoAndroidPhotoPicker.multipleMediaPicker(getWebPromptState = { state })
     val activityResultLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             // todo: check if null
@@ -133,7 +135,7 @@ fun rememberInfernoWebPrompterState(
         }
     state = InfernoWebPrompterState(
         activity = activity,
-        biometricPromptCallbackManager=biometricPromptCallbackManager,
+        biometricPromptCallbackManager = biometricPromptCallbackManager,
         store = store,
         customTabSessionId = customTabId,
         tabsUseCases = tabsUseCases,
@@ -214,7 +216,7 @@ class InfernoWebPrompterState internal constructor(
     // These three scopes have identical lifetimes. We do not yet have a way of combining scopes
     private var handlePromptScope: CoroutineScope? = null
     private var dismissPromptScope: CoroutineScope? = null
-    private val biometricPromptCallback = object: AuthenticationCallback() {
+    private val biometricPromptCallback = object : AuthenticationCallback() {
         // todo: biometric, define result behaviour
         override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
             super.onAuthenticationError(errorCode, errString)
@@ -295,7 +297,7 @@ class InfernoWebPrompterState internal constructor(
 //        }
     // todo: implement as state to integrate with credit card picker component,
     //  store value for biometric auth, reset when dismissed
-    private var creditCardDialogController = with(this.creditCardDelegate) {
+    var creditCardDialogController = with(this.creditCardDelegate) {
         CreditCardDialogController(
             store = store,
             manageCreditCardsCallback = onManageCreditCards,
@@ -303,6 +305,7 @@ class InfernoWebPrompterState internal constructor(
             sessionId = this@InfernoWebPrompterState.customTabSessionId,
         )
     }
+        private set
 
     //    @VisibleForTesting(otherwise = PRIVATE)
 //    internal var addressPicker =
@@ -766,7 +769,10 @@ class InfernoWebPrompterState internal constructor(
     }
 
     private fun showDialogRequest(prompt: PromptRequest) {
-        Log.d("InfernoWebPrompterState", "showDialogRequest, promptRequest is now visible\n-  prompt: $prompt$")
+        Log.d(
+            "InfernoWebPrompterState",
+            "showDialogRequest, promptRequest is now visible\n-  prompt: $prompt$"
+        )
 //        try {
         visiblePrompt = prompt
 //        } catch (e: Exception) {
@@ -787,7 +793,10 @@ class InfernoWebPrompterState internal constructor(
         promptRequest: PromptRequest,
         session: SessionState,
     ) {
-        Log.d("InfernoWebPrompterState", "handleDialogsRequest, promptRequest received: $promptRequest")
+        Log.d(
+            "InfernoWebPrompterState",
+            "handleDialogsRequest, promptRequest received: $promptRequest"
+        )
         // Requests that are handled with dialogs
         when (promptRequest) {
             is SelectLoginPrompt -> {

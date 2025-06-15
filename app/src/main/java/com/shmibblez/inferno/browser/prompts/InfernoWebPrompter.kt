@@ -261,14 +261,21 @@ fun InfernoWebPrompter(
             }
 
 
-            is SelectCreditCard -> SelectableListPrompt(
-                promptRequest = promptRequest,
-                header = stringResource(R.string.mozac_feature_prompts_select_credit_card_2),
-                manageText = stringResource(R.string.mozac_feature_prompts_manage_credit_cards_2),
-                onCancel = { state.onCancel(selectedTabId, promptRequest.uid) },
-                onConfirm = { state.onConfirm(selectedTabId, promptRequest.uid, it) },
-                onNavToAutofillSettings = onNavToAutofillSettings,
-            )
+            is SelectCreditCard -> {
+                if (state.creditCardDialogController.dismissedSessionId != selectedTabId) {
+                    SelectableListPrompt(
+                        promptRequest = promptRequest,
+                        header = stringResource(R.string.mozac_feature_prompts_select_credit_card_2),
+                        manageText = stringResource(R.string.mozac_feature_prompts_manage_credit_cards_2),
+                        onCancel = {
+                            state.onCancel(selectedTabId, promptRequest.uid)
+                            state.creditCardDialogController.dismissedSessionId = selectedTabId
+                        },
+                        onConfirm = { state.onConfirm(selectedTabId, promptRequest.uid, it) },
+                        onNavToAutofillSettings = onNavToAutofillSettings,
+                    )
+                }
+            }
 
             is SelectLoginPrompt -> {
                 Log.d(
