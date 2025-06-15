@@ -8,7 +8,6 @@ import android.content.Context
 import androidx.appcompat.content.res.AppCompatResources
 import mozilla.components.browser.toolbar.BrowserToolbar
 import com.shmibblez.inferno.R
-import com.shmibblez.inferno.browser.SHARE_WEIGHT
 import com.shmibblez.inferno.theme.ThemeManager
 
 /**
@@ -26,7 +25,7 @@ fun BrowserToolbar.Companion.createShareBrowserAction(
         R.drawable.mozac_ic_share_android_24,
     )!!,
     contentDescription = context.getString(R.string.browser_menu_share),
-    weight = { SHARE_WEIGHT },
+//    weight = { SHARE_WEIGHT },
     iconTintColorResource = ThemeManager.resolveAttribute(R.attr.textPrimary, context),
     listener = listener,
 )

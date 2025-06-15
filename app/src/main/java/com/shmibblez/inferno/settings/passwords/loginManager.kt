@@ -1,6 +1,9 @@
 package com.shmibblez.inferno.settings.passwords
 
+import android.content.Context
 import android.util.Log
+import androidx.biometric.BiometricPrompt
+import androidx.biometric.BiometricPrompt.AuthenticationCallback
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -26,11 +29,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import com.shmibblez.inferno.biometric.BiometricPromptCallbackManager
 import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.compose.base.InfernoTextStyle
 import com.shmibblez.inferno.ext.components
+import com.shmibblez.inferno.ext.infernoTheme
 import com.shmibblez.inferno.settings.compose.components.PrefUiConst
 import com.shmibblez.inferno.settings.logins.SavedLogin
 import com.shmibblez.inferno.settings.logins.mapToSavedLogin
@@ -50,10 +56,37 @@ private val ICON_SIZE = 18.dp
 //  - check duplicates not implemented
 //  - login search not implemented
 internal class LoginManagerState(
+    val context: Context,
     val storage: SyncableLoginsStorage,
     val coroutineScope: CoroutineScope,
     initiallyExpanded: Boolean = true,
+    private val biometricPromptCallbackManager: BiometricPromptCallbackManager,
 ) : LifecycleAwareFeature {
+
+    var authenticated by mutableStateOf(false)
+        private set
+
+    private val authCallback = object : AuthenticationCallback() {
+        override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+            super.onAuthenticationError(errorCode, errString)
+            authenticated = false
+            // todo: show error
+        }
+
+        override fun onAuthenticationFailed() {
+            super.onAuthenticationFailed()
+            authenticated = false
+        }
+
+        override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+            super.onAuthenticationSucceeded(result)
+            authenticated = true
+        }
+    }
+
+    fun startAuth() {
+        biometricPromptCallbackManager.showPrompt(title = context.getString(R.string.logins_biometric_prompt_message_2))
+    }
 
     private val jobs: MutableList<Job> = mutableListOf()
 
@@ -130,33 +163,37 @@ internal class LoginManagerState(
 
     override fun start() {
         refreshLogins()
+        biometricPromptCallbackManager.addCallbackListener(authCallback)
     }
 
     override fun stop() {
         jobs.forEach { it.cancel() }
+        biometricPromptCallbackManager.removeCallbackListener(authCallback)
     }
 
 }
 
 @Composable
-internal fun rememberLoginManagerState(): MutableState<LoginManagerState> {
+internal fun rememberLoginManagerState(
+    biometricPromptCallbackManager: BiometricPromptCallbackManager,
+): MutableState<LoginManagerState> {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
     val state = remember {
         mutableStateOf(
             LoginManagerState(
-                storage = context.components.core.passwordsStorage, coroutineScope = coroutineScope
+                context = context,
+                storage = context.components.core.passwordsStorage,
+                coroutineScope = coroutineScope,
+                biometricPromptCallbackManager = biometricPromptCallbackManager,
             )
         )
     }
 
     DisposableEffect(null) {
         state.value.start()
-
-        onDispose {
-            state.value.stop()
-        }
+        onDispose { state.value.stop() }
     }
 
     return state
@@ -192,18 +229,33 @@ internal fun LazyListScope.loginManager(
             )
         }
     }
+    
     if (state.expanded) {
-        items(state.logins) {
-            LoginItem(
-                login = it,
-                onEditLoginClicked = onEditLoginClicked,
-                onDeleteLoginClicked = onDeleteLoginClicked,
-            )
-        }
-        item {
-            AddLoginItem(onAddLoginClicked = onAddLoginClicked)
+        when (state.authenticated) {
+            // if authenticated show login items and add more item
+            true -> {
+                items(state.logins) {
+                    LoginItem(
+                        login = it,
+                        onEditLoginClicked = onEditLoginClicked,
+                        onDeleteLoginClicked = onDeleteLoginClicked,
+                    )
+                }
+                item {
+                    AddLoginItem(onAddLoginClicked = onAddLoginClicked)
+                }
+            }
+
+            // if not authenticated show authenticate message
+            false -> {
+                item {
+                    AuthenticateItem(onAuthClicked = { state.startAuth() })
+                }
+            }
         }
     }
+
+    // bottom spacer
     item {
         Spacer(
             modifier = Modifier.padding(bottom = PrefUiConst.PREFERENCE_HALF_VERTICAL_PADDING),
@@ -264,7 +316,7 @@ private fun AddLoginItem(onAddLoginClicked: () -> Unit) {
         modifier = Modifier
             .clickable { onAddLoginClicked.invoke() }
             .padding(horizontal = PrefUiConst.PREFERENCE_HORIZONTAL_PADDING)
-            .padding(top = PrefUiConst.PREFERENCE_INTERNAL_PADDING),
+            .padding(top = PrefUiConst.PREFERENCE_INTERNAL_PADDING * 2F),
         horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -278,4 +330,19 @@ private fun AddLoginItem(onAddLoginClicked: () -> Unit) {
         // add login text
         InfernoText(text = stringResource(R.string.add_login_2))
     }
+}
+
+@Composable
+private fun AuthenticateItem(onAuthClicked: () -> Unit) {
+    // add login text
+    InfernoText(
+        text = stringResource(R.string.logins_biometric_prompt_message_2),
+        fontColor = LocalContext.current.infernoTheme().value.primaryActionColor,
+        textDecoration = TextDecoration.Underline,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onAuthClicked.invoke() }
+            .padding(horizontal = PrefUiConst.PREFERENCE_HORIZONTAL_PADDING)
+            .padding(top = PrefUiConst.PREFERENCE_INTERNAL_PADDING * 2F),
+    )
 }

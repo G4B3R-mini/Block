@@ -1,7 +1,7 @@
 package com.shmibblez.inferno.browser.prompts.creditcard
 
 import androidx.compose.runtime.Composable
-import com.shmibblez.inferno.browser.prompts.InfernoPromptFeatureState
+import com.shmibblez.inferno.browser.prompts.InfernoWebPrompterState
 import mozilla.components.feature.prompts.creditcard.CreditCardPicker
 
 /**
@@ -12,7 +12,7 @@ interface InfernoCreditCardDelegate {
      * The [Composable] used for [CreditCardPicker] to display a
      * selectable prompt list of credit cards.
      */
-    val creditCardPickerComposable: (@Composable (InfernoPromptFeatureState) -> Unit)?
+    val creditCardPickerComposable: (@Composable (InfernoWebPrompterState) -> Unit)?
         get() = null // todo: override in BrowserComponent, call in InfernoWebPrompter, if null use default
 
     /**

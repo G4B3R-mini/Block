@@ -185,6 +185,7 @@ fun LoginEditorDialog(
                                 origin = hostnameStr,
                                 username = usernameStr,
                                 password = passwordStr,
+                                httpRealm = hostnameStr,
                             )
                             onAddLogin.invoke(login)
                         }

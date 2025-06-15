@@ -11,7 +11,7 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.fragment.app.Fragment
-import com.shmibblez.inferno.browser.prompts.InfernoPromptFeatureState
+import com.shmibblez.inferno.browser.prompts.InfernoWebPrompterState
 import mozilla.components.feature.prompts.PromptFeature
 
 /**
@@ -41,7 +41,7 @@ class InfernoAndroidPhotoPicker(
          */
         fun singleMediaPicker(
             getFragment: () -> Fragment,
-            getWebPromptState: () -> InfernoPromptFeatureState?,
+            getWebPromptState: () -> InfernoWebPrompterState?,
         ): ActivityResultLauncher<PickVisualMediaRequest> {
             return getFragment.invoke()
                 .registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
@@ -67,7 +67,7 @@ class InfernoAndroidPhotoPicker(
          */
         @Composable
         fun singleMediaPicker(
-            getWebPromptState: () -> InfernoPromptFeatureState?,
+            getWebPromptState: () -> InfernoWebPrompterState?,
         ): ActivityResultLauncher<PickVisualMediaRequest> {
 //            return getFragment.invoke()
 //                .registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
@@ -93,7 +93,7 @@ class InfernoAndroidPhotoPicker(
          */
         fun multipleMediaPicker(
             getFragment: () -> Fragment,
-            getWebPromptState: () -> InfernoPromptFeatureState?,
+            getWebPromptState: () -> InfernoWebPrompterState?,
         ): ActivityResultLauncher<PickVisualMediaRequest> {
             return getFragment.invoke()
                 .registerForActivityResult(ActivityResultContracts.PickMultipleVisualMedia()) { uriList ->
@@ -114,7 +114,7 @@ class InfernoAndroidPhotoPicker(
          */
         @Composable
         fun multipleMediaPicker(
-            getWebPromptState: () -> InfernoPromptFeatureState?,
+            getWebPromptState: () -> InfernoWebPrompterState?,
         ): ActivityResultLauncher<PickVisualMediaRequest> {
 //            return getFragment.invoke()
 //                .registerForActivityResult(ActivityResultContracts.PickMultipleVisualMedia()) { uriList ->

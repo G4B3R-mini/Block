@@ -1,5 +1,6 @@
 package com.shmibblez.inferno.settings.compose.components
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -29,6 +30,8 @@ fun InfernoSettingsPage(
     goBack: () -> Unit,
     content: @Composable (PaddingValues) -> Unit,
 ) {
+    BackHandler(enabled = true) { goBack.invoke() }
+    
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {

@@ -26,7 +26,7 @@ import com.shmibblez.inferno.settings.compose.components.PreferenceSpacer
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun SettingsPage(
-    goBackLegacy: () -> Unit,
+    goBack: () -> Unit,
     onNavigateToAccountSettingsPage: () -> Unit,
     onNavigateToAccountProblemSettings: () -> Unit,
     onNavigateToTurnOnSyncSettings: () -> Unit,
@@ -61,7 +61,7 @@ fun SettingsPage(
 
     InfernoSettingsPage(
         title = stringResource(R.string.settings_title),
-        goBack = goBackLegacy,
+        goBack = goBack,
     ) { edgeInsets ->
         LazyColumn(
             modifier = Modifier

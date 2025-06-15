@@ -22,6 +22,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.shmibblez.inferno.R
+import com.shmibblez.inferno.biometric.BiometricPromptCallbackManager
 import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.proto.InfernoSettings
@@ -36,12 +37,18 @@ import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun PasswordSettingsPage(goBack: () -> Unit, onNavToPasswordExceptionSettingsPage: () -> Unit) {
+fun PasswordSettingsPage(
+    goBack: () -> Unit,
+    biometricPromptCallbackManager: BiometricPromptCallbackManager,
+    onNavToPasswordExceptionSettingsPage: () -> Unit,
+) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val settings by context.infernoSettingsDataStore.data.collectAsState(InfernoSettings.getDefaultInstance())
 
-    val loginManagerState by rememberLoginManagerState()
+    val loginManagerState by rememberLoginManagerState(
+        biometricPromptCallbackManager = biometricPromptCallbackManager,
+    )
     // pair of whether to create and login to copy in case of edit
     var editLoginFor by remember { mutableStateOf<Pair<Boolean, SavedLogin?>?>(null) }
 
@@ -50,19 +57,12 @@ fun PasswordSettingsPage(goBack: () -> Unit, onNavToPasswordExceptionSettingsPag
         goBack = goBack,
     ) { edgeInsets ->
         LazyColumn(
-            modifier = Modifier.fillMaxWidth().padding(edgeInsets),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(edgeInsets),
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.Top,
         ) {
-            /**
-             * logins settings
-             */
-            /**
-             * logins settings
-             */
-
-
-
             // saved logins
             item { PreferenceTitle(stringResource(R.string.preferences_passwords_saved_logins_2)) }
 
@@ -117,10 +117,12 @@ fun PasswordSettingsPage(goBack: () -> Unit, onNavToPasswordExceptionSettingsPag
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .padding(horizontal = PrefUiConst.PREFERENCE_HORIZONTAL_PADDING)
                         .padding(
-                            horizontal = PrefUiConst.PREFERENCE_HORIZONTAL_PADDING,
-                            vertical = PrefUiConst.PREFERENCE_VERTICAL_PADDING,
-                        ).clickable {
+                            top = PrefUiConst.PREFERENCE_VERTICAL_PADDING * 2F,
+                            bottom = PrefUiConst.PREFERENCE_VERTICAL_PADDING,
+                        )
+                        .clickable {
                             /**
                              * todo: implement exceptions page
                              *  check: [SitePermissionsSettingsPage]
@@ -153,7 +155,6 @@ fun PasswordSettingsPage(goBack: () -> Unit, onNavToPasswordExceptionSettingsPag
                 onSaveLogin = { guid, login -> loginManagerState.updateLogin(guid, login) },
                 onDismiss = { editLoginFor = null }
             )
-            // todo: show login editor dialog
         }
     }
 }

@@ -86,8 +86,8 @@ fun SaveLoginDialogPrompt(
         }
     }
     if (!shouldRender) return
-    var username by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+    var username by remember { mutableStateOf(promptRequest.logins.firstOrNull()?.username ?: "") }
+    var password by remember { mutableStateOf(promptRequest.logins.firstOrNull()?.password ?: "") }
     val loginValid by remember { mutableStateOf(password.isEmpty()) }
     var validateStateUpdate by remember { mutableStateOf<Job?>(null) }
     var isUpdate by remember { mutableStateOf(false) }
@@ -258,14 +258,14 @@ fun SaveLoginDialogPrompt(
                 keyboardType = KeyboardType.Password,
                 imeAction = ImeAction.Done,
             ),
-            colors = TextFieldDefaults.colors(
-                focusedTextColor = Color.White,
-                unfocusedTextColor = Color.LightGray,
-                focusedContainerColor = Color.Black,
-                errorContainerColor = Color.Black,
-                disabledContainerColor = Color.Black,
-                unfocusedContainerColor = Color.Black,
-            ),
+//            colors = TextFieldDefaults.colors(
+//                focusedTextColor = Color.White,
+//                unfocusedTextColor = Color.LightGray,
+//                focusedContainerColor = Color.Black,
+//                errorContainerColor = Color.Black,
+//                disabledContainerColor = Color.Black,
+//                unfocusedContainerColor = Color.Black,
+//            ),
             singleLine = true,
         )
         // password
@@ -295,15 +295,15 @@ fun SaveLoginDialogPrompt(
                 keyboardType = KeyboardType.Password,
                 imeAction = ImeAction.Done,
             ),
-            colors = TextFieldDefaults.colors(
-                focusedTextColor = Color.White,
-                unfocusedTextColor = Color.LightGray,
-                errorTextColor = Color.Red,
-                focusedContainerColor = Color.Black,
-                errorContainerColor = Color.Black,
-                disabledContainerColor = Color.Black,
-                unfocusedContainerColor = Color.Black,
-            ),
+//            colors = TextFieldDefaults.colors(
+//                focusedTextColor = Color.White,
+//                unfocusedTextColor = Color.LightGray,
+//                errorTextColor = Color.Red,
+//                focusedContainerColor = Color.Black,
+//                errorContainerColor = Color.Black,
+//                disabledContainerColor = Color.Black,
+//                unfocusedContainerColor = Color.Black,
+//            ),
             singleLine = true,
             isError = !loginValid,
         )

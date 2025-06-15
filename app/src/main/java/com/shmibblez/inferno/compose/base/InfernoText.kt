@@ -13,6 +13,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
@@ -183,6 +184,7 @@ fun InfernoText(
     minLines: Int = infernoStyle.minLines,
     fontSize: TextUnit = infernoStyle.fontSize,
     fontColor: Color = infernoStyle.fontColor,
+    textDecoration: TextDecoration = TextDecoration.None,
     style: TextStyle? = null,
 ) {
     // removes material padding
@@ -202,6 +204,7 @@ fun InfernoText(
                 lineHeight = lineHeight,
                 color = fontColor,
                 letterSpacing = letterSpacing,
+                textDecoration = textDecoration,
             ).merge(style),
         )
     }

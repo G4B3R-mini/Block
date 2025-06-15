@@ -38,12 +38,15 @@ message InfernoSettings {
     TOOLBAR_ITEM_SHOW_TABS_TRAY = 11;
     TOOLBAR_ITEM_SHARE = 12;
     TOOLBAR_ITEM_MENU = 13;
+    TOOLBAR_ITEM_EXTENSIONS = 14;
+    TOOLBAR_ITEM_PASSWORDS = 15;
   }
 
   // general
   optional VerticalToolbarPosition toolbarVerticalPosition = 3 [default = TOOLBAR_BOTTOM];
   optional VerticalToolbarPosition inAppToolbarVerticalPosition = 4 [default = TOOLBAR_BOTTOM];
   repeated ToolbarItem toolbarItems = 5;
+  repeated ToolbarItem toolbarMenuItems = 88;
 
 
   /*** tab settings ***/
@@ -120,7 +123,7 @@ message InfernoSettings {
     INFERNO_LIGHT = 1;
     // pays homage to our one true guardian and savior mozilla
     MOZILLA_INCOGNITO_DARK = 2;
-    // also pays homage to the great moz
+    // the great moz
     MOZILLA_INCOGNITO_LIGHT = 3;
   }
   message InfernoTheme {

@@ -736,6 +736,40 @@ class ToolbarOptions {
                 type = type,
             )
         }
+
+        @Composable
+        fun ToolbarExtensions(
+            type: ToolbarOptionType,
+            dismissMenuSheet: () -> Unit = {},
+            onNavToExtensions: () -> Unit,
+        ) {
+            ToolbarOptionTemplate(
+                iconPainter = painterResource(R.drawable.ic_addons_extensions),
+                description = stringResource(R.string.browser_menu_extensions),
+                onClick = {
+                    dismissMenuSheet.invoke()
+                    onNavToExtensions.invoke()
+                },
+                type = type,
+            )
+        }
+
+        @Composable
+        fun ToolbarPasswords(
+            type: ToolbarOptionType,
+            dismissMenuSheet: () -> Unit = {},
+            onNavToPasswords: () -> Unit,
+        ) {
+            ToolbarOptionTemplate(
+                iconPainter = painterResource(R.drawable.ic_key_24),
+                description = stringResource(R.string.browser_menu_passwords),
+                onClick = {
+                    dismissMenuSheet.invoke()
+                    onNavToPasswords.invoke()
+                },
+                type = type,
+            )
+        }
     }
 }
 
@@ -1000,6 +1034,24 @@ class ToolbarOptionsIcons {
             ToolbarIconTemplate(
                 iconPainter = painterResource(R.drawable.ic_app_menu_24),
                 contentDescription = stringResource(R.string.content_description_menu),
+                tint = tint,
+            )
+        }
+
+        @Composable
+        fun ToolbarExtensionsIcon(tint: Color = LocalContext.current.infernoTheme().value.primaryIconColor) {
+            ToolbarIconTemplate(
+                iconPainter = painterResource(R.drawable.ic_addons_extensions),
+                contentDescription = stringResource(R.string.browser_menu_extensions),
+                tint = tint,
+            )
+        }
+
+        @Composable
+        fun ToolbarPasswowrdsIcon(tint: Color = LocalContext.current.infernoTheme().value.primaryIconColor) {
+            ToolbarIconTemplate(
+                iconPainter = painterResource(R.drawable.ic_key_24),
+                contentDescription = stringResource(R.string.browser_menu_passwords),
                 tint = tint,
             )
         }

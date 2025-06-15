@@ -8,7 +8,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.os.bundleOf
@@ -17,10 +16,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.shmibblez.inferno.biometric.BiometricPromptCallbackManager
 import com.shmibblez.inferno.browser.BrowserComponent
-import com.shmibblez.inferno.browser.getActivity
 import com.shmibblez.inferno.browser.nav.InitialBrowserTask.AppIcon.asStartDestination
 import com.shmibblez.inferno.browser.state.BrowserComponentState
-import com.shmibblez.inferno.browser.state.rememberBrowserComponentState
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.infernoTheme
 import com.shmibblez.inferno.extension.WebExtensionPromptFeature
@@ -69,7 +66,6 @@ fun BrowserNavHost(
     /**
      * todo: implement [WebExtensionPromptFeature] and init here
      */
-
 
 
     val context = LocalContext.current
@@ -181,6 +177,8 @@ fun BrowserNavHost(
                 onNavToHistory = { nav.navigate(route = BrowserRoute.History) },
                 onNavToSettings = { nav.navigate(route = BrowserRoute.Settings) },
                 onNavToExtensions = { nav.navigate(route = BrowserRoute.Settings.ExtensionsSettingsPage) },
+                onNavToPasswords = { nav.navigate(route = BrowserRoute.Settings.PasswordSettingsPage) },
+                onNavToAutofillSettings = { nav.navigate(route = BrowserRoute.Settings.AutofillSettingsPage) },
             )
         }
 
@@ -194,7 +192,7 @@ fun BrowserNavHost(
 
         composable<BrowserRoute.Settings> {
             SettingsPage(
-                goBackLegacy = { nav.popBackStack() },
+                goBack = { nav.popBackStack() },
                 onNavigateToAccountSettingsPage = { nav.navigate(route = BrowserRoute.Settings.AccountSettingsPage) },
                 onNavigateToAccountProblemSettings = { nav.navigate(route = BrowserRoute.Settings.AccountProblemSettingsPage) },
                 onNavigateToTurnOnSyncSettings = { nav.navigate(route = BrowserRoute.Settings.TurnOnSyncSettingsPage) },
@@ -263,7 +261,8 @@ fun BrowserNavHost(
             )
         }
         composable<BrowserRoute.Settings.ExtensionsSettingsPage.ExtensionSettingsPage> {
-            @Suppress("DEPRECATION") val addon = it.arguments?.getParcelable<Addon>(BrowserRoute.Settings.ExtensionsSettingsPage.ExtensionSettingsPage.ADDON_KEY)
+            @Suppress("DEPRECATION") val addon =
+                it.arguments?.getParcelable<Addon>(BrowserRoute.Settings.ExtensionsSettingsPage.ExtensionSettingsPage.ADDON_KEY)
             ExtensionPage(
                 initialAddon = addon!!,
                 goBack = {
@@ -289,6 +288,7 @@ fun BrowserNavHost(
         composable<BrowserRoute.Settings.PasswordSettingsPage> {
             PasswordSettingsPage(
                 goBack = { nav.popBackStack() },
+                biometricPromptCallbackManager = biometricPromptCallbackManager,
                 onNavToPasswordExceptionSettingsPage = { nav.navigate(route = BrowserRoute.Settings.PasswordSettingsPage.PasswordExceptionSettingsPage) },
             )
         }

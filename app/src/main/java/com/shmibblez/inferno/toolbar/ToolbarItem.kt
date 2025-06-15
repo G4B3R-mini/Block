@@ -1,11 +1,8 @@
 package com.shmibblez.inferno.toolbar
 
-import androidx.annotation.IntRange
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.constraintlayout.motion.widget.MotionScene.Transition.TransitionOnClick
-import com.shmibblez.inferno.R
 import com.shmibblez.inferno.ext.infernoTheme
 import com.shmibblez.inferno.proto.InfernoSettings
 import mozilla.components.browser.state.state.TabSessionState
@@ -36,6 +33,8 @@ val InfernoSettings.ToolbarItem?.allToolbarItemsNoMiniOrigin
         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_SHOW_TABS_TRAY,
         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_SHARE,
         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_MENU,
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_EXTENSIONS,
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_PASSWORDS,
     )
 
 val InfernoSettings.ToolbarItem?.allToolbarItemsNoOrigin
@@ -54,6 +53,8 @@ val InfernoSettings.ToolbarItem?.allToolbarItemsNoOrigin
         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_SHOW_TABS_TRAY,
         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_SHARE,
         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_MENU,
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_EXTENSIONS,
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_PASSWORDS,
     )
 
 @Composable
@@ -69,6 +70,8 @@ fun InfernoSettings.ToolbarItem.ToToolbarOption(
     onActivateReaderView: () -> Unit,
     onNavToSettings: () -> Unit,
     onNavToHistory: () -> Unit,
+    onNavToExtensions: () -> Unit,
+    onNavToPasswords: () -> Unit,
     onNavToTabsTray: () -> Unit,
 ) {
     when (this) {
@@ -196,6 +199,22 @@ fun InfernoSettings.ToolbarItem.ToToolbarOption(
                 ToolbarOptionType.EXPANDED -> {} // no-op, menu can only be shown in toolbar
             }
         }
+
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_EXTENSIONS -> {
+            ToolbarOptions.ToolbarExtensions(
+                type = type,
+                dismissMenuSheet = onDismissMenuBottomSheet,
+                onNavToExtensions = onNavToExtensions,
+            )
+        }
+
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_PASSWORDS -> {
+            ToolbarOptions.ToolbarPasswords(
+                type = type,
+                dismissMenuSheet = onDismissMenuBottomSheet,
+                onNavToPasswords = onNavToPasswords,
+            )
+        }
     }
 }
 
@@ -257,6 +276,14 @@ fun InfernoSettings.ToolbarItem.ToToolbarIcon(
         )
 
         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_MENU -> ToolbarOptionsIcons.ToolbarMenuIcon(
+            tint = tint,
+        )
+
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_EXTENSIONS -> ToolbarOptionsIcons.ToolbarExtensionsIcon(
+            tint = tint,
+        )
+
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_PASSWORDS -> ToolbarOptionsIcons.ToolbarPasswowrdsIcon(
             tint = tint,
         )
     }

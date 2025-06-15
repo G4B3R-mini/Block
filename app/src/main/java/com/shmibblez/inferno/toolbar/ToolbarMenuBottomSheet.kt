@@ -25,9 +25,11 @@ import com.shmibblez.inferno.toolbar.MenuOnlyComponents.Companion.NavOptions
 import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarPrivateModeToggle
 import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarRequestReaderView
 import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarBack
+import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarExtensions
 import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarForward
 import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarHistory
 import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarOriginMini
+import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarPasswords
 import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarReload
 import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarRequestDesktopSite
 import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarSettings
@@ -48,6 +50,8 @@ fun ToolbarMenuBottomSheet(
     onNavToSettings: () -> Unit,
     onNavToTabsTray: () -> Unit,
     onNavToHistory: () -> Unit,
+    onNavToExtensions: () -> Unit,
+    onNavToPasswords: () -> Unit,
 ) {
     if (tabSessionState == null) return
     ModalBottomSheet(
@@ -89,6 +93,20 @@ fun ToolbarMenuBottomSheet(
                     type = ToolbarOptionType.EXPANDED,
                     onActivateFindInPage = onActivateFindInPage,
                     dismissMenuSheet = onDismissMenuBottomSheet,
+                )
+            },
+            {
+                ToolbarExtensions(
+                    type = ToolbarOptionType.EXPANDED,
+                    dismissMenuSheet = onDismissMenuBottomSheet,
+                    onNavToExtensions = onNavToExtensions,
+                )
+            },
+            {
+                ToolbarPasswords(
+                    type = ToolbarOptionType.EXPANDED,
+                    dismissMenuSheet = onDismissMenuBottomSheet,
+                    onNavToPasswords = onNavToPasswords,
                 )
             },
             {

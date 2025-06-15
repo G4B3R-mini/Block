@@ -37,15 +37,15 @@ that's it for now, hopefully this project doesn't die
 `Errors that make something unusable, these should be fixed as soon as possible`
 
 - [ ] Settings Page
-  - [ ] when back pressed, nothing happens (does not go back to browser)
-    - [ ] check browser component back handlers, something may be interfering there
+    - [ ] when back pressed, nothing happens (does not go back to browser)
+        - [ ] check browser component back handlers, something may be interfering there
 
 [//]: # (`Nothing critical wooooooo`)
 
 ## Massiv Bugs
 
 - [ ] Homepage
-  - [ ] remove sponsored top sites
+    - [ ] remove sponsored top sites
 - [ ] BrowserComponent
     - [ ] every time google search is performed, open in app requested
     - [ ] load page, select, and return to browser not working properly (from extensions page links)
@@ -144,6 +144,15 @@ Did you add an account?
 ## Toolbar
 
 - [ ] add keyboard listener to toolbar, if hidden, remove focus, if pops up, request focus
+- [ ] add toolbar menu item editor to toolbar settings page
+    - [ ] make toolbar items and toolbar menu items expandable, both can be collapsed at the same
+      time, but only one can be expanded at any time, depending on that modify logic to determine
+      which settings to edit, and which items can be moved
+    - [ ] only items that cannot be in toolbar menu items are origin and menu item, origin mini is
+      ok
+    - [ ] allowed so user can edit which items are visible and their order, only obligatory is
+      settings item (cannot be removed)
+    - [ ] add menu settings listener to get items to be displayed
 
 ## Under Construction
 

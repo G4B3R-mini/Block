@@ -66,8 +66,9 @@ import mozilla.components.support.ktx.util.PromptAbuserDetector
  */
 @Composable
 fun InfernoWebPrompter(
-    state: InfernoPromptFeatureState,
+    state: InfernoWebPrompterState,
 ) {
+    Log.d("InfernoWebPrompter", "rebuild\n-  visiblePrompt: ${state.visiblePrompt}\n-  selectedTabId: ${state.selectedTabId}")
     // get active request, return if none
     val promptRequest = state.visiblePrompt ?: return
     // get selected tab id, if none return
@@ -75,6 +76,8 @@ fun InfernoWebPrompter(
 
     val context = LocalContext.current
     val promptAbuserDetector = remember { PromptAbuserDetector() }
+
+    Log.d("InfernoWebPrompter", "showing new prompt now")
 
     Box(
         modifier = Modifier.fillMaxWidth(),
@@ -347,7 +350,7 @@ fun InfernoWebPrompter(
                     onClear = { state.onClear(selectedTabId, promptRequest.uid) })
             }
 
-            /** no-op, handled in [InfernoPromptFeatureState] */
+            /** no-op, handled in [InfernoWebPrompterState] */
             is PromptRequest.File -> {}
         }
     }

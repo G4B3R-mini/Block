@@ -22,7 +22,6 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -53,7 +52,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
@@ -61,7 +59,6 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.DialogProperties
-import androidx.core.content.ContextCompat.getColor
 import androidx.core.content.getSystemService
 import androidx.core.view.OnApplyWindowInsetsListener
 import androidx.core.view.children
@@ -80,22 +77,20 @@ import com.shmibblez.inferno.R
 import com.shmibblez.inferno.biometric.BiometricPromptCallbackManager
 import com.shmibblez.inferno.browser.browsingmode.BrowsingMode
 import com.shmibblez.inferno.browser.prompts.DownloadComponent
-import com.shmibblez.inferno.browser.prompts.InfernoPromptFeatureState
+import com.shmibblez.inferno.browser.prompts.InfernoWebPrompterState
 import com.shmibblez.inferno.browser.prompts.InfernoWebPrompter
 import com.shmibblez.inferno.browser.prompts.creditcard.InfernoCreditCardDelegate
 import com.shmibblez.inferno.browser.prompts.login.InfernoLoginDelegate
-import com.shmibblez.inferno.browser.prompts.rememberInfernoPromptFeatureState
+import com.shmibblez.inferno.browser.prompts.rememberInfernoWebPrompterState
 import com.shmibblez.inferno.browser.readermode.InfernoReaderViewControls
 import com.shmibblez.inferno.browser.readermode.rememberInfernoReaderViewFeatureState
 import com.shmibblez.inferno.browser.state.BrowserComponentMode
 import com.shmibblez.inferno.browser.state.BrowserComponentState
 import com.shmibblez.inferno.browser.tabstrip.isTabStripEnabled
 import com.shmibblez.inferno.components.Components
-import com.shmibblez.inferno.components.TabCollectionStorage
 import com.shmibblez.inferno.components.accounts.FenixFxAEntryPoint
 import com.shmibblez.inferno.components.accounts.FxaWebChannelIntegration
 import com.shmibblez.inferno.components.appstate.AppAction.MessagingAction
-import com.shmibblez.inferno.components.appstate.AppAction.ShoppingAction
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.compose.snackbar.AcornSnackbarHostState
 import com.shmibblez.inferno.compose.snackbar.Snackbar
@@ -116,7 +111,6 @@ import com.shmibblez.inferno.loading.InfernoLoadingComponent
 import com.shmibblez.inferno.messaging.FenixMessageSurfaceId
 import com.shmibblez.inferno.perf.MarkersFragmentLifecycleCallbacks
 import com.shmibblez.inferno.settings.biometric.BiometricPromptFeature
-import com.shmibblez.inferno.shopping.DefaultShoppingExperienceFeature
 import com.shmibblez.inferno.shopping.ReviewQualityCheckFeature
 import com.shmibblez.inferno.shortcut.PwaOnboardingObserver
 import com.shmibblez.inferno.tabbar.InfernoTabBar
@@ -160,7 +154,6 @@ import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.browser.state.state.content.DownloadState
 import mozilla.components.browser.state.state.content.DownloadState.Status
 import mozilla.components.browser.thumbnails.BrowserThumbnails
-import mozilla.components.browser.toolbar.BrowserToolbar
 import mozilla.components.concept.engine.EngineView
 import mozilla.components.concept.engine.mediasession.MediaSession
 import mozilla.components.concept.engine.prompt.ShareData
@@ -213,29 +206,22 @@ import kotlin.math.roundToInt
 //  - splash screen, customize: https://medium.com/geekculture/implementing-the-perfect-splash-screen-in-android-295de045a8dc
 //    - add huge drawable with diagonal red and black in center (for ember will be gradient, bottom black top red)
 //    - center inferno logo drawable (for ember will be fire icon with white rounded letters below spelling "ember")
-// todo: from fragment_browser.xml, for below views first wrap views with AndroidView, then
-//  progressively implement in compose
-//
 
 // todo: test
 //   4. crash_reporter_view CrashContentView (com.shmibblez.inferno/crashes/CrashContentIntegration.kt)
 //   6. dynamicSnackbarContainer
 //   7. loginSelectBar, implemented in PromptComponent
-//   9. addressSelectBar AddressSelectBar, implemented in PromptComponent
-//   10. creditCardSelectBar CreditCardSelectBar, implemented in PromptComponent
+//   9. AddressSelectBar, implemented in PromptComponent
+//   10. CreditCardSelectBar, implemented in PromptComponent
 //     - test biometric authentication in SelectableListPrompt for credit cards (urgent)
 //   11. tabPreview (TabPreview moved to toolbar (swipe to switch tabs))
 
-
-// todo: test
-//   - savedLoginsLauncher
 
 // todo (long term):
 //  - add param callbacks in components (ex, DownloadComponent) for custom composable components
 //    (download dialogs, web dialogs, etc) and invoke where necessary, allows more customizability
 //    -> callbacks provide composable params, and composable fun is returned and called in component
 // todo:
-//  - fix external app browser implementation
 //  - animated splash screen not animating
 //  - add default search engines, select default
 //    - bundle in app
@@ -244,9 +230,6 @@ import kotlin.math.roundToInt
 //      - add way to select search engine
 //  - toolbar
 //    - revisit search engines, how to modify bundled?
-//  - change from datastore preferences to datastore
-//    - switch from: implementation "androidx.datastore:datastore-preferences:1.1.1"
-//      to: implementation "androidx.datastore:datastore:1.1.1"
 //  - create Mozilla Location Service (MLS) token and put in components/Core.kt
 //  - BuildConfig.MLS_TOKEN
 //  - color scheme, search for FirefoxTheme usages
@@ -268,21 +251,6 @@ import kotlin.math.roundToInt
 //    SupportUtils.getMozillaPageUrl(SupportUtils.MozillaPage.PRIVATE_NOTICE),
 //    SupportUtils.FXACCOUNT_SUMO_URL,
 //)
-//}
-
-//companion object {
-/**
- * Indicates weight of a page action. The lesser the weight, the closer it is to the URL.
- *
- * A weight of -1 indicates the position is not cared for and the action will be appended at the end.
- */
-//const val READER_MODE_WEIGHT = 1
-//const val TRANSLATIONS_WEIGHT = 2
-const val REVIEW_QUALITY_CHECK_WEIGHT = 3
-const val SHARE_WEIGHT = 4
-
-//const val RELOAD_WEIGHT = 5
-const val OPEN_IN_ACTION_WEIGHT = 6
 //}
 
 //private const val NAVIGATION_CFR_VERTICAL_OFFSET = 10
@@ -351,7 +319,9 @@ fun BrowserComponent(
     biometricPromptCallbackManager: BiometricPromptCallbackManager,
     onNavToHistory: () -> Unit,
     onNavToSettings: () -> Unit,
-    onNavToExtensions: () -> Unit, // todo: add toolbar icon for extensions
+    onNavToExtensions: () -> Unit,
+    onNavToPasswords: () -> Unit,
+    onNavToAutofillSettings: () -> Unit,
 ) {
     Log.d("BrowserComponent", "rebuilt")
     val coroutineScope = rememberCoroutineScope()
@@ -462,7 +432,7 @@ fun BrowserComponent(
             }.toIntArray()
             sitePermissionsFeature?.onPermissionsResult(permissions, grantResults)
         }
-    var tempWebPrompterState by remember { mutableStateOf<InfernoPromptFeatureState?>(null) }
+    var tempWebPrompterState by remember { mutableStateOf<InfernoWebPrompterState?>(null) }
     val requestPromptsPermissionsLauncher: ActivityResultLauncher<Array<String>> =
         rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { results ->
             val permissions = results.keys.toTypedArray()
@@ -488,8 +458,9 @@ fun BrowserComponent(
     val bottomBarOffsetPx = remember { Animatable(0F) }
 
 
-    val webPrompterState = rememberInfernoPromptFeatureState(
+    val webPrompterState = rememberInfernoWebPrompterState(
         activity = context.getActivity()!!,
+        biometricPromptCallbackManager = biometricPromptCallbackManager,
         store = store,
         customTabId = state.customTabSessionId,
         tabsUseCases = context.components.useCases.tabsUseCases,
@@ -521,11 +492,15 @@ fun BrowserComponent(
                 onDismiss: () -> Unit,
                 onSuccess: () -> Unit,
             ) {
-                val directions = NavGraphDirections.actionGlobalShareFragment(
-                    data = arrayOf(shareData),
-                    showPage = true,
-                    sessionId = getCurrentTab(context)?.id,
-                )
+                (shareData.url ?: shareData.text)?.let {
+                    val subject = shareData.title ?: context.getString(R.string.mozac_support_ktx_share_dialog_title)
+                    context.share(it, subject = subject)
+                }
+//                val directions = NavGraphDirections.actionGlobalShareFragment(
+//                    data = arrayOf(shareData),
+//                    showPage = true,
+//                    sessionId = getCurrentTab(context)?.id,
+//                )
 //                navController.navigate(directions)
             }
         },
@@ -535,11 +510,7 @@ fun BrowserComponent(
         },
         loginDelegate = object : InfernoLoginDelegate {
             override val onManageLogins = {
-                browserAnimator.captureEngineViewAndDrawStatically {
-                    // todo: navigation, go to saved logins page with logins manager expanded
-                    val directions = NavGraphDirections.actionGlobalSavedLoginsAuthFragment()
-//                    navController.navigate(directions)
-                }
+                onNavToPasswords.invoke()
             }
         },
         shouldAutomaticallyShowSuggestedPassword = { context.settings().isFirstTimeEngagingWithSignup },
@@ -580,14 +551,13 @@ fun BrowserComponent(
         creditCardDelegate = { prompterState, activityResultLauncher ->
             object : InfernoCreditCardDelegate {
                 override val onManageCreditCards = {
-                    // todo: navigation, go to credit cards page with manager expanded
-                    val directions = NavGraphDirections.actionGlobalAutofillSettingFragment()
-//                    navController.navigate(directions)
+                    onNavToAutofillSettings.invoke()
                 }
                 override val onSelectCreditCard = {
                     showBiometricPrompt(
                         context = context,
-                        biometricPromptFeature = biometricPromptFeature,
+                        title = context.getString(R.string.credit_cards_biometric_prompt_unlock_message_2),
+                        biometricPromptCallbackManager = biometricPromptCallbackManager,
                         webPrompterState = prompterState,
                         startForResult = activityResultLauncher,
                         setAlertDialog = { activeAlertDialog = it },
@@ -599,9 +569,7 @@ fun BrowserComponent(
             override val addressPickerView
                 get() = null
             override val onManageAddresses = {
-                // todo: navigation, go to address page with address manager expanded
-                val directions = NavGraphDirections.actionGlobalAutofillSettingFragment()
-//                navController.navigate(directions)
+                onNavToAutofillSettings.invoke()
             }
         },
     )
@@ -665,6 +633,8 @@ fun BrowserComponent(
             onNavToSettings = onNavToSettings,
             onNavToTabsTray = { showTabsTray = true },
             onNavToHistory = onNavToHistory,
+            onNavToExtensions = onNavToExtensions,
+            onNavToPasswords = onNavToPasswords,
         )
     }
 
@@ -1922,7 +1892,7 @@ fun BrowserComponent(
                             tabCount = state.tabList.size,
                             onShowMenuBottomSheet = { showToolbarMenuBottomSheet = true },
                             onDismissMenuBottomSheet = { showToolbarMenuBottomSheet = false },
-                            onRequestSearchBar = { /* todo: search bar */ },
+                            onRequestSearchBar = { /* todo: search bar, fills page and has 32.dp padding from insets */ },
                             onActivateFindInPage = { state.setBrowserModeFindInPage() },
                             onActivateReaderView = {
                                 val successful = infernoReaderViewState.showReaderView()
@@ -1932,6 +1902,8 @@ fun BrowserComponent(
                             },
                             onNavToSettings = onNavToSettings,
                             onNavToHistory = onNavToHistory,
+                            onNavToExtensions = onNavToExtensions,
+                            onNavToPasswords = onNavToPasswords,
                             onNavToTabsTray = { showTabsTray = true },
                             searchEngine = state.searchEngine,
                             editMode = state.browserMode == BrowserComponentMode.TOOLBAR_SEARCH,
@@ -2496,13 +2468,14 @@ private fun showSnackbarAfterLoginChange(
  */
 private fun showBiometricPrompt(
     context: Context,
-    biometricPromptFeature: BiometricPromptFeature?,
-    webPrompterState: InfernoPromptFeatureState?,
+    title: String,
+    biometricPromptCallbackManager: BiometricPromptCallbackManager,
+    webPrompterState: InfernoWebPrompterState?,
     startForResult: ManagedActivityResultLauncher<Intent, ActivityResult>,
     setAlertDialog: ((@Composable () -> Unit)?) -> Unit,
 ) {
     if (BiometricPromptFeature.canUseFeature(context)) {
-        biometricPromptFeature?.requestAuthentication(context.getString(R.string.credit_cards_biometric_prompt_unlock_message_2))
+        biometricPromptCallbackManager.showPrompt(title = title)
         return
     }
 
@@ -2543,7 +2516,7 @@ private fun showPinVerification(
 private fun showPinDialogWarning(
     context: Context,
     setAlertDialog: ((@Composable () -> Unit)?) -> Unit,
-    webPrompterState: InfernoPromptFeatureState?,
+    webPrompterState: InfernoWebPrompterState?,
 ) {
 //    AlertDialog.Builder(context).apply {
 //        setNegativeButton(context.getString(R.string.credit_cards_warning_dialog_later)) { _: DialogInterface, _ ->

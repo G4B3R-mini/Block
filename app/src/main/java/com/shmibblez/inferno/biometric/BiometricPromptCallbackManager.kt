@@ -5,7 +5,7 @@ import com.shmibblez.inferno.HomeActivity
 import java.util.concurrent.Executor
 
 class BiometricPromptCallbackManager(
-    activity: HomeActivity,
+    private val activity: HomeActivity,
     executor: Executor,
     private val callbackListeners: MutableList<AuthenticationCallback> = mutableListOf(),
 ) : BiometricPrompt(activity, executor, object : AuthenticationCallback() {
@@ -38,7 +38,11 @@ class BiometricPromptCallbackManager(
      * @param subtitle prompt subtitle, ex: "Log in using your biometric credential"
      * @param negativeButtonText ex: "Use account password"
      */
-    fun showPrompt(title: String, subtitle: String, negativeButtonText: String) {
+    fun showPrompt(
+        title: String,
+        subtitle: String? = null,
+        negativeButtonText: String = activity.getString(android.R.string.cancel),
+    ) {
         val promptInfo = PromptInfo.Builder()
             .setTitle(title)
             .setSubtitle(subtitle)

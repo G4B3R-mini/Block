@@ -16,6 +16,8 @@ internal fun InfernoMiniOriginToolbar(
     onActivateReaderView: () -> Unit,
     onNavToSettings: () -> Unit,
     onNavToHistory: () -> Unit,
+    onNavToExtensions: () -> Unit,
+    onNavToPasswords: () -> Unit,
     onNavToTabsTray: () -> Unit,
     // origin params
     searchEngine: SearchEngine?,

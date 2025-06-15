@@ -252,5 +252,7 @@ private fun InfernoSettings.ToolbarItem.toPrefString(context: Context): String {
         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_SHOW_TABS_TRAY -> "Show tab tray" // todo: string res - context.getString(R.string.)
         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_SHARE -> context.getString(R.string.share_header_2)
         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_MENU -> context.getString(R.string.content_description_menu)
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_EXTENSIONS -> context.getString(R.string.browser_menu_extensions)
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_PASSWORDS -> context.getString(R.string.browser_menu_passwords)
     }
 }
