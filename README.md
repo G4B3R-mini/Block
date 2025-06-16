@@ -33,9 +33,13 @@ that's it for now, hopefully this project doesn't die
 # Currently Under Development
 
 ## Not Implemented
+
 - [ ] Account (no sync yet)
 - [ ] Synced Tabs (no access yet)
 - [ ] Pocket (does anyone even use this, no future plans to implement)
+- [ ] consider making crash reporting in beta builds enabled and unselectable so cant be disabled,
+  add description "crash reporting is required in beta builds, this is a big help for fixing errors.
+  This can be disabled in normal builds" might be bad idea though
 
 ## Pending Launch
 
@@ -73,14 +77,16 @@ that's it for now, hopefully this project doesn't die
 - [ ] Homepage
     - [ ] top sites buggy (2 default pages repeated, add some more defaults)
     - [ ] persist homepage state, pass that to homepage so doesnt rebuild
-      - [ ] add settings launched effect so updates to selected settings
-      - [ ] add extension for settings to get homepage url, in InfernoTabBar logic is confusing
+        - [ ] add settings launched effect so updates to selected settings
+        - [ ] add extension for settings to get homepage url, in InfernoTabBar logic is confusing
 - [ ] BrowserComponent
     - [ ] every time google search is performed, open in app requested
     - [ ] load page, select, and return to browser not working properly (from extensions page links)
         - [ ] find more addons link (page stops working), extension settings page (very buggy)
-- [ ] MozEngineView not working properly when go to new compose page then return (most likely has to
-  do with lifecycle management, when return to page need to reset/relink)
+- [ ] Accessibility Settings
+    - [ ] custom sizing not doing anything, most likely has to do with default settings being loaded
+      first, setting up a settings loader with runBlocking is critical (so selected settings are
+      loaded from start)
 - [ ] theme settings
     - [ ] sometimes current theme selected when edit custom theme
 - [ ] proto settings
@@ -91,6 +97,9 @@ that's it for now, hopefully this project doesn't die
     - [ ] Decentraleyes settings page not loading correctly, has to do with in-browser settings
       page (in fenix, separate page that implements EngineView and a couple features, in inferno,
       goes to new custom tab)
+- [ ] Splash Screen
+    - [ ] Animation not working, make custom splashscreen activity (check guide url somewhere around
+      here)
 
 ## IntentProcessor and ExternalAppBrowser
 

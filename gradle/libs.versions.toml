@@ -5,6 +5,7 @@ activityCompose = "1.10.1"
 android-components = "134.0.20241117092920"
 datastore = "1.1.7"
 datastorePreferences = "1.1.7"
+firebaseBom = "33.15.0"
 gradle = "3.2.1"
 kotlinGradlePlugin = "1.2.10"
 kotlinxSerializationJson = "1.2.2"
@@ -85,6 +86,9 @@ androidx-paging-common = { module = "androidx.paging:paging-common", version.ref
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
 androidx-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest" }
 androidx-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
+firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
+firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 gradle = { module = "com.android.tools.build:gradle", version.ref = "gradle" }
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlinGradlePlugin" }
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }

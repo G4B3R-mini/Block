@@ -10,6 +10,9 @@ plugins {
     id 'androidx.navigation.safeargs.kotlin'
     id 'kotlin-parcelize'
     id 'org.jetbrains.kotlin.plugin.serialization' version '2.1.21'
+
+    id("com.google.gms.google-services")
+    id("com.google.firebase.crashlytics")
 }
 
 apply from: "$project.rootDir/automation/gradle/versionCode.gradle"
@@ -531,6 +534,18 @@ nimbus {
 }
 
 dependencies {
+    // everything involving data collection is here at the top, if theres something not here
+    // lmk and ill update
+    // Import the BoM for the Firebase platform
+
+    // crashlytics
+    implementation(platform(libs.firebase.bom))
+
+    // Add the dependencies for the Crashlytics and Analytics libraries
+    // When using the BoM, you don't specify versions in Firebase library dependencies
+    implementation(libs.firebase.crashlytics)
+    implementation(libs.firebase.analytics)
+
     // Android
     implementation libs.androidx.activity
     implementation libs.androidx.annotation
