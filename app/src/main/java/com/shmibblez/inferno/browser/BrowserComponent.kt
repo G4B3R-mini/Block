@@ -72,7 +72,6 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.shmibblez.inferno.BrowserDirection
 import com.shmibblez.inferno.HomeActivity
 import com.shmibblez.inferno.IntentReceiverActivity
-import com.shmibblez.inferno.NavGraphDirections
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.biometric.BiometricPromptCallbackManager
 import com.shmibblez.inferno.browser.browsingmode.BrowsingMode
@@ -322,6 +321,7 @@ fun BrowserComponent(
     onNavToExtensions: () -> Unit,
     onNavToPasswords: () -> Unit,
     onNavToAutofillSettings: () -> Unit,
+    onNavToSearchSettings: () -> Unit,
 ) {
     Log.d("BrowserComponent", "rebuilt")
     val coroutineScope = rememberCoroutineScope()
@@ -1788,9 +1788,11 @@ fun BrowserComponent(
                     InfernoLoadingComponent()
                 } else {
                     when (state.pageType) {
+                        BrowserComponentPageType.HOME,
                         BrowserComponentPageType.HOME_PRIVATE -> {
+                            val isPrivate = state.pageType == BrowserComponentPageType.HOME_PRIVATE
                             InfernoHomeComponent(
-                                isPrivate = true,
+                                isPrivate = isPrivate,
                                 onShowTabsTray = {
                                     state.selectedTabsTrayTab =
                                         it ?: InfernoTabsTraySelectedTab.PrivateTabs
@@ -1801,22 +1803,7 @@ fun BrowserComponent(
                                     // todo: bookmarks page
                                     //  settings
                                 },
-                            )
-                        }
-
-                        BrowserComponentPageType.HOME -> {
-                            InfernoHomeComponent(
-                                isPrivate = false,
-                                onShowTabsTray = {
-                                    state.selectedTabsTrayTab =
-                                        it ?: InfernoTabsTraySelectedTab.NormalTabs
-                                    showTabsTray = true
-                                },
-                                onNavToHistory = onNavToHistory,
-                                onNavToBookmarks = {
-                                    // todo: bookmarks page
-                                    //  settings
-                                },
+                                onNavToSearchSettings = onNavToSearchSettings,
                             )
                         }
 

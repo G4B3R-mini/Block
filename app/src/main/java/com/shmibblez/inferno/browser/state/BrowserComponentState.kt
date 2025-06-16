@@ -21,14 +21,13 @@ import com.shmibblez.inferno.components.Components
 import com.shmibblez.inferno.customtabs.PoweredByNotification
 import com.shmibblez.inferno.customtabs.WebAppSiteControlsBuilder
 import com.shmibblez.inferno.ext.components
-import com.shmibblez.inferno.ext.lastOpenedNormalTab
 import com.shmibblez.inferno.ext.newTab
+import com.shmibblez.inferno.ext.selectLastNormalTab
 import com.shmibblez.inferno.tabs.tabstray.InfernoTabsTraySelectedTab
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.map
 import mozilla.components.browser.icons.BrowserIcons
 import mozilla.components.browser.state.search.SearchEngine
@@ -472,14 +471,7 @@ class BrowserComponentState(
                         tabsUseCases.selectTab(customTabSessionId)
                     } else if (tabList.isNotEmpty()) {
                         // if tabs exist select
-                        val lastNormalTabId = store.state.lastOpenedNormalTab?.id
-                        if (tabList.any { tab -> tab.id == lastNormalTabId }) {
-                            tabsUseCases.selectTab(
-                                lastNormalTabId!!
-                            )
-                        } else {
-                            tabsUseCases.selectTab(tabList.last().id)
-                        }
+                        components.selectLastNormalTab()
                     } else if (!awaitingNewTab) {
                         // if no tabs available add new tab
                         components.newTab(private = false)

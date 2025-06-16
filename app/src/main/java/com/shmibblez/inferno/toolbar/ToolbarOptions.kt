@@ -40,6 +40,8 @@ import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.compose.sessionUseCases
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.infernoTheme
+import com.shmibblez.inferno.ext.selectLastNormalTab
+import com.shmibblez.inferno.ext.selectLastPrivateTab
 import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarBack
 import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarForward
 import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarReload
@@ -583,39 +585,26 @@ class ToolbarOptions {
                 )
             }
 
-            val state = LocalContext.current.components.core.store.state
-            val tabsUseCases = LocalContext.current.components.useCases.tabsUseCases
+            val components = LocalContext.current.components
+//            val state = LocalContext.current.components.core.store.state
+//            val tabsUseCases = LocalContext.current.components.useCases.tabsUseCases
 
             fun disablePrivateMode() {
                 // if private switch to normal tabs
-                val lastNormalTab = try {
-                    state.normalTabs.last()
-                } catch (e: NoSuchElementException) {
-                    null
-                }
-                if (lastNormalTab != null) {
-                    // if previous tabs exist switch to last one
-                    tabsUseCases.selectTab(lastNormalTab.id)
-                } else {
-                    // if no normal tabs create new one
-                    newTab(tabsUseCases, false)
-                }
+                components.selectLastNormalTab()
+//                val lastNormalTab = state.normalTabs.lastOrNull()
+//                if (lastNormalTab != null) {
+//                    // if previous tabs exist switch to last one
+//                    tabsUseCases.selectTab(lastNormalTab.id)
+//                } else {
+//                    // if no normal tabs create new one
+//                    newTab(tabsUseCases, false)
+//                }
             }
 
             fun enablePrivateMode() {
                 // if normal mode switch to private tabs
-                val lastPrivateTab = try {
-                    state.privateTabs.last()
-                } catch (e: NoSuchElementException) {
-                    null
-                }
-                if (lastPrivateTab != null) {
-                    // if private tabs exist switch to last one
-                    tabsUseCases.selectTab(lastPrivateTab.id)
-                } else {
-                    // if no private tabs exist create new one
-                    newTab(tabsUseCases, true)
-                }
+                components.selectLastPrivateTab()
             }
 
             ToolbarOptionTemplate(

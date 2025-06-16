@@ -408,7 +408,7 @@ class SessionControlInteractor(
 //    }
 
     override fun reportSessionMetrics(state: AppState) {
-        controller.handleReportSessionMetrics(state)
+//        controller.handleReportSessionMetrics(state)
     }
 
     override fun onMessageClicked(message: Message) {

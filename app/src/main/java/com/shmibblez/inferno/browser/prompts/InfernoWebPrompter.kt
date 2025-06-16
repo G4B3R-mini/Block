@@ -262,6 +262,7 @@ fun InfernoWebPrompter(
 
 
             is SelectCreditCard -> {
+                // todo: find better mechanism to debounce requests
                 if (state.creditCardDialogController.dismissedSessionId != selectedTabId) {
                     SelectableListPrompt(
                         promptRequest = promptRequest,

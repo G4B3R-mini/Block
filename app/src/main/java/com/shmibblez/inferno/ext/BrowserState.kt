@@ -11,7 +11,9 @@ import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.feature.tabs.ext.hasMediaPlayed
 import com.shmibblez.inferno.home.recenttabs.RecentTab
 import com.shmibblez.inferno.tabstray.ext.isNormalTabInactive
+import com.shmibblez.inferno.tabstray.ext.selectedPrivateTab
 import com.shmibblez.inferno.utils.Settings
+import mozilla.components.browser.state.selector.privateTabs
 import java.util.concurrent.TimeUnit
 
 /**
@@ -41,6 +43,13 @@ fun BrowserState.asRecentTabs(): List<RecentTab> {
  */
 val BrowserState.lastOpenedNormalTab: TabSessionState?
     get() = selectedNormalTab ?: normalTabs.maxByOrNull { it.lastAccess }
+
+/**
+ *  Get the selected private tab or the last accessed private tab
+ *  if there is no selected tab or the selected tab is a normal one.
+ */
+val BrowserState.lastOpenedPrivateTab: TabSessionState?
+    get() = selectedPrivateTab ?: privateTabs.maxByOrNull { it.lastAccess }
 
 /**
  *  Get the second-to-last accessed normal tab.

@@ -1,27 +1,30 @@
 package com.shmibblez.inferno.home.controllers
 
 import com.shmibblez.inferno.components.AppStore
+import com.shmibblez.inferno.components.appstate.AppAction
 import com.shmibblez.inferno.home.recenttabs.RecentTab
 import com.shmibblez.inferno.home.recenttabs.controller.DefaultRecentTabsController
 import com.shmibblez.inferno.home.recenttabs.controller.RecentTabController
+import com.shmibblez.inferno.tabs.tabstray.InfernoTabsTraySelectedTab
 import mozilla.components.feature.tabs.TabsUseCases.SelectTabUseCase
 
 /**
- * todo: reference [DefaultRecentTabsController]
+ * based off [DefaultRecentTabsController]
  */
 class InfernoRecentTabController(
     private val selectTabUseCase: SelectTabUseCase,
     private val appStore: AppStore,
+    private val onShowTabsTray: (InfernoTabsTraySelectedTab) -> Unit,
 ): RecentTabController {
     override fun handleRecentTabClicked(tabId: String) {
-//        TODO("Not yet implemented")
+        selectTabUseCase.invoke(tabId)
     }
 
     override fun handleRecentTabShowAllClicked() {
-//        TODO("Not yet implemented")
+        onShowTabsTray.invoke(InfernoTabsTraySelectedTab.NormalTabs)
     }
 
     override fun handleRecentTabRemoved(tab: RecentTab.Tab) {
-//        TODO("Not yet implemented")
+        appStore.dispatch(AppAction.RemoveRecentTab(tab))
     }
 }

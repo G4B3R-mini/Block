@@ -179,6 +179,7 @@ fun BrowserNavHost(
                 onNavToExtensions = { nav.navigate(route = BrowserRoute.Settings.ExtensionsSettingsPage) },
                 onNavToPasswords = { nav.navigate(route = BrowserRoute.Settings.PasswordSettingsPage) },
                 onNavToAutofillSettings = { nav.navigate(route = BrowserRoute.Settings.AutofillSettingsPage) },
+                onNavToSearchSettings = { nav.navigate(route = BrowserRoute.Settings.SearchSettingsPage) },
             )
         }
 

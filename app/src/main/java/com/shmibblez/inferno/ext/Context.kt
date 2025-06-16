@@ -9,15 +9,10 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.content.Intent.ACTION_SEND
-import android.content.Intent.EXTRA_SUBJECT
 import android.content.Intent.EXTRA_TEXT
-import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.content.res.Configuration
-import android.net.Uri
 import android.os.Build
-import android.os.Parcel
 import android.provider.Settings
-import android.service.chooser.ChooserAction
 import android.view.ContextThemeWrapper
 import android.view.View
 import android.view.ViewGroup
@@ -32,12 +27,13 @@ import com.shmibblez.inferno.components.toolbar.ToolbarPosition
 import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.theme.AcornWindowSize
 import com.shmibblez.inferno.settings.advanced.getSelectedLocale
 import com.shmibblez.inferno.utils.isLargeScreenSize
+import mozilla.components.browser.state.selector.normalTabs
+import mozilla.components.browser.state.selector.privateTabs
 import mozilla.components.browser.state.state.SessionState
 import mozilla.components.concept.engine.EngineSession
 import mozilla.components.concept.engine.EngineSession.LoadUrlFlags
 import mozilla.components.concept.storage.HistoryMetadataKey
 import mozilla.components.support.base.log.Log
-import mozilla.components.support.ktx.android.content.createChooserExcludingCurrentApp
 import java.lang.String.format
 import java.util.ArrayList
 import java.util.Locale
@@ -130,6 +126,44 @@ fun Components.newTab(
         this.useCases.tabsUseCases.moveTabs(listOf(tabId), nextTo, true)
 
     return tabId
+}
+
+/**
+ * selects last used normal tab if possible, if not, select last or create new one
+ */
+fun Components.selectLastNormalTab() {
+    val tabsUseCases = useCases.tabsUseCases
+    val normalTabs = core.store.state.normalTabs
+
+    val lastNormalTabId = core.store.state.lastOpenedNormalTab?.id
+    if (normalTabs.isEmpty()) {
+        newTab(private = false)
+    } else if (normalTabs.any { tab -> tab.id == lastNormalTabId }) {
+        tabsUseCases.selectTab(
+            lastNormalTabId!!
+        )
+    } else {
+        tabsUseCases.selectTab(normalTabs.last().id)
+    }
+}
+
+/**
+ * selects last used private tab if possible, if not, select last or create new one
+ */
+fun Components.selectLastPrivateTab() {
+    val tabsUseCases = useCases.tabsUseCases
+    val privateTabs = core.store.state.privateTabs
+
+    val lastPrivateTabId = core.store.state.lastOpenedPrivateTab?.id
+    if (privateTabs.isEmpty()) {
+        newTab(private = true)
+    } else if (privateTabs.any { tab -> tab.id == lastPrivateTabId }) {
+        tabsUseCases.selectTab(
+            lastPrivateTabId!!
+        )
+    } else {
+        tabsUseCases.selectTab(privateTabs.last().id)
+    }
 }
 
 

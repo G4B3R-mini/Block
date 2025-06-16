@@ -1,27 +1,33 @@
 package com.shmibblez.inferno.home.controllers
 
-import com.shmibblez.inferno.HomeActivity
 import com.shmibblez.inferno.home.toolbar.DefaultToolbarController
 import com.shmibblez.inferno.home.toolbar.ToolbarController
+import mozilla.components.browser.state.state.selectedOrDefaultSearchEngine
 import mozilla.components.browser.state.store.BrowserStore
+import mozilla.components.feature.search.SearchUseCases
 
 /**
  * todo: reference [DefaultToolbarController]
  */
 class InfernoToolbarController(
-    private val activity: HomeActivity,
+    private val defaultSearchUseCase: SearchUseCases.DefaultSearchUseCase,
     private val store: BrowserStore,
 ) : ToolbarController {
     override fun handlePasteAndGo(clipboardText: String) {
-        // TODO("Not yet implemented")
+        val searchEngine = store.state.search.selectedOrDefaultSearchEngine
+        defaultSearchUseCase.invoke(
+            searchTerms = clipboardText,
+            searchEngine = searchEngine,
+//            parentSessionId = ,
+        )
     }
 
     override fun handlePaste(clipboardText: String) {
-        // TODO("Not yet implemented")
+        // todo: paste requires massiv rework of some components, toolbar primarily, store in browser state?
     }
 
     override fun handleNavigateSearch() {
-        // TODO("Not yet implemented")
+        // no-op, not needed since already in homepage, could pop up search bar when ready
+        // todo: search bar, pop up when ready
     }
-
 }

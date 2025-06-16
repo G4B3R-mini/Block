@@ -32,6 +32,11 @@ that's it for now, hopefully this project doesn't die
 
 # Currently Under Development
 
+## Not Implemented
+- [ ] Account (no sync yet)
+- [ ] Synced Tabs (no access yet)
+- [ ] Pocket (does anyone even use this, no future plans to implement)
+
 ## Pending Launch
 
 - [x] Autofill Settings Page
