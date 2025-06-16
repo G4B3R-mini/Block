@@ -1,17 +1,26 @@
 package com.shmibblez.inferno.home.controllers
 
 import androidx.navigation.NavController
+import com.shmibblez.inferno.BrowserDirection
 import com.shmibblez.inferno.HomeActivity
+import com.shmibblez.inferno.R
 import com.shmibblez.inferno.components.AppStore
+import com.shmibblez.inferno.components.Components
 import com.shmibblez.inferno.components.TabCollectionStorage
+import com.shmibblez.inferno.components.UseCases
+import com.shmibblez.inferno.components.appstate.AppAction
 import com.shmibblez.inferno.components.appstate.AppState
+import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.home.sessioncontrol.DefaultSessionControlController
 import com.shmibblez.inferno.home.sessioncontrol.SessionControlController
 import com.shmibblez.inferno.messaging.MessageController
+import com.shmibblez.inferno.settings.SupportUtils
 import com.shmibblez.inferno.tabs.tabstray.InfernoTabsTraySelectedTab
 import com.shmibblez.inferno.utils.Settings
 import com.shmibblez.inferno.wallpapers.WallpaperState
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.concept.engine.Engine
 import mozilla.components.feature.session.SessionUseCases
@@ -29,6 +38,7 @@ class InfernoSessionControlController(
     private val activity: HomeActivity,
     private val settings: Settings,
     private val engine: Engine,
+    // todo: message controller?
     private val messageController: MessageController,
     private val store: BrowserStore,
     private val tabCollectionStorage: TabCollectionStorage,
@@ -36,6 +46,7 @@ class InfernoSessionControlController(
     private val restoreUseCase: TabsUseCases.RestoreUseCase,
     private val selectTabUseCase: TabsUseCases.SelectTabUseCase,
     private val reloadUrlUseCase: SessionUseCases.ReloadUrlUseCase,
+    private val loadUrlUseCase: SessionUseCases.LoadUrlUseCase,
     private val topSitesUseCases: TopSitesUseCases,
     private val appStore: AppStore,
     private val viewLifecycleScope: CoroutineScope,
@@ -45,94 +56,147 @@ class InfernoSessionControlController(
     private val showTabTray: (InfernoTabsTraySelectedTab?) -> Unit,
     private val onNavToHistory: () -> Unit,
     private val onNavToBookmarks: () -> Unit,
+    private val onNavToHomeSettings: () -> Unit,
 ) : SessionControlController {
     override fun handleCollectionAddTabTapped(collection: TabCollection) {
-        // TODO("Not yet implemented")
+        // todo: collections
     }
 
     override fun handleCollectionOpenTabClicked(tab: Tab) {
-        // TODO("Not yet implemented")
+        // todo: collections
     }
 
     override fun handleCollectionOpenTabsTapped(collection: TabCollection) {
-        // TODO("Not yet implemented")
+        // todo: collections
     }
 
     override fun handleCollectionRemoveTab(collection: TabCollection, tab: Tab) {
-        // TODO("Not yet implemented")
+        // todo: collections
     }
 
     override fun handleCollectionShareTabsClicked(collection: TabCollection) {
-        // TODO("Not yet implemented")
+        // todo: collections
     }
 
     override fun handleDeleteCollectionTapped(collection: TabCollection) {
-        // TODO("Not yet implemented")
+        // todo: collections
     }
 
     override fun handleOpenInPrivateTabClicked(topSite: TopSite) {
-        // TODO("Not yet implemented")
+        loadUrlUseCase.invoke(
+            url = topSite.url
+        )
     }
 
     override fun handleEditTopSiteClicked(topSite: TopSite) {
-        // TODO("Not yet implemented")
+        // todo: top sites, show edit top site dialog
     }
 
     override fun handleRemoveTopSiteClicked(topSite: TopSite) {
-        // TODO("Not yet implemented")
+        viewLifecycleScope.launch(Dispatchers.IO) {
+            with(activity.components.useCases.topSitesUseCase) {
+                removeTopSites(topSite)
+            }
+        }
+
+        showUndoSnackbarForTopSite(topSite)
     }
 
     override fun handleRenameCollectionTapped(collection: TabCollection) {
-        // TODO("Not yet implemented")
+        // todo: collections
     }
 
     override fun handleSelectTopSite(topSite: TopSite, position: Int) {
-        // TODO("Not yet implemented")
+        if (settings.enableHomepageAsNewTab) {
+            loadUrlUseCase.invoke(
+                url = appendSearchAttributionToUrlIfNeeded(topSite.url),
+            )
+        } else {
+            val existingTabForUrl = when (topSite) {
+                is TopSite.Frecent, is TopSite.Pinned -> {
+                    store.state.tabs.firstOrNull { topSite.url == it.content.url }
+                }
+
+                else -> null
+            }
+
+            if (existingTabForUrl == null) {
+                loadUrlUseCase.invoke(
+                    url = appendSearchAttributionToUrlIfNeeded(topSite.url),
+                )
+            } else {
+                selectTabUseCase.invoke(existingTabForUrl.id)
+            }
+        }
     }
 
     override fun handleTopSiteSettingsClicked() {
-        // TODO("Not yet implemented")
+        // todo: may need to add top sites settings
+        onNavToHomeSettings.invoke()
     }
 
     override fun handleSponsorPrivacyClicked() {
-        // TODO("Not yet implemented")
+        // no-op, no sponsors
     }
 
     override fun handleTopSiteLongClicked(topSite: TopSite) {
-        // TODO("Not yet implemented")
+        // no-op
     }
 
     override fun handleToggleCollectionExpanded(collection: TabCollection, expand: Boolean) {
-        // TODO("Not yet implemented")
+        appStore.dispatch(AppAction.CollectionExpanded(collection, expand))
     }
 
     override fun handleCreateCollection() {
-        // TODO("Not yet implemented")
+        // todo: collections
     }
 
     override fun handleRemoveCollectionsPlaceholder() {
-        // TODO("Not yet implemented")
+        settings.showCollectionsPlaceholderOnHome = false
+        appStore.dispatch(AppAction.RemoveCollectionsPlaceholder)
     }
 
     override fun handleMessageClicked(message: Message) {
-        // TODO("Not yet implemented")
+        messageController.onMessagePressed(message)
     }
 
     override fun handleMessageClosed(message: Message) {
-        // TODO("Not yet implemented")
+        messageController.onMessageDismissed(message)
     }
 
     override fun handleCustomizeHomeTapped() {
-        // TODO("Not yet implemented")
+        onNavToHomeSettings.invoke()
     }
 
     override fun handleShowWallpapersOnboardingDialog(state: WallpaperState): Boolean {
-        // TODO("Not yet implemented")
+        // todo: wallpaper for home, allow user to select custom image, show some default ones from
+        //  state.availableWallpapers, or load from somewhere (check impl)
+        //  option should be in homepage settings
         return false
     }
 
     override fun handleReportSessionMetrics(state: AppState) {
-        // TODO("Not yet implemented")
+        // no-op
     }
 
+    /**
+     * helper funs
+     */
+
+    /**
+     * Append a search attribution query to any provided search engine URL based on the
+     * user's current region.
+     */
+    private fun appendSearchAttributionToUrlIfNeeded(url: String): String {
+        if (url == SupportUtils.GOOGLE_URL) {
+            store.state.search.region?.let { region ->
+                return when (region.current) {
+                    "US" -> SupportUtils.GOOGLE_US_URL
+                    else -> SupportUtils.GOOGLE_XX_URL
+                }
+            }
+        }
+
+        return url
+    }
 }

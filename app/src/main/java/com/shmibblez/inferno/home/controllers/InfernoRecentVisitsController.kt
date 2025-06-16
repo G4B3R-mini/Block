@@ -2,6 +2,7 @@ package com.shmibblez.inferno.home.controllers
 
 import com.shmibblez.inferno.components.AppStore
 import com.shmibblez.inferno.components.appstate.AppAction
+import com.shmibblez.inferno.ext.findExistingTabFromUrl
 import com.shmibblez.inferno.home.recentvisits.RecentlyVisitedItem.RecentHistoryHighlight
 import com.shmibblez.inferno.home.recentvisits.RecentlyVisitedItem.RecentHistoryGroup
 import com.shmibblez.inferno.home.recentvisits.controller.DefaultRecentVisitsController
@@ -11,7 +12,8 @@ import kotlinx.coroutines.launch
 import mozilla.components.browser.state.action.HistoryMetadataAction
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.concept.storage.HistoryMetadataStorage
-import mozilla.components.feature.tabs.TabsUseCases.SelectOrAddUseCase
+import mozilla.components.feature.session.SessionUseCases
+import mozilla.components.feature.tabs.TabsUseCases
 
 /**
  * based off [DefaultRecentVisitsController]
@@ -19,13 +21,14 @@ import mozilla.components.feature.tabs.TabsUseCases.SelectOrAddUseCase
 class InfernoRecentVisitsController(
     private val store: BrowserStore,
     private val appStore: AppStore,
-    private val selectOrAddTabUseCase: SelectOrAddUseCase,
     private val storage: HistoryMetadataStorage,
     private val scope: CoroutineScope,
-    private val onNavToHistory: () -> Unit
-): RecentVisitsController {
+    private val selectTabUseCase: TabsUseCases.SelectTabUseCase,
+    private val loadUrlUseCase: SessionUseCases.LoadUrlUseCase,
+    private val onNavToHistory: () -> Unit,
+) : RecentVisitsController {
     override fun handleHistoryShowAllClicked() {
-         onNavToHistory.invoke()
+        onNavToHistory.invoke()
     }
 
     /**
@@ -55,7 +58,8 @@ class InfernoRecentVisitsController(
         // Then, perform the expensive IO work of removing search groups from storage.
         scope.launch {
             storage.deleteHistoryMetadata(groupTitle)
-        }    }
+        }
+    }
 
     /**
      * Switch to an already open tab for [recentHistoryHighlight] if one exists or
@@ -64,7 +68,13 @@ class InfernoRecentVisitsController(
      * @param recentHistoryHighlight the just clicked [RecentHistoryHighlight] to open in browser.
      */
     override fun handleRecentHistoryHighlightClicked(recentHistoryHighlight: RecentHistoryHighlight) {
-        selectOrAddTabUseCase.invoke(recentHistoryHighlight.url)
+        val tab = store.findExistingTabFromUrl(recentHistoryHighlight.url)
+
+        if (tab == null) {
+            loadUrlUseCase.invoke(url = recentHistoryHighlight.url)
+        } else {
+            selectTabUseCase.invoke(tab.id)
+        }
     }
 
     /**
@@ -76,6 +86,6 @@ class InfernoRecentVisitsController(
         appStore.dispatch(AppAction.RemoveRecentHistoryHighlight(highlightUrl))
         scope.launch {
             storage.deleteHistoryMetadataForUrl(highlightUrl)
-        }    }
-
+        }
+    }
 }

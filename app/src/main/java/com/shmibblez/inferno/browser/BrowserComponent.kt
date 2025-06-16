@@ -322,6 +322,7 @@ fun BrowserComponent(
     onNavToPasswords: () -> Unit,
     onNavToAutofillSettings: () -> Unit,
     onNavToSearchSettings: () -> Unit,
+    onNavToHomeSettings: () -> Unit,
 ) {
     Log.d("BrowserComponent", "rebuilt")
     val coroutineScope = rememberCoroutineScope()
@@ -1527,9 +1528,7 @@ fun BrowserComponent(
                 initReloadAction(context)
 
                 thumbnailsFeature = BrowserThumbnails(
-                    context,
-                    engineView!!,
-                    components.core.store
+                    context, engineView!!, components.core.store
                 ).apply { this.start() }
 
                 windowFeature = WindowFeature(
@@ -1789,7 +1788,8 @@ fun BrowserComponent(
                 } else {
                     when (state.pageType) {
                         BrowserComponentPageType.HOME,
-                        BrowserComponentPageType.HOME_PRIVATE -> {
+                        BrowserComponentPageType.HOME_PRIVATE,
+                            -> {
                             val isPrivate = state.pageType == BrowserComponentPageType.HOME_PRIVATE
                             InfernoHomeComponent(
                                 isPrivate = isPrivate,
@@ -1804,6 +1804,7 @@ fun BrowserComponent(
                                     //  settings
                                 },
                                 onNavToSearchSettings = onNavToSearchSettings,
+                                onNavToHomeSettings = onNavToHomeSettings,
                             )
                         }
 

@@ -87,6 +87,7 @@ fun InfernoHomeComponent(
     onNavToHistory: () -> Unit,
     onNavToBookmarks: () -> Unit,
     onNavToSearchSettings: () -> Unit,
+    onNavToHomeSettings: () -> Unit,
 ) {
     val settings = LocalContext.current.settings()
     val context = LocalContext.current
@@ -222,8 +223,11 @@ fun InfernoHomeComponent(
 //            }
         }
     }
-    // todo: in controllers use loadUrl instead of newTab since already in browser
-    //  check if loadUrl creates new tab or loads in current
+    // todo: in some controllers a new tab is created, so far:
+    //  - InfernoToolbarController (defaultSearch creates new tab)
+    //  in these cases delete home tab and then proceed with action
+    //  disc: there may be other controllers that do this, if using anything other than
+    //  loadUrl or selectTab use cases, check to make sure not opening new tab, if so close first
     val sessionControlInteractor = SessionControlInteractor(
         controller = InfernoSessionControlController(
             activity = context.getActivity()!! as HomeActivity,
@@ -240,6 +244,7 @@ fun InfernoHomeComponent(
             restoreUseCase = components.useCases.tabsUseCases.restore,
             selectTabUseCase = components.useCases.tabsUseCases.selectTab,
             reloadUrlUseCase = components.useCases.sessionUseCases.reload,
+            loadUrlUseCase = components.useCases.sessionUseCases.loadUrl,
             topSitesUseCases = components.useCases.topSitesUseCase,
             appStore = components.appStore,
             viewLifecycleScope = lifecycleOwner.lifecycleScope,
@@ -286,6 +291,7 @@ fun InfernoHomeComponent(
             showTabTray = onShowTabsTray,
             onNavToHistory = onNavToHistory,
             onNavToBookmarks = onNavToBookmarks,
+            onNavToHomeSettings = onNavToHomeSettings,
         ),
         recentTabController = InfernoRecentTabController(
             selectTabUseCase = components.useCases.tabsUseCases.selectTab,
@@ -293,22 +299,26 @@ fun InfernoHomeComponent(
             onShowTabsTray = onShowTabsTray,
         ),
         recentSyncedTabController = InfernoRecentSyncedTabController(
-            tabsUseCase = components.useCases.tabsUseCases,
             appStore = components.appStore,
+            browserStore = components.core.store,
+            loadUrlUseCase = components.useCases.sessionUseCases.loadUrl,
+            selectTabUseCase = components.useCases.tabsUseCases.selectTab,
             onShowTabsTray = onShowTabsTray,
         ),
         bookmarksController = InfernoBookmarksController(
             appStore = components.appStore,
             browserStore = components.core.store,
-            selectOrAddTabUseCase = components.useCases.tabsUseCases.selectOrAddTab,
+            loadUrlUseCase = components.useCases.sessionUseCases.loadUrl,
+            selectTabUseCase = components.useCases.tabsUseCases.selectTab,
             onNavToBookmarks = onNavToBookmarks,
         ),
         recentVisitsController = InfernoRecentVisitsController(
             appStore = components.appStore,
-            selectOrAddTabUseCase = components.useCases.tabsUseCases.selectOrAddTab,
             storage = components.core.historyStorage,
             scope = lifecycleOwner.lifecycleScope,
             store = components.core.store,
+            selectTabUseCase = components.useCases.tabsUseCases.selectTab,
+            loadUrlUseCase = components.useCases.sessionUseCases.loadUrl,
             onNavToHistory = onNavToHistory,
         ),
 //            pocketStoriesController = DefaultPocketStoriesController(
@@ -319,6 +329,7 @@ fun InfernoHomeComponent(
         privateBrowsingController = InfernoPrivateBrowsingController(
             activity = context.getActivity()!! as HomeActivity,
             appStore = components.appStore,
+            loadUrlUseCase = components.useCases.sessionUseCases.loadUrl,
         ),
         searchSelectorController = InfernoSearchSelectorController(
             onNavToSearchSettings = onNavToSearchSettings,

@@ -270,9 +270,6 @@ class DefaultSessionControlController(
     }
 
     override fun handleOpenInPrivateTabClicked(topSite: TopSite) {
-        if (topSite is TopSite.Provided) {
-        } else {
-        }
         with(activity) {
             browsingModeManager.mode = BrowsingMode.Private
             openToBrowserAndLoad(
@@ -359,9 +356,6 @@ class DefaultSessionControlController(
     }
 
     override fun handleRemoveTopSiteClicked(topSite: TopSite) {
-        when (topSite.url) {
-        }
-
         viewLifecycleScope.launch(Dispatchers.IO) {
             with(activity.components.useCases.topSitesUseCase) {
                 removeTopSites(topSite)
@@ -379,24 +373,6 @@ class DefaultSessionControlController(
     }
 
     override fun handleSelectTopSite(topSite: TopSite, position: Int) {
-        when (topSite) {
-            is TopSite.Default -> {}
-            is TopSite.Frecent ->{}
-            is TopSite.Pinned -> {}
-            is TopSite.Provided -> {
-                submitTopSitesImpressionPing(topSite, position)
-            }
-        }
-
-        when (topSite.url) {
-        }
-
-        val availableEngines: List<SearchEngine> = getAvailableSearchEngines()
-
-        availableEngines.firstOrNull { engine ->
-            engine.resultUrls.firstOrNull { it.contains(topSite.url) } != null
-        }
-
         if (settings.enableHomepageAsNewTab) {
             activity.openToBrowserAndLoad(
                 searchTermOrURL = appendSearchAttributionToUrlIfNeeded(topSite.url),

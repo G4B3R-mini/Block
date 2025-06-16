@@ -8,6 +8,7 @@ import com.shmibblez.inferno.home.bookmarks.controller.DefaultBookmarksControlle
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.concept.engine.EngineSession
 import mozilla.components.concept.engine.EngineSession.LoadUrlFlags.Companion.ALLOW_JAVASCRIPT_URL
+import mozilla.components.feature.session.SessionUseCases
 import mozilla.components.feature.tabs.TabsUseCases
 
 /**
@@ -16,7 +17,8 @@ import mozilla.components.feature.tabs.TabsUseCases
 class InfernoBookmarksController(
     private val appStore: AppStore,
     private val browserStore: BrowserStore,
-    private val selectOrAddTabUseCase: TabsUseCases.SelectOrAddUseCase,
+    private val loadUrlUseCase: SessionUseCases.LoadUrlUseCase,
+    private val selectTabUseCase: TabsUseCases.SelectTabUseCase,
     private val onNavToBookmarks: () -> Unit,
 ) : BookmarksController {
     override fun handleBookmarkClicked(bookmark: Bookmark) {
@@ -25,13 +27,13 @@ class InfernoBookmarksController(
         }
 
         if (existingTabForBookmark == null) {
-            selectOrAddTabUseCase(
+            loadUrlUseCase(
                 url = bookmark.url!!,
                 flags = EngineSession.LoadUrlFlags.select(ALLOW_JAVASCRIPT_URL),
             )
         } else {
             // select tab, will load since already on browser
-            selectOrAddTabUseCase.invoke(existingTabForBookmark.id)
+            selectTabUseCase.invoke(existingTabForBookmark.id)
         }
     }
 

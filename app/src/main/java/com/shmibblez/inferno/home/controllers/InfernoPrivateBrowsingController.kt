@@ -5,13 +5,13 @@ import com.shmibblez.inferno.browser.browsingmode.BrowsingMode
 import com.shmibblez.inferno.components.AppStore
 import com.shmibblez.inferno.components.appstate.AppAction
 import com.shmibblez.inferno.ext.components
-import com.shmibblez.inferno.ext.newTab
 import com.shmibblez.inferno.ext.selectLastNormalTab
 import com.shmibblez.inferno.ext.selectLastPrivateTab
 import com.shmibblez.inferno.ext.settings
 import com.shmibblez.inferno.home.privatebrowsing.controller.DefaultPrivateBrowsingController
 import com.shmibblez.inferno.home.privatebrowsing.controller.PrivateBrowsingController
 import com.shmibblez.inferno.settings.SupportUtils
+import mozilla.components.feature.session.SessionUseCases
 
 /**
  * based off [DefaultPrivateBrowsingController]
@@ -19,15 +19,15 @@ import com.shmibblez.inferno.settings.SupportUtils
 class InfernoPrivateBrowsingController(
     private val activity: HomeActivity,
     private val appStore: AppStore,
+    private val loadUrlUseCase: SessionUseCases.LoadUrlUseCase,
 ) : PrivateBrowsingController {
     override fun handleLearnMoreClicked() {
         val learnMoreURL =
             SupportUtils.getGenericSumoURLForTopic(SupportUtils.SumoTopic.PRIVATE_BROWSING_MYTHS) +
                     "?as=u&utm_source=inproduct"
 
-        activity.components.newTab(
-            url = learnMoreURL,
-            private = true,
+        loadUrlUseCase.invoke(
+            url = learnMoreURL
         )
     }
 

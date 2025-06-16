@@ -161,7 +161,7 @@ fun TopSites(
                         size = TOP_SITES_PER_PAGE,
                         step = TOP_SITES_PER_PAGE,
                         partialWindows = true,
-                    )[page].chunked(TOP_SITES_PER_ROW)
+                    )[page].filter { it !is TopSite.Default }.chunked(TOP_SITES_PER_ROW)
 
                     for (items in topSitesWindows) {
                         Row(modifier = Modifier.defaultMinSize(minWidth = TOP_SITES_ROW_WIDTH.dp)) {

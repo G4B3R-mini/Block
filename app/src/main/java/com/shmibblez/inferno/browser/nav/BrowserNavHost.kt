@@ -180,6 +180,7 @@ fun BrowserNavHost(
                 onNavToPasswords = { nav.navigate(route = BrowserRoute.Settings.PasswordSettingsPage) },
                 onNavToAutofillSettings = { nav.navigate(route = BrowserRoute.Settings.AutofillSettingsPage) },
                 onNavToSearchSettings = { nav.navigate(route = BrowserRoute.Settings.SearchSettingsPage) },
+                onNavToHomeSettings = { nav.navigate(route = BrowserRoute.Settings.HomePageSettingsPage) },
             )
         }
 

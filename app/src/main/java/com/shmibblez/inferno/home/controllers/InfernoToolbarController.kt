@@ -7,18 +7,17 @@ import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.feature.search.SearchUseCases
 
 /**
- * todo: reference [DefaultToolbarController]
+ * based off [DefaultToolbarController]
  */
 class InfernoToolbarController(
-    private val defaultSearchUseCase: SearchUseCases.DefaultSearchUseCase,
     private val store: BrowserStore,
+    private val defaultSearchUseCase: SearchUseCases.DefaultSearchUseCase,
 ) : ToolbarController {
     override fun handlePasteAndGo(clipboardText: String) {
         val searchEngine = store.state.search.selectedOrDefaultSearchEngine
         defaultSearchUseCase.invoke(
             searchTerms = clipboardText,
             searchEngine = searchEngine,
-//            parentSessionId = ,
         )
     }
 

@@ -22,7 +22,6 @@ import mozilla.components.service.nimbus.messaging.Message
 //import mozilla.components.service.pocket.PocketStory.PocketSponsoredStoryShim
 import com.shmibblez.inferno.browser.browsingmode.BrowsingMode
 import com.shmibblez.inferno.components.appstate.AppState
-import com.shmibblez.inferno.compose.SelectableChipColors
 import com.shmibblez.inferno.home.bookmarks.Bookmark
 import com.shmibblez.inferno.home.bookmarks.interactor.BookmarksInteractor
 import com.shmibblez.inferno.home.collections.CollectionsState
