@@ -52,7 +52,8 @@ fun Components.selectLastNormalTab() {
 fun Components.newTab(
     nextTo: String? = null,
     private: Boolean = false,
-    url: String = if (!private) "inferno:home" else "inferno:privatebrowsing",
+    customHomeUrl: String? = null,
+    url: String = customHomeUrl ?: if (!private) "inferno:home" else "inferno:privatebrowsing",
     selectTab: Boolean = true,
     startLoading: Boolean = true,
     parentId: String? = null,

@@ -71,7 +71,10 @@ that's it for now, hopefully this project doesn't die
 ## Massiv Bugs
 
 - [ ] Homepage
-    - [ ] remove sponsored top sites
+    - [ ] top sites buggy (2 default pages repeated, add some more defaults)
+    - [ ] persist homepage state, pass that to homepage so doesnt rebuild
+      - [ ] add settings launched effect so updates to selected settings
+      - [ ] add extension for settings to get homepage url, in InfernoTabBar logic is confusing
 - [ ] BrowserComponent
     - [ ] every time google search is performed, open in app requested
     - [ ] load page, select, and return to browser not working properly (from extensions page links)

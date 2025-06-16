@@ -5,7 +5,6 @@ import android.content.Context
 import android.webkit.URLUtil
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -197,36 +196,35 @@ fun HomePageSettingsPage(goBack: () -> Unit) {
                                     horizontal = PrefUiConst.PREFERENCE_HORIZONTAL_PADDING,
                                     vertical = PrefUiConst.PREFERENCE_VERTICAL_PADDING,
                                 ),
-//                            verticalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_INTERNAL_PADDING),
+                            verticalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_VERTICAL_INTERNAL_PADDING),
                             horizontalAlignment = Alignment.Start,
                         ) {
-                            InfernoText("Custom Url:") // todo: string res
+                            // custom url
+                            InfernoText(stringResource(R.string.top_sites_edit_dialog_url_title))// "Custom Url:") // todo: string res
 
-                            Row(
+                            // url editor
+                            InfernoOutlinedTextField(
+                                value = customUrl,
+                                onValueChange = {
+                                    customUrl = it.trim()
+                                    urlError = checkForUrlError(customUrl)
+                                },
                                 modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_HORIZONTAL_INTERNAL_PADDING),
-                            ) {
-                                // url editor
-                                InfernoOutlinedTextField(
-                                    value = customUrl,
-                                    onValueChange = {
-                                        customUrl = it.trim()
-                                        urlError = checkForUrlError(customUrl)
-                                    },
-                                    modifier = Modifier.weight(1F),
-                                    isError = urlError != null,
-                                    supportingText = {
-                                        if (urlError != null) {
-                                            InfernoText(
-                                                urlError!!, infernoStyle = InfernoTextStyle.Error
-                                            )
-                                        }
-                                    },
-                                )
+                                isError = urlError != null,
+                                supportingText = {
+                                    if (urlError != null) {
+                                        InfernoText(
+                                            urlError!!, infernoStyle = InfernoTextStyle.Error
+                                        )
+                                    }
+                                },
+                            )
 
-                                // save button
+                            // save button
+                            if (customUrl != settings.customHomeUrl) {
                                 InfernoButton(
-                                    text = stringResource(R.string.browser_menu_save),
+                                    text = stringResource(R.string.save_changes_to_login_2),
+                                    modifier = Modifier.fillMaxWidth(),
                                     onClick = {
                                         val url = customUrl
                                         if (URLUtil.isValidUrl(url)) {

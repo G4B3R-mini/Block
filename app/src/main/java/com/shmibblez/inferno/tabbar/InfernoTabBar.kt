@@ -25,6 +25,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -52,6 +53,8 @@ import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.infernoTheme
 import com.shmibblez.inferno.ext.newTab
+import com.shmibblez.inferno.proto.InfernoSettings
+import com.shmibblez.inferno.proto.infernoSettingsDataStore
 import com.shmibblez.inferno.toolbar.ToolbarOnlyComponents.Companion.ProgressBar
 import mozilla.components.browser.state.ext.getUrl
 import mozilla.components.browser.state.state.TabSessionState
@@ -85,6 +88,10 @@ fun InfernoTabBar(tabList: List<TabSessionState>, selectedTab: TabSessionState?)
     }
 
     val context = LocalContext.current
+    val settings by context.infernoSettingsDataStore.data.collectAsState(
+        initial = InfernoSettings.getDefaultInstance(),
+    )
+
     context.components.core.store
     val listState = rememberLazyListState()
     var tabAutoWidth by remember { mutableStateOf(calculateTabWidth()) }
@@ -176,6 +183,14 @@ fun InfernoTabBar(tabList: List<TabSessionState>, selectedTab: TabSessionState?)
                         .size(12.dp)
                         .clickable {
                             context.components.newTab(
+                                customHomeUrl = if (settings.shouldUseInfernoHome) null else {
+                                    settings.customHomeUrl.let {
+                                        when (it.isNullOrEmpty()) {
+                                            true -> null
+                                            false -> it
+                                        }
+                                    }
+                                },
                                 private = isPrivateSession,
                                 nextTo = selectedTab.id, // todo: next to current based on config, default is true
                             )
