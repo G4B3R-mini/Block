@@ -71,12 +71,12 @@ android {
 
     def releaseTemplate = {
         minifyEnabled true
-        proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        matchingFallbacks = ['release'] // Use on the "release" build type in dependencies (AARs)
+//        proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+//        matchingFallbacks = ['release'] // Use on the "release" build type in dependencies (AARs)
 
-        if (gradle.hasProperty("localProperties.autosignReleaseWithDebugKey")) {
-            signingConfig signingConfigs.debug
-        }
+//        if (gradle.hasProperty("localProperties.autosignReleaseWithDebugKey")) {
+//            signingConfig signingConfigs.debug
+//        }
 
         if (gradle.hasProperty("localProperties.debuggable")) {
             debuggable true
@@ -162,7 +162,7 @@ kotlin {
     jvmToolchain(Config.jvmTargetCompatibility)
 }
 
-def baseVersionCode = generatedVersionCode
+//def baseVersionCode = generatedVersionCode
 
 if (gradle.hasProperty('localProperties.dependencySubstitutions.geckoviewTopsrcdir')) {
     if (gradle.hasProperty('localProperties.dependencySubstitutions.geckoviewTopobjdir')) {
@@ -176,39 +176,42 @@ android.applicationVariants.configureEach { variant ->
 // -------------------------------------------------------------------------------------------------
 // Sentry: Read token from local file if it exists (Only release builds)
 // -------------------------------------------------------------------------------------------------
-    print("Sentry token:  " + variant.name)
-    try {
-        def token = new File("${rootDir}/.sentry_token").text.trim()
-        buildConfigField 'String', 'SENTRY_TOKEN', '"' + token + '"'
-        println "(Added from .sentry_token file)"
-    } catch (FileNotFoundException ignored) {
-        buildConfigField 'String', 'SENTRY_TOKEN', 'null'
-        println(" :( ")
-    }
+    // todo: remove everything related to sentry
+//    print("Sentry token:  " + variant.name)
+//    try {
+//        def token = new File("${rootDir}/.sentry_token").text.trim()
+//        buildConfigField 'String', 'SENTRY_TOKEN', '"' + token + '"'
+//        println "(Added from .sentry_token file)"
+//    } catch (FileNotFoundException ignored) {
+//        buildConfigField 'String', 'SENTRY_TOKEN', 'null'
+//        println(" :( ")
+//    }
 
 // -------------------------------------------------------------------------------------------------
 // Activating crash reports with command line parameter.
 // -------------------------------------------------------------------------------------------------
-    if (project.hasProperty("crashReportEnabled") && project.property("crashReportEnabled") == "true") {
-        buildConfigField 'boolean', 'CRASH_REPORTING_ENABLED', 'true'
-    } else {
-        buildConfigField 'boolean', 'CRASH_REPORTING_ENABLED', 'false'
-    }
+//    if (project.hasProperty("crashReportEnabled") && project.property("crashReportEnabled") == "true") {
+//        buildConfigField 'boolean', 'CRASH_REPORTING_ENABLED', 'true'
+//    } else {
+    // todo: remove everything related to sentry
+    buildConfigField 'boolean', 'CRASH_REPORTING_ENABLED', 'false'
+//    }
 
 // -------------------------------------------------------------------------------------------------
 // Activating telemetry  with command line parameter.
 // -------------------------------------------------------------------------------------------------
 
-    if (project.hasProperty("telemetry") && project.property("telemetry") == "true") {
-        buildConfigField 'boolean', 'TELEMETRY_ENABLED', 'true'
-    } else {
-        buildConfigField 'boolean', 'TELEMETRY_ENABLED', 'false'
-    }
+//    if (project.hasProperty("telemetry") && project.property("telemetry") == "true") {
+//        buildConfigField 'boolean', 'TELEMETRY_ENABLED', 'true'
+//    } else {
+    // todo: remove all telemetry libs
+    buildConfigField 'boolean', 'TELEMETRY_ENABLED', 'false'
+//    }
 
 // -------------------------------------------------------------------------------------------------
 // Generating version codes for Google Play
 // -------------------------------------------------------------------------------------------------
-    if (variant.buildType.buildConfigFields['IS_RELEASED']?.value) {
+//    if (variant.buildType.buildConfigFields['IS_RELEASED']?.value) {
         // The Google Play Store does not allow multiple APKs for the same app that all have the
         // same version code. Therefore we need to have different version codes for our ARM and x86
         // builds. See https://developer.android.com/studio/publish/versioning
@@ -221,84 +224,86 @@ android.applicationVariants.configureEach { variant ->
         // (minute granularity) time of day. To avoid conflicts, we ensure the minute portion
         // of the version code is even for APKs and odd for AABs.
 
-        def versionName = Config.releaseVersionName(project)
-
-        variant.outputs.each { output ->
-            def abi = output.getFilter(FilterConfiguration.FilterType.ABI.name())
-            def aab = project.hasProperty("aab")
-
-            // ensure baseVersionCode is an even number
-            if (baseVersionCode % 2) {
-                baseVersionCode = baseVersionCode + 1
-            }
-
-            def versionCodeOverride = baseVersionCode
-
-            if (aab) {
-                // AAB version code is odd
-                versionCodeOverride = baseVersionCode + 1
-                println("versionCode for AAB = $versionCodeOverride")
-            } else {
-                // APK version codes are even
-                if (abi == "x86_64") {
-                    versionCodeOverride = baseVersionCode + 6
-                } else if (abi == "x86") {
-                    versionCodeOverride = baseVersionCode + 4
-                } else if (abi == "arm64-v8a") {
-                    versionCodeOverride = baseVersionCode + 2
-                } else if (abi == "armeabi-v7a") {
-                    versionCodeOverride = baseVersionCode
-                }
-                println("versionCode for $abi = $versionCodeOverride")
-            }
-
-            output.versionNameOverride = versionName
-            output.versionCodeOverride = versionCodeOverride
-        }
+//        def versionName = Config.releaseVersionName(project)
+//
+//        variant.outputs.each { output ->
+//            def abi = output.getFilter(FilterConfiguration.FilterType.ABI.name())
+//            def aab = project.hasProperty("aab")
+//
+//            // ensure baseVersionCode is an even number
+//            if (baseVersionCode % 2) {
+//                baseVersionCode = baseVersionCode + 1
+//            }
+//
+//            def versionCodeOverride = baseVersionCode
+//
+//            if (aab) {
+//                // AAB version code is odd
+//                versionCodeOverride = baseVersionCode + 1
+//                println("versionCode for AAB = $versionCodeOverride")
+//            } else {
+//                // APK version codes are even
+//                if (abi == "x86_64") {
+//                    versionCodeOverride = baseVersionCode + 6
+//                } else if (abi == "x86") {
+//                    versionCodeOverride = baseVersionCode + 4
+//                } else if (abi == "arm64-v8a") {
+//                    versionCodeOverride = baseVersionCode + 2
+//                } else if (abi == "armeabi-v7a") {
+//                    versionCodeOverride = baseVersionCode
+//                }
+//                println("versionCode for $abi = $versionCodeOverride")
+//            }
+//
+//            output.versionNameOverride = versionName
+//            output.versionCodeOverride = versionCodeOverride
+//        }
 
         // If this is a release build, validate that "versionName" is set
-        tasks.withType(AppPreBuildTask).configureEach { prebuildTask ->
-            // You can't add a closure to a variant, so we need to look for an early variant-specific type
-            // of task (AppPreBuildTask is the first) and filter to make sure we're looking at the task for
-            // this variant that we're currently configuring
-            if (prebuildTask.variantName != variant.name) {
-                return
-            }
-
-            // Append to the task so the first thing it does is run our validation
-            prebuildTask.doFirst {
-                if (!project.hasProperty('versionName')) {
-                    throw new RuntimeException("Release builds require the 'versionName' property to be set.\n" + "If you're using an IDE, set your build variant to be a \"debug\" type.\n" + "If you're using the command-line, either build a debug variant instead ('./gradlew assembleDebug')\n" + "\tor continue building the release build and set the \"versionName\" property ('./gradlew -PversionName=<...> assembleNightly').")
-                    // TODO when Android Studio 3.5.0 is prevalent, we can set the "debug" build type as the default
-                    // https://issuetracker.google.com/issues/36988145#comment59
-                }
-            }
-        }
-    }
+//        tasks.withType(AppPreBuildTask).configureEach { prebuildTask ->
+//            // You can't add a closure to a variant, so we need to look for an early variant-specific type
+//            // of task (AppPreBuildTask is the first) and filter to make sure we're looking at the task for
+//            // this variant that we're currently configuring
+//            if (prebuildTask.variantName != variant.name) {
+//                return
+//            }
+//
+//            // Append to the task so the first thing it does is run our validation
+//            prebuildTask.doFirst {
+//                if (!project.hasProperty('versionName')) {
+//                    throw new RuntimeException("Release builds require the 'versionName' property to be set.\n" + "If you're using an IDE, set your build variant to be a \"debug\" type.\n" + "If you're using the command-line, either build a debug variant instead ('./gradlew assembleDebug')\n" + "\tor continue building the release build and set the \"versionName\" property ('./gradlew -PversionName=<...> assembleNightly').")
+//                    // TODO when Android Studio 3.5.0 is prevalent, we can set the "debug" build type as the default
+//                    // https://issuetracker.google.com/issues/36988145#comment59
+//                }
+//            }
+//        }
+//    }
 
 // -------------------------------------------------------------------------------------------------
 // BuildConfig: Set flag for official builds; similar to MOZILLA_OFFICIAL in mozilla-central.
 // -------------------------------------------------------------------------------------------------
 
-    if (project.hasProperty("official") || gradle.hasProperty("localProperties.official")) {
-        buildConfigField 'Boolean', 'MOZILLA_OFFICIAL', 'true'
-    } else {
-        buildConfigField 'Boolean', 'MOZILLA_OFFICIAL', 'false'
-    }
+//    if (project.hasProperty("official") || gradle.hasProperty("localProperties.official")) {
+//        buildConfigField 'Boolean', 'MOZILLA_OFFICIAL', 'true'
+//    } else {
+//        buildConfigField 'Boolean', 'MOZILLA_OFFICIAL', 'false'
+//    }
 }
 
 // Select the Glean from GeckoView.
 // `service-sync-logins` requires Glean, which pulls in glean-native,
 // but that's also provided by geckoview-omni, so now we need to select which one to use.
-project.configurations.configureEach {
-    resolutionStrategy.capabilitiesResolution.withCapability("org.mozilla.telemetry:glean-native") {
-        def toBeSelected = candidates.find { it.id instanceof ModuleComponentIdentifier && it.id.module.contains('geckoview') }
-        if (toBeSelected != null) {
-            select(toBeSelected)
-        }
-        because 'use GeckoView Glean instead of standalone Glean'
-    }
-}
+// todo: remove glean libs, maybe also use geckoview fork with no telemetry, or check how to disable
+//  in gecko view (optional)
+//project.configurations.configureEach {
+//    resolutionStrategy.capabilitiesResolution.withCapability("org.mozilla.telemetry:glean-native") {
+//        def toBeSelected = candidates.find { it.id instanceof ModuleComponentIdentifier && it.id.module.contains('geckoview') }
+//        if (toBeSelected != null) {
+//            select(toBeSelected)
+//        }
+//        because 'use GeckoView Glean instead of standalone Glean'
+//    }
+//}
 
 
 android.applicationVariants.configureEach { variant ->
@@ -317,37 +322,38 @@ android.applicationVariants.configureEach { variant ->
     println("Flavor:            " + variant.flavorName)
     println("Telemetry enabled: " + !isDebug)
 
-    if (useReleaseVersioning) {
-        // The Google Play Store does not allow multiple APKs for the same app that all have the
-        // same version code. Therefore we need to have different version codes for our ARM and x86
-        // builds.
-
-        def versionName = variant.buildType.name == 'nightly' ? "${Config.nightlyVersionName(project)}" : "${Config.releaseVersionName(project)}"
-        println("versionName override: $versionName")
-
-        variant.outputs.each { output ->
-            def isMozillaOnline = project.hasProperty("mozillaOnline") || gradle.hasProperty("localProperties.mozillaOnline")
-            def abi = output.getFilter(FilterConfiguration.FilterType.ABI.name())
-            // If it is a Mozilla Online build, use a unified version code of armeabi-v7a
-            def arch = (isMozillaOnline) ? "armeabi-v7a" : abi
-            def aab = project.hasProperty("aab")
-            // We use the same version code generator, that we inherited from Fennec, across all channels - even on
-            // channels that never shipped a Fennec build.
-            def versionCodeOverride = Config.generateFennecVersionCode(arch, aab)
-
-            println("versionCode for $abi = $versionCodeOverride, isMozillaOnline = $isMozillaOnline")
-
-            if (versionName != null) {
-                output.versionNameOverride = versionName
-            }
-            output.versionCodeOverride = versionCodeOverride
-        }
-    } else if (gradle.hasProperty("localProperties.branchBuild.fenix.version")) {
-        def versionName = gradle.getProperty("localProperties.branchBuild.fenix.version")
-        println("versionName override: $versionName")
-        variant.outputs.each { output -> output.versionNameOverride = versionName
-        }
-    }
+    // versioning manual
+//    if (useReleaseVersioning) {
+//        // The Google Play Store does not allow multiple APKs for the same app that all have the
+//        // same version code. Therefore we need to have different version codes for our ARM and x86
+//        // builds.
+//
+//        def versionName = variant.buildType.name == 'nightly' ? "${Config.nightlyVersionName(project)}" : "${Config.releaseVersionName(project)}"
+//        println("versionName override: $versionName")
+//
+//        variant.outputs.each { output ->
+//            def isMozillaOnline = project.hasProperty("mozillaOnline") || gradle.hasProperty("localProperties.mozillaOnline")
+//            def abi = output.getFilter(FilterConfiguration.FilterType.ABI.name())
+//            // If it is a Mozilla Online build, use a unified version code of armeabi-v7a
+//            def arch = (isMozillaOnline) ? "armeabi-v7a" : abi
+//            def aab = project.hasProperty("aab")
+//            // We use the same version code generator, that we inherited from Fennec, across all channels - even on
+//            // channels that never shipped a Fennec build.
+//            def versionCodeOverride = Config.generateFennecVersionCode(arch, aab)
+//
+//            println("versionCode for $abi = $versionCodeOverride, isMozillaOnline = $isMozillaOnline")
+//
+//            if (versionName != null) {
+//                output.versionNameOverride = versionName
+//            }
+//            output.versionCodeOverride = versionCodeOverride
+//        }
+//    } else if (gradle.hasProperty("localProperties.branchBuild.fenix.version")) {
+//        def versionName = gradle.getProperty("localProperties.branchBuild.fenix.version")
+//        println("versionName override: $versionName")
+//        variant.outputs.each { output -> output.versionNameOverride = versionName
+//        }
+//    }
 
 //// -------------------------------------------------------------------------------------------------
 //// BuildConfig: Set variables for Sentry, Crash Reporting, and Telemetry
@@ -385,36 +391,38 @@ android.applicationVariants.configureEach { variant ->
 // Adjust: Read token from local file if it exists (Only release builds)
 // -------------------------------------------------------------------------------------------------
 
-    print("Adjust token: ")
-
-    if (!isDebug) {
-        try {
-            def token = new File("${rootDir}/.adjust_token").text.trim()
-            buildConfigField 'String', 'ADJUST_TOKEN', '"' + token + '"'
-            println "(Added from .adjust_token file)"
-        } catch (FileNotFoundException ignored) {
-            buildConfigField 'String', 'ADJUST_TOKEN', 'null'
-            println("X_X")
-        }
-    } else {
-        buildConfigField 'String', 'ADJUST_TOKEN', 'null'
-        println("--")
-    }
+    // not used, todo: check
+//    print("Adjust token: ")
+//
+//    if (!isDebug) {
+//        try {
+//            def token = new File("${rootDir}/.adjust_token").text.trim()
+//            buildConfigField 'String', 'ADJUST_TOKEN', '"' + token + '"'
+//            println "(Added from .adjust_token file)"
+//        } catch (FileNotFoundException ignored) {
+//            buildConfigField 'String', 'ADJUST_TOKEN', 'null'
+//            println("X_X")
+//        }
+//    } else {
+//        buildConfigField 'String', 'ADJUST_TOKEN', 'null'
+//        println("--")
+//    }
 
 // -------------------------------------------------------------------------------------------------
 // MLS: Read token from local file if it exists
 // -------------------------------------------------------------------------------------------------
 
-    print("MLS token: ")
-
-    try {
-        def token = new File("${rootDir}/.mls_token").text.trim()
-        buildConfigField 'String', 'MLS_TOKEN', '"' + token + '"'
-        println "(Added from .mls_token file)"
-    } catch (FileNotFoundException ignored) {
-        buildConfigField 'String', 'MLS_TOKEN', '""'
-        println("X_X")
-    }
+    // not used, todo: what is location token used for?
+//    print("MLS token: ")
+//
+//    try {
+//        def token = new File("${rootDir}/.mls_token").text.trim()
+//        buildConfigField 'String', 'MLS_TOKEN', '"' + token + '"'
+//        println "(Added from .mls_token file)"
+//    } catch (FileNotFoundException ignored) {
+//        buildConfigField 'String', 'MLS_TOKEN', '""'
+//        println("X_X")
+//    }
 
 // -------------------------------------------------------------------------------------------------
 // Nimbus: Read endpoint from local.properties of a local file if it exists
@@ -444,6 +452,7 @@ android.applicationVariants.configureEach { variant ->
 //// Glean: Read custom server URL from local.properties of a local file if it exists
 //// -------------------------------------------------------------------------------------------------
 //
+    // not used, todo: remove glean completely
 //    print("Glean custom server URL: ")
 //
 //    if (gradle.hasProperty("localProperties.glean.custom.server.url")) {
@@ -459,31 +468,34 @@ android.applicationVariants.configureEach { variant ->
 // BuildConfig: Set flag for official builds; similar to MOZILLA_OFFICIAL in mozilla-central.
 // -------------------------------------------------------------------------------------------------
 
-    if (project.hasProperty("official") || gradle.hasProperty("localProperties.official")) {
-        buildConfigField 'Boolean', 'MOZILLA_OFFICIAL', 'true'
-    } else {
-        buildConfigField 'Boolean', 'MOZILLA_OFFICIAL', 'false'
-    }
+    // not used
+//    if (project.hasProperty("official") || gradle.hasProperty("localProperties.official")) {
+//        buildConfigField 'Boolean', 'MOZILLA_OFFICIAL', 'true'
+//    } else {
+//        buildConfigField 'Boolean', 'MOZILLA_OFFICIAL', 'false'
+//    }
 
 // -------------------------------------------------------------------------------------------------
 // BuildConfig: Set remote wallpaper URL using local file if it exists
 // -------------------------------------------------------------------------------------------------
 
-    print("Wallpaper URL: ")
-
-    try {
-        def token = new File("${rootDir}/.wallpaper_url").text.trim()
-        buildConfigField 'String', 'WALLPAPER_URL', '"' + token + '"'
-        println "(Added from .wallpaper_url file)"
-    } catch (FileNotFoundException ignored) {
-        buildConfigField 'String', 'WALLPAPER_URL', '""'
-        println("--")
-    }
+    // not used, wallpapers will be handled manually in runtime
+//    print("Wallpaper URL: ")
+//
+//    try {
+//        def token = new File("${rootDir}/.wallpaper_url").text.trim()
+//        buildConfigField 'String', 'WALLPAPER_URL', '"' + token + '"'
+//        println "(Added from .wallpaper_url file)"
+//    } catch (FileNotFoundException ignored) {
+//        buildConfigField 'String', 'WALLPAPER_URL', '""'
+//        println("--")
+//    }
 
 //// -------------------------------------------------------------------------------------------------
 //// BuildConfig: Set the Pocket consumer key from a local file if it exists
 //// -------------------------------------------------------------------------------------------------
 //
+    // pocket not implemented
 //    print("Pocket consumer key: ")
 //
 //    try {
@@ -499,17 +511,18 @@ android.applicationVariants.configureEach { variant ->
 // BuildConfig: Set flag to disable LeakCanary in debug (on CI builds)
 // -------------------------------------------------------------------------------------------------
 
-    if (isDebug) {
-        if (project.hasProperty("disableLeakCanary") || gradle.hasProperty("localProperties.disableLeakCanary")) {
-            buildConfigField "boolean", "LEAKCANARY", "false"
-            println("LeakCanary enabled in debug: false")
-        } else {
-            buildConfigField "boolean", "LEAKCANARY", "true"
-            println("LeakCanary enabled in debug: true")
-        }
-    } else {
-        buildConfigField "boolean", "LEAKCANARY", "false"
-    }
+    // not used
+//    if (isDebug) {
+//        if (project.hasProperty("disableLeakCanary") || gradle.hasProperty("localProperties.disableLeakCanary")) {
+//            buildConfigField "boolean", "LEAKCANARY", "false"
+//            println("LeakCanary enabled in debug: false")
+//        } else {
+//            buildConfigField "boolean", "LEAKCANARY", "true"
+//            println("LeakCanary enabled in debug: true")
+//        }
+//    } else {
+//        buildConfigField "boolean", "LEAKCANARY", "false"
+//    }
 }
 
 apply plugin: "org.mozilla.appservices.nimbus-gradle-plugin"
@@ -521,7 +534,7 @@ nimbus {
     // Map from the variant name to the channel as experimenter and nimbus understand it.
     // If nimbus's channels were accurately set up well for this project, then this
     // shouldn't be needed.
-    channels = [fenixDebug    : "developer",
+    channels = [fenixDebug    : "debug",
                 fenixNightly  : "nightly",
                 fenixBeta     : "beta",
                 fenixRelease  : "release",

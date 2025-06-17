@@ -43,8 +43,6 @@ that's it for now, hopefully this project doesn't die
 
 ## Pending Launch
 
-- [x] Autofill Settings Page
-    - [x] add biometric, fix padding (copy fixes to passwords page)
 - [ ] Web Prompter
     - [ ] AndroidPhotoPicker not working, activity callbacks murky (may have to add something
       similar to biometric prompt with listener and callback structure)
@@ -54,24 +52,14 @@ that's it for now, hopefully this project doesn't die
 - [ ] Crash Reporter
     - [ ] In onboarding, show quick settings on second page (crash reporting
       checked by default, show message saying this helps development of app, but can be disabled
-      right there), first page is welcome page, third page is theme
-    - [ ] Add crash reporting quick access (bug icon) and add to settings at bottom
-        - [ ] Crash reporting page will have a list of crashes with X on the right, when one clicked
-          goes to crash page
-            - [ ] crash page shows error log (# of lines then 3 dots) and optional checkbox for info
-              like device type, time error occurred, android version, and other relevant info, and
-              at the bottom cancel button and send
-    - [ ] crash reporting page is not possible with crashlytics, no way to get crash list
-    - [ ] new plan: setting to enable/disable automatic crash collection, show description: Crash
-      reporting is reset upon app restart
-        - [ ] add worker to init app and send errors every once in a while (once a day?) since
-          crashlytics sends crashes when app starts
-        - [ ] find way to send user feedback
-        - [ ] could also persist crashes manually (in db for example, or proto, max 5 most recent),
-          then when user chooses to send, go to send bug page, there user can add extra info and
-          choose what to send or not. Still keeping automatic for now, but later add more granular
-          control (instead of enable/disable, have options: Automatic, Disabled, Manual. For Manual
-          option, persist and send through crashes screen)
+      right there), first page is welcome page, which shows theme and customizable toolbar, next
+      button at bottom which goes to next page, on second page crash reporting and continue button.
+      Cannot dismiss with back press or click outside dialog
+    - [ ] crash reporting not tested (beta build)
+- [ ] COLORS
+    - [ ] CRITICAL: make secondary background color nicer current one is wack
+- [ ] Splash Screen
+    - [ ] shouldnt take too long, check url for tutorial
 
 ## Critical
 
@@ -291,6 +279,8 @@ Did you add an account?
           delete from persisted entries.
     - [ ] this _could_ be done with crashlytics, would be very hacky. Before sending a crash, clear
       all crashes, then attach data as messages, add error, and send data
+    - [ ] If implemented this way also add crash reporting quick access (bug icon) and add to
+      settings at bottom, only if proceed
 
 # Current Structures
 

@@ -110,6 +110,8 @@ class InfernoHomeComponentState(
     val onNavToSearchSettings: () -> Unit,
     val onNavToHomeSettings: () -> Unit,
 ) : LifecycleAwareFeature {
+
+    // throttles updates, when invisible does not update state vars
     var isVisible by mutableStateOf(false)
 
     private var storeScope: CoroutineScope? = null
