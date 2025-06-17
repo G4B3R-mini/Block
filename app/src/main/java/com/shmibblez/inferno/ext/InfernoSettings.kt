@@ -24,3 +24,17 @@ fun InfernoSettings.getSelectedTheme(context: Context): InfernoTheme {
     if (customObj == null) return getDefaultTheme()
     return InfernoTheme.fromSettingsObj(customObj)
 }
+
+/**
+ * @return custom home url if set and enabled, if not enabled or set then null
+ */
+fun InfernoSettings.determineCustomHomeUrl(): String? {
+    return if (shouldUseInfernoHome) null else {
+        customHomeUrl.let {
+            when (it.isNullOrEmpty()) {
+                true -> null
+                false -> it
+            }
+        }
+    }
+}

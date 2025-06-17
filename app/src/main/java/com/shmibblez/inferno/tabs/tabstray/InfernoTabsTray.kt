@@ -61,14 +61,9 @@ import com.shmibblez.inferno.tabstray.TabsTrayState.Mode
 import com.shmibblez.inferno.tabstray.TabsTrayTestTag
 import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.browser.state.state.recover.TabState
-import mozilla.components.browser.storage.sync.Tab
 
 enum class InfernoTabsTraySelectedTab {
     NormalTabs, PrivateTabs, SyncedTabs, RecentlyClosedTabs,
-}
-
-enum class InfernoTabsTrayDisplayType {
-    List, Grid,
 }
 
 open class InfernoTabsTrayMode {
@@ -303,54 +298,25 @@ private val MENU_ICON_SIZE = 16.dp
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun InfernoTabsTray(
-    dismiss: () -> Unit,
-    mode: InfernoTabsTrayMode,
-    setMode: (InfernoTabsTrayMode) -> Unit,
-    activeTabId: String?,
-    normalTabs: List<TabSessionState>,
-    privateTabs: List<TabSessionState>,
-    recentlyClosedTabs: List<TabState>,
-    tabDisplayType: InfernoTabsTrayDisplayType = InfernoTabsTrayDisplayType.List,
-    selectedTabsTrayTab: InfernoTabsTraySelectedTab = InfernoTabsTraySelectedTab.NormalTabs,
-
-    onBookmarkSelectedTabsClick: () -> Unit,
-    onDeleteSelectedTabsClick: () -> Unit,
-    onForceSelectedTabsAsInactiveClick: () -> Unit,
-    onTabSettingsClick: () -> Unit,
-    onHistoryClick: () -> Unit,
-    onShareAllTabsClick: () -> Unit,
-    onDeleteAllTabsClick: () -> Unit,
-    onAccountSettingsClick: () -> Unit,
-
-    onTabClick: (tab: TabSessionState) -> Unit,
-    onTabClose: (tab: TabSessionState) -> Unit,
-    onTabMediaClick: (tab: TabSessionState) -> Unit,
-    onTabMove: (String, String?, Boolean) -> Unit,
-    onTabLongClick: (TabSessionState) -> Unit,
-
-    onSyncedTabClick: (tab: Tab) -> Unit,
-    onSyncedTabClose: (deviceId: String, tab: Tab) -> Unit,
-
-    onClosedTabClick: (TabState) -> Unit,
-    onClosedTabClose: (TabState) -> Unit,
-    onClosedTabLongClick: (TabState) -> Unit,
-    onDeleteSelectedCloseTabsClick: () -> Unit,
-
-    ) {
+fun InfernoTabsTray(state: InfernoTabsTrayState) {
     val context = LocalContext.current
-    var selectedTab by remember { mutableStateOf(selectedTabsTrayTab) }
-    val normalTabCount = normalTabs.size
-    val privateTabCount = privateTabs.size
+    val normalTabCount = state.normalTabs.size
+    val privateTabCount = state.privateTabs.size
     val sheetState = rememberModalBottomSheetState()
     var initialized by remember { mutableStateOf(false) }
+
+    if (!state.visible) return
+    // request screenshot of active page before showing
+    state.onRequestScreenshot()
 
     LaunchedEffect(null) {
         initialized = true
     }
 
+
+
     ModalBottomSheet(
-        onDismissRequest = dismiss,
+        onDismissRequest = state::dismiss,
         modifier = Modifier
             .fillMaxWidth()
             .padding(WindowInsets.statusBars.asPaddingValues(LocalDensity.current)),
@@ -367,97 +333,97 @@ fun InfernoTabsTray(
         ) {
             Column {
 
-                if (mode == InfernoTabsTrayMode.Normal) {
+                if (state.mode == InfernoTabsTrayMode.Normal) {
                     NormalBanner(
-                        mode = mode,
-                        setMode = setMode,
-                        setSelectedTab = { selectedTab = it },
-                        selectedTab = selectedTab,
+                        mode = state.mode,
+                        setMode = state::setTabsTrayMode,
+                        setSelectedTab = state::setSelectedTabsTrayTab,
+                        selectedTab = state.selectedTrayTab,
                         normalTabCount = normalTabCount,
                         privateTabCount = privateTabCount,
-                        onBookmarkSelectedTabsClick = onBookmarkSelectedTabsClick,
-                        onDeleteSelectedTabsClick = onDeleteSelectedTabsClick,
-                        onForceSelectedTabsAsInactiveClick = onForceSelectedTabsAsInactiveClick,
-                        onTabSettingsClick = onTabSettingsClick,
-                        onHistoryClick = onHistoryClick,
-                        onShareAllTabsClick = onShareAllTabsClick,
-                        onDeleteAllTabsClick = onDeleteAllTabsClick,
-                        onAccountSettingsClick = onAccountSettingsClick,
-                        onDeleteSelectedCloseTabsClick = onDeleteSelectedCloseTabsClick,
+                        onBookmarkSelectedTabsClick = state::onBookmarkSelectedTabsClick,
+                        onDeleteSelectedTabsClick = state::onDeleteSelectedTabsClick,
+                        onForceSelectedTabsAsInactiveClick = state::onForceSelectedTabsAsInactiveClick,
+                        onTabSettingsClick = state::onTabSettingsClick,
+                        onHistoryClick = state.onHistoryClick,
+                        onShareAllTabsClick = state.onShareAllTabsClick,
+                        onDeleteAllTabsClick = state::onDeleteAllTabsClick,
+                        onAccountSettingsClick = state.onAccountSettingsClick,
+                        onDeleteSelectedCloseTabsClick = state::onDeleteSelectedCloseTabsClick,
                     )
                 } else {
                     SelectBanner(
-                        mode = mode,
-                        setMode = setMode,
-                        selectedTab = selectedTab,
+                        mode = state.mode,
+                        setMode = state::setTabsTrayMode,
+                        selectedTab = state.selectedTrayTab,
                         normalTabCount = normalTabCount,
                         privateTabCount = privateTabCount,
-                        onBookmarkSelectedTabsClick = onBookmarkSelectedTabsClick,
-                        onDeleteSelectedTabsClick = onDeleteSelectedTabsClick,
-                        onForceSelectedTabsAsInactiveClick = onForceSelectedTabsAsInactiveClick,
-                        onTabSettingsClick = onTabSettingsClick,
-                        onHistoryClick = onHistoryClick,
-                        onShareAllTabsClick = onShareAllTabsClick,
-                        onDeleteAllTabsClick = onDeleteAllTabsClick,
-                        onAccountSettingsClick = onAccountSettingsClick,
-                        onDeleteSelectedCloseTabsClick = onDeleteSelectedCloseTabsClick,
+                        onBookmarkSelectedTabsClick = state::onBookmarkSelectedTabsClick,
+                        onDeleteSelectedTabsClick = state::onDeleteSelectedTabsClick,
+                        onForceSelectedTabsAsInactiveClick = state::onForceSelectedTabsAsInactiveClick,
+                        onTabSettingsClick = state::onTabSettingsClick,
+                        onHistoryClick = state.onHistoryClick,
+                        onShareAllTabsClick = state.onShareAllTabsClick,
+                        onDeleteAllTabsClick = state::onDeleteAllTabsClick,
+                        onAccountSettingsClick = state.onAccountSettingsClick,
+                        onDeleteSelectedCloseTabsClick = state::onDeleteSelectedCloseTabsClick,
                     )
                 }
 
                 // corresponding tab page
-                when (selectedTab) {
+                when (state.selectedTrayTab) {
                     InfernoTabsTraySelectedTab.NormalTabs -> NormalTabsPage(
-                        activeTabId = activeTabId,
-                        normalTabs = normalTabs,
-                        tabDisplayType = tabDisplayType,
-                        mode = mode,
+                        activeTabId = state.selectedTabId,
+                        normalTabs = state.normalTabs,
+                        tabDisplayType = state.tabDisplayType,
+                        mode = state.mode,
                         header = null, // todo
-                        onTabClick = onTabClick,
-                        onTabClose = onTabClose,
-                        onTabMediaClick = onTabMediaClick,
-                        onTabMove = onTabMove,
+                        onTabClick = state::onTabClick,
+                        onTabClose = state::onTabClose,
+                        onTabMediaClick = state.onTabMediaClick,
+                        onTabMove = state.onTabMove,
                         onTabDragStart = {
-                            setMode(InfernoTabsTrayMode.Normal)
+                            state.setTabsTrayMode(InfernoTabsTrayMode.Normal)
                         },
-                        onTabLongClick = onTabLongClick,
+                        onTabLongClick = state::onTabLongClick,
                     )
 
                     InfernoTabsTraySelectedTab.PrivateTabs -> PrivateTabsPage(
-                        activeTabId = activeTabId,
-                        privateTabs = privateTabs,
-                        tabDisplayType = tabDisplayType,
-                        mode = mode,
+                        activeTabId = state.selectedTabId,
+                        privateTabs = state.privateTabs,
+                        tabDisplayType = state.tabDisplayType,
+                        mode = state.mode,
                         header = null, // todo
-                        onTabClick = onTabClick,
-                        onTabClose = onTabClose,
-                        onTabMediaClick = onTabMediaClick,
-                        onTabMove = onTabMove,
+                        onTabClick = state::onTabClick,
+                        onTabClose = state::onTabClose,
+                        onTabMediaClick = state.onTabMediaClick,
+                        onTabMove = state.onTabMove,
                         onTabDragStart = {
-                            setMode(InfernoTabsTrayMode.Normal)
+                            state.setTabsTrayMode(InfernoTabsTrayMode.Normal)
                         },
-                        onTabLongClick = onTabLongClick,
+                        onTabLongClick = state::onTabLongClick,
                     )
 
                     InfernoTabsTraySelectedTab.SyncedTabs -> SyncedTabsPage(
-                        activeTabId = activeTabId,
+                        activeTabId = state.selectedTabId,
                         syncedTabsStorage = context.components.backgroundServices.syncedTabsStorage,
                         accountManager = context.components.backgroundServices.accountManager,
                         commands = context.components.backgroundServices.syncedTabsCommands,
-                        onTabClick = onSyncedTabClick,
-                        onTabClose = onSyncedTabClose,
-                        tabDisplayType = tabDisplayType,
-                        mode = mode,
+                        onTabClick = state::onSyncedTabClick,
+                        onTabClose = state.onSyncedTabClose,
+                        tabDisplayType = state.tabDisplayType,
+                        mode = state.mode,
                     )
 
                     InfernoTabsTraySelectedTab.RecentlyClosedTabs -> RecentlyClosedTabsPage(
 //            activeTabId = activeTabId,
-                        recentlyClosedTabs = recentlyClosedTabs,
-                        mode = mode,
+                        recentlyClosedTabs = state.recentlyClosedTabs,
+                        mode = state.mode,
                         header = null, // todo
-                        onHistoryClick = onHistoryClick,
-                        onTabClick = onClosedTabClick,
-                        onTabClose = onClosedTabClose,
-                        onTabLongClick = onClosedTabLongClick,
+                        onHistoryClick = state.onHistoryClick,
+                        onTabClick = state::onClosedTabClick,
+                        onTabClose = state.onClosedTabClose,
+                        onTabLongClick = state::onClosedTabLongClick,
                     )
                 }
                 // extra item for button
@@ -468,8 +434,8 @@ fun InfernoTabsTray(
                 )
             }
             NewTabButton(
-                selectedTab,
-                activeTabId = activeTabId,
+                state.selectedTrayTab,
+                activeTabId = state.selectedTabId,
                 offset = if (initialized) -sheetState.requireOffset().toInt() else 0,
             )
         }

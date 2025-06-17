@@ -1,6 +1,7 @@
 package com.shmibblez.inferno.tabs.tabstray
 
 import androidx.compose.runtime.Composable
+import com.shmibblez.inferno.proto.InfernoSettings
 import mozilla.components.browser.state.state.TabSessionState
 
 // todo: inactive tabs
@@ -8,7 +9,7 @@ import mozilla.components.browser.state.state.TabSessionState
 internal fun NormalTabsPage(
     activeTabId: String?,
     normalTabs: List<TabSessionState>,
-    tabDisplayType: InfernoTabsTrayDisplayType,
+    tabDisplayType: InfernoSettings.TabTrayStyle,
     mode: InfernoTabsTrayMode,
     header: (@Composable () -> Unit)? = null,
     onTabClick: (tab: TabSessionState) -> Unit,
@@ -28,7 +29,7 @@ internal fun NormalTabsPage(
         }
     }
     when (tabDisplayType) {
-        InfernoTabsTrayDisplayType.List -> {
+        InfernoSettings.TabTrayStyle.TAB_TRAY_LIST -> {
             TabList(
                 activeTabId = activeTabId,
                 activeTabIndex = activeTabIndex,
@@ -44,7 +45,7 @@ internal fun NormalTabsPage(
             )
         }
 
-        InfernoTabsTrayDisplayType.Grid -> {
+        InfernoSettings.TabTrayStyle.TAB_TRAY_GRID -> {
             TabGrid(
                 activeTabId = activeTabId,
                 activeTabIndex = activeTabIndex,

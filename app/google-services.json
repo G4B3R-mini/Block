@@ -1,0 +1,67 @@
+{
+  "project_info": {
+    "project_number": "830438391623",
+    "project_id": "inferno-browser-android",
+    "storage_bucket": "inferno-browser-android.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:830438391623:android:e6ab4e9aaa7680f3895662",
+        "android_client_info": {
+          "package_name": "com.shmibblez.inferno.beta"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAGuJevgu8xBAocsGEPzFFL3ZY0iXV1NPY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:830438391623:android:10bcf55bcb521725895662",
+        "android_client_info": {
+          "package_name": "com.shmibblez.inferno.release"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAGuJevgu8xBAocsGEPzFFL3ZY0iXV1NPY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "dummy",
+        "android_client_info": {
+          "package_name": "com.shmibblez.inferno.debug"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "dummy"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

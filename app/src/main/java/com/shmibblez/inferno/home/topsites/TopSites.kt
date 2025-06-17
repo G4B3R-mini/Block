@@ -164,7 +164,7 @@ fun TopSites(
                         partialWindows = true,
                     )[page]
                         // remove sponsored
-                        .filter { it !is TopSite.Provided }
+//                        .filter { it !is TopSite.Provided }
                         // chunk
                         .chunked(TOP_SITES_PER_ROW)
 

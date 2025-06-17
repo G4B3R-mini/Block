@@ -20,6 +20,7 @@ import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.settings
+import com.shmibblez.inferno.proto.InfernoSettings
 import com.shmibblez.inferno.tabstray.ext.toComposeList
 import com.shmibblez.inferno.tabstray.syncedtabs.SyncedTabsIntegration
 import com.shmibblez.inferno.tabstray.syncedtabs.SyncedTabsList
@@ -63,7 +64,7 @@ internal fun SyncedTabsPage(
     commands: SyncedTabsCommands,
     onTabClick: (tab: Tab) -> Unit,
     onTabClose: (deviceId: String, tab: Tab) -> Unit,
-    tabDisplayType: InfernoTabsTrayDisplayType,
+    tabDisplayType: InfernoSettings.TabTrayStyle,
     mode: InfernoTabsTrayMode,
 ) {
     // todo: observe account manager changes to show error if necessary or continue

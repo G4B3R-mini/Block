@@ -4,6 +4,7 @@
 
 package com.shmibblez.inferno.compose
 
+import android.graphics.BitmapFactory
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -15,14 +16,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.shmibblez.inferno.theme.FirefoxTheme
 import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.browser.state.state.createTab
 import mozilla.components.concept.base.images.ImageLoadRequest
+import com.shmibblez.inferno.R
 
 private const val FALLBACK_ICON_SIZE = 36
 
@@ -68,7 +74,18 @@ fun TabThumbnail(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center,
             ) {
-                val icon = tab.content.icon
+
+                val icon = when (tab.content.url) {
+                    "inferno:home" -> BitmapFactory.decodeResource(
+                        LocalContext.current.resources, R.drawable.inferno
+                    )
+
+                    "inferno:privatebrowsing" -> BitmapFactory.decodeResource(
+                        LocalContext.current.resources, R.drawable.ic_private_browsing_24
+                    )
+
+                    else -> tab.content.icon
+                }
 
                 if (icon != null) {
                     icon.prepareToDraw()

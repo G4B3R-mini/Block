@@ -21,9 +21,10 @@ import com.shmibblez.inferno.components.Components
 import com.shmibblez.inferno.customtabs.PoweredByNotification
 import com.shmibblez.inferno.customtabs.WebAppSiteControlsBuilder
 import com.shmibblez.inferno.ext.components
+import com.shmibblez.inferno.ext.determineCustomHomeUrl
 import com.shmibblez.inferno.ext.newTab
 import com.shmibblez.inferno.ext.selectLastNormalTab
-import com.shmibblez.inferno.tabs.tabstray.InfernoTabsTraySelectedTab
+import com.shmibblez.inferno.ext.settings
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
@@ -38,7 +39,6 @@ import mozilla.components.browser.state.selector.selectedTab
 import mozilla.components.browser.state.state.CustomTabSessionState
 import mozilla.components.browser.state.state.ExternalAppType
 import mozilla.components.browser.state.state.TabSessionState
-import mozilla.components.browser.state.state.recover.TabState
 import mozilla.components.browser.state.state.selectedOrDefaultSearchEngine
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.concept.engine.manifest.WebAppManifest
@@ -318,14 +318,6 @@ class BrowserComponentState(
 
     var tabList: List<TabSessionState> by mutableStateOf(emptyList())
         private set
-    var normalTabs: List<TabSessionState> by mutableStateOf(emptyList())
-        private set
-    var privateTabs: List<TabSessionState> by mutableStateOf(emptyList())
-        private set
-    var customTabs: List<CustomTabSessionState> by mutableStateOf(emptyList())
-        private set
-    var closedTabs: List<TabState> by mutableStateOf(emptyList())
-        private set
     var currentTab: TabSessionState? by mutableStateOf(null)
         private set
     var currentCustomTab: CustomTabSessionState? by mutableStateOf(null)
@@ -338,9 +330,10 @@ class BrowserComponentState(
         private set
     var pageType: BrowserComponentPageType by mutableStateOf(BrowserComponentPageType.ENGINE)
         private set
-    var selectedTabsTrayTab: InfernoTabsTraySelectedTab by mutableStateOf(InfernoTabsTraySelectedTab.NormalTabs)
     var showExternalToolbar by mutableStateOf(true)
         private set
+
+    var lastSavedGeneratedPassword: String? = null
 
     // helper for compose migration, might be a lil sloppy
     var onActivityResultHandler: ((OnActivityResultModel) -> Boolean)? = null
@@ -350,7 +343,10 @@ class BrowserComponentState(
 
 
     override fun start() {
-        Log.d("BrowserComponentState", "----------------------------\n\nstart()\n\n----------------------------")
+        Log.d(
+            "BrowserComponentState",
+            "----------------------------\n\nstart()\n\n----------------------------"
+        )
         browserStateObserver = store.flowScoped(lifecycleOwner) { flow ->
             flow.map { it }.collect {
                 currentTab = it.selectedTab
@@ -406,7 +402,6 @@ class BrowserComponentState(
                             append("\n    - engineState crash: ${currentCustomTab?.engineState?.crashed}")
                         }
                     }
-                    append("\n  - customTabs.size: ${customTabs.size}")
                     append("\n  - currentTab:")
                     when (currentTab) {
                         null -> append(" null")
@@ -452,18 +447,10 @@ class BrowserComponentState(
 //                val mode = BrowsingMode.fromBoolean(isPrivateSession)
 //                (context.getActivity()!! as HomeActivity).browsingModeManager.mode = mode
 //                context.components.appStore.dispatch(AppAction.ModeChange(mode))
-                selectedTabsTrayTab = when (isPrivateSession) {
-                    true -> InfernoTabsTraySelectedTab.PrivateTabs
-                    false -> InfernoTabsTraySelectedTab.NormalTabs
-                }
                 tabList = when (isPrivateSession) {
                     true -> it.privateTabs
                     false -> it.normalTabs
                 }
-                normalTabs = it.normalTabs
-                privateTabs = it.privateTabs
-                customTabs = it.customTabs
-                closedTabs = it.closedTabs
                 // if no tab selected, select one
                 if (isPendingTab) {
                     if (customTabSessionId != null) {
@@ -474,7 +461,10 @@ class BrowserComponentState(
                         components.selectLastNormalTab()
                     } else if (!awaitingNewTab) {
                         // if no tabs available add new tab
-                        components.newTab(private = false)
+                        components.newTab(
+                            customHomeUrl = activity.settings().latestSettings?.determineCustomHomeUrl(),
+                            private = false,
+                        )
                         awaitingNewTab = true
                     }
                 } else {
@@ -488,7 +478,10 @@ class BrowserComponentState(
     }
 
     override fun stop() {
-        Log.d("BrowserComponentState", "----------------------------\n\nstop()()\n\n----------------------------")
+        Log.d(
+            "BrowserComponentState",
+            "----------------------------\n\nstop()()\n\n----------------------------"
+        )
         browserStateObserver?.cancel()
     }
 

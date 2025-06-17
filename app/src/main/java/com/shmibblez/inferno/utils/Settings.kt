@@ -141,7 +141,8 @@ class Settings(private val appContext: Context) : PreferencesHolder {
         }
     }
 
-    private var latestSettings: InfernoSettings? = null
+    var latestSettings: InfernoSettings? = null
+        private set
 
     init {
         MainScope().launch {

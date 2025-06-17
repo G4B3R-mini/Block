@@ -6,11 +6,12 @@ import android.net.Uri
 import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.focusable
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalView
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.shmibblez.inferno.HomeActivity
@@ -20,7 +21,6 @@ import com.shmibblez.inferno.components.TabCollectionStorage
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.containsQueryParameters
 import com.shmibblez.inferno.ext.settings
-import com.shmibblez.inferno.home.bookmarks.BookmarksFeature
 import com.shmibblez.inferno.home.controllers.InfernoBookmarksController
 import com.shmibblez.inferno.home.controllers.InfernoPrivateBrowsingController
 import com.shmibblez.inferno.home.controllers.InfernoRecentSyncedTabController
@@ -29,15 +29,11 @@ import com.shmibblez.inferno.home.controllers.InfernoRecentVisitsController
 import com.shmibblez.inferno.home.controllers.InfernoSearchSelectorController
 import com.shmibblez.inferno.home.controllers.InfernoSessionControlController
 import com.shmibblez.inferno.home.controllers.InfernoToolbarController
-import com.shmibblez.inferno.home.recentsyncedtabs.RecentSyncedTabFeature
-import com.shmibblez.inferno.home.recenttabs.RecentTabsListFeature
-import com.shmibblez.inferno.home.recentvisits.RecentVisitsFeature
 import com.shmibblez.inferno.home.sessioncontrol.SessionControlInteractor
-import com.shmibblez.inferno.home.store.HomepageState
-import com.shmibblez.inferno.home.topsites.DefaultTopSitesView
 import com.shmibblez.inferno.home.ui.Homepage
 import com.shmibblez.inferno.messaging.DefaultMessageController
-import com.shmibblez.inferno.tabs.tabstray.InfernoTabsTraySelectedTab
+import com.shmibblez.inferno.proto.InfernoSettings
+import com.shmibblez.inferno.proto.infernoSettingsDataStore
 import com.shmibblez.inferno.utils.Settings.Companion.TOP_SITES_PROVIDER_MAX_THRESHOLD
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.launch
@@ -46,11 +42,8 @@ import mozilla.components.browser.state.state.selectedOrDefaultSearchEngine
 import mozilla.components.concept.storage.FrecencyThresholdOption
 import mozilla.components.feature.tab.collections.TabCollection
 import mozilla.components.feature.top.sites.TopSitesConfig
-import mozilla.components.feature.top.sites.TopSitesFeature
 import mozilla.components.feature.top.sites.TopSitesFrecencyConfig
 import mozilla.components.feature.top.sites.TopSitesProviderConfig
-import mozilla.components.lib.state.ext.observeAsState
-import mozilla.components.support.base.feature.ViewBoundFeatureWrapper
 
 
 //object BrowserComponentConstants {
@@ -81,23 +74,16 @@ internal const val TOAST_ELEVATION = 80f
  */
 @Composable
 fun InfernoHomeComponent(
-    isPrivate: Boolean,
+    state: InfernoHomeComponentState,
     modifier: Modifier = Modifier,
-    onShowTabsTray: (InfernoTabsTraySelectedTab?) -> Unit,
-    onNavToHistory: () -> Unit,
-    onNavToBookmarks: () -> Unit,
-    onNavToSearchSettings: () -> Unit,
-    onNavToHomeSettings: () -> Unit,
 ) {
-    val settings = LocalContext.current.settings()
+    val settings by LocalContext.current.infernoSettingsDataStore.data.collectAsState(
+        initial = InfernoSettings.getDefaultInstance(),
+    )
     val context = LocalContext.current
     val components = context.components
-    val appState by components.appStore.observeAsState(
-        initialValue = components.appStore.state,
-    ) { it }
     val lifecycleOwner = LocalLifecycleOwner.current
     val lifecycleScope = lifecycleOwner.lifecycleScope
-    val view = LocalView.current
 
 //    if (context.settings().isExperimentationEnabled) {
 //        messagingFeatureHomescreen.set(
@@ -112,88 +98,28 @@ fun InfernoHomeComponent(
 ////        initializeMicrosurveyFeature(context.settings().microsurveyFeatureEnabled)
 //    }
 
-    val topSitesFeature = remember { ViewBoundFeatureWrapper<TopSitesFeature>() }
-    val recentTabsListFeature = remember { ViewBoundFeatureWrapper<RecentTabsListFeature>() }
-    val recentSyncedTabFeature = remember { ViewBoundFeatureWrapper<RecentSyncedTabFeature>() }
-    val bookmarksFeature = remember { ViewBoundFeatureWrapper<BookmarksFeature>() }
-    val historyMetadataFeature = remember { ViewBoundFeatureWrapper<RecentVisitsFeature>() }
+    DisposableEffect(null) {
+        state.isVisible = true
+        onDispose { state.isVisible = false }
+    }
 
-    // todo: use settings flow, collect as state or rebuild based on specific settings, custom collector?
-    val shouldShowTopSites = context.settings().showTopSitesFeature
-
-    if (shouldShowTopSites) {
-        topSitesFeature.set(
-            feature = TopSitesFeature(
-                view = DefaultTopSitesView(
-                    appStore = components.appStore,
-                    settings = components.settings,
-                ),
-                storage = components.core.topSitesStorage,
-                config = { getTopSitesConfig(context) },
-            ),
-            owner = lifecycleOwner,
-            view = view,
+    LaunchedEffect(
+        settings.shouldShowTopSites,
+        settings.shouldShowRecentTabs,
+        settings.shouldShowBookmarks,
+        settings.shouldShowHistory,
+    ) {
+        state.updateSettings(
+            shouldShowTopSites = settings.shouldShowTopSites,
+            shouldShowRecentTabs = settings.shouldShowRecentTabs,
+            shouldShowBookmarks = settings.shouldShowBookmarks,
+            shouldShowHistory = settings.shouldShowHistory,
         )
     }
 
-    if (context.settings().showRecentTabsFeature) {
-        recentTabsListFeature.set(
-            feature = RecentTabsListFeature(
-                browserStore = components.core.store,
-                appStore = components.appStore,
-            ),
-            owner = lifecycleOwner,
-            view = view,
-        )
-
-        recentSyncedTabFeature.set(
-            feature = RecentSyncedTabFeature(
-                context = context,
-                appStore = components.appStore,
-                syncStore = components.backgroundServices.syncStore,
-                storage = components.backgroundServices.syncedTabsStorage,
-                accountManager = components.backgroundServices.accountManager,
-                historyStorage = components.core.historyStorage,
-                coroutineScope = lifecycleOwner.lifecycleScope,
-            ),
-            owner = lifecycleOwner,
-            view = view,
-        )
-    }
-
-    if (context.settings().showBookmarksHomeFeature) {
-        bookmarksFeature.set(
-            feature = BookmarksFeature(
-                appStore = components.appStore,
-                bookmarksUseCase = run {
-                    context.components.useCases.bookmarksUseCases
-                },
-                scope = lifecycleOwner.lifecycleScope,
-            ),
-            owner = lifecycleOwner,
-            view = view,
-        )
-    }
-
-    if (context.settings().shouldShowHistory) {
-        historyMetadataFeature.set(
-            feature = RecentVisitsFeature(
-                appStore = components.appStore,
-                historyMetadataStorage = components.core.historyStorage,
-                historyHighlightsStorage = components.core.lazyHistoryStorage,
-                scope = lifecycleOwner.lifecycleScope,
-            ),
-            owner = lifecycleOwner,
-            view = view,
-        )
-    }
     val collectionStorageObserver = object : TabCollectionStorage.Observer {
         @SuppressLint("NotifyDataSetChanged")
         override fun onCollectionRenamed(tabCollection: TabCollection, title: String) {
-            // todo: session control
-//            lifecycleScope.launch(Main) {
-//                binding.sessionControlRecyclerView.adapter?.notifyDataSetChanged()
-//            }
             // todo: snackbar: showRenamedSnackbar()
         }
 
@@ -207,10 +133,6 @@ fun InfernoHomeComponent(
 //                    R.string.create_collection_tabs_saved
 //                }
 //
-//                // todo: session control
-////                lifecycleScope.launch(Main) {
-////                    binding.sessionControlRecyclerView.adapter?.notifyDataSetChanged()
-////                }
 //
 //                // todo: snackbar
 ////                Snackbar.make(
@@ -288,29 +210,29 @@ fun InfernoHomeComponent(
 //                    elevation = Companion.TOAST_ELEVATION,
 //                )
             },
-            showTabTray = onShowTabsTray,
-            onNavToHistory = onNavToHistory,
-            onNavToBookmarks = onNavToBookmarks,
-            onNavToHomeSettings = onNavToHomeSettings,
+            showTabTray = state.onShowTabsTray,
+            onNavToHistory = state.onNavToHistory,
+            onNavToBookmarks = state.onNavToBookmarks,
+            onNavToHomeSettings = state.onNavToHomeSettings,
         ),
         recentTabController = InfernoRecentTabController(
             selectTabUseCase = components.useCases.tabsUseCases.selectTab,
             appStore = components.appStore,
-            onShowTabsTray = onShowTabsTray,
+            onShowTabsTray = state.onShowTabsTray,
         ),
         recentSyncedTabController = InfernoRecentSyncedTabController(
             appStore = components.appStore,
             browserStore = components.core.store,
             loadUrlUseCase = components.useCases.sessionUseCases.loadUrl,
             selectTabUseCase = components.useCases.tabsUseCases.selectTab,
-            onShowTabsTray = onShowTabsTray,
+            onShowTabsTray = state.onShowTabsTray,
         ),
         bookmarksController = InfernoBookmarksController(
             appStore = components.appStore,
             browserStore = components.core.store,
             loadUrlUseCase = components.useCases.sessionUseCases.loadUrl,
             selectTabUseCase = components.useCases.tabsUseCases.selectTab,
-            onNavToBookmarks = onNavToBookmarks,
+            onNavToBookmarks = state.onNavToBookmarks,
         ),
         recentVisitsController = InfernoRecentVisitsController(
             appStore = components.appStore,
@@ -319,7 +241,7 @@ fun InfernoHomeComponent(
             store = components.core.store,
             selectTabUseCase = components.useCases.tabsUseCases.selectTab,
             loadUrlUseCase = components.useCases.sessionUseCases.loadUrl,
-            onNavToHistory = onNavToHistory,
+            onNavToHistory = state.onNavToHistory,
         ),
 //            pocketStoriesController = DefaultPocketStoriesController(
 //                homeActivity = context.getActivity()!! as HomeActivity,
@@ -332,7 +254,7 @@ fun InfernoHomeComponent(
             loadUrlUseCase = components.useCases.sessionUseCases.loadUrl,
         ),
         searchSelectorController = InfernoSearchSelectorController(
-            onNavToSearchSettings = onNavToSearchSettings,
+            onNavToSearchSettings = state.onNavToSearchSettings,
         ),
         toolbarController = InfernoToolbarController(
             store = components.core.store,
@@ -341,13 +263,13 @@ fun InfernoHomeComponent(
     )
 
     Homepage(
+        state = state,
         modifier = modifier.focusable(),
-        state = HomepageState.build(
-            appState = appState,
-            settings = settings,
-            isPrivate = isPrivate,
-        ),
-        isPrivate = isPrivate,
+//        state = HomepageState.build(
+//            appState = state.appState,
+////            settings = settings,
+//            isPrivate = state.isPrivate,
+//        ),
         interactor = sessionControlInteractor,
         onTopSitesItemBound = { },
     )
@@ -366,7 +288,7 @@ internal fun getTopSitesConfig(context: Context): TopSitesConfig {
             FrecencyThresholdOption.SKIP_ONE_TIME_PAGES,
         ) { !Uri.parse(it.url).containsQueryParameters(settings.frecencyFilterQuery) },
         providerConfig = TopSitesProviderConfig(
-            showProviderTopSites = settings.showContileFeature,
+            showProviderTopSites = false, // settings.showContileFeature, (show sponsored top sites, NO)
             maxThreshold = TOP_SITES_PROVIDER_MAX_THRESHOLD,
             providerFilter = { topSite ->
                 when (context.components.core.store.state.search.selectedOrDefaultSearchEngine?.name) {

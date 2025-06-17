@@ -15,6 +15,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.MenuAnchorType
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -26,6 +27,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import com.google.firebase.crashlytics.ktx.crashlytics
+import com.google.firebase.ktx.Firebase
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.base.InfernoCheckbox
 import com.shmibblez.inferno.compose.base.InfernoIcon
@@ -47,6 +50,7 @@ fun PrivacyAndSecuritySettingsPage(goBack: () -> Unit) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val settings by context.infernoSettingsDataStore.data.collectAsState(InfernoSettings.getDefaultInstance())
+    var crashlyticsEnabled by remember { mutableStateOf(Firebase.crashlytics.isCrashlyticsCollectionEnabled) }
 
     InfernoSettingsPage(
         title = stringResource(R.string.preferences_category_privacy_security),
@@ -59,6 +63,30 @@ fun PrivacyAndSecuritySettingsPage(goBack: () -> Unit) {
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.Top,
         ) {
+            // crashes title
+            item {
+                PreferenceTitle(stringResource(R.string.about_crashes))
+            }
+
+            // automatic crash reporting
+            item {
+                PreferenceSwitch(
+                    text = stringResource(R.string.preferences_automatically_send_crashes_title),
+                    summary = stringResource(R.string.onboarding_preferences_dialog_crash_reporting_description),
+                    selected = crashlyticsEnabled,
+                    onSelectedChange = {selected ->
+                        crashlyticsEnabled = selected
+                        Firebase.crashlytics.isCrashlyticsCollectionEnabled = selected
+//                        coroutineScope.launch {
+//                            context.infernoSettingsDataStore.updateData {
+//                                it.toBuilder().setAutomaticCrashReportingEnabled(selected).build()
+//                            }
+//                        }
+                    },
+                    enabled = true,
+                )
+            }
+
             // private browsing title
             item {
                 PreferenceTitle(stringResource(R.string.preferences_private_browsing_options))

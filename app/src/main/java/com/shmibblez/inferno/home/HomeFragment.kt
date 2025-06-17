@@ -148,7 +148,7 @@ import com.shmibblez.inferno.home.toolbar.DefaultToolbarController
 import com.shmibblez.inferno.home.toolbar.SearchSelectorBinding
 import com.shmibblez.inferno.home.toolbar.SearchSelectorMenuBinding
 import com.shmibblez.inferno.home.topsites.DefaultTopSitesView
-import com.shmibblez.inferno.home.ui.Homepage
+//import com.shmibblez.inferno.home.ui.Homepage
 import com.shmibblez.inferno.messaging.DefaultMessageController
 import com.shmibblez.inferno.messaging.FenixMessageSurfaceId
 import com.shmibblez.inferno.messaging.MessagingFeature
@@ -365,7 +365,7 @@ class HomeFragment : Fragment() {
                 feature = TopSitesFeature(
                     view = DefaultTopSitesView(
                         appStore = components.appStore,
-                        settings = components.settings,
+//                        settings = components.settings,
                     ),
                     storage = components.core.topSitesStorage,
                     config = ::getTopSitesConfig,
@@ -1207,18 +1207,18 @@ class HomeFragment : Fragment() {
                         initialValue = components.appStore.state,
                     ) { it }
 
-                    Homepage(
-                        state = HomepageState.build(
-                            appState = appState,
-                            settings = settings,
-                            isPrivate = browsingModeManager.mode.isPrivate,
-                        ),
-                        isPrivate = browsingModeManager.mode.isPrivate,
-                        interactor = sessionControlInteractor,
-                        onTopSitesItemBound = {
-                            StartupTimeline.onTopSitesItemBound(activity = (requireActivity() as HomeActivity))
-                        },
-                    )
+//                    Homepage(
+//                        state = HomepageState.build(
+//                            appState = appState,
+////                            settings = settings,
+//                            isPrivate = browsingModeManager.mode.isPrivate,
+//                        ),
+//                        isPrivate = browsingModeManager.mode.isPrivate,
+//                        interactor = sessionControlInteractor,
+//                        onTopSitesItemBound = {
+//                            StartupTimeline.onTopSitesItemBound(activity = (requireActivity() as HomeActivity))
+//                        },
+//                    )
                 }
             }
         }

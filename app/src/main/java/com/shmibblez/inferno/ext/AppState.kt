@@ -17,6 +17,7 @@ import com.shmibblez.inferno.home.blocklist.BlocklistHandler
 //import com.shmibblez.inferno.home.pocket.PocketRecommendedStoriesCategory
 //import com.shmibblez.inferno.home.pocket.ui.PocketStory
 import com.shmibblez.inferno.home.recentsyncedtabs.RecentSyncedTabState
+import com.shmibblez.inferno.proto.InfernoSettings
 import com.shmibblez.inferno.utils.Settings
 
 /**
@@ -236,6 +237,15 @@ fun AppState.filterState(blocklistHandler: BlocklistHandler): AppState =
 fun AppState.shouldShowRecentTabs(settings: Settings): Boolean {
     val hasTab = recentTabs.isNotEmpty() || recentSyncedTabState is RecentSyncedTabState.Success
     return settings.showRecentTabsFeature && hasTab
+}
+
+/**
+ * Determines whether a recent tab section should be shown, based on user preference
+ * and the availability of local or Synced tabs.
+ */
+fun AppState.shouldShowRecentTabs( shouldShowRecentTabs: Boolean): Boolean {
+    val hasTab = recentTabs.isNotEmpty() || recentSyncedTabState is RecentSyncedTabState.Success
+    return shouldShowRecentTabs && hasTab
 }
 
 /**

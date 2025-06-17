@@ -89,53 +89,51 @@ internal sealed class HomepageState {
          * Builds a new [HomepageState] from the current [AppState] and [Settings].
          *
          * @param appState State to build the [HomepageState] from.
-         * @param browsingModeManager Manager holding current state of whether the browser is in private mode or not.
-         * @param settings [Settings] corresponding to how the homepage should be displayed.
          */
         @Composable
         internal fun build(
             appState: AppState,
             isPrivate: Boolean,
-            settings: Settings,
+//            settings: Settings,
         ): HomepageState {
-            return with(appState) {
-                if (mode.isPrivate) {
-                    Private(
-                        feltPrivateBrowsingEnabled = settings.feltPrivateBrowsingEnabled,
+//            return with(appState) {
+//                if (mode.isPrivate) {
+                    return Private(
+                        feltPrivateBrowsingEnabled = false, // settings.feltPrivateBrowsingEnabled,
                     )
-                } else {
-                    Normal(
-                        topSites = topSites,
-                        recentTabs = recentTabs,
-                        syncedTab = when (recentSyncedTabState) {
-                            RecentSyncedTabState.None,
-                            RecentSyncedTabState.Loading,
-                            -> null
-
-                            is RecentSyncedTabState.Success -> recentSyncedTabState.tabs.firstOrNull()
-                        },
-                        bookmarks = bookmarks,
-                        recentlyVisited = recentHistory,
-                        collectionsState = CollectionsState.build(
-                            appState = appState,
-                            browserState = components.core.store.state,
-                            isPrivate = isPrivate,
-                        ),
-//                        pocketState = PocketState.build(appState, settings),
-                        showTopSites = settings.showTopSitesFeature && topSites.isNotEmpty(),
-                        showRecentTabs = shouldShowRecentTabs(settings),
-                        showBookmarks = settings.showBookmarksHomeFeature && bookmarks.isNotEmpty(),
-                        showRecentSyncedTab = shouldShowRecentSyncedTabs(),
-                        showRecentlyVisited = settings.shouldShowHistory && recentHistory.isNotEmpty(),
-//                        showPocketStories = settings.showPocketRecommendationsFeature &&
-//                            recommendationState.pocketStories.isNotEmpty(),
-                        topSiteColors = TopSiteColors.colors(wallpaperState = wallpaperState),
-                        cardBackgroundColor = Color.Black, // wallpaperState.cardBackgroundColor,
-                        buttonBackgroundColor = wallpaperState.buttonBackgroundColor,
-                        buttonTextColor = wallpaperState.buttonTextColor,
-                    )
-                }
-            }
+//                } else {
+//                    Normal(
+//                        topSites = topSites,
+//                        recentTabs = recentTabs,
+//                        syncedTab = when (recentSyncedTabState) {
+//                            RecentSyncedTabState.None,
+//                            RecentSyncedTabState.Loading,
+//                            -> null
+//
+//                            is RecentSyncedTabState.Success -> recentSyncedTabState.tabs.firstOrNull()
+//                        },
+//                        bookmarks = bookmarks,
+//                        recentlyVisited = recentHistory,
+//                        collectionsState = CollectionsState.build(
+//                            appState = appState,
+//                            browserState = components.core.store.state,
+//                            isPrivate = isPrivate,
+//                        ),
+////                        pocketState = PocketState.build(appState, settings),
+//                        showTopSites = settings.showTopSitesFeature && topSites.isNotEmpty(),
+//                        showRecentTabs = shouldShowRecentTabs(settings),
+//                        showBookmarks = settings.showBookmarksHomeFeature && bookmarks.isNotEmpty(),
+//                        showRecentSyncedTab = shouldShowRecentSyncedTabs(),
+//                        showRecentlyVisited = settings.shouldShowHistory && recentHistory.isNotEmpty(),
+////                        showPocketStories = settings.showPocketRecommendationsFeature &&
+////                            recommendationState.pocketStories.isNotEmpty(),
+//                        topSiteColors = TopSiteColors.colors(wallpaperState = wallpaperState),
+//                        cardBackgroundColor = Color.Black, // wallpaperState.cardBackgroundColor,
+//                        buttonBackgroundColor = wallpaperState.buttonBackgroundColor,
+//                        buttonTextColor = wallpaperState.buttonTextColor,
+//                    )
+//                }
+//            }
         }
     }
 }

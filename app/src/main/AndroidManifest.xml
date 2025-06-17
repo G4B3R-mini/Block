@@ -64,6 +64,10 @@
         android:usesCleartextTraffic="true"
         tools:ignore="DataExtractionRules,UnusedAttribute">
 
+        <meta-data
+            android:name="firebase_crashlytics_collection_enabled"
+            android:value="${crashlyticsCollectionEnabled}" />
+
         <profileable
             android:shell="true"
             tools:targetApi="29" />

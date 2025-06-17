@@ -331,7 +331,6 @@ message InfernoSettings {
 
   /*** privacy & security ***/
 
-
   // private mode
   optional bool openLinksInPrivateTab = 71 [default = false];
   optional bool allowScreenshotsInPrivateMode = 72 [default = false];

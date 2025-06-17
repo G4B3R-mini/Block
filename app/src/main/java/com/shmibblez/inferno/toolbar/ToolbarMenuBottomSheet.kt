@@ -40,6 +40,7 @@ import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarShowTabsTra
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ToolbarMenuBottomSheet(
+    visible: Boolean,
     tabSessionState: TabSessionState?,
     loading: Boolean,
     tabCount: Int,
@@ -48,12 +49,12 @@ fun ToolbarMenuBottomSheet(
     onActivateReaderView: () -> Unit,
     onRequestSearchBar: () -> Unit,
     onNavToSettings: () -> Unit,
-    onNavToTabsTray: () -> Unit,
+    onNavToTabsTray: (private: Boolean) -> Unit,
     onNavToHistory: () -> Unit,
     onNavToExtensions: () -> Unit,
     onNavToPasswords: () -> Unit,
 ) {
-    if (tabSessionState == null) return
+    if (!visible || tabSessionState == null) return
     ModalBottomSheet(
         onDismissRequest = onDismissMenuBottomSheet,
         modifier = Modifier.fillMaxWidth(),
@@ -122,7 +123,7 @@ fun ToolbarMenuBottomSheet(
                     type = ToolbarOptionType.EXPANDED,
                     tabCount = tabCount,
                     dismissMenuSheet = onDismissMenuBottomSheet,
-                    onNavToTabsTray =   onNavToTabsTray,
+                    onNavToTabsTray = {onNavToTabsTray.invoke(tabSessionState.content.private)},
                 )
             },
             {
@@ -154,9 +155,9 @@ fun ToolbarMenuBottomSheet(
             {
                 ToolbarHistory(
                     type = ToolbarOptionType.EXPANDED,
-                    onNavToHistory= onNavToHistory,
+                    onNavToHistory = onNavToHistory,
                     dismissMenuSheet = onDismissMenuBottomSheet,
-                    )
+                )
             },
             {
                 ToolbarSettings(

@@ -26,11 +26,8 @@ import com.shmibblez.inferno.R
 import com.shmibblez.inferno.components.components
 import com.shmibblez.inferno.compose.button.TertiaryButton
 import com.shmibblez.inferno.compose.home.HomeSectionHeader
-import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.infernoTheme
-import com.shmibblez.inferno.ext.settings
-import com.shmibblez.inferno.ext.shouldShowRecentSyncedTabs
-import com.shmibblez.inferno.ext.shouldShowRecentTabs
+import com.shmibblez.inferno.home.InfernoHomeComponentState
 import com.shmibblez.inferno.home.bookmarks.Bookmark
 import com.shmibblez.inferno.home.bookmarks.interactor.BookmarksInteractor
 import com.shmibblez.inferno.home.bookmarks.view.Bookmarks
@@ -54,7 +51,6 @@ import com.shmibblez.inferno.home.sessioncontrol.CollectionInteractor
 import com.shmibblez.inferno.home.sessioncontrol.CustomizeHomeIteractor
 import com.shmibblez.inferno.home.sessioncontrol.viewholders.FeltPrivacyModeInfoCard
 import com.shmibblez.inferno.home.sessioncontrol.viewholders.PrivateBrowsingDescription
-import com.shmibblez.inferno.home.store.HomepageState
 import com.shmibblez.inferno.home.topsites.TopSites
 
 private val ITEM_PADDING = 24.dp
@@ -64,17 +60,16 @@ private val HEADER_BOTTOM_PADDING = 16.dp
 /**
  * Top level composable for the homepage.
  *
- * @param state State representing the homepage.
  * @param interactor for interactions with the homepage UI.
  * @param onTopSitesItemBound Invoked during the composition of a top site item.
  */
 @Suppress("LongMethod")
 @Composable
 internal fun Homepage(
-    state: HomepageState,
+//    state: HomepageState,
+    state: InfernoHomeComponentState,
     interactor: HomepageInteractor,
     onTopSitesItemBound: () -> Unit,
-    isPrivate: Boolean,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -85,10 +80,10 @@ internal fun Homepage(
             .verticalScroll(rememberScrollState()),
     ) {
         Spacer(modifier = Modifier.height(16.dp))
-        when (isPrivate) {
+        when (state.isPrivate) {
             true -> {
                 val feltPrivateBrowsingEnabled =
-                    if (state is HomepageState.Private) state.feltPrivateBrowsingEnabled else false
+                    false // if (state is HomepageState.Private) state.feltPrivateBrowsingEnabled else false
                 if (feltPrivateBrowsingEnabled) {
                     FeltPrivacyModeInfoCard(
                         onLearnMoreClick = interactor::onLearnMoreClicked,
@@ -101,52 +96,41 @@ internal fun Homepage(
             }
 
             false -> {
-                val appState = LocalContext.current.components.appStore.state
-                val settings = LocalContext.current.settings()
-                val topSites = appState.topSites
-                val showTopSites = settings.showTopSitesFeature && topSites.isNotEmpty()
-                val recentTabs = appState.recentTabs
-                val showRecentTabs = appState.shouldShowRecentTabs(settings)
                 val cardBackgroundColor = Color.Black // wallpaperState.cardBackgroundColor,
-                val syncedTab = when (appState.recentSyncedTabState) {
-                    RecentSyncedTabState.None,
-                    RecentSyncedTabState.Loading,
-                        -> null
+                val syncedTab = state.appState.recentSyncedTabState.let {
+                    when (it) {
+                        RecentSyncedTabState.None,
+                        RecentSyncedTabState.Loading,
+                            -> null
 
-                    is RecentSyncedTabState.Success -> appState.recentSyncedTabState.tabs.firstOrNull()
+                        is RecentSyncedTabState.Success -> it.tabs.firstOrNull()
+                    }
                 }
-                val showRecentSyncedTab = appState.shouldShowRecentSyncedTabs()
 
-//                val buttonBackgroundColor = appState.wallpaperState.buttonBackgroundColor
-//                val buttonTextColor = appState.wallpaperState.buttonTextColor
-                val bookmarks = appState.bookmarks
-                val showBookmarks = settings.showBookmarksHomeFeature && bookmarks.isNotEmpty()
-                val recentlyVisited = appState.recentHistory
-                val showRecentlyVisited = settings.shouldShowHistory && recentlyVisited.isNotEmpty()
                 val collectionsState = CollectionsState.build(
-                    appState = appState,
+                    appState = state.appState,
                     browserState = components.core.store.state,
                     isPrivate = false,
                 )
                 val showCustomizeHome =
-                    showTopSites || showRecentTabs || showBookmarks || showRecentlyVisited // || showPocketStories
+                    state.showTopSites || state.showRecentTabs || state.showBookmarks || state.showRecentlyVisited // || showPocketStories
 
-                if (showTopSites) {
+                if (state.showTopSites) {
                     TopSites(
-                        topSites = topSites,
+                        topSites = state.topSites,
                         interactor = interactor,
                         onTopSitesItemBound = onTopSitesItemBound,
                     )
                 }
 
-                if (showRecentTabs) {
+                if (state.showRecentTabs) {
                     RecentTabsSection(
                         interactor = interactor,
 //                            cardBackgroundColor = cardBackgroundColor,
-                        recentTabs = recentTabs,
+                        recentTabs = state.recentTabs,
                     )
 
-                    if (showRecentSyncedTab) {
+                    if (state.showRecentSyncedTab) {
                         Spacer(modifier = Modifier.height(8.dp))
 
                         RecentSyncedTab(
@@ -158,17 +142,17 @@ internal fun Homepage(
                     }
                 }
 
-                if (showBookmarks) {
+                if (state.showBookmarks) {
                     BookmarksSection(
-                        bookmarks = bookmarks,
+                        bookmarks = state.bookmarks,
 //                        cardBackgroundColor = cardBackgroundColor,
                         interactor = interactor,
                     )
                 }
 
-                if (showRecentlyVisited) {
+                if (state.showRecentlyVisited) {
                     RecentlyVisitedSection(
-                        recentVisits = recentlyVisited,
+                        recentVisits = state.recentlyVisited,
                         cardBackgroundColor = cardBackgroundColor,
                         interactor = interactor,
                     )
@@ -251,7 +235,7 @@ private fun BookmarksSection(
             ),
         ),
         backgroundColor = cardBackgroundColor,
-        onBookmarkClick =   interactor::onBookmarkClicked,
+        onBookmarkClick = interactor::onBookmarkClicked,
     )
 }
 

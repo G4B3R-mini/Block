@@ -13,17 +13,17 @@ import com.shmibblez.inferno.utils.Settings
 
 class DefaultTopSitesView(
     val appStore: AppStore,
-    val settings: Settings,
+//    val settings: Settings,
 ) : TopSitesView {
 
     override fun displayTopSites(topSites: List<TopSite>) {
         appStore.dispatch(
             AppAction.TopSitesChange(
-                if (!settings.showContileFeature) {
+//                if (!settings.showContileFeature) {
                     topSites
-                } else {
-                    topSites.sort()
-                },
+//                } else {
+//                    topSites.sort()
+//                },
             ),
         )
     }

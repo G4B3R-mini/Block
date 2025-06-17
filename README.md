@@ -61,6 +61,17 @@ that's it for now, hopefully this project doesn't die
             - [ ] crash page shows error log (# of lines then 3 dots) and optional checkbox for info
               like device type, time error occurred, android version, and other relevant info, and
               at the bottom cancel button and send
+    - [ ] crash reporting page is not possible with crashlytics, no way to get crash list
+    - [ ] new plan: setting to enable/disable automatic crash collection, show description: Crash
+      reporting is reset upon app restart
+        - [ ] add worker to init app and send errors every once in a while (once a day?) since
+          crashlytics sends crashes when app starts
+        - [ ] find way to send user feedback
+        - [ ] could also persist crashes manually (in db for example, or proto, max 5 most recent),
+          then when user chooses to send, go to send bug page, there user can add extra info and
+          choose what to send or not. Still keeping automatic for now, but later add more granular
+          control (instead of enable/disable, have options: Automatic, Disabled, Manual. For Manual
+          option, persist and send through crashes screen)
 
 ## Critical
 
@@ -199,15 +210,6 @@ Did you add an account?
 ## Under Construction
 
 - [ ] biometric
-    - [ ] for components that depend on biometric/auth, you could create a fragment in
-      compose (as shown [here](https://stackoverflow.com/a/71480760/14642303)), that listens for
-      biometric success/fail callbacks, and takes composables as children. Put composables that
-      require biometric here with callbacks for biometric/auth events. This removes the need to
-      create deeply nested callbacks
-    - [ ] so far components that depend on biometric/pin auth are:
-        - [ ] dialog feature in browser component
-        - [ ] creditCardManager in settings
-        - [ ] loginManager in settings
 - [ ] autofill settings page
     - [ ] show some settings depending on login state (sync cards, sync logins, etc.)
     - [ ] use authentication when click on manage cards
@@ -218,9 +220,17 @@ Did you add an account?
 `Features that will be added eventually, but are currently not a priority`
 
 - [ ] more toolbar items
-    - [ ] go to passwords page (key with bottom right profile view) (requires auth, consider setting
-      a timeout like bitwarden does)
-    - [ ] extensions settings direct access
+    - [ ] print page
+    - [ ] scrolling screenshot
+
+[//]: # (    - [ ] keeping this here in case I come up with more, currently all good)
+
+- [ ] BrowserComponent
+    - [ ] persist component states, or move to state variables to manage visual bloating, pending:
+        - [ ] TabsTray
+        - [ ] Homepage
+        - [ ] ToolbarMenu
+        - [ ] DownloadComponent
 
 # Future Features
 
@@ -264,6 +274,23 @@ Did you add an account?
       and requires dialog to confirm
 - [ ] enhanced tracking protection
     - [ ] exceptions
+- [ ] crash reporting
+    - [ ] crash reporting setting will have 3 options: Disabled, Automatic, and Manual
+        - [ ] if automatic or manual show additional settings for data to send selected by default
+          in checkboxes (device model, time error occurred, email for contact -> data ordered from
+          less sensitive to most sensitive)
+    - [ ] accompanying crashes page that shows all errors (only store 5 latest)
+        - [ ] if disabled, show all errors
+        - [ ] if manual, show all unsent errors, once sent remove persisted entry
+        - [ ] if automatic, show all unsent errors, send error one day after occurs
+    - [ ] when error occurs, show crash notification (inferno browser just crashed, click to see
+      error), which takes user to individual crash page
+    - [ ] crash page when individual error clicked from crashes
+        - [ ] show log (first 10 lines, code format with different background), optional data with
+          options selected according to settings, description, and send button. When crash sent
+          delete from persisted entries.
+    - [ ] this _could_ be done with crashlytics, would be very hacky. Before sending a crash, clear
+      all crashes, then attach data as messages, add error, and send data
 
 # Current Structures
 
@@ -290,3 +317,13 @@ Did you add an account?
     - These listen to browser state changes and apply changes accordingly
     - In the case of compose adaptations, all mozilla logic is moved / adapted to a State instance
       that is remembered in compose and passed to an accompanying ui composable component
+- Crash Reporting
+    - Automatic crashlytics crash reporting, enabled for com.shmibblez.inferno and
+      com.shmibblez.inferno.beta builds (com.shmibblez.inferno.debug ignored)
+    - Can only be enabled or disabled, crash page is not possible since no way to get and send
+      individual reports with crashlytics, no way to attach optional data
+    - Currently `google-services.json` is public since _allegedly_ all api keys are public, and can
+      be extracted from apk so y not lol
+- Built Apks
+    - Code is not obfuscated, only minified so if anyone wishes to verify that code reflects repo
+      code they definitely can

@@ -51,6 +51,7 @@ import com.shmibblez.inferno.compose.Favicon
 import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.ext.components
+import com.shmibblez.inferno.ext.determineCustomHomeUrl
 import com.shmibblez.inferno.ext.infernoTheme
 import com.shmibblez.inferno.ext.newTab
 import com.shmibblez.inferno.proto.InfernoSettings
@@ -183,14 +184,7 @@ fun InfernoTabBar(tabList: List<TabSessionState>, selectedTab: TabSessionState?)
                         .size(12.dp)
                         .clickable {
                             context.components.newTab(
-                                customHomeUrl = if (settings.shouldUseInfernoHome) null else {
-                                    settings.customHomeUrl.let {
-                                        when (it.isNullOrEmpty()) {
-                                            true -> null
-                                            false -> it
-                                        }
-                                    }
-                                },
+                                customHomeUrl = settings.determineCustomHomeUrl(),
                                 private = isPrivateSession,
                                 nextTo = selectedTab.id, // todo: next to current based on config, default is true
                             )

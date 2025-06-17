@@ -106,6 +106,7 @@ import com.shmibblez.inferno.findInPageBar.BrowserFindInPageBar
 import com.shmibblez.inferno.home.CrashComponent
 import com.shmibblez.inferno.home.HomeFragment
 import com.shmibblez.inferno.home.InfernoHomeComponent
+import com.shmibblez.inferno.home.rememberInfernoHomeComponentState
 import com.shmibblez.inferno.loading.InfernoLoadingComponent
 import com.shmibblez.inferno.messaging.FenixMessageSurfaceId
 import com.shmibblez.inferno.perf.MarkersFragmentLifecycleCallbacks
@@ -114,9 +115,9 @@ import com.shmibblez.inferno.shopping.ReviewQualityCheckFeature
 import com.shmibblez.inferno.shortcut.PwaOnboardingObserver
 import com.shmibblez.inferno.tabbar.InfernoTabBar
 import com.shmibblez.inferno.tabs.tabstray.InfernoTabsTray
-import com.shmibblez.inferno.tabs.tabstray.InfernoTabsTrayDisplayType
 import com.shmibblez.inferno.tabs.tabstray.InfernoTabsTrayMode
 import com.shmibblez.inferno.tabs.tabstray.InfernoTabsTraySelectedTab
+import com.shmibblez.inferno.tabs.tabstray.rememberInfernoTabsTrayState
 import com.shmibblez.inferno.tabstray.TabsTrayFragmentDirections
 import com.shmibblez.inferno.tabstray.ext.isActiveDownload
 import com.shmibblez.inferno.tabstray.ext.isNormalTab
@@ -131,7 +132,6 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.mapNotNull
@@ -334,37 +334,25 @@ fun BrowserComponent(
     val snackbarHostState = remember { AcornSnackbarHostState() }
     var activeAlertDialog by remember { mutableStateOf<(@Composable () -> Unit)?>(null) }
 
-    // tabs tray vars
-    var showTabsTray by remember { mutableStateOf(false) }
-    var tabsTrayMode by remember { mutableStateOf<InfernoTabsTrayMode>(InfernoTabsTrayMode.Normal) }
-    fun dismissTabsTray() {
-        showTabsTray = false
-        tabsTrayMode = InfernoTabsTrayMode.Normal
-    }
+    // todo: review quality check
+////    val openInAppOnboardingObserver = ViewBoundFeatureWrapper<OpenInAppOnboardingObserver>()
+//    var reviewQualityCheckFeature by remember { mutableStateOf<ReviewQualityCheckFeature?>(null) }
+////    val translationsBinding = ViewBoundFeatureWrapper<TranslationsBinding>()
+//
+//    // as is in Fenix, currently doesnt do anything
+//    var reviewQualityCheckAvailable by remember {
+//        mutableStateOf(
+//            false
+//        )
+//    }
 
-    /* BrowserFragment vars */
-    var windowFeature by remember { mutableStateOf<WindowFeature?>(null) }
-//    val openInAppOnboardingObserver = ViewBoundFeatureWrapper<OpenInAppOnboardingObserver>()
-    var reviewQualityCheckFeature by remember { mutableStateOf<ReviewQualityCheckFeature?>(null) }
-//    val translationsBinding = ViewBoundFeatureWrapper<TranslationsBinding>()
-
-    // as is in Fenix, currently doesnt do anything
-    var reviewQualityCheckAvailable by remember {
-        mutableStateOf(
-            false
-        )
-    }
 
     var pwaOnboardingObserver: PwaOnboardingObserver? = null
 
-    /* BrowserFragment  vars */
+    // region Vanilla Features (no need to adapt to compose)
 
-    /* BaseBrowserFragment vars */
-    lateinit var browserAnimator: BrowserAnimator
-
+    var windowFeature by remember { mutableStateOf<WindowFeature?>(null) }
     var thumbnailsFeature by remember { mutableStateOf<BrowserThumbnails?>(null) }
-
-//    @VisibleForTesting val messagingFeatureMicrosurvey = ViewBoundFeatureWrapper<MessagingFeature>()
 
     var sessionFeature by remember { mutableStateOf<SessionFeature?>(null) }
     var shareDownloadsFeature by remember { mutableStateOf<ShareDownloadFeature?>(null) }
@@ -394,29 +382,16 @@ fun BrowserComponent(
 
     var pipFeature by remember { mutableStateOf<PictureInPictureFeature?>(null) }
 
-    val browserInitialized by remember { mutableStateOf(false) }
-    val initUIJob by remember { mutableStateOf<Job?>(null) }
+    // endregion
 
-    // todo:
-//    @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED) var webAppToolbarShouldBeVisible =
-//        true
-
-    var lastSavedGeneratedPassword by remember {
-        mutableStateOf<String?>(
-            null
-        )
-    }
-
-    /// old component features
-//    val webExtensionPromptFeature =
-//        remember { ViewBoundFeatureWrapper<WebExtensionPromptFeature>() }
+    // region Permission Launchers
 
     var requestDownloadPermissionsCallback by remember {
         mutableStateOf<((permissions: Array<String>, grantResults: IntArray) -> Unit)?>(
             null
         )
     }
-    // permission launchers
+
     val requestDownloadPermissionsLauncher: ActivityResultLauncher<Array<String>> =
         rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { results ->
             val permissions = results.keys.toTypedArray()
@@ -443,6 +418,10 @@ fun BrowserComponent(
             tempWebPrompterState?.onPermissionsResult(permissions, grantResults)
         }
 
+    // endregion
+
+    // region Bottom Bar Offset
+
     // connection to the nested scroll system and listen to the scroll
     var bottomBarHeightDp by remember {
         mutableStateOf(
@@ -458,6 +437,9 @@ fun BrowserComponent(
 
     val bottomBarOffsetPx = remember { Animatable(0F) }
 
+    // endregion
+
+    // region InfernoWebPrompterState
 
     val webPrompterState = rememberInfernoWebPrompterState(
         activity = context.getActivity()!!,
@@ -525,7 +507,7 @@ fun BrowserComponent(
                 url = url,
                 password = password,
                 lifecycleScope = coroutineScope,
-                setLastSavedGeneratedPassword = { lastSavedGeneratedPassword = it },
+                setLastSavedGeneratedPassword = { state.lastSavedGeneratedPassword = it },
             )
         },
         onSaveLogin = { isUpdate ->
@@ -540,14 +522,12 @@ fun BrowserComponent(
             hideUpdateFragmentAfterSavingGeneratedPassword(
                 username = username,
                 password = password,
-                lastSavedGeneratedPassword = lastSavedGeneratedPassword
+                lastSavedGeneratedPassword = state.lastSavedGeneratedPassword
             )
         },
         removeLastSavedGeneratedPassword = {
             removeLastSavedGeneratedPassword(
-                setLastSavedGeneratedPassword = {
-                    lastSavedGeneratedPassword = it
-                },
+                setLastSavedGeneratedPassword = { state.lastSavedGeneratedPassword = it },
             )
         },
         creditCardDelegate = { prompterState, activityResultLauncher ->
@@ -577,6 +557,10 @@ fun BrowserComponent(
     )
     tempWebPrompterState = webPrompterState
 
+    // endregion
+
+    // region InfernoReaderViewState
+
     val infernoReaderViewState = rememberInfernoReaderViewFeatureState(
         context = context,
         engine = context.components.core.engine,
@@ -588,6 +572,8 @@ fun BrowserComponent(
             }
         },
     )
+
+    // endregion
 
     val backHandler = OnBackPressedHandler(
         context = context,
@@ -616,135 +602,151 @@ fun BrowserComponent(
     if (activeAlertDialog != null) {
         activeAlertDialog!!.invoke()
     }
+
     // bottom sheet menu setup
     var showToolbarMenuBottomSheet by remember { mutableStateOf(false) }
-    if (showToolbarMenuBottomSheet) {
-        ToolbarMenuBottomSheet(
-            tabSessionState = state.currentTab,
-            loading = state.currentTab?.content?.loading ?: false,
-            tabCount = state.tabList.size,
-            onDismissMenuBottomSheet = { showToolbarMenuBottomSheet = false },
-            onActivateFindInPage = { state.setBrowserModeFindInPage() },
-            onActivateReaderView = {
-                val successful = infernoReaderViewState.showReaderView()
-                if (successful) {
-                    state.setBrowserModeReaderView()
-                }
-            },
-            onRequestSearchBar = { /* todo */ },
-            onNavToSettings = onNavToSettings,
-            onNavToTabsTray = { showTabsTray = true },
-            onNavToHistory = onNavToHistory,
-            onNavToExtensions = onNavToExtensions,
-            onNavToPasswords = onNavToPasswords,
+
+    /// views
+    var engineView by remember { mutableStateOf<EngineView?>(null) }
+    var swipeRefresh by remember { mutableStateOf<SwipeRefreshLayout?>(null) }
+
+    /// event handlers
+    val activityResultHandler: List<ActivityResultHandler?> = listOf(
+        webAuthnFeature, webPrompterState,
+//        promptsFeature,
+    )
+
+    // sets activity handler for onActivityResult
+    state.setOnActivityResultHandler { result: OnActivityResultModel ->
+        Logger.info(
+            "Fragment onActivityResult received with " + "requestCode: ${result.requestCode}, resultCode: ${result.resultCode}, data: ${result.data}",
         )
+
+        // feature activity result handler
+        activityResultHandler.any {
+            it?.onActivityResult(
+                result.requestCode, result.data, result.resultCode
+            ) ?: false
+        }
+
     }
 
-    if (showTabsTray) {
-        // request screenshot before showing
-        thumbnailsFeature?.requestScreenshot()
-        // todo: missing functionality from [TabsTrayFragment], [DefaultTabsTrayInteractor], and [DefaultTabsTrayController]
-        InfernoTabsTray(
-            dismiss = ::dismissTabsTray,
-            mode = tabsTrayMode,
-            setMode = { mode -> tabsTrayMode = mode },
-            activeTabId = state.currentTab?.id,
-            normalTabs = state.normalTabs,
-            privateTabs = state.privateTabs,
-            recentlyClosedTabs = state.closedTabs,
-            tabDisplayType = InfernoTabsTrayDisplayType.List,
-            selectedTabsTrayTab = state.selectedTabsTrayTab,
-            onBookmarkSelectedTabsClick = {
-                CoroutineScope(IO).launch {
-                    Result.runCatching {
-                        val bookmarksStorage = context.components.core.bookmarksStorage
-                        val parentGuid =
-                            bookmarksStorage.getRecentBookmarks(1).firstOrNull()?.parentGuid
-                                ?: BookmarkRoot.Mobile.id
+    // currently set to 0 always, todo: only do this if dynamic toolbar enabled
+    fun setEngineDynamicToolbarMaxHeight(h: Int = 0) {
+//        engineView?.setDynamicToolbarMaxHeight(h)
+        engineView?.setDynamicToolbarMaxHeight(h)
+        engineView?.setVerticalClipping(h)
+    }
 
-                        val parentNode = bookmarksStorage.getBookmark(parentGuid)
+    // on back pressed handlers
+    BackHandler {
+        onBackPressed(backHandler)
+    }
 
-                        tabsTrayMode.selectedTabs.forEach { tab ->
-                            bookmarksStorage.addItem(
-                                parentGuid = parentNode!!.guid,
-                                url = tab.content.url,
-                                title = tab.content.title,
-                                position = null,
-                            )
-                        }
-                        withContext(Main) {
-                            showBookmarkSnackbar(
-                                tabsTrayMode.selectedTabs.size,
-                                parentNode?.title,
-                                context = context,
-                                coroutineScope = coroutineScope,
-                                snackbarHostState = snackbarHostState,
-//                                navController = navController,
-                                dismissTabsTray = ::dismissTabsTray
-                            )
-                        }
-                    }.getOrElse {
-                        // silently fail
+    // region InfernoTabsTrayState
+
+    // todo: missing functionality from [TabsTrayFragment], [DefaultTabsTrayInteractor], and [DefaultTabsTrayController]
+    // todo: move everything below to state (create TabsTrayState), show/hide through there
+
+    // todo: call state.setTabDisplayType on settings change
+    val tabsTrayState by rememberInfernoTabsTrayState(
+        onRequestScreenshot = {
+            // request screenshot before showing
+            thumbnailsFeature?.requestScreenshot()
+        },
+        initiallyVisible = false,
+        initialMode = InfernoTabsTrayMode.Normal,
+        initiallySelectedTab = InfernoTabsTraySelectedTab.NormalTabs,
+        onBookmarkSelectedTabsClick = { selectedTabs, dismiss ->
+            CoroutineScope(IO).launch {
+                Result.runCatching {
+                    val bookmarksStorage = context.components.core.bookmarksStorage
+                    val parentGuid =
+                        bookmarksStorage.getRecentBookmarks(1).firstOrNull()?.parentGuid
+                            ?: BookmarkRoot.Mobile.id
+
+                    val parentNode = bookmarksStorage.getBookmark(parentGuid)
+
+                    selectedTabs.forEach { tab ->
+                        bookmarksStorage.addItem(
+                            parentGuid = parentNode!!.guid,
+                            url = tab.content.url,
+                            title = tab.content.title,
+                            position = null,
+                        )
                     }
+                    withContext(Main) {
+                        showBookmarkSnackbar(
+                            selectedTabs.size,
+                            parentNode?.title,
+                            context = context,
+                            coroutineScope = coroutineScope,
+                            snackbarHostState = snackbarHostState,
+//                                navController = navController,
+                            dismissTabsTray = dismiss
+                        )
+                    }
+                }.getOrElse {
+                    // silently fail
                 }
-                tabsTrayMode = InfernoTabsTrayMode.Normal
-            },
-            onDeleteSelectedTabsClick = {
-                /**
-                 * Helper function to delete multiple tabs and offer an undo option.
-                 */
-                fun deleteMultipleTabs(tabs: Collection<TabSessionState>) {
-                    val isPrivate = tabs.any { it.content.private }
+                dismiss.invoke()
+            }
+        },
+        onDeleteSelectedTabsClick = { selectedTabs, dismiss ->
+            /**
+             * Helper function to delete multiple tabs and offer an undo option.
+             */
+            fun deleteMultipleTabs(tabs: Collection<TabSessionState>) {
+                val isPrivate = tabs.any { it.content.private }
 
-                    // If user closes all the tabs from selected tabs page dismiss tray and navigate home.
-                    if (tabs.size == context.components.core.store.state.getNormalOrPrivateTabs(
-                            isPrivate
-                        ).size
-                    ) {
-                        tabs.map { it.id }.let {
-                            context.components.useCases.tabsUseCases.removeTabs(it)
-                        }
-                        dismissTabsTray()
-                        // todo: select last private or normal tab depending on type deleted
+                // If user closes all the tabs from selected tabs page dismiss tray and navigate home.
+                if (tabs.size == context.components.core.store.state.getNormalOrPrivateTabs(
+                        isPrivate
+                    ).size
+                ) {
+                    tabs.map { it.id }.let {
+                        context.components.useCases.tabsUseCases.removeTabs(it)
+                    }
+                    dismiss.invoke()
+                    // todo: select last private or normal tab depending on type deleted
 //                        dismissTabsTrayAndNavigateHome(
 //                            if (isPrivate) HomeFragment.ALL_PRIVATE_TABS else HomeFragment.ALL_NORMAL_TABS,
 //                        )
-                    } else {
-                        tabs.map { it.id }.let {
-                            context.components.useCases.tabsUseCases.removeTabs(it)
-                        }
+                } else {
+                    tabs.map { it.id }.let {
+                        context.components.useCases.tabsUseCases.removeTabs(it)
                     }
-                    showUndoSnackbarForTab(isPrivate, context, coroutineScope, snackbarHostState)
                 }
+                showUndoSnackbarForTab(isPrivate, context, coroutineScope, snackbarHostState)
+            }
 
-                val tabs = tabsTrayMode.selectedTabs
-                deleteMultipleTabs(tabs)
+            deleteMultipleTabs(selectedTabs)
 //                TabsTray.closeSelectedTabs.record(TabsTray.CloseSelectedTabsExtra(tabCount = tabs.size))
-                tabsTrayMode = InfernoTabsTrayMode.Normal
-            },
-            onForceSelectedTabsAsInactiveClick = {
-                val numDays: Long = DEFAULT_ACTIVE_DAYS + 1
-                val tabs = tabsTrayMode.selectedTabs
-                val currentTabId = context.components.core.store.state.selectedTabId
-                tabs.filterNot { it.id == currentTabId }.forEach { tab ->
-                    val daysSince = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(numDays)
-                    context.components.core.store.apply {
-                        dispatch(LastAccessAction.UpdateLastAccessAction(tab.id, daysSince))
-                        dispatch(DebugAction.UpdateCreatedAtAction(tab.id, daysSince))
-                    }
-                }
 
-                tabsTrayMode = InfernoTabsTrayMode.Normal
-            },
-            onTabSettingsClick = {
-                // todo: nav to tab settings page
+            dismiss.invoke()
+        },
+        onForceSelectedTabsAsInactiveClick = { selectedTabs, dismiss ->
+            val numDays: Long = DEFAULT_ACTIVE_DAYS + 1
+            val currentTabId = context.components.core.store.state.selectedTabId
+            selectedTabs.filterNot { it.id == currentTabId }.forEach { tab ->
+                val daysSince = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(numDays)
+                context.components.core.store.apply {
+                    dispatch(LastAccessAction.UpdateLastAccessAction(tab.id, daysSince))
+                    dispatch(DebugAction.UpdateCreatedAtAction(tab.id, daysSince))
+                }
+            }
+
+            dismiss.invoke()
+        },
+        onTabSettingsClick = { selectedTabs, dismiss ->
+            // todo: nav to tab settings page
 //                navController.navigate(
 //                    TabsTrayFragmentDirections.actionGlobalTabSettingsFragment(),
 //                )
-            },
-            onHistoryClick = onNavToHistory,
-            onShareAllTabsClick = {
-                // todo: context.shareTextList -> all urls
+        },
+        onHistoryClick = onNavToHistory,
+        onShareAllTabsClick = {
+            // todo: context.shareTextList -> all urls
 //                if (tabsTrayStore.state.selectedPage == Page.NormalTabs) {
 //                    tabsTrayStore.dispatch(TabsTrayAction.ShareAllNormalTabs)
 //                } else if (tabsTrayStore.state.selectedPage == Page.PrivateTabs) {
@@ -754,32 +756,29 @@ fun BrowserComponent(
 //                navigationInteractor.onShareTabsOfTypeClicked(
 //                    private = tabsTrayStore.state.selectedPage == Page.PrivateTabs,
 //                )
-            },
-            onDeleteAllTabsClick = {
-
-                when (state.selectedTabsTrayTab) {
-                    InfernoTabsTraySelectedTab.NormalTabs -> {
-                        context.components.useCases.tabsUseCases.removeNormalTabs.invoke()
-                        showUndoSnackbarForTab(
-                            isPrivate = false,
-                            context = context,
-                            coroutineScope = coroutineScope,
-                            snackbarHostState = snackbarHostState,
-                        )
-                    }
-
-                    InfernoTabsTraySelectedTab.PrivateTabs -> {
-                        context.components.useCases.tabsUseCases.removePrivateTabs.invoke()
-                        showUndoSnackbarForTab(
-                            isPrivate = true,
-                            context = context,
-                            coroutineScope = coroutineScope,
-                            snackbarHostState = snackbarHostState,
-                        )
-                    }
-
-                    else -> {}
+        },
+        onDeleteAllTabsClick = { private ->
+            when (private) {
+                false -> {
+                    context.components.useCases.tabsUseCases.removeNormalTabs.invoke()
+                    showUndoSnackbarForTab(
+                        isPrivate = false,
+                        context = context,
+                        coroutineScope = coroutineScope,
+                        snackbarHostState = snackbarHostState,
+                    )
                 }
+
+                true -> {
+                    context.components.useCases.tabsUseCases.removePrivateTabs.invoke()
+                    showUndoSnackbarForTab(
+                        isPrivate = true,
+                        context = context,
+                        coroutineScope = coroutineScope,
+                        snackbarHostState = snackbarHostState,
+                    )
+                }
+            }
 
 //                if (tabsTrayStore.state.selectedPage == Page.NormalTabs) {
 //                    tabsTrayStore.dispatch(TabsTrayAction.CloseAllNormalTabs)
@@ -790,225 +789,253 @@ fun BrowserComponent(
 //                navigationInteractor.onCloseAllTabsClicked(
 //                    private = tabsTrayStore.state.selectedPage == Page.PrivateTabs,
 //                )
-            },
-            onAccountSettingsClick = {
-                // todo: nav to account settings
-                val isSignedIn =
-                    context.components.backgroundServices.accountManager.authenticatedAccount() != null
+        },
+        onAccountSettingsClick = {
+            // todo: nav to account settings
+            val isSignedIn =
+                context.components.backgroundServices.accountManager.authenticatedAccount() != null
 
-                val direction = if (isSignedIn) {
-                    TabsTrayFragmentDirections.actionGlobalAccountSettingsFragment()
-                } else {
-                    TabsTrayFragmentDirections.actionGlobalTurnOnSync(entrypoint = FenixFxAEntryPoint.NavigationInteraction)
-                }
+            val direction = if (isSignedIn) {
+                TabsTrayFragmentDirections.actionGlobalAccountSettingsFragment()
+            } else {
+                TabsTrayFragmentDirections.actionGlobalTurnOnSync(entrypoint = FenixFxAEntryPoint.NavigationInteraction)
+            }
 //                navController.navigate(direction)
-            },
-            onTabClick = { tab ->
-                fun getTabPositionFromId(tabsList: List<TabSessionState>, tabId: String): Int {
-                    tabsList.forEachIndexed { index, tab -> if (tab.id == tabId) return index }
-                    return -1
-                }
-                run outer@{
-                    if (!context.settings().hasShownTabSwipeCFR && !context.isTabStripEnabled() && context.settings().isSwipeToolbarToSwitchTabsEnabled) {
-//                        val normalTabs = context.components.core.store.state.normalTabs
-                        val currentTabId = state.currentTab?.id
+        },
+        onTabClick = { tab, currentMode, enableSelect, dismiss ->
+            fun getTabPositionFromId(tabsList: List<TabSessionState>, tabId: String): Int {
+                tabsList.forEachIndexed { index, tab -> if (tab.id == tabId) return index }
+                return -1
+            }
 
-                        if (state.normalTabs.size >= 2) {
-                            val currentTabPosition =
-                                currentTabId?.let { getTabPositionFromId(state.normalTabs, it) }
-                                    ?: return@outer
-                            val newTabPosition = getTabPositionFromId(state.normalTabs, tab.id)
-
-                            if (abs(currentTabPosition - newTabPosition) == 1) {
-                                context.settings().shouldShowTabSwipeCFR = true
-                            }
-                        }
-                    }
-                }
-
-                val selected = tabsTrayMode.selectedTabs
-                when {
-                    selected.isEmpty() && tabsTrayMode.isNormal() -> {
+            val selected = currentMode.selectedTabs
+            when {
+                selected.isEmpty() && currentMode.isNormal() -> {
 //                TabsTray.openedExistingTab.record(TabsTray.OpenedExistingTabExtra(source ?: "unknown"))
-                        context.components.useCases.tabsUseCases.selectTab(tab.id)
-                        dismissTabsTray()
-                    }
-
-                    selected.contains(tab) -> {
-                        tabsTrayMode = InfernoTabsTrayMode.Select(selected - tab)
-                    }
-
-                    else -> {
-                        tabsTrayMode = InfernoTabsTrayMode.Select(selected + tab)
-                    }
+                    context.components.useCases.tabsUseCases.selectTab(tab.id)
+                    dismiss.invoke()
                 }
+
+                selected.contains(tab) -> {
+                    enableSelect(selected - tab)
+                }
+
+                else -> {
+                    enableSelect(selected + tab)
+                }
+            }
 
 //                tabsTrayInteractor.onTabSelected(tab, TABS_TRAY_FEATURE_NAME)
-            },
-            onTabClose = { closedTab ->
-                fun deleteTab(tabId: String, source: String?, isConfirmed: Boolean) {
-                    val browserStore = context.components.core.store
-                    val tab = browserStore.state.findTab(tabId)
-                    tab?.let {
-                        val isLastTab =
-                            browserStore.state.getNormalOrPrivateTabs(it.content.private).size == 1
-                        val isCurrentTab = browserStore.state.selectedTabId.equals(tabId)
-                        if (!isLastTab || !isCurrentTab) {
-                            context.components.useCases.tabsUseCases.removeTab(tabId)
-                            showUndoSnackbarForTab(
-                                isPrivate = it.content.private,
-                                context = context,
-                                coroutineScope = coroutineScope,
-                                snackbarHostState = snackbarHostState,
-                                setInitiallySelectedTabTray = { selectedTab ->
-                                    state.selectedTabsTrayTab = selectedTab
-                                },
-                                tab = tab,
-                            )
-                        } else {
-                            val privateDownloads = browserStore.state.downloads.filter { map ->
-                                map.value.private && map.value.isActiveDownload()
-                            }
-                            if (!isConfirmed && privateDownloads.isNotEmpty()) {
-                                showCancelledDownloadWarning(downloadCount = privateDownloads.size,
-                                    tabId = tabId,
-                                    source = source,
-                                    context = context,
-                                    coroutineScope = coroutineScope,
-                                    setAlertDialog = { ad -> activeAlertDialog = ad },
-                                    snackbarHostState = snackbarHostState,
-                                    setInitiallySelectedTabTray = { selectedTab: InfernoTabsTraySelectedTab ->
-                                        state.selectedTabsTrayTab = selectedTab
-                                    },
-                                    dismissTabsTray = { dismissTabsTray() })
-                                return
-                            } else {
-                                dismissTabsTray()
-                                context.components.useCases.tabsUseCases.removeTab(tabId)
-                            }
-                        }
-//            TabsTray.closedExistingTab.record(TabsTray.ClosedExistingTabExtra(source ?: "unknown"))
-                    }
-                }
-
-                deleteTab(closedTab.id, null, isConfirmed = false)
-            },
-            onTabMediaClick = { tab ->
-                when (tab.mediaSessionState?.playbackState) {
-                    MediaSession.PlaybackState.PLAYING -> {
-//                GleanTab.mediaPause.record(NoExtras())
-                        tab.mediaSessionState?.controller?.pause()
-                    }
-
-                    MediaSession.PlaybackState.PAUSED -> {
-//                GleanTab.mediaPlay.record(NoExtras())
-                        tab.mediaSessionState?.controller?.play()
-                    }
-
-                    else -> throw AssertionError(
-                        "Play/Pause button clicked without play/pause state.",
-                    )
-                }
-            },
-            onTabMove = { tabId, targetId, placeAfter ->
-                if (targetId != null && tabId != targetId) {
-                    context.components.useCases.tabsUseCases.moveTabs(
-                        listOf(tabId), targetId, placeAfter
-                    )
-                }
-            },
-            onTabLongClick = { tab ->
-                // set mode select and add pressed tab
-                if (tabsTrayMode.isNormal()) {
-                    when (state.selectedTabsTrayTab) {
-                        InfernoTabsTraySelectedTab.NormalTabs -> {
-                            tabsTrayMode = InfernoTabsTrayMode.Select(setOf(tab))
-                        }
-
-                        InfernoTabsTraySelectedTab.PrivateTabs -> {
-                            tabsTrayMode = InfernoTabsTrayMode.Select(setOf(tab))
-                        }
-
-                        else -> {}
-                    }
-                }
-            },
-            onSyncedTabClick = { tab ->
-                dismissTabsTray()
-                (context.getActivity()!! as HomeActivity).openToBrowserAndLoad(
-                    searchTermOrURL = tab.active().url,
-                    newTab = true,
-                    from = BrowserDirection.FromTabsTray,
-                )
-            },
-            onSyncedTabClose = { deviceId, tab ->
-                val closeSyncedTabsUseCases = context.components.useCases.closeSyncedTabsUseCases
-                CoroutineScope(IO).launch {
-                    val operation = closeSyncedTabsUseCases.close(deviceId, tab.active().url)
-                    withContext(Main) {
-                        showUndoSnackbarForSyncedTab(
-                            closeOperation = operation,
+        },
+        onTabClose = { closedTab, dismiss, setSelectedTabTrayTab ->
+            fun deleteTab(tabId: String, source: String?, isConfirmed: Boolean) {
+                val browserStore = context.components.core.store
+                val tab = browserStore.state.findTab(tabId)
+                tab?.let {
+                    val isLastTab =
+                        browserStore.state.getNormalOrPrivateTabs(it.content.private).size == 1
+                    val isCurrentTab = browserStore.state.selectedTabId.equals(tabId)
+                    if (!isLastTab || !isCurrentTab) {
+                        context.components.useCases.tabsUseCases.removeTab(tabId)
+                        showUndoSnackbarForTab(
+                            isPrivate = it.content.private,
                             context = context,
                             coroutineScope = coroutineScope,
                             snackbarHostState = snackbarHostState,
+                            setSelectedTabTrayTab = setSelectedTabTrayTab,
+                            tab = tab,
+                        )
+                    } else {
+                        val privateDownloads = browserStore.state.downloads.filter { map ->
+                            map.value.private && map.value.isActiveDownload()
+                        }
+                        if (!isConfirmed && privateDownloads.isNotEmpty()) {
+                            showCancelledDownloadWarning(downloadCount = privateDownloads.size,
+                                tabId = tabId,
+                                source = source,
+                                context = context,
+                                coroutineScope = coroutineScope,
+                                setAlertDialog = { ad -> activeAlertDialog = ad },
+                                snackbarHostState = snackbarHostState,
+                                setInitiallySelectedTabTray = setSelectedTabTrayTab,
+                                dismissTabsTray = dismiss)
+                            return
+                        } else {
+                            dismiss.invoke()
+                            context.components.useCases.tabsUseCases.removeTab(tabId)
+                        }
+                    }
+//            TabsTray.closedExistingTab.record(TabsTray.ClosedExistingTabExtra(source ?: "unknown"))
+                }
+            }
+
+            deleteTab(closedTab.id, null, isConfirmed = false)
+        },
+        onTabMediaClick = { tab ->
+            when (tab.mediaSessionState?.playbackState) {
+                MediaSession.PlaybackState.PLAYING -> {
+//                GleanTab.mediaPause.record(NoExtras())
+                    tab.mediaSessionState?.controller?.pause()
+                }
+
+                MediaSession.PlaybackState.PAUSED -> {
+//                GleanTab.mediaPlay.record(NoExtras())
+                    tab.mediaSessionState?.controller?.play()
+                }
+
+                else -> throw AssertionError(
+                    "Play/Pause button clicked without play/pause state.",
+                )
+            }
+        },
+        onTabMove = { tabId, targetId, placeAfter ->
+            if (targetId != null && tabId != targetId) {
+                context.components.useCases.tabsUseCases.moveTabs(
+                    listOf(tabId), targetId, placeAfter
+                )
+            }
+        },
+        onTabLongClick = { tab, mode, private, enableSelect ->
+            // set mode select and add pressed tab
+            if (mode.isNormal()) {
+                when (private) {
+                    false -> {
+                        enableSelect(setOf(tab))
+                    }
+
+                    true -> {
+                        enableSelect(setOf(tab))
+                    }
+                }
+            }
+        },
+        onSyncedTabClick = { tab, dismiss ->
+            dismiss.invoke()
+            (context.getActivity()!! as HomeActivity).openToBrowserAndLoad(
+                searchTermOrURL = tab.active().url,
+                newTab = true,
+                from = BrowserDirection.FromTabsTray,
+            )
+        },
+        onSyncedTabClose = { deviceId, tab ->
+            val closeSyncedTabsUseCases = context.components.useCases.closeSyncedTabsUseCases
+            CoroutineScope(IO).launch {
+                val operation = closeSyncedTabsUseCases.close(deviceId, tab.active().url)
+                withContext(Main) {
+                    showUndoSnackbarForSyncedTab(
+                        closeOperation = operation,
+                        context = context,
+                        coroutineScope = coroutineScope,
+                        snackbarHostState = snackbarHostState,
+                    )
+                }
+            }
+        },
+        onClosedTabClick = { tabState, currentMode, enableSelectClosed, dismiss ->
+            val selected = currentMode.selectedClosedTabs
+            when {
+                // restore tab
+                currentMode.isNormal() -> {
+                    val recentlyClosedTabsStorage =
+                        context.components.core.recentlyClosedTabsStorage.value
+                    val tabsUseCases = context.components.useCases.tabsUseCases
+                    val browserStore = context.components.core.store
+//            RecentlyClosedTabs.openTab.record(NoExtras())
+                    // restore tab
+                    coroutineScope.launch {
+                        tabsUseCases.restore(
+                            tabState,
+                            recentlyClosedTabsStorage.engineStateStorage(),
+                        )
+                        // remove restored tab from recently closed storage
+                        browserStore.dispatch(
+                            RecentlyClosedAction.RemoveClosedTabAction(
+                                tabState
+                            )
                         )
                     }
-                }
-            },
-            onClosedTabClick = { tabState ->
-                val selected = tabsTrayMode.selectedClosedTabs
-                when {
-                    // restore tab
-                    tabsTrayMode.isNormal() -> {
-                        val recentlyClosedTabsStorage =
-                            context.components.core.recentlyClosedTabsStorage.value
-                        val tabsUseCases = context.components.useCases.tabsUseCases
-                        val browserStore = context.components.core.store
-//            RecentlyClosedTabs.openTab.record(NoExtras())
-                        // restore tab
-                        coroutineScope.launch {
-                            tabsUseCases.restore(
-                                tabState,
-                                recentlyClosedTabsStorage.engineStateStorage(),
-                            )
-                            // remove restored tab from recently closed storage
-                            browserStore.dispatch(
-                                RecentlyClosedAction.RemoveClosedTabAction(
-                                    tabState
-                                )
-                            )
-                        }
-                        dismissTabsTray()
+                    dismiss.invoke()
 //                TabsTray.openedExistingTab.record(TabsTray.OpenedExistingTabExtra(source ?: "unknown"))
-                    }
-                    // if in selection mode and selected, deselect
-                    selected.contains(tabState) -> {
-                        tabsTrayMode = InfernoTabsTrayMode.SelectClosed(selected - tabState)
-                    }
-                    // if in selection mode and not selected, select
-                    else -> {
-                        tabsTrayMode = InfernoTabsTrayMode.SelectClosed(selected + tabState)
-                    }
                 }
-            },
-            onClosedTabClose = { tabState ->
-                val browserStore = context.components.core.store
+                // if in selection mode and selected, deselect
+                selected.contains(tabState) -> {
+                    enableSelectClosed(selected - tabState)
+                }
+                // if in selection mode and not selected, select
+                else -> {
+                    enableSelectClosed(selected + tabState)
+                }
+            }
+        },
+        onClosedTabClose = { tabState ->
+            val browserStore = context.components.core.store
+            browserStore.dispatch(RecentlyClosedAction.RemoveClosedTabAction(tabState))
+        },
+        onClosedTabLongClick = { tabState, mode, enableSelectClosed ->
+            if (mode.isNormal()) {
+                enableSelectClosed(setOf(tabState))
+            }
+        },
+        onDeleteSelectedCloseTabsClick = { mode, dismiss ->
+            val browserStore = context.components.core.store
+            for (tabState in mode.selectedClosedTabs) {
                 browserStore.dispatch(RecentlyClosedAction.RemoveClosedTabAction(tabState))
-            },
-            onClosedTabLongClick = { tabState ->
-                if (tabsTrayMode.isNormal()) {
-                    tabsTrayMode = InfernoTabsTrayMode.SelectClosed(setOf(tabState))
-                }
-            },
-            onDeleteSelectedCloseTabsClick = {
-                val browserStore = context.components.core.store
-                for (tabState in tabsTrayMode.selectedClosedTabs) {
-                    browserStore.dispatch(RecentlyClosedAction.RemoveClosedTabAction(tabState))
-                }
-                tabsTrayMode = InfernoTabsTrayMode.Normal
-            },
-        )
-    }
+            }
+            dismiss.invoke()
+        },
+    )
+
+    // endregion
+
+    // region Home State
+
+    val homeState by rememberInfernoHomeComponentState(
+        onShowTabsTray = {
+            tabsTrayState.show(it ?: InfernoTabsTraySelectedTab.PrivateTabs)
+        },
+        onNavToHistory = onNavToHistory,
+        onNavToBookmarks = {
+            // todo: bookmarks page
+        },
+        onNavToSearchSettings = onNavToSearchSettings,
+        onNavToHomeSettings = onNavToHomeSettings,
+    )
+
+    // endregion
+
+    // region ToolbarMenuBottomSheet todo: move to state, show/hide there
+
+    ToolbarMenuBottomSheet(
+        visible = showToolbarMenuBottomSheet,
+        tabSessionState = state.currentTab,
+        loading = state.currentTab?.content?.loading ?: false,
+        tabCount = state.tabList.size,
+        onDismissMenuBottomSheet = { showToolbarMenuBottomSheet = false },
+        onActivateFindInPage = { state.setBrowserModeFindInPage() },
+        onActivateReaderView = {
+            val successful = infernoReaderViewState.showReaderView()
+            if (successful) {
+                state.setBrowserModeReaderView()
+            }
+        },
+        onRequestSearchBar = { /* todo */ },
+        onNavToSettings = onNavToSettings,
+        onNavToTabsTray = tabsTrayState::show,
+        onNavToHistory = onNavToHistory,
+        onNavToExtensions = onNavToExtensions,
+        onNavToPasswords = onNavToPasswords,
+    )
+
+    // endregion
+
+    // region InfernoTabsTray
+
+
+    InfernoTabsTray(state = tabsTrayState)
+
+    // endregion
+
+    // region DownloadComponent
 
     val downloadManager = remember {
         FetchDownloadManager(
@@ -1052,46 +1079,27 @@ fun BrowserComponent(
         },
     )
 
+    // endregion
+
+    // region InfernoWebPrompter
+
     InfernoWebPrompter(
         state = webPrompterState,
         onNavToAutofillSettings = onNavToAutofillSettings,
     )
 
-    /// views
-    var engineView by remember { mutableStateOf<EngineView?>(null) }
-    var swipeRefresh by remember { mutableStateOf<SwipeRefreshLayout?>(null) }
+    // endregion
 
-    /// event handlers
-    val activityResultHandler: List<ActivityResultHandler?> = listOf(
-        webAuthnFeature, webPrompterState,
-//        promptsFeature,
+    // region ConextMenuComponent
+
+    ContextMenuComponent(
+        store = store,
+        engineView = engineView,
+        useCases = context.components.useCases.contextMenuUseCases,
+        tabId = state.customTabSessionId,
     )
-    // sets parent fragment handler for onActivityResult
-    state.setOnActivityResultHandler { result: OnActivityResultModel ->
-        Logger.info(
-            "Fragment onActivityResult received with " + "requestCode: ${result.requestCode}, resultCode: ${result.resultCode}, data: ${result.data}",
-        )
 
-        // feature activity result handler
-        activityResultHandler.any {
-            it?.onActivityResult(
-                result.requestCode, result.data, result.resultCode
-            ) ?: false
-        }
-
-    }
-
-    // currently set to 0 always, todo: only do this if dynamic toolbar enabled
-    fun setEngineDynamicToolbarMaxHeight(h: Int = 0) {
-//        engineView?.setDynamicToolbarMaxHeight(h)
-        engineView?.setDynamicToolbarMaxHeight(h)
-        engineView?.setVerticalClipping(h)
-    }
-
-    // on back pressed handlers
-    BackHandler {
-        onBackPressed(backHandler)
-    }
+    // endregion
 
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
@@ -1144,7 +1152,7 @@ fun BrowserComponent(
 
                 Lifecycle.Event.ON_STOP -> {
 //                    super.onStop()
-                    initUIJob?.cancel()
+//                    initUIJob?.cancel()
 //                    currentStartDownloadDialog?.dismiss()
 
                     context.components.core.store.state.findTabOrCustomTabOrSelectedTab(
@@ -1225,7 +1233,8 @@ fun BrowserComponent(
         }
     }
 
-    // todo: fix all feature init
+    // region init and dispose features
+
     DisposableEffect(engineView == null, state.customTabSessionId) {
         if (engineView != null) {
 
@@ -1611,12 +1620,7 @@ fun BrowserComponent(
         }
     }
 
-    ContextMenuComponent(
-        store = store,
-        engineView = engineView,
-        useCases = context.components.useCases.contextMenuUseCases,
-        tabId = state.customTabSessionId,
-    )
+    // endregion
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -1792,19 +1796,7 @@ fun BrowserComponent(
                             -> {
                             val isPrivate = state.pageType == BrowserComponentPageType.HOME_PRIVATE
                             InfernoHomeComponent(
-                                isPrivate = isPrivate,
-                                onShowTabsTray = {
-                                    state.selectedTabsTrayTab =
-                                        it ?: InfernoTabsTraySelectedTab.PrivateTabs
-                                    showTabsTray = true
-                                },
-                                onNavToHistory = onNavToHistory,
-                                onNavToBookmarks = {
-                                    // todo: bookmarks page
-                                    //  settings
-                                },
-                                onNavToSearchSettings = onNavToSearchSettings,
-                                onNavToHomeSettings = onNavToHomeSettings,
+                                state = homeState,
                             )
                         }
 
@@ -1896,7 +1888,7 @@ fun BrowserComponent(
                             onNavToHistory = onNavToHistory,
                             onNavToExtensions = onNavToExtensions,
                             onNavToPasswords = onNavToPasswords,
-                            onNavToTabsTray = { showTabsTray = true },
+                            onNavToTabsTray = tabsTrayState::show,
                             searchEngine = state.searchEngine,
                             editMode = state.browserMode == BrowserComponentMode.TOOLBAR_SEARCH,
                             onStartSearch = { state.setBrowserModeSearch() },
@@ -2381,7 +2373,7 @@ internal fun showUndoSnackbarForTab(
     context: Context,
     coroutineScope: CoroutineScope,
     snackbarHostState: AcornSnackbarHostState,
-    setInitiallySelectedTabTray: ((InfernoTabsTraySelectedTab) -> Unit)? = null,
+    setSelectedTabTrayTab: ((InfernoTabsTraySelectedTab) -> Unit)? = null,
     tab: TabSessionState? = null,
 ) {
     val snackbarMessage = when (isPrivate) {
@@ -2402,9 +2394,9 @@ internal fun showUndoSnackbarForTab(
                 if (tab != null) {
                     context.components.useCases.tabsUseCases.selectTab.invoke(tab.id)
                     if (tab.isNormalTab()) {
-                        setInitiallySelectedTabTray?.invoke(InfernoTabsTraySelectedTab.NormalTabs)
+                        setSelectedTabTrayTab?.invoke(InfernoTabsTraySelectedTab.NormalTabs)
                     } else if (tab.content.private) {
-                        setInitiallySelectedTabTray?.invoke(InfernoTabsTraySelectedTab.PrivateTabs)
+                        setSelectedTabTrayTab?.invoke(InfernoTabsTraySelectedTab.PrivateTabs)
                     }
                 }
             }
@@ -3021,28 +3013,6 @@ private fun evaluateMessagesForMicrosurvey(components: Components) =
     // todo:
 //    navigateToGlobalTabHistoryDialogFragment()
     return true
-}
-
-/**
- * Saves the external app session ID to be restored later in [onViewStateRestored].
- *//* override */ fun onSaveInstanceState(outState: Bundle) {
-    // todo:
-//    super.onSaveInstanceState(outState)
-//    outState.putString(KEY_CUSTOM_TAB_SESSION_ID, customTabSessionId)
-//    outState.putString(LAST_SAVED_GENERATED_PASSWORD, lastSavedGeneratedPassword)
-}
-
-/**
- * Retrieves the external app session ID saved by [onSaveInstanceState].
- *//* override */ fun onViewStateRestored(savedInstanceState: Bundle?) {
-    // todo:
-//    super.onViewStateRestored(savedInstanceState)
-//    savedInstanceState?.getString(KEY_CUSTOM_TAB_SESSION_ID)?.let {
-//        if (context.components.core.store.state.findCustomTab(it) != null) {
-//            customTabSessionId = it
-//        }
-//    }
-//    lastSavedGeneratedPassword = savedInstanceState?.getString(LAST_SAVED_GENERATED_PASSWORD)
 }
 
 /**

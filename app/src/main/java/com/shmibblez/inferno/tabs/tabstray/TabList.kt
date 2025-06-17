@@ -22,7 +22,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.IconButton
@@ -35,7 +34,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -363,7 +361,10 @@ private fun Thumbnail(
             MediaImage(
                 tab = tab,
                 onMediaIconClicked = onMediaIconClicked,
-                modifier = Modifier.fillMaxSize(), // align(Alignment.TopEnd),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .align(Alignment.TopStart)
+                    .padding(8.dp), // align(Alignment.TopEnd),
                 interactionSource = interactionSource,
             )
         }
@@ -401,10 +402,13 @@ fun MediaImage(
     Image(
         painter = rememberDrawablePainter(drawable = drawable),
         contentDescription = stringResource(contentDescription),
-        modifier = modifier.fillMaxSize().clickable(
-            interactionSource = interactionSource,
-            indication = null,
-        ) { onMediaIconClicked(tab) },
+        modifier = Modifier
+            .size(24.dp)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+            ) { onMediaIconClicked(tab) }
+            .then(modifier),
         contentScale = ContentScale.FillWidth,
         alignment = Alignment.TopCenter,
     )
