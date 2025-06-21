@@ -8,7 +8,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.os.Build
-import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
 import android.view.MotionEvent
@@ -94,7 +93,6 @@ import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.compose.snackbar.AcornSnackbarHostState
 import com.shmibblez.inferno.compose.snackbar.Snackbar
 import com.shmibblez.inferno.compose.snackbar.SnackbarHost
-import com.shmibblez.inferno.customtabs.ExternalAppBrowserActivity
 import com.shmibblez.inferno.downloads.DownloadService
 import com.shmibblez.inferno.downloads.dialog.DynamicDownloadDialog
 import com.shmibblez.inferno.ext.DEFAULT_ACTIVE_DAYS
@@ -111,7 +109,6 @@ import com.shmibblez.inferno.loading.InfernoLoadingComponent
 import com.shmibblez.inferno.messaging.FenixMessageSurfaceId
 import com.shmibblez.inferno.perf.MarkersFragmentLifecycleCallbacks
 import com.shmibblez.inferno.settings.biometric.BiometricPromptFeature
-import com.shmibblez.inferno.shopping.ReviewQualityCheckFeature
 import com.shmibblez.inferno.shortcut.PwaOnboardingObserver
 import com.shmibblez.inferno.tabbar.InfernoTabBar
 import com.shmibblez.inferno.tabs.tabstray.InfernoTabsTray
@@ -850,7 +847,8 @@ fun BrowserComponent(
                             map.value.private && map.value.isActiveDownload()
                         }
                         if (!isConfirmed && privateDownloads.isNotEmpty()) {
-                            showCancelledDownloadWarning(downloadCount = privateDownloads.size,
+                            showCancelledDownloadWarning(
+                                downloadCount = privateDownloads.size,
                                 tabId = tabId,
                                 source = source,
                                 context = context,
@@ -858,7 +856,8 @@ fun BrowserComponent(
                                 setAlertDialog = { ad -> activeAlertDialog = ad },
                                 snackbarHostState = snackbarHostState,
                                 setInitiallySelectedTabTray = setSelectedTabTrayTab,
-                                dismissTabsTray = dismiss)
+                                dismissTabsTray = dismiss
+                            )
                             return
                         } else {
                             dismiss.invoke()
@@ -1327,7 +1326,7 @@ fun BrowserComponent(
                 pipFeature = PictureInPictureFeature(
                     store = store,
                     activity = context.getActivity()!!,
-                    crashReporting = context.components.crashReporter, // context.components.analytics.crashReporter,
+                    crashReporting = null, // context.components.crashReporter, // context.components.analytics.crashReporter,
                     tabId = state.customTabSessionId,
                 )
 
@@ -1801,7 +1800,7 @@ fun BrowserComponent(
                         }
 
                         BrowserComponentPageType.CRASH -> {
-                            CrashComponent()
+//                            CrashComponent()
                         }
 
                         else -> {
@@ -3377,14 +3376,14 @@ internal fun fullScreenChanged(
         )
 
 //        (view as? SwipeGestureLayout)?.isSwipeEnabled = true
-        (activity as? HomeActivity)?.let { homeActivity ->
-            // ExternalAppBrowserActivity exclusively handles it's own theming unless in private mode.
-            if (homeActivity !is ExternalAppBrowserActivity || homeActivity.browsingModeManager.mode.isPrivate) {
-                homeActivity.themeManager.applyStatusBarTheme(
-                    homeActivity, homeActivity.isTabStripEnabled()
-                )
-            }
-        }
+//        (activity as? HomeActivity)?.let { homeActivity ->
+//            // ExternalAppBrowserActivity exclusively handles it's own theming unless in private mode.
+//            if (homeActivity !is ExternalAppBrowserActivity || homeActivity.browsingModeManager.mode.isPrivate) {
+//                homeActivity.themeManager.applyStatusBarTheme(
+//                    homeActivity, homeActivity.isTabStripEnabled()
+//                )
+//            }
+//        }
     }
 
     swipeRefresh.isEnabled = shouldPullToRefreshBeEnabled(inFullScreen, context)

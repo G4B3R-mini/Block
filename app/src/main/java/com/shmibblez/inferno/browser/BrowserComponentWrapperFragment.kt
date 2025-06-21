@@ -88,7 +88,7 @@ class BrowserComponentWrapperFragment : Fragment(), UserInteractionHandler, Acti
 //            BrowserNavHost()
         }
 
-        requireContext().components.crashReporter.install(requireContext())
+//        requireContext().components.crashReporter.install(requireContext())
         super.onViewCreated(view, savedInstanceState)
     }
 

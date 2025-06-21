@@ -334,7 +334,7 @@ private fun AddonItem(
                 addon.summary(context)?.let {
                     InfernoText(
                         text = it,
-                        infernoStyle = InfernoTextStyle.Subtitle,
+                        infernoStyle = InfernoTextStyle.SmallSecondary,
                     )
                 }
                 // star rating & number of reviews
@@ -350,7 +350,7 @@ private fun AddonItem(
                             text = stringResource(
                                 R.string.mozac_feature_addons_user_rating_count_2, reviews
                             ),
-                            infernoStyle = InfernoTextStyle.Subtitle,
+                            infernoStyle = InfernoTextStyle.SmallSecondary,
                         )
                     }
                 }

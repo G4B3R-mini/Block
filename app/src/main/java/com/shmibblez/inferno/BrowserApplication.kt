@@ -149,9 +149,19 @@ open class BrowserApplication : LocaleAwareApplication(), Provider {
 
     override fun onCreate() {
         super.onCreate()
+//        Thread.setDefaultUncaughtExceptionHandler { t, e ->
+//            Log.d("BrowserApplication", "AAA Error Cause: ${e.cause}")
+//            Log.d("BrowserApplication", "AAA Error Message: ${e.message}")
+//            Log.d("BrowserApplication", "AAA Error Localized Message: ${e.localizedMessage}")
+//            Log.d("BrowserApplication", "AAA Error Stack Trace: ${e.stackTrace}")
+//            Log.d("BrowserApplication", "AAA Error Suppressed: ${e.suppressed}")
+//            Log.d("BrowserApplication", "AAA Error Obj: $e")
+//        }
         // preload prefs
         Log.d("BrowserApplication", "preloading prefs")
-          runBlocking {  applicationContext.infernoSettingsDataStore.data.first()}
+        // todo: bind prefs instance to settings, with call to listenAsState from compose, provides
+        //  latest settings to outside components and infernoSettings to compose (reset as state)
+        runBlocking { applicationContext.infernoSettingsDataStore.data.first() }
         Log.d("BrowserApplication", "prefs loaded, continuing init")
         initialize()
     }
@@ -228,6 +238,16 @@ open class BrowserApplication : LocaleAwareApplication(), Provider {
             // Attention: Do not invoke any code from a-s in this scope.
             val megazordSetup = finishSetupMegazord()
 
+//            Thread.setDefaultUncaughtExceptionHandler { t, e ->
+//                Log.d("BrowserApplication", "AAA Error Cause: ${e.cause}")
+//                Log.d("BrowserApplication", "AAA Error Message: ${e.message}")
+//                Log.d("BrowserApplication", "AAA Error Localized Message: ${e.localizedMessage}")
+//                Log.d("BrowserApplication", "AAA Error Stack Trace: ${e.stackTrace}")
+//                Log.d("BrowserApplication", "AAA Error Suppressed: ${e.suppressed}")
+//                Log.d("BrowserApplication", "AAA Error Obj: $e")
+//            }
+//            components.crashReporter.install(this)
+
             setDayNightTheme()
             components.strictMode.enableStrictMode(true)
             warmBrowsersCache()
@@ -295,8 +315,7 @@ open class BrowserApplication : LocaleAwareApplication(), Provider {
         // the app is used.
         sessionStorage.autoSave(store)
             .periodicallyInForeground(interval = 30, unit = TimeUnit.SECONDS)
-            .whenGoingToBackground()
-            .whenSessionsChange()
+            .whenGoingToBackground().whenSessionsChange()
     }
 
     private fun restoreDownloads() {
@@ -535,16 +554,19 @@ open class BrowserApplication : LocaleAwareApplication(), Provider {
                     AppCompatDelegate.MODE_NIGHT_NO,
                 )
             }
+
             settings.shouldUseDarkTheme -> {
                 AppCompatDelegate.setDefaultNightMode(
                     AppCompatDelegate.MODE_NIGHT_YES,
                 )
             }
+
             SDK_INT < Build.VERSION_CODES.P && settings.shouldUseAutoBatteryTheme -> {
                 AppCompatDelegate.setDefaultNightMode(
                     AppCompatDelegate.MODE_NIGHT_AUTO_BATTERY,
                 )
             }
+
             SDK_INT >= Build.VERSION_CODES.P && settings.shouldFollowDeviceTheme -> {
                 AppCompatDelegate.setDefaultNightMode(
                     AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
@@ -817,7 +839,8 @@ open class BrowserApplication : LocaleAwareApplication(), Provider {
         return deviceRamBytes.toRoundedMegabytes()
     }
 
-    private fun Long.toRoundedMegabytes(): Long = (this / BYTES_TO_MEGABYTES_CONVERSION).roundToLong()
+    private fun Long.toRoundedMegabytes(): Long =
+        (this / BYTES_TO_MEGABYTES_CONVERSION).roundToLong()
 
     private fun isDeviceRamAboveThreshold() = deviceRamApproxMegabytes() > RAM_THRESHOLD_MEGABYTES
 

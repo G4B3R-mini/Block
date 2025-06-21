@@ -125,7 +125,7 @@ fun InfernoExternalToolbar(
                     maxLines = 1,
                 )
                 InfernoText(
-                    text = session?.content?.url ?: "", infernoStyle = InfernoTextStyle.Subtitle,
+                    text = session?.content?.url ?: "", infernoStyle = InfernoTextStyle.SmallSecondary,
                     maxLines = 1,
                 )
             }

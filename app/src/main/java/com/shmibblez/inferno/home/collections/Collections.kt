@@ -8,25 +8,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.shmibblez.inferno.R
-import com.shmibblez.inferno.browser.getActivity
-import com.shmibblez.inferno.components.appstate.AppAction
 import com.shmibblez.inferno.compose.MenuItem
-import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.infernoTheme
-import com.shmibblez.inferno.ext.newTab
 import com.shmibblez.inferno.home.sessioncontrol.CollectionInteractor
-import com.shmibblez.inferno.home.sessioncontrol.DefaultSessionControlController
-import com.shmibblez.inferno.tabs.tabstray.InfernoTabsTraySelectedTab
-import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.launch
 import mozilla.components.feature.tab.collections.TabCollection
-import mozilla.components.feature.tab.collections.ext.invoke
 
 /**
  * List of expandable collections.

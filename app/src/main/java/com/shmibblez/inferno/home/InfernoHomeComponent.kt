@@ -1,9 +1,6 @@
 package com.shmibblez.inferno.home
 
 import android.annotation.SuppressLint
-import android.content.Context
-import android.net.Uri
-import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.focusable
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -15,12 +12,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.shmibblez.inferno.HomeActivity
-import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.getActivity
 import com.shmibblez.inferno.components.TabCollectionStorage
 import com.shmibblez.inferno.ext.components
-import com.shmibblez.inferno.ext.containsQueryParameters
-import com.shmibblez.inferno.ext.settings
 import com.shmibblez.inferno.home.controllers.InfernoBookmarksController
 import com.shmibblez.inferno.home.controllers.InfernoPrivateBrowsingController
 import com.shmibblez.inferno.home.controllers.InfernoRecentSyncedTabController
@@ -34,37 +28,31 @@ import com.shmibblez.inferno.home.ui.Homepage
 import com.shmibblez.inferno.messaging.DefaultMessageController
 import com.shmibblez.inferno.proto.InfernoSettings
 import com.shmibblez.inferno.proto.infernoSettingsDataStore
-import com.shmibblez.inferno.utils.Settings.Companion.TOP_SITES_PROVIDER_MAX_THRESHOLD
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.launch
 import mozilla.components.browser.state.state.TabSessionState
-import mozilla.components.browser.state.state.selectedOrDefaultSearchEngine
-import mozilla.components.concept.storage.FrecencyThresholdOption
 import mozilla.components.feature.tab.collections.TabCollection
-import mozilla.components.feature.top.sites.TopSitesConfig
-import mozilla.components.feature.top.sites.TopSitesFrecencyConfig
-import mozilla.components.feature.top.sites.TopSitesProviderConfig
 
 
-//object BrowserComponentConstants {
-// Used to set homeViewModel.sessionToDelete when all tabs of a browsing mode are closed
-const val ALL_NORMAL_TABS = "all_normal"
-const val ALL_PRIVATE_TABS = "all_private"
-
-// Navigation arguments passed to HomeFragment
-const val FOCUS_ON_ADDRESS_BAR = "focusOnAddressBar"
-private const val SCROLL_TO_COLLECTION = "scrollToCollection"
-
-// Delay for scrolling to the collection header
-private const val ANIM_SCROLL_DELAY = 100L
-
-// Sponsored top sites titles and search engine names used for filtering
-const val AMAZON_SPONSORED_TITLE = "Amazon"
-const val AMAZON_SEARCH_ENGINE_NAME = "Amazon.com"
-const val EBAY_SPONSORED_TITLE = "eBay"
-
-// Elevation for undo toasts
-internal const val TOAST_ELEVATION = 80f
+////object BrowserComponentConstants {
+//// Used to set homeViewModel.sessionToDelete when all tabs of a browsing mode are closed
+//const val ALL_NORMAL_TABS = "all_normal"
+//const val ALL_PRIVATE_TABS = "all_private"
+//
+//// Navigation arguments passed to HomeFragment
+//const val FOCUS_ON_ADDRESS_BAR = "focusOnAddressBar"
+//private const val SCROLL_TO_COLLECTION = "scrollToCollection"
+//
+//// Delay for scrolling to the collection header
+//private const val ANIM_SCROLL_DELAY = 100L
+//
+//// Sponsored top sites titles and search engine names used for filtering
+//const val AMAZON_SPONSORED_TITLE = "Amazon"
+//const val AMAZON_SEARCH_ENGINE_NAME = "Amazon.com"
+//const val EBAY_SPONSORED_TITLE = "eBay"
+//
+//// Elevation for undo toasts
+//internal const val TOAST_ELEVATION = 80f
 //}
 
 // todo: implement layout, look at binding / layout [fragment_home.xml]
@@ -176,7 +164,7 @@ fun InfernoHomeComponent(
                 )
             },
             removeCollectionWithUndo = { tabCollection ->
-                val snackbarMessage = context.getString(R.string.snackbar_collection_deleted)
+//                val snackbarMessage = context.getString(R.string.snackbar_collection_deleted)
 
                 // todo: undo snackbar
 //                lifecycleScope.allowUndo(
@@ -194,7 +182,7 @@ fun InfernoHomeComponent(
                     components.core.tabCollectionStorage.removeCollection(tabCollection)
                 }
             },
-            showUndoSnackbarForTopSite = { topSite ->
+            showUndoSnackbarForTopSite = { // topSite ->
                 // todo: undo snackbar
 //                lifecycleScope.allowUndo(
 //                    view = binding.dynamicSnackbarContainer,
@@ -275,28 +263,28 @@ fun InfernoHomeComponent(
     )
 }
 
-/**
- * Returns a [TopSitesConfig] which specifies how many top sites to display and whether or
- * not frequently visited sites should be displayed.
- */
-@VisibleForTesting
-internal fun getTopSitesConfig(context: Context): TopSitesConfig {
-    val settings = context.settings()
-    return TopSitesConfig(
-        totalSites = settings.topSitesMaxLimit,
-        frecencyConfig = TopSitesFrecencyConfig(
-            FrecencyThresholdOption.SKIP_ONE_TIME_PAGES,
-        ) { !Uri.parse(it.url).containsQueryParameters(settings.frecencyFilterQuery) },
-        providerConfig = TopSitesProviderConfig(
-            showProviderTopSites = false, // settings.showContileFeature, (show sponsored top sites, NO)
-            maxThreshold = TOP_SITES_PROVIDER_MAX_THRESHOLD,
-            providerFilter = { topSite ->
-                when (context.components.core.store.state.search.selectedOrDefaultSearchEngine?.name) {
-                    HomeFragment.AMAZON_SEARCH_ENGINE_NAME -> topSite.title != HomeFragment.AMAZON_SPONSORED_TITLE
-                    HomeFragment.EBAY_SPONSORED_TITLE -> topSite.title != HomeFragment.EBAY_SPONSORED_TITLE
-                    else -> true
-                }
-            },
-        ),
-    )
-}
+///**
+// * Returns a [TopSitesConfig] which specifies how many top sites to display and whether or
+// * not frequently visited sites should be displayed.
+// */
+//@VisibleForTesting
+//internal fun getTopSitesConfig(context: Context): TopSitesConfig {
+//    val settings = context.settings()
+//    return TopSitesConfig(
+//        totalSites = settings.topSitesMaxLimit,
+//        frecencyConfig = TopSitesFrecencyConfig(
+//            FrecencyThresholdOption.SKIP_ONE_TIME_PAGES,
+//        ) { !Uri.parse(it.url).containsQueryParameters(settings.frecencyFilterQuery) },
+//        providerConfig = TopSitesProviderConfig(
+//            showProviderTopSites = false, // settings.showContileFeature, (show sponsored top sites, NO)
+//            maxThreshold = TOP_SITES_PROVIDER_MAX_THRESHOLD,
+//            providerFilter = { topSite ->
+//                when (context.components.core.store.state.search.selectedOrDefaultSearchEngine?.name) {
+//                    HomeFragment.AMAZON_SEARCH_ENGINE_NAME -> topSite.title != HomeFragment.AMAZON_SPONSORED_TITLE
+//                    HomeFragment.EBAY_SPONSORED_TITLE -> topSite.title != HomeFragment.EBAY_SPONSORED_TITLE
+//                    else -> true
+//                }
+//            },
+//        ),
+//    )
+//}

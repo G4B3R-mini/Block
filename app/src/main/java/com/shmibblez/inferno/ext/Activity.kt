@@ -15,14 +15,7 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
-import androidx.navigation.NavDestination
 import androidx.navigation.NavDirections
-import mozilla.components.concept.base.crash.Breadcrumb
-import mozilla.components.concept.engine.EngineSession
-import mozilla.components.feature.intent.ext.getSessionId
-import mozilla.components.support.utils.EXTRA_ACTIVITY_REFERRER_PACKAGE
-import mozilla.components.support.utils.SafeIntent
-import mozilla.components.support.utils.toSafeIntent
 import com.shmibblez.inferno.BrowserDirection
 import com.shmibblez.inferno.HomeActivity
 import com.shmibblez.inferno.NavGraphDirections
@@ -31,8 +24,6 @@ import com.shmibblez.inferno.addons.AddonDetailsFragmentDirections
 import com.shmibblez.inferno.addons.AddonPermissionsDetailsFragmentDirections
 import com.shmibblez.inferno.addons.AddonsManagementFragmentDirections
 import com.shmibblez.inferno.components.menu.MenuDialogFragmentDirections
-import com.shmibblez.inferno.customtabs.EXTRA_IS_SANDBOX_CUSTOM_TAB
-import com.shmibblez.inferno.customtabs.ExternalAppBrowserActivity
 import com.shmibblez.inferno.exceptions.trackingprotection.TrackingProtectionExceptionsFragmentDirections
 import com.shmibblez.inferno.home.HomeFragmentDirections
 import com.shmibblez.inferno.library.bookmarks.BookmarkFragmentDirections
@@ -58,7 +49,10 @@ import com.shmibblez.inferno.trackingprotection.TrackingProtectionPanelDialogFra
 import com.shmibblez.inferno.translations.TranslationsDialogFragmentDirections
 import com.shmibblez.inferno.translations.preferences.downloadlanguages.DownloadLanguagesPreferenceFragmentDirections
 import com.shmibblez.inferno.webcompat.ui.WebCompatReporterFragmentDirections
-import java.security.InvalidParameterException
+import mozilla.components.concept.engine.EngineSession
+import mozilla.components.feature.intent.ext.getSessionId
+import mozilla.components.support.utils.EXTRA_ACTIVITY_REFERRER_PACKAGE
+import mozilla.components.support.utils.SafeIntent
 
 /**
  * Attempts to call immersive mode using the View to hide the status bar and navigation buttons.
@@ -222,52 +216,11 @@ private fun Activity.openDefaultBrowserSumoPage(
 fun Activity.setNavigationIcon(
     @DrawableRes icon: Int,
 ) {
-    (this as? AppCompatActivity)?.supportActionBar?.let {
-        it.setDisplayHomeAsUpEnabled(true)
-        it.setHomeAsUpIndicator(icon)
-        it.setHomeActionContentDescription(R.string.action_bar_up_description)
-    }
-}
-
-/**
- * Delegate to the relevant 'get settings directions' function based on the given [Activity].
- *
- * @param from The [BrowserDirection] to indicate which fragment the browser is being opened from.
- * @param customTabSessionId Optional custom tab session ID if navigating from a custom tab.
- *
- * @return the [NavDirections] for the given [Activity].
- * @throws IllegalArgumentException if the given [Activity] is not supported.
- */
-fun Activity.getNavDirections(
-    from: BrowserDirection,
-    customTabSessionId: String? = null,
-): NavDirections? = when (this) {
-    is ExternalAppBrowserActivity -> getExternalAppBrowserNavDirections(from, customTabSessionId)
-    is HomeActivity -> getHomeNavDirections(from)
-    else -> throw IllegalArgumentException("$this is not supported")
-}
-
-private fun Activity.getExternalAppBrowserNavDirections(
-    from: BrowserDirection,
-    customTabSessionId: String?,
-): NavDirections? {
-    if (customTabSessionId == null) {
-        finishAndRemoveTask()
-        return null
-    }
-
-    return when (from) {
-        BrowserDirection.FromGlobal ->
-            NavGraphDirections.actionGlobalExternalAppBrowser(
-                activeSessionId = customTabSessionId,
-                webAppManifestUrl = intent.toSafeIntent().dataString,
-                isSandboxCustomTab = intent.getBooleanExtra(EXTRA_IS_SANDBOX_CUSTOM_TAB, false),
-            )
-
-        else -> throw InvalidParameterException(
-            "Tried to navigate to ExternalAppBrowserFragment from $from",
-        )
-    }
+//    (this as? AppCompatActivity)?.supportActionBar?.let {
+//        it.setDisplayHomeAsUpEnabled(true)
+//        it.setHomeAsUpIndicator(icon)
+//        it.setHomeActionContentDescription(R.string.action_bar_up_description)
+//    }
 }
 
 private fun getHomeNavDirections(
@@ -343,18 +296,6 @@ const val SETTINGS_SHOW_FRAGMENT_ARGS = ":settings:show_fragment_args"
 const val DEFAULT_BROWSER_APP_OPTION = "default_browser"
 const val EXTERNAL_APP_BROWSER_INTENT_SOURCE = "CUSTOM_TAB"
 
-/**
- * Depending on the [Activity], maybe derive the source of the given [intent].
- *
- * @param intent the [SafeIntent] to derive the source from.
- * @throws IllegalArgumentException if the given [Activity] is not supported.
- */
-fun Activity.getIntentSource(intent: SafeIntent): String? = when (this) {
-    is ExternalAppBrowserActivity -> EXTERNAL_APP_BROWSER_INTENT_SOURCE
-    is HomeActivity -> getHomeIntentSource(intent)
-    else -> throw IllegalArgumentException("$this is not supported")
-}
-
 private fun getHomeIntentSource(intent: SafeIntent): String? {
     return when {
         intent.isLauncherIntent -> HomeActivity.APP_ICON
@@ -372,38 +313,4 @@ fun Activity.isIntentInternal(): Boolean {
     return safeIntent.getStringExtra(EXTRA_ACTIVITY_REFERRER_PACKAGE) == this.packageName
 }
 
-/**
- * Depending on the [Activity], maybe derive the session ID of the given [intent].
- *
- * @param intent the [SafeIntent] to derive the session ID from.
- * @throws IllegalArgumentException if the given [Activity] is not supported.
- */
-fun Activity.getIntentSessionId(intent: SafeIntent): String? = when (this) {
-    is ExternalAppBrowserActivity -> getExternalAppBrowserIntentSessionId(intent)
-    is HomeActivity -> null
-    else -> throw IllegalArgumentException("$this is not supported")
-}
-
-private fun getExternalAppBrowserIntentSessionId(intent: SafeIntent) = intent.getSessionId()
-
-/**
- * Get the breadcrumb message for the [Activity].
- *
- * @param destination the [NavDestination] required to provide the destination ID.
- * @throws IllegalArgumentException if the given [Activity] is not supported.
- */
-fun Activity.getBreadcrumbMessage(destination: NavDestination): String = when (this) {
-    is ExternalAppBrowserActivity -> getExternalAppBrowserBreadcrumbMessage(destination.id)
-    is HomeActivity -> getHomeBreadcrumbMessage(destination.id)
-    else -> throw IllegalArgumentException("$this is not supported")
-}
-
-private fun Activity.getExternalAppBrowserBreadcrumbMessage(destinationId: Int): String {
-    val fragmentName = resources.getResourceEntryName(destinationId)
-    return "Changing to fragment $fragmentName, isCustomTab: true"
-}
-
-private fun Activity.getHomeBreadcrumbMessage(destinationId: Int): String {
-    val fragmentName = resources.getResourceEntryName(destinationId)
-    return "Changing to fragment $fragmentName, isCustomTab: false"
-}
+fun Activity.getIntentSessionId(intent: SafeIntent): String? = intent.getSessionId()

@@ -26,12 +26,11 @@
         app:popUpTo="@id/browserComponentWrapperFragment"
         app:popUpToInclusive="false" />
 
-    <!--  todo: go to browser component wrapper fragment, implement special functionality (no tabs, top bar, etc)  -->
-    <action
-        android:id="@+id/action_global_external_app_browser"
-        app:destination="@id/externalAppBrowserFragment"
-        app:popUpTo="@id/browserComponentWrapperFragment"
-        app:popUpToInclusive="false" />
+<!--    <action-->
+<!--        android:id="@+id/action_global_external_app_browser"-->
+<!--        app:destination="@id/externalAppBrowserFragment"-->
+<!--        app:popUpTo="@id/browserComponentWrapperFragment"-->
+<!--        app:popUpToInclusive="false" />-->
 
     <!--    <action-->
     <!--        android:id="@+id/action_global_onboarding"-->
@@ -370,22 +369,22 @@
             app:popExitAnim="@anim/slide_out_right" />
     </fragment>
 
-    <fragment
-        android:id="@+id/externalAppBrowserFragment"
-        android:name="com.shmibblez.inferno.customtabs.ExternalAppBrowserFragment"
-        tools:layout="@layout/fragment_browser">
-        <argument
-            android:name="activeSessionId"
-            app:argType="string"
-            app:nullable="true" />
-        <argument
-            android:name="webAppManifestUrl"
-            app:argType="string"
-            app:nullable="true" />
-        <argument
-            android:name="isSandboxCustomTab"
-            app:argType="boolean" />
-    </fragment>
+<!--    <fragment-->
+<!--        android:id="@+id/externalAppBrowserFragment"-->
+<!--        android:name="com.shmibblez.inferno.customtabs.ExternalAppBrowserFragment"-->
+<!--        tools:layout="@layout/fragment_browser">-->
+<!--        <argument-->
+<!--            android:name="activeSessionId"-->
+<!--            app:argType="string"-->
+<!--            app:nullable="true" />-->
+<!--        <argument-->
+<!--            android:name="webAppManifestUrl"-->
+<!--            app:argType="string"-->
+<!--            app:nullable="true" />-->
+<!--        <argument-->
+<!--            android:name="isSandboxCustomTab"-->
+<!--            app:argType="boolean" />-->
+<!--    </fragment>-->
 
     <fragment
         android:id="@+id/historyFragment"

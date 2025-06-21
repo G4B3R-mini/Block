@@ -189,7 +189,6 @@ import com.shmibblez.inferno.compose.core.Action
 import com.shmibblez.inferno.compose.snackbar.Snackbar
 import com.shmibblez.inferno.compose.snackbar.SnackbarState
 import com.shmibblez.inferno.crashes.CrashContentIntegration
-import com.shmibblez.inferno.customtabs.ExternalAppBrowserActivity
 import com.shmibblez.inferno.databinding.FragmentBrowserBinding
 import com.shmibblez.inferno.downloads.DownloadService
 import com.shmibblez.inferno.downloads.dialog.DynamicDownloadDialog
@@ -874,12 +873,12 @@ abstract class BaseBrowserFragment :
             view = view,
         )
 
-        pipFeature = PictureInPictureFeature(
-            store = store,
-            activity = requireActivity(),
-            crashReporting = context.components.crashReporter, // context.components.analytics.crashReporter,
-            tabId = customTabSessionId,
-        )
+//        pipFeature = PictureInPictureFeature(
+//            store = store,
+//            activity = requireActivity(),
+//            crashReporting = context.components.crashReporter, // context.components.analytics.crashReporter,
+//            tabId = customTabSessionId,
+//        )
 
         biometricPromptFeature.set(
             feature = BiometricPromptFeature(
@@ -1105,7 +1104,7 @@ abstract class BaseBrowserFragment :
         )
 
         // This component feature only works on Fenix when built on Mozilla infrastructure.
-        if (BuildConfig.MOZILLA_OFFICIAL) {
+//        if (BuildConfig.MOZILLA_OFFICIAL) {
             webAuthnFeature.set(
                 feature = WebAuthnFeature(
                     engine = requireComponents.core.engine,
@@ -1116,7 +1115,7 @@ abstract class BaseBrowserFragment :
                 owner = this,
                 view = view,
             )
-        }
+//        }
 
         screenOrientationFeature.set(
             feature = ScreenOrientationFeature(
@@ -2417,15 +2416,15 @@ abstract class BaseBrowserFragment :
             )
 
             (view as? SwipeGestureLayout)?.isSwipeEnabled = true
-            (activity as? HomeActivity)?.let { homeActivity ->
-                // ExternalAppBrowserActivity exclusively handles it's own theming unless in private mode.
-                if (homeActivity !is ExternalAppBrowserActivity || homeActivity.browsingModeManager.mode.isPrivate) {
-                    homeActivity.themeManager.applyStatusBarTheme(
-                        homeActivity,
-                        homeActivity.isTabStripEnabled()
-                    )
-                }
-            }
+//            (activity as? HomeActivity)?.let { homeActivity ->
+//                // ExternalAppBrowserActivity exclusively handles it's own theming unless in private mode.
+//                if (homeActivity !is ExternalAppBrowserActivity || homeActivity.browsingModeManager.mode.isPrivate) {
+//                    homeActivity.themeManager.applyStatusBarTheme(
+//                        homeActivity,
+//                        homeActivity.isTabStripEnabled()
+//                    )
+//                }
+//            }
             collapseBrowserView()
         }
 

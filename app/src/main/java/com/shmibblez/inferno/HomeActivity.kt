@@ -35,12 +35,6 @@ import androidx.appcompat.widget.Toolbar
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.NavController
-import com.google.firebase.crashlytics.internal.common.CrashlyticsCore
-import com.google.firebase.crashlytics.internal.common.CrashlyticsReportDataCapture
-import com.google.firebase.crashlytics.internal.model.CrashlyticsReport
-import com.google.firebase.crashlytics.ktx.crashlytics
-import com.google.firebase.ktx.Firebase
 import com.shmibblez.inferno.addons.ExtensionsProcessDisabledBackgroundController
 import com.shmibblez.inferno.addons.ExtensionsProcessDisabledForegroundController
 import com.shmibblez.inferno.biometric.BiometricPromptCallbackManager
@@ -52,7 +46,6 @@ import com.shmibblez.inferno.browser.nav.InitialBrowserTask
 import com.shmibblez.inferno.browser.state.BrowserComponentState
 import com.shmibblez.inferno.components.appstate.AppAction
 import com.shmibblez.inferno.components.appstate.OrientationMode
-import com.shmibblez.inferno.customtabs.ExternalAppBrowserActivity
 import com.shmibblez.inferno.databinding.ActivityHomeBinding
 import com.shmibblez.inferno.debugsettings.data.DefaultDebugSettingsRepository
 import com.shmibblez.inferno.experiments.ResearchSurfaceDialogFragment
@@ -83,9 +76,7 @@ import com.shmibblez.inferno.perf.ProfilerMarkers
 import com.shmibblez.inferno.perf.StartupPathProvider
 import com.shmibblez.inferno.perf.StartupTimeline
 import com.shmibblez.inferno.session.PrivateNotificationService
-import com.shmibblez.inferno.settings.SupportUtils
 import com.shmibblez.inferno.theme.DefaultThemeManager
-import com.shmibblez.inferno.theme.StatusBarColorManager
 import com.shmibblez.inferno.theme.ThemeManager
 import com.shmibblez.inferno.utils.Settings
 import com.shmibblez.inferno.utils.changeAppLauncherIcon
@@ -140,7 +131,7 @@ import java.util.concurrent.Executor
  * - browser screen
  */
 @SuppressWarnings("TooManyFunctions", "LargeClass", "LongMethod")
-open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
+open class HomeActivity : LocaleAwareAppCompatActivity() {
     private lateinit var browserComponentState: BrowserComponentState
     private lateinit var executor: Executor
     private lateinit var biometricPromptCallbackManager: BiometricPromptCallbackManager
@@ -225,6 +216,7 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
             SpeechProcessingIntentProcessor(this, components.core.store),
             AssistIntentProcessor(),
             StartSearchIntentProcessor(),
+            // todo: intent processor
             OpenBrowserIntentProcessor(this, ::getIntentSessionId),
             OpenSpecificTabIntentProcessor(this),
             OpenPasswordManagerIntentProcessor(),
@@ -378,7 +370,10 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
 //            }
         }
 
+        setTheme(R.style.NormalThemeBase)
         setContentView(binding.root)
+//        supportActionBar?.hide()
+
         ProfilerMarkers.addListenerForOnGlobalLayout(components.core.engine, this, binding.root)
 
         // Must be after we set the content view
@@ -400,25 +395,6 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
         lifecycleScope.launch(IO) {
             showFullscreenMessageIfNeeded(applicationContext)
         }
-
-//        // Unless the activity is recreated, navigate to home first (without rendering it)
-//        // to add it to the back stack.
-//        if (savedInstanceState == null) {
-//            navigateToHome(navHost.navController)
-//        }
-
-        // always start on browser
-//            if (!shouldStartOnHome() && shouldNavigateToBrowserOnColdStart(savedInstanceState)) {
-        navigateToBrowserOnColdStart()
-//            }
-//            else {
-//                StartOnHome.enterHomeScreen.record(NoExtras())
-//            }
-//
-//            if (settings().showHomeOnboardingDialog && components.fenixOnboarding.userHasBeenOnboarded()) {
-//                navHost.navController.navigate(NavGraphDirections.actionGlobalHomeOnboardingDialog())
-//            }
-//        }
 
         Performance.processIntentIfPerformanceTest(intent, this)
 
@@ -448,7 +424,7 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
 //                    }
 //                }
 //        }
-        supportActionBar?.hide()
+//        supportActionBar?.hide()
 
         lifecycle.addObservers(
             webExtensionPopupObserver,
@@ -478,10 +454,10 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
 
 //        components.core.requestInterceptor.setNavigationController(navHost.navController)
 
-        supportFragmentManager.registerFragmentLifecycleCallbacks(
-            StatusBarColorManager(themeManager, this),
-            true,
-        )
+//        supportFragmentManager.registerFragmentLifecycleCallbacks(
+//            StatusBarColorManager(themeManager, this),
+//            true,
+//        )
 
         if (settings().showContileFeature) {
             components.core.contileTopSitesUpdater.startPeriodicWork()
@@ -689,9 +665,10 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
 
         val activityStartedWithLink =
             startupPathProvider.startupPathForActivity == StartupPathProvider.StartupPath.VIEW
-        if (this !is ExternalAppBrowserActivity && !activityStartedWithLink) {
-            stopMediaSession()
-        }
+        // todo: external browser, stop media session
+//        if (this !is ExternalAppBrowserActivity && !activityStartedWithLink) {
+//            stopMediaSession()
+//        }
     }
 
     final override fun onConfigurationChanged(newConfig: Configuration) {
@@ -724,10 +701,11 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
     @VisibleForTesting
     internal fun handleNewIntent(intent: Intent) {
         Log.d("HomeActivity", "handleNewIntent()")
-        if (this is ExternalAppBrowserActivity) {
-            Log.d("HomeActivity", "handleNewActivity(), from external app -> exit")
-            return
-        }
+        // todo: external browser
+//        if (this is ExternalAppBrowserActivity) {
+//            Log.d("HomeActivity", "handleNewActivity(), from external app -> exit")
+//            return
+//        }
 
         val tab = components.core.store.state.findActiveMediaTab()
         if (tab != null) {
@@ -762,6 +740,7 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
         EngineView::class.java.name -> components.core.engine.createView(context, attrs).apply {
             Log.d("HomeActivity", "onCreateView() EngineView()")
             selectionActionDelegate = DefaultSelectionActionDelegate(
+                // todo: BrowserStoreSearchAdapter
                 BrowserStoreSearchAdapter(
                     components.core.store,
                     tabId = getIntentSessionId(intent.toSafeIntent()),
@@ -978,10 +957,6 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
     private fun setupTheme() {
         themeManager = createThemeManager()
         // ExternalAppBrowserActivity exclusively handles it's own theming unless in private mode.
-        if (this !is ExternalAppBrowserActivity || browsingModeManager.mode.isPrivate) {
-            themeManager.setActivityTheme(this)
-            themeManager.applyStatusBarTheme(this)
-        }
     }
 
     // Stop active media when activity is destroyed.
@@ -999,39 +974,6 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
                 )
             }
         }
-    }
-
-    /**
-     * Returns the [supportActionBar], inflating it if necessary.
-     * Everyone should call this instead of supportActionBar.
-     */
-    final override fun getSupportActionBarAndInflateIfNecessary(): ActionBar {
-        if (!isToolbarInflated) {
-
-            navigationToolbar = Toolbar(this.applicationContext)
-            setSupportActionBar(navigationToolbar)
-            // Add ids to this that we don't want to have a toolbar back button
-            setupNavigationToolbar()
-//            setNavigationIcon(R.drawable.ic_back_button)
-
-            isToolbarInflated = true
-        }
-
-        return supportActionBar!!
-    }
-
-    @Suppress("SpreadOperator")
-    private fun setupNavigationToolbar(vararg topLevelDestinationIds: Int) {
-        // todo: settings
-//        NavigationUI.setupWithNavController(
-//            navigationToolbar,
-//            navHost.navController,
-//            AppBarConfiguration.Builder(*topLevelDestinationIds).build(),
-//        )
-//
-//        navigationToolbar.setNavigationOnClickListener {
-//            onBackPressedDispatcher.onBackPressed()
-//        }
     }
 
     /**
@@ -1074,13 +1016,6 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
     }
 
     fun openToBrowser(from: BrowserDirection, customTabSessionId: String? = null) {
-        // todo: settings
-//        if (navHost.navController.alreadyOnDestination(R.id.browserComponentWrapperFragment)) return
-//        @IdRes val fragmentId = if (from.fragmentId != 0) from.fragmentId else null
-//        val directions = getNavDirections(from, customTabSessionId)
-//        if (directions != null) {
-//            navHost.navController.settings(fragmentId, directions)
-//        }
     }
 
     /**
@@ -1163,29 +1098,6 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
                 "newTab: $newTab",
             )
         }
-    }
-
-    @VisibleForTesting
-    internal fun navigateToBrowserOnColdStart() {
-        if (this is ExternalAppBrowserActivity) {
-            return
-        }
-
-        // Normal tabs + cold start -> Should go back to browser if we had any tabs open when we left last
-        // except for PBM + Cold Start there won't be any tabs since they're evicted so we never will navigate
-        if (settings().shouldReturnToBrowser && !browsingModeManager.mode.isPrivate) {
-            // Navigate to home first (without rendering it) to add it to the back stack.
-            openToBrowser(BrowserDirection.FromGlobal, null)
-        }
-    }
-
-    @VisibleForTesting
-    internal fun navigateToHome(navController: NavController) {
-        if (this is ExternalAppBrowserActivity) {
-            return
-        }
-
-        navController.navigate(NavGraphDirections.actionStartupHome())
     }
 
     final override fun attachBaseContext(base: Context) {

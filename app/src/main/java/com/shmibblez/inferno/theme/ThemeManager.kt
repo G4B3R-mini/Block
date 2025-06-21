@@ -25,7 +25,6 @@ import mozilla.components.support.ktx.android.view.setStatusBarColorCompat
 import com.shmibblez.inferno.HomeActivity
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.browsingmode.BrowsingMode
-import com.shmibblez.inferno.customtabs.ExternalAppBrowserActivity
 import com.shmibblez.inferno.ext.settings
 
 abstract class ThemeManager(
@@ -152,7 +151,7 @@ class DefaultThemeManager(
         set(value) {
             if (currentTheme != value) {
                 // ExternalAppBrowserActivity doesn't need to switch between private and non-private.
-                if (activity is ExternalAppBrowserActivity) return
+//                if (activity is ExternalAppBrowserActivity) return
                 // Don't recreate if activity is finishing
                 if (activity.isFinishing) return
 

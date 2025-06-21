@@ -244,14 +244,14 @@ fun NewCustomEngineDialog(
                     // engine url hint
                     InfernoText(
                         text = stringResource(R.string.search_add_custom_engine_search_string_example),
-                        infernoStyle = InfernoTextStyle.Subtitle,
+                        infernoStyle = InfernoTextStyle.SmallSecondary,
                         modifier = Modifier.fillMaxWidth(),
                     )
 
                     // learn more
                     InfernoText(
                         text = stringResource(R.string.exceptions_empty_message_learn_more_link),
-                        infernoStyle = InfernoTextStyle.Subtitle,
+                        infernoStyle = InfernoTextStyle.SmallSecondary,
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
@@ -293,14 +293,14 @@ fun NewCustomEngineDialog(
                     // api url hint
                     InfernoText(
                         text = stringResource(R.string.search_add_custom_engine_suggest_string_example_2),
-                        infernoStyle = InfernoTextStyle.Subtitle,
+                        infernoStyle = InfernoTextStyle.SmallSecondary,
                         modifier = Modifier.fillMaxWidth(),
                     )
 
                     // description learn more
                     InfernoText(
                         text = stringResource(R.string.exceptions_empty_message_learn_more_link),
-                        infernoStyle = InfernoTextStyle.Subtitle,
+                        infernoStyle = InfernoTextStyle.SmallSecondary,
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {

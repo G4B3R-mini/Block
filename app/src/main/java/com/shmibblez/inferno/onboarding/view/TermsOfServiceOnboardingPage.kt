@@ -174,7 +174,7 @@ private fun OnboardingPagePreview() {
                     lineThreeText = stringResource(id = R.string.onboarding_term_of_service_line_three),
                     lineThreeLinkText = stringResource(id = R.string.onboarding_term_of_service_line_three_link_text),
                 ),
-                imageRes = R.drawable.ic_firefox,
+                imageRes = R.drawable.inferno,
                 primaryButton = Action(
                     text = stringResource(
                         id = R.string.onboarding_term_of_service_agree_and_continue_button_label,

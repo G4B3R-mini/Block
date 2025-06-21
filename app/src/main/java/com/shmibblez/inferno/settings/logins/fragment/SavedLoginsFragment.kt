@@ -258,8 +258,8 @@ class SavedLoginsFragment : SecureFragment(), MenuProvider {
     override fun onPause() {
         toolbarChildContainer.removeAllViews()
         toolbarChildContainer.visibility = View.GONE
-        (activity as HomeActivity).getSupportActionBarAndInflateIfNecessary()
-            .setDisplayShowTitleEnabled(true)
+//        (activity as HomeActivity).getSupportActionBarAndInflateIfNecessary()
+//            .setDisplayShowTitleEnabled(true)
         sortingStrategyMenu.menuController.dismiss()
         sortLoginsMenuRoot.setOnClickListener(null)
 
@@ -279,8 +279,8 @@ class SavedLoginsFragment : SecureFragment(), MenuProvider {
     private fun initToolbar() {
         requireActivity().addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.RESUMED)
         showToolbar(getString(R.string.preferences_passwords_saved_logins_2))
-        (activity as HomeActivity).getSupportActionBarAndInflateIfNecessary()
-            .setDisplayShowTitleEnabled(false)
+//        (activity as HomeActivity).getSupportActionBarAndInflateIfNecessary()
+//            .setDisplayShowTitleEnabled(false)
         toolbarChildContainer = initChildContainerFromToolbar()
         sortLoginsMenuRoot = inflateSortLoginsMenuRoot()
         dropDownMenuAnchorView = sortLoginsMenuRoot.findViewById(R.id.drop_down_menu_anchor_view)

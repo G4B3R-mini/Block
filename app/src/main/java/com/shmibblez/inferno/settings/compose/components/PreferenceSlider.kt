@@ -63,7 +63,7 @@ fun PreferenceSlider(
         // subtitle
         InfernoText(
             text = summary,
-            infernoStyle = InfernoTextStyle.Subtitle,
+            infernoStyle = InfernoTextStyle.SmallSecondary,
         )
 
         // slider

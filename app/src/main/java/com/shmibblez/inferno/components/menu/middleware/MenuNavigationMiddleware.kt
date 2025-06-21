@@ -210,19 +210,19 @@ class MenuNavigationMiddleware(
                             showPage = true,
                         )
 
-                        val popUpToId = if (customTab != null) {
-                            R.id.externalAppBrowserFragment
-                        } else {
-                            R.id.browserComponentWrapperFragment
-                        }
-
-                        navController.nav(
-                            R.id.menuDialogFragment,
-                            direction,
-                            navOptions = NavOptions.Builder()
-                                .setPopUpTo(popUpToId, false)
-                                .build(),
-                        )
+//                        val popUpToId = if (customTab != null) {
+//                            R.id.externalAppBrowserFragment
+//                        } else {
+//                            R.id.browserComponentWrapperFragment
+//                        }
+//
+//                        navController.nav(
+//                            R.id.menuDialogFragment,
+//                            direction,
+//                            navOptions = NavOptions.Builder()
+//                                .setPopUpTo(popUpToId, false)
+//                                .build(),
+//                        )
                     }
                 }
 

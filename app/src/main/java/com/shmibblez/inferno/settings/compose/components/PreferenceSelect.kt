@@ -78,7 +78,7 @@ fun <T> PreferenceSelect(
             if (description != null) {
                 InfernoText(
                     text = description,
-                    infernoStyle = InfernoTextStyle.Subtitle,
+                    infernoStyle = InfernoTextStyle.SmallSecondary,
                     modifier = Modifier.alpha(
                         when (enabled) {
                             true -> 0.75F

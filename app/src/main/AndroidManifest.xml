@@ -64,9 +64,19 @@
         android:usesCleartextTraffic="true"
         tools:ignore="DataExtractionRules,UnusedAttribute">
 
+        <!-- crashlytics setup -->
         <meta-data
-            android:name="firebase_crashlytics_collection_enabled"
-            android:value="${crashlyticsCollectionEnabled}" />
+            android:name="firebase_analytics_collection_enabled"
+            android:value="false" />
+        <meta-data
+            android:name="firebase_messaging_auto_init_enabled"
+            android:value="false" />
+        <meta-data
+            android:name="firebase_analytics_collection_enabled"
+            android:value="false" />
+        <meta-data
+            android:name="firebase_analytics_collection_deactivated"
+            android:value="true" />
 
         <profileable
             android:shell="true"
@@ -205,18 +215,18 @@
             </intent-filter>
         </activity>
 
-        <activity
-            android:name=".customtabs.ExternalAppBrowserActivity"
-            android:autoRemoveFromRecents="false"
-            android:configChanges="keyboard|keyboardHidden|mcc|mnc|orientation|screenSize|layoutDirection|smallestScreenSize|screenLayout"
-            android:exported="false"
-            android:label="@string/app_name"
-            android:persistableMode="persistNever"
-            android:resizeableActivity="true"
-            android:supportsPictureInPicture="true"
-            android:taskAffinity=""
-            android:windowSoftInputMode="adjustResize|stateAlwaysHidden"
-            tools:ignore="RedundantLabel" />
+<!--        <activity-->
+<!--            android:name=".customtabs.ExternalAppBrowserActivity"-->
+<!--            android:autoRemoveFromRecents="false"-->
+<!--            android:configChanges="keyboard|keyboardHidden|mcc|mnc|orientation|screenSize|layoutDirection|smallestScreenSize|screenLayout"-->
+<!--            android:exported="false"-->
+<!--            android:label="@string/app_name"-->
+<!--            android:persistableMode="persistNever"-->
+<!--            android:resizeableActivity="true"-->
+<!--            android:supportsPictureInPicture="true"-->
+<!--            android:taskAffinity=""-->
+<!--            android:windowSoftInputMode="adjustResize|stateAlwaysHidden"-->
+<!--            tools:ignore="RedundantLabel" />-->
 
         <activity
             android:name=".IntentReceiverActivity"
@@ -337,13 +347,14 @@
             android:taskAffinity=""
             android:theme="@style/Theme.AppCompat.Translucent" />
 
-        <activity
-            android:name=".settings.account.AuthCustomTabActivity"
-            android:autoRemoveFromRecents="false"
-            android:configChanges="keyboard|keyboardHidden|mcc|mnc|orientation|screenSize|layoutDirection|smallestScreenSize|screenLayout"
-            android:exported="false"
-            android:taskAffinity=""
-            android:windowSoftInputMode="adjustResize|stateAlwaysHidden" />
+<!--    todo: AuthCustomTabActivity, add functionality to BrowserComponent    -->
+<!--        <activity-->
+<!--            android:name=".settings.account.AuthCustomTabActivity"-->
+<!--            android:autoRemoveFromRecents="false"-->
+<!--            android:configChanges="keyboard|keyboardHidden|mcc|mnc|orientation|screenSize|layoutDirection|smallestScreenSize|screenLayout"-->
+<!--            android:exported="false"-->
+<!--            android:taskAffinity=""-->
+<!--            android:windowSoftInputMode="adjustResize|stateAlwaysHidden" />-->
 
         <activity
             android:name=".settings.account.AuthIntentReceiverActivity"
@@ -437,15 +448,6 @@
             android:name=".messaging.NotificationDismissedService"
             android:exported="false" />
 
-        <meta-data
-            android:name="firebase_messaging_auto_init_enabled"
-            android:value="true" />
-        <meta-data
-            android:name="firebase_analytics_collection_enabled"
-            android:value="false" />
-        <meta-data
-            android:name="firebase_analytics_collection_deactivated"
-            android:value="true" />
         <!-- Removes the default Workmanager  initialization so that we can use on-demand initializer. -->
         <provider
             android:name="androidx.startup.InitializationProvider"

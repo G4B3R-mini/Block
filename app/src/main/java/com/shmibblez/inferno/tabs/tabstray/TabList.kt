@@ -280,7 +280,7 @@ private fun TabItem(
                 // tab url
                 InfernoText(
                     text = tab.content.url.toShortUrl(),
-                    infernoStyle = InfernoTextStyle.Subtitle,
+                    infernoStyle = InfernoTextStyle.SmallSecondary,
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 1,
                 )

@@ -120,7 +120,7 @@ fun ResearchSurfaceSurvey(
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Image(
-                        painter = painterResource(R.drawable.ic_firefox),
+                        painter = painterResource(R.drawable.inferno),
                         contentDescription = null,
                     )
                     Spacer(modifier = Modifier.height(16.dp))

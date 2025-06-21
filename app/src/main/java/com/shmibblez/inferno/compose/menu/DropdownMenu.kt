@@ -222,8 +222,7 @@ private fun FlexibleDropdownMenuItem(
 private fun MenuItemText(text: Text) {
     InfernoText(
         text = text.value,
-        fontColor = LocalContext.current.infernoTheme().value.primaryTextColor,
-        infernoStyle = InfernoTextStyle.Subtitle,
+        infernoStyle = InfernoTextStyle.Normal,
     )
 }
 

@@ -294,7 +294,7 @@ private fun LoginItem(
             )
             InfernoText(
                 text = login.password,
-                infernoStyle = InfernoTextStyle.Subtitle,
+                infernoStyle = InfernoTextStyle.SmallSecondary,
                 maxLines = 2,
             )
         }

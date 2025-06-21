@@ -14,11 +14,12 @@ import mozilla.components.support.ktx.android.content.getColorFromAttr
 import com.shmibblez.inferno.BuildConfig
 import com.shmibblez.inferno.IntentReceiverActivity
 import com.shmibblez.inferno.R
-import com.shmibblez.inferno.customtabs.EXTRA_IS_SANDBOX_CUSTOM_TAB
 import com.shmibblez.inferno.settings.account.AuthIntentReceiverActivity
 import java.io.UnsupportedEncodingException
 import java.net.URLEncoder
 import java.util.Locale
+
+const val EXTRA_IS_SANDBOX_CUSTOM_TAB = "org.mozilla.fenix.customtabs.EXTRA_IS_SANDBOX_CUSTOM_TAB"
 
 object SupportUtils {
     const val INFERNO_HOME_URL = "inferno:home"

@@ -109,7 +109,8 @@ object GeckoProvider {
         policy: TrackingProtectionPolicy,
     ): GeckoRuntimeSettings {
         return GeckoRuntimeSettings.Builder()
-            .crashHandler(CrashHandlerService::class.java)
+            // important: disabled
+//            .crashHandler(CrashHandlerService::class.java)
             .experimentDelegate(NimbusExperimentDelegate())
             .contentBlocking(
                 policy.toContentBlockingSetting(

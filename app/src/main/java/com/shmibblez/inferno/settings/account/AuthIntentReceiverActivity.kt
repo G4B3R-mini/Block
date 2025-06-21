@@ -35,7 +35,8 @@ class AuthIntentReceiverActivity : Activity() {
                 components.intentProcessors.customTabIntentProcessor.process(intent)
             }
 
-            intent.setClassName(applicationContext, AuthCustomTabActivity::class.java.name)
+            // todo: AuthCustomTabActivity
+//            intent.setClassName(applicationContext, AuthCustomTabActivity::class.java.name)
             intent.putExtra(HomeActivity.OPEN_TO_BROWSER, true)
 
             startActivity(intent)

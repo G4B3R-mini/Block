@@ -192,7 +192,7 @@ private fun DefaultLocaleItem(
             // language info
             InfernoText(
                 text = locale.toLanguageTag(),
-                infernoStyle = InfernoTextStyle.Subtitle,
+                infernoStyle = InfernoTextStyle.SmallSecondary,
                 maxLines = 2,
             )
         }
@@ -233,7 +233,7 @@ private fun LocaleItem(
             // language info
             InfernoText(
                 text = locale.toLanguageTag(),
-                infernoStyle = InfernoTextStyle.Subtitle,
+                infernoStyle = InfernoTextStyle.SmallSecondary,
                 maxLines = 2,
             )
         }

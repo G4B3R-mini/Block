@@ -27,7 +27,7 @@ class WallpaperDownloader(
     private val client: Client,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) {
-    private val remoteHost = BuildConfig.WALLPAPER_URL
+//    private val remoteHost = BuildConfig.WALLPAPER_URL
 
     /**
      * Downloads a wallpaper from the network. Will try to fetch 2 versions of each wallpaper:
@@ -70,7 +70,7 @@ class WallpaperDownloader(
 
         val remotePath = "${wallpaper.collection.name}/${wallpaper.name}/${imageType.lowercase()}.png"
         val request = Request(
-            url = "$remoteHost/$remotePath",
+            url = "", // ""$remoteHost/$remotePath",
             method = Request.Method.GET,
             conservative = true,
         )

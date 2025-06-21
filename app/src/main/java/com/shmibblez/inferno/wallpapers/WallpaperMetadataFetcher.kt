@@ -24,15 +24,19 @@ import java.util.Locale
 class WallpaperMetadataFetcher(
     private val client: Client,
 ) {
-    private val metadataUrl = BuildConfig.WALLPAPER_URL.substringBefore("android") +
-        "metadata/v$currentJsonVersion/wallpapers.json"
+//    private val metadataUrl = BuildConfig.WALLPAPER_URL.substringBefore("android") +
+//        "metadata/v$currentJsonVersion/wallpapers.json"
 
     /**
      * Downloads the list of wallpapers from the remote source. Failures will return an empty list.
      */
     suspend fun downloadWallpaperList(): List<Wallpaper> = withContext(Dispatchers.IO) {
         Result.runCatching {
-            val request = Request(url = metadataUrl, method = Request.Method.GET, conservative = true)
+            val request = Request(
+                url = "", // metadataUrl,
+                method = Request.Method.GET,
+                conservative = true
+            )
             val response = client.fetch(request)
             response.body.useBufferedReader {
                 val json = it.readText()

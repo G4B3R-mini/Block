@@ -38,6 +38,9 @@ interface InfernoTextStyle {
     fun toTextStyle() : TextStyle
 
     companion object {
+        /**
+         * Large text with bold font weight
+         */
         val Title: InfernoTextStyle
             @Composable get() = object : InfernoTextStyle {
                 override val fontStyle: FontStyle = FontStyle.Normal
@@ -63,6 +66,10 @@ interface InfernoTextStyle {
                     )
                 }
             }
+
+        /**
+         * Large text with normal font weight
+         */
         val Large: InfernoTextStyle
             @Composable get() = object : InfernoTextStyle {
                 override val fontStyle: FontStyle = FontStyle.Normal
@@ -88,6 +95,10 @@ interface InfernoTextStyle {
                     )
                 }
             }
+
+        /**
+         * Normal text, used in most places
+         */
         val Normal: InfernoTextStyle
             @Composable get() = object : InfernoTextStyle {
                 override val fontStyle: FontStyle = FontStyle.Normal
@@ -113,6 +124,39 @@ interface InfernoTextStyle {
                     )
                 }
             }
+
+        /**
+         * Same as [Normal], only difference is font color secondary
+         */
+        val NormalSecondary: InfernoTextStyle
+            @Composable get() = object : InfernoTextStyle {
+                override val fontStyle: FontStyle = FontStyle.Normal
+                override val fontWeight: FontWeight = FontWeight.Normal
+                override val textAlign: TextAlign = TextAlign.Start
+                override val lineHeight: TextUnit = 24.sp
+                override val letterSpacing: TextUnit = 0.15.sp
+                override val overflow: TextOverflow = TextOverflow.Ellipsis
+                override val softWrap: Boolean = true
+                override val maxLines: Int = Int.MAX_VALUE
+                override val minLines: Int = 1
+                override val fontSize: TextUnit = 16.sp
+                override val fontColor: Color =
+                    LocalContext.current.infernoTheme().value.secondaryTextColor
+
+                @Composable
+                override fun toTextStyle(): TextStyle {
+                    return LocalTextStyle.current.copy(
+                        fontSize = fontSize,
+                        lineHeight = lineHeight,
+                        color = fontColor,
+                        letterSpacing = letterSpacing,
+                    )
+                }
+            }
+
+        /**
+         * Small text with primary text color
+         */
         val Small: InfernoTextStyle
             @Composable get() = object : InfernoTextStyle {
                 override val fontStyle: FontStyle = FontStyle.Normal
@@ -138,7 +182,11 @@ interface InfernoTextStyle {
                     )
                 }
             }
-        val Subtitle: InfernoTextStyle
+
+        /**
+         * Same as [Small], only difference is font color secondary
+         */
+        val SmallSecondary: InfernoTextStyle
             @Composable get() = object : InfernoTextStyle {
                 override val fontStyle: FontStyle = FontStyle.Normal
                 override val fontWeight: FontWeight = FontWeight.Normal

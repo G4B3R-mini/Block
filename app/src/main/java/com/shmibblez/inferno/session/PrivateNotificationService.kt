@@ -16,7 +16,6 @@ import mozilla.components.support.base.android.NotificationsDelegate
 import com.shmibblez.inferno.HomeActivity
 import com.shmibblez.inferno.IntentReceiverActivity
 import com.shmibblez.inferno.R
-import com.shmibblez.inferno.customtabs.ExternalAppBrowserActivity
 import com.shmibblez.inferno.ext.components
 import java.util.Locale
 
@@ -98,7 +97,7 @@ class PrivateNotificationService : AbstractPrivateNotificationService() {
     }
 
     override fun ignoreTaskComponentClasses(): List<String> = listOf(
-        ExternalAppBrowserActivity::class.qualifiedName!!,
+//        ExternalAppBrowserActivity::class.qualifiedName!!,
         IntentReceiverActivity::class.qualifiedName!!,
     )
 

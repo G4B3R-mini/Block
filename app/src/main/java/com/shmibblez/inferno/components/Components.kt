@@ -10,6 +10,8 @@ import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.NotificationManagerCompat
+import com.google.firebase.crashlytics.ktx.crashlytics
+import com.google.firebase.ktx.Firebase
 //import com.google.android.play.core.review.ReviewManagerFactory
 import mozilla.components.feature.addons.AddonManager
 import mozilla.components.feature.addons.amo.AMOAddonsProvider
@@ -52,6 +54,9 @@ import com.shmibblez.inferno.settings.theme.InfernoThemeProvider
 import com.shmibblez.inferno.utils.ClipboardHandler
 import com.shmibblez.inferno.utils.Settings
 import com.shmibblez.inferno.wifi.WifiConnectionMonitor
+import kotlinx.coroutines.Job
+import mozilla.components.concept.base.crash.Breadcrumb
+import mozilla.components.concept.base.crash.CrashReporting
 import mozilla.components.lib.crash.CrashReporter
 import mozilla.components.lib.crash.service.MozillaSocorroService
 //import mozilla.components.lib.crash.CrashReporter
@@ -74,13 +79,29 @@ class Components(private val context: Context) {
             notificationManagerCompat,
         )
     }
-    val crashReporter = CrashReporter(
-        context, notificationsDelegate = notificationsDelegate, services = listOf(
-            MozillaSocorroService(
-                applicationContext = context, appName = "Inferno Browser"
-            )
-        )
-    )
+
+    // todo: key to handling errors
+//    Thread.setDefaultUncaughtExceptionHandler(handler)
+    val crashReporter = object : CrashReporting {
+        override fun recordCrashBreadcrumb(breadcrumb: Breadcrumb) {
+            Firebase.crashlytics.setCustomKey(breadcrumb.type.name, breadcrumb.message)
+        }
+        override fun submitCaughtException(throwable: Throwable): Job {
+            Firebase.crashlytics.recordException(throwable)
+            return Job().also { it.complete() }
+        }
+    }
+//    val crashReporter = CrashReporter(
+//        enabled = false,
+//        context = context,
+//        notificationsDelegate = notificationsDelegate,
+//        services = listOf(
+//            MozillaSocorroService(
+//                applicationContext = context, appName = "Inferno Browser"
+//            ),
+//        ),
+//    )
+
     val backgroundServices by lazyMonitored {
         BackgroundServices(
             context,
@@ -94,13 +115,13 @@ class Components(private val context: Context) {
         )
     }
     val services by lazyMonitored {
-        Services(
-            context, core.store, backgroundServices.accountManager
-        )
+        Services(context, core.store, backgroundServices.accountManager)
     }
 
 
-    val core by lazyMonitored { Core(context, crashReporter, strictMode) }
+    val core by lazyMonitored {
+        Core(context, crashReporter, strictMode)
+    }
 
     val useCases by lazyMonitored {
         UseCases(

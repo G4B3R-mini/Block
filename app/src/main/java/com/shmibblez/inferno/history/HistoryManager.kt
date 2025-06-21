@@ -255,7 +255,7 @@ private fun <T : History> ItemTemplate(
             // subtitle
             InfernoText(
                 text = subtitle,
-                infernoStyle = InfernoTextStyle.Subtitle,
+                infernoStyle = InfernoTextStyle.SmallSecondary,
                 maxLines = 1,
             )
         }

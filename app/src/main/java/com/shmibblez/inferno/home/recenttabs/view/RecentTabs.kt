@@ -51,6 +51,8 @@ import androidx.core.graphics.drawable.toBitmap
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.Image
 import com.shmibblez.inferno.compose.TabThumbnail
+import com.shmibblez.inferno.compose.base.InfernoText
+import com.shmibblez.inferno.compose.base.InfernoTextStyle
 import com.shmibblez.inferno.compose.menu.DropdownMenu
 import com.shmibblez.inferno.compose.menu.MenuItem
 import com.shmibblez.inferno.compose.text.Text
@@ -139,6 +141,7 @@ private fun RecentTabItem(
         Row(
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             RecentTabImage(
                 tab = tab,
@@ -148,20 +151,18 @@ private fun RecentTabItem(
                 contentScale = ContentScale.Crop,
             )
 
-            Spacer(modifier = Modifier.width(16.dp))
-
             Column(
                 modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.SpaceBetween,
+                verticalArrangement = Arrangement.SpaceAround,
             ) {
-                Text(
+                InfernoText(
                     text = tab.state.content.title.ifEmpty { tab.state.content.url.trimmed() },
-                    modifier = Modifier.semantics {
-                        testTagsAsResourceId = true
-                        testTag = "recent.tab.title"
-                    },
-                    color = LocalContext.current.infernoTheme().value.primaryTextColor,
-                    fontSize = 14.sp,
+//                    modifier = Modifier.semantics {
+//                        testTagsAsResourceId = true
+//                        testTag = "recent.tab.title"
+//                    },
+                    infernoStyle = InfernoTextStyle.Small,
+//                    fontSize = 14.sp,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
@@ -178,14 +179,13 @@ private fun RecentTabItem(
 
                     Spacer(modifier = Modifier.width(8.dp))
 
-                    Text(
+                    InfernoText(
                         text = tab.state.content.url.trimmed(),
-                        modifier = Modifier.semantics {
-                            testTagsAsResourceId = true
-                            testTag = "recent.tab.url"
-                        },
-                        color = LocalContext.current.infernoTheme().value.secondaryTextColor,
-                        fontSize = 12.sp,
+//                        modifier = Modifier.semantics {
+//                            testTagsAsResourceId = true
+//                            testTag = "recent.tab.url"
+//                        },
+                        infernoStyle = InfernoTextStyle.SmallSecondary,
                         overflow = TextOverflow.Ellipsis,
                         maxLines = 1,
                     )

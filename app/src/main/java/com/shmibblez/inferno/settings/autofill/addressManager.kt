@@ -213,7 +213,7 @@ private fun AddressItem(
             )
             InfernoText(
                 text = address.getAddressLabel(),
-                infernoStyle = InfernoTextStyle.Subtitle,
+                infernoStyle = InfernoTextStyle.SmallSecondary,
                 maxLines = 2,
             )
         }

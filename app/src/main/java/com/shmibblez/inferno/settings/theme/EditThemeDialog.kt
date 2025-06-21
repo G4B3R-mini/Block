@@ -280,7 +280,7 @@ fun EditThemeDialog(
                             fontColor = theme.primaryTextColor,
                         )
                         InfernoText(
-                            text = funFacts[1], infernoStyle = InfernoTextStyle.Subtitle,
+                            text = funFacts[1], infernoStyle = InfernoTextStyle.SmallSecondary,
                             fontColor = theme.secondaryTextColor,
                         )
                     }

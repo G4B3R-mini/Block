@@ -72,7 +72,7 @@ fun SwitchWithLabel(
                     LocalContext.current.infernoTheme().value.secondaryTextColor
                 },
 //                style = FirefoxTheme.typography.subtitle1,
-                infernoStyle = InfernoTextStyle.Subtitle,
+                infernoStyle = InfernoTextStyle.SmallSecondary,
             )
 
             description?.let {

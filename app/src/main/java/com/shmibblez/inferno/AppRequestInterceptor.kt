@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.ConnectivityManager
+import android.os.Build
 import android.util.Log
 import androidx.core.content.getSystemService
 import androidx.core.net.toUri
@@ -18,11 +19,10 @@ import mozilla.components.browser.errorpages.ErrorType
 import mozilla.components.concept.engine.EngineSession
 import mozilla.components.concept.engine.request.RequestInterceptor
 import com.shmibblez.inferno.ext.isOnline
+import com.shmibblez.inferno.ext.settings
+import com.shmibblez.inferno.proto.InfernoSettings
 import java.lang.ref.WeakReference
 
-
-//private val IGNORED_SCHEMES =
-//    Regex("^(https?|javascript|about|googlechrome)\$", RegexOption.IGNORE_CASE)
 
 class AppRequestInterceptor(
     private val context: Context,
@@ -66,6 +66,58 @@ class AppRequestInterceptor(
         isSubframeRequest: Boolean,
     ): RequestInterceptor.InterceptionResponse? {
 
+//        Intent.FLAG_ACTIVITY_REQUIRE_NON_BROWSER
+
+        // check app links setting, todo: app requests, change behaviour depending on user setting
+        val appLinksSetting = context.settings().latestSettings?.appLinksSetting
+        when (appLinksSetting) {
+            InfernoSettings.AppLinks.APP_LINKS_BLOCKED -> {
+                return null
+            }
+
+            InfernoSettings.AppLinks.APP_LINKS_ALLOWED -> {
+                // todo: if allowed just open dont ask
+            }
+
+            InfernoSettings.AppLinks.APP_LINKS_ASK_TO_OPEN -> {}
+            null -> {}
+        }
+
+        val openInAppAvailable = when (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            true -> openInAppAvailable(uri)
+            false -> openInAppAvailableBelowApi30(uri)
+        }
+
+        requestListeners.forEach { it.onRequestReceived(openInAppAvailable) }
+
+        return when (openInAppAvailable) {
+            true -> {
+                val services = context.components.services
+                services.appLinksInterceptor.onLoadRequest(
+                    engineSession,
+                    uri,
+                    lastUri,
+                    hasUserGesture,
+                    isSameDomain,
+                    isRedirect,
+                    isDirectNavigation,
+                    isSubframeRequest,
+                )
+            }
+
+            false -> null
+        }
+    }
+
+    private fun openInAppAvailable(uri: String): Boolean {
+        return false
+        // todo: use Intent().addFlags(Intent.FLAG_ACTIVITY_REQUIRE_NON_BROWSER) to check
+        //  reference here: https://medium.com/androiddevelopers/package-visibility-in-android-11-cc857f221cd9
+        //  in order to support this, add a setting for prompting open in app dialog (if disabled, do nothing, if enabled, show app prompt)
+        //  either way, include open in app toolbar and toolbar menu option, when clicked send url to all apps, show chooser
+    }
+
+    private fun openInAppAvailableBelowApi30(uri: String): Boolean {
         // intent for testing matches
         val intent = Intent(Intent.ACTION_VIEW)
         intent.setData(uri.toUri())
@@ -120,26 +172,7 @@ class AppRequestInterceptor(
         )
 
         val openInAppAvailable: Boolean = resultSize > 0
-
-        requestListeners.forEach { it.onRequestReceived(openInAppAvailable) }
-
-        return when (openInAppAvailable) {
-            true -> {
-                val services = context.components.services
-                services.appLinksInterceptor.onLoadRequest(
-                    engineSession,
-                    uri,
-                    lastUri,
-                    hasUserGesture,
-                    isSameDomain,
-                    isRedirect,
-                    isDirectNavigation,
-                    isSubframeRequest,
-                )
-            }
-
-            false -> null
-        }
+        return openInAppAvailable
     }
 
     override fun onErrorRequest(

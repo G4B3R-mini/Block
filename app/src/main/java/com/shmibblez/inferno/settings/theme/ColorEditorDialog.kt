@@ -332,7 +332,7 @@ private fun AboutItem(
                         "\n- Solid blue would be #0000FF (#FF0000FF with alpha)" +
                         // purple
                         "\n- You can also make colors transparent, in this case half transparent purple would be #889000FF",
-                infernoStyle = InfernoTextStyle.Subtitle,
+                infernoStyle = InfernoTextStyle.SmallSecondary,
                 fontColor = theme.secondaryTextColor,
             )
         }

@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:830438391623:android:e6ab4e9aaa7680f3895662",
+        "mobilesdk_app_id": "1:830438391623:android:84e7f1d5d69086d9895662",
         "android_client_info": {
-          "package_name": "com.shmibblez.inferno.beta"
+          "package_name": "com.shmibblez.inferno"
         }
       },
       "oauth_client": [],
@@ -26,9 +26,9 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:830438391623:android:10bcf55bcb521725895662",
+        "mobilesdk_app_id": "1:830438391623:android:e6ab4e9aaa7680f3895662",
         "android_client_info": {
-          "package_name": "com.shmibblez.inferno.release"
+          "package_name": "com.shmibblez.inferno.beta"
         }
       },
       "oauth_client": [],

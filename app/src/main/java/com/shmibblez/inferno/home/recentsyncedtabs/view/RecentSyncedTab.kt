@@ -163,7 +163,7 @@ fun RecentSyncedTab(
                         } else {
                             InfernoText(
                                 text = tab.deviceDisplayName,
-                                infernoStyle = InfernoTextStyle.Subtitle,
+                                infernoStyle = InfernoTextStyle.SmallSecondary,
                                 overflow = TextOverflow.Ellipsis,
                                 maxLines = 1,
                             )

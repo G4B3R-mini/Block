@@ -1,5 +1,3 @@
--dontobfuscate
-
 ####################################################################################################
 # Sentry
 ####################################################################################################
@@ -130,3 +128,71 @@
 -dontwarn java.beans.IntrospectionException
 -dontwarn java.beans.Introspector
 -dontwarn java.beans.PropertyDescriptor
+
+####################################################################################################
+# Protobuf
+####################################################################################################
+
+# Keep all protobuf classes and their members
+-keep class * extends com.google.protobuf.GeneratedMessageLite { *; }
+-keep class * extends com.google.protobuf.GeneratedMessageLite$* { *; }
+-keep class * implements com.google.protobuf.Internal$EnumLite { *; }
+-keep class * implements com.google.protobuf.Internal$EnumVerifier { *; }
+
+# Keep protobuf core classes
+-keep class com.google.protobuf.** { *; }
+
+# Optimize for Android
+-assumenosideeffects class com.google.protobuf.Android {
+    static boolean ASSUME_ANDROID return true;
+}
+
+# Optional: If you only use specific protobuf classes, replace the wildcards above with specific classes:
+# -keep class com.yourpackage.proto.** { *; }
+
+####################################################################################################
+# GeckoView Process Services - CRITICAL for runtime service creation
+####################################################################################################
+
+# Keep all GeckoView process classes and their inner classes
+-keep class org.mozilla.gecko.process.** { *; }
+-keepnames class org.mozilla.gecko.process.** { *; }
+
+# Specifically keep service allocator and process manager
+-keep class org.mozilla.gecko.process.ServiceAllocator { *; }
+-keep class org.mozilla.gecko.process.GeckoProcessManager { *; }
+-keep class org.mozilla.gecko.process.GeckoProcessManager$* { *; }
+
+# Keep all service classes that might be dynamically instantiated
+-keep class * extends org.mozilla.gecko.process.GeckoChildProcessServices { *; }
+-keep class org.mozilla.gecko.process.GeckoChildProcessServices { *; }
+-keep class org.mozilla.gecko.process.GeckoChildProcessServices$* { *; }
+
+# Keep service component names from being obfuscated
+-keepnames class org.mozilla.gecko.process.GeckoChildProcessServices$*
+
+# Additional GeckoView process rules
+-keep class org.mozilla.gecko.mozglue.** { *; }
+-keep class org.mozilla.gecko.annotation.** { *; }
+-keep class org.mozilla.gecko.util.ThreadUtils { *; }
+
+####################################################################################################
+# Service and Component preservation for dynamic loading
+####################################################################################################
+
+# Keep all service classes from obfuscation since they're referenced in manifest
+-keep public class * extends android.app.Service
+-keepnames public class * extends android.app.Service
+
+# Keep component info
+-keep class android.content.ComponentName { *; }
+-keepattributes *Annotation*
+
+####################################################################################################
+# GeckoView
+####################################################################################################
+
+-keep class org.mozilla.gecko.** { *; }
+-keepnames class org.mozilla.gecko.** { *; }
+-keepclassmembers class org.mozilla.gecko.** { *; }
+-dontwarn org.mozilla.gecko.**

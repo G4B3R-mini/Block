@@ -301,7 +301,7 @@ private fun CardItem(
             // expiry date
             InfernoText(
                 text = expiryDate,
-                infernoStyle = InfernoTextStyle.Subtitle,
+                infernoStyle = InfernoTextStyle.SmallSecondary,
                 maxLines = 2,
             )
         }

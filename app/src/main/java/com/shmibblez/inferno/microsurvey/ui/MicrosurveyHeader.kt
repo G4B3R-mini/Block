@@ -55,7 +55,7 @@ fun MicrosurveyHeader(
                 .padding(start = 32.dp),
         ) {
             Image(
-                painter = painterResource(R.drawable.ic_firefox),
+                painter = painterResource(R.drawable.inferno),
                 contentDescription = stringResource(id = R.string.microsurvey_app_icon_content_description),
                 modifier = Modifier.size(24.dp),
             )

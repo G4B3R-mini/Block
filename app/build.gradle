@@ -18,7 +18,8 @@ plugins {
 apply from: "$project.rootDir/automation/gradle/versionCode.gradle"
 
 import com.android.build.api.variant.FilterConfiguration
-import com.android.build.gradle.internal.tasks.AppPreBuildTask
+
+//import com.android.build.gradle.internal.tasks.AppPreBuildTask
 import groovy.json.JsonOutput
 
 android {
@@ -27,8 +28,8 @@ android {
         minSdkVersion Config.minSdkVersion
         compileSdk Config.compileSdkVersion
         targetSdkVersion Config.targetSdkVersion
-        versionCode 1
-        versionName Config.generateDebugVersionName()
+//        versionCode 1
+//        versionName Config.generateDebugVersionName()
         vectorDrawables.useSupportLibrary = true
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -69,19 +70,19 @@ android {
         buildConfigField "String[]", "SUPPORTED_LOCALE_ARRAY", getSupportedLocales()
     }
 
-    def releaseTemplate = {
-        minifyEnabled true
-//        proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-//        matchingFallbacks = ['release'] // Use on the "release" build type in dependencies (AARs)
-
-//        if (gradle.hasProperty("localProperties.autosignReleaseWithDebugKey")) {
-//            signingConfig signingConfigs.debug
+//    def releaseTemplate = {
+//        minifyEnabled true
+////        proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+////        matchingFallbacks = ['release'] // Use on the "release" build type in dependencies (AARs)
+//
+////        if (gradle.hasProperty("localProperties.autosignReleaseWithDebugKey")) {
+////            signingConfig signingConfigs.debug
+////        }
+//
+//        if (gradle.hasProperty("localProperties.debuggable")) {
+//            debuggable true
 //        }
-
-        if (gradle.hasProperty("localProperties.debuggable")) {
-            debuggable true
-        }
-    }
+//    }
 
     buildFeatures {
         compose true
@@ -91,37 +92,45 @@ android {
 
     buildTypes {
         release {
+//            postprocessing {
+//                removeUnusedCode true
+//                removeUnusedResources true
+//                obfuscate false
+//                optimizeCode true
+//            }
             minifyEnabled true
-            applicationIdSuffix ".release"
-            manifestPlaceholders["crashlyticsCollectionEnabled"] = true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         debug {
             minifyEnabled false
             applicationIdSuffix ".debug"
-            manifestPlaceholders["crashlyticsCollectionEnabled"] = false
+            debuggable true
         }
         beta {
             minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             applicationIdSuffix ".beta"
-            manifestPlaceholders["crashlyticsCollectionEnabled"] = true
+//            signingConfig signingConfigs.debug
         }
-        raptor releaseTemplate >> {
-            // the ">>" concatenates the raptor-specific options with the template
-            applicationIdSuffix ".raptor"
-            manifestPlaceholders.isRaptorEnabled = "true"
-            matchingFallbacks = ['release']
-        }
-        nightly releaseTemplate >> {
-            buildConfigField "boolean", "IS_RELEASED", "true"
-        }
+//        raptor releaseTemplate >> {
+//            // the ">>" concatenates the raptor-specific options with the template
+//            applicationIdSuffix ".raptor"
+//            manifestPlaceholders.isRaptorEnabled = "true"
+//            matchingFallbacks = ['release']
+//        }
+//        nightly releaseTemplate >> {
+//            buildConfigField "boolean", "IS_RELEASED", "true"
+//        }
     }
 
-    androidComponents {
-        beforeVariants(selector().withBuildType("release")) { variantBuilder ->
-            // There's a "release" build type that exists by default that we don't use (it's replaced by "nightly" and "beta")
-            variantBuilder.enable = false
-        }
-    }
+//    androidComponents {
+//        beforeVariants(selector().withBuildType("release")) { variantBuilder ->
+//            // There's a "release" build type that exists by default that we don't use (it's replaced by "nightly" and "beta")
+//            variantBuilder.enable = false
+//        }
+//    }
     // ^^ replaces:
 //    variantFilter {
 //        if (buildType.name == 'release') {
@@ -161,8 +170,6 @@ android {
 kotlin {
     jvmToolchain(Config.jvmTargetCompatibility)
 }
-
-//def baseVersionCode = generatedVersionCode
 
 if (gradle.hasProperty('localProperties.dependencySubstitutions.geckoviewTopsrcdir')) {
     if (gradle.hasProperty('localProperties.dependencySubstitutions.geckoviewTopobjdir')) {
@@ -212,17 +219,17 @@ android.applicationVariants.configureEach { variant ->
 // Generating version codes for Google Play
 // -------------------------------------------------------------------------------------------------
 //    if (variant.buildType.buildConfigFields['IS_RELEASED']?.value) {
-        // The Google Play Store does not allow multiple APKs for the same app that all have the
-        // same version code. Therefore we need to have different version codes for our ARM and x86
-        // builds. See https://developer.android.com/studio/publish/versioning
+    // The Google Play Store does not allow multiple APKs for the same app that all have the
+    // same version code. Therefore we need to have different version codes for our ARM and x86
+    // builds. See https://developer.android.com/studio/publish/versioning
 
-        // Our x86 builds need a higher version code to avoid installing ARM builds on an x86 device
-        // with ARM compatibility mode.
+    // Our x86 builds need a higher version code to avoid installing ARM builds on an x86 device
+    // with ARM compatibility mode.
 
-        // AAB builds need a version code that is distinct from any APK builds. Since AAB and APK
-        // builds may run in parallel, AAB and APK version codes might be based on the same
-        // (minute granularity) time of day. To avoid conflicts, we ensure the minute portion
-        // of the version code is even for APKs and odd for AABs.
+    // AAB builds need a version code that is distinct from any APK builds. Since AAB and APK
+    // builds may run in parallel, AAB and APK version codes might be based on the same
+    // (minute granularity) time of day. To avoid conflicts, we ensure the minute portion
+    // of the version code is even for APKs and odd for AABs.
 
 //        def versionName = Config.releaseVersionName(project)
 //
@@ -259,7 +266,7 @@ android.applicationVariants.configureEach { variant ->
 //            output.versionCodeOverride = versionCodeOverride
 //        }
 
-        // If this is a release build, validate that "versionName" is set
+    // If this is a release build, validate that "versionName" is set
 //        tasks.withType(AppPreBuildTask).configureEach { prebuildTask ->
 //            // You can't add a closure to a variant, so we need to look for an early variant-specific type
 //            // of task (AppPreBuildTask is the first) and filter to make sure we're looking at the task for
@@ -295,32 +302,53 @@ android.applicationVariants.configureEach { variant ->
 // but that's also provided by geckoview-omni, so now we need to select which one to use.
 // todo: remove glean libs, maybe also use geckoview fork with no telemetry, or check how to disable
 //  in gecko view (optional)
-//project.configurations.configureEach {
-//    resolutionStrategy.capabilitiesResolution.withCapability("org.mozilla.telemetry:glean-native") {
-//        def toBeSelected = candidates.find { it.id instanceof ModuleComponentIdentifier && it.id.module.contains('geckoview') }
-//        if (toBeSelected != null) {
-//            select(toBeSelected)
-//        }
-//        because 'use GeckoView Glean instead of standalone Glean'
-//    }
-//}
+project.configurations.configureEach {
+    resolutionStrategy.capabilitiesResolution.withCapability("org.mozilla.telemetry:glean-native") {
+        def toBeSelected = candidates.find { it.id instanceof ModuleComponentIdentifier && it.id.module.contains('geckoview') }
+        if (toBeSelected != null) {
+            select(toBeSelected)
+        }
+        because 'use GeckoView Glean instead of standalone Glean'
+    }
+}
+
+def debugVersionCode = 1
+def debugVersionName = "0.0.1"
+def betaVersionCode = 2 // 06-20-25 8:25PM GMT-5
+def betaVersionName = "0.0.1"
+def releaseVersionCode = 2 // 06-20-25 8:25PM GMT-5
+def releaseVersionName = "0.0.1"
 
 
 android.applicationVariants.configureEach { variant ->
 
 // -------------------------------------------------------------------------------------------------
-// Generate version codes for builds
+// Set version codes for builds (set manually)
 // -------------------------------------------------------------------------------------------------
 
-    def isDebug = variant.buildType.resValues['bool/IS_DEBUG']?.value ?: false
-    def useReleaseVersioning = variant.buildType.buildConfigFields['USE_RELEASE_VERSIONING']?.value ?: false
+//    def isDebug = variant.buildType.resValues['bool/IS_DEBUG']?.value ?: false
+//    def useReleaseVersioning = variant.buildType.buildConfigFields['USE_RELEASE_VERSIONING']?.value ?: false
+
+    variant.outputs.each { output ->
+        if (variant.name == "debug") {
+            output.versionCodeOverride = debugVersionCode
+            output.versionNameOverride = debugVersionName
+        } else if (variant.name == "beta") {
+            output.versionCodeOverride = betaVersionCode
+            output.versionNameOverride = betaVersionName
+        } else if (variant.name == "release") {
+            output.versionCodeOverride = releaseVersionCode
+            output.versionNameOverride = releaseVersionName
+        }
+    }
+
 
     println("----------------------------------------------")
     println("Variant name:      " + variant.name)
     println("Application ID:    " + [variant.applicationId, variant.buildType.applicationIdSuffix].findAll().join())
     println("Build type:        " + variant.buildType.name)
     println("Flavor:            " + variant.flavorName)
-    println("Telemetry enabled: " + !isDebug)
+//    println("Telemetry enabled: " + !isDebug)
 
     // versioning manual
 //    if (useReleaseVersioning) {
@@ -359,7 +387,7 @@ android.applicationVariants.configureEach { variant ->
 //// BuildConfig: Set variables for Sentry, Crash Reporting, and Telemetry
 //// -------------------------------------------------------------------------------------------------
 //
-//    buildConfigField 'String', 'SENTRY_TOKEN', 'null'
+    buildConfigField 'String', 'SENTRY_TOKEN', 'null'
 //    if (!isDebug) {
 //        buildConfigField 'boolean', 'CRASH_REPORTING', 'true'
 //        // Reading sentry token from local file (if it exists). In a release task on taskcluster it will be available.
@@ -369,13 +397,13 @@ android.applicationVariants.configureEach { variant ->
 //        } catch (FileNotFoundException ignored) {
 //        }
 //    } else {
-//        buildConfigField 'boolean', 'CRASH_REPORTING', 'false'
+    buildConfigField 'boolean', 'CRASH_REPORTING', 'false'
 //    }
 //
 //    if (!isDebug) {
 //        buildConfigField 'boolean', 'TELEMETRY', 'true'
 //    } else {
-//        buildConfigField 'boolean', 'TELEMETRY', 'false'
+    buildConfigField 'boolean', 'TELEMETRY', 'false'
 //    }
 //
 //    def buildDate = Config.generateBuildDate()
@@ -400,7 +428,7 @@ android.applicationVariants.configureEach { variant ->
 //            buildConfigField 'String', 'ADJUST_TOKEN', '"' + token + '"'
 //            println "(Added from .adjust_token file)"
 //        } catch (FileNotFoundException ignored) {
-//            buildConfigField 'String', 'ADJUST_TOKEN', 'null'
+    buildConfigField 'String', 'ADJUST_TOKEN', 'null'
 //            println("X_X")
 //        }
 //    } else {
@@ -420,7 +448,7 @@ android.applicationVariants.configureEach { variant ->
 //        buildConfigField 'String', 'MLS_TOKEN', '"' + token + '"'
 //        println "(Added from .mls_token file)"
 //    } catch (FileNotFoundException ignored) {
-//        buildConfigField 'String', 'MLS_TOKEN', '""'
+    buildConfigField 'String', 'MLS_TOKEN', '""'
 //        println("X_X")
 //    }
 
@@ -460,7 +488,7 @@ android.applicationVariants.configureEach { variant ->
 //        buildConfigField 'String', 'GLEAN_CUSTOM_URL', url
 //        println "(Added from local.properties file)"
 //    } else {
-//        buildConfigField 'String', 'GLEAN_CUSTOM_URL', 'null'
+    buildConfigField 'String', 'GLEAN_CUSTOM_URL', 'null'
 //        println("--")
 //    }
 
@@ -521,7 +549,7 @@ android.applicationVariants.configureEach { variant ->
 //            println("LeakCanary enabled in debug: true")
 //        }
 //    } else {
-//        buildConfigField "boolean", "LEAKCANARY", "false"
+    buildConfigField "boolean", "LEAKCANARY", "false"
 //    }
 }
 
@@ -553,11 +581,8 @@ dependencies {
 
     // crashlytics
     implementation(platform(libs.firebase.bom))
-
-    // Add the dependencies for the Crashlytics and Analytics libraries
-    // When using the BoM, you don't specify versions in Firebase library dependencies
+//    implementation(libs.firebase.analytics)
     implementation(libs.firebase.crashlytics)
-    implementation(libs.firebase.analytics)
 
     // Android
     implementation libs.androidx.activity

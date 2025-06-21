@@ -13,7 +13,6 @@ import mozilla.components.feature.accounts.FxaWebChannelFeature.Companion.WebCha
 import mozilla.components.service.fxa.ServerConfig
 import mozilla.components.service.fxa.manager.FxaAccountManager
 import mozilla.components.support.base.feature.LifecycleAwareFeature
-import com.shmibblez.inferno.customtabs.ExternalAppBrowserActivity
 import com.shmibblez.inferno.ext.isIntentInternal
 import java.lang.ref.WeakReference
 
@@ -57,6 +56,7 @@ class FxaWebChannelIntegration(
         feature.stop()
     }
 
+    // todo
     private fun handleWebCommandLogOut(command: WebChannelCommand) {
         if (command != WebChannelCommand.LOGOUT && command != WebChannelCommand.DELETE_ACCOUNT) {
             return
@@ -67,11 +67,12 @@ class FxaWebChannelIntegration(
         val activity = activityRef.get() ?: return
 
         val isInternalIntent = activity.isIntentInternal()
-        val isExternalTabActivity = activity is ExternalAppBrowserActivity
+//        val isExternalTabActivity = activity is ExternalAppBrowserActivity
 
         // We use a Custom Tab to show the account, but to avoid mistakenly closing a real
         // Custom Tab, we need to make sure the intent is internal.
-        if (!isExternalTabActivity && !isInternalIntent) {
+//        if (!isExternalTabActivity && !isInternalIntent) {
+        if (!isInternalIntent) {
             return
         }
 

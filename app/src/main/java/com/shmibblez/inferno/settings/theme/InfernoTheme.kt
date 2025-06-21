@@ -127,8 +127,7 @@ open class InfernoTheme(
 
     fun toSettingsObj(): InfernoSettings.InfernoTheme {
         // todo: use builder to return InfernoSettings.InfernoTheme
-        return InfernoSettings.InfernoTheme.newBuilder().setName(this.name)
-            .setTimeSet(Date().time)
+        return InfernoSettings.InfernoTheme.newBuilder().setName(this.name).setTimeSet(Date().time)
             .setPrimaryTextColor(this.primaryTextColor.toArgb())
             .setSecondaryTextColor(this.secondaryTextColor.toArgb())
             .setPrimaryIconColor(this.primaryIconColor.toArgb())
@@ -147,17 +146,17 @@ open class InfernoTheme(
         fun dark(context: Context) = InfernoTheme(
             defaultType = InfernoSettings.DefaultTheme.INFERNO_DARK,
             name = context.getString(R.string.preference_dark_theme),
-            primaryTextColor = Color.White,
-            secondaryTextColor = Color.White.copy(alpha = 0.75F),
-            primaryIconColor = Color.White,
-            secondaryIconColor = Color.White.copy(alpha = 0.75F),
-            primaryOutlineColor = Color.White,
-            secondaryOutlineColor = Color.White.copy(alpha = 0.75F),
-            primaryActionColor = Color.Red,
-            secondaryActionColor = Color.Red.copy(alpha = 0.75F),
-            errorColor = Color.Red,
-            primaryBackgroundColor = Color.Black,
-            secondaryBackgroundColor = Color.DarkGray,
+            primaryTextColor = Color(0xffe5dde5), // white // Color.White,
+            secondaryTextColor = Color(0xffa599a5), // light grey //  Color.White.copy(alpha = 0.75F),
+            primaryIconColor = Color(0xffe5dde5), // white // Color.White,
+            secondaryIconColor = Color(0xffa599a5), // light grey // Color.White.copy(alpha = 0.75F),
+            primaryOutlineColor = Color(0xffe5dde5), // white // Color.White,
+            secondaryOutlineColor = Color(0xffa599a5), // light grey // Color.White.copy(alpha = 0.75F),
+            primaryActionColor = Color(0xffcc0000), // red // Color.Red,
+            secondaryActionColor = Color(0xff1c2329), // mid dark gray // Color.White.copy(alpha = 0.75F),
+            errorColor = Color(0xffcc0000), // red // Color.Red
+            primaryBackgroundColor = Color(0xff000000), // black // Color.Black,
+            secondaryBackgroundColor = Color(0xff0c1519), // dark gray with hint of blue // Color.DarkGray
         )
 
         fun light(context: Context) = InfernoTheme(
