@@ -16,6 +16,6 @@ local.properties
 # apk / bundle builds
 *.aab
 *.apk
-/app/beta/
-/app/release/
+/app/beta/**
+/app/release/**
 **/build/
