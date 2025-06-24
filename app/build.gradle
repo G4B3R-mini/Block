@@ -142,12 +142,23 @@ android {
         execution 'ANDROIDX_TEST_ORCHESTRATOR'
         animationsDisabled = true
     }
+
     packagingOptions {
+        pickFirst '**/libjnidispatch.so'
+        pickFirst '**/libc++_shared.so'
+        // Keep all JNA native libraries
+        pickFirst '**/libjna.so'
         resources {
             excludes += ['META-INF/atomicfu.kotlin_module']
         }
     }
 
+    // Ensure native libraries are included (megazord)
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['libs']
+        }
+    }
 
     splits {
         abi {
@@ -312,12 +323,8 @@ project.configurations.configureEach {
     }
 }
 
-def debugVersionCode = 1
-def debugVersionName = "0.0.1"
-def betaVersionCode = 2 // 06-20-25 8:25PM GMT-5
-def betaVersionName = "0.0.1"
-def releaseVersionCode = 2 // 06-20-25 8:25PM GMT-5
-def releaseVersionName = "0.0.1"
+def versionCode = 3 // 3 - 06-23-25 9:33PM GMT-5, 2 - 06-20-25 8:25PM GMT-5
+def versionName = "0.0.2-beta"
 
 
 android.applicationVariants.configureEach { variant ->
@@ -331,14 +338,14 @@ android.applicationVariants.configureEach { variant ->
 
     variant.outputs.each { output ->
         if (variant.name == "debug") {
-            output.versionCodeOverride = debugVersionCode
-            output.versionNameOverride = debugVersionName
+            output.versionCodeOverride = versionCode
+            output.versionNameOverride = versionName
         } else if (variant.name == "beta") {
-            output.versionCodeOverride = betaVersionCode
-            output.versionNameOverride = betaVersionName
+            output.versionCodeOverride = versionCode
+            output.versionNameOverride = versionName
         } else if (variant.name == "release") {
-            output.versionCodeOverride = releaseVersionCode
-            output.versionNameOverride = releaseVersionName
+            output.versionCodeOverride = versionCode
+            output.versionNameOverride = versionName
         }
     }
 

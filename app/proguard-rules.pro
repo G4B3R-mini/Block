@@ -123,11 +123,26 @@
 # https://bugzilla.mozilla.org/show_bug.cgi?id=1596302
 -keep class androidx.lifecycle.** { *; }
 
+
+####################################################################################################
+# Java
+####################################################################################################
+
 -dontwarn java.beans.BeanInfo
 -dontwarn java.beans.FeatureDescriptor
 -dontwarn java.beans.IntrospectionException
 -dontwarn java.beans.Introspector
 -dontwarn java.beans.PropertyDescriptor
+
+# JNA - prevent native library stripping
+-keep class com.sun.jna.** { *; }
+-dontwarn com.sun.jna.**
+-keepattributes *Annotation*,Signature
+
+# Keep native method names
+-keepclasseswithmembernames class * {
+    native <methods>;
+}
 
 ####################################################################################################
 # Protobuf

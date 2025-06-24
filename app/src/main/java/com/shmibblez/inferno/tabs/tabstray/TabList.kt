@@ -399,17 +399,25 @@ fun MediaImage(
     }
     val drawable = AppCompatResources.getDrawable(LocalContext.current, icon)
     // Follow up ticket https://github.com/mozilla-mobile/fenix/issues/25774
-    Image(
-        painter = rememberDrawablePainter(drawable = drawable),
-        contentDescription = stringResource(contentDescription),
-        modifier = Modifier
+    Box(
+        modifier = modifier
             .size(24.dp)
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
-            ) { onMediaIconClicked(tab) }
-            .then(modifier),
-        contentScale = ContentScale.FillWidth,
-        alignment = Alignment.TopCenter,
-    )
+            ) { onMediaIconClicked(tab) },
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(LocalContext.current.infernoTheme().value.primaryActionColor),
+        )
+        Image(
+            painter = rememberDrawablePainter(drawable = drawable),
+            contentDescription = stringResource(contentDescription),
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.FillWidth,
+            alignment = Alignment.TopCenter,
+        )
+    }
 }

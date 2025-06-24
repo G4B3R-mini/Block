@@ -181,6 +181,7 @@ fun BrowserNavHost(
                 onNavToAutofillSettings = { nav.navigate(route = BrowserRoute.Settings.AutofillSettingsPage) },
                 onNavToSearchSettings = { nav.navigate(route = BrowserRoute.Settings.SearchSettingsPage) },
                 onNavToHomeSettings = { nav.navigate(route = BrowserRoute.Settings.HomePageSettingsPage) },
+                onNavToAccountSettings = { nav.navigate(route = BrowserRoute.Settings.AccountSettingsPage) },
             )
         }
 

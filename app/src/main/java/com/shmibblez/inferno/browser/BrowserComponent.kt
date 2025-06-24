@@ -320,6 +320,7 @@ fun BrowserComponent(
     onNavToAutofillSettings: () -> Unit,
     onNavToSearchSettings: () -> Unit,
     onNavToHomeSettings: () -> Unit,
+    onNavToAccountSettings: () -> Unit,
 ) {
     Log.d("BrowserComponent", "rebuilt")
     val coroutineScope = rememberCoroutineScope()
@@ -788,22 +789,24 @@ fun BrowserComponent(
 //                )
         },
         onAccountSettingsClick = {
-            // todo: nav to account settings
-            val isSignedIn =
-                context.components.backgroundServices.accountManager.authenticatedAccount() != null
-
-            val direction = if (isSignedIn) {
-                TabsTrayFragmentDirections.actionGlobalAccountSettingsFragment()
-            } else {
-                TabsTrayFragmentDirections.actionGlobalTurnOnSync(entrypoint = FenixFxAEntryPoint.NavigationInteraction)
-            }
-//                navController.navigate(direction)
+//            val isSignedIn =
+//                context.components.backgroundServices.accountManager.authenticatedAccount() != null
+//            val direction = if (isSignedIn) {
+//                TabsTrayFragmentDirections.actionGlobalAccountSettingsFragment()
+//            } else {
+//                TabsTrayFragmentDirections.actionGlobalTurnOnSync(entrypoint = FenixFxAEntryPoint.NavigationInteraction)
+//            }
+            // todo: nav, add sync settings direct nav, in account settings
+            //  nav directly to sync if signed in
+//            val isSignedIn =
+//                context.components.backgroundServices.accountManager.authenticatedAccount() != null
+            onNavToAccountSettings.invoke()
         },
         onTabClick = { tab, currentMode, enableSelect, dismiss ->
-            fun getTabPositionFromId(tabsList: List<TabSessionState>, tabId: String): Int {
-                tabsList.forEachIndexed { index, tab -> if (tab.id == tabId) return index }
-                return -1
-            }
+//            fun getTabPositionFromId(tabsList: List<TabSessionState>, tabId: String): Int {
+//                tabsList.forEachIndexed { index, tab -> if (tab.id == tabId) return index }
+//                return -1
+//            }
 
             val selected = currentMode.selectedTabs
             when {
@@ -814,15 +817,14 @@ fun BrowserComponent(
                 }
 
                 selected.contains(tab) -> {
-                    enableSelect(selected - tab)
+                    enableSelect.invoke(selected - tab)
                 }
 
                 else -> {
-                    enableSelect(selected + tab)
+                    enableSelect.invoke(selected + tab)
                 }
             }
 
-//                tabsTrayInteractor.onTabSelected(tab, TABS_TRAY_FEATURE_NAME)
         },
         onTabClose = { closedTab, dismiss, setSelectedTabTrayTab ->
             fun deleteTab(tabId: String, source: String?, isConfirmed: Boolean) {

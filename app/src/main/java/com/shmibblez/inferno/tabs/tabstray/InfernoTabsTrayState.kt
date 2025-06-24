@@ -10,9 +10,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import com.shmibblez.inferno.R
+import com.shmibblez.inferno.compose.menu.MenuItem
+import com.shmibblez.inferno.compose.text.Text
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.proto.InfernoSettings
 import com.shmibblez.inferno.proto.infernoSettingsDataStore
+import com.shmibblez.inferno.tabstray.TabsTrayTestTag
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.map
@@ -298,4 +302,223 @@ class InfernoTabsTrayState(
     override fun stop() {
         scope?.cancel()
     }
+}
+
+enum class InfernoTabsTraySelectedTab {
+    NormalTabs, PrivateTabs, SyncedTabs, RecentlyClosedTabs,
+}
+
+open class InfernoTabsTrayMode {
+    open val selectedTabs = emptySet<TabSessionState>()
+
+    open val selectedClosedTabs = emptySet<TabState>()
+
+    data object Normal : InfernoTabsTrayMode()
+
+    data class Select(override val selectedTabs: Set<TabSessionState>) : InfernoTabsTrayMode()
+
+    data class SelectClosed(override val selectedClosedTabs: Set<TabState>) : InfernoTabsTrayMode()
+
+    /**
+     * A helper to check if we're in [Mode.Select] mode.
+     */
+    fun isSelect() = this is Select || this is SelectClosed
+
+    /**
+     * A helper to check if we're in [Mode.Normal] mode.
+     */
+    fun isNormal() = this is Normal
+
+    /**
+     * Returns the list of menu items corresponding to the selected mode
+     *
+    //     * @param shouldShowInactiveButton Whether or not to show the inactive tabs menu item.
+     * @param selectedPage The currently selected page.
+     * @param normalTabCount The normal tabs number.
+     * @param privateTabCount The private tabs number.
+     * @param onBookmarkSelectedTabsClick Invoked when user interacts with the bookmark menu item.
+     * @param onCloseSelectedTabsClick Invoked when user interacts with the close menu item.
+     * @param onMakeSelectedTabsInactive Invoked when user interacts with the make inactive menu item.
+     * @param onTabSettingsClick Invoked when user interacts with the tab settings menu.
+    //     * @param onRecentlyClosedClick Invoked when user interacts with the recently closed menu item.
+     * @param onEnterMultiselectModeClick Invoked when user enters the multiselect mode.
+     * @param onShareAllTabsClick Invoked when user interacts with the share all menu item.
+     * @param onDeleteAllTabsClick Invoked when user interacts with the delete all menu item.
+     * @param onAccountSettingsClick Invoked when user interacts with the account settings.
+     */
+    fun generateMenuItems(
+//        shouldShowInactiveButton: Boolean,
+        selectedPage: InfernoTabsTraySelectedTab,
+        normalTabCount: Int,
+        privateTabCount: Int,
+        onBookmarkSelectedTabsClick: () -> Unit,
+        onCloseSelectedTabsClick: () -> Unit,
+        onMakeSelectedTabsInactive: () -> Unit,
+        onTabSettingsClick: () -> Unit,
+        onHistoryClick: () -> Unit,
+        onEnterMultiselectModeClick: () -> Unit,
+        onShareAllTabsClick: () -> Unit,
+        onDeleteAllTabsClick: () -> Unit,
+        onAccountSettingsClick: () -> Unit,
+        onDeleteSelectedCloseTabsClick: () -> Unit,
+    ): List<MenuItem> {
+        return if (this.isSelect()) {
+            generateMultiSelectBannerMenuItems(
+                selectedPage = selectedPage,
+//                shouldShowInactiveButton = shouldShowInactiveButton,
+                onBookmarkSelectedTabsClick = onBookmarkSelectedTabsClick,
+                onCloseSelectedTabsClick = onCloseSelectedTabsClick,
+                onMakeSelectedTabsInactive = onMakeSelectedTabsInactive,
+                onDeleteSelectedCloseTabsClick = onDeleteSelectedCloseTabsClick
+            )
+        } else {
+            generateTabPageBannerMenuItems(
+                selectedPage = selectedPage,
+                normalTabCount = normalTabCount,
+                privateTabCount = privateTabCount,
+                onTabSettingsClick = onTabSettingsClick,
+                onHistoryClick = onHistoryClick,
+                onEnterMultiselectModeClick = onEnterMultiselectModeClick,
+                onShareAllTabsClick = onShareAllTabsClick,
+                onDeleteAllTabsClick = onDeleteAllTabsClick,
+                onAccountSettingsClick = onAccountSettingsClick,
+            )
+        }
+    }
+
+    /**
+     *  Builds the menu items list when in multiselect mode
+     */
+    private fun generateMultiSelectBannerMenuItems(
+        selectedPage: InfernoTabsTraySelectedTab,
+//        shouldShowInactiveButton: Boolean,
+        onBookmarkSelectedTabsClick: () -> Unit,
+        onCloseSelectedTabsClick: () -> Unit,
+        onMakeSelectedTabsInactive: () -> Unit,
+        onDeleteSelectedCloseTabsClick: () -> Unit,
+    ): List<MenuItem> {
+        val bookmarkAllItem = MenuItem.TextItem(
+            text = Text.Resource(R.string.tab_tray_multiselect_menu_item_bookmark),
+            onClick = onBookmarkSelectedTabsClick,
+        )
+        val closeAllTabSessionStateItem = MenuItem.TextItem(
+            text = Text.Resource(R.string.tab_tray_multiselect_menu_item_close),
+            onClick = onCloseSelectedTabsClick,
+        )
+        val deleteAllClosedTabsItem = MenuItem.TextItem(
+            text = Text.Resource(R.string.tab_tray_multiselect_menu_item_close),
+            onClick = onDeleteSelectedCloseTabsClick,
+        )
+        val makeAllInactiveItem = MenuItem.TextItem(
+            text = Text.Resource(R.string.inactive_tabs_menu_item),
+            onClick = onMakeSelectedTabsInactive,
+        )
+
+        return when (selectedPage) {
+            InfernoTabsTraySelectedTab.NormalTabs -> listOf(
+                bookmarkAllItem,
+                closeAllTabSessionStateItem,
+                makeAllInactiveItem,
+            )
+
+            InfernoTabsTraySelectedTab.PrivateTabs -> listOf(
+                bookmarkAllItem,
+                closeAllTabSessionStateItem,
+                //                makeAllInactiveItem,
+            )
+
+            InfernoTabsTraySelectedTab.SyncedTabs -> listOf(
+                // todo
+            )
+
+            InfernoTabsTraySelectedTab.RecentlyClosedTabs -> listOf(
+                deleteAllClosedTabsItem,
+            )
+        }
+    }
+
+    /**
+     *  Builds the menu items list when in normal mode
+     */
+    @Suppress("LongParameterList")
+    private fun generateTabPageBannerMenuItems(
+        selectedPage: InfernoTabsTraySelectedTab,
+        normalTabCount: Int,
+        privateTabCount: Int,
+        onTabSettingsClick: () -> Unit,
+        onHistoryClick: () -> Unit,
+        onEnterMultiselectModeClick: () -> Unit,
+        onShareAllTabsClick: () -> Unit,
+        onDeleteAllTabsClick: () -> Unit,
+        onAccountSettingsClick: () -> Unit,
+    ): List<MenuItem> {
+        val tabSettingsItem = MenuItem.TextItem(
+            text = Text.Resource(R.string.tab_tray_menu_tab_settings),
+            testTag = TabsTrayTestTag.tabSettings,
+            onClick = onTabSettingsClick,
+        )
+//        val recentlyClosedTabsItem = MenuItem.TextItem(
+//            text = Text.Resource(R.string.tab_tray_menu_recently_closed),
+//            testTag = TabsTrayTestTag.recentlyClosedTabs,
+//            onClick = onRecentlyClosedClick,
+//        )
+        val historyItem = MenuItem.TextItem(
+            text = Text.Resource(R.string.recently_closed_show_full_history),
+            testTag = "history item",
+            onClick = onHistoryClick,
+        )
+        val enterSelectModeItem = MenuItem.TextItem(
+            text = Text.Resource(R.string.tabs_tray_select_tabs),
+            testTag = TabsTrayTestTag.selectTabs,
+            onClick = onEnterMultiselectModeClick,
+        )
+        val shareAllTabsItem = MenuItem.TextItem(
+            text = Text.Resource(R.string.tab_tray_menu_item_share),
+            testTag = TabsTrayTestTag.shareAllTabs,
+            onClick = onShareAllTabsClick,
+        )
+        val deleteAllTabsItem = MenuItem.TextItem(
+            text = Text.Resource(R.string.tab_tray_menu_item_close),
+            testTag = TabsTrayTestTag.closeAllTabs,
+            onClick = onDeleteAllTabsClick,
+        )
+        val accountSettingsItem = MenuItem.TextItem(
+            text = Text.Resource(R.string.tab_tray_menu_account_settings),
+            testTag = TabsTrayTestTag.accountSettings,
+            onClick = onAccountSettingsClick,
+        )
+        return when {
+            selectedPage == InfernoTabsTraySelectedTab.NormalTabs && normalTabCount == 0 -> listOf(
+                tabSettingsItem,
+//                recentlyClosedTabsItem,
+            )
+
+            selectedPage == InfernoTabsTraySelectedTab.NormalTabs -> listOf(
+                enterSelectModeItem,
+                shareAllTabsItem,
+                tabSettingsItem,
+                deleteAllTabsItem,
+            )
+
+            selectedPage == InfernoTabsTraySelectedTab.PrivateTabs && privateTabCount == 0 -> listOf(
+                tabSettingsItem,
+            )
+
+            selectedPage == InfernoTabsTraySelectedTab.PrivateTabs -> listOf(
+                tabSettingsItem,
+                deleteAllTabsItem,
+            )
+
+            selectedPage == InfernoTabsTraySelectedTab.SyncedTabs -> listOf(
+                accountSettingsItem,
+            )
+
+            selectedPage == InfernoTabsTraySelectedTab.RecentlyClosedTabs -> listOf(
+                historyItem,
+            )
+
+            else -> emptyList()
+        }
+    }
+
 }
