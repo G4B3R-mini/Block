@@ -6,6 +6,7 @@ import android.widget.ImageView
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
@@ -13,10 +14,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.browser.UiConst
+import com.shmibblez.inferno.ext.infernoTheme
 
 // todo (10):
 //   - make layout identical to toolbar, but glean
@@ -57,4 +61,19 @@ fun InfernoLoadingSquare(modifier: Modifier = Modifier, size: Dp) {
 
         },
     )
+}
+
+@Composable
+fun InfernoLoadingScreen(modifier: Modifier = Modifier, loadingSquareSize: Dp = 72.dp) {
+    Box(
+        modifier = modifier
+            .background(
+                LocalContext.current.infernoTheme().value.primaryBackgroundColor.copy(
+                    alpha = UiConst.LOADING_ALPHA
+                )
+            ),
+        contentAlignment = Alignment.Center,
+    ) {
+        InfernoLoadingSquare(size = loadingSquareSize)
+    }
 }

@@ -31,7 +31,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -914,7 +913,7 @@ private fun EditFolderScreen(
 
             IconListItem(
                 label = editState?.parent?.title ?: "",
-                beforeIconPainter = painterResource(R.drawable.ic_folder_icon),
+                beforeIconPainter = painterResource(R.drawable.ic_folder_24),
                 onClick = { store.dispatch(EditFolderAction.ParentFolderClicked) },
             )
         }
@@ -996,7 +995,7 @@ private fun AddFolderScreen(
 
             IconListItem(
                 label = state?.parent?.title ?: "",
-                beforeIconPainter = painterResource(R.drawable.ic_folder_icon),
+                beforeIconPainter = painterResource(R.drawable.ic_folder_24),
                 onClick = { store.dispatch(AddFolderAction.ParentFolderClicked) },
             )
         }

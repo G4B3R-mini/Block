@@ -43,7 +43,7 @@ import mozilla.components.support.ktx.kotlin.tryGetHostFromUrl
 class ConsecutiveUniqueJobHandler<T : Enum<T>>(
     val scope: CoroutineScope,
 ) {
-    class ResultScope<out E : Throwable, out R : Any>(
+    class ResultScope<out E : Throwable?, out R : Any?>(
         val isSuccess: Boolean,
         val isFailure: Boolean,
         val e: E?,
@@ -64,9 +64,10 @@ class ConsecutiveUniqueJobHandler<T : Enum<T>>(
      * @param type type of operation
      * @param task task to complete
      */
-    data class Op<T : Enum<T>, R : Any>(
+    data class Op<T : Enum<T>, R : Any?>(
         val type: T,
         val task: suspend () -> R?,
+        val onBegin: (() -> Unit)? = null,
         val onComplete: (ResultScope<Throwable, R>.(currentlyIdle: Boolean) -> Unit)? = null,
     ) {
         override fun equals(other: Any?): Boolean {
@@ -87,6 +88,7 @@ class ConsecutiveUniqueJobHandler<T : Enum<T>>(
             isIdle: () -> Boolean,
         ): Deferred<R?> {
             Log.d("CUJobHandler.Op", "invoke called, starting job")
+            onBegin?.invoke()
             return scope.async {
                 val r = task.runCatching { this.invoke() }
                 onFinish.invoke()
@@ -124,7 +126,8 @@ class ConsecutiveUniqueJobHandler<T : Enum<T>>(
                     "CUJobHandler.Op",
                     "onFinish start, queue: ${queue.map { (it as Op<*, *>).type }}, isIdle: $isIdle"
                 )
-                queue -= op; currentTask = null; invokeNext()
+                queue -= op; currentTask = null
+                invokeNext()
                 Log.d(
                     "CUJobHandler.Op",
                     "onFinish end, queue: ${queue.map { (it as Op<*, *>).type }}, isIdle: $isIdle"
@@ -134,14 +137,18 @@ class ConsecutiveUniqueJobHandler<T : Enum<T>>(
         )
     }
 
-    fun <R : Any> processTask(
+    /**
+     * @param onComplete called when finished loading, scope provides onSuccess{} and onFailure{}
+     */
+    fun <R : Any?> processTask(
 //        op: Op<T, R>,
         type: T,
-        task: suspend () -> R?,
+        task: suspend () -> R,
+        onBegin: (() -> Unit)? = null,
         onComplete: (ResultScope<Throwable, R>.(currentlyIdle: Boolean) -> Unit)? = null,
     ) {
         Log.d("CUJobHandler", "processTask called")
-        val op = Op(type, task, onComplete)
+        val op = Op(type, task, onBegin, onComplete)
         if (queue.contains(op)) return
         queue += op
         invokeNext()

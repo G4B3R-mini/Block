@@ -67,7 +67,7 @@ class SelectBookmarkFolderAdapter(private val sharedViewModel: BookmarksSharedVi
 
         fun bind(folder: BookmarkNodeWithDepth, selected: Boolean, onSelect: (BookmarkNode) -> Unit) {
             view.changeSelected(selected)
-            view.iconView.setImageResource(R.drawable.ic_folder_icon)
+            view.iconView.setImageResource(R.drawable.ic_folder_24)
             view.titleView.text = folder.node.title
             view.setOnClickListener {
                 onSelect(folder.node)

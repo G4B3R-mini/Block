@@ -9,7 +9,7 @@ import mozilla.components.concept.storage.BookmarkNode
 /**
  * Items that can be represented in the Bookmarks list.
  */
-internal sealed class BookmarkItem {
+sealed class BookmarkItem {
 
     abstract val guid: String
 

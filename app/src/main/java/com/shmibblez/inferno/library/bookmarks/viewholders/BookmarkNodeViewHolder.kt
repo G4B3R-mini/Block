@@ -106,7 +106,7 @@ class BookmarkNodeViewHolder(
         when {
             // Item is a folder
             item.type == BookmarkNodeType.FOLDER ->
-                iconView.setImageResource(R.drawable.ic_folder_icon)
+                iconView.setImageResource(R.drawable.ic_folder_24)
             // Item has a http/https URL
             url != null && url.startsWith("http") ->
                 context.components.core.icons.loadIntoView(iconView, url)
