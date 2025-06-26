@@ -34,7 +34,7 @@
 //    }
 //
 //    /**
-//     * Records impression events for a given [OnboardingPageUiData.Type].
+//     * Records impression events for a given [OnboardingPageUiData.Mode].
 //     * @param sequenceId The identifier of the onboarding sequence shown to the user.
 //     * @param pageType The page type for which the impression occurred.
 //     * @param sequencePosition The sequence position of the page for which the impression occurred.
@@ -42,11 +42,11 @@
 //    @Suppress("LongMethod")
 //    fun onImpression(
 //        sequenceId: String,
-//        pageType: OnboardingPageUiData.Type,
+//        pageType: OnboardingPageUiData.Mode,
 //        sequencePosition: String,
 //    ) {
 //        when (pageType) {
-//            OnboardingPageUiData.Type.DEFAULT_BROWSER -> {
+//            OnboardingPageUiData.Mode.DEFAULT_BROWSER -> {
 //                Onboarding.setToDefaultCard.record(
 //                    Onboarding.SetToDefaultCardExtra(
 //                        action = ACTION_IMPRESSION,
@@ -57,7 +57,7 @@
 //                )
 //            }
 //
-//            OnboardingPageUiData.Type.ADD_SEARCH_WIDGET -> {
+//            OnboardingPageUiData.Mode.ADD_SEARCH_WIDGET -> {
 //                Onboarding.addSearchWidgetCard.record(
 //                    Onboarding.AddSearchWidgetCardExtra(
 //                        action = ACTION_IMPRESSION,
@@ -68,7 +68,7 @@
 //                )
 //            }
 //
-//            OnboardingPageUiData.Type.SYNC_SIGN_IN -> {
+//            OnboardingPageUiData.Mode.SYNC_SIGN_IN -> {
 //                Onboarding.signInCard.record(
 //                    Onboarding.SignInCardExtra(
 //                        action = ACTION_IMPRESSION,
@@ -79,7 +79,7 @@
 //                )
 //            }
 //
-//            OnboardingPageUiData.Type.NOTIFICATION_PERMISSION -> {
+//            OnboardingPageUiData.Mode.NOTIFICATION_PERMISSION -> {
 //                Onboarding.turnOnNotificationsCard.record(
 //                    Onboarding.TurnOnNotificationsCardExtra(
 //                        action = ACTION_IMPRESSION,
@@ -90,7 +90,7 @@
 //                )
 //            }
 //
-//            OnboardingPageUiData.Type.ADD_ONS -> {
+//            OnboardingPageUiData.Mode.ADD_ONS -> {
 //                Onboarding.addOnsCard.record(
 //                    Onboarding.AddOnsCardExtra(
 //                        action = ACTION_IMPRESSION,
@@ -101,7 +101,7 @@
 //                )
 //            }
 //
-//            OnboardingPageUiData.Type.TOOLBAR_PLACEMENT -> {
+//            OnboardingPageUiData.Mode.TOOLBAR_PLACEMENT -> {
 //                Onboarding.toolbarPlacementCard.record(
 //                    Onboarding.ToolbarPlacementCardExtra(
 //                        action = ACTION_IMPRESSION,
@@ -112,7 +112,7 @@
 //                )
 //            }
 //
-//            OnboardingPageUiData.Type.THEME_SELECTION -> {
+//            OnboardingPageUiData.Mode.THEME_SELECTION -> {
 //                Onboarding.themeSelectionCard.record(
 //                    Onboarding.ThemeSelectionCardExtra(
 //                        action = ACTION_IMPRESSION,
@@ -123,7 +123,7 @@
 //                )
 //            }
 //
-//            OnboardingPageUiData.Type.TERMS_OF_SERVICE -> {
+//            OnboardingPageUiData.Mode.TERMS_OF_SERVICE -> {
 //                Onboarding.termsOfServiceCard.record(
 //                    Onboarding.TermsOfServiceCardExtra(
 //                        action = ACTION_IMPRESSION,

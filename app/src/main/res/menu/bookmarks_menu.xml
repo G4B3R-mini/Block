@@ -13,7 +13,7 @@
 
     <item
         android:id="@+id/add_bookmark_folder"
-        android:icon="@drawable/ic_folder_new"
+        android:icon="@drawable/ic_folder_new_24"
         app:iconTint="?attr/textPrimary"
         android:title="@string/bookmark_add_folder"
         app:showAsAction="ifRoom" />

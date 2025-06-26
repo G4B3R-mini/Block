@@ -315,6 +315,7 @@ fun BrowserComponent(
     state: BrowserComponentState,
     biometricPromptCallbackManager: BiometricPromptCallbackManager,
     onNavToHistory: () -> Unit,
+    onNavToBookmarks: () -> Unit,
     onNavToSettings: () -> Unit,
     onNavToExtensions: () -> Unit,
     onNavToPasswords: () -> Unit,
@@ -996,9 +997,7 @@ fun BrowserComponent(
             tabsTrayState.show(it ?: InfernoTabsTraySelectedTab.PrivateTabs)
         },
         onNavToHistory = onNavToHistory,
-        onNavToBookmarks = {
-            // todo: bookmarks page
-        },
+        onNavToBookmarks = onNavToBookmarks,
         onNavToSearchSettings = onNavToSearchSettings,
         onNavToHomeSettings = onNavToHomeSettings,
     )
@@ -1024,6 +1023,7 @@ fun BrowserComponent(
         onNavToSettings = onNavToSettings,
         onNavToTabsTray = tabsTrayState::show,
         onNavToHistory = onNavToHistory,
+        onNavToBookmarks = onNavToBookmarks,
         onNavToExtensions = onNavToExtensions,
         onNavToPasswords = onNavToPasswords,
     )
@@ -1888,6 +1888,7 @@ fun BrowserComponent(
                             },
                             onNavToSettings = onNavToSettings,
                             onNavToHistory = onNavToHistory,
+                            onNavToBookmarks = onNavToBookmarks,
                             onNavToExtensions = onNavToExtensions,
                             onNavToPasswords = onNavToPasswords,
                             onNavToTabsTray = tabsTrayState::show,

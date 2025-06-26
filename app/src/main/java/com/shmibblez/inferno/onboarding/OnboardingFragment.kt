@@ -151,7 +151,7 @@
 //            onSkipDefaultClick = {
 //                telemetryRecorder.onSkipSetToDefaultClick(
 //                    pagesToDisplay.telemetrySequenceId(),
-//                    pagesToDisplay.sequencePosition(OnboardingPageUiData.Type.DEFAULT_BROWSER),
+//                    pagesToDisplay.sequencePosition(OnboardingPageUiData.Mode.DEFAULT_BROWSER),
 //                )
 //            },
 //            onSignInButtonClick = {
@@ -163,13 +163,13 @@
 //                )
 //                telemetryRecorder.onSyncSignInClick(
 //                    sequenceId = pagesToDisplay.telemetrySequenceId(),
-//                    sequencePosition = pagesToDisplay.sequencePosition(OnboardingPageUiData.Type.SYNC_SIGN_IN),
+//                    sequencePosition = pagesToDisplay.sequencePosition(OnboardingPageUiData.Mode.SYNC_SIGN_IN),
 //                )
 //            },
 //            onSkipSignInClick = {
 //                telemetryRecorder.onSkipSignInClick(
 //                    pagesToDisplay.telemetrySequenceId(),
-//                    pagesToDisplay.sequencePosition(OnboardingPageUiData.Type.SYNC_SIGN_IN),
+//                    pagesToDisplay.sequencePosition(OnboardingPageUiData.Mode.SYNC_SIGN_IN),
 //                )
 //            },
 //            onNotificationPermissionButtonClick = {
@@ -177,33 +177,33 @@
 //                telemetryRecorder.onNotificationPermissionClick(
 //                    sequenceId = pagesToDisplay.telemetrySequenceId(),
 //                    sequencePosition =
-//                    pagesToDisplay.sequencePosition(OnboardingPageUiData.Type.NOTIFICATION_PERMISSION),
+//                    pagesToDisplay.sequencePosition(OnboardingPageUiData.Mode.NOTIFICATION_PERMISSION),
 //                )
 //            },
 //            onSkipNotificationClick = {
 //                telemetryRecorder.onSkipTurnOnNotificationsClick(
 //                    sequenceId = pagesToDisplay.telemetrySequenceId(),
 //                    sequencePosition =
-//                    pagesToDisplay.sequencePosition(OnboardingPageUiData.Type.NOTIFICATION_PERMISSION),
+//                    pagesToDisplay.sequencePosition(OnboardingPageUiData.Mode.NOTIFICATION_PERMISSION),
 //                )
 //            },
 //            onAddFirefoxWidgetClick = {
 //                telemetryRecorder.onAddSearchWidgetClick(
 //                    pagesToDisplay.telemetrySequenceId(),
-//                    pagesToDisplay.sequencePosition(OnboardingPageUiData.Type.ADD_SEARCH_WIDGET),
+//                    pagesToDisplay.sequencePosition(OnboardingPageUiData.Mode.ADD_SEARCH_WIDGET),
 //                )
 //                showAddSearchWidgetPrompt(requireActivity())
 //            },
 //            onSkipFirefoxWidgetClick = {
 //                telemetryRecorder.onSkipAddWidgetClick(
 //                    pagesToDisplay.telemetrySequenceId(),
-//                    pagesToDisplay.sequencePosition(OnboardingPageUiData.Type.ADD_SEARCH_WIDGET),
+//                    pagesToDisplay.sequencePosition(OnboardingPageUiData.Mode.ADD_SEARCH_WIDGET),
 //                )
 //            },
 //            onAddOnsButtonClick = {
 //                telemetryRecorder.onAddOnsButtonClick(
 //                    pagesToDisplay.telemetrySequenceId(),
-//                    pagesToDisplay.sequencePosition(OnboardingPageUiData.Type.ADD_ONS),
+//                    pagesToDisplay.sequencePosition(OnboardingPageUiData.Mode.ADD_ONS),
 //                )
 //            },
 //            onFinish = {
@@ -226,14 +226,14 @@
 //
 //                telemetryRecorder.onSelectToolbarPlacementClick(
 //                    pagesToDisplay.telemetrySequenceId(),
-//                    pagesToDisplay.sequencePosition(OnboardingPageUiData.Type.TOOLBAR_PLACEMENT),
+//                    pagesToDisplay.sequencePosition(OnboardingPageUiData.Mode.TOOLBAR_PLACEMENT),
 //                    onboardingStore.state.toolbarOptionSelected.id,
 //                )
 //            },
 //            onSkipCustomizeToolbarClick = {
 //                telemetryRecorder.onSkipToolbarPlacementClick(
 //                    pagesToDisplay.telemetrySequenceId(),
-//                    pagesToDisplay.sequencePosition(OnboardingPageUiData.Type.TOOLBAR_PLACEMENT),
+//                    pagesToDisplay.sequencePosition(OnboardingPageUiData.Mode.TOOLBAR_PLACEMENT),
 //                )
 //            },
 //
@@ -247,14 +247,14 @@
 //                telemetryRecorder.onSelectThemeClick(
 //                    selectedTheme.id,
 //                    pagesToDisplay.telemetrySequenceId(),
-//                    pagesToDisplay.sequencePosition(OnboardingPageUiData.Type.THEME_SELECTION),
+//                    pagesToDisplay.sequencePosition(OnboardingPageUiData.Mode.THEME_SELECTION),
 //                )
 //            },
 //
 //            onCustomizeThemeSkip = {
 //                telemetryRecorder.onSkipThemeClick(
 //                    pagesToDisplay.telemetrySequenceId(),
-//                    pagesToDisplay.sequencePosition(OnboardingPageUiData.Type.THEME_SELECTION),
+//                    pagesToDisplay.sequencePosition(OnboardingPageUiData.Mode.THEME_SELECTION),
 //                )
 //            },
 //        )
@@ -361,7 +361,7 @@
 //                    )
 //                    telemetryRecorder.onPrivacyPolicyClick(
 //                        pagesToDisplay.telemetrySequenceId(),
-//                        pagesToDisplay.sequencePosition(OnboardingPageUiData.Type.DEFAULT_BROWSER),
+//                        pagesToDisplay.sequencePosition(OnboardingPageUiData.Mode.DEFAULT_BROWSER),
 //                    )
 //                },
 //            ),
@@ -383,7 +383,7 @@
 //        requireContext().settings().lastSetAsDefaultPromptShownTimeInMillis = System.currentTimeMillis()
 //        telemetryRecorder.onSetToDefaultClick(
 //            sequenceId = pagesToDisplay.telemetrySequenceId(),
-//            sequencePosition = pagesToDisplay.sequencePosition(OnboardingPageUiData.Type.DEFAULT_BROWSER),
+//            sequencePosition = pagesToDisplay.sequencePosition(OnboardingPageUiData.Mode.DEFAULT_BROWSER),
 //        )
 //    }
 //

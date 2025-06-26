@@ -35,6 +35,7 @@ val InfernoSettings.ToolbarItem?.allToolbarItemsNoMiniOrigin
         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_MENU,
         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_EXTENSIONS,
         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_PASSWORDS,
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_BOOKMARKS,
     )
 
 val InfernoSettings.ToolbarItem?.allToolbarItemsNoOrigin
@@ -55,6 +56,7 @@ val InfernoSettings.ToolbarItem?.allToolbarItemsNoOrigin
         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_MENU,
         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_EXTENSIONS,
         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_PASSWORDS,
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_BOOKMARKS,
     )
 
 @Composable
@@ -70,6 +72,7 @@ fun InfernoSettings.ToolbarItem.ToToolbarOption(
     onActivateReaderView: () -> Unit,
     onNavToSettings: () -> Unit,
     onNavToHistory: () -> Unit,
+    onNavToBookmarks: () -> Unit,
     onNavToExtensions: () -> Unit,
     onNavToPasswords: () -> Unit,
     onNavToTabsTray: () -> Unit,
@@ -215,6 +218,14 @@ fun InfernoSettings.ToolbarItem.ToToolbarOption(
                 onNavToPasswords = onNavToPasswords,
             )
         }
+
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_BOOKMARKS -> {
+            ToolbarOptions.ToolbarBookmarks(
+                type = type,
+                onNavToBookmarks = onNavToBookmarks,
+                dismissMenuSheet = onDismissMenuBottomSheet,
+            )
+        }
     }
 }
 
@@ -284,6 +295,10 @@ fun InfernoSettings.ToolbarItem.ToToolbarIcon(
         )
 
         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_PASSWORDS -> ToolbarOptionsIcons.ToolbarPasswowrdsIcon(
+            tint = tint,
+        )
+
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_BOOKMARKS -> ToolbarOptionsIcons.ToolbarBookmarksIcon(
             tint = tint,
         )
     }

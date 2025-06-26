@@ -188,7 +188,7 @@ private fun PrefDownloadLanguageFileDialogPreviewAllLanguages() {
 }
 
 /**
- *  Download Languages File Dialog Type.
+ *  Download Languages File Dialog Mode.
  */
 sealed class DownloadLanguageFileDialogType {
 

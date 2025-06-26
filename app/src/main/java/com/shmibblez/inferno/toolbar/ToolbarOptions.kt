@@ -473,6 +473,24 @@ class ToolbarOptions {
         }
 
         @Composable
+        fun ToolbarBookmarks(
+            type: ToolbarOptionType,
+            onNavToBookmarks: () -> Unit,
+            dismissMenuSheet: (() -> Unit)? = null,
+        ) {
+            ToolbarOptionTemplate(
+                iconPainter = painterResource(R.drawable.ic_bookmark_list),
+                description = stringResource(R.string.home_bookmarks_show_all_content_description),
+                onClick = {
+                    onNavToBookmarks.invoke()
+                    dismissMenuSheet?.invoke()
+                },
+                enabled = true,
+                type = type,
+            )
+        }
+
+        @Composable
         fun ToolbarRequestDesktopSite(
             type: ToolbarOptionType,
             desktopMode: Boolean,
@@ -1040,6 +1058,15 @@ class ToolbarOptionsIcons {
         fun ToolbarPasswowrdsIcon(tint: Color = LocalContext.current.infernoTheme().value.primaryIconColor) {
             ToolbarIconTemplate(
                 iconPainter = painterResource(R.drawable.ic_key_24),
+                contentDescription = stringResource(R.string.browser_menu_passwords),
+                tint = tint,
+            )
+        }
+
+        @Composable
+        fun ToolbarBookmarksIcon(tint: Color = LocalContext.current.infernoTheme().value.primaryIconColor) {
+            ToolbarIconTemplate(
+                iconPainter = painterResource(R.drawable.ic_bookmark_list),
                 contentDescription = stringResource(R.string.browser_menu_passwords),
                 tint = tint,
             )

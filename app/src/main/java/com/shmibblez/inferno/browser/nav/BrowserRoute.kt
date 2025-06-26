@@ -10,6 +10,9 @@ interface BrowserRoute {
 
     @Serializable
     object History : BrowserRoute
+
+    @Serializable
+    object Bookmarks : BrowserRoute
     
     @Serializable
     object Settings {

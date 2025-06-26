@@ -25,6 +25,7 @@ import com.shmibblez.inferno.toolbar.MenuOnlyComponents.Companion.NavOptions
 import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarPrivateModeToggle
 import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarRequestReaderView
 import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarBack
+import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarBookmarks
 import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarExtensions
 import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarForward
 import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarHistory
@@ -51,6 +52,7 @@ fun ToolbarMenuBottomSheet(
     onNavToSettings: () -> Unit,
     onNavToTabsTray: (private: Boolean) -> Unit,
     onNavToHistory: () -> Unit,
+    onNavToBookmarks: () -> Unit,
     onNavToExtensions: () -> Unit,
     onNavToPasswords: () -> Unit,
 ) {
@@ -156,6 +158,13 @@ fun ToolbarMenuBottomSheet(
                 ToolbarHistory(
                     type = ToolbarOptionType.EXPANDED,
                     onNavToHistory = onNavToHistory,
+                    dismissMenuSheet = onDismissMenuBottomSheet,
+                )
+            },
+            {
+                ToolbarBookmarks(
+                    type = ToolbarOptionType.EXPANDED,
+                    onNavToBookmarks = onNavToBookmarks,
                     dismissMenuSheet = onDismissMenuBottomSheet,
                 )
             },

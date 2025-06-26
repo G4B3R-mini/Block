@@ -54,7 +54,7 @@ interface BookmarkController {
     /**
      * Handle bookmark nodes deletion
      * @param nodes The set of nodes to be deleted.
-     * @param removeType Type of removal.
+     * @param removeType Mode of removal.
      */
     fun handleBookmarkDeletion(nodes: Set<BookmarkNode>, removeType: BookmarkRemoveType)
     fun handleBookmarkFolderDeletion(nodes: Set<BookmarkNode>)
@@ -64,7 +64,7 @@ interface BookmarkController {
 }
 
 /**
- * Type of bookmark nodes deleted.
+ * Mode of bookmark nodes deleted.
  */
 enum class BookmarkRemoveType {
     SINGLE, MULTIPLE, FOLDER

@@ -84,7 +84,6 @@ import com.shmibblez.inferno.library.bookmarks.BookmarksTestTag.addBookmarkFolde
 import com.shmibblez.inferno.library.bookmarks.BookmarksTestTag.editBookmarkedItemTileTextField
 import com.shmibblez.inferno.library.bookmarks.BookmarksTestTag.editBookmarkedItemURLTextField
 import com.shmibblez.inferno.theme.FirefoxTheme
-import mozilla.components.ui.icons.R as iconsR
 
 /**
  * The UI host for the Bookmarks list screen and related subscreens.
@@ -1129,7 +1128,7 @@ private fun FolderInfo(
                 .clickable { onFolderClicked() },
         ) {
             InfernoIcon(
-                painter = painterResource(id = iconsR.drawable.mozac_ic_folder_24),
+                painter = painterResource(id = R.drawable.mozac_ic_folder_24),
                 contentDescription = "",
             )
             Text(
@@ -1163,7 +1162,7 @@ private fun ClearableTextField(
             if (isFocused && value.isNotEmpty()) {
                 IconButton(onClick = { onValueChange("") }) {
                     InfernoIcon(
-                        painter = painterResource(id = iconsR.drawable.mozac_ic_cross_circle_fill_24),
+                        painter = painterResource(id = R.drawable.mozac_ic_cross_circle_fill_24),
                         contentDescription = null,
                     )
                 }

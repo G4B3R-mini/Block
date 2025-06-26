@@ -20,7 +20,7 @@ enum class DebugLocale(val langTag: String) {
 }
 
 /**
- * Type declaring methods for interacting with a storage layer relating to debug locales.
+ * Mode declaring methods for interacting with a storage layer relating to debug locales.
  */
 interface AddressesDebugLocalesRepository {
     /**

@@ -34,7 +34,7 @@ sealed interface MenuItem {
     ) : MenuItem {
 
         /**
-         * Type representing different levels of importance of a UI element.
+         * Mode representing different levels of importance of a UI element.
          */
         enum class Level {
             /**

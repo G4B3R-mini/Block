@@ -16,6 +16,7 @@ internal fun InfernoMiniOriginToolbar(
     onActivateReaderView: () -> Unit,
     onNavToSettings: () -> Unit,
     onNavToHistory: () -> Unit,
+    onNavToBookmarks: () -> Unit,
     onNavToExtensions: () -> Unit,
     onNavToPasswords: () -> Unit,
     onNavToTabsTray: () -> Unit,

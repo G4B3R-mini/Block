@@ -117,14 +117,14 @@ import com.shmibblez.inferno.onboarding.store.OnboardingAddonStatus
 //)
 //
 //private fun OnboardingCardType.toPageUiDataType() = when (this) {
-//    OnboardingCardType.DEFAULT_BROWSER -> OnboardingPageUiData.Type.DEFAULT_BROWSER
-//    OnboardingCardType.SYNC_SIGN_IN -> OnboardingPageUiData.Type.SYNC_SIGN_IN
-//    OnboardingCardType.NOTIFICATION_PERMISSION -> OnboardingPageUiData.Type.NOTIFICATION_PERMISSION
-//    OnboardingCardType.ADD_SEARCH_WIDGET -> OnboardingPageUiData.Type.ADD_SEARCH_WIDGET
-//    OnboardingCardType.ADD_ONS -> OnboardingPageUiData.Type.ADD_ONS
-//    OnboardingCardType.TOOLBAR_PLACEMENT -> OnboardingPageUiData.Type.TOOLBAR_PLACEMENT
-//    OnboardingCardType.THEME_SELECTION -> OnboardingPageUiData.Type.THEME_SELECTION
-//    OnboardingCardType.TERMS_OF_SERVICE -> OnboardingPageUiData.Type.TERMS_OF_SERVICE
+//    OnboardingCardType.DEFAULT_BROWSER -> OnboardingPageUiData.Mode.DEFAULT_BROWSER
+//    OnboardingCardType.SYNC_SIGN_IN -> OnboardingPageUiData.Mode.SYNC_SIGN_IN
+//    OnboardingCardType.NOTIFICATION_PERMISSION -> OnboardingPageUiData.Mode.NOTIFICATION_PERMISSION
+//    OnboardingCardType.ADD_SEARCH_WIDGET -> OnboardingPageUiData.Mode.ADD_SEARCH_WIDGET
+//    OnboardingCardType.ADD_ONS -> OnboardingPageUiData.Mode.ADD_ONS
+//    OnboardingCardType.TOOLBAR_PLACEMENT -> OnboardingPageUiData.Mode.TOOLBAR_PLACEMENT
+//    OnboardingCardType.THEME_SELECTION -> OnboardingPageUiData.Mode.THEME_SELECTION
+//    OnboardingCardType.TERMS_OF_SERVICE -> OnboardingPageUiData.Mode.TERMS_OF_SERVICE
 //}
 //
 //private fun List<AddOnData>.toOnboardingAddOns() = map { it.toOnboardingAddOn() }

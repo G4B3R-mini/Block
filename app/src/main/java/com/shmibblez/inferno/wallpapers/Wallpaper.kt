@@ -8,7 +8,7 @@ import com.shmibblez.inferno.utils.Settings
 import java.util.Date
 
 /**
- * Type that represents wallpapers.
+ * Mode that represents wallpapers.
  *
  * @property name The name of the wallpaper.
  * @property collection The name of the collection the wallpaper belongs to.
@@ -30,7 +30,7 @@ data class Wallpaper(
     val assetsFileState: ImageFileState,
 ) {
     /**
-     * Type that represents a collection that a [Wallpaper] belongs to.
+     * Mode that represents a collection that a [Wallpaper] belongs to.
      *
      * @property name The name of the collection the wallpaper belongs to.
      * @property heading The heading of the collection.

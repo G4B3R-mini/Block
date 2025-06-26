@@ -11,10 +11,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.os.bundleOf
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.shmibblez.inferno.biometric.BiometricPromptCallbackManager
+import com.shmibblez.inferno.bookmarks.InfernoBookmarksPage
 import com.shmibblez.inferno.browser.BrowserComponent
 import com.shmibblez.inferno.browser.nav.InitialBrowserTask.AppIcon.asStartDestination
 import com.shmibblez.inferno.browser.state.BrowserComponentState
@@ -48,6 +50,13 @@ import com.shmibblez.inferno.settings.translation.DownloadTranslationLanguagesSe
 import com.shmibblez.inferno.settings.translation.TranslationExceptionsSettingsPage
 import com.shmibblez.inferno.settings.translation.TranslationSettingsPage
 import mozilla.components.feature.addons.Addon
+
+private fun NavHostController.navToBrowser() {
+    popBackStack(
+        route = BrowserRoute.InfernoBrowser,
+        inclusive = false,
+    )
+}
 
 @Composable
 fun BrowserNavHost(
@@ -175,6 +184,7 @@ fun BrowserNavHost(
                 biometricPromptCallbackManager = biometricPromptCallbackManager,
                 state = browserComponentState,
                 onNavToHistory = { nav.navigate(route = BrowserRoute.History) },
+                onNavToBookmarks = { nav.navigate(route = BrowserRoute.Bookmarks) },
                 onNavToSettings = { nav.navigate(route = BrowserRoute.Settings) },
                 onNavToExtensions = { nav.navigate(route = BrowserRoute.Settings.ExtensionsSettingsPage) },
                 onNavToPasswords = { nav.navigate(route = BrowserRoute.Settings.PasswordSettingsPage) },
@@ -187,6 +197,11 @@ fun BrowserNavHost(
 
         composable<BrowserRoute.History> {
             InfernoHistoryPage(goBack = { nav.popBackStack() })
+        }
+
+        composable<BrowserRoute.Bookmarks> {
+            InfernoBookmarksPage(goBack = { nav.popBackStack() },
+                onNavToBrowser = {nav.navToBrowser()})
         }
 
         /**
@@ -255,12 +270,7 @@ fun BrowserNavHost(
                         )
                     }
                 },
-                onNavToBrowser = {
-                    nav.popBackStack(
-                        route = BrowserRoute.InfernoBrowser,
-                        inclusive = false,
-                    )
-                },
+                onNavToBrowser = {nav.navToBrowser() },
             )
         }
         composable<BrowserRoute.Settings.ExtensionsSettingsPage.ExtensionSettingsPage> {
@@ -271,12 +281,7 @@ fun BrowserNavHost(
                 goBack = {
                     nav.popBackStack()
                 },
-                onNavToBrowser = {
-                    nav.popBackStack(
-                        route = BrowserRoute.InfernoBrowser,
-                        inclusive = false,
-                    )
-                },
+                onNavToBrowser = { nav.navToBrowser()  },
             )
         }
         composable<BrowserRoute.Settings.GestureSettingsPage> {
