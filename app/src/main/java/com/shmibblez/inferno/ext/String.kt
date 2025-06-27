@@ -11,6 +11,10 @@ import mozilla.components.support.ktx.kotlin.MAX_URI_LENGTH
 import mozilla.components.support.ktx.kotlin.toShortUrl
 import com.shmibblez.inferno.components.components
 
+fun String.isHomeUrl(): Boolean {
+    return this == "inferno:home" || this == "inferno:privatebrowsing"
+}
+
 /**
  * Replaces the keys with the values with the map provided.
  */

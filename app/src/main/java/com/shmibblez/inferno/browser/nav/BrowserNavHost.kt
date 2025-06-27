@@ -8,15 +8,19 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.os.bundleOf
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.dialog
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import com.shmibblez.inferno.biometric.BiometricPromptCallbackManager
 import com.shmibblez.inferno.bookmarks.InfernoBookmarksPage
+import com.shmibblez.inferno.bookmarks.ModifyBookmarkDialog
 import com.shmibblez.inferno.browser.BrowserComponent
 import com.shmibblez.inferno.browser.nav.InitialBrowserTask.AppIcon.asStartDestination
 import com.shmibblez.inferno.browser.state.BrowserComponentState
@@ -67,6 +71,7 @@ fun BrowserNavHost(
     startDestination: BrowserRoute = initialAction.asStartDestination(),
 ) {
     val nav = rememberNavController()
+    val scope = rememberCoroutineScope()
 
 //    val browserComponentState by rememberBrowserComponentState(
 //        customTabSessionId = customTabSessionId,
@@ -192,6 +197,14 @@ fun BrowserNavHost(
                 onNavToSearchSettings = { nav.navigate(route = BrowserRoute.Settings.SearchSettingsPage) },
                 onNavToHomeSettings = { nav.navigate(route = BrowserRoute.Settings.HomePageSettingsPage) },
                 onNavToAccountSettings = { nav.navigate(route = BrowserRoute.Settings.AccountSettingsPage) },
+                onNavToAddBookmarkDialog = { title, url ->
+                    nav.navigate(
+                        route = BrowserRoute.Bookmarks.AddBookmarkDialog(
+                            initialTitle = title,
+                            initialUrl = url,
+                        ),
+                    )
+                },
             )
         }
 
@@ -201,7 +214,20 @@ fun BrowserNavHost(
 
         composable<BrowserRoute.Bookmarks> {
             InfernoBookmarksPage(goBack = { nav.popBackStack() },
-                onNavToBrowser = {nav.navToBrowser()})
+                onNavToBrowser = { nav.navToBrowser() })
+        }
+
+        dialog<BrowserRoute.Bookmarks.AddBookmarkDialog> {
+            val params = it.savedStateHandle.toRoute<BrowserRoute.Bookmarks.AddBookmarkDialog>()
+            ModifyBookmarkDialog(
+                bookmarkGuid = null,
+                onDismiss = { nav.popBackStack() },
+                initialTitle = params.initialTitle,
+                initialUrl = params.initialUrl,
+                initialParentFolder = null,
+                create = true,
+                scope = scope,
+            )
         }
 
         /**
@@ -270,7 +296,7 @@ fun BrowserNavHost(
                         )
                     }
                 },
-                onNavToBrowser = {nav.navToBrowser() },
+                onNavToBrowser = { nav.navToBrowser() },
             )
         }
         composable<BrowserRoute.Settings.ExtensionsSettingsPage.ExtensionSettingsPage> {
@@ -281,7 +307,7 @@ fun BrowserNavHost(
                 goBack = {
                     nav.popBackStack()
                 },
-                onNavToBrowser = { nav.navToBrowser()  },
+                onNavToBrowser = { nav.navToBrowser() },
             )
         }
         composable<BrowserRoute.Settings.GestureSettingsPage> {

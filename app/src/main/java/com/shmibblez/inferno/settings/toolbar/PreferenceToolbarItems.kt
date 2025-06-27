@@ -255,5 +255,6 @@ private fun InfernoSettings.ToolbarItem.toPrefString(context: Context): String {
         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_EXTENSIONS -> context.getString(R.string.browser_menu_extensions)
         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_PASSWORDS -> context.getString(R.string.browser_menu_passwords)
         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_BOOKMARKS -> context.getString(R.string.home_bookmarks_show_all_content_description)
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_ADD_BOOKMARK -> context.getString(R.string.browser_menu_bookmark_this_page)
     }
 }

@@ -1,6 +1,7 @@
 package com.shmibblez.inferno.bookmarks
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.MutableState
@@ -16,10 +17,16 @@ import com.shmibblez.inferno.history.ConsecutiveUniqueJobHandler
 import com.shmibblez.inferno.library.bookmarks.composeRootTitles
 import com.shmibblez.inferno.library.bookmarks.friendlyRootTitle
 import com.shmibblez.inferno.library.bookmarks.ui.BookmarkItem
+import com.shmibblez.inferno.library.bookmarks.ui.SelectFolderItem
 import com.shmibblez.inferno.library.bookmarks.ui.isDesktopFolder
+import com.shmibblez.inferno.library.bookmarks.ui.title
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancel
 import mozilla.appservices.places.BookmarkRoot
+import mozilla.components.concept.storage.BookmarkInfo
 import mozilla.components.concept.storage.BookmarkNode
 import mozilla.components.concept.storage.BookmarkNodeType
 import mozilla.components.concept.storage.BookmarksStorage
@@ -60,7 +67,7 @@ fun rememberBookmarksManagerState(
 }
 
 /**
- * todo: also create ActivityResultManager, similar to [BiometricPromptCallbackManager],
+ * todo: important, also create ActivityResultManager, similar to [BiometricPromptCallbackManager],
  *  - allow adding listeners
  *  - store in activity, update listeners with manager.onActivityResult() with result code etc.
  *  - check way to create launchers, might be error if created after activity onCreate(), if not,
@@ -85,7 +92,7 @@ class BookmarksManagerState(
         data object Normal : Mode
         data object Select : Mode {
             var selectedRoots by mutableStateOf(setOf<BookmarkItem>())
-            var totalItemCount by mutableStateOf(0U)
+            var totalItemCount by mutableStateOf(0)
         }
 
         fun asSelect(): Select? {
@@ -103,7 +110,7 @@ class BookmarksManagerState(
         get() = mode is Mode.Normal
 
     private enum class JobType {
-        LOAD, SELECT, LOAD_URLS, DELETE_BOOKMARK, DELETE_FOLDER, DELETE_SELECTED,
+        LOAD, SELECT, LOAD_URLS, DELETE_BOOKMARK, DELETE_FOLDER, DELETE_SELECTED, UPDATE, CREATE_BOOKMARK, CREATE_FOLDER, MOVE_ITEMS,
     }
 
 //    var guid by mutableStateOf(initialGuid)
@@ -128,6 +135,10 @@ class BookmarksManagerState(
 
     private val taskManager = ConsecutiveUniqueJobHandler<JobType>(scope)
 
+    private suspend fun refreshItemsSus() {
+        root?.guid?.let { setRootSus(it) }
+    }
+
     private suspend fun setRootSus(newGuid: String) {
         storage.getTree(newGuid)?.let { rootNode ->
             root = rootNode
@@ -136,31 +147,35 @@ class BookmarksManagerState(
                 title = resolveFolderTitle.invoke(rootNode),
             )
             bookmarkItems = when (newGuid) {
-                BookmarkRoot.Root.id -> {
-                    rootNode.copy(
-                        children = rootNode.children?.filterNot { it.guid == BookmarkRoot.Mobile.id }
-                            ?.map { it.copy(title = resolveFolderTitle(it)) },
-                    ).childItems()
-                }
+//                BookmarkRoot.Root.id -> {
+//                    rootNode.copy(
+//                        children = rootNode.children?.filterNot { it.guid == BookmarkRoot.Mobile.id }
+//                            ?.map { it.copy(title = resolveFolderTitle(it)) },
+//                    ).childItems()
+//                }
 
-                BookmarkRoot.Mobile.id -> {
-                    if (storage.hasDesktopBookmarks()) {
-                        val desktopNode = storage.getTree(BookmarkRoot.Root.id)?.let {
-                            it.copy(title = resolveFolderTitle(it))
-                        }
-
-                        val mobileRoot = rootNode.copy(
-                            children = listOfNotNull(desktopNode) + rootNode.children.orEmpty(),
-                        )
-                        mobileRoot.childItems()
-                    } else {
-                        rootNode.childItems()
-                    }
-                }
+//                BookmarkRoot.Mobile.id -> {
+//                    if (storage.hasDesktopBookmarks()) {
+//                        val desktopNode = storage.getTree(BookmarkRoot.Root.id)?.let {
+//                            it.copy(title = resolveFolderTitle(it))
+//                        }
+//
+//                        val mobileRoot = rootNode.copy(
+//                            children = listOfNotNull(desktopNode) + rootNode.children.orEmpty(),
+//                        )
+//                        mobileRoot.childItems()
+//                    } else {
+//                        rootNode.childItems()
+//                    }
+//                }
 
                 else -> rootNode.childItems()
             }
         }
+        Log.d(
+            "BookmarksManagerState",
+            "setRootSus(), items loaded: $bookmarkItems"
+        )
     }
 
     fun setRoot(newGuid: String) {
@@ -177,7 +192,7 @@ class BookmarksManagerState(
             onComplete = {
                 loading = !it
                 onFailure {
-                    // todo: error handling, show retry button
+                    // todo: handle error, show retry button
                     folder = BookmarkItem.Folder(
                         guid = newGuid,
                         title = "Error...", //  todo: string res
@@ -203,20 +218,13 @@ class BookmarksManagerState(
         return true
     }
 
-    private suspend fun selectSus(item: BookmarkItem): Pair<BookmarkItem, UInt>? {
-        if (isNormal) {
-            mode = Mode.Select
-        }
-        val selected = (mode as? Mode.Select)?.selectedRoots ?: return null
-        val count = storage.countBookmarksInTrees((selected + item).map { it.guid })
-        return item to count
-    }
-
     /**
      * if in selection mode, go back to normal
      */
     fun exitSelect() {
-        if (isSelection) mode = Mode.Normal
+        if (isSelection) {
+            mode = Mode.Normal
+        }
     }
 
     fun isSelected(item: BookmarkItem): Boolean {
@@ -224,45 +232,51 @@ class BookmarksManagerState(
         return selected.contains(item)
     }
 
-    fun selectBookmark(item: BookmarkItem.Bookmark) {
-        taskManager.processTask(
-            type = JobType.SELECT, task = { selectSus(item) },
-            onComplete = {
-                onFailure {
-                    // todo: handle error
-                }
-                onSuccess { result ->
-                    result?.let { res ->
-                        val (guidAdded, count) = res
-                        (mode as? Mode.Select)?.let {
-                            it.selectedRoots += guidAdded
-                            it.totalItemCount = count
-                        }
-                    }
-                }
-            },
-        )
-    }
-
     /**
-     * @param item folder to select, if [item] is desktop folder, do nothing
+     * @param item item to select, if [item] is desktop folder, do nothing
      */
-    fun selectFolder(item: BookmarkItem.Folder) {
+    fun selectItem(item: BookmarkItem) {
         // cannot select desktop folders
-        if (item.isDesktopFolder) return
+        if ((item as? BookmarkItem.Folder)?.isDesktopFolder == true) return
+        // if not in selection mode init
+        if (!isSelection) mode = Mode.Select
+        val selectedItems = (mode as Mode.Select).selectedRoots
+        val isSelected = isSelected(item)
         taskManager.processTask(
-            type = JobType.SELECT, task = { selectSus(item) },
+            type = JobType.SELECT,
+            task = {
+                // if not in selection mode by the time
+                // this task is processed, return
+                if (isNormal) return@processTask null
+                val itemsToCount = when (isSelected) {
+                    true -> (selectedItems - item).map { it.guid }
+                    false -> (selectedItems + item).map { it.guid }
+                }
+                val count =
+                    storage.countBookmarksInTrees(itemsToCount).toInt()
+                return@processTask item to count
+            },
             onComplete = {
                 onFailure {
                     // todo: handle error
                 }
                 onSuccess { result ->
                     result?.let { res ->
-                        val (guidAdded, count) = res
-                        (mode as? Mode.Select)?.let {
-                            it.selectedRoots += guidAdded
-                            it.totalItemCount = count
+                        Log.d(
+                            "BookmarksManagerState",
+                            "item selected, before select, roots: ${(mode as Mode.Select).selectedRoots}, count: ${(mode as Mode.Select).totalItemCount} "
+                        )
+                        val (guidAdded, nestedItemCount) = res
+                        if (!isSelection) return@onSuccess
+                        when (isSelected) {
+                            true -> (mode as Mode.Select).selectedRoots -= guidAdded
+                            false -> (mode as Mode.Select).selectedRoots += guidAdded
                         }
+                        (mode as Mode.Select).totalItemCount = (mode as Mode.Select).selectedRoots.size + nestedItemCount
+                        Log.d(
+                            "BookmarksManagerState",
+                            "item selected, after select, roots: ${(mode as Mode.Select).selectedRoots}, count: ${(mode as Mode.Select).totalItemCount} "
+                        )
                     }
                 }
             },
@@ -292,7 +306,8 @@ class BookmarksManagerState(
         taskManager.processTask(
             type = JobType.DELETE_BOOKMARK,
             task = {
-                // todo: delete bookmark
+                storage.deleteNode(item.guid)
+                refreshItemsSus()
             },
         )
     }
@@ -301,7 +316,8 @@ class BookmarksManagerState(
         taskManager.processTask(
             type = JobType.DELETE_FOLDER,
             task = {
-                // todo: delete folder
+                storage.deleteNode(item.guid)
+                refreshItemsSus()
             },
         )
     }
@@ -316,10 +332,86 @@ class BookmarksManagerState(
         taskManager.processTask(
             type = JobType.DELETE_SELECTED,
             task = {
-                // todo: get whole tree recursive, store all jobs in list, await all and set normal
+                val jobs = mutableListOf<Deferred<Boolean>>()
+                for (item in selected) {
+                    val job = scope.async { storage.deleteNode(item.guid) }
+                    jobs.add(job)
+                }
+                jobs.awaitAll()
+                refreshItemsSus()
+                mode = Mode.Normal
             },
         )
+    }
 
+    fun update(guid: String, info: BookmarkInfo) {
+        taskManager.processTask(
+            type = JobType.UPDATE,
+            task = {
+                storage.updateNode(guid, info)
+            },
+        )
+    }
+
+    fun createBookmark(
+        parentGuid: String?,
+        url: String,
+        title: String,
+        position: UInt? = null,
+    ) {
+        taskManager.processTask(
+            type = JobType.CREATE_BOOKMARK,
+            task = {
+                storage.addItem(
+                    parentGuid = parentGuid ?: BookmarkRoot.Mobile.id,
+                    url = url,
+                    title = title,
+                    position = position,
+                )
+                refreshItemsSus()
+            },
+        )
+    }
+
+    fun createFolder(
+        parentGuid: String?,
+        title: String,
+        position: UInt? = null,
+    ) {
+        taskManager.processTask(
+            type = JobType.CREATE_FOLDER,
+            task = {
+                storage.addFolder(
+                    parentGuid = parentGuid ?: BookmarkRoot.Mobile.id,
+                    title = title,
+                    position = position,
+                )
+                refreshItemsSus()
+            },
+        )
+    }
+
+    fun moveSelected(destinationGuid: String) {
+        mode.asSelect()?.selectedRoots?.let {
+            taskManager.processTask(type = JobType.MOVE_ITEMS, task = {
+                val jobs = mutableListOf<Deferred<Any?>>()
+                for (item in it) {
+                    val info = BookmarkInfo(
+                        parentGuid = destinationGuid,
+                        position = null,
+                        title = item.title,
+                        url = when (item) {
+                            is BookmarkItem.Bookmark -> item.url
+                            is BookmarkItem.Folder -> null
+                        },
+                    )
+                    val job = scope.async { storage.updateNode(item.guid, info) }
+                    jobs.add(job)
+                }
+                jobs.awaitAll()
+                refreshItemsSus()
+            })
+        }
     }
 
     override fun start() {
@@ -331,14 +423,14 @@ class BookmarksManagerState(
     }
 }
 
-private suspend fun BookmarksStorage.hasDesktopBookmarks(): Boolean {
+suspend fun BookmarksStorage.hasDesktopBookmarks(): Boolean {
     return countBookmarksInTrees(
         listOf(BookmarkRoot.Menu.id, BookmarkRoot.Toolbar.id, BookmarkRoot.Unfiled.id),
     ) > 0u
 }
 
 
-private fun BookmarkNode.childItems(): List<BookmarkItem> =
+fun BookmarkNode.childItems(): List<BookmarkItem> =
     this.children?.sortedByDescending { it.lastModified }?.mapNotNull { node ->
         Result.runCatching {
             when (node.type) {
@@ -358,6 +450,65 @@ private fun BookmarkNode.childItems(): List<BookmarkItem> =
             }
         }.getOrNull()
     } ?: listOf()
+
+suspend fun BookmarksStorage.loadFolders(context: Context): List<SelectFolderItem>? {
+//    val folders = if (this.hasDesktopBookmarks()) {
+       val folders = this.getTree(BookmarkRoot.Root.id, recursive = true)?.let { rootNode ->
+            val excludingMobile = rootNode.children?.filterNot { it.guid == BookmarkRoot.Mobile.id }
+            val desktopRoot = rootNode.copy(children = excludingMobile)
+            rootNode.children?.find { it.guid == BookmarkRoot.Mobile.id }?.let {
+                val newChildren = listOf(desktopRoot) + it.children.orEmpty()
+                it.copy(children = newChildren)
+            }?.let { collectFolders(context, it) }
+        }
+//    } else {
+//        this.getTree(BookmarkRoot.Mobile.id, recursive = true)?.let { rootNode ->
+//            collectFolders(context, rootNode)
+//        }
+//    }
+
+    return folders
+}
+
+private fun collectFolders(
+    context: Context,
+    node: BookmarkNode,
+    indentation: Int = 0,
+    folders: MutableList<SelectFolderItem> = mutableListOf(),
+): List<SelectFolderItem> {
+    if (node.type == BookmarkNodeType.FOLDER) {
+        folders.add(
+            SelectFolderItem(
+                indentation = indentation,
+                folder = BookmarkItem.Folder(
+                    guid = node.guid,
+                    title = resolveFolderTitle(context, node),
+                ),
+            ),
+        )
+
+        node.children?.forEach { child ->
+            folders.addAll(collectFolders(context, child, indentation + 1))
+        }
+    }
+
+    return folders
+}
+
+fun BookmarkNode.resolveFolderTitle(context: Context): String {
+    return friendlyRootTitle(
+        context = context,
+        node = this,
+        rootTitles = composeRootTitles(context),
+    ) ?: ""
+}
+
+private fun resolveFolderTitle(context: Context, node: BookmarkNode) = friendlyRootTitle(
+    context = context,
+    node = node,
+    rootTitles = composeRootTitles(context),
+) ?: ""
+
 
 private class BookmarksSyncManager(
     private val syncStore: SyncStore,

@@ -362,6 +362,7 @@ private fun NormalBanner(
                 TabRowDefaults.PrimaryIndicator(
                     modifier = Modifier.tabIndicatorOffset(selectedTab.ordinal, matchContentSize = true),
                     width = 32.dp,
+                    color = LocalContext.current.infernoTheme().value.primaryActionColor,
                 )
             },
             tabs = {

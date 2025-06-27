@@ -38,4 +38,12 @@ sealed class BookmarkItem {
         val title: String,
         override val guid: String,
     ) : BookmarkItem()
+
+    override fun equals(other: Any?): Boolean {
+        return other is BookmarkItem && other.guid == this.guid
+    }
+
+    override fun hashCode(): Int {
+        return this.guid.hashCode() // super.hashCode()
+    }
 }

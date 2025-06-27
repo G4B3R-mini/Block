@@ -163,7 +163,7 @@ internal data class BookmarksEditFolderState(
     val folder: BookmarkItem.Folder,
 )
 
-internal data class SelectFolderItem(
+data class SelectFolderItem(
     val indentation: Int,
     val folder: BookmarkItem.Folder,
 ) {

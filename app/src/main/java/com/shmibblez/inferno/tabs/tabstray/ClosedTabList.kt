@@ -241,6 +241,7 @@ private fun ClosedTabListItem(
                             id = R.string.close_tab_title,
                             tab.toDisplayTitle(),
                         ),
+                        modifier = Modifier.size(14.dp),
                     )
                 }
             } else {

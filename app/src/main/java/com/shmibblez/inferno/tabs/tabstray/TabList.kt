@@ -294,11 +294,12 @@ private fun TabItem(
                         .testTag(TabsTrayTestTag.tabItemClose),
                 ) {
                     InfernoIcon(
-                        painter = painterResource(id = R.drawable.mozac_ic_cross_24),
+                        painter = painterResource(id = R.drawable.ic_cross_24),
                         contentDescription = stringResource(
                             id = R.string.close_tab_title,
                             tab.toDisplayTitle(),
                         ),
+                        modifier = Modifier.size(14.dp),
                     )
                 }
             } else {
@@ -362,7 +363,6 @@ private fun Thumbnail(
                 tab = tab,
                 onMediaIconClicked = onMediaIconClicked,
                 modifier = Modifier
-                    .fillMaxSize()
                     .align(Alignment.TopStart)
                     .padding(8.dp), // align(Alignment.TopEnd),
                 interactionSource = interactionSource,
@@ -410,7 +410,10 @@ fun MediaImage(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(LocalContext.current.infernoTheme().value.primaryActionColor),
+                .background(
+                    color = LocalContext.current.infernoTheme().value.primaryActionColor,
+                    shape = CircleShape,
+                ),
         )
         Image(
             painter = rememberDrawablePainter(drawable = drawable),

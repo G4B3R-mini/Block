@@ -19,9 +19,11 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.shmibblez.inferno.ext.infernoTheme
+import com.shmibblez.inferno.ext.isHomeUrl
 import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarFindInPage
 import mozilla.components.browser.state.state.TabSessionState
 import com.shmibblez.inferno.toolbar.MenuOnlyComponents.Companion.NavOptions
+import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarAddBookmark
 import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarPrivateModeToggle
 import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarRequestReaderView
 import com.shmibblez.inferno.toolbar.ToolbarOptions.Companion.ToolbarBack
@@ -53,6 +55,7 @@ fun ToolbarMenuBottomSheet(
     onNavToTabsTray: (private: Boolean) -> Unit,
     onNavToHistory: () -> Unit,
     onNavToBookmarks: () -> Unit,
+    onNavToAddBookmarkDialog: () -> Unit,
     onNavToExtensions: () -> Unit,
     onNavToPasswords: () -> Unit,
 ) {
@@ -103,6 +106,14 @@ fun ToolbarMenuBottomSheet(
                     type = ToolbarOptionType.EXPANDED,
                     dismissMenuSheet = onDismissMenuBottomSheet,
                     onNavToExtensions = onNavToExtensions,
+                )
+            },
+            {
+                ToolbarAddBookmark(
+                    type = ToolbarOptionType.EXPANDED,
+                    enabled = !tabSessionState.content.url.isHomeUrl(),
+                    onNavToAddBookmarkDialog = onNavToAddBookmarkDialog,
+                    dismissMenuSheet = onDismissMenuBottomSheet,
                 )
             },
             {

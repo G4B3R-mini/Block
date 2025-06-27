@@ -38,6 +38,7 @@ message InfernoSettings {
     TOOLBAR_ITEM_EXTENSIONS = 14;
     TOOLBAR_ITEM_PASSWORDS = 15;
     TOOLBAR_ITEM_BOOKMARKS = 16;
+    TOOLBAR_ITEM_ADD_BOOKMARK = 17;
   }
 
   // general

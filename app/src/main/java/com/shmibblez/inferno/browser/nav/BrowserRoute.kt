@@ -12,10 +12,17 @@ interface BrowserRoute {
     object History : BrowserRoute
 
     @Serializable
-    object Bookmarks : BrowserRoute
-    
+    object Bookmarks : BrowserRoute {
+
+        @Serializable
+        data class AddBookmarkDialog(
+            val initialTitle: String,
+            val initialUrl: String,
+        ) : BrowserRoute
+    }
+
     @Serializable
-    object Settings {
+    object Settings : BrowserRoute {
         /**
          * todo: based on [SettingsFragmentDirections.actionSettingsFragmentToAccountSettingsFragment]
          */

@@ -39,10 +39,13 @@ import com.shmibblez.inferno.ext.newTab
 import com.shmibblez.inferno.ext.shareTextList
 import com.shmibblez.inferno.library.bookmarks.ui.BookmarkItem
 import mozilla.appservices.places.BookmarkRoot
+import mozilla.components.concept.storage.BookmarkInfo
 import mozilla.components.support.ktx.android.content.share
 
 private val ICON_SIZE = 18.dp
 private const val WARN_OPEN_ALL_SIZE = 15
+
+// todo: add delete warn dialog
 
 @Composable
 fun InfernoBookmarksPage(
@@ -54,12 +57,14 @@ fun InfernoBookmarksPage(
     val components = context.components
     val managerState by rememberBookmarksManagerState(initialGuid = initialGuid)
     var showEditBookmarkDialogFor by remember {
-        mutableStateOf<Pair<BookmarkItem.Bookmark?, Boolean>?>(
-            null
-        )
+        mutableStateOf<Pair<BookmarkItem.Bookmark?, Boolean>?>(null)
     }
     var showEditFolderDialogFor by remember {
-        mutableStateOf<Pair<BookmarkItem.Folder?, Boolean>?>(
+        mutableStateOf<Pair<BookmarkItem.Folder?, Boolean>?>(null)
+    }
+    var showWarnDialogFor by remember { mutableStateOf<Pair<() -> Unit, Int>?>(null) }
+    var showSelectFolderFor by remember {
+        mutableStateOf<Pair<BookmarkItem.Folder, (BookmarkItem.Folder) -> Unit>?>(
             null
         )
     }
@@ -92,8 +97,10 @@ fun InfernoBookmarksPage(
     }
 
     // if no items selected, exit selection mode
-    LaunchedEffect(managerState.mode.asSelect()?.totalItemCount == 0U) {
-        managerState.exitSelect()
+    LaunchedEffect(managerState.mode.asSelect()?.totalItemCount == 0) {
+//        managerState.mode.asSelect()?.totalItemCount?.let {
+//            if (it == 0) managerState.exitSelect()
+//        }
     }
 
     fun openInNewTab(url: String, private: Boolean) {
@@ -104,7 +111,7 @@ fun InfernoBookmarksPage(
 
     fun openAllInNewTab(urls: List<String>, private: Boolean, override: Boolean = false) {
         if (urls.size > WARN_OPEN_ALL_SIZE && !override) {
-            // todo: show warn dialog to confirm
+            showWarnDialogFor = { openAllInNewTab(urls, private, override = true) } to urls.size
             return
         }
         managerState.exitSelect()
@@ -140,9 +147,13 @@ fun InfernoBookmarksPage(
                                         modifier = Modifier
                                             .padding(end = UiConst.TOP_BAR_INTERNAL_PADDING)
                                             .size(ICON_SIZE)
-                                            .clickable(onClick = {
-                                                // todo: move clicked
-                                            }),
+                                            .clickable(
+                                                onClick = {
+                                                    showSelectFolderFor = managerState.folder to {
+                                                        managerState.moveSelected(it.guid)
+                                                    }
+                                                },
+                                            ),
                                     )
                                     // delete selected action
                                     InfernoIcon(
@@ -151,13 +162,17 @@ fun InfernoBookmarksPage(
                                         modifier = Modifier
                                             .padding(end = UiConst.TOP_BAR_INTERNAL_PADDING)
                                             .size(ICON_SIZE)
-                                            .clickable(onClick = {
-                                                managerState.deleteSelected()
-                                            }),
+                                            .clickable(
+                                                onClick = {
+                                                    managerState.deleteSelected()
+                                                },
+                                            ),
                                     )
                                 }
 
                                 else -> {
+                                    var menuExpanded by remember { mutableStateOf(false) }
+
                                     // edit action
                                     if (selected.size == 1) {
                                         InfernoIcon(
@@ -167,7 +182,8 @@ fun InfernoBookmarksPage(
                                                 .padding(end = UiConst.TOP_BAR_INTERNAL_PADDING)
                                                 .size(ICON_SIZE)
                                                 .clickable(onClick = {
-                                                    val bookmark = selected.first() as BookmarkItem.Bookmark
+                                                    val bookmark =
+                                                        selected.first() as BookmarkItem.Bookmark
                                                     showEditBookmarkDialogFor = bookmark to false
                                                 }),
                                         )
@@ -179,29 +195,25 @@ fun InfernoBookmarksPage(
                                         modifier = Modifier
                                             .padding(end = UiConst.TOP_BAR_INTERNAL_PADDING)
                                             .size(ICON_SIZE)
-                                            .clickable(onClick = {
-                                                // todo: move clicked
-                                            }),
+                                            .clickable(
+                                                onClick = {
+                                                    showSelectFolderFor = managerState.folder to {
+                                                        managerState.moveSelected(it.guid)
+                                                    }
+                                                },
+                                            ),
                                     )
-                                    var menuExpanded by remember { mutableStateOf(false) }
                                     // menu
                                     Box(
                                         modifier = Modifier
                                             .padding(end = UiConst.TOP_BAR_INTERNAL_PADDING)
                                             .size(ICON_SIZE)
-                                            .clickable(onClick = {
-                                                // todo: move clicked
-                                            })
+                                            .clickable(onClick = { menuExpanded = true })
                                     ) {
                                         InfernoIcon(
                                             painter = painterResource(R.drawable.ic_menu_24),
                                             contentDescription = "",
-                                            modifier = Modifier
-                                                .padding(end = UiConst.TOP_BAR_INTERNAL_PADDING)
-                                                .size(ICON_SIZE)
-                                                .clickable(onClick = {
-                                                    // todo: move clicked
-                                                }),
+                                            modifier = Modifier.fillMaxSize(),
                                         )
                                         DropdownMenu(
                                             expanded = menuExpanded,
@@ -213,6 +225,7 @@ fun InfernoBookmarksPage(
                                                 text = { InfernoText(stringResource(R.string.create_collection_select_all)) },
                                                 onClick = {
                                                     managerState.selectAll()
+                                                    menuExpanded = false
                                                 },
                                             )
                                             // copy url
@@ -220,13 +233,19 @@ fun InfernoBookmarksPage(
                                                 val item = selected.first() as BookmarkItem.Bookmark
                                                 DropdownMenuItem(
                                                     text = { InfernoText(stringResource(R.string.bookmark_menu_copy_button)) },
-                                                    onClick = { copy(item.url) },
+                                                    onClick = {
+                                                        copy(item.url)
+                                                        menuExpanded = false
+                                                    },
                                                 )
                                             }
                                             // share url
                                             DropdownMenuItem(
                                                 text = { InfernoText(stringResource(R.string.bookmark_menu_share_button)) },
-                                                onClick = { shareAll(selected.map { (it as BookmarkItem.Bookmark).url }) },
+                                                onClick = {
+                                                    shareAll(selected.map { (it as BookmarkItem.Bookmark).url })
+                                                    menuExpanded = false
+                                                },
                                             )
                                             // open in new tab
                                             DropdownMenuItem(
@@ -236,6 +255,7 @@ fun InfernoBookmarksPage(
                                                         selected.map { (it as BookmarkItem.Bookmark).url },
                                                         false,
                                                     )
+                                                    menuExpanded = false
                                                 },
                                             )
                                             // open in new private tab
@@ -246,6 +266,7 @@ fun InfernoBookmarksPage(
                                                         selected.map { (it as BookmarkItem.Bookmark).url },
                                                         true,
                                                     )
+                                                    menuExpanded = false
                                                 },
                                             )
                                             // delete
@@ -256,20 +277,27 @@ fun InfernoBookmarksPage(
                                                         fontColor = LocalContext.current.infernoTheme().value.errorColor,
                                                     )
                                                 },
-                                                onClick = { managerState.deleteSelected() },
+                                                onClick = {
+                                                    managerState.deleteSelected()
+                                                    menuExpanded = false
+                                                },
                                             )
                                         }
                                     }
                                 }
                             }
-                            InfernoIcon(
-                                painter = painterResource(R.drawable.ic_folder_new_24),
-                                contentDescription = "",
-                                modifier = Modifier
-                                    .padding(end = UiConst.TOP_BAR_INTERNAL_PADDING)
-                                    .size(ICON_SIZE)
-                                    .clickable(onClick = onNavToBrowser),
-                            )
+
+                            // only show add if not in root
+                            if (managerState.root?.guid != BookmarkRoot.Root.id) {
+                                InfernoIcon(
+                                    painter = painterResource(R.drawable.ic_folder_new_24),
+                                    contentDescription = "",
+                                    modifier = Modifier
+                                        .padding(end = UiConst.TOP_BAR_INTERNAL_PADDING)
+                                        .size(ICON_SIZE)
+                                        .clickable(onClick = onNavToBrowser),
+                                )
+                            }
                         },
                     )
                 }
@@ -289,16 +317,19 @@ fun InfernoBookmarksPage(
 //                        )
 
                         // new folder
-                        InfernoIcon(
-                            painter = painterResource(R.drawable.ic_folder_new_24),
-                            contentDescription = "",
-                            modifier = Modifier
-                                .padding(end = UiConst.TOP_BAR_INTERNAL_PADDING)
-                                .size(ICON_SIZE)
-                                .clickable(onClick = {
-                                    showEditFolderDialogFor = null to true
-                                }),
-                        )
+                        // only show add if not in root
+                        if (managerState.root?.guid != BookmarkRoot.Root.id) {
+                            InfernoIcon(
+                                painter = painterResource(R.drawable.ic_folder_new_24),
+                                contentDescription = "",
+                                modifier = Modifier
+                                    .padding(end = UiConst.TOP_BAR_INTERNAL_PADDING)
+                                    .size(ICON_SIZE)
+                                    .clickable(onClick = {
+                                        showEditFolderDialogFor = null to true
+                                    }),
+                            )
+                        }
 
                         // exit (nav to browser)
                         InfernoIcon(
@@ -332,10 +363,102 @@ fun InfernoBookmarksPage(
         )
     }
 
+    // warn open all dialog
+    if (showWarnDialogFor != null) {
+        // show dialog if trying to open too many tabs, just to confirm
+        OpenAllWarnDialog(
+            onDismiss = { showWarnDialogFor = null },
+            onConfirm = showWarnDialogFor!!.first,
+            numberOfTabs = showWarnDialogFor!!.second,
+        )
+    }
+
+    // modify bookmark dialog
     if (showEditBookmarkDialogFor != null) {
-        // todo: edit bookmark dialog
-    } else if (showEditFolderDialogFor != null) {
-        // todo: show edit folder dialog
+        val bookmark = showEditBookmarkDialogFor!!.first
+        val create = showEditBookmarkDialogFor!!.second
+        when (create) {
+            true -> {
+                ModifyBookmarkDialog(bookmarkGuid = null,
+                    initialTitle = "",
+                    initialUrl = "",
+                    previewImageUrl = "",
+                    initialParentFolder = managerState.folder,
+                    onDismiss = { showEditBookmarkDialogFor = null },
+                    onConfirm = { parentGuid, _, title, url, position ->
+                        managerState.createBookmark(
+                            parentGuid = parentGuid, position = position, title = title, url = url
+                        )
+                    })
+            }
+
+            false -> {
+                ModifyBookmarkDialog(bookmarkGuid = bookmark!!.guid,
+                    initialTitle = bookmark.title,
+                    initialUrl = bookmark.url,
+                    previewImageUrl = bookmark.previewImageUrl,
+                    initialParentFolder = managerState.folder,
+                    onDismiss = { showEditBookmarkDialogFor = null },
+                    onConfirm = { parentGuid, guid, title, url, position ->
+                        managerState.update(
+                            guid, BookmarkInfo(
+                                parentGuid = parentGuid,
+                                position = position,
+                                title = title,
+                                url = url,
+                            )
+                        )
+                    })
+            }
+        }
+    }
+
+    // modify folder dialog
+    if (showEditFolderDialogFor != null) {
+        val folder = showEditFolderDialogFor!!.first
+        val create = showEditFolderDialogFor!!.second
+        when (create) {
+            true -> {
+                ModifyFolderDialog(folderGuid = null,
+                    initialTitle = "",
+                    initialParentFolder = managerState.folder,
+                    onDismiss = { showEditFolderDialogFor = null },
+                    onConfirm = { parentGuid, _, title, position ->
+                        managerState.createFolder(
+                            parentGuid = parentGuid,
+                            position = position,
+                            title = title,
+                        )
+                    })
+            }
+
+            false -> {
+                ModifyFolderDialog(folderGuid = folder!!.guid,
+                    initialTitle = folder.title,
+                    initialParentFolder = managerState.folder,
+                    onDismiss = { showEditFolderDialogFor = null },
+                    onConfirm = { parentGuid, guid, title, position ->
+                        // todo: test
+                        managerState.update(
+                            guid, BookmarkInfo(
+                                parentGuid = parentGuid,
+                                position = position,
+                                title = title,
+                                url = null,
+                            )
+                        )
+                    })
+            }
+        }
+    }
+
+    // select folder dialog
+    if (showSelectFolderFor != null) {
+        SelectParentFolderDialog(
+            onDismiss = { showSelectFolderFor = null },
+            initialSelection = showSelectFolderFor!!.first,
+            onConfirmSelection = showSelectFolderFor!!.second,
+        )
     }
 }
 
@@ -382,8 +505,6 @@ private fun EditingTopBar(
     title: String,
     actions: @Composable RowScope.() -> Unit,
 ) {
-    var menuExpanded by remember { mutableStateOf(false) }
-
     TopAppBar(
         title = {
             InfernoText(

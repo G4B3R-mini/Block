@@ -323,6 +323,7 @@ fun BrowserComponent(
     onNavToSearchSettings: () -> Unit,
     onNavToHomeSettings: () -> Unit,
     onNavToAccountSettings: () -> Unit,
+    onNavToAddBookmarkDialog: (title: String, url: String) -> Unit,
 ) {
     Log.d("BrowserComponent", "rebuilt")
     val coroutineScope = rememberCoroutineScope()
@@ -1024,6 +1025,9 @@ fun BrowserComponent(
         onNavToTabsTray = tabsTrayState::show,
         onNavToHistory = onNavToHistory,
         onNavToBookmarks = onNavToBookmarks,
+        onNavToAddBookmarkDialog = {
+            state.currentTab?.content?.let { onNavToAddBookmarkDialog.invoke(it.title, it.url) }
+        },
         onNavToExtensions = onNavToExtensions,
         onNavToPasswords = onNavToPasswords,
     )
@@ -1889,6 +1893,11 @@ fun BrowserComponent(
                             onNavToSettings = onNavToSettings,
                             onNavToHistory = onNavToHistory,
                             onNavToBookmarks = onNavToBookmarks,
+                            onNavToAddBookmarkDialog = {
+                                state.currentTab?.content?.let {
+                                    onNavToAddBookmarkDialog.invoke(it.title, it.url)
+                                }
+                            },
                             onNavToExtensions = onNavToExtensions,
                             onNavToPasswords = onNavToPasswords,
                             onNavToTabsTray = tabsTrayState::show,

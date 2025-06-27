@@ -57,6 +57,7 @@ fun InfernoButton(
         leadingIcon?.invoke()
         InfernoText(
             text = text,
+            maxLines = 1,
             modifier = Modifier.weight(1F),
             textAlign = TextAlign.Center,
             fontColor = LocalContext.current.infernoTheme().value.let {

@@ -11,7 +11,9 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -185,10 +187,7 @@ fun EditThemeDialog(
                 modifier = Modifier
                     .fillMaxWidth()
                     .align(Alignment.TopCenter)
-                    .padding(
-                        top = PrefUiConst.PREFERENCE_VERTICAL_INTERNAL_PADDING,
-                        bottom = LIST_BOTTOM_PADDING,
-                    ),
+                    .padding(top = PrefUiConst.PREFERENCE_VERTICAL_INTERNAL_PADDING),
                 verticalArrangement = Arrangement.spacedBy(PrefUiConst.PREFERENCE_VERTICAL_INTERNAL_PADDING * 2),
             ) {
                 /**
@@ -581,6 +580,10 @@ fun EditThemeDialog(
                             InfernoText(funFact[0], fontColor = theme.primaryTextColor)
                         }
                     }
+                }
+                // bottom padding
+                item {
+                    Spacer(Modifier.height(LIST_BOTTOM_PADDING))
                 }
             }
             Row(

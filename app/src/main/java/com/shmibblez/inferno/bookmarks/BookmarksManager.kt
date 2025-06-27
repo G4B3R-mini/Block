@@ -1,14 +1,16 @@
 package com.shmibblez.inferno.bookmarks
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -36,6 +38,7 @@ import com.shmibblez.inferno.toolbar.InfernoLoadingScreen
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.ext.infernoTheme
 import com.shmibblez.inferno.library.bookmarks.ui.isDesktopFolder
+import mozilla.appservices.places.BookmarkRoot
 
 private val ICON_SIZE = 18.dp
 
@@ -71,6 +74,9 @@ fun BookmarksManager(
             verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.Top),
             horizontalAlignment = Alignment.Start,
         ) {
+            // top spacer
+            item { Spacer(Modifier.height(8.dp)) }
+
             // if empty show placeholder
             if (state.bookmarkItems.isEmpty()) {
                 item {
@@ -89,12 +95,14 @@ fun BookmarksManager(
                             onClick = {
                                 when (state.mode) {
                                     BookmarksManagerState.Mode.Normal -> loadUrl.invoke(it.url)
-                                    BookmarksManagerState.Mode.Select -> state.selectBookmark(it)
+                                    BookmarksManagerState.Mode.Select -> state.selectItem(it)
                                 }
                             },
-                            onLongClick = { state.selectBookmark(it) },
+                            onLongClick = { state.selectItem(it) },
                             menuIcon = {
-                                Box(modifier = Modifier.size(ICON_SIZE)) {
+                                Box(modifier = Modifier
+                                    .size(ICON_SIZE)
+                                    .clickable { menuExpanded = true }) {
                                     InfernoIcon(
                                         painter = painterResource(R.drawable.ic_menu_24),
                                         contentDescription = "",
@@ -108,27 +116,42 @@ fun BookmarksManager(
                                         // edit bookmark
                                         DropdownMenuItem(
                                             text = { InfernoText(stringResource(R.string.bookmark_menu_edit_button)) },
-                                            onClick = { onRequestEditBookmark.invoke(it to false) },
+                                            onClick = {
+                                                onRequestEditBookmark.invoke(it to false)
+                                                menuExpanded = false
+                                            },
                                         )
                                         // copy url
                                         DropdownMenuItem(
                                             text = { InfernoText(stringResource(R.string.bookmark_menu_copy_button)) },
-                                            onClick = { copy.invoke(it.url) },
+                                            onClick = {
+                                                copy.invoke(it.url)
+                                                menuExpanded = false
+                                            },
                                         )
                                         // share url
                                         DropdownMenuItem(
                                             text = { InfernoText(stringResource(R.string.bookmark_menu_share_button)) },
-                                            onClick = { share.invoke(it.url) },
+                                            onClick = {
+                                                share.invoke(it.url)
+                                                menuExpanded = false
+                                            },
                                         )
                                         // open in new tab
                                         DropdownMenuItem(
                                             text = { InfernoText(stringResource(R.string.bookmark_menu_open_in_new_tab_button)) },
-                                            onClick = { openInNewTab(it.url, false) },
+                                            onClick = {
+                                                openInNewTab(it.url, false)
+                                                menuExpanded = false
+                                            },
                                         )
                                         // open in new private tab
                                         DropdownMenuItem(
                                             text = { InfernoText(stringResource(R.string.bookmark_menu_open_in_private_tab_button)) },
-                                            onClick = { openInNewTab(it.url, true) },
+                                            onClick = {
+                                                openInNewTab(it.url, true)
+                                                menuExpanded = false
+                                            },
                                         )
                                         // delete
                                         DropdownMenuItem(
@@ -138,7 +161,10 @@ fun BookmarksManager(
                                                     fontColor = LocalContext.current.infernoTheme().value.errorColor,
                                                 )
                                             },
-                                            onClick = { state.deleteBookmark(it) },
+                                            onClick = {
+                                                state.deleteBookmark(it)
+                                                menuExpanded = false
+                                            },
                                         )
                                     }
                                 }
@@ -157,17 +183,17 @@ fun BookmarksManager(
                             onClick = {
                                 when (state.mode) {
                                     BookmarksManagerState.Mode.Normal -> state.setRoot(it.guid)
-                                    BookmarksManagerState.Mode.Select -> state.selectFolder(it)
+                                    BookmarksManagerState.Mode.Select -> state.selectItem(it)
                                 }
                             },
-                            onLongClick = {
-                                // if item is desktop folder, ignored
-                                state.selectFolder(it)
-                            },
+                            // select is ignored if desktop folder
+                            onLongClick = { state.selectItem(it) },
                             menuIcon = {
                                 // only show menu if not desktop folder
-                                if (!it.isDesktopFolder) {
-                                    Box(modifier = Modifier.size(ICON_SIZE)) {
+                                if (!it.isDesktopFolder && it.guid != BookmarkRoot.Mobile.id) {
+                                    Box(modifier = Modifier
+                                        .size(ICON_SIZE)
+                                        .clickable { menuExpanded = true }) {
                                         InfernoIcon(
                                             painter = painterResource(R.drawable.ic_menu_24),
                                             contentDescription = "",
@@ -183,6 +209,7 @@ fun BookmarksManager(
                                                 text = { InfernoText(stringResource(R.string.bookmark_menu_edit_button)) },
                                                 onClick = {
                                                     onRequestEditFolder.invoke(it to false)
+                                                    menuExpanded = false
                                                 },
                                             )
                                             // open all in normal tabs
@@ -195,6 +222,7 @@ fun BookmarksManager(
                                                             openAllInNewTab(urls, false)
                                                         },
                                                     )
+                                                    menuExpanded = false
                                                 },
                                             )
                                             // open all in private tabs
@@ -207,12 +235,16 @@ fun BookmarksManager(
                                                             openAllInNewTab(urls, true)
                                                         },
                                                     )
+                                                    menuExpanded = false
                                                 },
                                             )
                                             // delete bookmark
                                             DropdownMenuItem(
                                                 text = { InfernoText(stringResource(R.string.bookmark_menu_delete_button)) },
-                                                onClick = { state.deleteFolder(it) },
+                                                onClick = {
+                                                    state.deleteFolder(it)
+                                                    menuExpanded = false
+                                                },
                                             )
                                         }
                                     }
@@ -302,16 +334,23 @@ private fun ListItem(
     ) {
         // icon, if selected show checkmark
         when (selected) {
-            true -> InfernoIcon(
-                painter = painterResource(R.drawable.ic_checkmark_24),
-                contentDescription = "",
-                modifier = Modifier
-                    .size(ICON_SIZE)
-                    .background(
-                        color = LocalContext.current.infernoTheme().value.primaryActionColor,
-                        shape = CircleShape,
-                    ),
-            )
+            true -> {
+                Box(
+                    modifier = Modifier
+                        .size(ICON_SIZE)
+                        .background(
+                            color = LocalContext.current.infernoTheme().value.primaryActionColor,
+                            shape = CircleShape,
+                        ),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    InfernoIcon(
+                        painter = painterResource(R.drawable.ic_checkmark_24),
+                        contentDescription = "",
+                        modifier = Modifier.size(ICON_SIZE - 4.dp),
+                    )
+                }
+            }
 
             false -> leadingIcon.invoke()
         }

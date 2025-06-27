@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import com.shmibblez.inferno.ext.infernoTheme
+import com.shmibblez.inferno.ext.isHomeUrl
 import com.shmibblez.inferno.proto.InfernoSettings
 import mozilla.components.browser.state.state.TabSessionState
 
@@ -36,6 +37,7 @@ val InfernoSettings.ToolbarItem?.allToolbarItemsNoMiniOrigin
         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_EXTENSIONS,
         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_PASSWORDS,
         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_BOOKMARKS,
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_ADD_BOOKMARK,
     )
 
 val InfernoSettings.ToolbarItem?.allToolbarItemsNoOrigin
@@ -57,6 +59,7 @@ val InfernoSettings.ToolbarItem?.allToolbarItemsNoOrigin
         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_EXTENSIONS,
         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_PASSWORDS,
         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_BOOKMARKS,
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_ADD_BOOKMARK,
     )
 
 @Composable
@@ -73,6 +76,7 @@ fun InfernoSettings.ToolbarItem.ToToolbarOption(
     onNavToSettings: () -> Unit,
     onNavToHistory: () -> Unit,
     onNavToBookmarks: () -> Unit,
+    onNavToAddBookmarkDialog: () -> Unit,
     onNavToExtensions: () -> Unit,
     onNavToPasswords: () -> Unit,
     onNavToTabsTray: () -> Unit,
@@ -226,6 +230,15 @@ fun InfernoSettings.ToolbarItem.ToToolbarOption(
                 dismissMenuSheet = onDismissMenuBottomSheet,
             )
         }
+
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_ADD_BOOKMARK -> {
+            ToolbarOptions.ToolbarAddBookmark(
+                type = type,
+                enabled = !tabSessionState.content.url.isHomeUrl(),
+                onNavToAddBookmarkDialog = onNavToAddBookmarkDialog,
+                dismissMenuSheet = onDismissMenuBottomSheet,
+            )
+        }
     }
 }
 
@@ -299,6 +312,10 @@ fun InfernoSettings.ToolbarItem.ToToolbarIcon(
         )
 
         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_BOOKMARKS -> ToolbarOptionsIcons.ToolbarBookmarksIcon(
+            tint = tint,
+        )
+
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_ADD_BOOKMARK -> ToolbarOptionsIcons.ToolbarAddBookmarkIcon(
             tint = tint,
         )
     }

@@ -158,6 +158,7 @@ private fun BookmarksList(
             val (id, titleOrCount) = state.undoSnackbarText()
             stringResource(id, titleOrCount)
         }
+
         else -> ""
     }
 
@@ -188,6 +189,7 @@ private fun BookmarksList(
                     ),
                 )
             }
+
             BookmarksSnackbarState.CantEditDesktopFolders -> scope.launch {
                 snackbarHostState.showSnackbar(
                     snackbarState = SnackbarState(
@@ -418,6 +420,7 @@ private fun BookmarksListTopBar(
                             }
                         }
                     }
+
                     selectedItems.any { it is BookmarkItem.Folder } -> {
                         IconButton(onClick = { store.dispatch(BookmarksListMenuAction.MultiSelect.MoveClicked) }) {
                             InfernoIcon(
@@ -437,6 +440,7 @@ private fun BookmarksListTopBar(
                             )
                         }
                     }
+
                     else -> {
                         if (selectedItems.size == 1) {
                             IconButton(onClick = { store.dispatch(BookmarksListMenuAction.MultiSelect.EditClicked) }) {
@@ -691,7 +695,8 @@ private fun BookmarksState.emptyListState(): EmptyListState? {
 private fun EmptyListState.drawableId(): Int = when (this) {
     is EmptyListState.NotAuthenticated,
     EmptyListState.Authenticated,
-    -> R.drawable.bookmarks_star_illustration
+        -> R.drawable.bookmarks_star_illustration
+
     EmptyListState.Folder -> R.drawable.bookmarks_folder_illustration
 }
 
@@ -810,11 +815,23 @@ private fun BookmarkListItemMenu(
         ),
         MenuItem(
             title = stringResource(R.string.bookmark_menu_open_in_new_tab_button),
-            onClick = { store.dispatch(BookmarksListMenuAction.Bookmark.OpenInNormalTabClicked(bookmark)) },
+            onClick = {
+                store.dispatch(
+                    BookmarksListMenuAction.Bookmark.OpenInNormalTabClicked(
+                        bookmark
+                    )
+                )
+            },
         ),
         MenuItem(
             title = stringResource(R.string.bookmark_menu_open_in_private_tab_button),
-            onClick = { store.dispatch(BookmarksListMenuAction.Bookmark.OpenInPrivateTabClicked(bookmark)) },
+            onClick = {
+                store.dispatch(
+                    BookmarksListMenuAction.Bookmark.OpenInPrivateTabClicked(
+                        bookmark
+                    )
+                )
+            },
         ),
         MenuItem(
             title = stringResource(R.string.bookmark_menu_delete_button),
@@ -844,11 +861,23 @@ private fun BookmarkListFolderMenu(
         ),
         MenuItem(
             title = stringResource(R.string.bookmark_menu_open_all_in_tabs_button),
-            onClick = { store.dispatch(BookmarksListMenuAction.Folder.OpenAllInNormalTabClicked(folder)) },
+            onClick = {
+                store.dispatch(
+                    BookmarksListMenuAction.Folder.OpenAllInNormalTabClicked(
+                        folder
+                    )
+                )
+            },
         ),
         MenuItem(
             title = stringResource(R.string.bookmark_menu_open_all_in_private_tabs_button),
-            onClick = { store.dispatch(BookmarksListMenuAction.Folder.OpenAllInPrivateTabClicked(folder)) },
+            onClick = {
+                store.dispatch(
+                    BookmarksListMenuAction.Folder.OpenAllInPrivateTabClicked(
+                        folder
+                    )
+                )
+            },
         ),
         MenuItem(
             title = stringResource(R.string.bookmark_menu_delete_button),
@@ -969,8 +998,7 @@ private fun AddFolderScreen(
                 onValueChange = { newText -> store.dispatch(AddFolderAction.TitleChanged(newText)) },
                 placeholder = "",
                 errorText = "",
-                modifier =
-                Modifier
+                modifier = Modifier
                     .padding(
                         start = 16.dp,
                         end = 16.dp,
@@ -1005,7 +1033,7 @@ private fun AddFolderScreen(
 @Composable
 private fun AddFolderTopBar(onBackClick: () -> Unit) {
     TopAppBar(
-        colors =TopAppBarDefaults.topAppBarColors(containerColor =  FirefoxTheme.colors.layer1),
+        colors = TopAppBarDefaults.topAppBarColors(containerColor = FirefoxTheme.colors.layer1),
         title = {
             Text(
                 text = stringResource(R.string.bookmark_add_folder),
@@ -1061,7 +1089,6 @@ private fun EditBookmarkScreen(
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun BookmarkEditor(
     bookmarkItem: BookmarkItem.Bookmark,
@@ -1075,8 +1102,7 @@ private fun BookmarkEditor(
         Favicon(url = bookmarkItem.previewImageUrl, size = 64.dp)
 
         Column(
-            Modifier
-                .semantics {
+            Modifier.semantics {
                     testTagsAsResourceId = true
                 },
         ) {
@@ -1084,9 +1110,7 @@ private fun BookmarkEditor(
                 value = bookmarkItem.title,
                 onValueChange = onTitleChanged,
                 placeholder = stringResource(R.string.bookmark_name_label_normal_case),
-                modifier =
-                Modifier
-                    .semantics {
+                modifier = Modifier.semantics {
                         testTag = editBookmarkedItemTileTextField
                     },
             )
@@ -1097,9 +1121,7 @@ private fun BookmarkEditor(
                 value = bookmarkItem.url,
                 onValueChange = onURLChanged,
                 placeholder = stringResource(R.string.bookmark_url_label),
-                modifier =
-                Modifier
-                    .semantics {
+                modifier = Modifier.semantics {
                         testTag = editBookmarkedItemURLTextField
                     },
             )
@@ -1395,10 +1417,18 @@ private fun SelectFolderPreview() {
                 innerSelectionGuid = "guid1",
                 folders = listOf(
                     SelectFolderItem(0, BookmarkItem.Folder("Bookmarks", "guid0")),
-                    SelectFolderItem(1, BookmarkItem.Folder("Desktop Bookmarks", BookmarkRoot.Root.id)),
-                    SelectFolderItem(2, BookmarkItem.Folder("Bookmarks Menu", BookmarkRoot.Menu.id)),
-                    SelectFolderItem(2, BookmarkItem.Folder("Bookmarks Toolbar", BookmarkRoot.Toolbar.id)),
-                    SelectFolderItem(2, BookmarkItem.Folder("Bookmarks Unfiled", BookmarkRoot.Unfiled.id)),
+                    SelectFolderItem(
+                        1, BookmarkItem.Folder("Desktop Bookmarks", BookmarkRoot.Root.id)
+                    ),
+                    SelectFolderItem(
+                        2, BookmarkItem.Folder("Bookmarks Menu", BookmarkRoot.Menu.id)
+                    ),
+                    SelectFolderItem(
+                        2, BookmarkItem.Folder("Bookmarks Toolbar", BookmarkRoot.Toolbar.id)
+                    ),
+                    SelectFolderItem(
+                        2, BookmarkItem.Folder("Bookmarks Unfiled", BookmarkRoot.Unfiled.id)
+                    ),
                     SelectFolderItem(1, BookmarkItem.Folder("Nested One", "guid0")),
                     SelectFolderItem(2, BookmarkItem.Folder("Nested Two", "guid0")),
                     SelectFolderItem(2, BookmarkItem.Folder("Nested Two", "guid0")),

@@ -205,21 +205,21 @@ class InfernoTabsTrayState(
     }
 
     fun onBookmarkSelectedTabsClick() {
-        onBookmarkSelectedTabsClick.invoke(mode.selectedTabs) { mode = InfernoTabsTrayMode.Normal }
+        onBookmarkSelectedTabsClick.invoke(mode.selectedTabs) { visible = false }
     }
 
     fun onDeleteSelectedTabsClick() {
-        onDeleteSelectedTabsClick.invoke(mode.selectedTabs) { mode = InfernoTabsTrayMode.Normal }
+        onDeleteSelectedTabsClick.invoke(mode.selectedTabs) { visible = false }
     }
 
     fun onForceSelectedTabsAsInactiveClick() {
         onForceSelectedTabsAsInactiveClick.invoke(mode.selectedTabs) {
-            mode = InfernoTabsTrayMode.Normal
+            visible = false
         }
     }
 
     fun onTabSettingsClick() {
-        onTabSettingsClick.invoke(mode.selectedTabs) { mode = InfernoTabsTrayMode.Normal }
+        onTabSettingsClick.invoke(mode.selectedTabs) { visible = false }
     }
 
     fun onDeleteAllTabsClick() {
@@ -235,7 +235,7 @@ class InfernoTabsTrayState(
             clickedTab,
             mode,
             { mode = InfernoTabsTrayMode.Select(it) },
-            { mode = InfernoTabsTrayMode.Normal },
+            { visible = false },
         )
     }
 
@@ -256,7 +256,7 @@ class InfernoTabsTrayState(
 
     fun onSyncedTabClick(tab: Tab) {
         onSyncedTabClick.invoke(tab) {
-            mode = InfernoTabsTrayMode.Normal
+            visible = false
         }
     }
 
@@ -265,7 +265,7 @@ class InfernoTabsTrayState(
             tab,
             mode,
             { mode = InfernoTabsTrayMode.SelectClosed(it) },
-            { mode = InfernoTabsTrayMode.Normal },
+            { visible = false },
         )
     }
 
