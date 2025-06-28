@@ -11,6 +11,7 @@ import android.widget.Space
 import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -26,6 +27,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -39,7 +41,9 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.fragment.app.FragmentManager
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.base.InfernoText
+import com.shmibblez.inferno.compose.base.InfernoTextStyle
 import com.shmibblez.inferno.ext.components
+import com.shmibblez.inferno.ext.infernoTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.distinctUntilChangedBy
@@ -170,7 +174,10 @@ fun ContextMenuComponent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(MaterialTheme.shapes.large)
-                    .background(Color(0xFF141414)),
+                    .background(LocalContext.current.infernoTheme().value.primaryBackgroundColor)
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
+                horizontalAlignment = Alignment.Start,
             ) {
                 item {
                     // todo: nest in column and make this stay at the top all the time, or make sticky
@@ -178,11 +185,11 @@ fun ContextMenuComponent(
                 }
 
                 itemsIndexed(labels) { i, label ->
-                    HorizontalDivider(
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        thickness = 0.5.dp,
-                        color = Color.Red,
-                    )
+//                    HorizontalDivider(
+//                        modifier = Modifier.padding(horizontal = 16.dp),
+//                        thickness = 0.5.dp,
+//                        color = LocalContext.current.infernoTheme().value.secondaryBackgroundColor,
+//                    )
                     ContextMenuItem(
                         label = label,
                         onClick = {
@@ -192,13 +199,13 @@ fun ContextMenuComponent(
                     )
                 }
 
-                item {
-                    if (!note.isNullOrBlank()) {
-                        HorizontalDivider(
-                            modifier = Modifier.padding(horizontal = 16.dp),
-                            thickness = 0.5.dp,
-                            color = Color.Red,
-                        )
+                if (!note.isNullOrBlank()) {
+//                        HorizontalDivider(
+//                            modifier = Modifier.padding(horizontal = 16.dp),
+//                            thickness = 0.5.dp,
+//                            color = LocalContext.current.infernoTheme().value.secondaryBackgroundColor,
+//                        )
+                    item {
                         AdditionalNote(
                             additionalNote = note,
                         )
@@ -213,10 +220,8 @@ fun ContextMenuComponent(
 private fun ContextMenuTitle(title: String) {
     InfernoText(
         text = title,
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
         fontWeight = FontWeight.Bold,
         maxLines = 2,
-        fontColor = Color.White,
     )
 }
 
@@ -224,10 +229,7 @@ private fun ContextMenuTitle(title: String) {
 private fun ContextMenuItem(label: String, onClick: () -> Unit) {
     InfernoText(
         text = label,
-        modifier = Modifier
-            .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        fontColor = Color.White,
+        modifier = Modifier.clickable(onClick = onClick),
     )
 }
 
@@ -236,9 +238,7 @@ private fun AdditionalNote(additionalNote: String?) {
     if (additionalNote == null) return
     InfernoText(
         text = additionalNote,
-        modifier = Modifier.padding(24.dp),
-        fontSize = 12.sp,
-        fontColor = Color.White,
+        infernoStyle = InfernoTextStyle.SmallSecondary,
     )
 }
 

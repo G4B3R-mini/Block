@@ -12,7 +12,6 @@ import androidx.annotation.VisibleForTesting.Companion.PRIVATE
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import com.shmibblez.inferno.browser.prompts.webPrompts.InfernoAndroidPhotoPicker
-import com.shmibblez.inferno.browser.prompts.webPrompts.FilePicker
 import com.shmibblez.inferno.browser.prompts.webPrompts.FileUploadsDirCleaner
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.concept.engine.prompt.PromptRequest
@@ -274,20 +273,20 @@ class PromptFeature private constructor(
         infernoAndroidPhotoPicker = infernoAndroidPhotoPicker,
     )
 
-    @VisibleForTesting
-    // var for testing purposes
-    internal var filePicker = FilePicker(
-        container,
-        store,
-        customTabId,
-        fileUploadsDirCleaner,
-        infernoAndroidPhotoPicker,
-        onNeedToRequestPermissions,
-    )
+//    @VisibleForTesting
+//    // var for testing purposes
+//    internal var filePicker = FilePicker(
+//        container,
+//        store,
+//        customTabId,
+//        fileUploadsDirCleaner,
+//        infernoAndroidPhotoPicker,
+//        onNeedToRequestPermissions,
+//    )
 
 
-    override val onNeedToRequestPermissions
-        get() = filePicker.onNeedToRequestPermissions
+    override val onNeedToRequestPermissions: OnNeedToRequestPermissions
+        get() = {} // filePicker.onNeedToRequestPermissions
 
     /* override */ fun onOpenLink(url: String) {
         tabsUseCases.addTab(
@@ -314,7 +313,8 @@ class PromptFeature private constructor(
 //            return true
 //        }
 
-        return filePicker.onActivityResult(requestCode, resultCode, data)
+//        return filePicker.onActivityResult(requestCode, resultCode, data)
+        return false
     }
 
     /**
@@ -326,7 +326,7 @@ class PromptFeature private constructor(
      * @see [onNeedToRequestPermissions].
      */
     override fun onPermissionsResult(permissions: Array<String>, grantResults: IntArray) {
-        filePicker.onPermissionsResult(permissions, grantResults)
+//        filePicker.onPermissionsResult(permissions, grantResults)
     }
 
     /**
@@ -336,7 +336,7 @@ class PromptFeature private constructor(
      */
 
     fun onAndroidPhotoPickerResult(uriList: Array<Uri>) {
-        filePicker.onAndroidPhotoPickerResult(uriList)
+//        filePicker.onAndroidPhotoPickerResult(uriList)
     }
 
     companion object {

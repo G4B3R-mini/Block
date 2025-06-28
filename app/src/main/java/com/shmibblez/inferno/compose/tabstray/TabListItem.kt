@@ -4,10 +4,8 @@
 
 package com.shmibblez.inferno.compose.tabstray
 
-import android.util.Log
 import androidx.compose.animation.core.DecayAnimationSpec
 import androidx.compose.animation.rememberSplineBasedDecay
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -35,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.colorResource
@@ -44,21 +43,20 @@ import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import mozilla.components.browser.state.state.TabSessionState
-import mozilla.components.browser.state.state.createTab
-import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.annotation.LightDarkPreview
-import mozilla.components.support.ktx.kotlin.MAX_URI_LENGTH
-import mozilla.components.ui.colors.PhotonColors
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.DismissibleItemBackground
 import com.shmibblez.inferno.compose.SwipeToDismissBox
-import com.shmibblez.inferno.compose.SwipeToDismissState
 import com.shmibblez.inferno.compose.TabThumbnail
 import com.shmibblez.inferno.compose.rememberSwipeToDismissState
+import com.shmibblez.inferno.ext.infernoTheme
 import com.shmibblez.inferno.ext.toShortUrl
+import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.annotation.LightDarkPreview
 import com.shmibblez.inferno.tabstray.TabsTrayTestTag
 import com.shmibblez.inferno.tabstray.ext.toDisplayTitle
 import com.shmibblez.inferno.theme.FirefoxTheme
+import mozilla.components.browser.state.state.TabSessionState
+import mozilla.components.browser.state.state.createTab
+import mozilla.components.support.ktx.kotlin.MAX_URI_LENGTH
 
 /**
  * List item used to display a tab that supports clicks,
@@ -78,7 +76,6 @@ import com.shmibblez.inferno.theme.FirefoxTheme
  * @param onClick Callback to handle when item is clicked.
  * @param onLongClick Optional callback to handle when item is long clicked.
  */
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 @Suppress("MagicNumber", "LongMethod")
 fun TabListItem(
@@ -216,10 +213,11 @@ fun TabListItem(
 }
 
 @Composable
-private fun clickableColor() = when (isSystemInDarkTheme()) {
-    true -> PhotonColors.White
-    false -> PhotonColors.Black
-}
+private fun clickableColor() = LocalContext.current.infernoTheme().value.secondaryBackgroundColor
+//when (isSystemInDarkTheme()) {
+//    true -> PhotonColors.White
+//    false -> PhotonColors.Black
+//}
 
 @Composable
 private fun Thumbnail(

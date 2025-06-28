@@ -12,6 +12,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.Intent.ACTION_MAIN
 import android.content.Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.net.Uri
 import android.os.Build
@@ -27,14 +28,17 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
 import android.view.WindowManager.LayoutParams.FLAG_SECURE
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.CallSuper
 import androidx.annotation.RequiresApi
 import androidx.annotation.VisibleForTesting
-import androidx.appcompat.app.ActionBar
 import androidx.appcompat.widget.Toolbar
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.shmibblez.inferno.addons.ExtensionsProcessDisabledBackgroundController
 import com.shmibblez.inferno.addons.ExtensionsProcessDisabledForegroundController
 import com.shmibblez.inferno.biometric.BiometricPromptCallbackManager
@@ -42,7 +46,12 @@ import com.shmibblez.inferno.browser.browsingmode.BrowsingMode
 import com.shmibblez.inferno.browser.browsingmode.BrowsingModeManager
 import com.shmibblez.inferno.browser.browsingmode.DefaultBrowsingModeManager
 import com.shmibblez.inferno.browser.nav.BrowserNavHost
+import com.shmibblez.inferno.browser.nav.BrowserRoute
 import com.shmibblez.inferno.browser.nav.InitialBrowserTask
+import com.shmibblez.inferno.browser.prompts.InfernoWebPrompterState
+import com.shmibblez.inferno.browser.prompts.creditcard.InfernoCreditCardDelegate
+import com.shmibblez.inferno.browser.prompts.login.InfernoLoginDelegate
+import com.shmibblez.inferno.browser.prompts.webPrompts.InfernoAndroidPhotoPicker
 import com.shmibblez.inferno.browser.state.BrowserComponentState
 import com.shmibblez.inferno.components.appstate.AppAction
 import com.shmibblez.inferno.components.appstate.OrientationMode
@@ -96,13 +105,19 @@ import mozilla.components.browser.state.state.SessionState
 import mozilla.components.browser.state.state.WebExtensionState
 import mozilla.components.concept.engine.EngineSession
 import mozilla.components.concept.engine.EngineView
+import mozilla.components.concept.engine.prompt.ShareData
 import mozilla.components.concept.storage.HistoryMetadataKey
 import mozilla.components.feature.contextmenu.DefaultSelectionActionDelegate
 import mozilla.components.feature.customtabs.isCustomTabIntent
 import mozilla.components.feature.media.ext.findActiveMediaTab
 import mozilla.components.feature.privatemode.notification.PrivateNotificationFeature
+import mozilla.components.feature.prompts.address.AddressDelegate
+import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.file.AndroidPhotoPicker
+import mozilla.components.feature.prompts.share.ShareDelegate
 import mozilla.components.feature.search.BrowserStoreSearchAdapter
 import mozilla.components.service.fxa.sync.SyncReason
+import mozilla.components.service.sync.autofill.DefaultCreditCardValidationDelegate
+import mozilla.components.service.sync.logins.DefaultLoginValidationDelegate
 import mozilla.components.support.base.feature.ActivityResultHandler
 import mozilla.components.support.base.feature.UserInteractionHandler
 import mozilla.components.support.base.feature.UserInteractionOnBackPressedCallback
@@ -132,7 +147,9 @@ import java.util.concurrent.Executor
  */
 @SuppressWarnings("TooManyFunctions", "LargeClass", "LongMethod")
 open class HomeActivity : LocaleAwareAppCompatActivity() {
+    private lateinit var nav: NavHostController
     private lateinit var browserComponentState: BrowserComponentState
+    private lateinit var webPrompterState: InfernoWebPrompterState
     private lateinit var executor: Executor
     private lateinit var biometricPromptCallbackManager: BiometricPromptCallbackManager
 
@@ -316,9 +333,11 @@ open class HomeActivity : LocaleAwareAppCompatActivity() {
             intent.getSerializableExtra(INITIAL_BROWSER_TASK) as InitialBrowserTask?
         }
 
+        val customTabSessionId = (initialTask as? InitialBrowserTask.ExternalApp)?.tabId
+
         // initialize and start
         browserComponentState = BrowserComponentState(
-            customTabSessionId = (initialTask as? InitialBrowserTask.ExternalApp)?.tabId,
+            customTabSessionId = customTabSessionId,
             activity = this,
             coroutineScope = this.lifecycleScope,
             lifecycleOwner = this,
@@ -333,9 +352,153 @@ open class HomeActivity : LocaleAwareAppCompatActivity() {
             executor = executor,
         )
 
+        val requestPromptsPermissionsLauncher: ActivityResultLauncher<Array<String>> =
+            registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { results ->
+                val permissions = results.keys.toTypedArray()
+                val grantResults = results.values.map {
+                    if (it) PackageManager.PERMISSION_GRANTED else PackageManager.PERMISSION_DENIED
+                }.toIntArray()
+                webPrompterState.onPermissionsResult(permissions, grantResults)
+            }
+
+        webPrompterState = InfernoWebPrompterState(
+            activity = this,
+            biometricPromptCallbackManager = biometricPromptCallbackManager,
+            store = this.components.core.store,
+            customTabSessionId = customTabSessionId,
+            tabsUseCases = this.components.useCases.tabsUseCases,
+            shareDelegate = object : ShareDelegate {
+                // todo: replace context.share with android share sheet impl for supported api
+                //  levels, looks nicer
+                override fun showShareSheet(
+                    context: Context,
+                    shareData: ShareData,
+                    onDismiss: () -> Unit,
+                    onSuccess: () -> Unit,
+                ) {
+                    (shareData.url ?: shareData.text)?.let {
+                        val subject = shareData.title
+                            ?: context.getString(R.string.mozac_support_ktx_share_dialog_title)
+                        context.share(it, subject = subject)
+                    }
+//                val directions = NavGraphDirections.actionGlobalShareFragment(
+//                    data = arrayOf(shareData),
+//                    showPage = true,
+//                    sessionId = getCurrentTab(context)?.id,
+//                )
+//                navController.navigate(directions)
+                }
+            },
+            exitFullscreenUsecase = this.components.useCases.sessionUseCases.exitFullscreen,
+            creditCardValidationDelegate = DefaultCreditCardValidationDelegate(
+                this.components.core.lazyAutofillStorage,
+            ),
+            loginValidationDelegate = DefaultLoginValidationDelegate(
+                this.components.core.lazyPasswordsStorage,
+            ),
+            isLoginAutofillEnabled = {
+                this.settings().shouldAutofillLogins
+            },
+            isSaveLoginEnabled = {
+                this.settings().shouldPromptToSaveLogins
+            },
+            isCreditCardAutofillEnabled = {
+                this.settings().shouldAutofillCreditCardDetails
+            },
+            isAddressAutofillEnabled = {
+                this.settings().addressFeature && this.settings().shouldAutofillAddressDetails
+            },
+            loginExceptionStorage = this.components.core.loginExceptionStorage,
+            loginDelegate = object : InfernoLoginDelegate {
+                override val onManageLogins = {
+                    nav.navigate(route = BrowserRoute.Settings.PasswordSettingsPage)
+                }
+            },
+            shouldAutomaticallyShowSuggestedPassword = { this.settings().isFirstTimeEngagingWithSignup },
+            onFirstTimeEngagedWithSignup = {
+                this.settings().isFirstTimeEngagingWithSignup = false
+            },
+            onSaveLoginWithStrongPassword = { url, password ->
+                // todo
+//                handleOnSaveLoginWithGeneratedStrongPassword(
+//                    passwordsStorage = this.components.core.passwordsStorage,
+//                    url = url,
+//                    password = password,
+//                    lifecycleScope = coroutineScope,
+//                    setLastSavedGeneratedPassword = { browserComponentState.lastSavedGeneratedPassword = it },
+//                )
+            },
+            onSaveLogin = { isUpdate ->
+                // todo
+//                showSnackbarAfterLoginChange(
+//                    isUpdate = isUpdate,
+//                    context = context,
+//                    coroutineScope = coroutineScope,
+//                    snackbarHostState = snackbarHostState,
+//                )
+            },
+            hideUpdateFragmentAfterSavingGeneratedPassword = { username, password ->
+                // todo
+//                hideUpdateFragmentAfterSavingGeneratedPassword(
+//                    username = username,
+//                    password = password,
+//                    lastSavedGeneratedPassword = state.lastSavedGeneratedPassword
+//                )
+                false
+            },
+            removeLastSavedGeneratedPassword = {
+                // todo
+//                removeLastSavedGeneratedPassword(
+//                    setLastSavedGeneratedPassword = { state.lastSavedGeneratedPassword = it },
+//                )
+            },
+            creditCardDelegate = object : InfernoCreditCardDelegate {
+                override val onManageCreditCards = {
+                    nav.navigate(route = BrowserRoute.Settings.AutofillSettingsPage)
+                }
+                override val onSelectCreditCard = {
+                    // todo: add support for pin
+                    biometricPromptCallbackManager.showPrompt(
+                        title = this@HomeActivity.getString(R.string.credit_cards_biometric_prompt_message),
+                    )
+//                    showBiometricPrompt(
+//                        context = context,
+//                        title = context.getString(R.string.credit_cards_biometric_prompt_unlock_message_2),
+//                        biometricPromptCallbackManager = biometricPromptCallbackManager,
+//                        webPrompterState = prompterState,
+//                        startForResult = activityResultLauncher,
+//                        setAlertDialog = { activeAlertDialog = it },
+//                    )
+                }
+            },
+            addressDelegate = object : AddressDelegate {
+                override val addressPickerView
+                    get() = null
+                override val onManageAddresses = {
+                    nav.navigate(route = BrowserRoute.Settings.AutofillSettingsPage)
+                }
+            },
+            fileUploadsDirCleaner = this.components.core.fileUploadsDirCleaner,
+            onNeedToRequestPermissions = { permissions ->
+//            requestPermissions(permissions, BaseBrowserFragment.REQUEST_CODE_PROMPT_PERMISSIONS)
+                requestPromptsPermissionsLauncher.launch(permissions)
+            },
+            androidPhotoPicker = AndroidPhotoPicker(
+                context = this,
+                singleMediaPicker = InfernoAndroidPhotoPicker.singleMediaPicker(getActivity = { this },
+                    getWebPromptState = { webPrompterState }),
+                multipleMediaPicker = InfernoAndroidPhotoPicker.multipleMediaPicker(getActivity = { this },
+                    getWebPromptState = { webPrompterState }),
+            ),
+        ).apply { this.start() }
+
         binding.rootCompose.setContent {
+            nav = rememberNavController()
+
             BrowserNavHost(
+                nav = nav,
                 browserComponentState = browserComponentState,
+                webPrompterState = webPrompterState,
                 biometricPromptCallbackManager = biometricPromptCallbackManager,
 //                customTabSessionId = (initialTask as? InitialBrowserTask.ExternalApp)?.tabId,
                 initialAction = initialTask,
@@ -654,6 +817,7 @@ open class HomeActivity : LocaleAwareAppCompatActivity() {
 
         // stop browser component state
         browserComponentState.stop()
+        webPrompterState.stop()
         biometricPromptCallbackManager.cancelAuthentication()
 
         components.core.contileTopSitesUpdater.stopPeriodicWork()
@@ -796,6 +960,7 @@ open class HomeActivity : LocaleAwareAppCompatActivity() {
     @Deprecated("Deprecated in Java")
     // https://github.com/mozilla-mobile/fenix/issues/19919
     final override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        webPrompterState.onActivityResult(requestCode, data, resultCode)
         supportFragmentManager.primaryNavigationFragment?.childFragmentManager?.fragments?.forEach {
             if (it is ActivityResultHandler && it.onActivityResult(requestCode, data, resultCode)) {
                 return

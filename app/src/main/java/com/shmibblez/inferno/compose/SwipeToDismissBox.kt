@@ -193,7 +193,6 @@ class SwipeToDismissState(
  * when the content is swiped. You can/should use the [state] to have different backgrounds on each side.
  * @param dismissContent The content that can be dismissed.
  */
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun SwipeToDismissBox(
     modifier: Modifier = Modifier,

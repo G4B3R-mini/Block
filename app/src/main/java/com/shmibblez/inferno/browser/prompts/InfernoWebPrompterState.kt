@@ -5,9 +5,7 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
-import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.VisibleForTesting
 import androidx.annotation.VisibleForTesting.Companion.PRIVATE
@@ -71,6 +69,7 @@ import mozilla.components.concept.storage.LoginValidationDelegate
 import mozilla.components.feature.prompts.PromptFeature
 import mozilla.components.feature.prompts.address.AddressDelegate
 import mozilla.components.feature.prompts.address.DefaultAddressDelegate
+import com.shmibblez.inferno.mozillaAndroidComponents.feature.prompts.file.AndroidPhotoPicker
 import mozilla.components.feature.prompts.login.LoginExceptions
 import mozilla.components.feature.prompts.share.ShareDelegate
 import mozilla.components.feature.session.SessionUseCases
@@ -112,22 +111,20 @@ fun rememberInfernoWebPrompterState(
     onSaveLogin: (Boolean) -> Unit = { _ -> },
     hideUpdateFragmentAfterSavingGeneratedPassword: (String, String) -> Boolean = { _, _ -> true },
     removeLastSavedGeneratedPassword: () -> Unit = {},
-    creditCardDelegate: (InfernoWebPrompterState, ManagedActivityResultLauncher<Intent, ActivityResult>) -> InfernoCreditCardDelegate = { _, _ ->
-        object : InfernoCreditCardDelegate {}
-    },
+    creditCardDelegate: InfernoCreditCardDelegate = object : InfernoCreditCardDelegate {},
     addressDelegate: AddressDelegate = DefaultAddressDelegate(),
     fileUploadsDirCleaner: FileUploadsDirCleaner,
     onNeedToRequestPermissions: OnNeedToRequestPermissions,
 ): InfernoWebPrompterState {
     var state: InfernoWebPrompterState? = null
     val singleMediaPicker =
-        InfernoAndroidPhotoPicker.singleMediaPicker(getWebPromptState = { state })
+        InfernoAndroidPhotoPicker.singleMediaPickerFrag(getWebPromptState = { state })
     val multipleMediaPicker =
-        InfernoAndroidPhotoPicker.multipleMediaPicker(getWebPromptState = { state })
+        InfernoAndroidPhotoPicker.multipleMediaPickerFrag(getWebPromptState = { state })
     val activityResultLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             // todo: check if null
-            Log.d("rememberInfernoPromptFe", "state: $state (check if null)")
+            Log.d("InfernoWebPrompterState", "activity result received, result: $result")
             state?.onActivityResult(
                 PIN_REQUEST, result.data, result.resultCode
             )
@@ -159,12 +156,11 @@ fun rememberInfernoWebPrompterState(
         addressDelegate = addressDelegate,
         fileUploadsDirCleaner = fileUploadsDirCleaner,
         onNeedToRequestPermissions = onNeedToRequestPermissions,
-        infernoAndroidPhotoPicker = InfernoAndroidPhotoPicker(
+        androidPhotoPicker = AndroidPhotoPicker(
             context = activity.applicationContext,
             singleMediaPicker = singleMediaPicker,
             multipleMediaPicker = multipleMediaPicker,
         ),
-        activityResultLauncher = activityResultLauncher,
     )
 
     DisposableEffect(null) {
@@ -202,14 +198,12 @@ class InfernoWebPrompterState internal constructor(
     internal val onSaveLogin: (Boolean) -> Unit = { _ -> },
     private val hideUpdateFragmentAfterSavingGeneratedPassword: (String, String) -> Boolean = { _, _ -> true },
     private val removeLastSavedGeneratedPassword: () -> Unit = {},
-    creditCardDelegate: (InfernoWebPrompterState, ManagedActivityResultLauncher<Intent, ActivityResult>) -> InfernoCreditCardDelegate = { _, _ ->
-        object : InfernoCreditCardDelegate {}
-    },
+    private val creditCardDelegate: InfernoCreditCardDelegate = object :
+        InfernoCreditCardDelegate {},
     addressDelegate: AddressDelegate = DefaultAddressDelegate(),
     fileUploadsDirCleaner: FileUploadsDirCleaner,
     onNeedToRequestPermissions: OnNeedToRequestPermissions,
-    infernoAndroidPhotoPicker: InfernoAndroidPhotoPicker?,
-    activityResultLauncher: ManagedActivityResultLauncher<Intent, ActivityResult>,
+    androidPhotoPicker: AndroidPhotoPicker?,
 ) : InfernoFeatureState, PermissionsFeature, InfernoPrompter, ActivityResultHandler,
     UserInteractionHandler {
 
@@ -266,11 +260,11 @@ class InfernoWebPrompterState internal constructor(
     @VisibleForTesting
     // var for testing purposes
     internal var filePicker = FilePicker(
-        activity,
+        PromptContainer.Activity(activity),
         store,
         this.customTabSessionId,
         fileUploadsDirCleaner,
-        infernoAndroidPhotoPicker,
+        androidPhotoPicker,
         onNeedToRequestPermissions,
     )
         private set
@@ -279,8 +273,6 @@ class InfernoWebPrompterState internal constructor(
         SelectLoginPromptController()
     )
         private set
-
-    private val creditCardDelegate = creditCardDelegate.invoke(this, activityResultLauncher)
 
     //    @VisibleForTesting(otherwise = PRIVATE)
 //    internal var creditCardPicker =
@@ -344,6 +336,10 @@ class InfernoWebPrompterState internal constructor(
      */
     @Suppress("ComplexMethod", "LongMethod")
     override fun start() {
+        Log.d(
+            "InfernoWebPrompterState",
+            "start()"
+        )
         promptAbuserDetector.resetJSAlertAbuseState()
         biometricPromptCallbackManager.addCallbackListener(biometricPromptCallback)
 
@@ -353,6 +349,10 @@ class InfernoWebPrompterState internal constructor(
                     arrayOf(it?.content?.promptRequests, it?.content?.loading)
                 }.collect { state ->
                     state?.content?.let { content ->
+                        Log.d(
+                            "InfernoWebPrompterState",
+                            "browser state change\nactiveRequest: $activePromptRequest\nrequests: (${content.promptRequests.size}): ${content.promptRequests}\n---------------------------------------------------------------------------------------"
+                        )
                         if (content.promptRequests.lastOrNull() != activePromptRequest) {
                             // Dismiss any active select login or credit card prompt if it does
                             // not match the current prompt request for the session.
@@ -463,6 +463,10 @@ class InfernoWebPrompterState internal constructor(
     }
 
     override fun stop() {
+        Log.d(
+            "InfernoWebPrompterState",
+            "stop()"
+        )
         // Stops observing the selected session for incoming prompt requests.
         handlePromptScope?.cancel()
         dismissPromptScope?.cancel()
@@ -489,6 +493,10 @@ class InfernoWebPrompterState internal constructor(
      * @param resultCode The code of the result.
      */
     override fun onActivityResult(requestCode: Int, data: Intent?, resultCode: Int): Boolean {
+        Log.d(
+            "InfernoWebPrompterState",
+            "onActivityResult:\nrequestCode: $requestCode\ndata: $data\nresultCode: $resultCode\n-------------------------------------------------------------------------------"
+        )
         if (requestCode == PIN_REQUEST) {
             if (resultCode == Activity.RESULT_OK) {
                 creditCardDialogController.onAuthSuccess()

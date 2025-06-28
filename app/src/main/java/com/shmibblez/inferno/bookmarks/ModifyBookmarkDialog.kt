@@ -62,7 +62,7 @@ fun <G : String?> ModifyBookmarkDialog(
     var parentFolder by remember { mutableStateOf<BookmarkItem.Folder?>(null) }
 
     LaunchedEffect(initialParentFolder) {
-        parentFolder = initialParentFolder ?: store.getTree(BookmarkRoot.Root.id)?.let {
+        parentFolder = initialParentFolder ?: store.getTree(BookmarkRoot.Mobile.id)?.let {
             BookmarkItem.Folder(
                 title = it.resolveFolderTitle(context), guid = it.guid
             )

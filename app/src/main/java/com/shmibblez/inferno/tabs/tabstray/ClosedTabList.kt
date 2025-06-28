@@ -2,12 +2,10 @@ package com.shmibblez.inferno.tabs.tabstray
 
 import androidx.compose.animation.core.DecayAnimationSpec
 import androidx.compose.animation.rememberSplineBasedDecay
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,30 +15,28 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.DismissibleItemBackground
 import com.shmibblez.inferno.compose.SwipeToDismissBox
 import com.shmibblez.inferno.compose.base.InfernoCheckbox
 import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.base.InfernoText
+import com.shmibblez.inferno.compose.base.InfernoTextStyle
 import com.shmibblez.inferno.compose.rememberSwipeToDismissState
+import com.shmibblez.inferno.ext.infernoTheme
 import com.shmibblez.inferno.ext.toShortUrl
 import com.shmibblez.inferno.tabstray.HEADER_ITEM_KEY
 import com.shmibblez.inferno.tabstray.TabsTrayTestTag
@@ -48,7 +44,6 @@ import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.browser.state.state.recover.TabState
 import mozilla.components.support.ktx.kotlin.MAX_URI_LENGTH
 import mozilla.components.support.ktx.kotlin.trimmed
-import mozilla.components.ui.colors.PhotonColors
 
 // todo: everything with FirefoxTheme commented out was fixed by shameless haccs
 //   - tab thumbnails
@@ -131,7 +126,6 @@ private fun ViewFullHistoryItem(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun ClosedTabListItem(
     tab: TabState,
@@ -190,9 +184,12 @@ private fun ClosedTabListItem(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-//                .background(FirefoxTheme.colors.layer3)
-//                .background(contentBackgroundColor)
-                .background(if (multiSelectionSelected) Color.Red else Color.Black)
+                .background(
+                    when (multiSelectionSelected) {
+                        true -> LocalContext.current.infernoTheme().value.primaryActionColor
+                        false -> LocalContext.current.infernoTheme().value.primaryBackgroundColor
+                    }
+                )
                 .then(clickableModifier)
                 .padding(start = 16.dp, top = 8.dp, bottom = 8.dp)
                 .testTag(TabsTrayTestTag.tabItemRoot),
@@ -203,26 +200,13 @@ private fun ClosedTabListItem(
             ) {
                 InfernoText(
                     text = tab.toDisplayTitle().take(MAX_URI_LENGTH),
-                    fontColor = Color.White, // FirefoxTheme.colors.textPrimary,
-                    style = TextStyle(
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.W400,
-                        letterSpacing = 0.5.sp,
-                        lineHeight = 24.sp,
-                    ), // FirefoxTheme.typography.body1,
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 2,
                 )
 
                 InfernoText(
                     text = tab.url.toShortUrl(),
-                    fontColor = Color.White, // FirefoxTheme.colors.textSecondary,
-                    style = TextStyle(
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.W400,
-                        letterSpacing = 0.25.sp,
-                        lineHeight = 20.sp,
-                    ), // FirefoxTheme.typography.body2,
+                    infernoStyle = InfernoTextStyle.SmallSecondary,
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 1,
                 )
@@ -256,8 +240,9 @@ private fun ClosedTabListItem(
 }
 
 @Composable
-private fun clickableColor() = when (isSystemInDarkTheme()) {
+private fun clickableColor() = LocalContext.current.infernoTheme().value.secondaryBackgroundColor
+//    when (isSystemInDarkTheme()) {
 //    true -> PhotonColors.White
 //    false -> PhotonColors.Black
-    else -> PhotonColors.White // todo: update with colors / theme update
-}
+//    else -> LocalContext.current.infernoTheme().value.secondaryBackgroundColor
+//}

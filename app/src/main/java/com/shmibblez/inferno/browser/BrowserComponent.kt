@@ -8,7 +8,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.os.Build
-import android.provider.Settings
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
@@ -58,7 +57,6 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.DialogProperties
-import androidx.core.content.getSystemService
 import androidx.core.view.OnApplyWindowInsetsListener
 import androidx.core.view.children
 import androidx.core.view.isVisible
@@ -75,18 +73,13 @@ import com.shmibblez.inferno.R
 import com.shmibblez.inferno.biometric.BiometricPromptCallbackManager
 import com.shmibblez.inferno.browser.browsingmode.BrowsingMode
 import com.shmibblez.inferno.browser.prompts.DownloadComponent
-import com.shmibblez.inferno.browser.prompts.InfernoWebPrompterState
 import com.shmibblez.inferno.browser.prompts.InfernoWebPrompter
-import com.shmibblez.inferno.browser.prompts.creditcard.InfernoCreditCardDelegate
-import com.shmibblez.inferno.browser.prompts.login.InfernoLoginDelegate
-import com.shmibblez.inferno.browser.prompts.rememberInfernoWebPrompterState
+import com.shmibblez.inferno.browser.prompts.InfernoWebPrompterState
 import com.shmibblez.inferno.browser.readermode.InfernoReaderViewControls
 import com.shmibblez.inferno.browser.readermode.rememberInfernoReaderViewFeatureState
 import com.shmibblez.inferno.browser.state.BrowserComponentMode
 import com.shmibblez.inferno.browser.state.BrowserComponentState
-import com.shmibblez.inferno.browser.tabstrip.isTabStripEnabled
 import com.shmibblez.inferno.components.Components
-import com.shmibblez.inferno.components.accounts.FenixFxAEntryPoint
 import com.shmibblez.inferno.components.accounts.FxaWebChannelIntegration
 import com.shmibblez.inferno.components.appstate.AppAction.MessagingAction
 import com.shmibblez.inferno.compose.base.InfernoText
@@ -101,7 +94,6 @@ import com.shmibblez.inferno.ext.dpToPx
 import com.shmibblez.inferno.ext.infernoTheme
 import com.shmibblez.inferno.ext.settings
 import com.shmibblez.inferno.findInPageBar.BrowserFindInPageBar
-import com.shmibblez.inferno.home.CrashComponent
 import com.shmibblez.inferno.home.HomeFragment
 import com.shmibblez.inferno.home.InfernoHomeComponent
 import com.shmibblez.inferno.home.rememberInfernoHomeComponentState
@@ -115,7 +107,6 @@ import com.shmibblez.inferno.tabs.tabstray.InfernoTabsTray
 import com.shmibblez.inferno.tabs.tabstray.InfernoTabsTrayMode
 import com.shmibblez.inferno.tabs.tabstray.InfernoTabsTraySelectedTab
 import com.shmibblez.inferno.tabs.tabstray.rememberInfernoTabsTrayState
-import com.shmibblez.inferno.tabstray.TabsTrayFragmentDirections
 import com.shmibblez.inferno.tabstray.ext.isActiveDownload
 import com.shmibblez.inferno.tabstray.ext.isNormalTab
 import com.shmibblez.inferno.theme.ThemeManager
@@ -152,7 +143,6 @@ import mozilla.components.browser.state.state.content.DownloadState.Status
 import mozilla.components.browser.thumbnails.BrowserThumbnails
 import mozilla.components.concept.engine.EngineView
 import mozilla.components.concept.engine.mediasession.MediaSession
-import mozilla.components.concept.engine.prompt.ShareData
 import mozilla.components.concept.storage.LoginEntry
 import mozilla.components.feature.accounts.push.CloseTabsUseCases
 import mozilla.components.feature.downloads.manager.FetchDownloadManager
@@ -161,10 +151,8 @@ import mozilla.components.feature.downloads.temporary.ShareDownloadFeature
 import mozilla.components.feature.downloads.ui.DownloadCancelDialogFragment
 import mozilla.components.feature.media.fullscreen.MediaSessionFullscreenFeature
 import mozilla.components.feature.privatemode.feature.SecureWindowFeature
-import mozilla.components.feature.prompts.address.AddressDelegate
 import mozilla.components.feature.prompts.dialog.FullScreenNotificationToast
 import mozilla.components.feature.prompts.dialog.GestureNavUtils
-import mozilla.components.feature.prompts.share.ShareDelegate
 import mozilla.components.feature.search.SearchFeature
 import mozilla.components.feature.session.FullScreenFeature
 import mozilla.components.feature.session.PictureInPictureFeature
@@ -177,8 +165,6 @@ import mozilla.components.feature.tabs.WindowFeature
 import mozilla.components.feature.webauthn.WebAuthnFeature
 import mozilla.components.lib.state.DelicateAction
 import mozilla.components.lib.state.ext.flowScoped
-import mozilla.components.service.sync.autofill.DefaultCreditCardValidationDelegate
-import mozilla.components.service.sync.logins.DefaultLoginValidationDelegate
 import mozilla.components.service.sync.logins.LoginsApiException
 import mozilla.components.service.sync.logins.SyncableLoginsStorage
 import mozilla.components.support.base.feature.ActivityResultHandler
@@ -190,7 +176,6 @@ import mozilla.components.support.ktx.android.view.exitImmersiveMode
 import mozilla.components.ui.widgets.VerticalSwipeRefreshLayout
 import java.lang.ref.WeakReference
 import java.util.concurrent.TimeUnit
-import kotlin.math.abs
 import kotlin.math.roundToInt
 
 // todo:
@@ -313,6 +298,7 @@ object UiConst {
 fun BrowserComponent(
 //    navController: NavController,
     state: BrowserComponentState,
+    webPrompterState: InfernoWebPrompterState,
     biometricPromptCallbackManager: BiometricPromptCallbackManager,
     onNavToHistory: () -> Unit,
     onNavToBookmarks: () -> Unit,
@@ -409,15 +395,15 @@ fun BrowserComponent(
             }.toIntArray()
             sitePermissionsFeature?.onPermissionsResult(permissions, grantResults)
         }
-    var tempWebPrompterState by remember { mutableStateOf<InfernoWebPrompterState?>(null) }
-    val requestPromptsPermissionsLauncher: ActivityResultLauncher<Array<String>> =
-        rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { results ->
-            val permissions = results.keys.toTypedArray()
-            val grantResults = results.values.map {
-                if (it) PackageManager.PERMISSION_GRANTED else PackageManager.PERMISSION_DENIED
-            }.toIntArray()
-            tempWebPrompterState?.onPermissionsResult(permissions, grantResults)
-        }
+//    var tempWebPrompterState by remember { mutableStateOf<InfernoWebPrompterState?>(null) }
+//    val requestPromptsPermissionsLauncher: ActivityResultLauncher<Array<String>> =
+//        rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { results ->
+//            val permissions = results.keys.toTypedArray()
+//            val grantResults = results.values.map {
+//                if (it) PackageManager.PERMISSION_GRANTED else PackageManager.PERMISSION_DENIED
+//            }.toIntArray()
+//            tempWebPrompterState?.onPermissionsResult(permissions, grantResults)
+//        }
 
     // endregion
 
@@ -442,121 +428,124 @@ fun BrowserComponent(
 
     // region InfernoWebPrompterState
 
-    val webPrompterState = rememberInfernoWebPrompterState(
-        activity = context.getActivity()!!,
-        biometricPromptCallbackManager = biometricPromptCallbackManager,
-        store = store,
-        customTabId = state.customTabSessionId,
-        tabsUseCases = context.components.useCases.tabsUseCases,
-        fileUploadsDirCleaner = context.components.core.fileUploadsDirCleaner,
-        creditCardValidationDelegate = DefaultCreditCardValidationDelegate(
-            context.components.core.lazyAutofillStorage,
-        ),
-        loginValidationDelegate = DefaultLoginValidationDelegate(
-            context.components.core.lazyPasswordsStorage,
-        ),
-        isLoginAutofillEnabled = {
-            context.settings().shouldAutofillLogins
-        },
-        isSaveLoginEnabled = {
-            context.settings().shouldPromptToSaveLogins
-        },
-        isCreditCardAutofillEnabled = {
-            context.settings().shouldAutofillCreditCardDetails
-        },
-        isAddressAutofillEnabled = {
-            context.settings().addressFeature && context.settings().shouldAutofillAddressDetails
-        },
-        loginExceptionStorage = context.components.core.loginExceptionStorage,
-        shareDelegate = object : ShareDelegate {
-            // todo: replace with context.share
-            override fun showShareSheet(
-                context: Context,
-                shareData: ShareData,
-                onDismiss: () -> Unit,
-                onSuccess: () -> Unit,
-            ) {
-                (shareData.url ?: shareData.text)?.let {
-                    val subject = shareData.title
-                        ?: context.getString(R.string.mozac_support_ktx_share_dialog_title)
-                    context.share(it, subject = subject)
-                }
-//                val directions = NavGraphDirections.actionGlobalShareFragment(
-//                    data = arrayOf(shareData),
-//                    showPage = true,
-//                    sessionId = getCurrentTab(context)?.id,
-//                )
-//                navController.navigate(directions)
-            }
-        },
-        onNeedToRequestPermissions = { permissions ->
-//            requestPermissions(permissions, BaseBrowserFragment.REQUEST_CODE_PROMPT_PERMISSIONS)
-            requestPromptsPermissionsLauncher.launch(permissions)
-        },
-        loginDelegate = object : InfernoLoginDelegate {
-            override val onManageLogins = {
-                onNavToPasswords.invoke()
-            }
-        },
-        shouldAutomaticallyShowSuggestedPassword = { context.settings().isFirstTimeEngagingWithSignup },
-        onFirstTimeEngagedWithSignup = {
-            context.settings().isFirstTimeEngagingWithSignup = false
-        },
-        onSaveLoginWithStrongPassword = { url, password ->
-            handleOnSaveLoginWithGeneratedStrongPassword(
-                passwordsStorage = context.components.core.passwordsStorage,
-                url = url,
-                password = password,
-                lifecycleScope = coroutineScope,
-                setLastSavedGeneratedPassword = { state.lastSavedGeneratedPassword = it },
-            )
-        },
-        onSaveLogin = { isUpdate ->
-            showSnackbarAfterLoginChange(
-                isUpdate = isUpdate,
-                context = context,
-                coroutineScope = coroutineScope,
-                snackbarHostState = snackbarHostState,
-            )
-        },
-        hideUpdateFragmentAfterSavingGeneratedPassword = { username, password ->
-            hideUpdateFragmentAfterSavingGeneratedPassword(
-                username = username,
-                password = password,
-                lastSavedGeneratedPassword = state.lastSavedGeneratedPassword
-            )
-        },
-        removeLastSavedGeneratedPassword = {
-            removeLastSavedGeneratedPassword(
-                setLastSavedGeneratedPassword = { state.lastSavedGeneratedPassword = it },
-            )
-        },
-        creditCardDelegate = { prompterState, activityResultLauncher ->
-            object : InfernoCreditCardDelegate {
-                override val onManageCreditCards = {
-                    onNavToAutofillSettings.invoke()
-                }
-                override val onSelectCreditCard = {
-                    showBiometricPrompt(
-                        context = context,
-                        title = context.getString(R.string.credit_cards_biometric_prompt_unlock_message_2),
-                        biometricPromptCallbackManager = biometricPromptCallbackManager,
-                        webPrompterState = prompterState,
-                        startForResult = activityResultLauncher,
-                        setAlertDialog = { activeAlertDialog = it },
-                    )
-                }
-            }
-        },
-        addressDelegate = object : AddressDelegate {
-            override val addressPickerView
-                get() = null
-            override val onManageAddresses = {
-                onNavToAutofillSettings.invoke()
-            }
-        },
-    )
-    tempWebPrompterState = webPrompterState
+//    val webPrompterState = rememberInfernoWebPrompterState(
+//        activity = context.getActivity()!!,
+//        biometricPromptCallbackManager = biometricPromptCallbackManager,
+//        store = store,
+//        customTabId = state.customTabSessionId,
+//        tabsUseCases = context.components.useCases.tabsUseCases,
+//        fileUploadsDirCleaner = context.components.core.fileUploadsDirCleaner,
+//        creditCardValidationDelegate = DefaultCreditCardValidationDelegate(
+//            context.components.core.lazyAutofillStorage,
+//        ),
+//        loginValidationDelegate = DefaultLoginValidationDelegate(
+//            context.components.core.lazyPasswordsStorage,
+//        ),
+//        isLoginAutofillEnabled = {
+//            context.settings().shouldAutofillLogins
+//        },
+//        isSaveLoginEnabled = {
+//            context.settings().shouldPromptToSaveLogins
+//        },
+//        isCreditCardAutofillEnabled = {
+//            context.settings().shouldAutofillCreditCardDetails
+//        },
+//        isAddressAutofillEnabled = {
+//            context.settings().addressFeature && context.settings().shouldAutofillAddressDetails
+//        },
+//        loginExceptionStorage = context.components.core.loginExceptionStorage,
+//        shareDelegate = object : ShareDelegate {
+//            // todo: replace with context.share
+//            override fun showShareSheet(
+//                context: Context,
+//                shareData: ShareData,
+//                onDismiss: () -> Unit,
+//                onSuccess: () -> Unit,
+//            ) {
+//                (shareData.url ?: shareData.text)?.let {
+//                    val subject = shareData.title
+//                        ?: context.getString(R.string.mozac_support_ktx_share_dialog_title)
+//                    context.share(it, subject = subject)
+//                }
+////                val directions = NavGraphDirections.actionGlobalShareFragment(
+////                    data = arrayOf(shareData),
+////                    showPage = true,
+////                    sessionId = getCurrentTab(context)?.id,
+////                )
+////                navController.navigate(directions)
+//            }
+//        },
+//        onNeedToRequestPermissions = { permissions ->
+////            requestPermissions(permissions, BaseBrowserFragment.REQUEST_CODE_PROMPT_PERMISSIONS)
+//            requestPromptsPermissionsLauncher.launch(permissions)
+//        },
+//        loginDelegate = object : InfernoLoginDelegate {
+//            override val onManageLogins = {
+//                onNavToPasswords.invoke()
+//            }
+//        },
+//        shouldAutomaticallyShowSuggestedPassword = { context.settings().isFirstTimeEngagingWithSignup },
+//        onFirstTimeEngagedWithSignup = {
+//            context.settings().isFirstTimeEngagingWithSignup = false
+//        },
+//        onSaveLoginWithStrongPassword = { url, password ->
+//            handleOnSaveLoginWithGeneratedStrongPassword(
+//                passwordsStorage = context.components.core.passwordsStorage,
+//                url = url,
+//                password = password,
+//                lifecycleScope = coroutineScope,
+//                setLastSavedGeneratedPassword = { state.lastSavedGeneratedPassword = it },
+//            )
+//        },
+//        onSaveLogin = { isUpdate ->
+//            showSnackbarAfterLoginChange(
+//                isUpdate = isUpdate,
+//                context = context,
+//                coroutineScope = coroutineScope,
+//                snackbarHostState = snackbarHostState,
+//            )
+//        },
+//        hideUpdateFragmentAfterSavingGeneratedPassword = { username, password ->
+//            hideUpdateFragmentAfterSavingGeneratedPassword(
+//                username = username,
+//                password = password,
+//                lastSavedGeneratedPassword = state.lastSavedGeneratedPassword
+//            )
+//        },
+//        removeLastSavedGeneratedPassword = {
+//            removeLastSavedGeneratedPassword(
+//                setLastSavedGeneratedPassword = { state.lastSavedGeneratedPassword = it },
+//            )
+//        },
+//        creditCardDelegate =
+//            object : InfernoCreditCardDelegate {
+//                override val onManageCreditCards = {
+//                    onNavToAutofillSettings.invoke()
+//                }
+//                override val onSelectCreditCard = {
+//                    // todo: add support for pin
+//                    biometricPromptCallbackManager.showPrompt(
+//                        title = context.getString(R.string.credit_cards_biometric_prompt_message),
+//                    )
+////                    showBiometricPrompt(
+////                        context = context,
+////                        title = context.getString(R.string.credit_cards_biometric_prompt_unlock_message_2),
+////                        biometricPromptCallbackManager = biometricPromptCallbackManager,
+////                        webPrompterState = prompterState,
+////                        startForResult = activityResultLauncher,
+////                        setAlertDialog = { activeAlertDialog = it },
+////                    )
+//                }
+//        },
+//        addressDelegate = object : AddressDelegate {
+//            override val addressPickerView
+//                get() = null
+//            override val onManageAddresses = {
+//                onNavToAutofillSettings.invoke()
+//            }
+//        },
+//    )
+//    tempWebPrompterState = webPrompterState
 
     // endregion
 
@@ -613,7 +602,7 @@ fun BrowserComponent(
 
     /// event handlers
     val activityResultHandler: List<ActivityResultHandler?> = listOf(
-        webAuthnFeature, webPrompterState,
+        webAuthnFeature, // webPrompterState,
 //        promptsFeature,
     )
 
@@ -1800,7 +1789,7 @@ fun BrowserComponent(
                         BrowserComponentPageType.HOME,
                         BrowserComponentPageType.HOME_PRIVATE,
                             -> {
-                            val isPrivate = state.pageType == BrowserComponentPageType.HOME_PRIVATE
+//                            val isPrivate = state.pageType == BrowserComponentPageType.HOME_PRIVATE
                             InfernoHomeComponent(
                                 state = homeState,
                             )
@@ -2459,35 +2448,35 @@ private fun showSnackbarAfterLoginChange(
     }
 }
 
-/**
- * Shows a biometric prompt and fallback to prompting for the password.
- */
-private fun showBiometricPrompt(
-    context: Context,
-    title: String,
-    biometricPromptCallbackManager: BiometricPromptCallbackManager,
-    webPrompterState: InfernoWebPrompterState?,
-    startForResult: ManagedActivityResultLauncher<Intent, ActivityResult>,
-    setAlertDialog: ((@Composable () -> Unit)?) -> Unit,
-) {
-    if (BiometricPromptFeature.canUseFeature(context)) {
-        biometricPromptCallbackManager.showPrompt(title = title)
-        return
-    }
-
-    // Fallback to prompting for password with the KeyguardManager
-    val manager = context.getSystemService<KeyguardManager>()
-    if (manager?.isKeyguardSecure == true) {
-        showPinVerification(context, manager, startForResult)
-    } else {
-        // Warn that the device has not been secured
-        if (context.settings().shouldShowSecurityPinWarning) {
-            showPinDialogWarning(context, setAlertDialog, webPrompterState)
-        } else {
-//                promptsFeature.get()?.onBiometricResult(isAuthenticated = true)
-        }
-    }
-}
+///**
+// * Shows a biometric prompt and fallback to prompting for the password.
+// */
+//private fun showBiometricPrompt(
+//    context: Context,
+//    title: String,
+//    biometricPromptCallbackManager: BiometricPromptCallbackManager,
+//    webPrompterState: InfernoWebPrompterState?,
+//    startForResult: ManagedActivityResultLauncher<Intent, ActivityResult>,
+//    setAlertDialog: ((@Composable () -> Unit)?) -> Unit,
+//) {
+//    if (BiometricPromptFeature.canUseFeature(context)) {
+//        biometricPromptCallbackManager.showPrompt(title = title)
+//        return
+//    }
+//
+//    // Fallback to prompting for password with the KeyguardManager
+//    val manager = context.getSystemService<KeyguardManager>()
+//    if (manager?.isKeyguardSecure == true) {
+//        showPinVerification(context, manager, startForResult)
+//    } else {
+//        // Warn that the device has not been secured
+//        if (context.settings().shouldShowSecurityPinWarning) {
+//            showPinDialogWarning(context, setAlertDialog, webPrompterState)
+//        } else {
+////                promptsFeature.get()?.onBiometricResult(isAuthenticated = true)
+//        }
+//    }
+//}
 
 /**
  * Shows a pin request prompt. This is only used when BiometricPrompt is unavailable.
@@ -2506,71 +2495,71 @@ private fun showPinVerification(
     startForResult.launch(intent)
 }
 
-/**
- * Shows a dialog warning about setting up a device lock PIN.
- */
-private fun showPinDialogWarning(
-    context: Context,
-    setAlertDialog: ((@Composable () -> Unit)?) -> Unit,
-    webPrompterState: InfernoWebPrompterState?,
-) {
-//    AlertDialog.Builder(context).apply {
-//        setNegativeButton(context.getString(R.string.credit_cards_warning_dialog_later)) { _: DialogInterface, _ ->
-////                promptsFeature.get()?.onBiometricResult(isAuthenticated = false)
-//        }
+///**
+// * Shows a dialog warning about setting up a device lock PIN.
+// */
+//private fun showPinDialogWarning(
+//    context: Context,
+//    setAlertDialog: ((@Composable () -> Unit)?) -> Unit,
+//    webPrompterState: InfernoWebPrompterState?,
+//) {
+////    AlertDialog.Builder(context).apply {
+////        setNegativeButton(context.getString(R.string.credit_cards_warning_dialog_later)) { _: DialogInterface, _ ->
+//////                promptsFeature.get()?.onBiometricResult(isAuthenticated = false)
+////        }
+////
+////        setPositiveButton(context.getString(R.string.credit_cards_warning_dialog_set_up_now)) { it: DialogInterface, _ ->
+////            it.dismiss()
+//////                promptsFeature.get()?.onBiometricResult(isAuthenticated = false)
+////            context.startActivity(Intent(Settings.ACTION_SECURITY_SETTINGS))
+////        }
+////
+////        create()
+////    }.show().withCenterAlignedButtons().secure(activity)
 //
-//        setPositiveButton(context.getString(R.string.credit_cards_warning_dialog_set_up_now)) { it: DialogInterface, _ ->
-//            it.dismiss()
-////                promptsFeature.get()?.onBiometricResult(isAuthenticated = false)
-//            context.startActivity(Intent(Settings.ACTION_SECURITY_SETTINGS))
-//        }
+//    setAlertDialog {
+//        AlertDialog(
+//            onDismissRequest = { setAlertDialog(null) },
+//            title = {
+//                InfernoText(
+//                    text = stringResource(R.string.credit_cards_warning_dialog_title_2),
+//                    fontWeight = FontWeight.Bold,
+//                )
+//            },
+//            text = {
+//                InfernoText(
+//                    text = stringResource(R.string.credit_cards_warning_dialog_message_3),
+//                )
+//            },
+//            confirmButton = {
+//                InfernoText(
+//                    text = stringResource(R.string.credit_cards_warning_dialog_set_up_now),
+//                    modifier = Modifier.clickable {
+//                        setAlertDialog(null)
+//                        webPrompterState?.onBiometricResult(isAuthenticated = false)
+//                        context.startActivity(Intent(Settings.ACTION_SECURITY_SETTINGS))
+//                    },
+//                )
+//            },
+//            dismissButton = {
+//                InfernoText(
+//                    text = stringResource(R.string.credit_cards_warning_dialog_later),
+//                    modifier = Modifier.clickable {
+//                        setAlertDialog(null)
+//                        webPrompterState?.onBiometricResult(isAuthenticated = false)
+//                    },
+//                )
+//            },
+//            properties = DialogProperties(
+//                dismissOnBackPress = true,
+//                dismissOnClickOutside = false,
+//                usePlatformDefaultWidth = true,
+//            ),
+//        )
+//    }
 //
-//        create()
-//    }.show().withCenterAlignedButtons().secure(activity)
-
-    setAlertDialog {
-        AlertDialog(
-            onDismissRequest = { setAlertDialog(null) },
-            title = {
-                InfernoText(
-                    text = stringResource(R.string.credit_cards_warning_dialog_title_2),
-                    fontWeight = FontWeight.Bold,
-                )
-            },
-            text = {
-                InfernoText(
-                    text = stringResource(R.string.credit_cards_warning_dialog_message_3),
-                )
-            },
-            confirmButton = {
-                InfernoText(
-                    text = stringResource(R.string.credit_cards_warning_dialog_set_up_now),
-                    modifier = Modifier.clickable {
-                        setAlertDialog(null)
-                        webPrompterState?.onBiometricResult(isAuthenticated = false)
-                        context.startActivity(Intent(Settings.ACTION_SECURITY_SETTINGS))
-                    },
-                )
-            },
-            dismissButton = {
-                InfernoText(
-                    text = stringResource(R.string.credit_cards_warning_dialog_later),
-                    modifier = Modifier.clickable {
-                        setAlertDialog(null)
-                        webPrompterState?.onBiometricResult(isAuthenticated = false)
-                    },
-                )
-            },
-            properties = DialogProperties(
-                dismissOnBackPress = true,
-                dismissOnClickOutside = false,
-                usePlatformDefaultWidth = true,
-            ),
-        )
-    }
-
-    context.settings().incrementSecureWarningCount()
-}
+//    context.settings().incrementSecureWarningCount()
+//}
 
 
 @VisibleForTesting

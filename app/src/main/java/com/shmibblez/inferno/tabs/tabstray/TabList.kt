@@ -9,7 +9,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -65,20 +64,11 @@ import com.shmibblez.inferno.tabstray.ext.toDisplayTitle
 import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.concept.engine.mediasession.MediaSession.PlaybackState
 import mozilla.components.support.ktx.kotlin.MAX_URI_LENGTH
-import mozilla.components.ui.colors.PhotonColors
 import kotlin.math.max
 
-// todo: everything with FirefoxTheme commented out was fixed by shameless haccs
+// todo:
 //   - tab thumbnails
 //     - round out thumbnails, add white border,
-//     - thumbnails not filling whole width
-//     - use inferno icon for inferno:home or about:blank url (copy from MiniTabBar composable)
-//   - menu icon too big, more padding just for that one (4.dp to start)
-//   - add new tab floating button at bottom right
-//   - set bottom padding item height properly
-//
-// todo: bugs
-//   - hold to move tab not moving properly
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -310,11 +300,7 @@ private fun TabItem(
 }
 
 @Composable
-private fun clickableColor() = when (isSystemInDarkTheme()) {
-//    true -> PhotonColors.White
-//    false -> PhotonColors.Black
-    else -> PhotonColors.White // todo: update with colors / theme update
-}
+private fun clickableColor() = LocalContext.current.infernoTheme().value.secondaryBackgroundColor
 
 
 @Composable
@@ -346,7 +332,7 @@ private fun Thumbnail(
                 shape = CircleShape,
                 colors = CardDefaults.cardColors(
                     containerColor = LocalContext.current.infernoTheme().value.primaryActionColor
-                ), // FirefoxTheme.colors.layerAccent ),
+                ),
             ) {
                 InfernoIcon(
                     painter = painterResource(id = R.drawable.ic_checkmark_24),
@@ -374,7 +360,7 @@ private fun Thumbnail(
 /**
  * Controller buttons for the media (play/pause) state for the given [tab].
  *
- * @param tab [TabSessionState] which the image should be shown.
+ * @param tab [TabSessionState] for which the image should be shown.
  * @param onMediaIconClicked handles the click event when tab has media session like play/pause.
  * @param modifier [Modifier] to be applied to the layout.
  * @param interactionSource [MutableInteractionSource] used to propagate the ripple effect on click.

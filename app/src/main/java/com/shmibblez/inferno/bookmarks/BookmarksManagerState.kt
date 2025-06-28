@@ -110,7 +110,7 @@ class BookmarksManagerState(
         get() = mode is Mode.Normal
 
     private enum class JobType {
-        LOAD, SELECT, LOAD_URLS, DELETE_BOOKMARK, DELETE_FOLDER, DELETE_SELECTED, UPDATE, CREATE_BOOKMARK, CREATE_FOLDER, MOVE_ITEMS,
+        LOAD, SELECT, SELECT_ALL, LOAD_URLS, DELETE_BOOKMARK, DELETE_FOLDER, DELETE_SELECTED, UPDATE, CREATE_BOOKMARK, CREATE_FOLDER, MOVE_ITEMS,
     }
 
 //    var guid by mutableStateOf(initialGuid)
@@ -287,6 +287,45 @@ class BookmarksManagerState(
         if (isSelection) {
             mode.asSelect()!!.selectedRoots = bookmarkItems.toSet()
         }
+
+        // if not in select mode return
+        if (!isSelection) return
+        // guid when task requested
+        val initialRootGuid = root?.guid
+        // filter out desktop folders
+        val selectableItems = bookmarkItems.mapNotNull { when ((it as? BookmarkItem.Folder)?.isDesktopFolder) {
+            true -> null
+            else -> it
+        } } ?: return
+        taskManager.processTask(
+            type = JobType.SELECT_ALL,
+            task = {
+                // if not in selection mode or root guid changed by the time
+                // this task is processed, return
+                if (isNormal || root?.guid != initialRootGuid) return@processTask null
+                val itemsToCount = selectableItems.map { it.guid }
+                val count = storage.countBookmarksInTrees(itemsToCount).toInt()
+                return@processTask selectableItems to count
+            },
+            onComplete = {
+                onFailure {
+                    // todo: handle error
+                }
+                onSuccess { result ->
+                    result?.let { res ->
+                        if (!isSelection) return@onSuccess
+
+                        val (selectableItems, nestedItemCount) = res
+                        (mode as Mode.Select).selectedRoots = selectableItems.toSet()
+                        (mode as Mode.Select).totalItemCount = (mode as Mode.Select).selectedRoots.size + nestedItemCount
+                        Log.d(
+                            "BookmarksManagerState",
+                            "item selected, after select, roots: ${(mode as Mode.Select).selectedRoots}, count: ${(mode as Mode.Select).totalItemCount} "
+                        )
+                    }
+                }
+            },
+        )
     }
 
     fun loadBookmarkUrls(item: BookmarkItem.Folder, onLoad: (urls: List<String>) -> Unit) {

@@ -137,7 +137,6 @@ import mozilla.components.support.ktx.kotlinx.coroutines.flow.ifAnyChanged
 import mozilla.components.support.locale.ActivityContextWrapper
 import mozilla.components.ui.widgets.withCenterAlignedButtons
 //import mozilla.telemetry.glean.private.NoExtras
-import com.shmibblez.inferno.BuildConfig
 //import com.shmibblez.inferno.GleanMetrics.Events
 //import com.shmibblez.inferno.GleanMetrics.Logins
 //import com.shmibblez.inferno.GleanMetrics.MediaState
@@ -348,14 +347,14 @@ abstract class BaseBrowserFragment :
 
     // Registers a photo picker activity launcher in single-select mode.
     private val singleMediaPicker =
-        InfernoAndroidPhotoPicker.singleMediaPicker(
+        InfernoAndroidPhotoPicker.singleMediaPickerFrag(
             { this },
             { null }, //getPromptsFeature() },
         )
 
     // Registers a photo picker activity launcher in multi-select mode.
     private val multipleMediaPicker =
-        InfernoAndroidPhotoPicker.multipleMediaPicker(
+        InfernoAndroidPhotoPicker.multipleMediaPickerFrag(
             { this },
             { null }, // getPromptsFeature() },
         )

@@ -23,6 +23,7 @@ import com.shmibblez.inferno.bookmarks.InfernoBookmarksPage
 import com.shmibblez.inferno.bookmarks.ModifyBookmarkDialog
 import com.shmibblez.inferno.browser.BrowserComponent
 import com.shmibblez.inferno.browser.nav.InitialBrowserTask.AppIcon.asStartDestination
+import com.shmibblez.inferno.browser.prompts.InfernoWebPrompterState
 import com.shmibblez.inferno.browser.state.BrowserComponentState
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.infernoTheme
@@ -64,13 +65,13 @@ private fun NavHostController.navToBrowser() {
 
 @Composable
 fun BrowserNavHost(
+    nav: NavHostController,
     browserComponentState: BrowserComponentState,
+    webPrompterState: InfernoWebPrompterState,
     biometricPromptCallbackManager: BiometricPromptCallbackManager,
-//    customTabSessionId: String?,
     initialAction: InitialBrowserTask? = null,
     startDestination: BrowserRoute = initialAction.asStartDestination(),
 ) {
-    val nav = rememberNavController()
     val scope = rememberCoroutineScope()
 
 //    val browserComponentState by rememberBrowserComponentState(
@@ -186,8 +187,9 @@ fun BrowserNavHost(
 
         composable<BrowserRoute.InfernoBrowser> {
             BrowserComponent(
-                biometricPromptCallbackManager = biometricPromptCallbackManager,
                 state = browserComponentState,
+                webPrompterState = webPrompterState,
+                biometricPromptCallbackManager = biometricPromptCallbackManager,
                 onNavToHistory = { nav.navigate(route = BrowserRoute.History) },
                 onNavToBookmarks = { nav.navigate(route = BrowserRoute.Bookmarks) },
                 onNavToSettings = { nav.navigate(route = BrowserRoute.Settings) },

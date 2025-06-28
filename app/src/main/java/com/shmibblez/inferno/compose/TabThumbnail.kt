@@ -19,12 +19,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.shmibblez.inferno.R
-import com.shmibblez.inferno.theme.FirefoxTheme
+import com.shmibblez.inferno.ext.infernoTheme
 import mozilla.components.browser.state.state.TabSessionState
-import mozilla.components.browser.state.state.createTab
 import mozilla.components.concept.base.images.ImageLoadRequest
 
 private const val FALLBACK_ICON_SIZE = 36
@@ -47,7 +45,7 @@ fun TabThumbnail(
     tab: TabSessionState,
     size: Int,
     modifier: Modifier = Modifier,
-    backgroundColor: Color = Color.Black, // FirefoxTheme.colors.layer2,
+    backgroundColor: Color = LocalContext.current.infernoTheme().value.secondaryBackgroundColor,
     contentDescription: String? = null,
     contentScale: ContentScale = ContentScale.FillWidth,
     alignment: Alignment = Alignment.TopCenter,
@@ -105,16 +103,16 @@ fun TabThumbnail(
     }
 }
 
-@Preview
-@Composable
-private fun ThumbnailCardPreview() {
-    FirefoxTheme {
-        TabThumbnail(
-            tab = createTab(url = "www.mozilla.com", title = "Mozilla"),
-            size = 108,
-            modifier = Modifier
-                .size(108.dp, 80.dp)
-                .clip(RoundedCornerShape(8.dp)),
-        )
-    }
-}
+//@Preview
+//@Composable
+//private fun ThumbnailCardPreview() {
+//    FirefoxTheme {
+//        TabThumbnail(
+//            tab = createTab(url = "www.mozilla.com", title = "Mozilla"),
+//            size = 108,
+//            modifier = Modifier
+//                .size(108.dp, 80.dp)
+//                .clip(RoundedCornerShape(8.dp)),
+//        )
+//    }
+//}

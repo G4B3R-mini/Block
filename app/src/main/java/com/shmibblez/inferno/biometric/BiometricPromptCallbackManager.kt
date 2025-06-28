@@ -51,4 +51,31 @@ class BiometricPromptCallbackManager(
 
         this.authenticate(promptInfo)
     }
+
+    // todo: incorporate this to authenticate instead of just showPrompt
+    //  currently users that dont have biometric are cooked
+    //  need to support non-biometric devices with pin
+//    /**
+//     * Shows a biometric prompt and fallback to prompting for the password.
+//     */
+//    private fun showBiometricPrompt(context: Context) {
+//        if (BiometricPromptFeature.canUseFeature(BiometricManager.from(context))) {
+//            biometricPromptFeature.get()
+//                ?.requestAuthentication(getString(R.string.credit_cards_biometric_prompt_unlock_message_2))
+//            return
+//        }
+//
+//        // Fallback to prompting for password with the KeyguardManager
+//        val manager = context.getSystemService<KeyguardManager>()
+//        if (manager?.isKeyguardSecure == true) {
+//            showPinVerification(manager)
+//        } else {
+//            // Warn that the device has not been secured
+//            if (context.settings().shouldShowSecurityPinWarning) {
+//                showPinDialogWarning(context)
+//            } else {
+//                promptsFeature.get()?.onBiometricResult(isAuthenticated = true)
+//            }
+//        }
+//    }
 }
