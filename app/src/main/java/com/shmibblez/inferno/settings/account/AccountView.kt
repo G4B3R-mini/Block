@@ -1,7 +1,5 @@
 package com.shmibblez.inferno.settings.account
 
-import android.content.Context
-import android.graphics.BitmapFactory
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -22,181 +20,47 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.lifecycleScope
+import androidx.core.content.res.ResourcesCompat
+import androidx.core.graphics.drawable.toBitmap
 import com.shmibblez.inferno.R
-import com.shmibblez.inferno.browser.infernoFeatureState.InfernoFeatureState
 import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.base.InfernoText
-import com.shmibblez.inferno.ext.bitmapForUrl
-import com.shmibblez.inferno.ext.components
+import com.shmibblez.inferno.compose.base.InfernoTextStyle
 import com.shmibblez.inferno.ext.infernoTheme
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import mozilla.components.concept.fetch.Client
-import mozilla.components.concept.sync.AccountObserver
-import mozilla.components.concept.sync.AuthType
-import mozilla.components.concept.sync.OAuthAccount
-import mozilla.components.concept.sync.Profile
-import mozilla.components.service.fxa.manager.FxaAccountManager
 
 //import com.shmibblez.inferno.proto.InfernoSettings
 //import com.shmibblez.inferno.proto.infernoSettingsDataStore
 
-class AccountState(
-    val context: Context,
-    val lifecycleOwner: LifecycleOwner,
-    profile: Profile?,
-    val scope: CoroutineScope,
-    val accountManager: FxaAccountManager,
-    private val httpClient: Client,
-    private val updateFxAAllowDomesticChinaServerMenu: () -> Unit,
-) : InfernoFeatureState {
-
-    enum class AccountAuthState {
-        SIGNED_OUT, SIGNED_IN, REQUIRES_REAUTH,
-    }
-
-    var authState: AccountAuthState? by mutableStateOf(null)
-        private set
-    fun isSignedIn() = authState == AccountAuthState.SIGNED_IN
-    fun requiresReauth() = authState == AccountAuthState.SIGNED_IN
-    fun isSignedOut() = authState == AccountAuthState.SIGNED_IN
-
-
-    val profile by mutableStateOf(profile)
-
-    private val accountObserver = object : AccountObserver {
-        private fun updateAccountUi(profile: Profile? = null) {
-            lifecycleOwner.lifecycleScope.launch {
-                updateAccountState(
-                    context = context,
-                    profile = profile
-                        ?: context.components.backgroundServices.accountManager.accountProfile(),
-                )
-            }
-        }
-
-        override fun onAuthenticated(account: OAuthAccount, authType: AuthType) = updateAccountUi()
-
-        override fun onLoggedOut() = updateAccountUi()
-        override fun onProfileUpdated(profile: Profile) = updateAccountUi(profile)
-        override fun onAuthenticationProblems() = updateAccountUi()
-    }
-
-    override fun start() {
-        context.components.backgroundServices.accountManager.register(
-            accountObserver,
-            owner = lifecycleOwner,
-            autoPause = true,
-        )
-    }
-
-    override fun stop() {
-        context.components.backgroundServices.accountManager.unregister(accountObserver)
-    }
-
-    fun updateAccountState(context: Context, profile: Profile?) {
-        val account = accountManager.authenticatedAccount()
-
-        updateFxAAllowDomesticChinaServerMenu()
-
-        // Signed-in, no problems.
-        authState = when {
-            account != null && !accountManager.accountNeedsReauth() -> AccountAuthState.SIGNED_IN
-            account != null && accountManager.accountNeedsReauth() -> AccountAuthState.REQUIRES_REAUTH
-            else -> AccountAuthState.SIGNED_OUT
-        }
-    }
-
-    /**
-     * Returns generic avatar for accounts.
-     */
-    internal fun genericAvatar(context: Context) =
-        BitmapFactory.decodeResource(context.resources, R.drawable.ic_account).asImageBitmap()
-
-
-    /**
-     * Gets a rounded drawable from a URL if possible, else null.
-     */
-    internal suspend fun toRoundedDrawable(
-        url: String,
-        context: Context,
-    ) = httpClient.bitmapForUrl(url)?.let { bitmap ->
-        RoundedBitmapDrawableFactory.create(context.resources, bitmap).apply {
-            isCircular = true
-            setAntiAlias(true)
-        }.bitmap?.asImageBitmap()
-    }
-}
-
-@Composable
-fun rememberAccountState(
-    profile: Profile?,
-    scope: CoroutineScope,
-    accountManager: FxaAccountManager,
-    httpClient: Client,
-    updateFxAAllowDomesticChinaServerMenu: () -> Unit,
-): AccountState {
-    val context = LocalContext.current
-    val lifecycleOwner = LocalLifecycleOwner.current
-    val state = AccountState(
-        context = context,
-        lifecycleOwner = lifecycleOwner,
-        profile = profile,
-        scope = scope,
-        accountManager = accountManager,
-        httpClient = httpClient,
-        updateFxAAllowDomesticChinaServerMenu = updateFxAAllowDomesticChinaServerMenu,
-    )
-
-    DisposableEffect(null) {
-        state.start()
-
-        onDispose {
-            state.stop()
-        }
-    }
-
-    return remember { state }
-}
-
 @Composable
 fun AccountView(
     state: AccountState,
-    onNavigateSignedIn: () -> Unit,
-    onNavigateRequiresReauth: () -> Unit,
-    onNavigateSignedOut: () -> Unit,
+    onNavToAccountSettings: () -> Unit,
+//    onNavigateSignedIn: () -> Unit,
+//    onNavigateRequiresReauth: () -> Unit,
+//    onNavigateSignedOut: () -> Unit,
 ) {
     when (state.authState) {
-        AccountState.AccountAuthState.SIGNED_IN -> {
-            SignedInComponent(state = state, onClick = onNavigateSignedIn)
+        AccountState.AccountAuthState.SignedIn -> {
+            SignedInComponent(state = state, onClick = onNavToAccountSettings)
         }
 
-        AccountState.AccountAuthState.REQUIRES_REAUTH -> {
-            ReauthComponent(state = state, onClick = onNavigateRequiresReauth)
+        AccountState.AccountAuthState.RequiresReauth -> {
+            ReauthComponent(state = state, onClick = onNavToAccountSettings)
         }
 
-        AccountState.AccountAuthState.SIGNED_OUT -> {
-            SignedOutComponent(onClick = onNavigateSignedOut)
+        AccountState.AccountAuthState.SignedOut -> {
+            SignedOutComponent(onClick = onNavToAccountSettings)
         }
 
-        null -> { /* no-op, loading */
-        }
+        null -> {} // no-op, loading
     }
 }
 
@@ -228,11 +92,12 @@ private fun SignedInComponent(
     Row(
         modifier = Modifier
             .clickable(onClick = onClick)
-            .padding(16.dp)
+            .padding(horizontal = 16.dp)
             .background(
-                color = Color.DarkGray,
+                color =  LocalContext.current.infernoTheme().value.secondaryBackgroundColor,
                 shape = MaterialTheme.shapes.medium,
-            ),
+            )
+            .padding(16.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -242,10 +107,11 @@ private fun SignedInComponent(
             contentDescription = null,
             modifier = Modifier.size(72.dp),
         )
+        // account info
         Column(
             modifier = Modifier.height(72.dp),
             horizontalAlignment = Alignment.Start,
-            verticalArrangement = Arrangement.SpaceBetween,
+            verticalArrangement = Arrangement.SpaceAround,
         ) {
             // display name
             InfernoText(
@@ -266,8 +132,11 @@ private fun ReauthComponent(state: AccountState, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .clickable(onClick = onClick)
-            .background(colorResource(R.color.sync_error_background_color))
-            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+            .background(
+                color = LocalContext.current.infernoTheme().value.errorColor,
+                shape = MaterialTheme.shapes.medium,
+            )
             .padding(16.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -279,6 +148,7 @@ private fun ReauthComponent(state: AccountState, onClick: () -> Unit) {
             modifier = Modifier.size(72.dp),
             tint = LocalContext.current.infernoTheme().value.errorColor,
         )
+        // messages
         Column(
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -286,14 +156,13 @@ private fun ReauthComponent(state: AccountState, onClick: () -> Unit) {
             // error message
             InfernoText(
                 text = stringResource(R.string.preferences_account_sync_error),
-                fontSize = 16.sp,
-                fontColor = colorResource(R.color.sync_error_text_color),
+                fontColor =  LocalContext.current.infernoTheme().value.errorColor,
             )
             // email
-            if (state.profile?.email != null) {
+            state.profile?.email?.let {
                 InfernoText(
-                    text = state.profile?.email ?: "",
-                    fontColor = colorResource(R.color.sync_error_text_color),
+                    text = it,
+                    fontColor = LocalContext.current.infernoTheme().value.errorColor,
                     maxLines = 4,
                 )
             }
@@ -303,28 +172,36 @@ private fun ReauthComponent(state: AccountState, onClick: () -> Unit) {
 
 @Composable
 private fun SignedOutComponent(onClick: () -> Unit) {
+    val context = LocalContext.current
+
     Row(
         modifier = Modifier
             .clickable(onClick = onClick)
             .fillMaxWidth()
-            .padding(16.dp)
+            .padding(horizontal = 16.dp)
             .background(
-                color = Color.DarkGray,
+                color = context.infernoTheme().value.secondaryBackgroundColor,
                 shape = MaterialTheme.shapes.medium,
-            ),
+            )
+            .padding(16.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         // account icon
+//        InfernoIcon(
+//            painter = painterResource().ge
+//        )
         Image(
-            bitmap = ImageBitmap.imageResource(R.drawable.ic_fx_accounts_avatar),
+            bitmap = ResourcesCompat.getDrawable(
+                context.resources, R.drawable.ic_fx_accounts_avatar, null
+            )!!.toBitmap().asImageBitmap(),
             contentDescription = null,
             modifier = Modifier.size(72.dp),
         )
         Column(
-            modifier = Modifier.height(72.dp),
+//            modifier = Modifier.height(72.dp),
             horizontalAlignment = Alignment.Start,
-            verticalArrangement = Arrangement.SpaceBetween,
+            verticalArrangement = Arrangement.SpaceAround,
         ) {
             // title
             InfernoText(
@@ -335,6 +212,8 @@ private fun SignedOutComponent(onClick: () -> Unit) {
             // summary
             InfernoText(
                 text = stringResource(R.string.preferences_sign_in_description_2),
+                infernoStyle = InfernoTextStyle.Small,
+//                maxLines = 3,
             )
         }
     }

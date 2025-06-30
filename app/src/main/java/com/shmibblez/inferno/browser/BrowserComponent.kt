@@ -1109,12 +1109,10 @@ fun BrowserComponent(
                     engineView!!.setActivityContext(null)
                     // todo: accessibility
 //                    context.accessibilityManager.removeAccessibilityStateChangeListener(view.findFragment<BrowserComponentWrapperFragment>())
-
 //                    _bottomToolbarContainerView = null
 //                    _browserToolbarView = null
 //                    _browserToolbarInteractor = null
 //                    _binding = null
-
 
 //                    leadingAction = null
 //                    forwardAction = null

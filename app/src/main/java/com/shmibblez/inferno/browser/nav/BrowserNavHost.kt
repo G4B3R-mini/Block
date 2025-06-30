@@ -239,9 +239,7 @@ fun BrowserNavHost(
         composable<BrowserRoute.Settings> {
             SettingsPage(
                 goBack = { nav.popBackStack() },
-                onNavigateToAccountSettingsPage = { nav.navigate(route = BrowserRoute.Settings.AccountSettingsPage) },
-                onNavigateToAccountProblemSettings = { nav.navigate(route = BrowserRoute.Settings.AccountProblemSettingsPage) },
-                onNavigateToTurnOnSyncSettings = { nav.navigate(route = BrowserRoute.Settings.TurnOnSyncSettingsPage) },
+                onNavToAccountSettings = { nav.navigate(route = BrowserRoute.Settings.AccountSettingsPage) },
                 onNavigateToToolbarSettings = { nav.navigate(route = BrowserRoute.Settings.ToolbarSettingsPage) },
                 onNavigateToTabBarSettings = { nav.navigate(route = BrowserRoute.Settings.TabSettingsPage) },
                 onNavigateToSearchSettings = { nav.navigate(route = BrowserRoute.Settings.SearchSettingsPage) },
@@ -259,17 +257,8 @@ fun BrowserNavHost(
                 onNavigateToPrivacyAndSecuritySettings = { nav.navigate(route = BrowserRoute.Settings.PrivacyAndSecuritySettingsPage) },
             )
         }
-        // todo
         composable<BrowserRoute.Settings.AccountSettingsPage> {
             AccountSettingsPage(goBack = { nav.popBackStack() })
-        }
-        // todo
-        composable<BrowserRoute.Settings.AccountProblemSettingsPage> {
-            AccountProblemSettingsPage(goBack = { nav.popBackStack() })
-        }
-        // todo
-        composable<BrowserRoute.Settings.TurnOnSyncSettingsPage> {
-            TurnOnSyncSettingsPage(goBack = { nav.popBackStack() })
         }
         composable<BrowserRoute.Settings.ToolbarSettingsPage> {
             ToolbarSettingsPage(goBack = { nav.popBackStack() })

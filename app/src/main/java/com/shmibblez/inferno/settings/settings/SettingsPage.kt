@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -27,9 +28,7 @@ import com.shmibblez.inferno.settings.compose.components.PreferenceSpacer
 @Composable
 fun SettingsPage(
     goBack: () -> Unit,
-    onNavigateToAccountSettingsPage: () -> Unit,
-    onNavigateToAccountProblemSettings: () -> Unit,
-    onNavigateToTurnOnSyncSettings: () -> Unit,
+    onNavToAccountSettings: () -> Unit,
     onNavigateToToolbarSettings: () -> Unit,
     onNavigateToTabBarSettings: () -> Unit,
     onNavigateToSearchSettings: () -> Unit,
@@ -51,12 +50,11 @@ fun SettingsPage(
     val translationSupported =
         FxNimbus.features.translations.value().globalSettingsEnabled && context.components.core.store.state.translationEngine.isEngineSupported == true
 
-    val accountState = rememberAccountState(
-        profile = context.components.backgroundServices.accountManager.accountProfile(),
+    val accountState by rememberAccountState(
         scope = lifecycleScope,
         accountManager = context.components.backgroundServices.accountManager,
         httpClient = context.components.core.client,
-        updateFxAAllowDomesticChinaServerMenu = {},
+//        updateFxAAllowDomesticChinaServerMenu = {},
     )
 
     InfernoSettingsPage(
@@ -72,15 +70,11 @@ fun SettingsPage(
             item {
                 AccountView(
                     state = accountState,
-                    onNavigateSignedIn = onNavigateToAccountSettingsPage,
-                    onNavigateRequiresReauth = onNavigateToAccountProblemSettings,
-                    onNavigateSignedOut = onNavigateToTurnOnSyncSettings,
+                    onNavToAccountSettings = onNavToAccountSettings,
                 )
             }
 
-            item {
-                PreferenceSpacer()
-            }
+            item { PreferenceSpacer() }
 
             // toolbar settings
             item {

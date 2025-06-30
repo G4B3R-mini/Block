@@ -29,18 +29,6 @@ interface BrowserRoute {
         @Serializable
         object AccountSettingsPage : BrowserRoute
 
-        /**
-         * todo: based on [SettingsFragmentDirections.actionSettingsFragmentToAccountProblemFragment]
-         */
-        @Serializable
-        object AccountProblemSettingsPage : BrowserRoute
-
-        /**
-         * todo: based on [SettingsFragmentDirections.actionSettingsFragmentToTurnOnSyncFragment]
-         */
-        @Serializable
-        object TurnOnSyncSettingsPage : BrowserRoute
-
         @Serializable
         object ToolbarSettingsPage : BrowserRoute
 

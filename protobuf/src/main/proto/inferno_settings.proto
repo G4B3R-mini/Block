@@ -11,6 +11,8 @@ message InfernoSettings {
 
   optional uint64 numberOfAppLaunches = 1 [default = 0];
   optional uint64 lastBrowseActivityMs = 2 [default = 0];
+  //  optional uint64 lastSyncTimeMs = 93 [default = 0]; // never used, could replace shared pref
+  //  used internally by moz sync handlers
 
 
   /*** toolbar settings ***/
