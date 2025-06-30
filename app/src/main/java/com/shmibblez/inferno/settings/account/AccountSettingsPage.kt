@@ -49,6 +49,10 @@ import mozilla.components.service.fxa.sync.getLastSynced
 import mozilla.components.service.fxa.sync.setLastSynced
 import java.lang.Exception
 
+/**
+ * todo: before next update, check crashlytics for error, might need to test app on specific model
+ *  google phone, first run debug, if no error test bundle / apk to see if error with proguard
+ */
 @Composable
 fun AccountSettingsPage(goBack: () -> Unit) {
     val context = LocalContext.current
@@ -247,6 +251,8 @@ private fun SignedInOptions(accountState: AccountState) {
                 )
             }
         }
+
+        // todo: add sync icon to end, animate when syncing
         // sync now item
         item {
             Column(
