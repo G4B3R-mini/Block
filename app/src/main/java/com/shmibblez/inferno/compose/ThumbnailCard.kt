@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import mozilla.components.browser.icons.compose.Loader
@@ -24,7 +25,7 @@ import mozilla.components.browser.icons.compose.Placeholder
 import mozilla.components.browser.icons.compose.WithIcon
 import mozilla.components.concept.base.images.ImageLoadRequest
 import com.shmibblez.inferno.components.components
-import com.shmibblez.inferno.theme.FirefoxTheme
+import com.shmibblez.inferno.ext.infernoTheme
 
 private const val THUMBNAIL_SIZE = 108
 private const val FALLBACK_ICON_SIZE = 36
@@ -47,14 +48,14 @@ fun ThumbnailCard(
     url: String,
     request: ImageLoadRequest,
     modifier: Modifier = Modifier,
-    backgroundColor: Color = FirefoxTheme.colors.layer2,
+    backgroundColor: Color = LocalContext.current.infernoTheme().value.secondaryBackgroundColor,
     contentDescription: String? = null,
     contentScale: ContentScale = ContentScale.FillWidth,
     alignment: Alignment = Alignment.TopCenter,
 ) {
-    Card(
-        modifier = modifier,
-        colors = CardDefaults.cardColors(containerColor = backgroundColor),
+    Box(
+        modifier = modifier.background(backgroundColor),
+        contentAlignment = Alignment.Center,
     ) {
         ThumbnailImage(
             request = request,
@@ -63,7 +64,7 @@ fun ThumbnailCard(
         ) {
             components.core.icons.Loader(url) {
                 Placeholder {
-                    Box(modifier = Modifier.background(color = FirefoxTheme.colors.layer3))
+                    Box(modifier = Modifier.background(color = LocalContext.current.infernoTheme().value.primaryBackgroundColor))
                 }
 
                 WithIcon { icon ->
@@ -89,13 +90,11 @@ fun ThumbnailCard(
 @Preview
 @Composable
 private fun ThumbnailCardPreview() {
-    FirefoxTheme {
-        ThumbnailCard(
-            url = "https://mozilla.com",
-            request = ImageLoadRequest("123", THUMBNAIL_SIZE, false),
-            modifier = Modifier
-                .size(THUMBNAIL_SIZE.dp)
-                .clip(RoundedCornerShape(8.dp)),
-        )
-    }
+    ThumbnailCard(
+        url = "https://mozilla.com",
+        request = ImageLoadRequest("123", THUMBNAIL_SIZE, false),
+        modifier = Modifier
+            .size(THUMBNAIL_SIZE.dp)
+            .clip(RoundedCornerShape(8.dp)),
+    )
 }

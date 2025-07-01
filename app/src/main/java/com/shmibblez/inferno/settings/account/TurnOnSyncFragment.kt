@@ -23,7 +23,7 @@ import mozilla.components.support.ktx.android.content.hasCamera
 import mozilla.components.support.ktx.android.content.isPermissionGranted
 import mozilla.components.support.ktx.android.view.hideKeyboard
 //import mozilla.telemetry.glean.private.NoExtras
-import com.shmibblez.inferno.Config
+//import com.shmibblez.inferno.Config
 //import com.shmibblez.inferno.GleanMetrics.SyncAuth
 import com.shmibblez.inferno.HomeActivity
 import com.shmibblez.inferno.R

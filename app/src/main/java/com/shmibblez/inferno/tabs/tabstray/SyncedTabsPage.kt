@@ -2,6 +2,9 @@ package com.shmibblez.inferno.tabs.tabstray
 
 import android.content.Context
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -19,6 +22,7 @@ import androidx.lifecycle.lifecycleScope
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.ext.components
+import com.shmibblez.inferno.ext.infernoTheme
 import com.shmibblez.inferno.ext.settings
 import com.shmibblez.inferno.proto.InfernoSettings
 import com.shmibblez.inferno.tabstray.ext.toComposeList
@@ -26,6 +30,7 @@ import com.shmibblez.inferno.tabstray.syncedtabs.SyncedTabsIntegration
 import com.shmibblez.inferno.tabstray.syncedtabs.SyncedTabsList
 import com.shmibblez.inferno.tabstray.syncedtabs.SyncedTabsListItem
 import com.shmibblez.inferno.tabstray.syncedtabs.SyncedTabsListSupportedFeature
+import com.shmibblez.inferno.toolbar.InfernoLoadingScreen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -260,6 +265,13 @@ internal fun SyncedTabsPage(
             onTabClick = onTabClick,
             onTabCloseClick = onTabClose,
         )
+    } else {
+        // todo: only fill to current height
+        InfernoLoadingScreen(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(300.dp),
+        )
     }
 }
 
@@ -293,6 +305,6 @@ private fun SyncedTabsError(errorType: ErrorType) {
         modifier = Modifier
             .padding(16.dp)
             .clickable(onClick = onClick),
-        fontColor = Color.Red,
+        fontColor = LocalContext.current.infernoTheme().value.errorColor,
     )
 }

@@ -3,6 +3,7 @@ package com.shmibblez.inferno.compose.base
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
@@ -68,4 +69,45 @@ fun InfernoButton(
             },
         )
     }
+}
+/**
+ * @param sensitive whether action is sensitive
+ */
+@Composable
+fun InfernoButton(
+    sensitive: Boolean = false,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    shape: Shape = ButtonDefaults.shape,
+    colors: ButtonColors = ButtonColors(
+        containerColor = LocalContext.current.infernoTheme().value.primaryActionColor,
+        contentColor = when (sensitive) {
+            true -> LocalContext.current.infernoTheme().value.errorColor
+            false -> LocalContext.current.infernoTheme().value.primaryTextColor
+        },
+        disabledContainerColor = LocalContext.current.infernoTheme().value.secondaryActionColor,
+        disabledContentColor = when (sensitive) {
+            true -> LocalContext.current.infernoTheme().value.errorColor
+            false -> LocalContext.current.infernoTheme().value.secondaryTextColor
+        }
+    ),
+    elevation: ButtonElevation? = ButtonDefaults.buttonElevation(),
+    border: BorderStroke? = null,
+    contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
+    interactionSource: MutableInteractionSource? = null,
+    content: @Composable RowScope.() -> Unit,
+) {
+    Button(
+        onClick = onClick,
+        modifier = modifier, // .clip(shape),
+        enabled = enabled,
+        shape = shape,
+        colors = colors,
+        elevation = elevation,
+        border = border,
+        contentPadding = contentPadding,
+        interactionSource = interactionSource,
+        content = content,
+    )
 }

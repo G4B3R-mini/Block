@@ -30,7 +30,7 @@ needs work right now.
 
 that's it for now, hopefully this project doesn't die
 
-# Currently Under Development
+# Important Stuff
 
 ## Not Implemented
 
@@ -41,38 +41,19 @@ that's it for now, hopefully this project doesn't die
   add description "crash reporting is required in beta builds, this is a big help for fixing errors.
   This can be disabled in normal builds" might be bad idea though
 
-## Pending Launch
-
-- [ ] Web Prompter
-    - [ ] AndroidPhotoPicker not working, activity callbacks murky (may have to add something
-      similar to biometric prompt with listener and callback structure)
-- [ ] Home Page
-    - [ ] override actions (currently functions do nothing)
-    - [ ] remove sponsored top sites
-- [ ] Crash Reporter
-    - [ ] In onboarding, show quick settings on second page (crash reporting
-      checked by default, show message saying this helps development of app, but can be disabled
-      right there), first page is welcome page, which shows theme and customizable toolbar, next
-      button at bottom which goes to next page, on second page crash reporting and continue button.
-      Cannot dismiss with back press or click outside dialog
-    - [ ] crash reporting not tested (beta build)
-- [ ] COLORS
-    - [ ] CRITICAL: make secondary background color nicer current one is wack
-- [ ] Splash Screen
-    - [ ] shouldnt take too long, check url for tutorial
-
 ## Critical
 
 `Errors that make something unusable, these should be fixed as soon as possible`
 
-- [ ] Settings Page
-    - [ ] when back pressed, nothing happens (does not go back to browser)
-        - [ ] check browser component back handlers, something may be interfering there
+- [ ] Crash on Google Pixel devices on setup megazord in startup, might be related to proguard
+  settings, check megazord init in case some code runs only on release mode
 
 [//]: # (`Nothing critical wooooooo`)
 
 ## Massiv Bugs
 
+- [ ] Account Settings Page
+    - [ ] SignedInOptions, device constellation not loading properly
 - [ ] Homepage
     - [ ] top sites buggy (2 default pages repeated, add some more defaults)
     - [ ] persist homepage state, pass that to homepage so doesnt rebuild
@@ -108,14 +89,9 @@ that's it for now, hopefully this project doesn't die
       this also means access to biometric setup and activity callbacks (FileManager and other stuff
       for web prompter) will be much easier, no need for complex fragment wrapper implementation
 
-## InfernoPromptFeatureState
-
-- [ ] add filePicker param and move creation to base activity, this avoids having to create a custom
-  FilePicker for use in compose, and assures all logic is handled correctly
-
 ## InfernoHistoryPage
 
-- [ ] offset wonky, works pretty well thou, check how implemented in moz pager
+- [ ] offset wonky, switch to moz pager implementation instead of custom
 - [ ] delete time range (2 hours, 2 days, everything), copy moz implementation
 - [ ] reference DefaultPagedHistoryProvider
 - [ ] also add time range deletion,
@@ -146,7 +122,6 @@ that's it for now, hopefully this project doesn't die
 - [x] OnQuit (Working)
     - [ ] side note: not reflected when quit, need to add to callback when app closed
 - [ ] Passwords (Buggy)
-    - [ ] side note: ui good, passwords not saving when added though
     - [ ] side note: exceptions not tested
     - [ ] side note: getting this error message:
 
@@ -195,18 +170,18 @@ Did you add an account?
       settings item (cannot be removed)
     - [ ] add menu settings listener to get items to be displayed
 
-## Under Construction
-
-- [ ] biometric
-- [ ] autofill settings page
-    - [ ] show some settings depending on login state (sync cards, sync logins, etc.)
-    - [ ] use authentication when click on manage cards
-    - [ ] use authentication when click on manage logins
-
 ## Pending addition
 
-`Features that will be added eventually, but are currently not a priority`
+`Features that will be added soon, priority is in the order listed`
 
+- [ ] AuthIntentReceiverActivity
+    - [ ] Instead of going to HomeActivity, go to AuthCustomTabActivity which overrides
+      HomeActivity, once auth setup pop activity
+- [ ] Toolbar & Toolbar Menu Icons
+    - [ ] Account icon, add account state to icon, show icon & description depending on state
+- [ ] Qr code scanner
+    - [ ] Login (add in AccountSettingsPage for SignedOutOptions)
+    - [ ] Homepage / toolbar menu icon for opening website
 - [ ] more toolbar items
     - [ ] print page
     - [ ] scrolling screenshot
@@ -216,7 +191,6 @@ Did you add an account?
 - [ ] BrowserComponent
     - [ ] persist component states, or move to state variables to manage visual bloating, pending:
         - [ ] TabsTray
-        - [ ] Homepage
         - [ ] ToolbarMenu
         - [ ] DownloadComponent
 

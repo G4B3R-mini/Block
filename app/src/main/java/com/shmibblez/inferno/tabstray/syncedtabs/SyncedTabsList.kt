@@ -26,6 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -40,8 +41,8 @@ import com.shmibblez.inferno.compose.button.PrimaryButton
 import com.shmibblez.inferno.compose.ext.dashedBorder
 import com.shmibblez.inferno.compose.list.ExpandableListHeader
 import com.shmibblez.inferno.compose.list.FaviconListItem
+import com.shmibblez.inferno.ext.infernoTheme
 import com.shmibblez.inferno.tabstray.TabsTrayTestTag
-import com.shmibblez.inferno.theme.FirefoxTheme
 import mozilla.components.browser.storage.sync.Tab as SyncTab
 
 private const val EXPANDED_BY_DEFAULT = true
@@ -106,8 +107,13 @@ fun SyncedTabsList(
                                         onClick = { onTabClick(syncedTab.tab) },
                                         iconDescription = stringResource(R.string.close_tab),
                                         iconPainter = painterResource(R.drawable.ic_close_24),
-                                        onIconClick = { onTabCloseClick(syncedTab.action.deviceId, syncedTab.tab) },
+                                        onIconClick = {
+                                            onTabCloseClick(
+                                                syncedTab.action.deviceId, syncedTab.tab
+                                            )
+                                        },
                                     )
+
                                     is SyncedTabsListItem.Tab.Action.None -> FaviconListItem(
                                         label = syncedTab.displayTitle,
                                         url = syncedTab.displayURL,
@@ -130,6 +136,7 @@ fun SyncedTabsList(
                         )
                     }
                 }
+
                 else -> {
                     // no-op
                 }
@@ -160,7 +167,7 @@ fun SyncedTabsSectionHeader(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(FirefoxTheme.colors.layer1),
+            .background(LocalContext.current.infernoTheme().value.primaryBackgroundColor),
     ) {
         ExpandableListHeader(
             headerText = headerText,
@@ -190,7 +197,7 @@ fun SyncedTabsErrorItem(
             .padding(all = 8.dp)
             .height(IntrinsicSize.Min)
             .dashedBorder(
-                color = FirefoxTheme.colors.borderPrimary,
+                color = LocalContext.current.infernoTheme().value.secondaryTextColor,
                 cornerRadius = 8.dp,
                 dashHeight = 2.dp,
                 dashWidth = 4.dp,
@@ -203,7 +210,7 @@ fun SyncedTabsErrorItem(
         ) {
             Text(
                 text = errorText,
-                color = FirefoxTheme.colors.textPrimary,
+                color = LocalContext.current.infernoTheme().value.errorColor,
                 modifier = Modifier.fillMaxWidth(),
                 fontSize = 14.sp,
             )
@@ -228,7 +235,7 @@ fun SyncedTabsErrorItem(
 fun SyncedTabsNoTabsItem() {
     Text(
         text = stringResource(R.string.synced_tabs_no_open_tabs),
-        color = FirefoxTheme.colors.textSecondary,
+        color = LocalContext.current.infernoTheme().value.secondaryTextColor,
         modifier = Modifier
             .padding(horizontal = 16.dp, vertical = 8.dp)
             .fillMaxWidth(),
@@ -240,67 +247,61 @@ fun SyncedTabsNoTabsItem() {
 @Composable
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 private fun SyncedTabsListItemsPreview() {
-    FirefoxTheme {
-        Column(Modifier.background(FirefoxTheme.colors.layer1)) {
-            SyncedTabsSectionHeader(headerText = "Google Pixel Pro Max +Ultra 5000")
+    Column(Modifier.background(LocalContext.current.infernoTheme().value.primaryBackgroundColor)) {
+        SyncedTabsSectionHeader(headerText = "Google Pixel Pro Max +Ultra 5000")
 
-            Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
-            SyncedTabsSectionHeader(
-                headerText = "Collapsible Google Pixel Pro Max +Ultra 5000",
-                expanded = true,
-            ) { println("Clicked section header") }
+        SyncedTabsSectionHeader(
+            headerText = "Collapsible Google Pixel Pro Max +Ultra 5000",
+            expanded = true,
+        ) { println("Clicked section header") }
 
-            Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
-            FaviconListItem(
-                label = "Mozilla",
-                url = "www.mozilla.org",
-                description = "www.mozilla.org",
-                onClick = {},
-            )
+        FaviconListItem(
+            label = "Mozilla",
+            url = "www.mozilla.org",
+            description = "www.mozilla.org",
+            onClick = {},
+        )
 
-            Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
-            SyncedTabsErrorItem(errorText = stringResource(R.string.synced_tabs_reauth))
+        SyncedTabsErrorItem(errorText = stringResource(R.string.synced_tabs_reauth))
 
-            Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
-            SyncedTabsNoTabsItem()
+        SyncedTabsNoTabsItem()
 
-            Spacer(modifier = Modifier.height(16.dp))
-        }
+        Spacer(modifier = Modifier.height(16.dp))
     }
 }
 
 @Composable
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 private fun SyncedTabsErrorPreview() {
-    FirefoxTheme {
-        Box(Modifier.background(FirefoxTheme.colors.layer1)) {
-            SyncedTabsErrorItem(
-                errorText = stringResource(R.string.synced_tabs_no_tabs),
-                errorButton = SyncedTabsListItem.ErrorButton(
-                    buttonText = stringResource(R.string.synced_tabs_sign_in_button),
-                ) {
-                    println("SyncedTabsErrorButton click")
-                },
-            )
-        }
+    Box(Modifier.background(LocalContext.current.infernoTheme().value.primaryBackgroundColor)) {
+        SyncedTabsErrorItem(
+            errorText = stringResource(R.string.synced_tabs_no_tabs),
+            errorButton = SyncedTabsListItem.ErrorButton(
+                buttonText = stringResource(R.string.synced_tabs_sign_in_button),
+            ) {
+                println("SyncedTabsErrorButton click")
+            },
+        )
     }
 }
 
 @Composable
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 private fun SyncedTabsListPreview() {
-    FirefoxTheme {
-        Box(Modifier.background(FirefoxTheme.colors.layer1)) {
-            SyncedTabsList(
-                syncedTabs = getFakeSyncedTabList(),
-                onTabClick = { println("Tab clicked") },
-                onTabCloseClick = { _, _ -> println("Tab closed") },
-            )
-        }
+    Box(Modifier.background(LocalContext.current.infernoTheme().value.primaryBackgroundColor)) {
+        SyncedTabsList(
+            syncedTabs = getFakeSyncedTabList(),
+            onTabClick = { println("Tab clicked") },
+            onTabCloseClick = { _, _ -> println("Tab closed") },
+        )
     }
 }
 
@@ -320,8 +321,14 @@ internal fun getFakeSyncedTabList(): List<SyncedTabsListItem> = listOf(
     SyncedTabsListItem.DeviceSection(
         displayName = "Device 2",
         tabs = listOf(
-            generateFakeTab("Firefox", "www.getfirefox.org", SyncedTabsListItem.Tab.Action.Close("device2222")),
-            generateFakeTab("Thunderbird", "www.getthunderbird.org", SyncedTabsListItem.Tab.Action.Close("device2222")),
+            generateFakeTab(
+                "Firefox", "www.getfirefox.org", SyncedTabsListItem.Tab.Action.Close("device2222")
+            ),
+            generateFakeTab(
+                "Thunderbird",
+                "www.getthunderbird.org",
+                SyncedTabsListItem.Tab.Action.Close("device2222")
+            ),
         ),
     ),
     SyncedTabsListItem.DeviceSection("Device 3", emptyList()),
@@ -335,15 +342,14 @@ private fun generateFakeTab(
     tabName: String,
     tabUrl: String,
     action: SyncedTabsListItem.Tab.Action = SyncedTabsListItem.Tab.Action.None,
-): SyncedTabsListItem.Tab =
-    SyncedTabsListItem.Tab(
-        tabName.ifEmpty { tabUrl },
-        tabUrl,
-        action,
-        SyncTab(
-            history = listOf(TabEntry(tabName, tabUrl, null)),
-            active = 0,
-            lastUsed = 0L,
-            inactive = false,
-        ),
-    )
+): SyncedTabsListItem.Tab = SyncedTabsListItem.Tab(
+    tabName.ifEmpty { tabUrl },
+    tabUrl,
+    action,
+    SyncTab(
+        history = listOf(TabEntry(tabName, tabUrl, null)),
+        active = 0,
+        lastUsed = 0L,
+        inactive = false,
+    ),
+)

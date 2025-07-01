@@ -19,6 +19,8 @@ import com.shmibblez.inferno.settings.SupportUtils
 
 /**
  * Component group which encapsulates foreground-friendly services.
+ *
+ * When user requests sign in, new custom tab auth intent is launched
  */
 class Services(
     private val context: Context,

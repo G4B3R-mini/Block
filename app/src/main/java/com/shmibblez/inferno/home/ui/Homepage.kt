@@ -96,7 +96,7 @@ internal fun Homepage(
             }
 
             false -> {
-                val cardBackgroundColor = Color.Black // wallpaperState.cardBackgroundColor,
+                val cardBackgroundColor = LocalContext.current.infernoTheme().value.primaryBackgroundColor // wallpaperState.cardBackgroundColor,
                 val syncedTab = state.appState.recentSyncedTabState.let {
                     when (it) {
                         RecentSyncedTabState.None,
@@ -131,7 +131,7 @@ internal fun Homepage(
                     )
 
                     if (state.showRecentSyncedTab) {
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(ITEM_PADDING))
 
                         RecentSyncedTab(
                             tab = syncedTab,
@@ -175,8 +175,7 @@ internal fun Homepage(
                     CustomizeHomeButton(interactor = interactor)
                 }
 
-                // This is a temporary value until I can fix layout issues
-                Spacer(Modifier.height(100.dp))
+                Spacer(Modifier.height(16.dp))
             }
         }
     }

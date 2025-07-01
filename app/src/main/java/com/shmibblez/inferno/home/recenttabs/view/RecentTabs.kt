@@ -133,7 +133,7 @@ private fun RecentTabItem(
         Row(
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             RecentTabImage(
                 tab = tab,
@@ -233,36 +233,43 @@ fun RecentTabImage(
         else -> null
     }
 
-    when {
-        icon != null -> {
-            Image(
-                bitmap = icon, contentDescription = "", modifier = Modifier.size(THUMBNAIL_SIZE.dp)
-            )
-        }
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.Center,
+    ) {
+        when {
+            icon != null -> {
+                Image(
+                    bitmap = icon,
+                    contentDescription = "",
+                    modifier = Modifier.size(THUMBNAIL_SIZE.dp)
+                )
+            }
 
-        !previewImageUrl.isNullOrEmpty() -> {
-            Image(
-                url = previewImageUrl,
+            !previewImageUrl.isNullOrEmpty() -> {
+                Image(
+                    url = previewImageUrl,
+                    modifier = modifier,
+                    targetSize = THUMBNAIL_SIZE.dp,
+                    contentScale = ContentScale.Crop,
+                    fallback = {
+                        TabThumbnail(
+                            tab = tab.state,
+                            size = LocalDensity.current.run { THUMBNAIL_SIZE.dp.toPx().toInt() },
+                            modifier = modifier,
+                            contentScale = contentScale,
+                        )
+                    },
+                )
+            }
+
+            else -> TabThumbnail(
+                tab = tab.state,
+                size = LocalDensity.current.run { THUMBNAIL_SIZE.dp.toPx().toInt() },
                 modifier = modifier,
-                targetSize = THUMBNAIL_SIZE.dp,
-                contentScale = ContentScale.Crop,
-                fallback = {
-                    TabThumbnail(
-                        tab = tab.state,
-                        size = LocalDensity.current.run { THUMBNAIL_SIZE.dp.toPx().toInt() },
-                        modifier = modifier,
-                        contentScale = contentScale,
-                    )
-                },
+                contentScale = contentScale,
             )
         }
-
-        else -> TabThumbnail(
-            tab = tab.state,
-            size = LocalDensity.current.run { THUMBNAIL_SIZE.dp.toPx().toInt() },
-            modifier = modifier,
-            contentScale = contentScale,
-        )
     }
 }
 

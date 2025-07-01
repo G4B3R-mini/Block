@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -29,6 +30,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -40,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.compose.Image
 import com.shmibblez.inferno.compose.ThumbnailCard
+import com.shmibblez.inferno.compose.base.InfernoButton
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.compose.base.InfernoTextStyle
 import com.shmibblez.inferno.compose.button.SecondaryButton
@@ -80,18 +83,27 @@ fun RecentSyncedTab(
 
     Card(
         modifier = Modifier
-            .background(LocalContext.current.infernoTheme().value.primaryBackgroundColor)
             .fillMaxWidth()
             .combinedClickable(
                 onClick = { tab?.let { onRecentSyncedTabClick(tab) } },
                 onLongClick = { isDropdownExpanded = true },
-            ),
-        shape = RoundedCornerShape(8.dp),
+            )
+            .background(LocalContext.current.infernoTheme().value.primaryBackgroundColor),
+        shape = RectangleShape,
         colors = CardDefaults.cardColors(containerColor = LocalContext.current.infernoTheme().value.secondaryBackgroundColor),
         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
     ) {
-        Column {
-            Row(modifier = Modifier.height(IntrinsicSize.Min)) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalAlignment = Alignment.Start,
+        ) {
+            Row(
+                modifier = Modifier.height(IntrinsicSize.Min),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
                 if (tab == null) {
                     RecentTabImagePlaceholder()
                 } else {
@@ -120,10 +132,8 @@ fun RecentSyncedTab(
                     }
                 }
 
-                Spacer(modifier = Modifier.width(16.dp))
-
                 Column(
-                    verticalArrangement = Arrangement.SpaceBetween,
+                    verticalArrangement = Arrangement.SpaceEvenly,
                     modifier = Modifier.fillMaxHeight(),
                 ) {
                     if (tab == null) {
@@ -138,7 +148,10 @@ fun RecentSyncedTab(
                         )
                     }
 
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    ) {
                         if (tab == null) {
                             Box(
                                 modifier = Modifier
@@ -155,8 +168,6 @@ fun RecentSyncedTab(
                                 modifier = Modifier.size(18.dp),
                             )
                         }
-
-                        Spacer(modifier = Modifier.width(8.dp))
 
                         if (tab == null) {
                             TextLinePlaceHolder()
@@ -175,7 +186,7 @@ fun RecentSyncedTab(
 //            Spacer(modifier = Modifier.height(32.dp))
 
             if (tab != null)
-                SecondaryButton(
+                InfernoButton(
                     text = stringResource(R.string.recent_tabs_see_all_synced_tabs_button_text),
                     onClick = onSeeAllSyncedTabsButtonClick,
                 )

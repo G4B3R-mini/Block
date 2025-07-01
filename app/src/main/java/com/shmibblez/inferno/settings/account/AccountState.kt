@@ -3,6 +3,8 @@ package com.shmibblez.inferno.settings.account
 import android.content.Context
 import android.graphics.BitmapFactory
 import android.util.Log
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.MutableState
@@ -11,9 +13,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory
+import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.shmibblez.inferno.R
@@ -47,16 +53,16 @@ class AccountState(
     private val taskManager = ConsecutiveUniqueJobHandler<JobType>(scope)
 
     sealed interface AccountAuthState {
-        data object SignedOut: AccountAuthState
+        data object SignedOut : AccountAuthState
         data object SignedIn : AccountAuthState
-        data object RequiresReauth: AccountAuthState
+        data object RequiresReauth : AccountAuthState
     }
 
     var authState: AccountAuthState? by mutableStateOf(null)
         private set
 
     var isSyncing by mutableStateOf(false)
-    private set
+        private set
 
     fun isSignedIn() = authState is AccountAuthState.SignedIn
     fun requiresReauth() = authState is AccountAuthState.RequiresReauth
@@ -123,12 +129,10 @@ class AccountState(
     }
 
     fun syncNow() {
-        taskManager.processTask(
-            type = JobType.SYNC,
-            task = {accountManager.syncNow(SyncReason.User)},
+        taskManager.processTask(type = JobType.SYNC,
+            task = { accountManager.syncNow(SyncReason.User) },
             onBegin = { isSyncing = true },
-            onComplete = { isSyncing = false }
-        )
+            onComplete = { isSyncing = false })
     }
 
     fun updateAccountState() {
@@ -147,8 +151,10 @@ class AccountState(
     /**
      * Returns generic avatar for accounts.
      */
-    internal fun genericAvatar(context: Context) =
-        BitmapFactory.decodeResource(context.resources, R.drawable.ic_account).asImageBitmap()
+    internal fun genericAvatar(context: Context) = ResourcesCompat.getDrawable(
+        context.resources, R.drawable.ic_account, null
+    )!!.toBitmap().asImageBitmap()
+//        BitmapFactory.decodeResource(context.resources, R.drawable.ic_account).asImageBitmap()
 
 
     /**

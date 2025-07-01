@@ -4,10 +4,8 @@
 
 package com.shmibblez.inferno.home.bookmarks.view
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,14 +21,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -41,11 +37,6 @@ import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import mozilla.components.browser.icons.compose.Loader
-import mozilla.components.browser.icons.compose.Placeholder
-import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.annotation.LightDarkPreview
-import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.utils.inComposePreview
-import mozilla.components.ui.colors.PhotonColors
 import com.shmibblez.inferno.components.components
 import com.shmibblez.inferno.compose.ContextualMenu
 import com.shmibblez.inferno.compose.Favicon
@@ -55,7 +46,10 @@ import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.compose.base.InfernoTextStyle
 import com.shmibblez.inferno.ext.infernoTheme
 import com.shmibblez.inferno.home.bookmarks.Bookmark
-import com.shmibblez.inferno.theme.FirefoxTheme
+import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.annotation.LightDarkPreview
+import com.shmibblez.inferno.mozillaAndroidComponents.compose.base.utils.inComposePreview
+import mozilla.components.browser.icons.compose.Loader
+import mozilla.components.browser.icons.compose.Placeholder
 
 private val cardShape = RoundedCornerShape(8.dp)
 
@@ -85,7 +79,7 @@ fun Bookmarks(
             testTagsAsResourceId = true
             testTag = "bookmarks"
         },
-        contentPadding = PaddingValues(horizontal = 16.dp),
+//        contentPadding = PaddingValues(horizontal = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         items(bookmarks) { bookmark ->

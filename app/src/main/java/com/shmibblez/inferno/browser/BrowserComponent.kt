@@ -97,7 +97,6 @@ import com.shmibblez.inferno.findInPageBar.BrowserFindInPageBar
 import com.shmibblez.inferno.home.HomeFragment
 import com.shmibblez.inferno.home.InfernoHomeComponent
 import com.shmibblez.inferno.home.rememberInfernoHomeComponentState
-import com.shmibblez.inferno.loading.InfernoLoadingComponent
 import com.shmibblez.inferno.messaging.FenixMessageSurfaceId
 import com.shmibblez.inferno.perf.MarkersFragmentLifecycleCallbacks
 import com.shmibblez.inferno.settings.biometric.BiometricPromptFeature
@@ -111,6 +110,7 @@ import com.shmibblez.inferno.tabstray.ext.isActiveDownload
 import com.shmibblez.inferno.tabstray.ext.isNormalTab
 import com.shmibblez.inferno.theme.ThemeManager
 import com.shmibblez.inferno.toolbar.InfernoExternalToolbar
+import com.shmibblez.inferno.toolbar.InfernoLoadingScreen
 import com.shmibblez.inferno.toolbar.InfernoToolbar
 import com.shmibblez.inferno.toolbar.ToolbarMenuBottomSheet
 import com.shmibblez.inferno.wifi.SitePermissionsWifiIntegration
@@ -1781,7 +1781,12 @@ fun BrowserComponent(
                 )
 
                 if (state.isPendingTab) {
-                    InfernoLoadingComponent()
+                    InfernoLoadingScreen(
+                        modifier = Modifier.fillMaxSize(),
+                        loadingSquareSize = 128.dp,
+                        fadeIn = false,
+                        alpha = 1F,
+                    )
                 } else {
                     when (state.pageType) {
                         BrowserComponentPageType.HOME,
@@ -1968,9 +1973,10 @@ fun MozEngineView(
     setSwipeView: (VerticalSwipeRefreshLayout) -> Unit,
     setEngineView: (GeckoEngineView) -> Unit,
 ) {
-    val infernoTheme = LocalContext.current.infernoTheme().value
-    val trackColor = infernoTheme.primaryActionColor.toArgb()
-    val discColor = infernoTheme.secondaryBackgroundColor.toArgb()
+//    val infernoTheme = LocalContext.current.infernoTheme().value
+    val trackColor = LocalContext.current.infernoTheme().value.primaryActionColor.toArgb()
+    val discColor = LocalContext.current.infernoTheme().value.secondaryBackgroundColor.toArgb()
+    val bgColor = LocalContext.current.infernoTheme().value.primaryBackgroundColor.toArgb()
 
     AndroidView(
         modifier = modifier,
@@ -1995,7 +2001,7 @@ fun MozEngineView(
             gv.layoutParams.height = LayoutParams.MATCH_PARENT
             gv.setBackgroundColor(android.graphics.Color.TRANSPARENT)
             gv.visibility = View.VISIBLE
-            gv.setBackgroundColor(android.graphics.Color.DKGRAY)
+            gv.setBackgroundColor(bgColor)
             gv.isEnabled = true
             gv.isActivated = true
             gv.isVisible = true
@@ -2012,6 +2018,7 @@ fun MozEngineView(
                     break
                 }
             }
+            gv!!.setBackgroundColor(bgColor)
 //        // setup views
 //        with(sv.layoutParams) {
 //            this.width = LayoutParams.MATCH_PARENT
@@ -2021,7 +2028,7 @@ fun MozEngineView(
 //            this.width = LayoutParams.MATCH_PARENT
 //            this.height = LayoutParams.MATCH_PARENT
 //        }
-            gv!!.isEnabled = true
+            gv.isEnabled = true
             gv.isActivated = true
         },
     )

@@ -3,6 +3,7 @@ package com.shmibblez.inferno.toolbar
 import android.graphics.drawable.AnimatedVectorDrawable
 import android.view.ViewGroup.LayoutParams
 import android.widget.ImageView
+import androidx.annotation.FloatRange
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
@@ -21,7 +22,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -39,7 +39,7 @@ import com.shmibblez.inferno.ext.infernoTheme
 internal fun PlaceholderBrowserToolbar() {
     Box(
         modifier = Modifier
-            .background(Color.Black)
+            .background(LocalContext.current.infernoTheme().value.secondaryBackgroundColor)
             .fillMaxWidth()
             .height(UiConst.TOOLBAR_HEIGHT + UiConst.TAB_BAR_HEIGHT),
     ) {
@@ -75,8 +75,13 @@ fun InfernoLoadingSquare(modifier: Modifier = Modifier, size: Dp) {
  * loading screen with centered [InfernoLoadingSquare], fades in when created
  */
 @Composable
-fun InfernoLoadingScreen(modifier: Modifier = Modifier, loadingSquareSize: Dp = 72.dp) {
-    var visible by remember { mutableStateOf(false) }
+fun InfernoLoadingScreen(
+    modifier: Modifier = Modifier,
+    loadingSquareSize: Dp = 72.dp,
+    fadeIn: Boolean = true,
+    @FloatRange(0.0, 1.0) alpha: Float = UiConst.LOADING_ALPHA,
+) {
+    var visible by remember { mutableStateOf(!fadeIn) }
 
     // fade in when created
     LaunchedEffect(null) {
@@ -89,7 +94,7 @@ fun InfernoLoadingScreen(modifier: Modifier = Modifier, loadingSquareSize: Dp = 
                 .fillMaxSize()
                 .background(
                     LocalContext.current.infernoTheme().value.primaryBackgroundColor.copy(
-                        alpha = UiConst.LOADING_ALPHA
+                        alpha = alpha,
                     )
                 ),
             contentAlignment = Alignment.Center,

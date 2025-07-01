@@ -11,8 +11,10 @@ import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import com.shmibblez.inferno.HomeActivity
+import com.shmibblez.inferno.browser.nav.InitialBrowserTask
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.settings
+import mozilla.components.feature.intent.ext.getSessionId
 
 /**
  * Processes incoming intents and sends them to the corresponding activity.
@@ -28,16 +30,43 @@ class AuthIntentReceiverActivity : Activity() {
             // assumes it is not. If it's null, then we make a new one and open
             // the HomeActivity.
             val intent = intent?.let { Intent(intent) } ?: Intent()
+            val initialBrowserTask: InitialBrowserTask
 
             if (settings().lastKnownMode.isPrivate) {
-                components.intentProcessors.privateCustomTabIntentProcessor.process(intent)
+                val matches = components.intentProcessors.privateCustomTabIntentProcessor.process(intent)
+                initialBrowserTask = when (matches) {
+                    true -> {
+                        InitialBrowserTask.ExternalApp(
+                            tabId = intent.getSessionId()!!,
+                            private = true,
+                        )
+                    }
+
+                    false -> {
+                        InitialBrowserTask.OpenToBrowser(private = true)
+                    }
+                }
             } else {
-                components.intentProcessors.customTabIntentProcessor.process(intent)
+                val matches = components.intentProcessors.customTabIntentProcessor.process(intent)
+                initialBrowserTask = when (matches) {
+                    true -> {
+                        InitialBrowserTask.ExternalApp(
+                            tabId = intent.getSessionId()!!,
+                            private = false,
+                        )
+                    }
+
+                    false -> {
+                        InitialBrowserTask.OpenToBrowser(private = false)
+                    }
+                }
             }
 
-            // todo: AuthCustomTabActivity
+            // todo: AuthCustomTabActivity, closes when auth complete, extend HomeActivity
+            intent.setClassName(applicationContext, HomeActivity::class.java.name)
 //            intent.setClassName(applicationContext, AuthCustomTabActivity::class.java.name)
             intent.putExtra(HomeActivity.OPEN_TO_BROWSER, true)
+            intent.putExtra(HomeActivity.INITIAL_BROWSER_TASK, initialBrowserTask)
 
             startActivity(intent)
 

@@ -59,8 +59,6 @@ fun ExpandableListHeader(
             InfernoText(
                 text = headerText,
                 infernoStyle = InfernoTextStyle.Title,
-//                color = FirefoxTheme.colors.textPrimary,
-//                style = headerTextStyle,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f),
@@ -71,7 +69,7 @@ fun ExpandableListHeader(
 
                 InfernoIcon(
                     painter = painterResource(
-                        if (expanded) R.drawable.ic_chevron_up else R.drawable.ic_chevron_down_24,
+                        if (expanded) R.drawable.ic_chevron_up_24 else R.drawable.ic_chevron_down_24,
                     ),
                     contentDescription = if (expanded) {
                         collapseActionContentDescription
