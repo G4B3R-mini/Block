@@ -8,11 +8,14 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ButtonElevation
+import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import com.shmibblez.inferno.ext.infernoTheme
 
 /**
@@ -44,32 +47,35 @@ fun InfernoButton(
     contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
     interactionSource: MutableInteractionSource? = null,
 ) {
-    Button(
-        onClick = onClick,
-        modifier = modifier, // .clip(shape),
-        enabled = enabled,
-        shape = shape,
-        colors = colors,
-        elevation = elevation,
-        border = border,
-        contentPadding = contentPadding,
-        interactionSource = interactionSource,
-    ) {
-        leadingIcon?.invoke()
-        InfernoText(
-            text = text,
-            maxLines = 1,
-            modifier = Modifier.weight(1F),
-            textAlign = TextAlign.Center,
-            fontColor = LocalContext.current.infernoTheme().value.let {
-                when (enabled) {
-                    true -> colors.contentColor
-                    false -> colors.disabledContentColor
-                }
-            },
-        )
+    CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides Dp.Unspecified) {
+        Button(
+            onClick = onClick,
+            modifier = modifier, // .clip(shape),
+            enabled = enabled,
+            shape = shape,
+            colors = colors,
+            elevation = elevation,
+            border = border,
+            contentPadding = contentPadding,
+            interactionSource = interactionSource,
+        ) {
+            leadingIcon?.invoke()
+            InfernoText(
+                text = text,
+                maxLines = 1,
+                modifier = Modifier.weight(1F),
+                textAlign = TextAlign.Center,
+                fontColor = LocalContext.current.infernoTheme().value.let {
+                    when (enabled) {
+                        true -> colors.contentColor
+                        false -> colors.disabledContentColor
+                    }
+                },
+            )
+        }
     }
 }
+
 /**
  * @param sensitive whether action is sensitive
  */
@@ -98,16 +104,18 @@ fun InfernoButton(
     interactionSource: MutableInteractionSource? = null,
     content: @Composable RowScope.() -> Unit,
 ) {
-    Button(
-        onClick = onClick,
-        modifier = modifier, // .clip(shape),
-        enabled = enabled,
-        shape = shape,
-        colors = colors,
-        elevation = elevation,
-        border = border,
-        contentPadding = contentPadding,
-        interactionSource = interactionSource,
-        content = content,
-    )
+    CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides Dp.Unspecified) {
+        Button(
+            onClick = onClick,
+            modifier = modifier, // .clip(shape),
+            enabled = enabled,
+            shape = shape,
+            colors = colors,
+            elevation = elevation,
+            border = border,
+            contentPadding = contentPadding,
+            interactionSource = interactionSource,
+            content = content,
+        )
+    }
 }

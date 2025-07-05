@@ -30,45 +30,50 @@ class AuthIntentReceiverActivity : Activity() {
             // assumes it is not. If it's null, then we make a new one and open
             // the HomeActivity.
             val intent = intent?.let { Intent(intent) } ?: Intent()
-            val initialBrowserTask: InitialBrowserTask
+            val initialBrowserTask: InitialBrowserTask?
 
             if (settings().lastKnownMode.isPrivate) {
-                val matches = components.intentProcessors.privateCustomTabIntentProcessor.process(intent)
+                // if has session id, matches is true, else false
+                val matches =
+                    components.intentProcessors.privateCustomTabIntentProcessor.process(intent)
                 initialBrowserTask = when (matches) {
                     true -> {
-                        InitialBrowserTask.ExternalApp(
+                        InitialBrowserTask.AuthCustomTab(
                             tabId = intent.getSessionId()!!,
                             private = true,
                         )
                     }
 
                     false -> {
-                        InitialBrowserTask.OpenToBrowser(private = true)
+                        null
+//                        InitialBrowserTask.OpenToBrowser(private = true)
                     }
                 }
             } else {
+                // if has session id, matches is true, else false
                 val matches = components.intentProcessors.customTabIntentProcessor.process(intent)
                 initialBrowserTask = when (matches) {
                     true -> {
-                        InitialBrowserTask.ExternalApp(
+                        InitialBrowserTask.AuthCustomTab(
                             tabId = intent.getSessionId()!!,
                             private = false,
                         )
                     }
 
                     false -> {
-                        InitialBrowserTask.OpenToBrowser(private = false)
+                        null
+//                        InitialBrowserTask.OpenToBrowser(private = false)
                     }
                 }
             }
 
-            // todo: AuthCustomTabActivity, closes when auth complete, extend HomeActivity
-            intent.setClassName(applicationContext, HomeActivity::class.java.name)
-//            intent.setClassName(applicationContext, AuthCustomTabActivity::class.java.name)
-            intent.putExtra(HomeActivity.OPEN_TO_BROWSER, true)
-            intent.putExtra(HomeActivity.INITIAL_BROWSER_TASK, initialBrowserTask)
+            if (initialBrowserTask != null) {
+                intent.setClassName(applicationContext, AuthCustomTabActivity::class.java.name)
+                intent.putExtra(HomeActivity.OPEN_TO_BROWSER, true)
+                intent.putExtra(HomeActivity.INITIAL_BROWSER_TASK, initialBrowserTask)
 
-            startActivity(intent)
+                startActivity(intent)
+            }
 
             finish()
         }

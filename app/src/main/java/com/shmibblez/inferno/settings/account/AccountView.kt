@@ -38,16 +38,10 @@ import com.shmibblez.inferno.ext.infernoTheme
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
-//import com.shmibblez.inferno.proto.InfernoSettings
-//import com.shmibblez.inferno.proto.infernoSettingsDataStore
-
 @Composable
 fun AccountView(
     state: AccountState,
     onNavToAccountSettings: () -> Unit,
-//    onNavigateSignedIn: () -> Unit,
-//    onNavigateRequiresReauth: () -> Unit,
-//    onNavigateSignedOut: () -> Unit,
 ) {
     when (state.authState) {
         AccountState.AccountAuthState.SignedIn -> {
@@ -93,6 +87,7 @@ private fun SignedInComponent(
 
     Row(
         modifier = Modifier
+            .fillMaxWidth()
             .clickable(onClick = onClick)
             .padding(horizontal = 16.dp)
             .background(
@@ -119,13 +114,14 @@ private fun SignedInComponent(
         ) {
             // display name
             InfernoText(
-                text = state.profile?.displayName ?: "",
+                text = state.profile?.displayName ?: "Loading...", // todo: string res
                 modifier = Modifier.padding(bottom = 8.dp),
                 fontWeight = FontWeight.Bold,
             )
             // email
             InfernoText(
-                text = state.profile?.email ?: "",
+                text = state.profile?.email ?: "Loading...", // todo: string res
+                infernoStyle = InfernoTextStyle.SmallSecondary,
             )
         }
     }
@@ -135,10 +131,11 @@ private fun SignedInComponent(
 private fun ReauthComponent(state: AccountState, onClick: () -> Unit) {
     Row(
         modifier = Modifier
+            .fillMaxWidth()
             .clickable(onClick = onClick)
             .padding(horizontal = 16.dp)
             .background(
-                color = LocalContext.current.infernoTheme().value.errorColor,
+                color = LocalContext.current.infernoTheme().value.secondaryBackgroundColor,
                 shape = MaterialTheme.shapes.medium,
             )
             .padding(16.dp),
@@ -155,7 +152,7 @@ private fun ReauthComponent(state: AccountState, onClick: () -> Unit) {
         // messages
         Column(
             horizontalAlignment = Alignment.Start,
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             // error message
             InfernoText(
@@ -166,6 +163,7 @@ private fun ReauthComponent(state: AccountState, onClick: () -> Unit) {
             state.profile?.email?.let {
                 InfernoText(
                     text = it,
+                    infernoStyle = InfernoTextStyle.Small,
                     fontColor = LocalContext.current.infernoTheme().value.errorColor,
                     maxLines = 4,
                 )
@@ -180,8 +178,8 @@ private fun SignedOutComponent(onClick: () -> Unit) {
 
     Row(
         modifier = Modifier
-            .clickable(onClick = onClick)
             .fillMaxWidth()
+            .clickable(onClick = onClick)
             .padding(horizontal = 16.dp)
             .background(
                 color = context.infernoTheme().value.secondaryBackgroundColor,
@@ -192,9 +190,6 @@ private fun SignedOutComponent(onClick: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         // account icon
-//        InfernoIcon(
-//            painter = painterResource().ge
-//        )
         Image(
             bitmap = ResourcesCompat.getDrawable(
                 context.resources, R.drawable.ic_fx_accounts_avatar, null
@@ -203,9 +198,8 @@ private fun SignedOutComponent(onClick: () -> Unit) {
             modifier = Modifier.size(72.dp),
         )
         Column(
-//            modifier = Modifier.height(72.dp),
             horizontalAlignment = Alignment.Start,
-            verticalArrangement = Arrangement.SpaceAround,
+            verticalArrangement = Arrangement.SpaceEvenly,
         ) {
             // title
             InfernoText(
@@ -216,8 +210,7 @@ private fun SignedOutComponent(onClick: () -> Unit) {
             // summary
             InfernoText(
                 text = stringResource(R.string.preferences_sign_in_description_2),
-                infernoStyle = InfernoTextStyle.Small,
-//                maxLines = 3,
+                infernoStyle = InfernoTextStyle.SmallSecondary,
             )
         }
     }

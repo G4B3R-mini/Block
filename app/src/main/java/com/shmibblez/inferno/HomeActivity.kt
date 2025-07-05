@@ -334,9 +334,11 @@ open class HomeActivity : LocaleAwareAppCompatActivity() {
         }
 
         val customTabSessionId = (initialTask as? InitialBrowserTask.ExternalApp)?.tabId
+        val isAuth = initialTask is InitialBrowserTask.AuthCustomTab
 
         // initialize and start
         browserComponentState = BrowserComponentState(
+            isAuth = isAuth,
             customTabSessionId = customTabSessionId,
             activity = this,
             coroutineScope = this.lifecycleScope,

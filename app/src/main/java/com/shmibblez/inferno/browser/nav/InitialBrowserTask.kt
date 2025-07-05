@@ -5,8 +5,11 @@ package com.shmibblez.inferno.browser.nav
  */
 sealed class InitialBrowserTask : java.io.Serializable {
 
-    data class ExternalApp(val tabId: String, val private: Boolean = false) : InitialBrowserTask(),
-        java.io.Serializable
+    class AuthCustomTab(tabId: String, private: Boolean = false) :
+        ExternalApp(tabId = tabId, private = private)
+
+    open class ExternalApp(val tabId: String, val private: Boolean = false) :
+        InitialBrowserTask(), java.io.Serializable
 
     data class OpenToBrowser(val private: Boolean = false) : InitialBrowserTask(),
         java.io.Serializable
@@ -35,6 +38,7 @@ sealed class InitialBrowserTask : java.io.Serializable {
 
     fun InitialBrowserTask?.asStartDestination(): BrowserRoute {
         return when (this) {
+            is AuthCustomTab -> BrowserRoute.InfernoBrowser
             AppIcon -> BrowserRoute.InfernoBrowser
             is ExternalApp -> BrowserRoute.InfernoBrowser // BrowserRoute.ExternalBrowser
             OpenPasswordManager -> BrowserRoute.InfernoBrowser

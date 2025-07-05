@@ -227,6 +227,7 @@ private class CustomTabManager(
 
 @Composable
 fun rememberBrowserComponentState(
+    isAuth: Boolean,
     customTabSessionId: String?,
     activity: AppCompatActivity,
     coroutineScope: CoroutineScope = rememberCoroutineScope(),
@@ -242,6 +243,7 @@ fun rememberBrowserComponentState(
         },
         restore = {
             BrowserComponentState(
+                isAuth = isAuth,
                 customTabSessionId = customTabSessionId,
                 activity = activity,
                 coroutineScope = coroutineScope,
@@ -254,6 +256,7 @@ fun rememberBrowserComponentState(
     ), key = null, init = {
         mutableStateOf(
             BrowserComponentState(
+                isAuth = isAuth,
                 customTabSessionId = customTabSessionId,
                 activity = activity,
                 coroutineScope = coroutineScope,
@@ -291,6 +294,7 @@ fun rememberBrowserComponentState(
 private const val INIT_JOB_MILLIS = 3000L
 
 class BrowserComponentState(
+    val isAuth: Boolean = false,
     val customTabSessionId: String?,
     val activity: AppCompatActivity,
     val coroutineScope: CoroutineScope,
@@ -365,7 +369,8 @@ class BrowserComponentState(
                 // set and manage customTabManager
                 if (currentCustomTab != null && customTabManager == null) {
                     // if custom tab exists and manager not setup, setup
-                    customTabManager = CustomTabManager(customTabSessionState = currentCustomTab!!,
+                    customTabManager = CustomTabManager(
+                        customTabSessionState = currentCustomTab!!,
                         activity = activity,
                         icons = components.core.icons,
                         store = store,
@@ -374,7 +379,8 @@ class BrowserComponentState(
 //                        controlsBuilder = SiteControlsBuilder.CopyAndRefresh(components.useCases.sessionUseCases.reload),
                         notificationsDelegate = components.notificationsDelegate,
                         components = components,
-                        setShowExternalToolbar = { show -> showExternalToolbar = show })
+                        setShowExternalToolbar = { show -> showExternalToolbar = show },
+                    )
                     customTabManager!!.start()
                 } else if (currentCustomTab == null && customTabManager != null) {
                     // if custom tab nonexistent and manager exists, unexist manager and stop
@@ -391,7 +397,7 @@ class BrowserComponentState(
                     }
                 }
 
-                var logStr = StringBuilder().apply {
+                val logStr = StringBuilder().apply {
                     append("state changed:")
                     append("\n  - currentCustomTab:")
                     when (currentCustomTab) {

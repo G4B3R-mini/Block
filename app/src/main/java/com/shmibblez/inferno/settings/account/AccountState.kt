@@ -1,10 +1,7 @@
 package com.shmibblez.inferno.settings.account
 
 import android.content.Context
-import android.graphics.BitmapFactory
 import android.util.Log
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.MutableState
@@ -13,10 +10,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory
 import androidx.core.graphics.drawable.toBitmap
@@ -28,6 +23,7 @@ import com.shmibblez.inferno.ext.bitmapForUrl
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.history.ConsecutiveUniqueJobHandler
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import mozilla.components.concept.fetch.Client
 import mozilla.components.concept.sync.AccountObserver
 import mozilla.components.concept.sync.AuthFlowError
@@ -99,7 +95,7 @@ class AccountState(
         override fun onProfileUpdated(profile: Profile) {
             Log.d("AccountState", "AccountObserver, onProfileUpdated, profile: $profile")
 //            updateAccountState(profile)
-            updateAccountState()
+            updateAccountState(profile)
         }
 
         override fun onAuthenticationProblems() {
@@ -111,8 +107,10 @@ class AccountState(
     override fun start() {
         Log.d("AccountState", "AccountObserver, start()")
         // init state
-        profile = accountManager.accountProfile()
-        updateAccountState()
+        Log.d(
+            "AccountState",
+            "AccountObserver, start called, profile: $profile\naccount: ${accountManager.authenticatedAccount()}"
+        )
 
         // register listener
         context.components.backgroundServices.accountManager.register(
@@ -120,7 +118,9 @@ class AccountState(
             owner = lifecycleOwner,
             autoPause = true,
         )
-//        authState = AccountAuthState.SIGNED_OUT
+        scope.launch { accountManager.start() }
+
+        updateAccountState()
     }
 
     override fun stop() {
@@ -135,15 +135,16 @@ class AccountState(
             onComplete = { isSyncing = false })
     }
 
-    fun updateAccountState() {
-        val account = accountManager.authenticatedAccount()
-
+    fun updateAccountState(profile: Profile? = accountManager.accountProfile()) {
         updateFxAAllowDomesticChinaServerMenu()
 
+        this.profile = profile
+        val account = accountManager.authenticatedAccount()
         // Signed-in, no problems.
         authState = when {
-            account != null && !accountManager.accountNeedsReauth() -> AccountAuthState.SignedIn
-            account != null && accountManager.accountNeedsReauth() -> AccountAuthState.RequiresReauth
+            // only account check was done before, should be no problem
+            (account != null) && !accountManager.accountNeedsReauth() -> AccountAuthState.SignedIn
+            (account != null) && accountManager.accountNeedsReauth() -> AccountAuthState.RequiresReauth
             else -> AccountAuthState.SignedOut
         }
     }
@@ -152,8 +153,11 @@ class AccountState(
      * Returns generic avatar for accounts.
      */
     internal fun genericAvatar(context: Context) = ResourcesCompat.getDrawable(
-        context.resources, R.drawable.ic_account, null
+        context.resources, R.drawable.ic_fx_accounts_avatar, null
     )!!.toBitmap().asImageBitmap()
+//        ResourcesCompat.getDrawable(
+//            context.resources, R.drawable.ic_account, null
+//        )!!.toBitmap().asImageBitmap()
 //        BitmapFactory.decodeResource(context.resources, R.drawable.ic_account).asImageBitmap()
 
 

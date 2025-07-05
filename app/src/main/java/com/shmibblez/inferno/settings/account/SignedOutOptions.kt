@@ -1,6 +1,5 @@
 package com.shmibblez.inferno.settings.account
 
-import android.Manifest
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,13 +17,10 @@ import com.shmibblez.inferno.compose.base.InfernoOutlinedButton
 import com.shmibblez.inferno.compose.base.InfernoText
 import com.shmibblez.inferno.compose.base.InfernoTextStyle
 import com.shmibblez.inferno.ext.components
-import com.shmibblez.inferno.ext.settings
 import com.shmibblez.inferno.settings.PairFragment
 import com.shmibblez.inferno.settings.compose.components.PrefUiConst
 import mozilla.components.service.fxa.manager.SCOPE_PROFILE
 import mozilla.components.service.fxa.manager.SCOPE_SYNC
-import mozilla.components.support.ktx.android.content.isPermissionGranted
-import mozilla.components.support.ktx.android.view.hideKeyboard
 
 /**
  * todo: reference [TurnOnSyncFragment]

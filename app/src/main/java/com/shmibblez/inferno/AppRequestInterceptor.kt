@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.ConnectivityManager
+import android.net.Uri
 import android.os.Build
 import android.util.Log
 import androidx.core.content.getSystemService
@@ -29,11 +30,30 @@ class AppRequestInterceptor(
 ) : RequestInterceptor {
 
     interface AppRequestCallback {
-        fun onRequestReceived(openInAppAvailable: Boolean)
+        fun onRequestReceived(openInAppAvailable: Boolean, uri: Uri?)
     }
 
     private var navController: WeakReference<NavController>? = null
     private val requestListeners = mutableListOf<AppRequestCallback>()
+    private val uriPrefixes = listOf(
+        // android-specific
+        "android.resource",
+        "file",
+        "content",
+        "data",
+        "app",
+        "intent",
+        // common uri hosts
+        "tel",
+        "mailto",
+        "imap",
+        "irc",
+        "nntp",
+        "acap",
+        "icap",
+        "mtqp",
+        "wss",
+    )
 
     fun setNavigationController(navController: NavController) {
         this.navController = WeakReference(navController)
@@ -83,12 +103,15 @@ class AppRequestInterceptor(
             null -> {}
         }
 
+        /**
+         * todo: implement [openInAppAvailable] and use when true
+         */
         val openInAppAvailable = when (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            true -> openInAppAvailable(uri)
+            true -> openInAppAvailableBelowApi30(uri)
             false -> openInAppAvailableBelowApi30(uri)
         }
 
-        requestListeners.forEach { it.onRequestReceived(openInAppAvailable) }
+        requestListeners.forEach { it.onRequestReceived(openInAppAvailable, uri.toUri()) }
 
         return when (openInAppAvailable) {
             true -> {
@@ -110,7 +133,7 @@ class AppRequestInterceptor(
     }
 
     private fun openInAppAvailable(uri: String): Boolean {
-        return false
+        return true
         // todo: use Intent().addFlags(Intent.FLAG_ACTIVITY_REQUIRE_NON_BROWSER) to check
         //  reference here: https://medium.com/androiddevelopers/package-visibility-in-android-11-cc857f221cd9
         //  in order to support this, add a setting for prompting open in app dialog (if disabled, do nothing, if enabled, show app prompt)
@@ -118,6 +141,11 @@ class AppRequestInterceptor(
     }
 
     private fun openInAppAvailableBelowApi30(uri: String): Boolean {
+        // if direct app request return true
+        for (p in uriPrefixes) {
+            if (uri.startsWith(p)) return true
+        }
+
         // intent for testing matches
         val intent = Intent(Intent.ACTION_VIEW)
         intent.setData(uri.toUri())

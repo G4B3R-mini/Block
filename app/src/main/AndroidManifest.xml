@@ -347,14 +347,13 @@
             android:taskAffinity=""
             android:theme="@style/Theme.AppCompat.Translucent" />
 
-<!--    todo: AuthCustomTabActivity, add functionality to BrowserComponent    -->
-<!--        <activity-->
-<!--            android:name=".settings.account.AuthCustomTabActivity"-->
-<!--            android:autoRemoveFromRecents="false"-->
-<!--            android:configChanges="keyboard|keyboardHidden|mcc|mnc|orientation|screenSize|layoutDirection|smallestScreenSize|screenLayout"-->
-<!--            android:exported="false"-->
-<!--            android:taskAffinity=""-->
-<!--            android:windowSoftInputMode="adjustResize|stateAlwaysHidden" />-->
+        <activity
+            android:name=".settings.account.AuthCustomTabActivity"
+            android:autoRemoveFromRecents="false"
+            android:configChanges="keyboard|keyboardHidden|mcc|mnc|orientation|screenSize|layoutDirection|smallestScreenSize|screenLayout"
+            android:exported="false"
+            android:taskAffinity=""
+            android:windowSoftInputMode="adjustResize|stateAlwaysHidden" />
 
         <activity
             android:name=".settings.account.AuthIntentReceiverActivity"

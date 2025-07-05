@@ -192,7 +192,6 @@ private fun IntentProcessor?.toInitialBrowserTask(
     return when (this) {
         /**
          * external app processors (web apps, custom tabs, etc)
-         * todo: check if need to use custom tab or just initial currentTab
          */
         // IntentProcessors.externalAppIntentProcessors
         is WebAppIntentProcessor,
@@ -240,7 +239,6 @@ private fun IntentProcessor?.toInitialBrowserTask(
         }
         // IntentProcessors.webNotificationsIntentProcessor
         is WebNotificationIntentProcessor -> {
-            // todo: test, 99% sure this is implemented by gecko engine already
             // open to browser, corresponding tab should already be selected/created
             InitialBrowserTask.OpenToBrowser(private = false)
         }

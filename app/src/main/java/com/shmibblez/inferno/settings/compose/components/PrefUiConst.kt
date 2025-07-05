@@ -11,8 +11,8 @@ internal object PrefUiConst {
     val PREFERENCE_HORIZONTAL_INTERNAL_PADDING = 8.dp
 
     // themes settings
-    const val CUSTOM_THEMES_MAX = 20;
-    const val CUSTOM_THEME_MAX_NAME_LENGTH = 25;
+    const val CUSTOM_THEMES_MAX = 20
+    const val CUSTOM_THEME_MAX_NAME_LENGTH = 25
 
     // homepage settings
     // tabliss, awesome project check it out: [tabliss](https://github.com/joelshepherd/tabliss)

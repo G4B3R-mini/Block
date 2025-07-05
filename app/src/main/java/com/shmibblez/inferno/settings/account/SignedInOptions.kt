@@ -69,20 +69,11 @@ internal fun SignedInOptions(edgeInsets: PaddingValues, onSignOut: () -> Unit) {
     }
 
     var lastSyncedDate by remember {
-        mutableStateOf<LastSyncTime>(
-            LastSyncTime.Success(
-                lastSavedSyncTime()
-            )
-        )
+        mutableStateOf<LastSyncTime>(LastSyncTime.Success(lastSavedSyncTime()))
     }
     var syncEnginesStatus by remember { mutableStateOf(SyncEnginesStorage(context).getStatus()) }
     var isSyncing by remember { mutableStateOf(false) }
-    var deviceName by remember {
-        mutableStateOf(
-            accountManager.authenticatedAccount()?.deviceConstellation()
-                ?.state()?.currentDevice?.displayName
-        )
-    }
+    var deviceName by remember { mutableStateOf<String?>(null) }
     var showEditDeviceNameDialogFor by remember { mutableStateOf<String?>(null) }
 
     /**
@@ -182,6 +173,8 @@ internal fun SignedInOptions(edgeInsets: PaddingValues, onSignOut: () -> Unit) {
             autoPause = true,
         )
 
+        accountManager.start()
+
         // loop that updates last synced time every 30 seconds
         lifecycleOwner.lifecycleScope.launch {
             while (true) {
@@ -207,11 +200,12 @@ internal fun SignedInOptions(edgeInsets: PaddingValues, onSignOut: () -> Unit) {
         item {
             Column(
                 modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(onClick = ::onManageAccountClicked)
                     .padding(
                         horizontal = PrefUiConst.PREFERENCE_HORIZONTAL_PADDING,
                         vertical = PrefUiConst.PREFERENCE_VERTICAL_PADDING,
-                    )
-                    .clickable(onClick = ::onManageAccountClicked),
+                    ),
             ) {
                 InfernoText(text = stringResource(R.string.preferences_manage_account))
                 InfernoText(
@@ -225,6 +219,7 @@ internal fun SignedInOptions(edgeInsets: PaddingValues, onSignOut: () -> Unit) {
         item {
             Column(
                 modifier = Modifier
+                    .fillMaxWidth()
                     .clickable(onClick = ::syncNow)
                     .padding(
                         horizontal = PrefUiConst.PREFERENCE_HORIZONTAL_PADDING,
@@ -353,6 +348,7 @@ internal fun SignedInOptions(edgeInsets: PaddingValues, onSignOut: () -> Unit) {
         item {
             Column(
                 modifier = Modifier
+                    .fillMaxWidth()
                     .padding(
                         horizontal = PrefUiConst.PREFERENCE_HORIZONTAL_PADDING,
                         vertical = PrefUiConst.PREFERENCE_VERTICAL_PADDING,

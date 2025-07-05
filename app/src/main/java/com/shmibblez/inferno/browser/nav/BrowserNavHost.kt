@@ -16,7 +16,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.dialog
-import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.shmibblez.inferno.biometric.BiometricPromptCallbackManager
 import com.shmibblez.inferno.bookmarks.InfernoBookmarksPage
@@ -30,9 +29,7 @@ import com.shmibblez.inferno.ext.infernoTheme
 import com.shmibblez.inferno.extension.WebExtensionPromptFeature
 import com.shmibblez.inferno.history.InfernoHistoryPage
 import com.shmibblez.inferno.settings.accessibility.AccessibilitySettingsPage
-import com.shmibblez.inferno.settings.account.AccountProblemSettingsPage
 import com.shmibblez.inferno.settings.account.AccountSettingsPage
-import com.shmibblez.inferno.settings.account.TurnOnSyncSettingsPage
 import com.shmibblez.inferno.settings.autofill.AutofillSettingsPage
 import com.shmibblez.inferno.settings.extensions.ExtensionPage
 import com.shmibblez.inferno.settings.extensions.ExtensionsPage
@@ -90,6 +87,7 @@ fun BrowserNavHost(
         context.components.core.requestInterceptor.setNavigationController(nav)
 
         when (initialAction) {
+            is InitialBrowserTask.AuthCustomTab -> {}
             InitialBrowserTask.AppIcon -> {}
             is InitialBrowserTask.ExternalApp -> {}
             InitialBrowserTask.OpenPasswordManager -> {

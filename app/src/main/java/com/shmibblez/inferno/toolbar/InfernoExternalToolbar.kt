@@ -41,12 +41,9 @@ import mozilla.components.support.ktx.kotlin.ifNullOrEmpty
 private val ICON_SIZE = 18.dp
 private val MENU_OPTION_PADDING = 8.dp
 
-// todo: not loading, reference ExternalAppBrowserFragment
-// todo: setup custom tab in browser state once selected (reset customTabInitialized bool),
-//  then copy logic below to initialize
-
 @Composable
 fun InfernoExternalToolbar(
+    isAuth: Boolean,
     showExternalToolbar: Boolean,
     session: CustomTabSessionState?,
     onNavToBrowser: () -> Unit,
@@ -102,7 +99,8 @@ fun InfernoExternalToolbar(
             // back/close button
             InfernoIcon(
                 painter = painterResource(
-                    when (canGoBack) {
+                    if (isAuth) R.drawable.ic_close_24
+                    else when (canGoBack) {
                         true -> R.drawable.ic_back_button_24
                         false -> R.drawable.ic_close_24
                     }
@@ -125,7 +123,8 @@ fun InfernoExternalToolbar(
                     maxLines = 1,
                 )
                 InfernoText(
-                    text = session?.content?.url ?: "", infernoStyle = InfernoTextStyle.SmallSecondary,
+                    text = session?.content?.url ?: "",
+                    infernoStyle = InfernoTextStyle.SmallSecondary,
                     maxLines = 1,
                 )
             }

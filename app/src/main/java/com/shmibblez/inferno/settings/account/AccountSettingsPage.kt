@@ -3,7 +3,6 @@ package com.shmibblez.inferno.settings.account
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -13,11 +12,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.lifecycleScope
-import com.shmibblez.inferno.settings.compose.components.InfernoSettingsPage
 import com.shmibblez.inferno.R
 import com.shmibblez.inferno.ext.components
-import com.shmibblez.inferno.proto.InfernoSettings
-import com.shmibblez.inferno.proto.infernoSettingsDataStore
+import com.shmibblez.inferno.settings.compose.components.InfernoSettingsPage
 import com.shmibblez.inferno.toolbar.InfernoLoadingScreen
 import kotlinx.coroutines.launch
 
@@ -29,9 +26,6 @@ import kotlinx.coroutines.launch
 fun AccountSettingsPage(goBack: () -> Unit) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
-    val settings by context.infernoSettingsDataStore.data.collectAsState(
-        initial = InfernoSettings.getDefaultInstance()
-    )
     var showSignOutDialog by remember { mutableStateOf(false) }
 
 
@@ -49,7 +43,6 @@ fun AccountSettingsPage(goBack: () -> Unit) {
         // todo: some todos left in child components
         when (accountState.authState) {
             AccountState.AccountAuthState.SignedOut -> {
-                // todo
                 SignedOutOptions(edgeInsets = edgeInsets)
             }
 

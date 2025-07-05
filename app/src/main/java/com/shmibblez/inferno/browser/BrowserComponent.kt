@@ -1832,6 +1832,7 @@ fun BrowserComponent(
                 ) {
                     if (state.browserMode == BrowserComponentMode.TOOLBAR_EXTERNAL) {
                         InfernoExternalToolbar(
+                            isAuth = state.isAuth,
                             showExternalToolbar = state.showExternalToolbar,
                             session = state.currentCustomTab,
                             onNavToBrowser = {
@@ -1846,7 +1847,10 @@ fun BrowserComponent(
                             },
                             onToggleDesktopMode = { state.toggleDesktopMode() },
                             onGoBack = {
-                                if (state.currentCustomTab?.content?.canGoBack != false) {
+                                if (state.isAuth) {
+                                    // if is auth activity, exit
+                                    context.getActivity()!!.finish()
+                                } else if (state.currentCustomTab?.content?.canGoBack != false) {
                                     // if can go back (or sesh null), invoke go back
                                     context.components.useCases.sessionUseCases.goBack.invoke(it)
                                 } else {
