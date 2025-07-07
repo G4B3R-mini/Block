@@ -17,15 +17,27 @@ that's it for now, hopefully this project doesn't die
 # Important Stuff
 
 ## Search Engines
+
 - Set default search engine to best on this list (between DuckDuckGo, Brave Search, and Ecosia)
 - Engines to add as defaults:
-  - Ecosia
-  - Startpage
-  - SearXNG
-  - Qwant
-  - Brave Search
-  - Dogpile (still exists, ui is pretty bad)
+    - Ecosia
+    - Startpage
+    - SearXNG
+    - Qwant
+    - Brave Search
+    - Dogpile (still exists, ui is pretty bad)
 - move google to the bottom
+
+## Toolbar Settings
+
+- [ ] Reflect toolbar and tabbar positioning, also apply tabbar enabled/disabled
+    - [ ] update toolbar height calculation and positioning (add if else tree in compose for order
+      and position)
+- [ ] Add support for dynamic / non-dynamic toolbar
+    - [ ] GeckoView toolbar offset is always 0 (set when parent AndroidView created and on update)
+    - [ ] If not dynamic, remove offset, ensure scaffold bottom/top content padding equal to bar
+      height
+    - [ ] If dynamic, enable offset, ensure scaffold bottom/top content padding is always 0
 
 ## Not Implemented
 
@@ -37,7 +49,7 @@ that's it for now, hopefully this project doesn't die
 
 - [ ] Crash on Google Pixel devices on setup megazord in startup, might be related to proguard
   settings, check megazord init in case some code runs only on release mode
-  - [ ] test in Google Pixel 6 emulator (check crashlytics for specific model & android version)
+    - [ ] test in Google Pixel 6 emulator (check crashlytics for specific model & android version)
 
 [//]: # (`Nothing critical wooooooo`)
 
