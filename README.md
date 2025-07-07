@@ -4,42 +4,32 @@ Inferno Browser is a mobile browser for Android which mainly focuses on usabilit
 relevant features. It's built mainly off of Mozilla's Fenix browser, also making use of the android
 gecko engine. It is almost ready for beta launch on the Google play store
 
-# Next Steps
-
-Before launching however, there are 4 main things that have to be fixed, these are:
-
-- access from external apps (external app browser)
-- extension access (settings)
-- some websites crashing unexpectedly (does not happen on Firefox)
-- crash reporting system
-
-In order for this app to be launched for actual use, these problems must be fixed. Not to shadow the
-fact that there are some other things that are a bit hacky or clunky, but they are functional and
-can be progressively improved; the 4 points above are crucial and currently lacking. With this in
-mind, the app IS currently in a functional state, and is actually very usable this is my main
-browser lol, collaboration is welcome you can email me ideas or if you want some pointers on what
-needs work right now.
-
 # Nice Features
 
 - tab bar
+- toolbar customization (modify items in toolbar)
 - color customization / themes
     - preset themes and custom themes
 - enhanced privacy (mozilla telemetry has been removed)
-- toolbar customization (modify items in toolbar)
 
 that's it for now, hopefully this project doesn't die
 
 # Important Stuff
 
+## Search Engines
+- Set default search engine to best on this list (between DuckDuckGo, Brave Search, and Ecosia)
+- Engines to add as defaults:
+  - Ecosia
+  - Startpage
+  - SearXNG
+  - Qwant
+  - Brave Search
+  - Dogpile (still exists, ui is pretty bad)
+- move google to the bottom
+
 ## Not Implemented
 
-- [ ] Account (no sync yet)
-- [ ] Synced Tabs (no access yet)
 - [ ] Pocket (does anyone even use this, no future plans to implement)
-- [ ] consider making crash reporting in beta builds enabled and unselectable so cant be disabled,
-  add description "crash reporting is required in beta builds, this is a big help for fixing errors.
-  This can be disabled in normal builds" might be bad idea though
 
 ## Critical
 
@@ -47,6 +37,7 @@ that's it for now, hopefully this project doesn't die
 
 - [ ] Crash on Google Pixel devices on setup megazord in startup, might be related to proguard
   settings, check megazord init in case some code runs only on release mode
+  - [ ] test in Google Pixel 6 emulator (check crashlytics for specific model & android version)
 
 [//]: # (`Nothing critical wooooooo`)
 
