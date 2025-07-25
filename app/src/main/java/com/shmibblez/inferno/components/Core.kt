@@ -6,6 +6,7 @@ package com.shmibblez.inferno.components
 
 import android.content.Context
 import android.content.res.Configuration
+import android.graphics.BitmapFactory
 import android.os.Build
 import android.os.StrictMode
 import androidx.appcompat.content.res.AppCompatResources.getDrawable
@@ -109,8 +110,11 @@ import com.shmibblez.inferno.settings.advanced.getSelectedLocale
 import com.shmibblez.inferno.share.SaveToPDFMiddleware
 //import com.shmibblez.inferno.telemetry.TelemetryMiddleware
 import com.shmibblez.inferno.utils.getUndoDelay
+import mozilla.components.browser.state.search.RegionState
 import org.mozilla.geckoview.GeckoRuntime
+import java.util.Locale
 import java.util.concurrent.TimeUnit
+import kotlin.coroutines.CoroutineContext
 
 /**
  * Component group for all core browser functionality.
@@ -291,7 +295,7 @@ class Core(
         }
     }
 
-    val applicationSearchEngines: List<SearchEngine> by lazyMonitored {
+    private val applicationSearchEngines: List<SearchEngine> by lazyMonitored {
         listOf(
             createApplicationSearchEngine(
                 id = BOOKMARKS_SEARCH_ENGINE_ID,
@@ -318,16 +322,16 @@ class Core(
      * The [BrowserStore] holds the global [BrowserState].
      */
     val store by lazyMonitored {
-        val searchExtraParamsNimbus = FxNimbus.features.searchExtraParams.value()
-        val searchExtraParams = searchExtraParamsNimbus.takeIf { it.enabled }?.run {
-            SearchExtraParams(
-                searchEngine,
-                featureEnabler.keys.firstOrNull(),
-                featureEnabler.values.firstOrNull(),
-                channelId.keys.first(),
-                channelId.values.first(),
-            )
-        }
+//        val searchExtraParamsNimbus = FxNimbus.features.searchExtraParams.value()
+//        val searchExtraParams = searchExtraParamsNimbus.takeIf { it.enabled }?.run {
+//            SearchExtraParams(
+//                searchEngine,
+//                featureEnabler.keys.firstOrNull(),
+//                featureEnabler.values.firstOrNull(),
+//                channelId.keys.first(),
+//                channelId.values.first(),
+//            )
+//        }
         val middlewareList = mutableListOf(
             LastAccessMiddleware(),
             RecentlyClosedMiddleware(recentlyClosedTabsStorage, RECENTLY_CLOSED_MAX),
@@ -339,8 +343,162 @@ class Core(
             RegionMiddleware(context, locationService),
             SearchMiddleware(
                 context = context,
-                additionalBundledSearchEngineIds = listOf("reddit", "youtube"),
+                additionalBundledSearchEngineIds = listOf("reddit", "youtube"), // todo: remove?
                 migration = SearchMigration(context),
+                bundleStorage = object : SearchMiddleware.BundleStorage {
+                    private val engines = listOf(
+                        // brave search
+                        SearchEngine(
+                            id = "brave",
+                            name = "Brave Search",
+                            icon = BitmapFactory.decodeResource(
+                                context.resources,
+                                R.drawable.favicon_brave
+                            ),
+                            // inputEncoding = ,
+                            type = SearchEngine.Type.BUNDLED,
+                            resultUrls = listOf("https://search.brave.com/search?q={searchTerms}&client=inferno+browser"),
+                            suggestUrl = "https://search.brave.com/api/suggest?q={searchTerms}&client=inferno+browser",
+                            isGeneral = true,
+                        ),
+                        // ecosia
+                        SearchEngine(
+                            id = "ecosia",
+                            name = "Ecosia Search",
+                            icon = BitmapFactory.decodeResource(
+                                context.resources,
+                                R.drawable.favicon_ecosia
+                            ),
+                            // inputEncoding = ,
+                            type = SearchEngine.Type.BUNDLED,
+                            resultUrls = listOf("https://www.ecosia.org/search?q={searchTerms}&client=inferno+browser"),
+                            suggestUrl = "https://ac.ecosia.org/autocomplete?q={searchTerms}&type=list&client=inferno+browser",
+                            isGeneral = true,
+                        ),
+                        // wikipedia
+                        SearchEngine(
+                            id = "wikipedia",
+                            name = "Wikipedia Search",
+                            icon = BitmapFactory.decodeResource(
+                                context.resources,
+                                R.drawable.favicon_wikipedia
+                            ),
+                            // inputEncoding = ,
+                            type = SearchEngine.Type.BUNDLED,
+                            resultUrls = listOf("https://en.wikipedia.org/wiki/Special:Search?go=Go&search={searchTerms}&client=inferno+browser"),
+                            suggestUrl = "https://en.wikipedia.org/w/api.php?action=opensearch&search={searchTerms}&client=inferno+browser",
+                            isGeneral = true,
+                        ),
+                        // startpage
+                        SearchEngine(
+                            id = "startpage",
+                            name = "Startpage",
+                            icon = BitmapFactory.decodeResource(
+                                context.resources,
+                                R.drawable.favicon_startpage
+                            ),
+                            // inputEncoding = ,
+                            type = SearchEngine.Type.BUNDLED,
+                            resultUrls = listOf("https://www.startpage.com/sp/search?query={searchTerms}&client=inferno+browser"),
+                            suggestUrl = "https://www.startpage.com/osuggestions?q={searchTerms}&client=inferno+browser",
+                            isGeneral = true,
+                        ),
+                        // qwant
+                        SearchEngine(
+                            id = "qwant",
+                            name = "Qwant Search",
+                            icon = BitmapFactory.decodeResource(
+                                context.resources,
+                                R.drawable.favicon_qwant
+                            ),
+                            // inputEncoding = ,
+                            type = SearchEngine.Type.BUNDLED,
+                            resultUrls = listOf("https://www.qwant.com/?q={searchTerms}&client=inferno+browser"),
+                            suggestUrl = "https://api.qwant.com/api/suggest/?q={searchTerms}&client=opensearch&client=inferno+browser",
+                            isGeneral = true,
+                        ),
+                        // dogpile
+                        SearchEngine(
+                            id = "dogpile",
+                            name = "Dogpile Search",
+                            icon = BitmapFactory.decodeResource(
+                                context.resources,
+                                R.drawable.favicon_dogpile
+                            ),
+                            // inputEncoding = ,
+                            type = SearchEngine.Type.BUNDLED,
+                            resultUrls = listOf("https://www.dogpile.com/serp?q={searchTerms}&client=inferno+browser"),
+                            suggestUrl = null, // dogpile does not have a suggestions api
+                            isGeneral = true,
+                        ),
+                        // todo: engines pending addition:
+                        //  - SearXNG is tricky and self-hosted, if free instance use that
+                        // duckduckgo
+                        SearchEngine(
+                            id = "duckduckgo",
+                            name = "DuckDuckGo",
+                            icon = BitmapFactory.decodeResource(
+                                context.resources,
+                                R.drawable.favicon_duckduckgo
+                            ),
+                            // inputEncoding = ,
+                            type = SearchEngine.Type.BUNDLED,
+                            resultUrls = listOf("https://duckduckgo.com/?q={searchTerms}&client=inferno+browser"),
+                            suggestUrl = "https://duckduckgo.com/ac/?q={searchTerms}&type=list&client=inferno+browser",
+                            isGeneral = true,
+                        ),
+                        // google
+                        SearchEngine(
+                            id = "google",
+                            name = "Google Search",
+                            icon = BitmapFactory.decodeResource(
+                                context.resources,
+                                R.drawable.favicon_google
+                            ),
+                            // inputEncoding = ,
+                            type = SearchEngine.Type.BUNDLED,
+                            resultUrls = listOf("https://www.google.com/search?q={searchTerms}&client=inferno+browser"),
+                            suggestUrl = "https://www.google.com/complete/search?q={searchTerms}&client=inferno+browser",
+                            isGeneral = true,
+                        ),
+                        // bing
+                        SearchEngine(
+                            id = "bing",
+                            name = "Bing",
+                            icon = BitmapFactory.decodeResource(
+                                context.resources,
+                                R.drawable.favicon_bing
+                            ),
+                            // inputEncoding = ,
+                            type = SearchEngine.Type.BUNDLED,
+                            resultUrls = listOf("https://www.bing.com/search?q={searchTerms}&client=inferno+browser"),
+                            suggestUrl = "https://www.bing.com/osjson.aspx?query={searchTerms}&client=inferno+browser",
+                            isGeneral = true,
+                        ),
+                    )
+
+                    override suspend fun load(
+                        ids: List<String>,
+                        searchExtraParams: SearchExtraParams?,
+                        coroutineContext: CoroutineContext,
+                    ): List<SearchEngine> {
+                        return engines
+                    }
+
+                    override suspend fun load(
+                        region: RegionState,
+                        locale: Locale,
+                        distribution: String?,
+                        searchExtraParams: SearchExtraParams?,
+                        coroutineContext: CoroutineContext,
+                    ): SearchMiddleware.BundleStorage.Bundle {
+                        return SearchMiddleware.BundleStorage.Bundle(
+                            list = engines,
+                            defaultSearchEngineId = "ecosia",
+                        )
+                    }
+
+                },
 //                    searchExtraParams = searchExtraParams,
             ),
             RecordingDevicesMiddleware(context, context.components.notificationsDelegate),
@@ -477,14 +635,14 @@ class Core(
     val lazyPasswordsStorage = lazyMonitored { SyncableLoginsStorage(context, lazySecurePrefs) }
     val lazyAutofillStorage =
         lazyMonitored { AutofillCreditCardsAddressesStorage(context, lazySecurePrefs) }
-    val lazyDomainsAutocompleteProvider = lazyMonitored {
+    private val lazyDomainsAutocompleteProvider = lazyMonitored {
         // Assume this is used together with other autocomplete providers (like history) which have priority 0
         // and set priority 1 for the domains provider to ensure other providers' results are shown first.
         ShippedDomainsProvider(1).also { shippedDomainsProvider ->
             shippedDomainsProvider.initialize(context)
         }
     }
-    val lazySessionAutocompleteProvider = lazyMonitored {
+    private val lazySessionAutocompleteProvider = lazyMonitored {
         SessionAutocompleteProvider(store)
     }
 

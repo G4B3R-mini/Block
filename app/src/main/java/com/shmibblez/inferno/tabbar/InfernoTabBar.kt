@@ -6,6 +6,7 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -32,8 +33,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -234,18 +239,52 @@ private fun MiniTab(
             modifier = Modifier
 //        .alpha(if (selected) 1F else 0.33F)
                 .fillMaxSize()
-                .background(
-                    color = when (selected) {
-                        true -> LocalContext.current.infernoTheme().value.secondaryBackgroundColor.copy(
-                            alpha = UiConst.BAR_BG_ALPHA
-                        )
+//                .background(
+//                    color = when (selected) {
+//                        true -> LocalContext.current.infernoTheme().value.secondaryBackgroundColor.copy(
+//                            alpha = UiConst.BAR_BG_ALPHA
+//                        )
+//
+//                        false -> Color.Transparent
+//                    }, shape = when (selected) {
+//                        true -> MaterialTheme.shapes.small
+//                        false -> RectangleShape
+//                    }
+//                )
+                .let {
+                    when (selected) {
+                        true -> {
+                            it
+                                .background(
+                                    color = LocalContext.current.infernoTheme().value.secondaryBackgroundColor.copy(
+                                        alpha = UiConst.SECONDARY_BAR_BG_ALPHA
+                                    ),
+                                    shape = MaterialTheme.shapes.small,
+                                )
+//                                .drawWithCache {
+//                                    onDrawWithContent {
+//                                        drawContent()
+//                                        drawLine(
+//                                            brush = SolidColor(borderColor),
+//                                            start = Offset(width.value, 0f),
+//                                            end = Offset(size.width - width.value, 0f),
+//                                            strokeWidth = 2.dp.toPx(),
+//                                        )
+//                                    }
+//                                }
+//                                .clip(MaterialTheme.shapes.small)
+//                                .border(
+//                                    width = 2.dp,
+//                                    color = LocalContext.current.infernoTheme().value.primaryTextColor.copy(
+//                                        alpha = UiConst.BAR_BG_ALPHA
+//                                    ),
+//                                    shape = MaterialTheme.shapes.small,
+//                                )
+                        }
 
-                        false -> Color.Transparent
-                    }, shape = when (selected) {
-                        true -> MaterialTheme.shapes.small
-                        false -> RectangleShape
+                        false -> it
                     }
-                )
+                }
                 .clickable(enabled = !selected) {
                     context.components.useCases.tabsUseCases.selectTab(
                         tabSessionState.id

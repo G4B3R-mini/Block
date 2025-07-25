@@ -146,17 +146,18 @@ open class InfernoTheme(
         fun dark(context: Context) = InfernoTheme(
             defaultType = InfernoSettings.DefaultTheme.INFERNO_DARK,
             name = context.getString(R.string.preference_dark_theme),
-            primaryTextColor = Color(0xffe5dde5), // white // Color.White,
-            secondaryTextColor = Color(0xffa599a5), // light grey //  Color.White.copy(alpha = 0.75F),
-            primaryIconColor = Color(0xffe5dde5), // white // Color.White,
-            secondaryIconColor = Color(0xffa599a5), // light grey // Color.White.copy(alpha = 0.75F),
-            primaryOutlineColor = Color(0xffe5dde5), // white // Color.White,
-            secondaryOutlineColor = Color(0xffa599a5), // light grey // Color.White.copy(alpha = 0.75F),
-            primaryActionColor = Color(0xffcc0000), // red // Color.Red,
-            secondaryActionColor = Color(0xff1c2329), // mid dark gray // Color.White.copy(alpha = 0.75F),
-            errorColor = Color(0xffcc0000), // red // Color.Red
-            primaryBackgroundColor = Color(0xff000000), // black // Color.Black,
-            secondaryBackgroundColor = Color(0xff0c1519), // dark gray with hint of blue // Color.DarkGray
+            primaryTextColor = Color(0xffe5dde5), // white
+            secondaryTextColor = Color(0xffa599a5), // light grey
+            primaryIconColor = Color(0xffe5dde5), // white
+            secondaryIconColor = Color(0xffa599a5), // light grey
+            primaryOutlineColor = Color(0xffe5dde5), // white
+            secondaryOutlineColor = Color(0xffa599a5), // light grey
+            primaryActionColor = Color(0xffcc0000), // red
+            secondaryActionColor = Color(0xff1c2329), // mid dark gray
+            errorColor = Color(0xffcc0000), // red
+            primaryBackgroundColor = Color(0xff000000), // black
+            secondaryBackgroundColor = Color(0xff0c1015), // dark gray with hint of blue todo: run this, should look much better
+//            secondaryBackgroundColor = Color(0xff770011), // dark red
         )
 
         fun light(context: Context) = InfernoTheme(

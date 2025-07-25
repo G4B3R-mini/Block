@@ -3,6 +3,7 @@ package com.shmibblez.inferno.toolbar
 import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.focusable
@@ -177,9 +178,9 @@ internal fun BaseToolbarOrigin(
             .clip(MaterialTheme.shapes.small)
             .background(
                 LocalContext.current.infernoTheme().value.secondaryBackgroundColor.copy(
-                    alpha = UiConst.BAR_BG_ALPHA
+                    alpha = UiConst.SECONDARY_BAR_BG_ALPHA
                 )
-            ),
+            )
     ) {
         // origin editor
         val customTextSelectionColors = TextSelectionColors(
@@ -465,10 +466,10 @@ private fun ToolbarSearchEngineSelector(
         )
         Row(
             modifier = Modifier
-                .background(
-                    color = LocalContext.current.infernoTheme().value.secondaryBackgroundColor,
-                    shape = MaterialTheme.shapes.extraSmall,
-                )
+//                .background(
+//                    color = LocalContext.current.infernoTheme().value.seco,
+//                    shape = MaterialTheme.shapes.extraSmall,
+//                )
                 .fillMaxHeight()
                 .focusGroup(),
             verticalAlignment = Alignment.CenterVertically,
@@ -478,8 +479,8 @@ private fun ToolbarSearchEngineSelector(
                     Box(
                         modifier = Modifier
                             .fillMaxHeight()
-                            .clip(MaterialTheme.shapes.extraSmall)
                             .padding(start = 4.dp, top = 4.dp, bottom = 4.dp)
+                            .clip(MaterialTheme.shapes.extraSmall)
                             .aspectRatio(1F),
                     )
                 }
@@ -490,8 +491,8 @@ private fun ToolbarSearchEngineSelector(
                         contentDescription = "search engine icon",
                         modifier = Modifier
                             .fillMaxHeight()
-                            .clip(MaterialTheme.shapes.extraSmall)
                             .padding(start = 4.dp, top = 4.dp, bottom = 4.dp)
+                            .clip(MaterialTheme.shapes.extraSmall)
                             .aspectRatio(1F),
                     )
                 }
@@ -542,7 +543,7 @@ private fun ToolbarSearchEngineSelectorPopupMenu(
 
     val context = LocalContext.current
     DropdownMenu(
-        modifier = Modifier.padding(horizontal = 8.dp, vertical = 0.dp),
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 0.dp),
         expanded = showPopupMenu,
         containerColor = LocalContext.current.infernoTheme().value.secondaryBackgroundColor,
         onDismissRequest = { setShowPopupMenu(false) },
@@ -557,7 +558,7 @@ private fun ToolbarSearchEngineSelectorPopupMenu(
                         setShowPopupMenu(false)
                     },
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Image(
                     bitmap = engine.icon.asImageBitmap(),
@@ -576,11 +577,11 @@ private fun ToolbarSearchEngineSelectorPopupMenu(
             }
 //            DividerToolbarMenuItem()
         }
-        HorizontalDivider(
-            modifier = Modifier.padding(horizontal = 8.dp),
-            thickness = 0.5.dp,
-            color = LocalContext.current.infernoTheme().value.primaryIconColor,
-        )
+//        HorizontalDivider(
+//            modifier = Modifier.padding(horizontal = 8.dp),
+//            thickness = 0.5.dp,
+//            color = LocalContext.current.infernoTheme().value.primaryIconColor,
+//        )
         // TODO: search engine settings
     }
 }

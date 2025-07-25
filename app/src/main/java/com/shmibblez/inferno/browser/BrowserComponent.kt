@@ -260,6 +260,7 @@ enum class BrowserComponentPageType {
 object UiConst {
     const val LOADING_ALPHA = 0.5F
     const val BAR_BG_ALPHA = 0.74F
+    const val SECONDARY_BAR_BG_ALPHA = 1.0F
     val TOP_BAR_INTERNAL_PADDING = 16.dp
 
     val TOOLBAR_HEIGHT = 44.dp
