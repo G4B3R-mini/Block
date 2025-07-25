@@ -22,6 +22,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -51,7 +52,9 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -102,6 +105,7 @@ import com.shmibblez.inferno.perf.MarkersFragmentLifecycleCallbacks
 import com.shmibblez.inferno.settings.biometric.BiometricPromptFeature
 import com.shmibblez.inferno.shortcut.PwaOnboardingObserver
 import com.shmibblez.inferno.tabbar.InfernoTabBar
+import com.shmibblez.inferno.tabbar.rememberInfernoTabBarState
 import com.shmibblez.inferno.tabs.tabstray.InfernoTabsTray
 import com.shmibblez.inferno.tabs.tabstray.InfernoTabsTrayMode
 import com.shmibblez.inferno.tabs.tabstray.InfernoTabsTraySelectedTab
@@ -113,6 +117,7 @@ import com.shmibblez.inferno.toolbar.InfernoExternalToolbar
 import com.shmibblez.inferno.toolbar.InfernoLoadingScreen
 import com.shmibblez.inferno.toolbar.InfernoToolbar
 import com.shmibblez.inferno.toolbar.ToolbarMenuBottomSheet
+import com.shmibblez.inferno.toolbar.rememberInfernoToolbarState
 import com.shmibblez.inferno.wifi.SitePermissionsWifiIntegration
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -141,6 +146,7 @@ import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.browser.state.state.content.DownloadState
 import mozilla.components.browser.state.state.content.DownloadState.Status
 import mozilla.components.browser.thumbnails.BrowserThumbnails
+import mozilla.components.compose.browser.awesomebar.AwesomeBarOrientation
 import mozilla.components.concept.engine.EngineView
 import mozilla.components.concept.engine.mediasession.MediaSession
 import mozilla.components.concept.storage.LoginEntry
@@ -265,7 +271,6 @@ object UiConst {
 
     val TOOLBAR_HEIGHT = 44.dp
     val TAB_BAR_HEIGHT = 36.dp
-    val AWESOME_BAR_HEIGHT = 200.dp
     val TAB_WIDTH = 112.dp
     val EXTERNAL_TOOLBAR_HEIGHT = 62.dp // TOOLBAR_HEIGHT + TAB_BAR_HEIGHT
 
@@ -277,7 +282,7 @@ object UiConst {
     fun calcBottomBarHeight(browserComponentMode: BrowserComponentMode): Dp {
         return when (browserComponentMode) {
             BrowserComponentMode.TOOLBAR -> TOOLBAR_HEIGHT + TAB_BAR_HEIGHT
-            BrowserComponentMode.TOOLBAR_SEARCH -> TOOLBAR_HEIGHT + AWESOME_BAR_HEIGHT
+            BrowserComponentMode.TOOLBAR_SEARCH -> TOOLBAR_HEIGHT
             BrowserComponentMode.TOOLBAR_EXTERNAL -> EXTERNAL_TOOLBAR_HEIGHT
             BrowserComponentMode.FIND_IN_PAGE -> FIND_IN_PAGE_BAR_HEIGHT
             BrowserComponentMode.READER_VIEW -> READER_VIEW_HEIGHT
@@ -1097,6 +1102,18 @@ fun BrowserComponent(
 
     // endregion
 
+    // region InfernoToolbarState
+
+    val toolbarState by rememberInfernoToolbarState()
+
+    // endregion
+
+    // region InfernoTabBarState
+
+    val tabBarState by rememberInfernoTabBarState()
+
+    // endregion
+
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
@@ -1621,7 +1638,7 @@ fun BrowserComponent(
         snackbarHost = { SnackbarHost(snackbarHostState = snackbarHostState) },
         contentWindowInsets = ScaffoldDefaults.contentWindowInsets,
         containerColor = LocalContext.current.infernoTheme().value.primaryBackgroundColor,
-        content = {
+        content = { edgeInsets ->
             //    var startX by remember {mutableFloatStateOf(0F)}
             var startY by remember { mutableFloatStateOf(0F) }
             Box(
@@ -1724,53 +1741,62 @@ fun BrowserComponent(
 //                        }
 //                    }
                     .motionEventSpy {
-                        if (it.action == MotionEvent.ACTION_DOWN) {
-                            startY = it.y
-                        }
-                        if (it.action == MotionEvent.ACTION_MOVE) {
-                            val dy = it.y - startY
-                            startY = it.y
-                            // if not loading scroll
+                        if (state.browserMode != BrowserComponentMode.TOOLBAR_SEARCH) {
+                            // if not searching, apply dynamic toolbar
+                            if (it.action == MotionEvent.ACTION_DOWN) {
+                                startY = it.y
+                            }
+                            if (it.action == MotionEvent.ACTION_MOVE) {
+                                val dy = it.y - startY
+                                startY = it.y
+                                // if not loading scroll
 //                                if (currentTab?.content?.loading == false) {
-                            val newOffset = (bottomBarOffsetPx.value - dy).coerceIn(
-                                0F,
-                                bottomBarHeightDp
-                                    .dpToPx(context)
-                                    .toFloat()
-                            )
-                            coroutineScope.launch {
-                                bottomBarOffsetPx.snapTo(newOffset)
+                                val newOffset = (bottomBarOffsetPx.value - dy).coerceIn(
+                                    0F,
+                                    bottomBarHeightDp
+                                        .dpToPx(context)
+                                        .toFloat()
+                                )
+                                coroutineScope.launch {
+                                    bottomBarOffsetPx.snapTo(newOffset)
 //                                setEngineDynamicToolbarMaxHeight(
 //                                    bottomBarHeightDp.dpToPx(context) - newOffset.toInt()
 //                                )
-                            }
-//                                }
-                        }
-                        if (it.action == MotionEvent.ACTION_UP || it.action == MotionEvent.ACTION_CANCEL) {
-                            // set bottom bar position
-                            coroutineScope.launch {
-                                if (bottomBarOffsetPx.value <= (bottomBarHeightDp.dpToPx(context) / 2)) {
-                                    // if more than halfway up, go up
-                                    bottomBarOffsetPx.animateTo(0F)
-                                } else {
-                                    // if more than halfway down, go down
-                                    bottomBarOffsetPx.animateTo(
-                                        bottomBarHeightDp
-                                            .dpToPx(context)
-                                            .toFloat()
-                                    )
                                 }
+//                                }
+                            }
+                            if (it.action == MotionEvent.ACTION_UP || it.action == MotionEvent.ACTION_CANCEL) {
+                                // set bottom bar position
+                                coroutineScope.launch {
+                                    if (bottomBarOffsetPx.value <= (bottomBarHeightDp.dpToPx(context) / 2)) {
+                                        // if more than halfway up, go up
+                                        bottomBarOffsetPx.animateTo(0F)
+                                    } else {
+                                        // if more than halfway down, go down
+                                        bottomBarOffsetPx.animateTo(
+                                            bottomBarHeightDp
+                                                .dpToPx(context)
+                                                .toFloat()
+                                        )
+                                    }
 //                                setEngineDynamicToolbarMaxHeight(
 //                                    bottomBarHeightDp.dpToPx(context) - bottomBarOffsetPx.value.toInt()
 //                                )
+                                }
                             }
-                        }
 //                        else if (it.action == MotionEvent.ACTION_SCROLL) {
 //                            // TODO: move nested scroll connection logic here
 //                        }
+                        } else {
+                            // if searching and not completely shown, show completely
+                            if (bottomBarOffsetPx.targetValue != 0F) {
+                                coroutineScope.launch {
+                                    bottomBarOffsetPx.snapTo(0F)
+                                }
+                            }
+                        }
                     },
             ) {
-//                MozAwesomeBar(setView = { ab -> awesomeBar = ab })
                 MozEngineView(
                     modifier = Modifier
                         .fillMaxSize()
@@ -1808,6 +1834,32 @@ fun BrowserComponent(
                         }
                     }
                 }
+                // if searching show awesome bar
+                if (state.browserMode == BrowserComponentMode.TOOLBAR_SEARCH) {
+                    // awesome bar
+                    InfernoAwesomeBar(
+                        text = toolbarState.awesomeSearchText,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(bottom = edgeInsets.calculateBottomPadding()),
+//                    providers = emptyList(),
+                        orientation = AwesomeBarOrientation.BOTTOM,
+                        onSuggestionClicked = { providerGroup, suggestion ->
+                            // todo: change action based on providerGroup
+                            val t = suggestion.title
+                            if (t != null) {
+                                toolbarState.onAutocomplete(TextFieldValue(t, TextRange(t.length)))
+                            }
+                        },
+                        onAutoComplete = { providerGroup, suggestion ->
+                            // todo: filter out based on providerGroup
+                            val t = suggestion.title
+                            if (t != null) {
+                                toolbarState.onAutocomplete(TextFieldValue(t, TextRange(t.length)))
+                            }
+                        },
+                    )
+                }
             }
         },
         floatingActionButtonPosition = FabPosition.End,
@@ -1829,7 +1881,8 @@ fun BrowserComponent(
                     },
             ) {
                 Column(
-                    Modifier.fillMaxSize()
+                    Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Bottom,
                 ) {
                     if (state.browserMode == BrowserComponentMode.TOOLBAR_EXTERNAL) {
                         InfernoExternalToolbar(
@@ -1870,13 +1923,10 @@ fun BrowserComponent(
                     }
                     if (state.browserMode == BrowserComponentMode.TOOLBAR || state.browserMode == BrowserComponentMode.TOOLBAR_SEARCH) {
                         if (state.browserMode == BrowserComponentMode.TOOLBAR) {
-                            InfernoTabBar(state.tabList, state.currentTab)
+                            InfernoTabBar(state = tabBarState)
                         }
-                        // todo: package in variables above, invoke here or in top app bar based on
-                        //  settings
                         InfernoToolbar(
-                            tabSessionState = state.currentTab,
-                            tabCount = state.tabList.size,
+                            state = toolbarState,
                             onShowMenuBottomSheet = { showToolbarMenuBottomSheet = true },
                             onDismissMenuBottomSheet = { showToolbarMenuBottomSheet = false },
                             onRequestSearchBar = { /* todo: search bar, fills page and has 32.dp padding from insets */ },
@@ -1898,7 +1948,6 @@ fun BrowserComponent(
                             onNavToExtensions = onNavToExtensions,
                             onNavToPasswords = onNavToPasswords,
                             onNavToTabsTray = tabsTrayState::show,
-                            searchEngine = state.searchEngine,
                             editMode = state.browserMode == BrowserComponentMode.TOOLBAR_SEARCH,
                             onStartSearch = { state.setBrowserModeSearch() },
                             onStopSearch = { state.setBrowserModeToolbar() },

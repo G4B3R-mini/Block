@@ -156,8 +156,7 @@ open class InfernoTheme(
             secondaryActionColor = Color(0xff1c2329), // mid dark gray
             errorColor = Color(0xffcc0000), // red
             primaryBackgroundColor = Color(0xff000000), // black
-            secondaryBackgroundColor = Color(0xff0c1015), // dark gray with hint of blue todo: run this, should look much better
-//            secondaryBackgroundColor = Color(0xff770011), // dark red
+            secondaryBackgroundColor = Color(0xff1c2025), // dark gray with hint of blue
         )
 
         fun light(context: Context) = InfernoTheme(

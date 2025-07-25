@@ -1,16 +1,95 @@
 package com.shmibblez.inferno.toolbar
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.TextFieldValue
+import com.shmibblez.inferno.ext.components
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.map
 import mozilla.components.browser.state.search.SearchEngine
+import mozilla.components.browser.state.selector.normalTabs
+import mozilla.components.browser.state.selector.privateTabs
+import mozilla.components.browser.state.selector.selectedTab
 import mozilla.components.browser.state.state.TabSessionState
+import mozilla.components.browser.state.state.selectedOrDefaultSearchEngine
+import mozilla.components.browser.state.store.BrowserStore
+import mozilla.components.lib.state.ext.flowScoped
+import mozilla.components.support.base.feature.LifecycleAwareFeature
+
+
+@Composable
+fun rememberInfernoToolbarState(
+    // item params
+    store: BrowserStore = LocalContext.current.components.core.store,
+): MutableState<InfernoToolbarState> {
+    val state = remember {
+        mutableStateOf(
+            InfernoToolbarState(
+                store = store,
+            )
+        )
+    }
+
+    DisposableEffect(null) {
+        state.value.start()
+        onDispose { state.value.stop() }
+    }
+
+    return state
+}
+
+class InfernoToolbarState(
+    // item params
+    private val store: BrowserStore,
+) : LifecycleAwareFeature {
+    private var scope: CoroutineScope? = null
+
+    var tabSessionState by mutableStateOf<TabSessionState?>(null)
+        private set
+
+    var tabCount by mutableIntStateOf(0)
+        private set
+
+    var awesomeSearchText by mutableStateOf("")
+
+    var onAutocomplete by mutableStateOf<(TextFieldValue) -> Unit>({})
+
+    var searchEngine by mutableStateOf<SearchEngine?>(null)
+
+    override fun start() {
+        scope = store.flowScoped { flow ->
+            flow.map { it }.collect {
+                tabSessionState = it.selectedTab
+                // update selected tab tray tab based on if normal or private
+                it.selectedTab?.content?.private?.let { private ->
+                    tabCount = when (private) {
+                        true -> it.privateTabs.size
+                        false -> it.normalTabs.size
+                    }
+                }
+                searchEngine = it.search.selectedOrDefaultSearchEngine!!
+            }
+        }
+    }
+
+    override fun stop() {
+        scope?.cancel()
+    }
+}
 
 // todo: wrap params in viewmodel, emit from BrowserComponent, find out how to update only
 //  necessary components
 @Composable
 fun InfernoToolbar(
-    // item params
-    tabSessionState: TabSessionState?,
-    tabCount: Int,
+    state: InfernoToolbarState,
     onShowMenuBottomSheet: () -> Unit,
     onDismissMenuBottomSheet: () -> Unit,
     onRequestSearchBar: () -> Unit,
@@ -24,12 +103,11 @@ fun InfernoToolbar(
     onNavToPasswords: () -> Unit,
     onNavToTabsTray: () -> Unit,
     // origin params
-    searchEngine: SearchEngine?,
     editMode: Boolean,
     onStartSearch: () -> Unit,
     onStopSearch: () -> Unit,
 ) {
-    if (tabSessionState == null || searchEngine == null) {
+    if (state.tabSessionState == null || state.searchEngine == null) {
         PlaceholderBrowserToolbar()
         return
     }
@@ -44,8 +122,9 @@ fun InfernoToolbar(
     // for now just show OriginBrowserToolbar
     if (isOrigin) {
         InfernoOriginToolbar(
-            tabSessionState = tabSessionState,
-            tabCount = tabCount,
+            state = state,
+            tabSessionState = state.tabSessionState!!,
+            tabCount = state.tabCount,
             onShowMenuBottomSheet = onShowMenuBottomSheet,
             onDismissMenuBottomSheet = onDismissMenuBottomSheet,
             onRequestSearchBar = onRequestSearchBar,
@@ -58,15 +137,15 @@ fun InfernoToolbar(
             onNavToExtensions = onNavToExtensions,
             onNavToPasswords = onNavToPasswords,
             onNavToTabsTray = onNavToTabsTray,
-            searchEngine = searchEngine,
+            searchEngine = state.searchEngine,
             editMode = editMode,
             onStartSearch = onStartSearch,
             onStopSearch = onStopSearch,
         )
     } else if (isMiniOrigin) {
         InfernoMiniOriginToolbar(
-            tabSessionState = tabSessionState,
-            tabCount = tabCount,
+            tabSessionState = state.tabSessionState!!,
+            tabCount = state.tabCount,
             onShowMenuBottomSheet = onShowMenuBottomSheet,
             onDismissMenuBottomSheet = onDismissMenuBottomSheet,
             onRequestSearchBar = onRequestSearchBar,
@@ -79,7 +158,7 @@ fun InfernoToolbar(
             onNavToExtensions = onNavToExtensions,
             onNavToPasswords = onNavToPasswords,
             onNavToTabsTray = onNavToTabsTray,
-            searchEngine = searchEngine,
+            searchEngine = state.searchEngine,
             editMode = editMode,
             onStartSearch = onStartSearch,
             onStopSearch = onStopSearch,

@@ -5,7 +5,6 @@ import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -18,8 +17,6 @@ import androidx.compose.ui.platform.LocalContext
 import com.shmibblez.inferno.browser.awesomebar.SuggestionFetcher
 import com.shmibblez.inferno.browser.awesomebar.Suggestions
 import com.shmibblez.inferno.ext.components
-import mozilla.components.compose.browser.awesomebar.AwesomeBarColors
-import mozilla.components.compose.browser.awesomebar.AwesomeBarDefaults
 import mozilla.components.compose.browser.awesomebar.AwesomeBarOrientation
 import mozilla.components.concept.awesomebar.AwesomeBar
 import mozilla.components.concept.base.profiler.Profiler
@@ -30,7 +27,6 @@ import mozilla.components.feature.awesomebar.provider.SearchSuggestionProvider
 @Composable
 fun InfernoAwesomeBar(
     text: String,
-    colors: AwesomeBarColors = AwesomeBarDefaults.colors(),
 //    providers: List<AwesomeBar.SuggestionProvider>,
     orientation: AwesomeBarOrientation = AwesomeBarOrientation.TOP,
     onSuggestionClicked: (AwesomeBar.SuggestionProviderGroup, AwesomeBar.Suggestion) -> Unit,
@@ -95,9 +91,7 @@ fun InfernoAwesomeBar(
     }
 
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(UiConst.AWESOME_BAR_HEIGHT),
+        modifier = modifier.fillMaxWidth(),
 //            .testTag("inferno.awesomebar")
         verticalArrangement = Arrangement.Bottom,
     ) {

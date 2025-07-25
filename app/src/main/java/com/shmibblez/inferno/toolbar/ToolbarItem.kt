@@ -12,9 +12,10 @@ val InfernoSettings.ToolbarItem?.defaultToolbarItems
     get() = listOf(
         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_BACK,
         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_FORWARD,
-        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_ORIGIN,
         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_RELOAD,
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_ORIGIN,
         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_SHOW_TABS_TRAY,
+        InfernoSettings.ToolbarItem.TOOLBAR_ITEM_SETTINGS,
         InfernoSettings.ToolbarItem.TOOLBAR_ITEM_MENU,
     )
 

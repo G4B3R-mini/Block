@@ -79,6 +79,7 @@ fun InfernoSettings.getToolbarItems(): List<InfernoSettings.ToolbarItem> {
 
 @Composable
 internal fun InfernoOriginToolbar(
+    state: InfernoToolbarState,
     // item params
     tabSessionState: TabSessionState,
     tabCount: Int,
@@ -102,12 +103,9 @@ internal fun InfernoOriginToolbar(
 ) {
     val animationValue = remember { Animatable(if (editMode) EDIT_VALUE else DISPLAY_VALUE) }
 
-    var awesomeSearchText by remember { mutableStateOf("") }
     val loading = tabSessionState.content.loading
     val context = LocalContext.current
     val settings by context.infernoSettingsDataStore.data.collectAsState(initial = InfernoSettings.getDefaultInstance())
-    var onAutocomplete: (TextFieldValue) -> Unit by remember { mutableStateOf({}) }
-
 
     LaunchedEffect(editMode) {
         if (editMode) {
@@ -142,102 +140,116 @@ internal fun InfernoOriginToolbar(
     }
 
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(
-                when (editMode) {
-                    true -> UiConst.TOOLBAR_HEIGHT + UiConst.AWESOME_BAR_HEIGHT
-                    false -> UiConst.TOOLBAR_HEIGHT
-                }
-            )
-            .background(Color.Transparent),
+            .height(UiConst.TOOLBAR_HEIGHT)
+            .background(
+                LocalContext.current.infernoTheme().value.primaryBackgroundColor.copy(
+                    alpha = UiConst.BAR_BG_ALPHA
+                ),
+            ),
     ) {
-        // awesome bar
-        if (editMode) {
-            InfernoAwesomeBar(
-                text = awesomeSearchText,
-                colors = AwesomeBarDefaults.colors(),
-//                    providers = emptyList(),
-                orientation = AwesomeBarOrientation.BOTTOM,
-                onSuggestionClicked = { providerGroup, suggestion ->
-                    // todo: change action based on providerGroup
-                    val t = suggestion.title
-                    if (t != null) {
-                        onAutocomplete(TextFieldValue(t, TextRange(t.length)))
-                    }
+        // origin
+        ToolbarOrigin(
+            originModifier = Modifier.padding(
+                start = (leftWidth * animationValue.value),
+                end = (rightWidth * animationValue.value),
+            ),
+            tabSessionState = tabSessionState,
+            searchEngine = searchEngine,
+            setAwesomeSearchText = { state.awesomeSearchText = it },
+            setOnAutocomplete = { state.onAutocomplete = it },
+            siteSecure = detectSiteSecurity(tabSessionState),
+            siteTrackingProtection = detectSiteTrackingProtection(tabSessionState),
+            editMode = editMode,
+            onStartSearch = onStartSearch,
+            onStopSearch = onStopSearch,
+            animationValue = animationValue.value,
+        )
+
+        // icons on left
+        Row(
+            modifier = Modifier
+                .padding(start = TOOLBAR_ICON_PADDING, end = 4.dp)
+                .align(Alignment.CenterStart)
+                .offset {
+                    IntOffset(
+                        x = (-leftWidthPx * (1F - animationValue.value)).roundToInt(), y = 0
+                    )
                 },
-                onAutoComplete = { providerGroup, suggestion ->
-                    // todo: filter out based on providerGroup
-                    val t = suggestion.title
-                    if (t != null) {
-                        onAutocomplete(TextFieldValue(t, TextRange(t.length)))
-                    }
-                },
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(
+                TOOLBAR_ICON_PADDING, Alignment.CenterHorizontally
             )
+        ) {
+            for (k in leftKeys) {
+                k.ToToolbarOption(
+                    type = ToolbarOptionType.ICON,
+                    tabSessionState = tabSessionState,
+                    loading = loading,
+                    tabCount = tabCount,
+                    onShowMenuBottomSheet = onShowMenuBottomSheet,
+                    onDismissMenuBottomSheet = onDismissMenuBottomSheet,
+                    onRequestSearchBar = onRequestSearchBar,
+                    onActivateFindInPage = onActivateFindInPage,
+                    onActivateReaderView = onActivateReaderView,
+                    onNavToSettings = onNavToSettings,
+                    onNavToHistory = onNavToHistory,
+                    onNavToBookmarks = onNavToBookmarks,
+                    onNavToAddBookmarkDialog = onNavToAddBookmarkDialog,
+                    onNavToExtensions = onNavToExtensions,
+                    onNavToPasswords = onNavToPasswords,
+                    onNavToTabsTray = onNavToTabsTray,
+//                searchEngine = searchEngine,
+//                siteSecure = siteSecure,
+//                siteTrackingProtection = siteTrackingProtection,
+//                setAwesomeSearchText = setAwesomeSearchText,
+//                setOnAutocomplete = setOnAutocomplete,
+//                originModifier = originModifier,
+//                editMode = editMode,
+//                onStartSearch = onStartSearch,
+//                onStopSearch = onStopSearch,
+//                // todo: test if still recomposes if animationValue passed directly and remembered
+//                //  in toolbar origin, might also have to have different animatable in origin composable
+//                animationValue = animationValue.value,
+                )
+            }
         }
 
-        Box(
+        // icons on right
+        Row(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(UiConst.TOOLBAR_HEIGHT)
-                .background(
-                    LocalContext.current.infernoTheme().value.primaryBackgroundColor.copy(
-                        alpha = UiConst.BAR_BG_ALPHA
-                    ),
-                ),
-        ) {
-            // origin
-            ToolbarOrigin(
-                originModifier = Modifier.padding(
-                    start = (leftWidth * animationValue.value),
-                    end = (rightWidth * animationValue.value),
-                ),
-                tabSessionState = tabSessionState,
-                searchEngine = searchEngine,
-                setAwesomeSearchText = { awesomeSearchText = it },
-                setOnAutocomplete = { onAutocomplete = it },
-                siteSecure = detectSiteSecurity(tabSessionState),
-                siteTrackingProtection = detectSiteTrackingProtection(tabSessionState),
-                editMode = editMode,
-                onStartSearch = onStartSearch,
-                onStopSearch = onStopSearch,
-                animationValue = animationValue.value,
+                .padding(horizontal = TOOLBAR_ICON_PADDING)
+                .align(Alignment.CenterEnd)
+                .offset {
+                    IntOffset(
+                        x = (rightWidthPx * (1F - animationValue.value)).roundToInt(), y = 0
+                    )
+                },
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(
+                TOOLBAR_ICON_PADDING, Alignment.CenterHorizontally
             )
-
-            // icons on left
-            Row(
-                modifier = Modifier
-                    .padding(start = TOOLBAR_ICON_PADDING, end = 4.dp)
-                    .align(Alignment.CenterStart)
-                    .offset {
-                        IntOffset(
-                            x = (-leftWidthPx * (1F - animationValue.value)).roundToInt(), y = 0
-                        )
-                    },
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(
-                    TOOLBAR_ICON_PADDING, Alignment.CenterHorizontally
-                )
-            ) {
-                for (k in leftKeys) {
-                    k.ToToolbarOption(
-                        type = ToolbarOptionType.ICON,
-                        tabSessionState = tabSessionState,
-                        loading = loading,
-                        tabCount = tabCount,
-                        onShowMenuBottomSheet = onShowMenuBottomSheet,
-                        onDismissMenuBottomSheet = onDismissMenuBottomSheet,
-                        onRequestSearchBar = onRequestSearchBar,
-                        onActivateFindInPage = onActivateFindInPage,
-                        onActivateReaderView = onActivateReaderView,
-                        onNavToSettings = onNavToSettings,
-                        onNavToHistory = onNavToHistory,
-                        onNavToBookmarks = onNavToBookmarks,
-                        onNavToAddBookmarkDialog = onNavToAddBookmarkDialog,
-                        onNavToExtensions = onNavToExtensions,
-                        onNavToPasswords = onNavToPasswords,
-                        onNavToTabsTray = onNavToTabsTray,
+        ) {
+            for (k in rightKeys) {
+                k.ToToolbarOption(
+                    type = ToolbarOptionType.ICON,
+                    tabSessionState = tabSessionState,
+                    loading = loading,
+                    tabCount = tabCount,
+                    onShowMenuBottomSheet = onShowMenuBottomSheet,
+                    onDismissMenuBottomSheet = onDismissMenuBottomSheet,
+                    onRequestSearchBar = onRequestSearchBar,
+                    onActivateFindInPage = onActivateFindInPage,
+                    onActivateReaderView = onActivateReaderView,
+                    onNavToSettings = onNavToSettings,
+                    onNavToHistory = onNavToHistory,
+                    onNavToBookmarks = onNavToBookmarks,
+                    onNavToAddBookmarkDialog = onNavToAddBookmarkDialog,
+                    onNavToExtensions = onNavToExtensions,
+                    onNavToPasswords = onNavToPasswords,
+                    onNavToTabsTray = onNavToTabsTray,
 //                searchEngine = searchEngine,
 //                siteSecure = siteSecure,
 //                siteTrackingProtection = siteTrackingProtection,
@@ -250,57 +262,7 @@ internal fun InfernoOriginToolbar(
 //                // todo: test if still recomposes if animationValue passed directly and remembered
 //                //  in toolbar origin, might also have to have different animatable in origin composable
 //                animationValue = animationValue.value,
-                    )
-                }
-            }
-
-            // icons on right
-            Row(
-                modifier = Modifier
-                    .padding(horizontal = TOOLBAR_ICON_PADDING)
-                    .align(Alignment.CenterEnd)
-                    .offset {
-                        IntOffset(
-                            x = (rightWidthPx * (1F - animationValue.value)).roundToInt(), y = 0
-                        )
-                    },
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(
-                    TOOLBAR_ICON_PADDING, Alignment.CenterHorizontally
                 )
-            ) {
-                for (k in rightKeys) {
-                    k.ToToolbarOption(
-                        type = ToolbarOptionType.ICON,
-                        tabSessionState = tabSessionState,
-                        loading = loading,
-                        tabCount = tabCount,
-                        onShowMenuBottomSheet = onShowMenuBottomSheet,
-                        onDismissMenuBottomSheet = onDismissMenuBottomSheet,
-                        onRequestSearchBar = onRequestSearchBar,
-                        onActivateFindInPage = onActivateFindInPage,
-                        onActivateReaderView = onActivateReaderView,
-                        onNavToSettings = onNavToSettings,
-                        onNavToHistory = onNavToHistory,
-                        onNavToBookmarks = onNavToBookmarks,
-                        onNavToAddBookmarkDialog = onNavToAddBookmarkDialog,
-                        onNavToExtensions = onNavToExtensions,
-                        onNavToPasswords = onNavToPasswords,
-                        onNavToTabsTray = onNavToTabsTray,
-//                searchEngine = searchEngine,
-//                siteSecure = siteSecure,
-//                siteTrackingProtection = siteTrackingProtection,
-//                setAwesomeSearchText = setAwesomeSearchText,
-//                setOnAutocomplete = setOnAutocomplete,
-//                originModifier = originModifier,
-//                editMode = editMode,
-//                onStartSearch = onStartSearch,
-//                onStopSearch = onStopSearch,
-//                // todo: test if still recomposes if animationValue passed directly and remembered
-//                //  in toolbar origin, might also have to have different animatable in origin composable
-//                animationValue = animationValue.value,
-                    )
-                }
             }
         }
     }

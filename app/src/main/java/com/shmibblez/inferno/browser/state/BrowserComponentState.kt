@@ -330,8 +330,6 @@ class BrowserComponentState(
         private set
     var isPrivateSession: Boolean by mutableStateOf(false)
         private set
-    var searchEngine: SearchEngine? by mutableStateOf(null)
-        private set
     var pageType: BrowserComponentPageType by mutableStateOf(BrowserComponentPageType.ENGINE)
         private set
     var showExternalToolbar by mutableStateOf(true)
@@ -477,7 +475,6 @@ class BrowserComponentState(
                     awaitingNewTab = false
                 }
 
-                searchEngine = it.search.selectedOrDefaultSearchEngine!!
                 pageType = resolvePageType(currentTab)
             }
         }

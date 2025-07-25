@@ -25,7 +25,9 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -55,6 +57,7 @@ import com.shmibblez.inferno.browser.UiConst
 import com.shmibblez.inferno.compose.Favicon
 import com.shmibblez.inferno.compose.base.InfernoIcon
 import com.shmibblez.inferno.compose.base.InfernoText
+import com.shmibblez.inferno.compose.base.InfernoTextStyle
 import com.shmibblez.inferno.ext.components
 import com.shmibblez.inferno.ext.determineCustomHomeUrl
 import com.shmibblez.inferno.ext.infernoTheme
@@ -62,13 +65,65 @@ import com.shmibblez.inferno.ext.newTab
 import com.shmibblez.inferno.proto.InfernoSettings
 import com.shmibblez.inferno.proto.infernoSettingsDataStore
 import com.shmibblez.inferno.toolbar.ToolbarOnlyComponents.Companion.ProgressBar
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.map
 import mozilla.components.browser.state.ext.getUrl
+import mozilla.components.browser.state.selector.normalTabs
+import mozilla.components.browser.state.selector.privateTabs
+import mozilla.components.browser.state.selector.selectedTab
 import mozilla.components.browser.state.state.TabSessionState
-
+import mozilla.components.browser.state.store.BrowserStore
+import mozilla.components.lib.state.ext.flowScoped
+import mozilla.components.support.base.feature.LifecycleAwareFeature
 
 // todo:
 //   - add gesture detection for switching tabs (swipe left/right to go to tab on left/right)
 //   - update MiniTabViewHolder layout for individual tab layout
+
+@Composable
+fun rememberInfernoTabBarState(
+    store: BrowserStore = LocalContext.current.components.core.store,
+): MutableState<InfernoTabBarState> {
+    val state = remember { mutableStateOf(InfernoTabBarState(store = store)) }
+
+    DisposableEffect(null) {
+        state.value.start()
+        onDispose { state.value.stop() }
+    }
+
+    return state
+}
+
+class InfernoTabBarState(
+    private val store: BrowserStore,
+) : LifecycleAwareFeature {
+    private var scope: CoroutineScope? = null
+
+    var tabList by mutableStateOf<List<TabSessionState>>(emptyList())
+        private set
+    var selectedTab by mutableStateOf<TabSessionState?>(null)
+        private set
+
+    override fun start() {
+        scope = store.flowScoped { flow ->
+            flow.map { it }.collect {
+                selectedTab = it.selectedTab
+                // update selected tab tray tab based on if normal or private
+                it.selectedTab?.content?.private?.let { private ->
+                    tabList = when (private) {
+                        true -> it.privateTabs
+                        false -> it.normalTabs
+                    }
+                }
+            }
+        }
+    }
+
+    override fun stop() {
+        scope?.cancel()
+    }
+}
 
 inline fun <T> Iterable<T>.findIndex(predicate: (T) -> Boolean): Int? {
     forEachIndexed { i, e -> if (predicate(e)) return i }
@@ -79,14 +134,14 @@ private val verticalDividerPadding = 6.dp
 private val TAB_END_PADDING = 4.dp
 
 @Composable
-fun InfernoTabBar(tabList: List<TabSessionState>, selectedTab: TabSessionState?) {
+fun InfernoTabBar(state: InfernoTabBarState) {
     val configuration = LocalConfiguration.current
     fun calculateTabWidth(): Dp {
         val screenWidth = configuration.screenWidthDp.dp
         // available space for tabs to occupy
         // screen width - side padding - add square width
         val availableTabSpace = screenWidth - (1F * TAB_END_PADDING) - 1.dp - UiConst.TAB_BAR_HEIGHT
-        val tabWidth = availableTabSpace / tabList.size.let { if (it <= 0) 1 else it }
+        val tabWidth = availableTabSpace / state.tabList.size.let { if (it <= 0) 1 else it }
         return when (tabWidth > UiConst.TAB_WIDTH) {
             true -> tabWidth
             false -> UiConst.TAB_WIDTH
@@ -102,30 +157,30 @@ fun InfernoTabBar(tabList: List<TabSessionState>, selectedTab: TabSessionState?)
     val listState = rememberLazyListState()
     var tabAutoWidth by remember { mutableStateOf(calculateTabWidth()) }
     // if no tab selected return
-    val isPrivateSession: Boolean = (if (tabList.isEmpty()) {
+    val isPrivateSession: Boolean = (if (state.tabList.isEmpty()) {
         Log.d("BrowserTabBar", "tab list empty")
         false
-    } else if (selectedTab == null) {
+    } else if (state.selectedTab == null) {
         false
-    } else tabList.find { it.id == selectedTab.id }!!.content.private)
+    } else state.tabList.find { it.id == state.selectedTab!!.id }!!.content.private)
 
     // scroll to active tab
-    LaunchedEffect(selectedTab?.id, LocalConfiguration.current.orientation) {
+    LaunchedEffect(state.selectedTab?.id, LocalConfiguration.current.orientation) {
         // scroll to selected tab, auto centers
-        val i = tabList.findIndex { it.id == selectedTab?.id }
+        val i = state.tabList.findIndex { it.id == state.selectedTab?.id }
         if (i != null) listState.animateScrollToItem(
             i, 0,
         )
     }
 
     // calculate tab width
-    LaunchedEffect(tabList.size, LocalConfiguration.current.orientation) {
+    LaunchedEffect(state.tabList.size, LocalConfiguration.current.orientation) {
         tabAutoWidth = calculateTabWidth()
         Log.d("BrowserTabBar", "tabAutoWidth changed")
     }
 
     // if tab list empty or no tab selected return empty tab list, return nothing
-    if (tabList.isEmpty() || selectedTab == null) return
+    if (state.tabList.isEmpty() || state.selectedTab == null) return
 
     return Box(
         modifier = Modifier
@@ -153,17 +208,17 @@ fun InfernoTabBar(tabList: List<TabSessionState>, selectedTab: TabSessionState?)
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Start,
                 ) {
-                    val selectedIndex = tabList.findIndex { it.id == selectedTab.id }
+                    val selectedIndex = state.tabList.findIndex { it.id == state.selectedTab?.id }
                     item { Spacer(Modifier.width(TAB_END_PADDING)) }
-                    items(tabList.size) {
+                    items(state.tabList.size) {
                         MiniTab(
                             context = context,
-                            tabSessionState = tabList[it],
+                            tabSessionState = state.tabList[it],
                             autoWidth = tabAutoWidth,
-                            selected = tabList[it].id == selectedTab.id,
+                            selected = state.tabList[it].id == state.selectedTab!!.id,
                             index = it,
-                            selectedIndex = selectedIndex!!,
-                            lastIndex = tabList.size - 1
+                            selectedIndex = selectedIndex ?: 0,
+                            lastIndex = state.tabList.size - 1
                         )
                     }
                     item { Spacer(Modifier.width(TAB_END_PADDING)) }
@@ -191,7 +246,7 @@ fun InfernoTabBar(tabList: List<TabSessionState>, selectedTab: TabSessionState?)
                             context.components.newTab(
                                 customHomeUrl = settings.determineCustomHomeUrl(),
                                 private = isPrivateSession,
-                                nextTo = selectedTab.id, // todo: next to current based on config, default is true
+                                nextTo = state.selectedTab!!.id, // todo: next to current based on config, default is true
                             )
                         },
                     painter = painterResource(R.drawable.ic_new_24),
@@ -201,9 +256,9 @@ fun InfernoTabBar(tabList: List<TabSessionState>, selectedTab: TabSessionState?)
         }
 
         // loading bar
-        if (selectedTab.content.loading) {
+        if (state.selectedTab!!.content.loading) {
             ProgressBar(
-                progress = (selectedTab.content.progress.toFloat()) / 100F,
+                progress = (state.selectedTab!!.content.progress.toFloat()) / 100F,
                 modifier = Modifier
                     .align(Alignment.TopCenter)
                     .height(2.dp),
@@ -254,13 +309,12 @@ private fun MiniTab(
                 .let {
                     when (selected) {
                         true -> {
-                            it
-                                .background(
-                                    color = LocalContext.current.infernoTheme().value.secondaryBackgroundColor.copy(
-                                        alpha = UiConst.SECONDARY_BAR_BG_ALPHA
-                                    ),
-                                    shape = MaterialTheme.shapes.small,
-                                )
+                            it.background(
+                                color = LocalContext.current.infernoTheme().value.secondaryBackgroundColor.copy(
+                                    alpha = UiConst.SECONDARY_BAR_BG_ALPHA
+                                ),
+                                shape = MaterialTheme.shapes.small,
+                            )
 //                                .drawWithCache {
 //                                    onDrawWithContent {
 //                                        drawContent()
@@ -346,6 +400,10 @@ private fun MiniTab(
             // site title
             InfernoText(
                 text = tabSessionState.content.title.ifEmpty { tabSessionState.content.url },
+                infernoStyle = when (selected) {
+                    true -> InfernoTextStyle.Small
+                    false -> InfernoTextStyle.SmallSecondary
+                },
                 modifier = Modifier.weight(1F),
                 textAlign = TextAlign.Start,
                 maxLines = 1,

@@ -494,7 +494,7 @@ class Core(
                     ): SearchMiddleware.BundleStorage.Bundle {
                         return SearchMiddleware.BundleStorage.Bundle(
                             list = engines,
-                            defaultSearchEngineId = "ecosia",
+                            defaultSearchEngineId = "brave",
                         )
                     }
 
