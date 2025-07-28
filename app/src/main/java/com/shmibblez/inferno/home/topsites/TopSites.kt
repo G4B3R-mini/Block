@@ -416,7 +416,9 @@ private fun FaviconImage(painter: Painter) {
 @Composable
 private fun TopSiteFavicon(url: String, imageUrl: String? = null) {
     when (url) {
-        SupportUtils.INFERNO_HOME_URL, SupportUtils.INFERNO_HOME_URL_2 -> FaviconImage(
+        SupportUtils.INFERNO_HOME_URL,
+//        SupportUtils.INFERNO_HOME_URL_2,
+            -> FaviconImage(
             painterResource(R.drawable.inferno)
         )
 

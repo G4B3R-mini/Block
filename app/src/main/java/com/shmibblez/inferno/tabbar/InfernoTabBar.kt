@@ -104,14 +104,20 @@ class InfernoTabBarState(
         private set
     var selectedTab by mutableStateOf<TabSessionState?>(null)
         private set
+    var isPrivateSession by mutableStateOf(false)
+        private set
 
     override fun start() {
         scope = store.flowScoped { flow ->
             flow.map { it }.collect {
                 selectedTab = it.selectedTab
-                // update selected tab tray tab based on if normal or private
-                it.selectedTab?.content?.private?.let { private ->
-                    tabList = when (private) {
+                // update tab list and if private or not
+                if (selectedTab == null) {
+                    tabList = emptyList()
+                    isPrivateSession = false
+                } else {
+                    isPrivateSession = selectedTab?.content?.private ?: false
+                    tabList = when (isPrivateSession) {
                         true -> it.privateTabs
                         false -> it.normalTabs
                     }
@@ -157,12 +163,6 @@ fun InfernoTabBar(state: InfernoTabBarState) {
     val listState = rememberLazyListState()
     var tabAutoWidth by remember { mutableStateOf(calculateTabWidth()) }
     // if no tab selected return
-    val isPrivateSession: Boolean = (if (state.tabList.isEmpty()) {
-        Log.d("BrowserTabBar", "tab list empty")
-        false
-    } else if (state.selectedTab == null) {
-        false
-    } else state.tabList.find { it.id == state.selectedTab!!.id }!!.content.private)
 
     // scroll to active tab
     LaunchedEffect(state.selectedTab?.id, LocalConfiguration.current.orientation) {
@@ -245,7 +245,7 @@ fun InfernoTabBar(state: InfernoTabBarState) {
                         .clickable {
                             context.components.newTab(
                                 customHomeUrl = settings.determineCustomHomeUrl(),
-                                private = isPrivateSession,
+                                private = state.isPrivateSession,
                                 nextTo = state.selectedTab!!.id, // todo: next to current based on config, default is true
                             )
                         },
@@ -347,7 +347,7 @@ private fun MiniTab(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             val url = tabSessionState.getUrl()
-            val isHomePage = url == "inferno:home" || url == "about:blank"
+            val isHomePage = url == "inferno:home" // || url == "about:blank"
             val isPrivateHomePage =
                 url == "inferno:privatebrowsing" || url == "about:privatebrowsing"
 

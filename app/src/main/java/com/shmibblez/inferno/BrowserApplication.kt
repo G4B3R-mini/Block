@@ -249,7 +249,9 @@ open class BrowserApplication : LocaleAwareApplication(), Provider {
 //            components.crashReporter.install(this)
 
             setDayNightTheme()
-            components.strictMode.enableStrictMode(true)
+//            components.strictMode.enableStrictMode(true)
+            // was true before (above), causing crash on Pixel 6 Pro, Android 12 (31)
+            components.strictMode.enableStrictMode(false)
             warmBrowsersCache()
 
             initializeWebExtensionSupport()

@@ -75,8 +75,8 @@ internal fun SyncedTabsPage(
     // todo: observe account manager changes to show error if necessary or continue
 //    accountManager.registerForSyncEvents(
 //        SyncStatusObserver(),
-//        owner = TODO(),
-//        autoPause = TODO()
+//        owner = todo,
+//        autoPause = todo
 //    )
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current

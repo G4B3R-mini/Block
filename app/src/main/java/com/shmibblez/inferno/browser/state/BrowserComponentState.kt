@@ -539,7 +539,7 @@ class BrowserComponentState(
     private fun resolvePageType(tabSessionState: TabSessionState?): BrowserComponentPageType {
         val url = tabSessionState?.content?.url
         return if (tabSessionState?.engineState?.crashed == true) BrowserComponentPageType.CRASH
-        else if (url == "inferno:home" || url == "about:blank") // TODO: create const class and set base to inferno:home
+        else if (url == "inferno:home") // || url == "about:blank") // TODO: create const class and set base to inferno:home
             BrowserComponentPageType.HOME
         else if (url == "inferno:privatebrowsing" || url == "about:privatebrowsing")  // TODO: add to const class and set base to inferno:private
             BrowserComponentPageType.HOME_PRIVATE

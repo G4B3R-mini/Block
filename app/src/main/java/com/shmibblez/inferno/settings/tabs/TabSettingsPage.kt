@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -34,113 +35,131 @@ fun TabSettingsPage(goBack: () -> Unit) {
         title = "Tab Settings", // todo: string res
         goBack = goBack,
     ) { edgeInsets ->
-        Column(
-            modifier = Modifier.fillMaxWidth().padding(edgeInsets),
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(edgeInsets),
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.Top,
         ) {
             // general title
-            PreferenceTitle(stringResource(R.string.preferences_category_general))
+            item {
+                PreferenceTitle(stringResource(R.string.preferences_category_general))
+            }
 
             // close tabs method
-            PreferenceSelect(
-                text = stringResource(R.string.preferences_close_tabs),
-                description = "Whether to close tabs manually or automatically after a certain period of time", // todo: string res
-                enabled = true,
-                selectedMenuItem = settings.closeTabsMethod,
-                menuItems = listOf(
-                    InfernoSettings.CloseTabsMethod.CLOSE_TABS_MANUALLY,
-                    InfernoSettings.CloseTabsMethod.CLOSE_TABS_AFTER_ONE_DAY,
-                    InfernoSettings.CloseTabsMethod.CLOSE_TABS_AFTER_ONE_WEEK,
-                    InfernoSettings.CloseTabsMethod.CLOSE_TABS_AFTER_ONE_MONTH,
-                ),
-                mapToTitle = { it.toPrefString(context) },
-                onSelectMenuItem = { closeTabsMethod ->
-                    coroutineScope.launch {
-                        context.infernoSettingsDataStore.updateData {
-                            it.toBuilder().setCloseTabsMethod(closeTabsMethod).build()
+            item {
+                PreferenceSelect(
+                    text = stringResource(R.string.preferences_close_tabs),
+                    description = "Whether to close tabs manually or automatically after a certain period of time", // todo: string res
+                    enabled = true,
+                    selectedMenuItem = settings.closeTabsMethod,
+                    menuItems = listOf(
+                        InfernoSettings.CloseTabsMethod.CLOSE_TABS_MANUALLY,
+                        InfernoSettings.CloseTabsMethod.CLOSE_TABS_AFTER_ONE_DAY,
+                        InfernoSettings.CloseTabsMethod.CLOSE_TABS_AFTER_ONE_WEEK,
+                        InfernoSettings.CloseTabsMethod.CLOSE_TABS_AFTER_ONE_MONTH,
+                    ),
+                    mapToTitle = { it.toPrefString(context) },
+                    onSelectMenuItem = { closeTabsMethod ->
+                        coroutineScope.launch {
+                            context.infernoSettingsDataStore.updateData {
+                                it.toBuilder().setCloseTabsMethod(closeTabsMethod).build()
+                            }
                         }
-                    }
-                },
-            )
+                    },
+                )
+            }
 
             // separate inactive tabs
-            PreferenceSwitch(
-                text = stringResource(R.string.preferences_inactive_tabs),
-                summary = stringResource(R.string.preferences_inactive_tabs_title),
-                selected = settings.shouldSeparateInactiveTabs,
-                onSelectedChange = { shouldSeparateInactiveTabs ->
-                    coroutineScope.launch {
-                        context.infernoSettingsDataStore.updateData {
-                            it.toBuilder().setShouldSeparateInactiveTabs(shouldSeparateInactiveTabs)
-                                .build()
+            item {
+                PreferenceSwitch(
+                    text = stringResource(R.string.preferences_inactive_tabs),
+                    summary = stringResource(R.string.preferences_inactive_tabs_title),
+                    selected = settings.shouldSeparateInactiveTabs,
+                    onSelectedChange = { shouldSeparateInactiveTabs ->
+                        coroutineScope.launch {
+                            context.infernoSettingsDataStore.updateData {
+                                it.toBuilder()
+                                    .setShouldSeparateInactiveTabs(shouldSeparateInactiveTabs)
+                                    .build()
+                            }
                         }
-                    }
-                },
-            )
+                    },
+                )
+            }
 
             // tab bar title
-            PreferenceTitle("Tab Bar Settings") // todo: string res
+            item {
+                PreferenceTitle("Tab Bar Settings")
+            } // todo: string res
 
             // enable tab bar
-            PreferenceSwitch(
-                text = "Enable tab bar", // todo: string res
-                summary = "Whether to show the tab bar in the browser.", // todo: string res
-                selected = settings.isTabBarEnabled,
-                onSelectedChange = { isTabBarEnabled ->
-                    coroutineScope.launch {
-                        context.infernoSettingsDataStore.updateData {
-                            it.toBuilder().setIsTabBarEnabled(isTabBarEnabled).build()
+            item {
+                PreferenceSwitch(
+                    text = "Enable tab bar", // todo: string res
+                    summary = "Whether to show the tab bar in the browser.", // todo: string res
+                    selected = settings.isTabBarEnabled,
+                    onSelectedChange = { isTabBarEnabled ->
+                        coroutineScope.launch {
+                            context.infernoSettingsDataStore.updateData {
+                                it.toBuilder().setIsTabBarEnabled(isTabBarEnabled).build()
+                            }
                         }
-                    }
-                },
-            )
+                    },
+                )
+            }
 
             // tab close where to show
-            PreferenceSelect(
-                text = "Show tab close icon:", // todo: string res
-                // todo: when add gestures, if set to do not show close, check if gesture to close
-                //  tabs is enabled for any option, if not, auto set swipe down on tab or toolbar
-                //  to close and show toast long informing user swipe down gesture was set to
-                //  close tabs
-                description = "Which tabs to show close on. If not visible, a gesture to close tabs must be enabled.", // todo: string res
-                enabled = true,
-                selectedMenuItem = settings.miniTabShowClose,
-                menuItems = listOf(
-                    InfernoSettings.MiniTabShowClose.MINI_TAB_SHOW_ON_ALL,
-                    InfernoSettings.MiniTabShowClose.MINI_TAB_SHOW_ONLY_ON_ACTIVE,
-                    // todo: gestures -> enable when functional
+            item {
+                PreferenceSelect(
+                    text = "Show tab close icon:", // todo: string res
+                    // todo: when add gestures, if set to do not show close, check if gesture to close
+                    //  tabs is enabled for any option, if not, auto set swipe down on tab or toolbar
+                    //  to close and show toast long informing user swipe down gesture was set to
+                    //  close tabs
+                    description = "Which tabs to show close on. If not visible, a gesture to close tabs must be enabled.", // todo: string res
+                    enabled = true,
+                    selectedMenuItem = settings.miniTabShowClose,
+                    menuItems = listOf(
+                        InfernoSettings.MiniTabShowClose.MINI_TAB_SHOW_ON_ALL,
+                        InfernoSettings.MiniTabShowClose.MINI_TAB_SHOW_ONLY_ON_ACTIVE,
+                        // todo: gestures -> enable when functional
 //                    InfernoSettings.MiniTabShowClose.MINI_TAB_SHOW_ON_NONE,
-                ),
-                mapToTitle = { it.toPrefString(context) },
-                onSelectMenuItem = { miniTabShowClose ->
-                    coroutineScope.launch {
-                        context.infernoSettingsDataStore.updateData {
-                            it.toBuilder().setMiniTabShowClose(miniTabShowClose).build()
+                    ),
+                    mapToTitle = { it.toPrefString(context) },
+                    onSelectMenuItem = { miniTabShowClose ->
+                        coroutineScope.launch {
+                            context.infernoSettingsDataStore.updateData {
+                                it.toBuilder().setMiniTabShowClose(miniTabShowClose).build()
+                            }
                         }
-                    }
-                },
-            )
+                    },
+                )
+            }
 
             // vertical tab bar position
-            PreferenceSelect(
-                text = "Tab bar location:", // todo: string res
-                description = "Where to place the tab bar in the browser.", // todo: string res
-                enabled = true,
-                selectedMenuItem = settings.tabBarVerticalPosition,
-                menuItems = listOf(
-                    InfernoSettings.VerticalTabBarPosition.TAB_BAR_BOTTOM,
-                    InfernoSettings.VerticalTabBarPosition.TAB_BAR_TOP,
-                ),
-                mapToTitle = { it.toPrefString(context) },
-                onSelectMenuItem = { tabBarVerticalPosition ->
-                    coroutineScope.launch {
-                        context.infernoSettingsDataStore.updateData {
-                            it.toBuilder().setTabBarVerticalPosition(tabBarVerticalPosition).build()
+            item {
+                PreferenceSelect(
+                    text = "Tab bar location:", // todo: string res
+                    description = "Where to place the tab bar in the browser.", // todo: string res
+                    enabled = true,
+                    selectedMenuItem = settings.tabBarVerticalPosition,
+                    menuItems = listOf(
+                        InfernoSettings.VerticalTabBarPosition.TAB_BAR_BOTTOM,
+                        InfernoSettings.VerticalTabBarPosition.TAB_BAR_TOP,
+                    ),
+                    mapToTitle = { it.toPrefString(context) },
+                    onSelectMenuItem = { tabBarVerticalPosition ->
+                        coroutineScope.launch {
+                            context.infernoSettingsDataStore.updateData {
+                                it.toBuilder().setTabBarVerticalPosition(tabBarVerticalPosition)
+                                    .build()
+                            }
                         }
-                    }
-                },
-            )
+                    },
+                )
+            }
 
             // tab bar position relative to toolbar
             // only show if both toolbar and tab bar are both at top or bottom
@@ -152,49 +171,55 @@ fun TabSettingsPage(goBack: () -> Unit) {
                 settings.toolbarVerticalPosition == InfernoSettings.VerticalToolbarPosition.TOOLBAR_BOTTOM
             val tabBarBottom =
                 settings.tabBarVerticalPosition == InfernoSettings.VerticalTabBarPosition.TAB_BAR_BOTTOM
-            if ((toolbarTop && tabBarTop) || (toolbarBottom && tabBarBottom)) {
+            item {
+                if ((toolbarTop && tabBarTop) || (toolbarBottom && tabBarBottom)) {
+                    PreferenceSelect(
+                        text = "Tab bar position:", // todo: string res
+                        description = "Tab bar position relative to toolbar.", // todo: string res
+                        enabled = true,
+                        selectedMenuItem = settings.tabBarPosition,
+                        menuItems = listOf(
+                            InfernoSettings.TabBarPosition.TAB_BAR_ABOVE_TOOLBAR,
+                            InfernoSettings.TabBarPosition.TAB_BAR_BELOW_TOOLBAR,
+                        ),
+                        mapToTitle = { it.toPrefString(context) },
+                        onSelectMenuItem = { tabBarPosition ->
+                            coroutineScope.launch {
+                                context.infernoSettingsDataStore.updateData {
+                                    it.toBuilder().setTabBarPosition(tabBarPosition).build()
+                                }
+                            }
+                        },
+                    )
+                }
+            }
+
+            // tab tray title
+            item {
+                PreferenceTitle("Tab Tray") // todo: string res
+            }
+
+            // tab tray layout
+            item {
                 PreferenceSelect(
-                    text = "Tab bar position:", // todo: string res
-                    description = "Tab bar position relative to toolbar.", // todo: string res
+                    text = stringResource(R.string.preferences_tab_view),
+                    description = "How to display tabs inside tab tray.", // todo: string res
                     enabled = true,
-                    selectedMenuItem = settings.tabBarPosition,
+                    selectedMenuItem = settings.tabTrayStyle,
                     menuItems = listOf(
-                        InfernoSettings.TabBarPosition.TAB_BAR_ABOVE_TOOLBAR,
-                        InfernoSettings.TabBarPosition.TAB_BAR_BELOW_TOOLBAR,
+                        InfernoSettings.TabTrayStyle.TAB_TRAY_LIST,
+                        InfernoSettings.TabTrayStyle.TAB_TRAY_GRID,
                     ),
                     mapToTitle = { it.toPrefString(context) },
-                    onSelectMenuItem = { tabBarPosition ->
+                    onSelectMenuItem = { tabTrayStyle ->
                         coroutineScope.launch {
                             context.infernoSettingsDataStore.updateData {
-                                it.toBuilder().setTabBarPosition(tabBarPosition).build()
+                                it.toBuilder().setTabTrayStyle(tabTrayStyle).build()
                             }
                         }
                     },
                 )
             }
-
-            // tab tray title
-            PreferenceTitle("Tab Tray") // todo: string res
-
-            // tab tray layout
-            PreferenceSelect(
-                text = stringResource(R.string.preferences_tab_view),
-                description = "How to display tabs inside tab tray.", // todo: string res
-                enabled = true,
-                selectedMenuItem = settings.tabTrayStyle,
-                menuItems = listOf(
-                    InfernoSettings.TabTrayStyle.TAB_TRAY_LIST,
-                    InfernoSettings.TabTrayStyle.TAB_TRAY_GRID,
-                ),
-                mapToTitle = { it.toPrefString(context) },
-                onSelectMenuItem = { tabTrayStyle ->
-                    coroutineScope.launch {
-                        context.infernoSettingsDataStore.updateData {
-                            it.toBuilder().setTabTrayStyle(tabTrayStyle).build()
-                        }
-                    }
-                },
-            )
         }
     }
 }

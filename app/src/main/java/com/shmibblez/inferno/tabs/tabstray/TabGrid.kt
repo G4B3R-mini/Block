@@ -17,5 +17,5 @@ fun TabGrid(
     onTabDragStart: () -> Unit,
     onTabLongClick: (TabSessionState) -> Unit,
 ) {
-    TODO()
+    // todo: not implemented yet (urgent)
 }

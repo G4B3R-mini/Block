@@ -216,7 +216,7 @@ fun RecentTabImage(
 
     val context = LocalContext.current
     val isHomePage =
-        previewImageUrl == SupportUtils.INFERNO_HOME_URL || previewImageUrl == SupportUtils.INFERNO_HOME_URL_2
+        previewImageUrl == SupportUtils.INFERNO_HOME_URL // || previewImageUrl == SupportUtils.INFERNO_HOME_URL_2
     val isPrivateHomePage =
         previewImageUrl == SupportUtils.INFERNO_PRIVATE_HOME_URL || previewImageUrl == SupportUtils.INFERNO_PRIVATE_HOME_URL_2
     val icon = when {
@@ -292,7 +292,7 @@ private fun RecentTabIcon(
     icon: Bitmap? = null,
 ) {
     val context = LocalContext.current
-    val isHomePage = url == SupportUtils.INFERNO_HOME_URL || url == SupportUtils.INFERNO_HOME_URL_2
+    val isHomePage = url == SupportUtils.INFERNO_HOME_URL // || url == SupportUtils.INFERNO_HOME_URL_2
     val isPrivateHomePage =
         url == SupportUtils.INFERNO_PRIVATE_HOME_URL || url == SupportUtils.INFERNO_PRIVATE_HOME_URL_2
     val homeIcon = when {

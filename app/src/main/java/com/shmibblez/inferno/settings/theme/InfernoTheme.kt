@@ -154,25 +154,26 @@ open class InfernoTheme(
             secondaryOutlineColor = Color(0xffa599a5), // light grey
             primaryActionColor = Color(0xffcc0000), // red
             secondaryActionColor = Color(0xff1c2329), // mid dark gray
-            errorColor = Color(0xffcc0000), // red
+            errorColor = Color(0xffcc0000), // redSettingsPage
             primaryBackgroundColor = Color(0xff000000), // black
-            secondaryBackgroundColor = Color(0xff1c2025), // dark gray with hint of blue
+            secondaryBackgroundColor = Color(0xff2c3035), // dark gray with hint of blue
         )
 
+        // todo: refine, this looks really bad lmao
         fun light(context: Context) = InfernoTheme(
             defaultType = InfernoSettings.DefaultTheme.INFERNO_LIGHT,
             name = context.getString(R.string.preference_light_theme),
-            primaryTextColor = Color.Black,
-            secondaryTextColor = Color.Black.copy(alpha = 0.75F),
-            primaryIconColor = Color.Black,
-            secondaryIconColor = Color.Black.copy(alpha = 0.75F),
-            primaryOutlineColor = Color.Black,
-            secondaryOutlineColor = Color.Black.copy(alpha = 0.75F),
-            primaryActionColor = Color.Red,
-            secondaryActionColor = Color.Red.copy(alpha = 0.75F),
-            errorColor = Color.Red,
-            primaryBackgroundColor = Color.White,
-            secondaryBackgroundColor = Color.LightGray,
+            primaryTextColor = Color(0xff000000), // default
+            secondaryTextColor = Color(0xff5f5f5f), // default
+            primaryIconColor = Color(0xff000000), // default
+            secondaryIconColor = Color(0xff5f5f5f), // default
+            primaryOutlineColor = Color(0xff000000), // default
+            secondaryOutlineColor = Color(0xff888888), // default
+            primaryActionColor = Color(0xffff0000), // red
+            secondaryActionColor = Color(0xff990000), // default
+            errorColor = Color(0xffff0000), // default
+            primaryBackgroundColor = Color(0xffffffff), // default
+            secondaryBackgroundColor = Color(0xffa0a0a0), // default
         )
 
         // todo: refine incog based on moz private theme

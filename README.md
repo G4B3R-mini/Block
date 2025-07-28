@@ -18,13 +18,8 @@ that's it for now, hopefully this project doesn't die
 
 ## Search Engines
 
-- Set default search engine to best on this list (between DuckDuckGo, Brave Search, and Ecosia)
 - Engines to add as defaults:
-    - Startpage
-    - SearXNG
-    - Qwant
-    - Dogpile (still exists, ui is pretty bad)
-- move google to the bottom
+    - May be able to add at least one SearXNG, or a couple default instances
 
 ## Toolbar Settings
 

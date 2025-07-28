@@ -44,8 +44,25 @@ internal fun PrivateTabsPage(
             )
         }
 
-        InfernoSettings.TabTrayStyle.TAB_TRAY_GRID -> {
-            TabGrid(
+//        InfernoSettings.TabTrayStyle.TAB_TRAY_GRID -> {
+//            TabGrid(
+//                activeTabId = activeTabId,
+//                activeTabIndex = activeTabIndex,
+//                tabs = privateTabs,
+//                mode = mode,
+//                header = header,
+//                onTabClick = onTabClick,
+//                onTabClose = onTabClose,
+//                onTabMediaClick = onTabMediaClick,
+//                onTabMove = onTabMove,
+//                onTabDragStart = onTabDragStart,
+//                onTabLongClick = onTabLongClick,
+//            )
+//        }
+
+        // fixme: for now while TabGrid is implemented
+        else -> {
+            TabList(
                 activeTabId = activeTabId,
                 activeTabIndex = activeTabIndex,
                 tabs = privateTabs,

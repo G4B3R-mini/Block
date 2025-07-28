@@ -56,7 +56,7 @@ fun Favicon(
         )
     }
     val context = LocalContext.current
-    val isHomepage = url == SupportUtils.INFERNO_HOME_URL || url == SupportUtils.INFERNO_HOME_URL_2
+    val isHomepage = url == SupportUtils.INFERNO_HOME_URL // || url == SupportUtils.INFERNO_HOME_URL_2
     val isPrivateHomepage =
         url == SupportUtils.INFERNO_PRIVATE_HOME_URL || url == SupportUtils.INFERNO_PRIVATE_HOME_URL_2
     val icon = when {
