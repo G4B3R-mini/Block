@@ -239,6 +239,12 @@ class Settings(private val appContext: Context) : PreferencesHolder {
             }
         }
 
+    var toolbarVerticalPosition: InfernoSettings.VerticalToolbarPosition
+        get() = getPref(default = InfernoSettings.VerticalToolbarPosition.TOOLBAR_BOTTOM) { it?.toolbarVerticalPosition }
+        set(value) {
+            setPref { it.setToolbarVerticalPosition(value) }
+        }
+
     //    var shouldUseBottomToolbar by booleanPreference(
 //        key = appContext.getPreferenceKey(R.string.pref_key_toolbar_bottom),
 //        default = false,
@@ -247,7 +253,7 @@ class Settings(private val appContext: Context) : PreferencesHolder {
     var inAppToolbarVerticalPosition: InfernoSettings.VerticalToolbarPosition
         get() = getPref(default = InfernoSettings.VerticalToolbarPosition.TOOLBAR_BOTTOM) { it?.inAppToolbarVerticalPosition }
         set(value) {
-            setPref { it.setToolbarVerticalPosition(value) }
+            setPref { it.setInAppToolbarVerticalPosition(value) }
         }
     var toolbarItems: List<InfernoSettings.ToolbarItem>
         get() = getPref(default = (null as InfernoSettings.ToolbarItem?).defaultToolbarItems) { it?.toolbarItemsList }

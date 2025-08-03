@@ -59,6 +59,10 @@ private data class StoppedDownloadState(
     val downloadJobStatus: Status,
 )
 
+
+/**
+ * Shows prompts when download requested and finished
+ */
 @Composable
 fun DownloadComponent(
     applicationContext: Context,

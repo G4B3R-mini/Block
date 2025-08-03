@@ -25,13 +25,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
@@ -47,7 +45,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.platform.LocalContext
@@ -102,6 +99,7 @@ import com.shmibblez.inferno.home.InfernoHomeComponent
 import com.shmibblez.inferno.home.rememberInfernoHomeComponentState
 import com.shmibblez.inferno.messaging.FenixMessageSurfaceId
 import com.shmibblez.inferno.perf.MarkersFragmentLifecycleCallbacks
+import com.shmibblez.inferno.proto.InfernoSettings
 import com.shmibblez.inferno.settings.biometric.BiometricPromptFeature
 import com.shmibblez.inferno.shortcut.PwaOnboardingObserver
 import com.shmibblez.inferno.tabbar.InfernoTabBar
@@ -279,14 +277,87 @@ object UiConst {
     val READER_VIEW_HEIGHT = 50.dp
     val PROGRESS_BAR_HEIGHT = 2.dp
     private val FULLSCREEN_BOTTOM_BAR_HEIGHT = 0.dp
-    fun calcBottomBarHeight(browserComponentMode: BrowserComponentMode): Dp {
-        return when (browserComponentMode) {
-            BrowserComponentMode.TOOLBAR -> TOOLBAR_HEIGHT + TAB_BAR_HEIGHT
-            BrowserComponentMode.TOOLBAR_SEARCH -> TOOLBAR_HEIGHT
-            BrowserComponentMode.TOOLBAR_EXTERNAL -> EXTERNAL_TOOLBAR_HEIGHT
-            BrowserComponentMode.FIND_IN_PAGE -> FIND_IN_PAGE_BAR_HEIGHT
-            BrowserComponentMode.READER_VIEW -> READER_VIEW_HEIGHT
-            BrowserComponentMode.FULLSCREEN -> FULLSCREEN_BOTTOM_BAR_HEIGHT
+    fun calcBottomBarHeight(
+        browserComponentMode: BrowserComponentMode,
+        toolbarPosition: InfernoSettings.VerticalToolbarPosition,
+        tabBarPosition: InfernoSettings.VerticalTabBarPosition,
+        tabBarActive: Boolean,
+    ): Dp {
+        if (toolbarPosition == InfernoSettings.VerticalToolbarPosition.TOOLBAR_BOTTOM) {
+            // if toolbar top
+            return when (browserComponentMode) {
+                BrowserComponentMode.TOOLBAR -> {
+                    if (tabBarActive && tabBarPosition == InfernoSettings.VerticalTabBarPosition.TAB_BAR_BOTTOM) {
+                        // toolbar and tab bar top
+                        TOOLBAR_HEIGHT + TAB_BAR_HEIGHT
+                    } else {
+                        // only toolbar top
+                        TOOLBAR_HEIGHT
+                    }
+                }
+
+                BrowserComponentMode.TOOLBAR_SEARCH -> TOOLBAR_HEIGHT
+                BrowserComponentMode.TOOLBAR_EXTERNAL -> EXTERNAL_TOOLBAR_HEIGHT
+                BrowserComponentMode.FIND_IN_PAGE -> FIND_IN_PAGE_BAR_HEIGHT
+                BrowserComponentMode.READER_VIEW -> READER_VIEW_HEIGHT
+                BrowserComponentMode.FULLSCREEN -> FULLSCREEN_BOTTOM_BAR_HEIGHT
+            }
+        } else {
+            // toolbar position bottom
+            return when (browserComponentMode) {
+                BrowserComponentMode.TOOLBAR -> {
+                    // toolbar bottom
+                    if (tabBarActive && tabBarPosition == InfernoSettings.VerticalTabBarPosition.TAB_BAR_BOTTOM) {
+                        TAB_BAR_HEIGHT
+                    } else {
+                        0.dp
+                    }
+                }
+
+                else -> 0.dp
+            }
+        }
+    }
+
+    fun calcTopBarHeight(
+        browserComponentMode: BrowserComponentMode,
+        toolbarPosition: InfernoSettings.VerticalToolbarPosition,
+        tabBarPosition: InfernoSettings.VerticalTabBarPosition,
+        tabBarActive: Boolean,
+    ): Dp {
+        if (toolbarPosition == InfernoSettings.VerticalToolbarPosition.TOOLBAR_TOP) {
+            // if toolbar top
+            return when (browserComponentMode) {
+                BrowserComponentMode.TOOLBAR -> {
+                    if (tabBarActive && tabBarPosition == InfernoSettings.VerticalTabBarPosition.TAB_BAR_TOP) {
+                        // toolbar and tab bar top
+                        TOOLBAR_HEIGHT + TAB_BAR_HEIGHT
+                    } else {
+                        // only toolbar top
+                        TOOLBAR_HEIGHT
+                    }
+                }
+
+                BrowserComponentMode.TOOLBAR_SEARCH -> TOOLBAR_HEIGHT
+                BrowserComponentMode.TOOLBAR_EXTERNAL -> EXTERNAL_TOOLBAR_HEIGHT
+                BrowserComponentMode.FIND_IN_PAGE -> FIND_IN_PAGE_BAR_HEIGHT
+                BrowserComponentMode.READER_VIEW -> READER_VIEW_HEIGHT
+                BrowserComponentMode.FULLSCREEN -> FULLSCREEN_BOTTOM_BAR_HEIGHT
+            }
+        } else {
+            // toolbar position bottom
+            return when (browserComponentMode) {
+                BrowserComponentMode.TOOLBAR -> {
+                    // toolbar bottom
+                    if (tabBarActive && tabBarPosition == InfernoSettings.VerticalTabBarPosition.TAB_BAR_TOP) {
+                        TAB_BAR_HEIGHT
+                    } else {
+                        0.dp
+                    }
+                }
+
+                else -> 0.dp
+            }
         }
     }
 }
@@ -401,15 +472,6 @@ fun BrowserComponent(
             }.toIntArray()
             sitePermissionsFeature?.onPermissionsResult(permissions, grantResults)
         }
-//    var tempWebPrompterState by remember { mutableStateOf<InfernoWebPrompterState?>(null) }
-//    val requestPromptsPermissionsLauncher: ActivityResultLauncher<Array<String>> =
-//        rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { results ->
-//            val permissions = results.keys.toTypedArray()
-//            val grantResults = results.values.map {
-//                if (it) PackageManager.PERMISSION_GRANTED else PackageManager.PERMISSION_DENIED
-//            }.toIntArray()
-//            tempWebPrompterState?.onPermissionsResult(permissions, grantResults)
-//        }
 
     // endregion
 
@@ -419,139 +481,46 @@ fun BrowserComponent(
     var bottomBarHeightDp by remember {
         mutableStateOf(
             UiConst.calcBottomBarHeight(
-                BrowserComponentMode.TOOLBAR
+                browserComponentMode = BrowserComponentMode.TOOLBAR,
+                toolbarPosition = context.settings().toolbarVerticalPosition,
+                tabBarPosition = context.settings().tabBarVerticalPosition,
+                tabBarActive = context.settings().isTabBarEnabled,
+            )
+        )
+    }
+    var topBarHeightDp by remember {
+        mutableStateOf(
+            UiConst.calcTopBarHeight(
+                browserComponentMode = BrowserComponentMode.TOOLBAR,
+                toolbarPosition = context.settings().toolbarVerticalPosition,
+                tabBarPosition = context.settings().tabBarVerticalPosition,
+                tabBarActive = context.settings().isTabBarEnabled,
             )
         )
     }
 
-    LaunchedEffect(state.browserMode) {
-        bottomBarHeightDp = UiConst.calcBottomBarHeight(state.browserMode)
+    LaunchedEffect(
+        state.browserMode,
+        context.settings().toolbarVerticalPosition,
+        context.settings().tabBarVerticalPosition,
+        context.settings().isTabBarEnabled
+    ) {
+        bottomBarHeightDp = UiConst.calcBottomBarHeight(
+            browserComponentMode = state.browserMode,
+            toolbarPosition = context.settings().toolbarVerticalPosition,
+            tabBarPosition = context.settings().tabBarVerticalPosition,
+            tabBarActive = context.settings().isTabBarEnabled,
+        )
+        topBarHeightDp = UiConst.calcTopBarHeight(
+            browserComponentMode = state.browserMode,
+            toolbarPosition = context.settings().toolbarVerticalPosition,
+            tabBarPosition = context.settings().tabBarVerticalPosition,
+            tabBarActive = context.settings().isTabBarEnabled,
+        )
     }
 
     val bottomBarOffsetPx = remember { Animatable(0F) }
-
-    // endregion
-
-    // region InfernoWebPrompterState
-
-//    val webPrompterState = rememberInfernoWebPrompterState(
-//        activity = context.getActivity()!!,
-//        biometricPromptCallbackManager = biometricPromptCallbackManager,
-//        store = store,
-//        customTabId = state.customTabSessionId,
-//        tabsUseCases = context.components.useCases.tabsUseCases,
-//        fileUploadsDirCleaner = context.components.core.fileUploadsDirCleaner,
-//        creditCardValidationDelegate = DefaultCreditCardValidationDelegate(
-//            context.components.core.lazyAutofillStorage,
-//        ),
-//        loginValidationDelegate = DefaultLoginValidationDelegate(
-//            context.components.core.lazyPasswordsStorage,
-//        ),
-//        isLoginAutofillEnabled = {
-//            context.settings().shouldAutofillLogins
-//        },
-//        isSaveLoginEnabled = {
-//            context.settings().shouldPromptToSaveLogins
-//        },
-//        isCreditCardAutofillEnabled = {
-//            context.settings().shouldAutofillCreditCardDetails
-//        },
-//        isAddressAutofillEnabled = {
-//            context.settings().addressFeature && context.settings().shouldAutofillAddressDetails
-//        },
-//        loginExceptionStorage = context.components.core.loginExceptionStorage,
-//        shareDelegate = object : ShareDelegate {
-//            // todo: replace with context.share
-//            override fun showShareSheet(
-//                context: Context,
-//                shareData: ShareData,
-//                onDismiss: () -> Unit,
-//                onSuccess: () -> Unit,
-//            ) {
-//                (shareData.url ?: shareData.text)?.let {
-//                    val subject = shareData.title
-//                        ?: context.getString(R.string.mozac_support_ktx_share_dialog_title)
-//                    context.share(it, subject = subject)
-//                }
-////                val directions = NavGraphDirections.actionGlobalShareFragment(
-////                    data = arrayOf(shareData),
-////                    showPage = true,
-////                    sessionId = getCurrentTab(context)?.id,
-////                )
-////                navController.navigate(directions)
-//            }
-//        },
-//        onNeedToRequestPermissions = { permissions ->
-////            requestPermissions(permissions, BaseBrowserFragment.REQUEST_CODE_PROMPT_PERMISSIONS)
-//            requestPromptsPermissionsLauncher.launch(permissions)
-//        },
-//        loginDelegate = object : InfernoLoginDelegate {
-//            override val onManageLogins = {
-//                onNavToPasswords.invoke()
-//            }
-//        },
-//        shouldAutomaticallyShowSuggestedPassword = { context.settings().isFirstTimeEngagingWithSignup },
-//        onFirstTimeEngagedWithSignup = {
-//            context.settings().isFirstTimeEngagingWithSignup = false
-//        },
-//        onSaveLoginWithStrongPassword = { url, password ->
-//            handleOnSaveLoginWithGeneratedStrongPassword(
-//                passwordsStorage = context.components.core.passwordsStorage,
-//                url = url,
-//                password = password,
-//                lifecycleScope = coroutineScope,
-//                setLastSavedGeneratedPassword = { state.lastSavedGeneratedPassword = it },
-//            )
-//        },
-//        onSaveLogin = { isUpdate ->
-//            showSnackbarAfterLoginChange(
-//                isUpdate = isUpdate,
-//                context = context,
-//                coroutineScope = coroutineScope,
-//                snackbarHostState = snackbarHostState,
-//            )
-//        },
-//        hideUpdateFragmentAfterSavingGeneratedPassword = { username, password ->
-//            hideUpdateFragmentAfterSavingGeneratedPassword(
-//                username = username,
-//                password = password,
-//                lastSavedGeneratedPassword = state.lastSavedGeneratedPassword
-//            )
-//        },
-//        removeLastSavedGeneratedPassword = {
-//            removeLastSavedGeneratedPassword(
-//                setLastSavedGeneratedPassword = { state.lastSavedGeneratedPassword = it },
-//            )
-//        },
-//        creditCardDelegate =
-//            object : InfernoCreditCardDelegate {
-//                override val onManageCreditCards = {
-//                    onNavToAutofillSettings.invoke()
-//                }
-//                override val onSelectCreditCard = {
-//                    // todo: add support for pin
-//                    biometricPromptCallbackManager.showPrompt(
-//                        title = context.getString(R.string.credit_cards_biometric_prompt_message),
-//                    )
-////                    showBiometricPrompt(
-////                        context = context,
-////                        title = context.getString(R.string.credit_cards_biometric_prompt_unlock_message_2),
-////                        biometricPromptCallbackManager = biometricPromptCallbackManager,
-////                        webPrompterState = prompterState,
-////                        startForResult = activityResultLauncher,
-////                        setAlertDialog = { activeAlertDialog = it },
-////                    )
-//                }
-//        },
-//        addressDelegate = object : AddressDelegate {
-//            override val addressPickerView
-//                get() = null
-//            override val onManageAddresses = {
-//                onNavToAutofillSettings.invoke()
-//            }
-//        },
-//    )
-//    tempWebPrompterState = webPrompterState
+    val topBarOffsetPx = remember { Animatable(0F) }
 
     // endregion
 
@@ -570,29 +539,6 @@ fun BrowserComponent(
     )
 
     // endregion
-
-    val backHandler = OnBackPressedHandler(
-        context = context,
-        toolbarBackPressedHandler = {
-            if (state.browserMode != BrowserComponentMode.TOOLBAR) {
-                state.setBrowserModeToolbar()
-                true
-            } else {
-                false
-            }
-        },
-        readerViewBackPressedHandler = {
-            if (infernoReaderViewState.active) {
-                infernoReaderViewState.hideReaderView()
-                true
-            } else {
-                false
-            }
-        },
-        fullScreenFeature = fullScreenFeature,
-//        promptsFeature = promptsFeature,
-        sessionFeature = sessionFeature,
-    )
 
     // show alert dialog if not null
     if (activeAlertDialog != null) {
@@ -634,10 +580,37 @@ fun BrowserComponent(
         engineView?.setVerticalClipping(h)
     }
 
+    // region Back Event Handling
+
+    val backHandler = OnBackPressedHandler(
+        context = context,
+        toolbarBackPressedHandler = {
+            if (state.browserMode != BrowserComponentMode.TOOLBAR) {
+                state.setBrowserModeToolbar()
+                true
+            } else {
+                false
+            }
+        },
+        readerViewBackPressedHandler = {
+            if (infernoReaderViewState.active) {
+                infernoReaderViewState.hideReaderView()
+                true
+            } else {
+                false
+            }
+        },
+        fullScreenFeature = fullScreenFeature,
+//        promptsFeature = promptsFeature,
+        sessionFeature = sessionFeature,
+    )
+
     // on back pressed handlers
     BackHandler {
         onBackPressed(backHandler)
     }
+
+    // endregion
 
     // region InfernoTabsTrayState
 
@@ -1000,119 +973,7 @@ fun BrowserComponent(
 
     // endregion
 
-    // region ToolbarMenuBottomSheet todo: move to state, show/hide there
-
-    ToolbarMenuBottomSheet(
-        visible = showToolbarMenuBottomSheet,
-        tabSessionState = state.currentTab,
-        loading = state.currentTab?.content?.loading ?: false,
-        tabCount = state.tabList.size,
-        onDismissMenuBottomSheet = { showToolbarMenuBottomSheet = false },
-        onActivateFindInPage = { state.setBrowserModeFindInPage() },
-        onActivateReaderView = {
-            val successful = infernoReaderViewState.showReaderView()
-            if (successful) {
-                state.setBrowserModeReaderView()
-            }
-        },
-        onRequestSearchBar = { /* todo */ },
-        onNavToSettings = onNavToSettings,
-        onNavToTabsTray = tabsTrayState::show,
-        onNavToHistory = onNavToHistory,
-        onNavToBookmarks = onNavToBookmarks,
-        onNavToAddBookmarkDialog = {
-            state.currentTab?.content?.let { onNavToAddBookmarkDialog.invoke(it.title, it.url) }
-        },
-        onNavToExtensions = onNavToExtensions,
-        onNavToPasswords = onNavToPasswords,
-    )
-
-    // endregion
-
-    // region InfernoTabsTray
-
-
-    InfernoTabsTray(state = tabsTrayState)
-
-    // endregion
-
-    // region DownloadComponent
-
-    val downloadManager = remember {
-        FetchDownloadManager(
-            context.applicationContext,
-            store,
-            DownloadService::class,
-            notificationsDelegate = context.components.notificationsDelegate,
-        )
-    }
-
-    DownloadComponent(
-        applicationContext = context.applicationContext,
-        store = store,
-        useCases = context.components.useCases.downloadUseCases,
-        customTabSessionId = state.customTabSessionId,
-        downloadManager = downloadManager,
-        shouldForwardToThirdParties = {
-            context.settings().shouldUseExternalDownloadManager
-//            PreferenceManager.getDefaultSharedPreferences(context).getBoolean(
-//                context.getPreferenceKey(R.string.pref_key_external_download_manager),
-//                false, // todo: test if true
-//            )
-        },
-        onNeedToRequestPermissions = { permissions ->
-            // todo: test
-            requestDownloadPermissionsLauncher.launch(permissions)
-//            requestPermissions(permissions, REQUEST_CODE_DOWNLOAD_PERMISSIONS)
-        },
-        onCannotOpenFile = {
-            showCannotOpenFileError(
-                context = context,
-                downloadState = it,
-                coroutineScope = coroutineScope,
-                snackbarHostState = snackbarHostState,
-            )
-        },
-        useCustomFirstPartyDownloadPrompt = true,
-        useCustomThirdPartyDownloadDialog = true,
-        setOnPermissionsResultCallback = {
-            requestDownloadPermissionsCallback = it
-        },
-    )
-
-    // endregion
-
-    // region InfernoWebPrompter
-
-    InfernoWebPrompter(
-        state = webPrompterState,
-        onNavToAutofillSettings = onNavToAutofillSettings,
-    )
-
-    // endregion
-
-    // region ConextMenuComponent
-
-    ContextMenuComponent(
-        store = store,
-        engineView = engineView,
-        useCases = context.components.useCases.contextMenuUseCases,
-        tabId = state.customTabSessionId,
-    )
-
-    // endregion
-
-    // region InfernoToolbarState
-
-    val toolbarState by rememberInfernoToolbarState()
-
-    // endregion
-
-    // region InfernoTabBarState
-
-    val tabBarState by rememberInfernoTabBarState()
-
-    // endregion
+    // region Lifecycle Events
 
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
@@ -1244,7 +1105,9 @@ fun BrowserComponent(
         }
     }
 
-    // region init and dispose features
+    // endregion
+
+    // region Feature Lifecycle Management
 
     DisposableEffect(engineView == null, state.customTabSessionId) {
         if (engineView != null) {
@@ -1633,6 +1496,116 @@ fun BrowserComponent(
 
     // endregion
 
+    // region InfernoToolbarState
+
+    val toolbarState by rememberInfernoToolbarState()
+
+    // endregion
+
+    // region InfernoTabBarState
+
+    val tabBarState by rememberInfernoTabBarState()
+
+    // endregion
+
+    @Composable
+    fun externalToolbar() {
+        InfernoExternalToolbar(
+            isAuth = state.isAuth,
+            showExternalToolbar = state.showExternalToolbar,
+            session = state.currentCustomTab,
+            onNavToBrowser = {
+                state.migrateExternalToNormal()
+                context.getActivity()?.let {
+                    it.finish()
+                    // todo: intent launcher, create funs for adding flags to intent for different task types (browser, custom tab, pwa)
+                    val intent = Intent(context, HomeActivity::class.java)
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    it.startActivity(intent)
+                }
+            },
+            onToggleDesktopMode = { state.toggleDesktopMode() },
+            onGoBack = {
+                if (state.isAuth) {
+                    // if is auth activity, exit
+                    context.getActivity()!!.finish()
+                } else if (state.currentCustomTab?.content?.canGoBack != false) {
+                    // if can go back (or sesh null), invoke go back
+                    context.components.useCases.sessionUseCases.goBack.invoke(it)
+                } else {
+                    // if cant go back, end activity / return to app that launched
+                    context.getActivity()!!.finish()
+                }
+            },
+            onGoForward = {
+                context.components.useCases.sessionUseCases.goForward.invoke(it)
+            },
+            onReload = {
+                context.components.useCases.sessionUseCases.reload.invoke(it)
+            },
+            onShare = { context.share(it) },
+        )
+    }
+
+    @Composable
+    fun toolbar() {
+        InfernoToolbar(
+            state = toolbarState,
+            onShowMenuBottomSheet = { showToolbarMenuBottomSheet = true },
+            onDismissMenuBottomSheet = { showToolbarMenuBottomSheet = false },
+            onRequestSearchBar = { /* todo: search bar, fills page and has 32.dp padding from insets */ },
+            onActivateFindInPage = { state.setBrowserModeFindInPage() },
+            onActivateReaderView = {
+                val successful = infernoReaderViewState.showReaderView()
+                if (successful) {
+                    state.setBrowserModeReaderView()
+                }
+            },
+            onNavToSettings = onNavToSettings,
+            onNavToHistory = onNavToHistory,
+            onNavToBookmarks = onNavToBookmarks,
+            onNavToAddBookmarkDialog = {
+                state.currentTab?.content?.let {
+                    onNavToAddBookmarkDialog.invoke(it.title, it.url)
+                }
+            },
+            onNavToExtensions = onNavToExtensions,
+            onNavToPasswords = onNavToPasswords,
+            onNavToTabsTray = tabsTrayState::show,
+            editMode = state.browserMode == BrowserComponentMode.TOOLBAR_SEARCH,
+            onStartSearch = { state.setBrowserModeSearch() },
+            onStopSearch = { state.setBrowserModeToolbar() },
+        )
+    }
+
+    @Composable
+    fun tabBar() {
+        val bothTopOrBottom =
+            (context.settings().toolbarVerticalPosition == InfernoSettings.VerticalToolbarPosition.TOOLBAR_TOP && context.settings().tabBarVerticalPosition == InfernoSettings.VerticalTabBarPosition.TAB_BAR_TOP) || (context.settings().toolbarVerticalPosition == InfernoSettings.VerticalToolbarPosition.TOOLBAR_BOTTOM && context.settings().tabBarVerticalPosition == InfernoSettings.VerticalTabBarPosition.TAB_BAR_BOTTOM)
+        InfernoTabBar(
+            state = tabBarState,
+            isAboveToolbar = bothTopOrBottom && context.settings().tabBarPosition == InfernoSettings.TabBarPosition.TAB_BAR_ABOVE_TOOLBAR,
+            isBelowToolbar = bothTopOrBottom && context.settings().tabBarPosition == InfernoSettings.TabBarPosition.TAB_BAR_BELOW_TOOLBAR,
+        )
+    }
+
+    @Composable
+    fun readerViewControls() {
+        InfernoReaderViewControls(
+            state = infernoReaderViewState,
+        )
+    }
+
+    @Composable
+    fun findInPageBar() {
+        BrowserFindInPageBar(
+            onDismiss = { state.setBrowserModeToolbar() },
+            engineSession = state.currentTab?.engineState?.engineSession,
+            engineView = engineView,
+            session = state.currentTab,
+        )
+    }
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         snackbarHost = { SnackbarHost(snackbarHostState = snackbarHostState) },
@@ -1751,37 +1724,69 @@ fun BrowserComponent(
                                 startY = it.y
                                 // if not loading scroll
 //                                if (currentTab?.content?.loading == false) {
-                                val newOffset = (bottomBarOffsetPx.value - dy).coerceIn(
+                                val newBottomOffset = (bottomBarOffsetPx.value - dy).coerceIn(
                                     0F,
                                     bottomBarHeightDp
                                         .dpToPx(context)
                                         .toFloat()
                                 )
+                                val newTopOffset = (topBarOffsetPx.value - dy).coerceIn(
+                                    0F,
+                                    topBarHeightDp
+                                        .dpToPx(context)
+                                        .toFloat()
+                                )
                                 coroutineScope.launch {
-                                    bottomBarOffsetPx.snapTo(newOffset)
-//                                setEngineDynamicToolbarMaxHeight(
-//                                    bottomBarHeightDp.dpToPx(context) - newOffset.toInt()
-//                                )
+                                    this.async {
+                                        bottomBarOffsetPx.snapTo(newBottomOffset)
+                                    }
+                                    this.async {
+                                        topBarOffsetPx.snapTo(newTopOffset)
+                                    }
                                 }
 //                                }
                             }
                             if (it.action == MotionEvent.ACTION_UP || it.action == MotionEvent.ACTION_CANCEL) {
+                                val refPx: Float
+                                val maxRefPx: Int
+                                when (context.settings().toolbarVerticalPosition) {
+                                    InfernoSettings.VerticalToolbarPosition.TOOLBAR_BOTTOM -> {
+                                        refPx = bottomBarOffsetPx.value
+                                        maxRefPx = bottomBarHeightDp.dpToPx(context)
+                                    }
+
+                                    InfernoSettings.VerticalToolbarPosition.TOOLBAR_TOP -> {
+                                        refPx = topBarOffsetPx.value
+                                        maxRefPx = topBarHeightDp.dpToPx(context)
+                                    }
+                                }
                                 // set bottom bar position
                                 coroutineScope.launch {
-                                    if (bottomBarOffsetPx.value <= (bottomBarHeightDp.dpToPx(context) / 2)) {
-                                        // if more than halfway up, go up
-                                        bottomBarOffsetPx.animateTo(0F)
+                                    if (refPx <= (maxRefPx / 2)) {
+                                        // if more than halfway shown, show completely
+                                        this.async {
+                                            bottomBarOffsetPx.animateTo(0F)
+                                        }
+                                        this.async {
+                                            topBarOffsetPx.animateTo(0F)
+                                        }
                                     } else {
-                                        // if more than halfway down, go down
-                                        bottomBarOffsetPx.animateTo(
-                                            bottomBarHeightDp
-                                                .dpToPx(context)
-                                                .toFloat()
-                                        )
+                                        // if more than halfway hidden, hide completely
+                                        this.async {
+                                            bottomBarOffsetPx.animateTo(
+                                                bottomBarHeightDp
+                                                    .dpToPx(context)
+                                                    .toFloat()
+                                            )
+                                        }
+                                        this.async {
+                                            topBarOffsetPx.animateTo(
+                                                topBarHeightDp
+                                                    .dpToPx(context)
+                                                    .toFloat()
+                                            )
+                                        }
                                     }
-//                                setEngineDynamicToolbarMaxHeight(
-//                                    bottomBarHeightDp.dpToPx(context) - bottomBarOffsetPx.value.toInt()
-//                                )
                                 }
                             }
 //                        else if (it.action == MotionEvent.ACTION_SCROLL) {
@@ -1789,9 +1794,14 @@ fun BrowserComponent(
 //                        }
                         } else {
                             // if searching and not completely shown, show completely
-                            if (bottomBarOffsetPx.targetValue != 0F) {
+                            if (bottomBarOffsetPx.targetValue != 0F || topBarOffsetPx.targetValue != 0F) {
                                 coroutineScope.launch {
-                                    bottomBarOffsetPx.snapTo(0F)
+                                    this.async {
+                                        bottomBarOffsetPx.snapTo(0F)
+                                    }
+                                    this.async {
+                                        topBarOffsetPx.snapTo(0F)
+                                    }
                                 }
                             }
                         }
@@ -1848,30 +1858,172 @@ fun BrowserComponent(
                             // todo: change action based on providerGroup
                             val t = suggestion.title
                             if (t != null) {
-                                toolbarState.onAutocomplete(TextFieldValue(t, TextRange(t.length)))
+                                toolbarState.onAutocomplete(
+                                    TextFieldValue(
+                                        t, TextRange(t.length)
+                                    )
+                                )
                             }
                         },
                         onAutoComplete = { providerGroup, suggestion ->
                             // todo: filter out based on providerGroup
                             val t = suggestion.title
                             if (t != null) {
-                                toolbarState.onAutocomplete(TextFieldValue(t, TextRange(t.length)))
+                                toolbarState.onAutocomplete(
+                                    TextFieldValue(
+                                        t, TextRange(t.length)
+                                    )
+                                )
                             }
                         },
                     )
                 }
+
+                /**
+                 * pop-ups & bottom sheets
+                 */
+
+                // region ToolbarMenuBottomSheet todo: move to state, show/hide there
+
+                ToolbarMenuBottomSheet(
+                    visible = showToolbarMenuBottomSheet,
+                    tabSessionState = state.currentTab,
+                    loading = state.currentTab?.content?.loading ?: false,
+                    tabCount = state.tabList.size,
+                    onDismissMenuBottomSheet = { showToolbarMenuBottomSheet = false },
+                    onActivateFindInPage = { state.setBrowserModeFindInPage() },
+                    onActivateReaderView = {
+                        val successful = infernoReaderViewState.showReaderView()
+                        if (successful) {
+                            state.setBrowserModeReaderView()
+                        }
+                    },
+                    onRequestSearchBar = { /* todo */ },
+                    onNavToSettings = onNavToSettings,
+                    onNavToTabsTray = tabsTrayState::show,
+                    onNavToHistory = onNavToHistory,
+                    onNavToBookmarks = onNavToBookmarks,
+                    onNavToAddBookmarkDialog = {
+                        state.currentTab?.content?.let {
+                            onNavToAddBookmarkDialog.invoke(
+                                it.title, it.url
+                            )
+                        }
+                    },
+                    onNavToExtensions = onNavToExtensions,
+                    onNavToPasswords = onNavToPasswords,
+                )
+
+                // endregion
+
+                // region InfernoTabsTray
+
+                InfernoTabsTray(state = tabsTrayState)
+
+                // endregion
+
+                // region DownloadComponent
+
+                val downloadManager = remember {
+                    FetchDownloadManager(
+                        context.applicationContext,
+                        store,
+                        DownloadService::class,
+                        notificationsDelegate = context.components.notificationsDelegate,
+                    )
+                }
+
+                DownloadComponent(
+                    applicationContext = context.applicationContext,
+                    store = store,
+                    useCases = context.components.useCases.downloadUseCases,
+                    customTabSessionId = state.customTabSessionId,
+                    downloadManager = downloadManager,
+                    shouldForwardToThirdParties = {
+                        context.settings().shouldUseExternalDownloadManager
+//            PreferenceManager.getDefaultSharedPreferences(context).getBoolean(
+//                context.getPreferenceKey(R.string.pref_key_external_download_manager),
+//                false, // todo: test if true
+//            )
+                    },
+                    onNeedToRequestPermissions = { permissions ->
+                        // todo: test
+                        requestDownloadPermissionsLauncher.launch(permissions)
+//            requestPermissions(permissions, REQUEST_CODE_DOWNLOAD_PERMISSIONS)
+                    },
+                    onCannotOpenFile = {
+                        showCannotOpenFileError(
+                            context = context,
+                            downloadState = it,
+                            coroutineScope = coroutineScope,
+                            snackbarHostState = snackbarHostState,
+                        )
+                    },
+                    useCustomFirstPartyDownloadPrompt = true,
+                    useCustomThirdPartyDownloadDialog = true,
+                    setOnPermissionsResultCallback = {
+                        requestDownloadPermissionsCallback = it
+                    },
+                )
+
+                // endregion
+
+                // region InfernoWebPrompter
+
+                InfernoWebPrompter(
+                    state = webPrompterState,
+                    onNavToAutofillSettings = onNavToAutofillSettings,
+                )
+
+                // endregion
+
+                // region ConextMenuComponent
+
+                ContextMenuComponent(
+                    store = store,
+                    engineView = engineView,
+                    useCases = context.components.useCases.contextMenuUseCases,
+                    tabId = state.customTabSessionId,
+                )
+
+                // endregion
             }
         },
         floatingActionButtonPosition = FabPosition.End,
         floatingActionButton = {
 //            MozFloatingActionButton { fab -> readerViewAppearanceButton = fab }
         },
+        topBar = {
+            Column(
+                modifier = Modifier
+                    .height(topBarHeightDp)
+                    .offset {
+                        IntOffset(
+                            x = 0, y = -topBarOffsetPx.value.roundToInt()
+                        )
+                    },
+                verticalArrangement = Arrangement.Top,
+            ) {
+                if (state.browserMode == BrowserComponentMode.TOOLBAR && context.settings().isTabBarEnabled && context.settings().tabBarVerticalPosition == InfernoSettings.VerticalTabBarPosition.TAB_BAR_TOP && context.settings().tabBarPosition == InfernoSettings.TabBarPosition.TAB_BAR_ABOVE_TOOLBAR) {
+                    tabBar()
+                }
+                if (context.settings().toolbarVerticalPosition == InfernoSettings.VerticalToolbarPosition.TOOLBAR_TOP) {
+                    when (state.browserMode) {
+                        BrowserComponentMode.TOOLBAR, BrowserComponentMode.TOOLBAR_SEARCH -> toolbar()
+                        BrowserComponentMode.TOOLBAR_EXTERNAL -> externalToolbar()
+                        BrowserComponentMode.FIND_IN_PAGE -> findInPageBar()
+                        BrowserComponentMode.READER_VIEW -> readerViewControls()
+                        BrowserComponentMode.FULLSCREEN -> {}
+                    }
+                }
+                if (state.browserMode == BrowserComponentMode.TOOLBAR && context.settings().isTabBarEnabled && context.settings().tabBarVerticalPosition == InfernoSettings.VerticalTabBarPosition.TAB_BAR_TOP && context.settings().tabBarPosition == InfernoSettings.TabBarPosition.TAB_BAR_BELOW_TOOLBAR) {
+                    tabBar()
+                }
+            }
+        },
         bottomBar = {
             // hide and show when scrolling
-            BottomAppBar(
-//                scrollBehavior = BottomAppBarScrollBehavior, // todo: scroll behavior, remove offset
-                contentPadding = PaddingValues(0.dp),
-                containerColor = Color.Transparent,
+            Column(
                 modifier = Modifier
                     .height(bottomBarHeightDp)
                     .offset {
@@ -1879,93 +2031,25 @@ fun BrowserComponent(
                             x = 0, y = bottomBarOffsetPx.value.roundToInt()
                         )
                     },
+                verticalArrangement = Arrangement.Bottom,
             ) {
-                Column(
-                    Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.Bottom,
-                ) {
-                    if (state.browserMode == BrowserComponentMode.TOOLBAR_EXTERNAL) {
-                        InfernoExternalToolbar(
-                            isAuth = state.isAuth,
-                            showExternalToolbar = state.showExternalToolbar,
-                            session = state.currentCustomTab,
-                            onNavToBrowser = {
-                                state.migrateExternalToNormal()
-                                context.getActivity()?.let {
-                                    it.finish()
-                                    // todo: intent launcher, create funs for adding flags to intent for different task types (browser, custom tab, pwa)
-                                    val intent = Intent(context, HomeActivity::class.java)
-                                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                    it.startActivity(intent)
-                                }
-                            },
-                            onToggleDesktopMode = { state.toggleDesktopMode() },
-                            onGoBack = {
-                                if (state.isAuth) {
-                                    // if is auth activity, exit
-                                    context.getActivity()!!.finish()
-                                } else if (state.currentCustomTab?.content?.canGoBack != false) {
-                                    // if can go back (or sesh null), invoke go back
-                                    context.components.useCases.sessionUseCases.goBack.invoke(it)
-                                } else {
-                                    // if cant go back, end activity / return to app that launched
-                                    context.getActivity()!!.finish()
-                                }
-                            },
-                            onGoForward = {
-                                context.components.useCases.sessionUseCases.goForward.invoke(it)
-                            },
-                            onReload = {
-                                context.components.useCases.sessionUseCases.reload.invoke(it)
-                            },
-                            onShare = { context.share(it) },
-                        )
+                if (state.browserMode == BrowserComponentMode.TOOLBAR && context.settings().isTabBarEnabled && context.settings().tabBarVerticalPosition == InfernoSettings.VerticalTabBarPosition.TAB_BAR_BOTTOM && context.settings().tabBarPosition == InfernoSettings.TabBarPosition.TAB_BAR_ABOVE_TOOLBAR) {
+                    tabBar()
+                }
+                if (context.settings().toolbarVerticalPosition == InfernoSettings.VerticalToolbarPosition.TOOLBAR_BOTTOM) {
+                    when (state.browserMode) {
+                        BrowserComponentMode.TOOLBAR,
+                        BrowserComponentMode.TOOLBAR_SEARCH,
+                            -> toolbar()
+
+                        BrowserComponentMode.TOOLBAR_EXTERNAL -> externalToolbar()
+                        BrowserComponentMode.FIND_IN_PAGE -> findInPageBar()
+                        BrowserComponentMode.READER_VIEW -> readerViewControls()
+                        BrowserComponentMode.FULLSCREEN -> {}
                     }
-                    if (state.browserMode == BrowserComponentMode.TOOLBAR || state.browserMode == BrowserComponentMode.TOOLBAR_SEARCH) {
-                        if (state.browserMode == BrowserComponentMode.TOOLBAR) {
-                            InfernoTabBar(state = tabBarState)
-                        }
-                        InfernoToolbar(
-                            state = toolbarState,
-                            onShowMenuBottomSheet = { showToolbarMenuBottomSheet = true },
-                            onDismissMenuBottomSheet = { showToolbarMenuBottomSheet = false },
-                            onRequestSearchBar = { /* todo: search bar, fills page and has 32.dp padding from insets */ },
-                            onActivateFindInPage = { state.setBrowserModeFindInPage() },
-                            onActivateReaderView = {
-                                val successful = infernoReaderViewState.showReaderView()
-                                if (successful) {
-                                    state.setBrowserModeReaderView()
-                                }
-                            },
-                            onNavToSettings = onNavToSettings,
-                            onNavToHistory = onNavToHistory,
-                            onNavToBookmarks = onNavToBookmarks,
-                            onNavToAddBookmarkDialog = {
-                                state.currentTab?.content?.let {
-                                    onNavToAddBookmarkDialog.invoke(it.title, it.url)
-                                }
-                            },
-                            onNavToExtensions = onNavToExtensions,
-                            onNavToPasswords = onNavToPasswords,
-                            onNavToTabsTray = tabsTrayState::show,
-                            editMode = state.browserMode == BrowserComponentMode.TOOLBAR_SEARCH,
-                            onStartSearch = { state.setBrowserModeSearch() },
-                            onStopSearch = { state.setBrowserModeToolbar() },
-                        )
-                    }
-                    if (state.browserMode == BrowserComponentMode.FIND_IN_PAGE) {
-                        BrowserFindInPageBar(
-                            onDismiss = { state.setBrowserModeToolbar() },
-                            engineSession = state.currentTab?.engineState?.engineSession,
-                            engineView = engineView,
-                            session = state.currentTab,
-                        )
-                    }
-                    if (state.browserMode == BrowserComponentMode.READER_VIEW) {
-                        InfernoReaderViewControls(
-                            state = infernoReaderViewState,
-                        )
-                    }
+                }
+                if (state.browserMode == BrowserComponentMode.TOOLBAR && context.settings().isTabBarEnabled && context.settings().tabBarVerticalPosition == InfernoSettings.VerticalTabBarPosition.TAB_BAR_BOTTOM && context.settings().tabBarPosition == InfernoSettings.TabBarPosition.TAB_BAR_BELOW_TOOLBAR) {
+                    tabBar()
                 }
             }
         },

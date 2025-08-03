@@ -65,7 +65,7 @@ import mozilla.components.support.ktx.android.content.runOnlyInMainProcess
 import mozilla.components.support.locale.LocaleAwareApplication
 //import mozilla.components.support.rusterrors.initializeRustErrors
 import mozilla.components.support.rusthttp.RustHttpConfig
-import mozilla.components.support.rustlog.RustLog
+//import mozilla.components.support.rustlog.RustLog
 import mozilla.components.support.utils.BrowsersCache
 import mozilla.components.support.utils.logElapsedTime
 import mozilla.components.support.webextensions.WebExtensionSupport
@@ -113,7 +113,6 @@ import com.shmibblez.inferno.session.PerformanceActivityLifecycleCallbacks
 import com.shmibblez.inferno.session.VisibilityLifecycleCallback
 //import com.shmibblez.inferno.utils.Settings
 import com.shmibblez.inferno.utils.Settings.Companion.TOP_SITES_PROVIDER_MAX_THRESHOLD
-import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 //import com.shmibblez.inferno.wallpapers.Wallpaper
@@ -124,11 +123,9 @@ import kotlin.math.roundToLong
 private const val RAM_THRESHOLD_MEGABYTES = 1024
 private const val BYTES_TO_MEGABYTES_CONVERSION = 1024.0 * 1024.0
 
-// TODO: check if anything important commented out
-
 /**
- *The main application class for Fenix. Records data to measure initialization performance.
- *  Installs [CrashReporter], initializes [Glean]  in fenix builds and setup Megazord in the main process.
+ *
+ * initializes setup Megazord in the main process.
  */
 @Suppress("Registered", "TooManyFunctions", "LargeClass")
 open class BrowserApplication : LocaleAwareApplication(), Provider {
@@ -510,7 +507,7 @@ open class BrowserApplication : LocaleAwareApplication(), Provider {
 //        initializeRustErrors(components.analytics.crashReporter)
         // ... but RustHttpConfig.setClient() and RustLog.enable() can be called later.
 
-        RustLog.enable()
+//        RustLog.enable()
     }
 
     @OptIn(DelicateCoroutinesApi::class) // GlobalScope usage
