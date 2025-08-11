@@ -438,6 +438,11 @@ class Settings(private val appContext: Context) : PreferencesHolder {
         set(value) {
             setPref { it.setIsTabBarEnabled(value) }
         }
+    var miniTabShowClose: InfernoSettings.MiniTabShowClose
+        get() = getPref(default = InfernoSettings.MiniTabShowClose.MINI_TAB_SHOW_ON_ALL) { it?.miniTabShowClose }
+        set(value) {
+            setPref { it.setMiniTabShowClose(value) }
+        }
     var tabBarVerticalPosition: InfernoSettings.VerticalTabBarPosition
         get() = getPref(default = InfernoSettings.VerticalTabBarPosition.TAB_BAR_BOTTOM) { it?.tabBarVerticalPosition }
         set(value) {

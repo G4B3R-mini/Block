@@ -85,51 +85,67 @@ class AppRequestInterceptor(
         isDirectNavigation: Boolean,
         isSubframeRequest: Boolean,
     ): RequestInterceptor.InterceptionResponse? {
+        // todo: for this release default, for next one new method:
+        //  - first get packages of apps that can open [uri] from input params
+        //  - then get packages of apps that can open http://www.a.com
+        //  - if same packages do nothing, if 1 or more different, show request or open by default
+        val services = context.components.services
+        return services.appLinksInterceptor.onLoadRequest(
+            engineSession,
+            uri,
+            lastUri,
+            hasUserGesture,
+            isSameDomain,
+            isRedirect,
+            isDirectNavigation,
+            isSubframeRequest,
+        )
 
-//        Intent.FLAG_ACTIVITY_REQUIRE_NON_BROWSER
-
-        // check app links setting, todo: app requests, change behaviour depending on user setting
-        val appLinksSetting = context.settings().latestSettings?.appLinksSetting
-        when (appLinksSetting) {
-            InfernoSettings.AppLinks.APP_LINKS_BLOCKED -> {
-                return null
-            }
-
-            InfernoSettings.AppLinks.APP_LINKS_ALLOWED -> {
-                // todo: if allowed just open dont ask
-            }
-
-            InfernoSettings.AppLinks.APP_LINKS_ASK_TO_OPEN -> {}
-            null -> {}
-        }
-
-        /**
-         * todo: implement [openInAppAvailable] and use when true
-         */
-        val openInAppAvailable = when (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            true -> openInAppAvailableBelowApi30(uri)
-            false -> openInAppAvailableBelowApi30(uri)
-        }
-
-        requestListeners.forEach { it.onRequestReceived(openInAppAvailable, uri.toUri()) }
-
-        return when (openInAppAvailable) {
-            true -> {
-                val services = context.components.services
-                services.appLinksInterceptor.onLoadRequest(
-                    engineSession,
-                    uri,
-                    lastUri,
-                    hasUserGesture,
-                    isSameDomain,
-                    isRedirect,
-                    isDirectNavigation,
-                    isSubframeRequest,
-                )
-            }
-
-            false -> null
-        }
+////        Intent.FLAG_ACTIVITY_REQUIRE_NON_BROWSER
+//
+//        // check app links setting, todo: app requests, change behaviour depending on user setting
+//        val appLinksSetting = context.settings().latestSettings?.appLinksSetting
+//        when (appLinksSetting) {
+//            InfernoSettings.AppLinks.APP_LINKS_BLOCKED -> {
+//                return null
+//            }
+//
+//            InfernoSettings.AppLinks.APP_LINKS_ALLOWED -> {
+//                // todo: if allowed just open dont ask
+//                return RequestInterceptor.InterceptionResponse.Url(url = uri)
+//            }
+//
+//            InfernoSettings.AppLinks.APP_LINKS_ASK_TO_OPEN -> {}
+//            null -> {}
+//        }
+//
+//        /**
+//         * todo: implement [openInAppAvailable] and use when true
+//         */
+//        val openInAppAvailable = when (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+//            true -> openInAppAvailableBelowApi30(uri)
+//            false -> openInAppAvailableBelowApi30(uri)
+//        }
+//
+//        requestListeners.forEach { it.onRequestReceived(openInAppAvailable, uri.toUri()) }
+//
+//        return when (openInAppAvailable) {
+//            true -> {
+//                val services = context.components.services
+//                services.appLinksInterceptor.onLoadRequest(
+//                    engineSession,
+//                    uri,
+//                    lastUri,
+//                    hasUserGesture,
+//                    isSameDomain,
+//                    isRedirect,
+//                    isDirectNavigation,
+//                    isSubframeRequest,
+//                )
+//            }
+//
+//            false -> null
+//        }
     }
 
     private fun openInAppAvailable(uri: String): Boolean {

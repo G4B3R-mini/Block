@@ -133,7 +133,14 @@ private val verticalDividerPadding = 6.dp
 private val TAB_END_PADDING = 4.dp
 
 @Composable
-fun InfernoTabBar(state: InfernoTabBarState, isAboveToolbar: Boolean, isBelowToolbar: Boolean) {
+fun InfernoTabBar(
+    state: InfernoTabBarState,
+    isAboveToolbar: Boolean,
+    isBelowToolbar: Boolean,
+    isAtTop: Boolean,
+    isAtBottom: Boolean,
+    showClose: InfernoSettings.MiniTabShowClose,
+) {
     val configuration = LocalConfiguration.current
     fun calculateTabWidth(): Dp {
         val screenWidth = configuration.screenWidthDp.dp
@@ -193,7 +200,7 @@ fun InfernoTabBar(state: InfernoTabBarState, isAboveToolbar: Boolean, isBelowToo
                         true -> 0.dp
                         false -> 4.dp
                     },
-                    )
+                )
         ) {
             // tabs
             Box(
@@ -213,14 +220,16 @@ fun InfernoTabBar(state: InfernoTabBarState, isAboveToolbar: Boolean, isBelowToo
                     val selectedIndex = state.tabList.findIndex { it.id == state.selectedTab?.id }
                     item { Spacer(Modifier.width(TAB_END_PADDING)) }
                     items(state.tabList.size) {
+                        val selected = state.tabList[it].id == state.selectedTab!!.id
                         MiniTab(
                             context = context,
                             tabSessionState = state.tabList[it],
                             autoWidth = tabAutoWidth,
-                            selected = state.tabList[it].id == state.selectedTab!!.id,
+                            selected = selected,
                             index = it,
                             selectedIndex = selectedIndex ?: 0,
-                            lastIndex = state.tabList.size - 1
+                            lastIndex = state.tabList.size - 1,
+                            showClose = showClose == InfernoSettings.MiniTabShowClose.MINI_TAB_SHOW_ON_ALL || showClose == InfernoSettings.MiniTabShowClose.MINI_TAB_SHOW_ONLY_ON_ACTIVE && selected,
                         )
                     }
                     item { Spacer(Modifier.width(TAB_END_PADDING)) }
@@ -238,19 +247,19 @@ fun InfernoTabBar(state: InfernoTabBarState, isAboveToolbar: Boolean, isBelowToo
             Box(
                 modifier = Modifier
                     .fillMaxHeight()
-                    .aspectRatio(1F),
+                    .aspectRatio(1F)
+                    .clickable {
+                        context.components.newTab(
+                            customHomeUrl = settings.determineCustomHomeUrl(),
+                            private = state.isPrivateSession,
+                            nextTo = state.selectedTab!!.id, // todo: next to current based on config, default is true
+                        )
+                    },
                 contentAlignment = Alignment.Center,
             ) {
                 InfernoIcon(
                     modifier = Modifier
-                        .size(12.dp)
-                        .clickable {
-                            context.components.newTab(
-                                customHomeUrl = settings.determineCustomHomeUrl(),
-                                private = state.isPrivateSession,
-                                nextTo = state.selectedTab!!.id, // todo: next to current based on config, default is true
-                            )
-                        },
+                        .size(12.dp),
                     painter = painterResource(R.drawable.ic_new_24),
                     contentDescription = "new tab",
                 )
@@ -262,7 +271,15 @@ fun InfernoTabBar(state: InfernoTabBarState, isAboveToolbar: Boolean, isBelowToo
             ProgressBar(
                 progress = (state.selectedTab!!.content.progress.toFloat()) / 100F,
                 modifier = Modifier
-                    .align(Alignment.TopCenter)
+                    .align(
+                        when {
+                            isAboveToolbar -> Alignment.TopCenter
+                            isBelowToolbar -> Alignment.BottomCenter
+                            isAtTop -> Alignment.BottomCenter
+                            isAtBottom -> Alignment.TopCenter
+                            else -> Alignment.TopCenter
+                        }
+                    )
                     .height(2.dp),
             )
         }
@@ -278,6 +295,7 @@ private fun MiniTab(
     index: Int,
     selectedIndex: Int,
     lastIndex: Int,
+    showClose: Boolean,
 ) {
     // only draw border if not to left of selected, not selected, and not last
     val drawBorder = index + 1 != selectedIndex && !selected && index != lastIndex
@@ -412,17 +430,19 @@ private fun MiniTab(
                 overflow = TextOverflow.Ellipsis,
                 fontSize = 14.sp,
             )
-            // close
-            InfernoIcon(
-                modifier = Modifier
-                    .padding(8.dp, 0.dp, 8.dp, 0.dp)
-                    .size(10.dp)
-                    .clickable {
-                        context.components.useCases.tabsUseCases.removeTab(tabSessionState.id)
-                    },
-                painter = painterResource(R.drawable.ic_close_24),
-                contentDescription = stringResource(R.string.close_tab),
-            )
+            // close icon
+            if (showClose) {
+                InfernoIcon(
+                    modifier = Modifier
+                        .padding(8.dp, 0.dp, 8.dp, 0.dp)
+                        .size(10.dp)
+                        .clickable {
+                            context.components.useCases.tabsUseCases.removeTab(tabSessionState.id)
+                        },
+                    painter = painterResource(R.drawable.ic_close_24),
+                    contentDescription = stringResource(R.string.close_tab),
+                )
+            }
             // separator
             if (drawBorder) {
                 VerticalDivider(

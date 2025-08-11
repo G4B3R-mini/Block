@@ -40,21 +40,23 @@ that's it for now, hopefully this project doesn't die
 
 `Errors that make something unusable, these should be fixed as soon as possible`
 
-- [ ] Crash on Google Pixel devices on setup megazord in startup, might be related to proguard
+- [x] (Fixed as of latest release) Crash on Google Pixel devices on setup megazord in startup, might be related to proguard
   settings, check megazord init in case some code runs only on release mode
-    - [ ] test in Google Pixel 6 emulator (check crashlytics for specific model & android version)
+    - [x] test in Google Pixel 6 emulator (check crashlytics for specific model & android version)
 
-[//]: # (`Nothing critical wooooooo`)
+`Nothing critical wooooooo`
 
 ## Massiv Bugs
 
+- [ ] AppRequestInterceptor
+    - [ ] currently using default interceptor, new one will compare apps that can open current uri
+      with list of apps that can open a generic uri. If list is different, then forward request, if
+      same apps in both then don't show open in dialog
 - [ ] AccountView in Settings Page
     - [ ] When first opened with wifi off, exit page, turn on wifi, and return, stays as loading
 - [ ] Homepage
     - [ ] top sites buggy (2 default pages repeated, add some more defaults)
     - [ ] persist homepage state, pass that to homepage so doesnt rebuild
-        - [ ] add settings launched effect so updates to selected settings
-        - [ ] add extension for settings to get homepage url, in InfernoTabBar logic is confusing
 - [ ] BrowserComponent
 - [ ] Accessibility Settings
     - [ ] custom sizing not doing anything, most likely has to do with default settings being loaded

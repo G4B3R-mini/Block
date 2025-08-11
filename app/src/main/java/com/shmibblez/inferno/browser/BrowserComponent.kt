@@ -1508,6 +1508,8 @@ fun BrowserComponent(
 
     // endregion
 
+    // region Components
+
     @Composable
     fun externalToolbar() {
         InfernoExternalToolbar(
@@ -1586,6 +1588,9 @@ fun BrowserComponent(
             state = tabBarState,
             isAboveToolbar = bothTopOrBottom && context.settings().tabBarPosition == InfernoSettings.TabBarPosition.TAB_BAR_ABOVE_TOOLBAR,
             isBelowToolbar = bothTopOrBottom && context.settings().tabBarPosition == InfernoSettings.TabBarPosition.TAB_BAR_BELOW_TOOLBAR,
+            isAtTop = context.settings().tabBarVerticalPosition == InfernoSettings.VerticalTabBarPosition.TAB_BAR_TOP,
+            isAtBottom = context.settings().tabBarVerticalPosition == InfernoSettings.VerticalTabBarPosition.TAB_BAR_BOTTOM,
+            showClose = context.settings().miniTabShowClose,
         )
     }
 
@@ -1605,6 +1610,8 @@ fun BrowserComponent(
             session = state.currentTab,
         )
     }
+
+    // endregion
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -2001,7 +2008,8 @@ fun BrowserComponent(
                         IntOffset(
                             x = 0, y = -topBarOffsetPx.value.roundToInt()
                         )
-                    },
+                    }
+                    .clickable {},
                 verticalArrangement = Arrangement.Top,
             ) {
                 if (state.browserMode == BrowserComponentMode.TOOLBAR && context.settings().isTabBarEnabled && context.settings().tabBarVerticalPosition == InfernoSettings.VerticalTabBarPosition.TAB_BAR_TOP && context.settings().tabBarPosition == InfernoSettings.TabBarPosition.TAB_BAR_ABOVE_TOOLBAR) {
@@ -2030,7 +2038,8 @@ fun BrowserComponent(
                         IntOffset(
                             x = 0, y = bottomBarOffsetPx.value.roundToInt()
                         )
-                    },
+                    }
+                    .clickable { },
                 verticalArrangement = Arrangement.Bottom,
             ) {
                 if (state.browserMode == BrowserComponentMode.TOOLBAR && context.settings().isTabBarEnabled && context.settings().tabBarVerticalPosition == InfernoSettings.VerticalTabBarPosition.TAB_BAR_BOTTOM && context.settings().tabBarPosition == InfernoSettings.TabBarPosition.TAB_BAR_ABOVE_TOOLBAR) {
