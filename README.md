@@ -1,8 +1,8 @@
 # About
 
-Inferno Browser is a mobile browser for Android which mainly focuses on usability, privacy, and
-relevant features. It's built mainly off of Mozilla's Fenix browser, also making use of the android
-gecko engine. It is almost ready for beta launch on the Google play store
+O Inferno Browser é um navegador móvel para Android que se concentra principalmente em usabilidade, privacidade e
+recursos relevantes. Ele foi desenvolvido principalmente com base no navegador Fenix ​​da Mozilla, utilizando também o Android
+Gecko Engine. Está quase pronto para o lançamento beta na Google Play Store.
 
 # Nice Features
 
