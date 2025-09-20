@@ -4,8 +4,8 @@ import io.gitlab.arturbosch.detekt.Detekt
 
 buildscript {
     repositories {
-//        google()
-//        mavenCentral()
+       google()
+      mavenCentral()
         maven { url "https://maven.mozilla.org/maven2" }
         if (project.hasProperty("googleRepo")) {
             maven {
@@ -52,8 +52,8 @@ plugins {
 
 allprojects {
     repositories {
-//        google()
-//        mavenCentral()
+      google()
+        mavenCentral()
         if (project.hasProperty("googleRepo")) {
             maven {
                 name "Google"
